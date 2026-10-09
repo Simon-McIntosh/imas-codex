@@ -18,12 +18,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
   <meta name="plan-blocks" content="jt60sa-imas-maps">
-  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;signal-cocos-conventions#s3&quot;], &quot;s7&quot;: [&quot;signal-cocos-conventions#s8&quot;], &quot;s8&quot;: [&quot;signal-cocos-conventions#s3&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;signal-cocos-conventions#s3&quot;], &quot;s7&quot;: [&quot;signal-cocos-conventions#s8&quot;], &quot;s8&quot;: [&quot;signal-cocos-conventions#s3&quot;, &quot;signal-cocos-conventions#s2&quot;, &quot;mapping-decision-chain#s5&quot;]}">
   <meta name="plan-sprint" content="S17">
   <title>Mapping as a Chain of Bounded Decisions | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-10-09">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 </head>
@@ -88,7 +88,8 @@
       A resolver runs before any model. It reads the source's convention from the graph, where
       <code>signal-cocos-conventions</code> persists it on the <code>SignalSource</code>: its <code>cocos_class</code>,
       its <code>cocos_survivors</code>, its <code>cocos</code> when the survivors are one convention, its confidence, and
-      its <code>HAS_GEOMETRY</code> sensor geometry. It reads the DD field's <code>cocos_transformation_type</code>,
+      its <code>HAS_GEOMETRY</code> sensor geometry when present; a slot whose class is an angle class stays open while
+      the source has no geometry. It reads the DD field's <code>cocos_transformation_type</code>,
       resolved through the field's ancestors because the DD carries a label on a structure such as
       <code>magnetics/ip</code> rather than on its data leaf, and the DD's own COCOS. A COCOS-labelled field gets its sign
       and factor from <code>cocos_sign</code> in code when every surviving source convention gives the same factor for
@@ -156,8 +157,11 @@
     <p>
       <strong>Node</strong> <code>mapping-chain-jt60sa-proof</code>, role test, 1 h. Write paths:
       <code>docs/evidence/fragments/mapping-decision-chain/mapping-chain-jt60sa-proof.html</code>.
-      <strong>Done when</strong> the fragment holds the slot table and the escalation list, and no written binding's sign
-      disagrees with its source's recorded convention.
+      <strong>Done when</strong> the fragment holds the slot table and the escalation list, at least one slot settled by
+      Jev or the local model is among the bindings checked, and no written binding's sign disagrees with its source's
+      recorded convention. As the negative control, the same check is run once over a scratch copy of the bindings in
+      which one psi_like and one ip_like source's survivors are replaced by a convention giving the opposite factor, and
+      the fragment shows the check reporting both disagreements.
     </p>
 
     <h2 id="s8">§8 — Candidates match the source&#x27;s COCOS class</h2>
@@ -177,7 +181,7 @@
     </p>
     <p>
       <strong>Node</strong> <code>mapping-class-filter</code>, role implement, 2 h, after <code>signal-cocos-conventions</code>
-      §3 and §2. Write paths: <code>imas_codex/ids/candidates.py</code>, <code>imas_codex/ids/mapping.py</code> and
+      §3 and §2, and after this plan's §5, which also writes <code>imas_codex/ids/mapping.py</code>. Write paths: <code>imas_codex/ids/candidates.py</code>, <code>imas_codex/ids/mapping.py</code> and
       <code>tests/ids/test_candidate_class_filter.py</code>. <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> passes with tests showing a confident psi_like
       source keeping only psi_like candidates, one of them labelled through a structure ancestor; a none source dropping a
@@ -228,14 +232,14 @@
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="draft-binding-context" data-choice="" data-by="" data-when="" data-recommended="inject" data-recommended-by="coordinator">
+<div class="r-dec" data-key="draft-binding-context" data-choice="inject" data-by="Simon McIntosh" data-when="2026-10-09T00:51:33+00:00" data-recommended="inject" data-recommended-by="coordinator">
     <p class="r-dec-q">Do draft bindings of a source&#x27;s siblings enter later decisions&#x27; state?</p>
     <p class="r-dec-ctx">A draft binding is a MAPS_TO_IMAS edge under an IMASMapping at status generated. Injecting the drafts of the same sensor family, such as a probe&#x27;s position already drafted to magnetics/b_field_pol_probe(i)/position, keeps a probe&#x27;s measurement and geometry on the same struct-array index and the family&#x27;s signs consistent.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="inject">Inject drafts, labelled as drafts</button>
+      <button class="r-opt chosen" data-value="inject">Inject drafts, labelled as drafts</button>
       <button class="r-opt" data-value="validated-only">Inject only validated bindings</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead ruling 2026-10-09, accepting the recommendation: injecting a sensor family&#x27;s draft bindings, labelled as drafts, keeps a probe&#x27;s measurement and geometry on the same struct-array index and the family&#x27;s signs consistent; a wrong draft that propagates is caught by validation and the §7 proof rather than by withholding sibling context.</p>
     </div>
 </section>
 </main>

@@ -23,6 +23,8 @@
   <title>Signal Evidence Followups | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
   <main class="plan-doc">
@@ -71,10 +73,12 @@
       <strong>Node</strong> <code>signal-followup-record</code>, role implement, 1.5 h. Write paths:
       <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/discovery/signals/followups.py</code> and
       <code>tests/discovery/test_signal_followups.py</code>. <strong>Done when</strong>
-      <code>uv run --no-sync pytest tests/discovery/test_signal_followups.py tests/graph/test_schema_compliance.py -p no:cacheprovider</code>
-      passes with tests showing a followup round-trips through the generated models, a second raise of the same open
-      slot updates the one record, a raise for a different slot of the same source adds a second, resolving records who
-      and when, and the <code>declared</code> evidence type is accepted.
+      <code>uv run --no-sync pytest tests/discovery/test_signal_followups.py -p no:cacheprovider</code> passes with tests
+      showing a followup round-trips through the generated models, a second raise of the same open slot updates the one
+      record, a raise for a different slot of the same source adds a second, resolving records who and when, and the
+      <code>declared</code> evidence type is accepted; and
+      <code>uv run --no-sync pytest tests/graph/test_schema_compliance.py -m graph -p no:cacheprovider</code> passes
+      against the live graph, since the default markers deselect that file.
     </p>
 
     <h2 id="s3">§3 — Triage from the terminal and from an agent session</h2>
@@ -123,7 +127,10 @@
       <strong>Node</strong> <code>followup-evidence-in-state</code>, role implement, 1.5 h, after
       <code>signal-cocos-conventions</code> §7 and <code>mapping-decision-chain</code> §5. Write paths:
       <code>imas_codex/discovery/signals/conventions.py</code>, <code>imas_codex/ids/slot_judgment.py</code>,
-      <code>imas_codex/ids/models.py</code> and <code>tests/discovery/test_followup_evidence_state.py</code>.
+      <code>imas_codex/ids/slot_context.py</code>, <code>imas_codex/ids/mapping.py</code>,
+      <code>imas_codex/ids/models.py</code> and <code>tests/discovery/test_followup_evidence_state.py</code>. The map's
+      judgment state is assembled by <code>build_slot_context</code> in <code>slot_context.py</code> and called from
+      <code>map_signals</code> in <code>mapping.py</code>, so both are in scope.
       <strong>Done when</strong>
       <code>uv run --no-sync pytest tests/discovery/test_followup_evidence_state.py tests/ids -p no:cacheprovider</code>
       passes with tests showing a below-threshold answer raising one followup, attached evidence leading the next state,
@@ -160,16 +167,24 @@
     <h4 class="r-gate-measure">the conventions proof has run on JT-60SA and listed the followups it raised</h4>
     <p class="r-gate-required-evidence">signal-cocos-conventions#s8</p>
     </div>
+<div class="r-gate" data-id="g-sef-4" data-section="s5" data-gated-sections="s5" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">the terminal and MCP triage verbs list followups, show their context, attach evidence and re-queue the raising stage</h4>
+    <p class="r-gate-required-evidence">signal-evidence-followups#s3</p>
+    </div>
+<div class="r-gate" data-id="g-sef-5" data-section="s5" data-gated-sections="s5" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">the conventions stage and the map raise followups through raise_followup and read attached evidence first</h4>
+    <p class="r-gate-required-evidence">signal-evidence-followups#s4</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-sef-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build signal-evidence-followups §2" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Record followups in the graph and build the triage surface</h4>
-        <div class="r-fu-body">The record and the terminal and agent triage verbs do not wait on the conventions stage; only §4 and §5 do.</div>
-        <pre class="r-fu-prompt">/reckon-build signal-evidence-followups §2</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sef-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build signal-evidence-followups §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Record followups in the graph and build the triage surface</h4>
+    <div class="r-fu-body">The record and the terminal and agent triage verbs do not wait on the conventions stage; only §4 and §5 do.</div>
+    <pre class="r-fu-prompt">/reckon-build signal-evidence-followups §2</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

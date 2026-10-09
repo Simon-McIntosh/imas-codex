@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="signal-cocos-conventions">
   <meta name="plan-title" content="Signal COCOS Conventions Before the Map">
-  <meta name="plan-summary" content="A conventions stage judges each signal's COCOS dependence and class with Jev, validates its convention against facility data, and persists both to the graph">
+  <meta name="plan-summary" content="A conventions stage judges each signal&#x27;s COCOS dependence and class with Jev, validates its convention against facility data, and persists both to the graph">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="22.0">
@@ -20,10 +20,12 @@
   <meta name="plan-tags" content="signals,discovery">
   <meta name="plan-blocks" content="jt60sa-imas-maps">
   <meta name="plan-sprint" content="S17">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
   <title>Signal COCOS Conventions Before the Map | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
   <main class="plan-doc">
@@ -103,16 +105,30 @@
       physics domains.
     </p>
     <p>
+      The fixture is a frozen snapshot for calibration: the bundle is gitignored and moves (it read
+      <code>v0.2.0-rc3</code> and then <code>v0.2.0-rc4</code> on 2026-10-09), so the fixture records the bundle version
+      and the sha256 of every file it read. The live, versioned record of the rules is <code>external-map-rules</code>.
+      Two rules govern the translation. The class comes from the DD, never from a rule's <code>transformation</code>
+      field: every imas-ambix flux-loop rule is one_like with <code>source_cocos</code> null although the DD labels
+      <code>magnetics/flux_loop/flux</code> psi_like, because its <code>channel_factor</code> was fitted directly against
+      a COCOS 17 prediction and is therefore the total sign from raw data to COCOS 17, recorded as such. And flux-loop
+      signs are marked unadjudicated: imas-codex's diagnostic convention audit (<code>09a095988</code>) disagrees with
+      imas-ambix in sign on all 54 flux-loop comparisons and agrees on all 34 pickup-coil comparisons, so no flux-loop row
+      scores a sign until <code>jt60sa-discovery-completion</code> §56 adjudicates it. Rows are split by source into a
+      calibration half and a held-out half, stratified by class.
+    </p>
+    <p>
       <strong>Node</strong> <code>convention-reference-labels</code>, role implement, 1.5 h. Live graph read through the
       linked <code>.env</code>; read-only access to the imas-ambix checkout at its absolute path. Write paths:
       <code>tests/fixtures/conventions/reference_labels.json</code> and
       <code>docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html</code>.
-      <strong>Done when</strong> the fixture holds one row per imas-ambix JT-60SA binding that joins to a SignalSource,
-      with the source id, target path, DD class, imas-ambix transformation, source_cocos, channel_factor and
-      validation_state, and 60 JET rows each carrying a convention-dependent label, a class and a one-line reason; at least
-      20 of the JET rows are convention-independent quantities such as temperatures, densities and plant voltages, as the
-      negative control; and the fragment states the joined count per class and lists every imas-ambix binding that did
-      not join, with the reason.
+      <strong>Done when</strong> the fixture records the bundle version and file hashes, and holds one row per imas-ambix
+      JT-60SA binding that joins to a SignalSource, with the source id, target path, DD class, imas-ambix transformation,
+      source_cocos, channel_factor as the total sign to its target COCOS, validation_state, a sign-adjudicated flag that
+      is false on every flux-loop row, and its half; and 60 JET rows each carrying a convention-dependent label, a class,
+      a one-line reason and its half; at least 20 of the JET rows are convention-independent quantities such as
+      temperatures, densities and plant voltages, as the negative control, split across both halves; and the fragment
+      states the joined count per class and half and lists every imas-ambix binding that did not join, with the reason.
     </p>
 
     <h2 id="s3">§3 — Convention properties on the signal source</h2>
@@ -126,8 +142,10 @@
       <code>cocos_survivors</code>, an integer list; <code>cocos</code>, set only when the survivors are one convention;
       <code>cocos_confidence</code>; <code>convention_status</code> from a new enum (judged, probed, settled,
       needs_followup); <code>convention_question</code>, the open question a followup carries; timestamps; and claim
-      fields for the stage's claim loop. A member whose channel sign differs from its source, such as a differential flux
-      loop, keeps it on <code>FacilitySignal.channel_sign</code>.
+      fields for the stage's claim loop. An absolute and a differential measurement are different quantities in
+      different sources (§9), so a difference's order is a property of its source, not a per-member exception. A member
+      whose installation reverses its sign within an otherwise identical group, such as a pickup coil mounted the other
+      way round, keeps that on <code>FacilitySignal.channel_sign</code>.
     </p>
     <p>
       A new <code>ConventionObservation</code> node records one sign read from facility data: facility, shot, quantity,
@@ -138,9 +156,11 @@
       <strong>Node</strong> <code>convention-schema</code>, role implement, 1.5 h. Write paths:
       <code>imas_codex/schemas/facility.yaml</code> and <code>tests/graph/test_signal_convention_schema.py</code>.
       <strong>Done when</strong> <code>uv run build-models --force</code> regenerates the models and
-      <code>uv run --no-sync pytest tests/graph/test_signal_convention_schema.py tests/graph/test_schema_compliance.py -p no:cacheprovider</code>
-      passes, with tests showing every new property and the observation edge round-trip through the generated models,
-      the class enum refusing a value outside it, and no signal value property touched by the schema change.
+      <code>uv run --no-sync pytest tests/graph/test_signal_convention_schema.py -p no:cacheprovider</code> passes, with
+      tests showing every new property and the observation edge round-trip through the generated models, the class enum
+      refusing a value outside it, and no signal value property touched by the schema change; and
+      <code>uv run --no-sync pytest tests/graph/test_schema_compliance.py -m graph -p no:cacheprovider</code> passes
+      against the live graph, since the default markers deselect that file.
     </p>
 
     <h2 id="s4">§4 — Jev judges dependence, class and writer</h2>
@@ -174,12 +194,14 @@
     </p>
     <p>
       <strong>Node</strong> <code>convention-judgment-calibration</code>, role implement, 1 h, after
-      <code>convention-judgment</code> and §2. It judges every §2 reference source live, under a USD 2 cap, and sets the
-      acceptance thresholds as seat keys. Write paths: <code>pyproject.toml</code> and
+      <code>convention-judgment</code> and §2. It judges every §2 reference source live, under a USD 2 cap, chooses the
+      acceptance thresholds on the calibration half only, and sets them as seat keys. Write paths:
+      <code>pyproject.toml</code> and
       <code>docs/evidence/fragments/signal-cocos-conventions/convention-judgment-calibration.html</code>.
-      <strong>Done when</strong> the fragment states the AUC of <code>p_convention_dependent</code>, class accuracy and
-      writer accuracy at the chosen thresholds, the spend, and every misjudged reference source with its label and Jev's
-      distribution.
+      <strong>Done when</strong> the fragment states, on the held-out half, the AUC of
+      <code>p_convention_dependent</code>, class accuracy and writer accuracy at the thresholds chosen on the calibration
+      half; the share of convention-independent negative-control rows judged dependent at that threshold; the spend; and
+      every misjudged held-out source with its label and Jev's distribution.
     </p>
 
     <h2 id="s5">§5 — Facility data validates the convention</h2>
@@ -218,8 +240,9 @@
       <strong>Node</strong> <code>cocos-determination-core</code>, role implement, 2 h. Write paths:
       <code>imas_codex/cocos/determination.py</code> and <code>tests/cocos/test_determination.py</code>.
       <strong>Done when</strong> <code>uv run --no-sync pytest tests/cocos -p no:cacheprovider</code> passes with tests
-      showing MAST-like observations without a handedness declaration leave survivors {3, 4} with psi_like unanimous and
-      ip_like split to COCOS 17; the same observations with a declaration leave one survivor; a one-polarity cohort is
+      showing MAST-like observations without a handedness declaration leave survivors {3, 4}, with the conversion factor
+      to COCOS 17 unanimous for psi_like and split for ip_like; the same observations with a declaration leave one
+      survivor; a one-polarity cohort is
       flagged polarity-incomplete with lowered confidence; and a contradictory set leaves no survivor and reports itself
       not COCOS-expressible.
     </p>
@@ -256,8 +279,9 @@
     </p>
     <p>
       <strong>Node</strong> <code>sensor-geometry-graph</code>, role implement, 2.5 h, after the inventory and the
-      <code>geometry-storage</code> decision. A <code>SensorGeometry</code> node holds one sensor's position, orientation
-      angles, area, turns, loop path, unit and frame, with its source file, content hash and valid shot range, linked
+      <code>geometry-storage</code> decision, locked to the graph. A <code>SensorGeometry</code> node holds one sensor's
+      position, orientation angles, area, turns, loop path, unit and frame, its measurement kind (absolute, or
+      differential with its reference sensor), with its source file, content hash and valid shot range, linked
       <code>HAS_GEOMETRY</code> from its measurement source. JET's device descriptions are ingested first. Write paths:
       <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/discovery/static/geometry.py</code> and
       <code>tests/discovery/test_sensor_geometry.py</code>. <strong>Done when</strong> the tests pass and a live count
@@ -270,7 +294,8 @@
       cross-checks the result against the imas-ambix machine descriptions. Write path:
       <code>docs/evidence/fragments/signal-cocos-conventions/jt60sa-sensor-geometry.html</code> beside the module's
       deck reader. <strong>Done when</strong> each JT-60SA magnetic sensor the inventory joined carries geometry per
-      operation phase, and the fragment lists every position or angle that differs from imas-ambix beyond 1 mm or 0.1°.
+      operation phase with its measurement kind, flux loop 7 reads absolute and the other 26 differential with loop 7 as
+      reference, and the fragment lists every position or angle that differs from imas-ambix beyond 1 mm or 0.1°.
     </p>
 
     <h2 id="s7">§7 — The conventions stage in discover</h2>
@@ -306,39 +331,85 @@
       <strong>Node</strong> <code>conventions-proof</code>, role implement, 1.5 h over resumes. Write path:
       <code>docs/evidence/fragments/signal-cocos-conventions/conventions-proof.html</code>.
       <strong>Done when</strong> the fragment holds the class confusion against the reference labels, the survivors per
-      writer against imas-ambix's <code>source_cocos</code>, channel signs against its <code>channel_factor</code>, the
-      followups raised with their questions, and every disagreement with imas-ambix listed beside imas-ambix's evidence
-      string.
+      writer, each source's total sign to COCOS 17 against the imas-ambix rule pulled into the graph by
+      <code>external-map-rules</code>, citing the pulled version, the followups raised with their questions, and every
+      disagreement listed beside the rule's evidence string. Flux-loop sign comparisons are reported but not scored
+      until <code>jt60sa-discovery-completion</code> §56 adjudicates them, and the JT-60SA flux loops are judged in the
+      absolute and differential sources §9 creates.
+    </p>
+
+    <h2 id="s9">§9 — Absolute and differential measurements are separate sources</h2>
+<section data-reckon="section" data-id="s9" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>
+      The lead ruled on 2026-10-09 that an absolute and a differential measurement are different signals and belong to
+      different sources. A differential flux loop measures ψ<sub>L</sub> − ψ<sub>ref</sub>: still psi_like, but a
+      different quantity, whose DD home is a <code>magnetics/flux_loop</code> entry whose <code>type</code> names it
+      differential and whose <code>indices_differential</code> names the two loops. Its sign includes the order of the
+      difference, which is a property of the source. On JT-60SA flux loop 7 is the only absolute loop and the other 26
+      are differential entries [7, L], per the SELENE deck's type-6 entries and imas-ambix's loop-reference study.
+    </p>
+    <p>
+      The graph does not group them that way. <code>detect_signal_sources</code> keys groups on digit runs in the
+      accessor, so loops 1 to 9 are one-member sources and loops 10 to 27 share one 25-member source; loop 7 stands alone
+      only by accident. The measurement kind comes from the sensor geometry §6 ingests: each <code>SensorGeometry</code>
+      records whether its sensor is absolute or differential and, when differential, its reference sensor. A regroup in
+      <code>imas_codex/discovery/base/grouping.py</code> then makes each source hold one kind: it moves members, links
+      each differential source <code>REFERENCES</code> its reference sensor's source, records <code>SPLIT_FROM</code> or
+      <code>MERGED_INTO</code> with the reason and time so the change is traceable like a rename, and clears the
+      convention and candidate state of every source it changed so they are judged again.
+    </p>
+    <p>
+      <strong>Node</strong> <code>measurement-kind-sources</code>, role implement, 2 h, after
+      <code>jt60sa-sensor-geometry</code>. Write paths: <code>imas_codex/discovery/base/grouping.py</code>,
+      <code>imas_codex/schemas/facility.yaml</code> and <code>tests/discovery/test_measurement_kind_sources.py</code>.
+      <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/discovery/test_measurement_kind_sources.py -p no:cacheprovider</code> passes
+      with tests showing a mixed source split by kind, singleton sources of one kind merged, every move recorded with its
+      reason, a source of one kind left untouched, and changed sources' convention and candidate state cleared; and a
+      live JT-60SA run leaves flux loop 7 alone in an absolute source and the 26 differential loops in one differential
+      source linked to it, with the counts in
+      <code>docs/evidence/fragments/signal-cocos-conventions/measurement-kind-sources.html</code>.
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="geometry-storage" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Do sensor positions and orientations live in the graph, so every judgment and map prompt can read them?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="graph">SensorGeometry nodes in the graph (recommended)</button>
-          <button class="r-opt" data-value="fetch">Read from facility files at judgment time</button>
-        </p>
-        <p class="r-dec-rat">Recommended: the graph. Geometry is small, static per operation phase, and needed by three readers: the convention judgment, the probe for angle classes, and the map for geometry targets and index consistency. Reading it from the facility at judgment time would make the map depend on facility access, which it must not.</p>
-      </div>
-      <div class="r-dec" data-key="convention-granularity" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Where does the convention live: on the SignalSource, or on each FacilitySignal?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="source">SignalSource, with a per-member channel sign (recommended)</button>
-          <button class="r-opt" data-value="signal">Each FacilitySignal</button>
-        </p>
-        <p class="r-dec-rat">Recommended: the SignalSource, which is the unit one binding maps. A channel whose sign differs within a group, such as a differential flux loop, is a per-member sign rather than a different convention.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="geometry-storage" data-choice="graph" data-by="Simon McIntosh" data-when="2026-10-09T00:50:57+00:00">
+    <p class="r-dec-q">Do sensor positions and orientations live in the graph, so every judgment and map prompt can read them?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="graph">SensorGeometry nodes in the graph (recommended)</button>
+      <button class="r-opt" data-value="fetch">Read from facility files at judgment time</button>
+      </p>
+    <p class="r-dec-rat">Lead ruling 2026-10-09, accepting the recommendation: geometry is small, static per operation phase, and read by the convention judgment, the probe for angle classes and the map for geometry targets and index consistency; fetching it from facility files at judgment time would make the map depend on facility access.</p>
+    </div>
+<div class="r-dec" data-key="convention-granularity" data-choice="source" data-by="Simon McIntosh" data-when="2026-10-09T00:50:57+00:00">
+    <p class="r-dec-q">Where does the convention live: on the SignalSource, or on each FacilitySignal?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="source">SignalSource, with a per-member channel sign (recommended)</button>
+      <button class="r-opt" data-value="signal">Each FacilitySignal</button>
+      </p>
+    <p class="r-dec-rat">Lead ruling 2026-10-09: the SignalSource carries the convention because it is the unit one binding maps. The lead amended the channel-sign example: absolute and differential measurements are different signals in different sources (§9), so a difference&#x27;s order is a source property; channel_sign stays only for a member whose installation reverses its sign within an otherwise identical group.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-scc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build signal-cocos-conventions §2" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Label the reference sources and prototype the facility probe</h4>
-        <div class="r-fu-body">The reference labels calibrate the Jev thresholds, and the JET probe prototype shows which coefficients facility data can settle before the probe is built.</div>
-        <pre class="r-fu-prompt">/reckon-build signal-cocos-conventions §2</pre>
-      </article>
-    </section>
-  </main>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build signal-cocos-conventions §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Label the reference sources and prototype the facility probe</h4>
+    <div class="r-fu-body">The reference labels calibrate the Jev thresholds, and the JET probe prototype shows which coefficients facility data can settle before the probe is built.</div>
+    <pre class="r-fu-prompt">/reckon-build signal-cocos-conventions §2</pre>
+    </article>
+</section>
+  <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-scc-1" data-section="s8" data-gated-sections="s8" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">the current imas-ambix JT-60SA bundle and its readable history are pulled into the graph as versioned rules with change records</h4>
+    <p class="r-gate-required-evidence">external-map-rules#s5</p>
+    </div>
+<div class="r-gate" data-id="g-scc-2" data-section="s8" data-gated-sections="s8" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">JT-60SA flux loop 7 is alone in an absolute source and the 26 differential loops share one differential source linked to it</h4>
+    <p class="r-gate-required-evidence">signal-cocos-conventions#s9</p>
+    </div>
+</section>
+</main>
 </body>
 </html>

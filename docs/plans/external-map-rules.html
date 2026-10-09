@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="external-map-rules">
+  <meta name="plan-title" content="External Machine-Map Rules Pulled Into the Graph">
+  <meta name="plan-summary" content="imas-codex pulls imas-ambix machine-map rules into the graph by version, records how each rule changes between pulls, and reads them as evidence">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="8.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="signals,discovery">
+  <meta name="plan-sprint" content="S17">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;: [&quot;external-map-rules#s2&quot;], &quot;s5&quot;: [&quot;external-map-rules#s3&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <title>External Machine-Map Rules Pulled Into the Graph | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — imas-codex pulls the rules, and keeps their history</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      imas-ambix holds a JT-60SA machine map whose rules were validated against data: the bundle
+      <code>imas-alambic-jt60sa</code> under <code>/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/</code>, 45 rules to
+      COCOS 17 for magnetics, PF, TF and equilibrium, each with a <code>channel_factor</code>, a
+      <code>validation_state</code> (corpus-validated or source-only) and an evidence string. It is the strongest
+      external evidence the conventions stage (<code>signal-cocos-conventions</code>) and the map can read. It also moves:
+      the bundle read <code>v0.2.0-rc3</code> and then <code>v0.2.0-rc4</code> on 2026-10-09, and its
+      <code>superseded/</code> directory keeps earlier states, among them the differential-loop names before a rename and
+      the loops before differential entries existed.
+    </p>
+    <p>
+      The lead ruled on 2026-10-09 that imas-codex pulls the rules rather than imas-ambix pushing them, and that the graph
+      tracks their evolution as it tracks other changing attributes. The graph already has two idioms for this. The DD has
+      a version node per release (<code>DDVersion</code>) and a change record per path and version
+      (<code>IMASNodeChange</code>, linked <code>FOR_IMAS_PATH</code> and <code>IN_VERSION</code>). Standard names record
+      renames and supersedes as <code>StandardNameChange</code> events through <code>HAS_INTERNAL_CHANGE</code>. A pulled
+      bundle becomes a version node, each rule a node keyed by a stable rule identity, and each difference between two
+      pulls a change record on the rule. imas-ambix owns its rules; imas-codex records what it read, at which version
+      and content hash, and when.
+    </p>
+    <p>
+      A pulled rule is evidence, never a settled convention. The conventions stage and the map read it beside their own
+      judgments and their facility probe; a disagreement raises a followup through
+      <code>signal-evidence-followups</code> rather than overriding either side. When a pull changes a rule that a
+      source's convention or binding relied on, that source is re-queued.
+    </p>
+    <p>
+      <strong>Two translation hazards</strong> come from reading the rules naively. The DD labels
+      <code>magnetics/flux_loop/flux</code> psi_like, but every imas-ambix flux-loop rule is one_like with
+      <code>source_cocos</code> null: its −1 was fitted directly against a COCOS 17 prediction, so it is the total sign
+      from raw data to COCOS 17. Read as one_like, a psi_like field would be flipped twice or not at all. The pull
+      therefore records <code>channel_factor</code> as the total sign to the rule's target COCOS and takes the class from
+      the DD, never from the rule's <code>transformation</code> field. Second, the flux-loop signs are not adjudicated:
+      imas-codex's diagnostic convention audit (merged <code>09a095988</code>,
+      <code>docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-diagnostic-conventions.json</code>) disagrees with
+      imas-ambix in sign on all 54 flux-loop comparisons and agrees on all 34 pickup-coil comparisons. The pull records
+      the rules as they are, with their validation state; adjudicating them belongs to
+      <code>jt60sa-discovery-completion</code> §56.
+    </p>
+
+    <h2 id="s2">§2 — Design the record before writing it</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      The record has to survive renames, re-groupings and sign corrections, so its identity rules are settled first.
+      The design reads the bundle's own format (<code>bundle.json</code>, <code>machine_map.json</code> at schema version
+      1.10.0, <code>maps/*.json</code>, <code>superseded/*</code> and their receipts), how imas-ambix releases a bundle
+      (<code>imas-ambix:jt60sa-facility-mint</code>), and the graph's change idioms in
+      <code>imas_codex/schemas/imas_dd.yaml</code> (<code>DDVersion</code>, <code>IMASNodeChange</code>),
+      <code>imas_codex/schemas/standard_name.yaml</code> (<code>StandardNameChange</code>) and
+      <code>imas_codex/schemas/facility_config.yaml</code> (<code>SourceVersion</code>). It answers: what identifies one
+      rule across versions when its name changes; how a rule joins a <code>SignalSource</code> and an
+      <code>IMASNode</code>, with the live join counts for the current bundle; which change types exist; and which
+      changes re-queue a source.
+    </p>
+    <p>
+      <strong>Node</strong> <code>external-map-record-design</code>, role implement, 2 h. Live graph read through the
+      linked <code>.env</code>; read-only access to the imas-ambix checkout. Write path:
+      <code>docs/evidence/fragments/external-map-rules/external-map-record-design.html</code>.
+      <strong>Done when</strong> the fragment proposes the node and edge classes with every property, the rule identity
+      with one worked example of a rule renamed between two superseded states, the change types with one example each,
+      the join counts of the current bundle's rules to SignalSources and IMASNodes with every rule that does not join
+      listed, and the re-queue rule.
+    </p>
+
+    <h2 id="s3">§3 — Pull a bundle version into the graph</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <code>imas-codex imas map pull FACILITY --bundle PATH</code> reads one bundle, records its version and the sha256
+      of every file read, writes or updates each rule under the §2 identity, joins it to its source and target, and
+      writes a change record for every rule whose values differ from the previous pulled version. Pulling a version whose
+      hashes are already recorded writes nothing. The schema follows the §2 design as adjusted by the lead.
+    </p>
+    <p>
+      <strong>Node</strong> <code>external-map-pull</code>, role implement, 3 h, after §2. Write paths:
+      <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/ids/external_maps.py</code>,
+      <code>imas_codex/cli/map.py</code> and <code>tests/ids/test_external_maps.py</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/ids/test_external_maps.py -p no:cacheprovider</code> passes with tests on two
+      bundle fixtures showing one version node per pull, a change record for each changed rule and none for an unchanged
+      one, a renamed rule keeping its identity, a re-pull of the same hashes writing nothing, a flux-loop rule carrying the
+      DD's psi_like class with its channel factor stored as the total sign to its target COCOS, and a rule that joins no
+      source recorded unjoined rather than dropped; and
+      <code>uv run --no-sync pytest tests/graph/test_schema_compliance.py -m graph -p no:cacheprovider</code> passes
+      against the live graph.
+    </p>
+
+    <h2 id="s4">§4 — Rules reach the judgments as evidence</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The conventions judgment and the map's slot context read a source's current pulled rules, labelled with provider,
+      version and validation state. A pull that changes a rule re-queues every source that rule joins for the
+      conventions stage, and raises a followup when the new rule disagrees with a convention already settled.
+    </p>
+    <p>
+      <strong>Node</strong> <code>external-rules-as-evidence</code>, role implement, 1.5 h, after §3,
+      <code>signal-cocos-conventions</code> §7 and <code>signal-evidence-followups</code> §2. Write paths:
+      <code>imas_codex/ids/external_maps.py</code>, <code>imas_codex/discovery/signals/conventions.py</code>,
+      <code>imas_codex/ids/slot_context.py</code> and <code>tests/ids/test_external_rule_evidence.py</code>.
+      <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/ids/test_external_rule_evidence.py -p no:cacheprovider</code> passes with tests
+      showing a source's rules in both states labelled with their version, a changed rule re-queuing its sources, a
+      disagreeing rule raising one followup, and an unchanged re-pull re-queuing nothing.
+    </p>
+
+    <h2 id="s5">§5 — Pull the JT-60SA history</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Pull every readable JT-60SA bundle state in order, oldest first: the superseded states that carry a
+      <code>machine_map.json</code>, then the current bundle. The graph then holds the evolution, including the
+      differential-loop rename and the arrival of the differential entries, as change records a later reader can query.
+    </p>
+    <p>
+      <strong>Node</strong> <code>jt60sa-external-map-history</code>, role implement, 1.25 h, after §3. Write path:
+      <code>docs/evidence/fragments/external-map-rules/jt60sa-external-map-history.html</code>.
+      <strong>Done when</strong> the fragment lists each pulled version with its file hashes and rule count, the change
+      records per version by type, the differential-loop rename shown as change records with old and new values, and the
+      current bundle's joined and unjoined rule counts.
+    </p>
+
+    <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-emr-1" data-section="s4" data-gated-sections="s4" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">discover conventions judges and persists each source's convention through the conventions module this section extends</h4>
+    <p class="r-gate-required-evidence">signal-cocos-conventions#s7</p>
+    </div>
+<div class="r-gate" data-id="g-emr-2" data-section="s4" data-gated-sections="s4" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">raise_followup records a SignalFollowup idempotently on source, stage and open slot</h4>
+    <p class="r-gate-required-evidence">signal-evidence-followups#s2</p>
+    </div>
+</section>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="pull-source" data-choice="" data-by="" data-when="" data-recommended="released-or-hashed" data-recommended-by="coordinator">
+        <p class="r-dec-q">What may a pull read: only released bundle tags, or a local checkout too?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="released-or-hashed">A released tag, or a local checkout whose file hashes are recorded</button>
+          <button class="r-opt" data-value="released-only">Released tags only</button>
+        </p>
+        <p class="r-dec-rat">Recommended: either, provided every file read is hashed. Release candidates change within a day and are read from the local checkout before they are released; hashing every file makes a local pull as reproducible as a tag.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-emr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="/reckon-build external-map-rules §2" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Design the external rule record</h4>
+        <div class="r-fu-body">The rule identity and change types are settled before any schema is written, because the record has to survive renames and re-groupings.</div>
+        <pre class="r-fu-prompt">/reckon-build external-map-rules §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
