@@ -20,23 +20,23 @@
  </defs>
  <g id="figure_1">
   <g id="patch_1">
-   <path d="M 0 381.6 
-L 1008 381.6 
-L 1008 0 
-L 0 0 
+   <path d="M 0 381.6
+L 1008 381.6
+L 1008 0
+L 0 0
 z
 " style="fill: #ffffff"/>
   </g>
   <g id="axes_1">
    <g id="line2d_1">
-    <path d="M 151.2 201.6 
-L 151.2 273.6 
-L 504 273.6 
+    <path d="M 151.2 201.6
+L 151.2 273.6
+L 504 273.6
 " clip-path="url(#p9f80fe1d43)" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #666666; stroke-width: 1.2"/>
    </g>
    <g id="line2d_2">
-    <path d="M 504 291.6 
-L 504 255.6 
+    <path d="M 504 291.6
+L 504 255.6
 " clip-path="url(#p9f80fe1d43)" style="fill: none; stroke: #242424; stroke-width: 2.6; stroke-linecap: square"/>
    </g>
    <g id="text_1">
@@ -58,21 +58,21 @@ L 504 255.6
     <text style="font-size: 20px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="842.4" y="169.2" transform="rotate(-0 842.4 169.2)">Explicit promotion</text>
    </g>
    <g id="patch_2">
-    <path d="M 253.999512 126 
-Q 324.000882 126 392.660611 126 
+    <path d="M 253.999512 126
+Q 324.000882 126 392.660611 126
 " style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
-    <path d="M 384.660611 122 
-L 392.660611 126 
-L 384.660611 130 
+    <path d="M 384.660611 122
+L 392.660611 126
+L 384.660611 130
 " style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
    </g>
    <g id="patch_3">
-    <path d="M 613.997314 126 
-Q 676.799814 126 738.260673 126 
+    <path d="M 613.997314 126
+Q 676.799814 126 738.260673 126
 " style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
-    <path d="M 730.260673 122 
-L 738.260673 126 
-L 730.260673 130 
+    <path d="M 730.260673 122
+L 738.260673 126
+L 730.260673 130
 " style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
    </g>
    <g id="text_7">

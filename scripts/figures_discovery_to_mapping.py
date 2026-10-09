@@ -309,6 +309,9 @@ def save(fig: Any, stem: str, presentation: Path) -> dict[str, Any]:
     svg = FIGURES / f"{stem}.svg"
     png = presentation / f"{stem}.png"
     fig.savefig(svg, format="svg", metadata={"Date": None}, facecolor="white")
+    svg.write_text(
+        "\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n"
+    )
     fig.savefig(png, dpi=200, facecolor="white")
     width, height = fig.get_size_inches()
     plt.close(fig)
@@ -649,7 +652,7 @@ def report_html(receipt: dict[str, Any]) -> str:
         '<section id="method"><h2>Reproduce and inspect the evidence</h2><p>Run the single script below. It prefers the live hand-off when present and otherwise uses the contract fixture in the main checkout. It regenerates all four SVGs, all four slide PNGs, the evidence receipt and this report. It never accesses the facility over SSH or writes the graph.</p><pre>UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" uv run --no-sync python scripts/figures_discovery_to_mapping.py</pre>'
     )
     parts.append(
-        f'<p>Renderer revision <code>{e(receipt["revision"])}</code>; script SHA-256 <code>{e(receipt["renderer_sha256"])}</code>. Schema property checks are recorded with schema hashes in <a href="/imas-codex/figures/discovery-to-mapping/evidence.json">the machine-readable evidence receipt</a>. Each query uses a nine-second server timeout and is rejected if measured wall time reaches ten seconds. Online range indexes are checked first; facility and identity hints enforce indexed starts. The known JT-60SA Facility and nonzero signals/sources act as positive controls. A zero inventory triggers an identity-index witness lookup for that label, and the schema check prevents a misspelled facility or status property from masquerading as an empty result.</p>'
+        f'<p>Repository base revision <code>{e(receipt["revision"])}</code>; script SHA-256 <code>{e(receipt["renderer_sha256"])}</code>. Schema property checks are recorded with schema hashes in <a href="/imas-codex/figures/discovery-to-mapping/evidence.json">the machine-readable evidence receipt</a>. Each query uses a nine-second server timeout and is rejected if measured wall time reaches ten seconds. Online range indexes are checked first; facility and identity hints enforce indexed starts. The known JT-60SA Facility and nonzero signals/sources act as positive controls. A zero inventory triggers an identity-index witness lookup for that label, and the schema check prevents a misspelled facility or status property from masquerading as an empty result.</p>'
     )
     parts.append(
         "<p>Every query, parameters, result and elapsed time is printed by the script and preserved below. A zero with no identity witness means that label has no indexed identity to inspect; it is explicitly weaker evidence than a populated positive control.</p>"

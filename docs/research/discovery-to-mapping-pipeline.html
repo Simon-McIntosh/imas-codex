@@ -18,7 +18,7 @@
 <header><p class="eyebrow">JT-60SA · imas-codex chapter</p>
 <h1>Discovery to mapping</h1>
 <p class="lead">Discovery turns facility files, documentation and signal inventories into graph-backed mapping proposals. A generated mapping is a draft: imas-ambix still has to resolve machine indices, validate the rules against data and write the tokamap directory and IDS.</p></header>
-<section id="snapshot"><h2>What this snapshot establishes</h2><p>Graph reads ran from <strong>2026-10-09T02:48:19.323263+00:00</strong> to <strong>2026-10-09T02:48:29.319240+00:00</strong>. They found <strong>15,111 signals</strong>, <strong>5,180 sources</strong>, <strong>156 sources with a candidate route</strong>, <strong>0 mapping records</strong> and <strong>0 field bindings</strong> for JT-60SA. These are sequential live reads, not an atomic snapshot; concurrent discovery can change the totals.</p>
+<section id="snapshot"><h2>What this snapshot establishes</h2><p>Graph reads ran from <strong>2026-10-09T02:51:36.833687+00:00</strong> to <strong>2026-10-09T02:51:46.629572+00:00</strong>. They found <strong>15,111 signals</strong>, <strong>5,180 sources</strong>, <strong>156 sources with a candidate route</strong>, <strong>0 mapping records</strong> and <strong>0 field bindings</strong> for JT-60SA. These are sequential live reads, not an atomic snapshot; concurrent discovery can change the totals.</p>
 <p><strong>Example provenance: CONTRACT FIXTURE.</strong> The JSON renders use <code>/home/ITER/mcintos/Code/imas-codex/tests/fixtures/mapping_handoff_example.json</code>, SHA-256 <code>07adcf794051238910d0227bd5174aec75f5df5af3194cb01448aba33ce84a94</code>. Its export timestamp is <code>2026-10-09T00:00:00Z</code>; it is separate from the graph observation time. Fixture values are illustrative contract data, including confidence and units, and are not measurements of live mapping quality.</p>
 <p>No third system has a generated mapping in the hand-off available for this report. The examples cover pickup probes and PF coil currents only. Missing graph records are labelled explicitly; no record, transform, convention or machine index is invented.</p></section>
 <section id="discovery"><h2>From facility context to candidate targets</h2><p>The discovery sequence starts with paths. Code discovery reads those paths to recover source files and data-access logic; document discovery reads the same path inventory. Wiki discovery is an independent source of descriptions and operating context. Signal scanning inventories the facility data systems and creates signal identities. Enrichment adds physical meaning using code and wiki context, and access checks establish whether the signal can be read.</p><p>The diagram separates required stage inputs from context. Counts are inventories at the observation time, not an attrition funnel: files, sources, signals and bindings are different entities. Signal status counts are current states, not cumulative counts of completed transitions. In particular, checked means access was attempted; CHECKED_WITH.success holds the outcome, so checked is not a success count. Documents are part of the evidence inventory; the sequence explicitly lists code and wiki as enrichment context.</p>
@@ -91,9 +91,9 @@
 }</pre></details>
 <p>JSON syntax uses Pygments <code>friendly</code> on white. The style is not yet matched to imas-ambix. Node projections show selected schema-declared fields; the edge projection shows the persisted transform, units, convention, confidence and evidence fields. Null records mean the exact source or edge was not found, not that another source with a similar name is equivalent. The same excerpt appears as selectable text above.</p></section>
 <section id="method"><h2>Reproduce and inspect the evidence</h2><p>Run the single script below. It prefers the live hand-off when present and otherwise uses the contract fixture in the main checkout. It regenerates all four SVGs, all four slide PNGs, the evidence receipt and this report. It never accesses the facility over SSH or writes the graph.</p><pre>UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" uv run --no-sync python scripts/figures_discovery_to_mapping.py</pre>
-<p>Renderer revision <code>c8e35ade24760cda644f88438dd6ad3996d1582d</code>; script SHA-256 <code>b7901522f6a35ad912df087a8681ee8c81f3f6fb10f95b0cbebfe4b66a7cd808</code>. Schema property checks are recorded with schema hashes in <a href="/imas-codex/figures/discovery-to-mapping/evidence.json">the machine-readable evidence receipt</a>. Each query uses a nine-second server timeout and is rejected if measured wall time reaches ten seconds. Online range indexes are checked first; facility and identity hints enforce indexed starts. The known JT-60SA Facility and nonzero signals/sources act as positive controls. A zero inventory triggers an identity-index witness lookup for that label, and the schema check prevents a misspelled facility or status property from masquerading as an empty result.</p>
+<p>Repository base revision <code>6079a971c0c3f20decd205e38543e9bb25d38c0d</code>; script SHA-256 <code>aeaff32230231b92ba0fa66cec5e81b26e64371e453f615b3c687811f25288a5</code>. Schema property checks are recorded with schema hashes in <a href="/imas-codex/figures/discovery-to-mapping/evidence.json">the machine-readable evidence receipt</a>. Each query uses a nine-second server timeout and is rejected if measured wall time reaches ten seconds. Online range indexes are checked first; facility and identity hints enforce indexed starts. The known JT-60SA Facility and nonzero signals/sources act as positive controls. A zero inventory triggers an identity-index witness lookup for that label, and the schema check prevents a misspelled facility or status property from masquerading as an empty result.</p>
 <p>Every query, parameters, result and elapsed time is printed by the script and preserved below. A zero with no identity witness means that label has no indexed identity to inspect; it is explicitly weaker evidence than a populated positive control.</p>
-<details><summary>index_inventory · 0.0123 s</summary><pre>SHOW INDEXES YIELD labelsOrTypes, properties, state, type WHERE any(label IN labelsOrTypes WHERE
+<details><summary>index_inventory · 0.0100 s</summary><pre>SHOW INDEXES YIELD labelsOrTypes, properties, state, type WHERE any(label IN labelsOrTypes WHERE
 label IN $labels) AND type IN [&#x27;RANGE&#x27;, &#x27;TEXT&#x27;] RETURN labelsOrTypes, properties, state, type LIMIT
 100
 PARAMS {
@@ -659,7 +659,7 @@ RESULT [
     &quot;type&quot;: &quot;RANGE&quot;
   }
 ]</pre></details>
-<details><summary>facility_control · 0.0009 s</summary><pre>MATCH (f:Facility {id: $facility}) USING INDEX f:Facility(id) RETURN f.id AS id LIMIT 1
+<details><summary>facility_control · 0.0008 s</summary><pre>MATCH (f:Facility {id: $facility}) USING INDEX f:Facility(id) RETURN f.id AS id LIMIT 1
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
@@ -668,7 +668,7 @@ RESULT [
     &quot;id&quot;: &quot;jt-60sa&quot;
   }
 ]</pre></details>
-<details><summary>FacilityPath · 0.0323 s</summary><pre>MATCH (n:FacilityPath {facility_id: $facility}) USING INDEX n:FacilityPath(facility_id) RETURN
+<details><summary>FacilityPath · 0.0327 s</summary><pre>MATCH (n:FacilityPath {facility_id: $facility}) USING INDEX n:FacilityPath(facility_id) RETURN
 count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -680,7 +680,7 @@ RESULT [
     &quot;with_status&quot;: 9916
   }
 ]</pre></details>
-<details><summary>CodeFile · 0.1217 s</summary><pre>MATCH (n:CodeFile {facility_id: $facility}) USING INDEX n:CodeFile(facility_id) RETURN count(n) AS
+<details><summary>CodeFile · 0.1199 s</summary><pre>MATCH (n:CodeFile {facility_id: $facility}) USING INDEX n:CodeFile(facility_id) RETURN count(n) AS
 total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -692,7 +692,7 @@ RESULT [
     &quot;with_status&quot;: 68268
   }
 ]</pre></details>
-<details><summary>Document · 0.0033 s</summary><pre>MATCH (n:Document {facility_id: $facility}) USING INDEX n:Document(facility_id) RETURN count(n) AS
+<details><summary>Document · 0.0032 s</summary><pre>MATCH (n:Document {facility_id: $facility}) USING INDEX n:Document(facility_id) RETURN count(n) AS
 total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -704,7 +704,7 @@ RESULT [
     &quot;with_status&quot;: 1057
   }
 ]</pre></details>
-<details><summary>WikiPage · 0.0115 s</summary><pre>MATCH (n:WikiPage {facility_id: $facility}) USING INDEX n:WikiPage(facility_id) RETURN count(n) AS
+<details><summary>WikiPage · 0.0116 s</summary><pre>MATCH (n:WikiPage {facility_id: $facility}) USING INDEX n:WikiPage(facility_id) RETURN count(n) AS
 total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -716,7 +716,7 @@ RESULT [
     &quot;with_status&quot;: 4484
   }
 ]</pre></details>
-<details><summary>FacilitySignal · 0.0224 s</summary><pre>MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN
+<details><summary>FacilitySignal · 0.0216 s</summary><pre>MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN
 count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -728,7 +728,7 @@ RESULT [
     &quot;with_status&quot;: 15111
   }
 ]</pre></details>
-<details><summary>SignalSource · 0.0052 s</summary><pre>MATCH (n:SignalSource {facility_id: $facility}) USING INDEX n:SignalSource(facility_id) RETURN
+<details><summary>SignalSource · 0.0049 s</summary><pre>MATCH (n:SignalSource {facility_id: $facility}) USING INDEX n:SignalSource(facility_id) RETURN
 count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -740,7 +740,7 @@ RESULT [
     &quot;with_status&quot;: 5180
   }
 ]</pre></details>
-<details><summary>IMASMapping · 0.0007 s</summary><pre>MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN
+<details><summary>IMASMapping · 0.0006 s</summary><pre>MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN
 count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -752,7 +752,7 @@ RESULT [
     &quot;with_status&quot;: 0
   }
 ]</pre></details>
-<details><summary>IMASMapping_identity_control · 0.0009 s</summary><pre>MATCH (n:IMASMapping) USING INDEX n:IMASMapping(id) WHERE n.id IS NOT NULL RETURN n.id AS id,
+<details><summary>IMASMapping_identity_control · 0.0006 s</summary><pre>MATCH (n:IMASMapping) USING INDEX n:IMASMapping(id) WHERE n.id IS NOT NULL RETURN n.id AS id,
 n.facility_id AS facility_id LIMIT 1
 PARAMS {}
 RESULT [
@@ -761,7 +761,7 @@ RESULT [
     &quot;facility_id&quot;: &quot;jet&quot;
   }
 ]</pre></details>
-<details><summary>signal_statuses · 0.0208 s</summary><pre>MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN
+<details><summary>signal_statuses · 0.0204 s</summary><pre>MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN
 n.status AS status, count(n) AS count ORDER BY status LIMIT 30
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -813,26 +813,26 @@ RESULT [
     &quot;count&quot;: 0
   }
 ]</pre></details>
-<details><summary>binding_control · 0.0035 s</summary><pre>MATCH (s:SignalSource {facility_id: $facility}) USING INDEX s:SignalSource(facility_id) MATCH
+<details><summary>binding_control · 0.0034 s</summary><pre>MATCH (s:SignalSource {facility_id: $facility}) USING INDEX s:SignalSource(facility_id) MATCH
 (s)-[:MAPS_TO_IMAS]-&gt;(n:IMASNode) RETURN s.id AS source_id, n.id AS target_path LIMIT 1
 PARAMS {
   &quot;facility&quot;: &quot;jet&quot;
 }
 RESULT []</pre></details>
-<details><summary>mapping_statuses · 0.0008 s</summary><pre>MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN
+<details><summary>mapping_statuses · 0.0006 s</summary><pre>MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN
 n.ids_name AS ids, n.status AS status, count(n) AS count ORDER BY ids, status LIMIT 30
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
 RESULT []</pre></details>
-<details><summary>pickup-probe_source · 0.0008 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) RETURN s
+<details><summary>pickup-probe_source · 0.0007 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) RETURN s
 {.id, .group_key, .status, .description} AS record LIMIT 1
 PARAMS {
   &quot;source&quot;: &quot;jt-60sa:magnetics:pickup_probe&quot;,
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
 RESULT []</pre></details>
-<details><summary>pickup-probe_edge · 0.0010 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) MATCH
+<details><summary>pickup-probe_edge · 0.0009 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) MATCH
 (s)-[r:MAPS_TO_IMAS]-&gt;(n:IMASNode {id: $target}) RETURN r {.source_property, .transform_expression,
 .source_units, .target_units, .cocos_label, .confidence, .evidence, .mapping_type, .error_type,
 .derived_from} AS record LIMIT 2
@@ -842,7 +842,7 @@ PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
 RESULT []</pre></details>
-<details><summary>pickup-probe_target · 0.0009 s</summary><pre>MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit,
+<details><summary>pickup-probe_target · 0.0008 s</summary><pre>MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit,
 .cocos_transformation_type} AS record LIMIT 1
 PARAMS {
   &quot;target&quot;: &quot;magnetics/b_field_pol_probe/field/data&quot;
@@ -874,7 +874,7 @@ PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
 RESULT []</pre></details>
-<details><summary>pf-coil-current_target · 0.0006 s</summary><pre>MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit,
+<details><summary>pf-coil-current_target · 0.0009 s</summary><pre>MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit,
 .cocos_transformation_type} AS record LIMIT 1
 PARAMS {
   &quot;target&quot;: &quot;pf_active/coil/current/data&quot;

@@ -1,12 +1,12 @@
 {
-  "revision": "c8e35ade24760cda644f88438dd6ad3996d1582d",
-  "observed_started_at": "2026-10-09T02:48:19.323263+00:00",
+  "revision": "6079a971c0c3f20decd205e38543e9bb25d38c0d",
+  "observed_started_at": "2026-10-09T02:51:36.833687+00:00",
   "schema_sha256": {
     "facility.yaml": "45aabd047cffc21ac9bf3269482b43491acafc1d1bc55f01ed041b0a76730507",
     "imas_dd.yaml": "78fe27dc782ff33e9422cf23295988c8fb15a3669f9741b5b7b87438f8254a5b",
     "common.yaml": "8ad1491a5cce17ea65fe52593ec77c432ded5023aa828753112c466c2f95de9a"
   },
-  "renderer_sha256": "b7901522f6a35ad912df087a8681ee8c81f3f6fb10f95b0cbebfe4b66a7cd808",
+  "renderer_sha256": "aeaff32230231b92ba0fa66cec5e81b26e64371e453f615b3c687811f25288a5",
   "source": {
     "path": "/home/ITER/mcintos/Code/imas-codex/tests/fixtures/mapping_handoff_example.json",
     "kind": "CONTRACT FIXTURE",
@@ -238,7 +238,7 @@
           "IMASNode"
         ]
       },
-      "seconds": 0.0123,
+      "seconds": 0.01,
       "rows": [
         {
           "labelsOrTypes": [
@@ -796,7 +796,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0009,
+      "seconds": 0.0008,
       "rows": [
         {
           "id": "jt-60sa"
@@ -809,7 +809,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0323,
+      "seconds": 0.0327,
       "rows": [
         {
           "total": 9916,
@@ -824,7 +824,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.1217,
+      "seconds": 0.1199,
       "rows": [
         {
           "total": 68268,
@@ -839,7 +839,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0033,
+      "seconds": 0.0032,
       "rows": [
         {
           "total": 1057,
@@ -854,7 +854,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0115,
+      "seconds": 0.0116,
       "rows": [
         {
           "total": 4484,
@@ -869,7 +869,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0224,
+      "seconds": 0.0216,
       "rows": [
         {
           "total": 15111,
@@ -884,7 +884,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0052,
+      "seconds": 0.0049,
       "rows": [
         {
           "total": 5180,
@@ -899,7 +899,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0007,
+      "seconds": 0.0006,
       "rows": [
         {
           "total": 0,
@@ -912,7 +912,7 @@
       "name": "IMASMapping_identity_control",
       "query": "MATCH (n:IMASMapping) USING INDEX n:IMASMapping(id) WHERE n.id IS NOT NULL RETURN n.id AS id, n.facility_id AS facility_id LIMIT 1",
       "parameters": {},
-      "seconds": 0.0009,
+      "seconds": 0.0006,
       "rows": [
         {
           "id": "jet:balance_of_plant",
@@ -926,7 +926,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0208,
+      "seconds": 0.0204,
       "rows": [
         {
           "status": "checked",
@@ -987,7 +987,7 @@
       "parameters": {
         "facility": "jet"
       },
-      "seconds": 0.0035,
+      "seconds": 0.0034,
       "rows": []
     },
     {
@@ -996,7 +996,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0008,
+      "seconds": 0.0006,
       "rows": []
     },
     {
@@ -1006,7 +1006,7 @@
         "source": "jt-60sa:magnetics:pickup_probe",
         "facility": "jt-60sa"
       },
-      "seconds": 0.0008,
+      "seconds": 0.0007,
       "rows": []
     },
     {
@@ -1017,7 +1017,7 @@
         "target": "magnetics/b_field_pol_probe/field/data",
         "facility": "jt-60sa"
       },
-      "seconds": 0.001,
+      "seconds": 0.0009,
       "rows": []
     },
     {
@@ -1026,7 +1026,7 @@
       "parameters": {
         "target": "magnetics/b_field_pol_probe/field/data"
       },
-      "seconds": 0.0009,
+      "seconds": 0.0008,
       "rows": [
         {
           "record": {
@@ -1065,7 +1065,7 @@
       "parameters": {
         "target": "pf_active/coil/current/data"
       },
-      "seconds": 0.0006,
+      "seconds": 0.0009,
       "rows": [
         {
           "record": {
@@ -1078,12 +1078,12 @@
       ]
     }
   ],
-  "observed_finished_at": "2026-10-09T02:48:29.319240+00:00",
+  "observed_finished_at": "2026-10-09T02:51:46.629572+00:00",
   "artifacts": [
     {
       "svg": "docs/figures/discovery-to-mapping/pipeline.svg",
       "png": "/work/projects/imas_gpu/jt60sa/presentation/pipeline.png",
-      "svg_bytes": 8981,
+      "svg_bytes": 8934,
       "png_bytes": 257116,
       "png_width": 2800,
       "png_height": 2000
@@ -1091,7 +1091,7 @@
     {
       "svg": "docs/figures/discovery-to-mapping/mapping-lifecycle.svg",
       "png": "/work/projects/imas_gpu/jt60sa/presentation/mapping-lifecycle.png",
-      "svg_bytes": 4481,
+      "svg_bytes": 4462,
       "png_bytes": 106233,
       "png_width": 2800,
       "png_height": 1060
@@ -1099,7 +1099,7 @@
     {
       "svg": "docs/figures/discovery-to-mapping/pickup-probe.svg",
       "png": "/work/projects/imas_gpu/jt60sa/presentation/pickup-probe.png",
-      "svg_bytes": 27495,
+      "svg_bytes": 27491,
       "png_bytes": 255426,
       "png_width": 2800,
       "png_height": 1400
@@ -1107,7 +1107,7 @@
     {
       "svg": "docs/figures/discovery-to-mapping/pf-coil-current.svg",
       "png": "/work/projects/imas_gpu/jt60sa/presentation/pf-coil-current.png",
-      "svg_bytes": 27257,
+      "svg_bytes": 27253,
       "png_bytes": 247190,
       "png_width": 2800,
       "png_height": 1400
