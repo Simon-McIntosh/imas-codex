@@ -82,7 +82,7 @@ async def test_interleaved_batch_keeps_each_description_on_its_signal():
 
     with (
         patch.object(parallel, "claim_signals_for_enrichment", side_effect=claim),
-        patch.object(parallel, "detect_signal_sources", return_value=(0, 0)),
+        patch.object(parallel, "prepare_signal_sources", return_value=(0, 0, 0)),
         patch.object(parallel, "propagate_units_from_signal_nodes", return_value=0),
         patch.object(parallel, "fetch_tree_context", return_value={}),
         patch.object(parallel, "fetch_epoch_context", return_value={}),
@@ -135,7 +135,7 @@ async def test_repeated_prompt_number_writes_one_row():
 
     with (
         patch.object(parallel, "claim_signals_for_enrichment", side_effect=claim),
-        patch.object(parallel, "detect_signal_sources", return_value=(0, 0)),
+        patch.object(parallel, "prepare_signal_sources", return_value=(0, 0, 0)),
         patch.object(parallel, "propagate_units_from_signal_nodes", return_value=0),
         patch.object(parallel, "fetch_tree_context", return_value={}),
         patch.object(parallel, "fetch_epoch_context", return_value={}),
@@ -182,7 +182,7 @@ async def test_reset_signal_without_a_name_is_enriched():
 
     with (
         patch.object(parallel, "claim_signals_for_enrichment", side_effect=claim),
-        patch.object(parallel, "detect_signal_sources", return_value=(0, 0)),
+        patch.object(parallel, "prepare_signal_sources", return_value=(0, 0, 0)),
         patch.object(parallel, "propagate_units_from_signal_nodes", return_value=0),
         patch.object(parallel, "fetch_tree_context", return_value={}),
         patch.object(parallel, "fetch_epoch_context", return_value={}),
