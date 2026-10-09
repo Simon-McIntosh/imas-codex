@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping"
+  ],
+  "added_failures_note": "The reviewed node ran a focused gate only (tests/cli/test_map_promotion.py and tests/ids/test_mapping_handoff.py) and recorded no baseline_suite/after_suite arms, so I derived the added-failure count from my own paired arms over the affected caller file. Its own gate is green: head-committed.log 10 passed EXIT=0 at bccf8308c241d13fc96cb9df67efaae7666f8ca2, reproduced by reviewer-gate.log 6 passed EXIT=0 (the 6 promotion tests). The added failure is in tests/core/test_settings.py, a file the change re-signatured but the node's gate never imported.",
+  "after_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/core/test_settings.py::TestMapRunModelSeat",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T030724705657-review-of-maps-never-promote-by-default/reviewer-after-settings.log",
+    "revision": "bccf8308c241d13fc96cb9df67efaae7666f8ca2"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/core/test_settings.py::TestMapRunModelSeat",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T030724705657-review-of-maps-never-promote-by-default/reviewer-baseline-settings.log",
+    "revision": "46d5b846c0d45a7922fc42ca69200e95691964d3"
+  },
+  "blockers": "One added failure is a blocker to a clean landing, not to the \u00a72 goal: tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping must drop its now-removed no_activate kwarg. The file is outside the reviewed node's write scope, so the coordinator must apply the one-line fix before promoting.",
+  "completed_at": "2026-10-09T03:15:30.754Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-09T03:07:36Z",
+  "evidence_inputs": "Range 46d5b846c0d45a7922fc42ca69200e95691964d3..bccf8308c241d13fc96cb9df67efaae7666f8ca2 (two commits: c46108d64 fix(map): require validation before activation; bccf8308c docs(map): record promotion guard evidence). Independently reproduced at head bccf8308: reviewer-gate.log, 6 passed EXIT=0; reviewer-after-settings.log, 1 failed EXIT=1 with TypeError on no_activate; reviewer-baseline-settings.log at base 46d5b846, 1 passed EXIT=0. Guard fires: reviewer-negative-control.log, mutation admitting generated to activate -> test_activate_refuses_generated_mapping FAILED EXIT=1. Grep confirms no_activate survives in source only as the assertion string in the new test; the only other code reference is the broken caller. IMASMapping lifecycle generated/validated/active matches models.py; map_activate admits only validated and clears at 15+ call sites unchanged.",
+  "findings": [
+    {
+      "file": "tests/core/test_settings.py",
+      "line": "497",
+      "severity": "blocking",
+      "text": "The change removed the no_activate parameter from _run_rich_mode/_run_plain_mode (map.py:432/369), but tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping still calls map_mod._run_rich_mode(..., no_activate=True, ...) and now raises TypeError: _run_rich_mode() got an unexpected keyword argument 'no_activate'. Paired arms: baseline 46d5b846 -> 1 passed EXIT=0 (reviewer-baseline-settings.log); head bccf8308 -> 1 failed EXIT=1 (reviewer-after-settings.log). This is an added failure introduced by the change; the file is outside the node's declared write paths, so the coordinator owns the one-line caller fix (drop the kwarg).",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "imas_codex/cli/map.py",
+      "line": "856",
+      "severity": "follow-on",
+      "text": "map_validate replaces ValidatedSignalMapping(**b) with SimpleNamespace(**{**b, 'transform_expression': b.get('transform_expression') or 'value'}). This drops the model's field defaults (source_property='value', disposition=MAPPED, evidence=''), its confidence Field(ge=0, le=1) bound, its compose_slots validator, and its mapping_type default of 'direct'. validate_mapping reads attributes directly so it works, but the typed contract the model provided is now unenforced and unrecorded.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "docs/research/discover-cli-surface.html",
+      "line": "45",
+      "severity": "follow-on",
+      "text": "The map run option table still lists --no-activate as a live flag after its removal from the CLI. Stale documentation, outside the node's write scope; flagged for a docs sweep rather than fixed here.",
+      "verdict": "CONFIRMED"
+    }
+  ],
+  "follow_ons": "Two follow-ons. (1) imas_codex/cli/map.py:856 \u2014 reduce the map_validate binding construction back to ValidatedSignalMapping (or a typed model) so confidence bounds and required fields stay enforced; the SimpleNamespace substitution is a typing regression inside the node's own file, so it could have been done in scope. (2) docs/research/discover-cli-surface.html:45 still documents --no-activate; a docs sweep should drop it. Neither blocks the \u00a72 goal.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Only caller of the removed parameter is tests/core/test_settings.py:497 (_run_rich_mode(..., no_activate=True)), which now raises TypeError \u2014 an added failure. imas_codex/cli/discover/sequence.py:544 is the sole in-tree caller of map_run.callback and was updated. validate_mapping (imas_codex/ids/validation.py:76) reads source_id/target_id/transform_expression/units attributes directly, so the SimpleNamespace substitution at map.py:856 satisfies it.",
+    "diff": "Read 46d5b846..bccf8308: two commits, four files, +209/-24. imas_codex/cli/map.py removes the --no-activate option and its plumbing, forces activate=False in both run modes, makes map_validate promote generated->validated only on a clean pass, and tightens map_activate to validated-only. imas_codex/cli/discover/sequence.py drops one no_activate=False line. tests/cli/test_map_promotion.py is new (6 tests). The evidence fragment gains 5 lines.",
+    "goal_activate_guard": "map activate now admits only status=='validated' (map.py:1077) and the promoting UPDATE carries WHERE m.status='validated' (map.py:1090); a generated mapping is refused with exit 1 and an explanatory message. test_activate_refuses_generated_mapping and test_activate_promotes_validated_mapping cover both arms and pass.",
+    "goal_exit_generated": "map run persists at generated: _run_plain_mode (:397) and _run_rich_mode (:500) both hard-code activate=False, the --no-activate option is deleted from the run command, and test_map_run_keeps_generated_status asserts status=='generated' and that '--no-activate' is absent from `map run --help`. Reproduced at head: 6 passed EXIT=0.",
+    "goal_sequence_stage": "discover sequence's run_mapping_stage (sequence.py:544) calls map_run.callback without no_activate; the option no longer exists, so any mapping it produces stays generated. test_sequence_mapping_stage_keeps_generated_status asserts receipt['bindings']==1 and status=='generated'.",
+    "manifest": "manifest.md reads status: complete, carries both commits, the gate command and its 10-passed result, the negative-control path, and a failure_attribution for two scaffolding failures. baseline_suite/after_suite are empty because the node ran a focused gate only; the added-failure count is therefore derived by the reviewer from its own paired arms.",
+    "write_paths": "manifest declares imas_codex/cli/map.py, imas_codex/cli/discover/sequence.py, tests/cli/test_map_promotion.py, docs/evidence/fragments/generated-map-handoff/maps-never-promote-by-default.html and a figures dir; the diff touches exactly the first four (figures unused, harmless). Nothing outside the declared scope was modified."
+  },
+  "justifications": {
+    "durability": "15: both promotions are guarded by WHERE status=<expected> and a post-update row check, so a concurrent status change cannot silently promote; map_validate refuses on any failed check instead of swallowing. Weaker: the SimpleNamespace path drops the confidence range and required-field guarantees the model enforced, so a malformed binding can now reach validate_mapping.",
+    "evidence": "15: the focused gate is green and independently reproduced (6 passed EXIT=0 at head), and I independently reproduced the refusal control (guard weakened to admit generated -> test_activate_refuses_generated_mapping FAILED EXIT=1). Weaker than full: the node recorded no paired suite arms, and its gate never executed the module that calls the removed parameter, so the regression it introduced was invisible to its own evidence.",
+    "fit": "16: mechanism-based naming, idiomatic click, no plan/ticket identifiers in code, and a matched style with the surrounding subcommands. Weaker: map_validate swapped a validated pydantic model for SimpleNamespace without comment, which sits against the repo's pydantic-for-schemas convention.",
+    "goal_fidelity": "19: every \u00a72 clause holds and each is backed by a named passing test I reproduced at head (map run leaves generated; activate refuses generated and promotes validated; the sequence stage leaves generated), and --no-activate is gone from the CLI surface. One point withheld because the removal of the parameter left a live caller (tests/core/test_settings.py) broken, so the goal landed but the change is not self-consistent.",
+    "reuse": "15: validate_mapping and the graph client are reused, not re-derived. Weaker: the SimpleNamespace substitution abandons ValidatedSignalMapping (field defaults, confidence bounds, compose_slots validator, mapping_type default) that the code already had, duplicating its shape in a looser form rather than fixing the model construction.",
+    "scope_discipline": "15: the node stayed strictly inside its four declared write paths. Weaker: the added failure lives in tests/core/test_settings.py, which the node was fenced out of, and it neither reported that gap nor widened its gate to any file importing the functions it re-signatured, so a cross-file consequence of its own edit went unrecorded."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a72 asks map run to persist at generated by default with --no-activate removed, activation gated on map validate, and the discover sequence's mapping stage to stop forcing activation. All three landed: activate=False is hard-coded in both run modes, the option is deleted, map_activate admits only status=='validated' and its UPDATE carries WHERE m.status='validated', and sequence.py dropped one no_activate=False line. VERDICT done_when: all three clause groups have a named passing test reproduced at head (6 passed EXIT=0): test_map_run_keeps_generated_status, test_activate_refuses_generated_mapping + test_activate_promotes_validated_mapping, test_sequence_mapping_stage_keeps_generated_status. VERDICT write_paths: the diff touches exactly the declared paths. VERDICT manifest: complete, with commits, gate result and a negative-control path; suite arms empty as expected for a focused gate. VERDICT guard: independently reproduced by weakening map_activate to admit generated, which turns the refusal test red. CONCERN: removing the parameter broke tests/core/test_settings.py:497, an added failure the node's focused gate could not see.",
+  "review_run_id": "r-20261009T030724705657-review-of-maps-never-promote-by-default",
+  "review_scope": "incremental node: commits 46d5b846..bccf8308 (two commits) against base 46d5b846c0d45a7922fc42ca69200e95691964d3; files imas_codex/cli/map.py, imas_codex/cli/discover/sequence.py, tests/cli/test_map_promotion.py, docs/evidence/fragments/generated-map-handoff/maps-never-promote-by-default.html",
+  "reviewed_base_sha": "46d5b846c0d45a7922fc42ca69200e95691964d3",
+  "reviewed_head_sha": "bccf8308c241d13fc96cb9df67efaae7666f8ca2",
+  "reviewed_run_id": "r-20261009T025446957668-maps-never-promote-by-default",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T03:27:00+00:00",
+  "total": 95
+}
