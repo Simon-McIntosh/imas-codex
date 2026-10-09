@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -432,6 +432,9 @@
 </div>
 <div class="r-comment" data-section="s16" data-id="c-close-s16" data-who="reckon-build" data-when="2026-10-09T06:15:00Z">
     <div class="r-comment-body"><p>§16 landed: the hand-off reads <code>CocosLabel.NONE</code>, and a live graph test pins the nearest-label query. Hop order is moot today because no ancestor chain carries two labels, and a second test guards that (merge <code>04e46d27c</code>; 6 unit and 2 graph tests pass). <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s16">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s16" data-id="c-run-r-20261009T055343804825-handoff-label-token-and-graph-test" data-who="reckon-build" data-when="2026-10-09T06:11:37.145Z">
+    <div class="r-comment-body"><p>handoff.py now imports CocosLabel.NONE and defines no token of its own (local COCOS_ABSENT removed, three absent-value sites read CocosLabel.NONE); added tests/ids/test_mapping_handoff_graph.py, a graph-marked test whose live-graph run reads field/data one_like/xml, flux_loop/flux/data psi_like/inferred_forward and a time target none/none, plus an invariant test that no ancestor chain carries two labels.</p></div>
 </div>
 </section>
 </main>
