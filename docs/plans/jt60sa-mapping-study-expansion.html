@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="jt60sa-mapping-study-expansion">
   <meta name="plan-title" content="JT-60SA Mapping Study Expansion">
-  <meta name="plan-summary" content="Fix the defects that would corrupt a wider study, then map six JT-60SA systems one at a time and score each against imas-ambix's hand-built tokamap">
+  <meta name="plan-summary" content="Fix the defects that would corrupt a wider study, then map six JT-60SA systems one at a time and score each against imas-ambix&#x27;s hand-built tokamap">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="12.0">
@@ -26,6 +26,8 @@
   <title>JT-60SA Mapping Study Expansion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
   <main class="plan-doc">
@@ -314,33 +316,33 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="mapping-seat" data-choice="local" data-by="Simon McIntosh" data-when="2026-10-09">
-        <p class="r-dec-q">Which lane serves the <code>ids-mapping</code> seat during the study?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="local">local</button>
-          <button class="r-opt" data-value="openrouter">openrouter</button>
-        </p>
-        <p class="r-dec-rat">The lead ruled on 2026-10-09 that map requests use the local lane, configured in <code>pyproject.toml</code>, and never OpenRouter.</p>
-      </div>
-      <div class="r-dec" data-key="system-concurrency" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How many system sections may run against the graph at once?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="three">three, one IDS each</button>
-          <button class="r-opt" data-value="one">one at a time</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="mapping-seat" data-choice="local" data-by="Simon McIntosh" data-when="2026-10-09">
+    <p class="r-dec-q">Which lane serves the ids-mapping seat during the study?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="local">local</button>
+      <button class="r-opt" data-value="openrouter">openrouter</button>
+      </p>
+    <p class="r-dec-rat">The lead ruled on 2026-10-09 that map requests use the local lane, configured in pyproject.toml , and never OpenRouter.</p>
+    </div>
+<div class="r-dec" data-key="system-concurrency" data-choice="all six at once, one IDS each" data-by="Simon McIntosh" data-when="2026-10-09">
+    <p class="r-dec-q">How many system sections may run against the graph at once?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="three">three, one IDS each</button>
+      <button class="r-opt" data-value="one">one at a time</button>
+      </p>
+    <p class="r-dec-rat">&lt;p&gt;The lead ruled on 2026-10-09 to run at maximum graph width. All six system sections dispatch together once the defect wave lands, each on its own IDS and its own focused sources, so their claims do not overlap. The picker routes every node; no lane is named.&lt;/p&gt;</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-jmse-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09">
-        <h4 class="r-fu-title">Build the defect wave, then the system iterations</h4>
-        <div class="r-fu-body"><p>The defect wave, §1 to §7, starts at once in four chains: §1 then §2 then §3, §4 alone, §5 then §6, and §7 alone.</p></div>
-        <pre class="r-fu-prompt">/reckon-build jt60sa-mapping-study-expansion</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-jmse-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-09" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the defect wave, then the system iterations</h4>
+    <div class="r-fu-body"><p>The defect wave, §1 to §7, starts at once in four chains: §1 then §2 then §3, §4 alone, §5 then §6, and §7 alone.</p></div>
+    <pre class="r-fu-prompt">/reckon-build jt60sa-mapping-study-expansion</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
