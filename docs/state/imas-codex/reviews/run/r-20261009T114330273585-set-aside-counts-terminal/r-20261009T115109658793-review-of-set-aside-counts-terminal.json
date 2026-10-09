@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Both arms were reproduced independently. Reviewed-run baseline arm (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114330273585-set-aside-counts-terminal/reproduction.log) records 1 failed, exit 1 at the base SOURCE with the reviewed test file present; reviewed-run after arm (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114330273585-set-aside-counts-terminal/committed-gate.log) records 7 passed, exit 0 at 016e5cf6620815e180781e7b925158d76074c06d. I reconstructed the base arm myself (head tree with parallel.py reverted to bc37a9e94d434fb30afe0cbc3947e16a0bf596e1, reviewed tests/discovery/test_path_enrich_failures.py kept) and reproduced 1 failed, 6 passed, EXIT=1 (log: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114330273585-set-aside-counts-terminal/review-base-arm.log), and the head arm independently at 7 passed, EXIT=0 (log: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114330273585-set-aside-counts-terminal/review-head-gate.log). The after arm carries zero failing ids, so no failing test id is present at the head that was absent at the base; added_failure_count is 0 and added_failure_ids is empty. The one failing base-arm id (test_set_aside_path_counts_as_terminal_at_failure_limit) is the defect the reviewed change repairs, not a failure the change introduces.",
+  "after_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_path_enrich_failures.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114330273585-set-aside-counts-terminal/committed-gate.log",
+    "revision": "016e5cf6620815e180781e7b925158d76074c06d"
+  },
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_path_enrich_failures.py::test_set_aside_path_counts_as_terminal_at_failure_limit",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/discovery/test_path_enrich_failures.py::test_set_aside_path_counts_as_terminal_at_failure_limit"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T114330273585-set-aside-counts-terminal/reproduction.log",
+    "revision": "bc37a9e94d434fb30afe0cbc3947e16a0bf596e1"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/paths/parallel.py terminal_count property (the reviewed query)"
+  ],
+  "completed_at": "2026-10-09T11:58:58.298Z",
+  "dispatched_at": "2026-10-09T11:51:19Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/paths/parallel.py",
+      "line": "181",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's reproduction.log header reads 'revision=bc37a9e9... tree=<worktree>' but the run's worktree carried the reviewed test file (uncommitted), so the header does not say that the base arm is base SOURCE plus the reviewed test; reconstructed explicitly here (base source at bc37a9e94d434fb30afe0cbc3947e16a0bf596e1 with the reviewed test file), it reproduces 1 failed, 6 passed, EXIT=1, so the measurement is the correct base arm and only the header is under-specified."
+    },
+    {
+      "file": "tests/discovery/test_path_enrich_failures.py",
+      "line": "168",
+      "severity": "follow-on",
+      "text": "follow-on: the PathGraph fake decides the terminal-count branch by string-matching the production Cypher ('coalesce(p.enrich_failures, 0) >= $failure_limit' in cypher), so the assertion is coupled to the query text rather than to an independently computed terminal count; the mutation check still reddens correctly (removing the clause drops terminal_count to 0 and the at-limit assertion fails), so the negative-control signal is sound, but a semantically equivalent reword of the clause would fail the test spuriously."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "One production call site: the terminal_count property at parallel.py:178-206, whose query the reviewed change extends; the constant used (ENRICH_FAILURE_LIMIT) is already the shared budget for the claim and pending queries in the same module.",
+    "diff": "Two commits against the base: 016e5cf6 adds the failure-limit disjunct to the terminal_count query and one docstring bullet in parallel.py (+5/-1); a75eb29e adds the fake branch and the new boundary test in tests/discovery/test_path_enrich_failures.py (+20); nothing else changes.",
+    "done_when": "\u00a764's done-when is a test showing a path at the failure limit counted as terminal and not pending, and a path below the limit counted as neither. test_set_aside_path_counts_as_terminal_at_failure_limit asserts has_pending_work False and terminal_count 1 at ENRICH_FAILURE_LIMIT, and has_pending_work True and terminal_count 0 at ENRICH_FAILURE_LIMIT-1, carrying both sides of the boundary; the mutation (clause removed) fails the at-limit assertion (EXIT=1).",
+    "goal": "\u00a764 asks that a path whose enrich_failures has reached the shared limit count as terminal in progress totals; parallel.py:197 adds 'OR coalesce(p.enrich_failures, 0) >= $failure_limit' to the terminal_count WHERE clause and passes failure_limit=ENRICH_FAILURE_LIMIT, the same module constant the claim and pending queries use, so a budget-exhausted path is now terminal.",
+    "manifest": "The reviewed manifest records both commits (a75eb29e test, 016e5cf6 fix), the focused gate (7 passed), the negative control (1 failed, 6 passed, EXIT=1) and the base reproduction, and honestly leaves baseline_suite/after_suite null rather than inventing an arm; its base-arm reproduction.log header is under-specified (see finding).",
+    "write_paths": "The node was fenced to imas_codex/discovery/paths/parallel.py and tests/discovery/test_path_enrich_failures.py; git diff --name-only bc37a9e9..016e5cf6 shows exactly those two files, and git diff --stat reports 24 insertions and 1 deletion with no generated or gitignored file staged."
+  },
+  "justifications": {
+    "durability": "Removing the new clause reddens the added test (1 failed, 6 passed, EXIT=1) and I reproduced that red independently at 016e5cf6620815e180781e7b925158d76074c06d in a scratch tree; each assertion compares the code's output against an independent constant (0 and 1 across the boundary, True/False for pending) rather than a value fed back into the code. Minor reservation: the test fake selects the terminal-count branch by matching the production query text, so its sensitivity is to the clause string as well as to behaviour.",
+    "evidence": "The gate measures the done-when and its result is recorded: committed-gate.log shows 7 passed, EXIT=0 at 016e5cf6620815e180781e7b925158d76074c06d; the base arm (base source plus reviewed test) shows 1 failed, EXIT=1 at bc37a9e94d434fb30afe0cbc3947e16a0bf596e1; the mutation shows 1 failed, 6 passed, EXIT=1. I reproduced the head arm (7 passed, EXIT=0) and the base arm (1 failed, 6 passed, EXIT=1) independently in a scratch extraction under TMPDIR. Reservation: the reviewed manifest left baseline_suite/after_suite null and its base-arm log header names the base revision without recording that the reviewed test file was present.",
+    "fit": "The change follows the module's Cypher idiom and extends the existing WHERE clause rather than adding a parallel query, and it reuses the module's ENRICH_FAILURE_LIMIT constant; the docstring gained a mechanism bullet ('set aside: enrichment reached its failure budget'), the test names are by what they assert, and both commits carry a conventional subject with a mechanism body and no attribution line.",
+    "goal_fidelity": "parallel.py:197 implements exactly what \u00a764 names \u2014 a path whose enrich_failures has reached the limit counts terminal \u2014 and passes failure_limit=ENRICH_FAILURE_LIMIT, the same constant the claim/pending queries use, so the terminal and pending counts now agree at the budget boundary; no adjacent behaviour is changed.",
+    "reuse": "The change reuses the existing ENRICH_FAILURE_LIMIT constant and the existing terminal_count query, complementing has_pending_work's '< $failure_limit' clause rather than re-deriving the limit; no new constant or duplicate query is introduced.",
+    "scope_discipline": "git diff bc37a9e9..016e5cf6 touches exactly the two declared write paths \u2014 one source file and one test file \u2014 with a single purpose, and stages no generated or gitignored file; the node's fence also named an evidence fragment and a figures directory, both left untouched because the node produced neither."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a764 asks that a path whose enrich_failures has reached the shared limit count as terminal in progress totals; parallel.py:197 adds 'OR coalesce(p.enrich_failures, 0) >= $failure_limit' to the terminal_count WHERE clause and passes failure_limit=ENRICH_FAILURE_LIMIT, the same module constant the claim and pending queries use.\nVERDICT done_when: \u00a764's done-when is a test showing a path at the failure limit counted terminal and not pending, and a path below the limit counted as neither; test_set_aside_path_counts_as_terminal_at_failure_limit asserts both sides, and the mutation fails the at-limit assertion (EXIT=1).\nVERDICT write_paths: the diff bc37a9e9..016e5cf6 touches exactly the two declared paths, 24 insertions, 1 deletion, no generated file.\nVERDICT manifest: records both commits, the 7-passed gate, the 1-failed mutation and the base reproduction, and leaves baseline_suite/after_suite null; its base-arm log header is under-specified.\nVERDICT diff: +5/-1 in parallel.py (query disjunct and docstring bullet); +20 in the test file (fake branch and boundary test); nothing else.\nCALL_SITES: imas_codex/discovery/paths/parallel.py terminal_count property (the reviewed query)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: implements exactly what \u00a764 names, reusing the shared constant so terminal and pending agree at the boundary.\nSCORE evidence: 18\nJUSTIFICATION evidence: head arm 7 passed EXIT=0 and base arm 1 failed EXIT=1 reproduced independently; the manifest leaves the suite arms null and its base-arm header omits that the reviewed test was present.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: exactly the two declared paths, one purpose, no generated file staged.\nSCORE durability: 17\nJUSTIFICATION durability: mutation reddens the added test, reproduced independently; the fake keys on the query text, so sensitivity is partly to the clause string.\nSCORE fit: 19\nJUSTIFICATION fit: extends the existing query idiom, mechanism-named docstring bullet, conventional commits with bodies and no attribution.\nSCORE reuse: 19\nJUSTIFICATION reuse: reuses ENRICH_FAILURE_LIMIT and the existing query; no new constant or duplicate query.\nFINDING imas_codex/discovery/paths/parallel.py:181 follow-on: reproduction.log names the base revision without recording that the reviewed test file was present, so the base arm is under-specified; reconstructed explicitly it reproduces 1 failed, 6 passed, EXIT=1.\nFINDING tests/discovery/test_path_enrich_failures.py:168 follow-on: the fake selects the terminal-count branch by matching the production query text, coupling the assertion to the clause string; the mutation signal is sound but an equivalent reword would fail the test spuriously.\n",
+  "review_run_id": "r-20261009T115109658793-review-of-set-aside-counts-terminal",
+  "reviewed_base_sha": "bc37a9e94d434fb30afe0cbc3947e16a0bf596e1",
+  "reviewed_head_sha": "016e5cf6620815e180781e7b925158d76074c06d",
+  "reviewed_run_id": "r-20261009T114330273585-set-aside-counts-terminal",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T11:58:17.968722+00:00",
+  "total": 112
+}
