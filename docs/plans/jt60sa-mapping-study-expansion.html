@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a">
 <meta name="plan-impl" content="0.6667">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -569,6 +569,9 @@
 </div>
 <div class="r-comment" data-section="s24" data-id="c-close-s24" data-who="reckon-build" data-when="2026-10-09T10:00:00Z">
     <div class="r-comment-body"><p>§24 landed: validation retargets a structure binding to its <code>data</code> or <code>time</code> child, or refuses it (merge <code>c792d5d1a</code>; 580 tests pass). The seven coils rows refused as "target is not a data field" will now land on <code>/data</code>. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s24">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s24" data-id="c-run-r-20261009T094732527709-binding-targets-data-field" data-who="reckon-build" data-when="2026-10-09T09:57:50.455Z">
+    <div class="r-comment-body"><p>retargets a structure binding to its data leaf (or its time child when source_property is time) during validate_mappings, refusing a structure with no such child as an escalation; tests/ids 580 passed, 5 skipped, negative control 3 failed (exit 1)</p></div>
 </div>
 </section>
 </main>
