@@ -5539,8 +5539,8 @@ async def run_parallel_data_discovery(
         )
     )
 
-    # --- Check workers ---
-    if num_check_workers > 0:
+    # --- Check workers (unless enrich_only: checks open remote sessions) ---
+    if num_check_workers > 0 and not enrich_only:
         workers.append(
             WorkerSpec(
                 "check",

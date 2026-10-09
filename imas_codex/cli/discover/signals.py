@@ -243,7 +243,7 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
             check_graph=True,
             check_embed=not options.scan_only,
             check_model=not options.scan_only,
-            check_ssh=True,
+            check_ssh=not options.flush,
             check_auth=False,
             graph_refresh_interval=2.0,
             graph_refresh_fn=signals_graph_refresh if use_rich else None,
