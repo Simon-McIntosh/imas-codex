@@ -344,8 +344,8 @@ class TestDiscoveryFunctionSeats:
         "discovery-score",
         "discovery-describe",
         "discovery-vision",
+        "ids-mapping",
     )
-    LOCAL_SEATS = ("ids-mapping",)
 
     def test_seats_resolve_configured_models(self, monkeypatch):
         """Each seat resolves the model configured in pyproject.toml."""
@@ -353,28 +353,7 @@ class TestDiscoveryFunctionSeats:
 
         for seat in self.DISCOVERY_SEATS:
             monkeypatch.delenv(settings._MODEL_ENV_VARS[seat], raising=False)
-            assert settings.get_model(seat) == "openrouter/deepseek/deepseek-v4.1-flash"
-        for seat in self.LOCAL_SEATS:
-            monkeypatch.delenv(settings._MODEL_ENV_VARS[seat], raising=False)
             assert settings.get_model(seat) == "local/deepseek-v4.1-flash"
-
-    def test_discovery_seats_stay_off_the_local_lane(self):
-        """The discovery seats call OpenRouter, priced, with no local endpoint.
-
-        Their many short, unique prompts evict agent sessions' cached prefixes
-        on the shared local lane, so they must not resolve to it.
-        """
-        settings._load_pyproject_settings.cache_clear()
-        settings.register_model_endpoints()
-        pricing = settings._get_section("llm")["openrouter-pricing"]
-
-        for seat in self.DISCOVERY_SEATS:
-            config = settings.get_model_config(seat)
-            assert config.get("api_base") is None, f"{seat} still has an api_base"
-            model = settings.get_model(seat)
-            assert settings.get_model_endpoint(model) is None
-            assert not settings.is_explicit_free_local_endpoint(model)
-            assert model in pricing, f"{model} has no OpenRouter price"
 
     def test_seats_honour_environment_override(self, monkeypatch):
         """A seat's model is overridable through its environment variable."""
@@ -383,15 +362,15 @@ class TestDiscoveryFunctionSeats:
         monkeypatch.setenv("IMAS_CODEX_DISCOVERY_SCORE_MODEL", "test-score-model")
         assert settings.get_model("discovery-score") == "test-score-model"
 
-    def test_local_seats_register_local_endpoint(self):
-        """IDS mapping binds its model to the ambix-local route."""
+    def test_discovery_seats_register_local_endpoint(self):
+        """The discovery seats bind their model to the ambix-local route."""
         settings._load_pyproject_settings.cache_clear()
         settings.register_model_endpoints()
 
         route_api_base = settings._get_section("model-routes")["ambix-local"][
             "api-base"
         ]
-        for seat in self.LOCAL_SEATS:
+        for seat in self.DISCOVERY_SEATS:
             config = settings.get_model_config(seat)
             assert config["api_base"] == route_api_base, (
                 f"{seat} is not routed to ambix-local"
