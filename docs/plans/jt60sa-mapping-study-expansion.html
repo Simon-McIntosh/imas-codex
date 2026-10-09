@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc">
 <meta name="plan-impl" content="0.7083">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -587,6 +587,9 @@
 </div>
 <div class="r-comment" data-section="s23" data-id="c-run-r-20261009T100134913048-review-of-coil-member-identifier" data-who="reckon-build" data-when="2026-10-09T10:12:47.133Z">
     <div class="r-comment-body"><p>§23 — review of r-20261009T094715891590-coil-member-identifier at head 7fd829ac9 vs base 0ea3c2c5c: the per-source-group member pattern is declared in facility config (signal_member_patterns / MemberIdentifierPattern), set for MMSYS as ^cur(?P&lt;member&gt;.+?)(?:TFLKAT|LKAT|HiTe)$, and read by _member_identifier before the trailing-number fallback; independent exercise of the committed functions gives curEF5LKAT-&gt;EF5, curCS1HiTe-&gt;CS1, curUFPLKAT-&gt;UFP, cur1TFLKAT-&gt;1, no-pattern curEFCC4-&gt;4, unmatched nominalValue-&gt;None, and the re-exported artifact /work/projects/imas_gpu/jt60sa/handoff/jt-60sa-coils-handoff.json holds 40/40 MMSYS rows non-null (was 0/40). Verdict pass, total 117 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20).</p></div>
+</div>
+<div class="r-comment" data-section="s23" data-id="c-s23-citation" data-who="reckon-build" data-when="2026-10-09T10:14:00Z">
+    <div class="r-comment-body"><p>Correction to the §23 evidence fragment, appended so the original citation stays visible. The fragment says the 40-of-40 re-export ran "at commit <code>0ea3c2c5c</code>". That is the change's parent. The export ran at 11:56 from the uncommitted working tree, before <code>7fd829ac9</code> was committed at 11:58, so checking out <code>0ea3c2c5c</code> reproduces 0 of 40. The code that produced the evidence is <code>7fd829ac9</code>, merged at <code>563463bbc</code>. The independent review scored §23 19 to 20 with no added failures and found this as its only follow-on.</p></div>
 </div>
 </section>
 </main>
