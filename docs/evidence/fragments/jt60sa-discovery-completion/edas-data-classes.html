@@ -5,10 +5,15 @@
     <code>T, O, P, A, C, G, J, K, M, N, V</code> across 6,240 rows.
     The scanner takes each letter from <code>eddbreadTable</code>'s
     <code>classlist</code>, rather than inferring it from a signal name.
-    The live graph has 3,770 rows currently interpreted as parameter;
-    this positive control confirms that P is present at scale in the
-    catalogue-derived data. P therefore retains its existing parameter
-    interpretation even though the access manual documents J rather than P.
+    In the current graph, all 6,338 JT-60SA EDDB signals have a null raw-letter
+    slot because they have not been re-enumerated since that slot was added.
+    Of these, 3,770 are currently classed <code>parameter</code>, also with no
+    raw letter. Their catalogue paths span CryoHRS (704; for example
+    <code>CryoHRS/cAT105</code>), QMS (645; <code>QMS/PreP12CRYO</code>),
+    CryoMag (413; <code>CryoMag/m1C01CV</code>) and other categories. These
+    paths do not identify whether their EDDB letter is P or J. The graph
+    therefore cannot settle P versus J: P keeps its existing parameter mapping
+    until a re-enumeration records the letters and a native read verifies it.
     The EDDB access manual gives no read call for A, C, K or V, so their
     interpreted class stays unset while their raw letter is kept. The graph's
     English <code>eDAS_QuickReference_E.pdf</code> record is deferred and
@@ -17,10 +22,12 @@
   </p>
   <p id="edas-data-classes-measure">
     The baseline scanner check failed 11 of 11 selected cases: J, M, G and N
-    were unset, and no signal had a raw-letter slot. The edited scanner check
-    passed 16 cases, and a graph transaction confirmed that re-enumeration
-    refreshed accessor, interpreted class, raw letter, unit and catalogue text
-    while preserving the enriched description, name, domain, keywords,
-    status and claim. A J-to-unset mutation failed the J read-call test.
+    were unset, and no signal had a raw-letter slot. The scanner and payload
+    checks passed 16 cases, and a graph transaction confirmed that
+    re-enumeration refreshed accessor, interpreted class, raw letter, unit and
+    catalogue text while preserving the enriched description, name, domain,
+    keywords, status and claim. A J-to-unset mutation failed the J read-call
+    test. The remote reader now selects the native call for T, O, P, J, M, G
+    and N; unknown letters produce a refusal without invoking a reader.
   </p>
 </section>

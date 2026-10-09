@@ -99,16 +99,18 @@ async def test_check_payload_keeps_catalogue_letter(letter):
 
 
 @pytest.mark.parametrize(
-    ("letter", "reader", "response"),
+    ("letter", "reader", "args", "response"),
     [
-        ("P", "eddbreadPara", {"count": 1, "data": ["ready"]}),
-        ("J", "eddbreadPara", {"count": 1, "data": ["ready"]}),
-        ("M", "eddbreadImage", {"datasize": 4, "data": b"image"}),
-        ("G", "eddbreadBinary", {"datasize": 4, "data": b"data"}),
-        ("N", "eddbreadComment", {"data": "comment"}),
+        ("T", "eddbreadTime", ("0", "0.01"), {"ntime": 1}),
+        ("O", "eddbreadOne", (None, 0, 0), {"count": 1}),
+        ("P", "eddbreadPara", (None, 0, 0), {"count": 1, "data": ["ready"]}),
+        ("J", "eddbreadPara", (None, 0, 0), {"count": 1, "data": ["ready"]}),
+        ("M", "eddbreadImage", (0,), {"datasize": 4, "data": b"image"}),
+        ("G", "eddbreadBinary", (0,), {"datasize": 4, "data": b"data"}),
+        ("N", "eddbreadComment", (0,), {"data": "comment"}),
     ],
 )
-def test_remote_check_uses_class_reader(letter, reader, response, capsys):
+def test_remote_check_uses_class_reader(letter, reader, args, response, capsys):
     calls = []
 
     class Wrapper:
@@ -150,10 +152,12 @@ def test_remote_check_uses_class_reader(letter, reader, response, capsys):
         check_main()
     result = json.loads(capsys.readouterr().out)["results"][0]
     assert [name for name, _ in calls] == [reader]
+    assert calls[0][1] == ("E101173", "CAM", "channel", *args)
     assert result["success"] is True
 
 
-def test_remote_check_refuses_unresolved_class(capsys):
+@pytest.mark.parametrize("letter", ["A", "C", "K", "V", ""])
+def test_remote_check_refuses_unresolved_class(letter, capsys):
     calls = []
 
     class Wrapper:
@@ -182,7 +186,7 @@ def test_remote_check_refuses_unresolved_class(capsys):
                 "id": "unknown",
                 "category": "CAM",
                 "data_name": "channel",
-                "data_class": "A",
+                "data_class": letter,
             }
         ],
     }
@@ -196,7 +200,7 @@ def test_remote_check_refuses_unresolved_class(capsys):
     result = json.loads(capsys.readouterr().out)["results"][0]
     assert calls == []
     assert result["success"] is False
-    assert "class A" in result["error"]
+    assert f"class {letter or '<unset>'}" in result["error"]
 
 
 @pytest.mark.graph

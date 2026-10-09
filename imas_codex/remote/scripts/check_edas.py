@@ -2,8 +2,7 @@
 """Validate JT-60SA EDAS signals return data for a reference shot.
 
 This script runs on the JT-60SA host where eddb_pwrapper is available.
-It reads each signal for the shot: eddbreadTime for a time series,
-eddbreadOne for a one-point datum.
+It reads each signal with the call selected by its EDDB catalogue class.
 
 Requirements:
 - Python 3.8+ (stdlib only except eddb_pwrapper)
@@ -253,23 +252,56 @@ def main():
                     }
                 )
                 continue
-            # An EDDB check reads data, not the catalogue: a time series through
-            # eddbreadTime over a short window (string bounds), a one-point
-            # datum through eddbreadOne. A catalogue hit says a name is
-            # registered, not that the shot carries it.
-            if sig.get("data_class") == "O":
-                ok, rtn = db.eddbreadOne(
-                    ref_shot, sig["category"], sig["data_name"], None, 0, 0
+            # A catalogue hit says a name is registered, not that this shot
+            # carries it. Refuse letters without a known read call instead of
+            # treating their payloads as time series.
+            data_class = sig.get("data_class")
+            if data_class not in {"T", "O", "P", "J", "M", "G", "N"}:
+                results.append(
+                    {
+                        "id": sig["id"],
+                        "success": False,
+                        "error": f"unrecognised EDDB data class {data_class or '<unset>'}",
+                    }
                 )
-                count = (rtn or {}).get("count", 0) if ok else 0
-                dtype = "one_point"
-            else:
+                continue
+            if data_class == "T":
                 ok, rtn = db.eddbreadTime(
                     ref_shot, sig["category"], sig["data_name"], "0", "0.01"
                 )
-                count = (rtn or {}).get("ntime", 0) if ok else 0
+                has_value = bool(ok and (rtn or {}).get("ntime", 0))
                 dtype = "time_series"
-            if ok and count:
+            elif data_class == "O":
+                ok, rtn = db.eddbreadOne(
+                    ref_shot, sig["category"], sig["data_name"], None, 0, 0
+                )
+                has_value = bool(ok and (rtn or {}).get("count", 0))
+                dtype = "one_point"
+            elif data_class in {"P", "J"}:
+                ok, rtn = db.eddbreadPara(
+                    ref_shot, sig["category"], sig["data_name"], None, 0, 0
+                )
+                has_value = bool(ok and (rtn or {}).get("count", 0))
+                dtype = "parameter"
+            elif data_class == "M":
+                ok, rtn = db.eddbreadImage(
+                    ref_shot, sig["category"], sig["data_name"], 0
+                )
+                has_value = bool(ok and (rtn or {}).get("datasize", 0))
+                dtype = "image"
+            elif data_class == "G":
+                ok, rtn = db.eddbreadBinary(
+                    ref_shot, sig["category"], sig["data_name"], 0
+                )
+                has_value = bool(ok and (rtn or {}).get("datasize", 0))
+                dtype = "binary"
+            else:
+                ok, rtn = db.eddbreadComment(
+                    ref_shot, sig["category"], sig["data_name"], 0
+                )
+                has_value = bool(ok and (rtn or {}).get("data"))
+                dtype = "comment"
+            if has_value:
                 results.append({"id": sig["id"], "success": True, "dtype": dtype})
             else:
                 irc = (rtn or {}).get("irc") if isinstance(rtn, dict) else None
