@@ -21,13 +21,13 @@ from __future__ import annotations
 import json
 import logging
 import re
-import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.config.discovery_config import get_discovery_config
 from imas_codex.discovery.base.facility import get_facility
+from imas_codex.discovery.code.workers import _host_unreachable
 from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import async_run_python_script, run_python_script
 
@@ -279,24 +279,9 @@ def enrich_paths(
             python_command=environment.python_command,
             setup_commands=list(environment.setup_commands),
         )
-    except subprocess.TimeoutExpired as e:
-        # Recover partial results from JSONL lines that completed before timeout
-        partial_output = getattr(e, "output", None) or ""
-        if partial_output:
-            logger.warning(
-                f"Enrichment SSH timed out after {timeout}s for {facility}, "
-                f"recovering partial output ({len(partial_output)} bytes)"
-            )
-            return _parse_enrich_output(
-                partial_output,
-                paths,
-                fill_missing_error=f"ssh_timeout({timeout}s)",
-            )
-        logger.warning(f"Enrichment SSH timed out after {timeout}s for {facility}")
-        return [
-            EnrichmentResult(path=p, error=f"ssh_timeout({timeout}s)") for p in paths
-        ]
     except Exception as e:
+        if _host_unreachable(e):
+            raise
         logger.warning(f"Enrichment failed for {facility}: {e}")
         return [EnrichmentResult(path=p, error=str(e)[:100]) for p in paths]
 
@@ -524,26 +509,11 @@ async def async_enrich_paths(
                 python_command=environment.python_command,
                 setup_commands=list(environment.setup_commands),
             )
-    except subprocess.TimeoutExpired as e:
-        # Recover partial results from JSONL lines that completed before timeout
-        partial_output = getattr(e, "output", None) or ""
-        if partial_output:
-            logger.warning(
-                f"Enrichment SSH timed out after {timeout}s for {facility}, "
-                f"recovering partial output ({len(partial_output)} bytes)"
-            )
-            return _parse_enrich_output(
-                partial_output,
-                paths,
-                fill_missing_error=f"ssh_timeout({timeout}s)",
-            )
-        logger.warning(f"Enrichment SSH timed out after {timeout}s for {facility}")
-        return [
-            EnrichmentResult(path=p, error=f"ssh_timeout({timeout}s)") for p in paths
-        ]
     except asyncio.CancelledError:
         raise
     except Exception as e:
+        if _host_unreachable(e):
+            raise
         logger.warning(f"Enrichment failed for {facility}: {e}")
         return [EnrichmentResult(path=p, error=str(e)[:100]) for p in paths]
 
