@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050">
 <meta name="plan-impl" content="0.6667">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -522,6 +522,9 @@
 <div class="r-comment" data-section="s20" data-id="c-run-r-20261009T074531433954-review-of-bounded-map-run-persists" data-who="reckon-build" data-when="2026-10-09T07:53:19.456Z">
     <div class="r-comment-body"><p>Independent review of run r-20261009T071123224920-bounded-map-run-persists stored as a parsed record scoring all six dimensions (goal_fidelity 19, evidence 17, scope_discipline 16, durability 15, fit 19, reuse 12; total 98) at reviewed_base_sha e47bbba8c11c3d8cd3bee2ddccc0d0dac0e805a1 and reviewed_head_sha b7a688b0c1614ed12b01b0f688a541bbd717cd20, added_failure_count 0 with no ids, verdict SOUND WITH FINDINGS (three follow-ons).</p></div>
 </div>
+<div class="r-comment" data-section="s20" data-id="c-s20-shutdown-cost" data-who="reckon-build" data-when="2026-10-09T08:27:00Z">
+    <div class="r-comment-body"><p>Live observation from the bounded §8 run (<code>--time 25</code>, started 09:56): at the deadline, the shutdown validation ran assembly discovery for all 50 <code>pf_active</code> sections one at a time, about one local-lane call a minute. A run bounded to 25 minutes therefore persists roughly 45 minutes after its deadline. Assembly discovery for independent sections could run concurrently, or a shutdown pass could persist bindings first and leave assembly to a later run.</p></div>
+</div>
 <div class="r-comment" data-section="s21" data-id="c-close-s21" data-who="reckon-build" data-when="2026-10-09T08:16:00Z">
     <div class="r-comment-body"><p>§21 landed: a failed target choice no longer holds the assign phase open, so an unbounded map run ends and persists (merge <code>a758dc050</code>; 571 tests pass). <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s21">evidence</a></p></div>
 </div>
@@ -530,6 +533,9 @@
 </div>
 <div class="r-comment" data-section="s21" data-id="c-run-r-20261009T081532319292-review-of-assign-phase-ends-on-handled" data-who="reckon-build" data-when="2026-10-09T08:25:19.252Z">
     <div class="r-comment-body"><p>review of assign-phase-ends-on-handled stored — 6 dimensions all in 0..20 (total 106, SOUND WITH FINDINGS), reviewed_base_sha ab71c99f and reviewed_head_sha 40d38488 recorded, added_failure_count 0 with no added_failure_ids.</p></div>
+</div>
+<div class="r-comment" data-section="s21" data-id="c-s21-review" data-who="reckon-build" data-when="2026-10-09T08:27:00Z">
+    <div class="r-comment-body"><p>The independent review scored §21 14 to 20 with no added failures. Follow-on: the test replaces <code>has_pending_assignment_work</code> with a stand-in, so the real predicate's new <code>AND NOT n.id IN $handled_source_ids</code> clause has no test that fails if it is removed.</p></div>
 </div>
 </section>
 </main>
