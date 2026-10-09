@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1008pt" height="381.6pt" viewBox="0 0 1008 381.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 381.6
+L 1008 381.6
+L 1008 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="line2d_1">
+    <path d="M 151.2 201.6
+L 151.2 273.6
+L 504 273.6
+" clip-path="url(#p9f80fe1d43)" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #666666; stroke-width: 1.2"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 504 291.6
+L 504 255.6
+" clip-path="url(#p9f80fe1d43)" style="fill: none; stroke: #242424; stroke-width: 2.6; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 24px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="151.2" y="136.8" transform="rotate(-0 151.2 136.8)">generated</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="151.2" y="169.2" transform="rotate(-0 151.2 169.2)">Draft field bindings</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 24px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="504" y="136.8" transform="rotate(-0 504 136.8)">validated</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="504" y="169.2" transform="rotate(-0 504 169.2)">Validation passed</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 24px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="842.4" y="136.8" transform="rotate(-0 842.4 136.8)">active</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="842.4" y="169.2" transform="rotate(-0 842.4 169.2)">Explicit promotion</text>
+   </g>
+   <g id="patch_2">
+    <path d="M 253.999512 126
+Q 324.000882 126 392.660611 126
+" style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 384.660611 122
+L 392.660611 126
+L 384.660611 130
+" style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 613.997314 126
+Q 676.799814 126 738.260673 126
+" style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 730.260673 122
+L 738.260673 126
+L 730.260673 130
+" style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="324" y="79.2" transform="rotate(-0 324 79.2)">map validate</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="676.8" y="79.2" transform="rotate(-0 676.8 79.2)">map activate</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="151.2" y="57.6" transform="rotate(-0 151.2 57.6)">map run</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #242424" x="532.8" y="278.796094" transform="rotate(-0 532.8 278.796094)">activate without validation: REFUSE</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #666666" x="32.4" y="349.2" transform="rotate(-0 32.4 349.2)">Required lifecycle policy; this diagram is not an activation-test result.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p9f80fe1d43">
+   <rect x="0" y="0" width="1008" height="381.6"/>
+  </clipPath>
+ </defs>
+</svg>
