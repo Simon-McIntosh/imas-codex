@@ -54,10 +54,11 @@ class SignalsStageOptions:
 def _validate_focus(facility: str, focus_items: list[str]) -> None:
     """Refuse focus items that name no signal or source at this facility.
 
-    A focus item may name a FacilitySignal by id or accessor, or a
-    SignalSource by id. Anything that resolves to none of those is a typo
-    the claim would silently honour by selecting nothing, so it is refused
-    up front with the offending identities named.
+    A focus item may name a FacilitySignal by id or accessor, a SignalSource
+    by id, or a source array by a ``data_source_path`` segment (such as
+    ``magPbTC10``). Anything that resolves to none of those is a typo the
+    claim would silently honour by selecting nothing, so it is refused up
+    front with the offending identities named.
     """
     from imas_codex.graph import GraphClient
 
@@ -65,13 +66,23 @@ def _validate_focus(facility: str, focus_items: list[str]) -> None:
         rows = gc.query(
             "MATCH (n) WHERE (n:FacilitySignal OR n:SignalSource) "
             "AND n.facility_id = $facility "
-            "AND (n.id IN $ids OR n.accessor IN $ids) "
-            "RETURN n.id AS id, n.accessor AS accessor",
+            "AND (n.id IN $ids OR n.accessor IN $ids "
+            "OR ANY(segment IN split(coalesce(n.data_source_path, ''), '/') "
+            "WHERE segment IN $ids)) "
+            "RETURN n.id AS id, n.accessor AS accessor, "
+            "n.data_source_path AS data_source_path",
             facility=facility,
             ids=focus_items,
         )
     matched = {row["id"] for row in rows}
     matched.update(row["accessor"] for row in rows if row["accessor"])
+    for row in rows:
+        if row["data_source_path"]:
+            matched.update(
+                segment
+                for segment in row["data_source_path"].split("/")
+                if segment in focus_items
+            )
     missing = [item for item in focus_items if item not in matched]
     if missing:
         raise click.UsageError(

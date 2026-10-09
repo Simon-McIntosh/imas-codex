@@ -511,20 +511,26 @@ def build_category_predicate(alias: str = "s") -> str:
 def build_focus_predicate(
     alias: str = "s", focus_items: list[str] | None = None
 ) -> str:
-    """Render the focus filter for FacilitySignal rows.
+    """Render the focus predicate for a FacilitySignal claim.
 
-    A focus item names a signal identity directly (``$focus_items`` matching
-    ``s.id`` or ``s.accessor``) or a whole signal source, in which case every
-    member of that source is included through its ``MEMBER_OF`` edge. An empty
-    focus renders no filter so the claim keeps its full scope.
+    A focus item names a ``SignalSource`` — either by its own id, or by a
+    handle its members carry: a signal id, a signal accessor, or a source
+    array (a trailing ``data_source_path`` segment a study names, such as
+    ``magPbTC10``). Every member of a named source is selected, so naming one
+    member of a grouped source reaches the whole group. A focus item that is
+    itself a signal id or accessor also selects that signal directly. An empty
+    focus renders no predicate so the claim keeps its full scope.
     """
     if not focus_items:
         return ""
     return (
         f"AND ({alias}.id IN $focus_items "
-        f"OR {alias}.accessor IN $focus_items OR EXISTS {{ "
-        f"MATCH ({alias})-[:MEMBER_OF]->(source:SignalSource) "
-        "WHERE source.id IN $focus_items })"
+        f"OR {alias}.accessor IN $focus_items "
+        f"OR EXISTS {{ MATCH ({alias})-[:MEMBER_OF]->(source:SignalSource) "
+        "WHERE source.id IN $focus_items OR EXISTS { "
+        "MATCH (source)<-[:MEMBER_OF]-(named:FacilitySignal) "
+        "WHERE ANY(segment IN split(coalesce(named.data_source_path, ''), '/') "
+        "WHERE segment IN $focus_items) } })"
     )
 
 
