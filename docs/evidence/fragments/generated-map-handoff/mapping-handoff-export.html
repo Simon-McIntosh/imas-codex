@@ -1,0 +1,18 @@
+<section id="mapping-handoff-export">
+  <h2 id="mapping-handoff-export-title">Mapping hand-off export</h2>
+  <p id="mapping-handoff-export-gate">The focused mocked-graph and fixture gate completed: <code>4 passed, 1 warning in 7.76s</code>.</p>
+  <p id="mapping-handoff-export-help-label"><code>imas-codex imas map export --help</code>:</p>
+  <pre id="mapping-handoff-export-help">Usage: imas-codex imas map export [OPTIONS] FACILITY
+
+  Export existing mappings with their facility signal members.
+
+  Every mapping retains its graph status; generated mappings remain drafts.
+
+  Example:
+    imas-codex imas map export jt-60sa -i magnetics -i pf_active --out handoff.json
+
+Options:
+  -i, --ids TEXT  IDS name to export. Repeatable.  [required]
+  --out FILE      JSON hand-off file to write.  [required]
+  --help          Show this message and exit.</pre>
+</section>
