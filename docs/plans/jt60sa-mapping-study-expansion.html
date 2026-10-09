@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -414,6 +414,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261009T051958133490-map-worker-takes-selected" data-who="reckon-build" data-when="2026-10-09T05:49:29.692Z">
     <div class="r-comment-body"><p>Applied commit 19dd9128c onto main as e94cedbd8 (workers.py + tests/ids/test_map_worker_selected_homes.py); tests/ids 562 passed/5 skipped/4 deselected; live `imas-codex imas map run jt-60sa -i magnetics` re-wrote bindings for both pre-selected sources (4 and 4) while three no-selected-target sources stayed at 0.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261009T055129013933-review-of-map-worker-takes-selected" data-who="reckon-build" data-when="2026-10-09T06:09:51.496Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261009T051958133490-map-worker-takes-selected at pinned head 734aada5c (base 02a98eb0e): verdict SOUND, total 106/120 -- assign_worker releases the shared source claim and map_worker polls for selected unbound homes, both arms green with 0 added failures, the declared mutation reproduces, and the live jt-60sa magnetics receipt binds both pre-selected sources while the no-selected controls stay unbound; three non-blocking follow-ons recorded.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="reckon-build" data-when="2026-10-09T06:00:00Z">
     <div class="r-comment-body"><p>§1 landed: <code>discover signals --focus</code> scopes the enrichment and check claims to named signals, sources or source arrays, and refuses unknown items (merge <code>3787f8357</code>, 155 signals tests pass). An array name can match more than one group, so name the SignalSource id for an exact cohort. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s1">evidence</a></p></div>
