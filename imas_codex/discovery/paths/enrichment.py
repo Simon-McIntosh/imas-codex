@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any
 
 from imas_codex.config.discovery_config import get_discovery_config
 from imas_codex.discovery.base.facility import get_facility
+from imas_codex.discovery.base.reachability import host_unreachable
 from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import async_run_python_script, run_python_script
 
@@ -280,23 +281,10 @@ def enrich_paths(
             setup_commands=list(environment.setup_commands),
         )
     except subprocess.TimeoutExpired as e:
-        # Recover partial results from JSONL lines that completed before timeout
-        partial_output = getattr(e, "output", None) or ""
-        if partial_output:
-            logger.warning(
-                f"Enrichment SSH timed out after {timeout}s for {facility}, "
-                f"recovering partial output ({len(partial_output)} bytes)"
-            )
-            return _parse_enrich_output(
-                partial_output,
-                paths,
-                fill_missing_error=f"ssh_timeout({timeout}s)",
-            )
-        logger.warning(f"Enrichment SSH timed out after {timeout}s for {facility}")
-        return [
-            EnrichmentResult(path=p, error=f"ssh_timeout({timeout}s)") for p in paths
-        ]
+        return _timeout_results(e, paths)
     except Exception as e:
+        if host_unreachable(e):
+            raise
         logger.warning(f"Enrichment failed for {facility}: {e}")
         return [EnrichmentResult(path=p, error=str(e)[:100]) for p in paths]
 
@@ -477,6 +465,18 @@ def _parse_enrich_output(
     return results
 
 
+def _timeout_results(
+    error: subprocess.TimeoutExpired, paths: list[str]
+) -> list[EnrichmentResult]:
+    """Keep complete path results and charge paths left unfinished at timeout."""
+    output = error.output or ""
+    if isinstance(output, bytes):
+        output = output.decode(errors="replace")
+    return _parse_enrich_output(
+        output, paths, fill_missing_error=f"timeout after {error.timeout}s"
+    )
+
+
 async def async_enrich_paths(
     facility: str,
     paths: list[str],
@@ -524,26 +524,13 @@ async def async_enrich_paths(
                 python_command=environment.python_command,
                 setup_commands=list(environment.setup_commands),
             )
-    except subprocess.TimeoutExpired as e:
-        # Recover partial results from JSONL lines that completed before timeout
-        partial_output = getattr(e, "output", None) or ""
-        if partial_output:
-            logger.warning(
-                f"Enrichment SSH timed out after {timeout}s for {facility}, "
-                f"recovering partial output ({len(partial_output)} bytes)"
-            )
-            return _parse_enrich_output(
-                partial_output,
-                paths,
-                fill_missing_error=f"ssh_timeout({timeout}s)",
-            )
-        logger.warning(f"Enrichment SSH timed out after {timeout}s for {facility}")
-        return [
-            EnrichmentResult(path=p, error=f"ssh_timeout({timeout}s)") for p in paths
-        ]
     except asyncio.CancelledError:
         raise
+    except subprocess.TimeoutExpired as e:
+        return _timeout_results(e, paths)
     except Exception as e:
+        if host_unreachable(e):
+            raise
         logger.warning(f"Enrichment failed for {facility}: {e}")
         return [EnrichmentResult(path=p, error=str(e)[:100]) for p in paths]
 
@@ -623,6 +610,7 @@ def get_paths_pending_enrichment(facility: str, threshold: float = 0.30) -> list
     Returns:
         List of paths ready for enrichment
     """
+    from imas_codex.discovery.paths.parallel import ENRICH_FAILURE_LIMIT
     from imas_codex.graph import GraphClient
 
     with GraphClient() as gc:
@@ -631,15 +619,17 @@ def get_paths_pending_enrichment(facility: str, threshold: float = 0.30) -> list
             MATCH (p:FacilityPath {facility_id: $facility})
             WHERE p.status = 'scored'
                 AND (p.is_enriched IS NULL OR p.is_enriched = false)
+                AND coalesce(p.enrich_failures, 0) < $failure_limit
                 AND (
                     p.should_enrich = true
-                    OR (p.should_enrich IS NULL AND p.scan_relevance >= $threshold)
+                    OR p.scan_relevance >= $threshold
                 )
             RETURN p.path AS path
             ORDER BY p.scan_relevance DESC
             """,
             facility=facility,
             threshold=threshold,
+            failure_limit=ENRICH_FAILURE_LIMIT,
         )
 
     return [r["path"] for r in result]

@@ -30,6 +30,10 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
 from imas_codex.discovery.base.llm import ProviderBudgetExhausted
 from imas_codex.discovery.base.progress import WorkerStats
+from imas_codex.discovery.base.reachability import (
+    host_unreachable,
+    wait_for_reachable_host,
+)
 from imas_codex.discovery.base.state import DiscoveryStateBase
 from imas_codex.discovery.base.supervision import (
     OrphanRecoverySpec,
@@ -59,6 +63,8 @@ EXPANSION_GATE = """p.status IN $expand_statuses
     AND (p.path_purpose = 'container'
          OR p.children_worth_listing >= $expand_threshold)
     AND p.expanded_at IS NULL"""
+
+ENRICH_FAILURE_LIMIT = 5
 
 
 def _expansion_gate_params() -> dict[str, Any]:
@@ -272,7 +278,7 @@ def has_pending_work(facility: str) -> bool:
     - Discovered paths awaiting first scan (including actively claimed)
     - Scanned paths awaiting scoring (including actively claimed)
     - Triaged paths with should_expand=true that haven't been expanded yet
-    - Triaged paths with should_enrich=true that haven't been enriched yet
+    - Triaged paths selected for enrichment that haven't been enriched yet
     - Enriched paths that haven't been scored yet
 
     Note: Unlike claim functions, this does NOT filter out claimed paths.
@@ -298,6 +304,7 @@ def has_pending_work(facility: str) -> bool:
                       AND NOT (p.path_purpose IN $excluded_purposes)
                       AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
                       AND (p.is_enriched IS NULL OR p.is_enriched = false)
+                      AND coalesce(p.enrich_failures, 0) < $failure_limit
                       THEN 'enrich' ELSE null END AS enr,
                  CASE WHEN p.is_enriched = true
                       AND NOT (p.path_purpose IN $excluded_purposes)
@@ -318,6 +325,7 @@ def has_pending_work(facility: str) -> bool:
             scanned=PathStatus.scanned.value,
             triaged=PathStatus.triaged.value,
             minimum=get_path_scan_threshold(),
+            failure_limit=ENRICH_FAILURE_LIMIT,
             **_expansion_gate_params(),
             **excluded_params,
         )
@@ -415,12 +423,14 @@ def _has_pending_enrich_work(facility: str, threshold: float | None = None) -> b
               AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
               AND NOT (p.path_purpose IN $excluded_purposes)
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
+              AND coalesce(p.enrich_failures, 0) < $failure_limit
               {excluded_clause}
             RETURN count(p) > 0 AS has_work
             """,
             facility=facility,
             triaged=PathStatus.triaged.value,
             minimum=minimum,
+            failure_limit=ENRICH_FAILURE_LIMIT,
             excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             **excluded_params,
         )
@@ -806,7 +816,7 @@ def claim_paths_for_enriching(
 
     Claims paths where:
     - status = 'triaged'
-    - should_enrich = true OR triage_composite >= auto_enrich_threshold
+    - should_enrich = true OR scan_relevance >= auto_enrich_threshold
     - is_enriched is null or false
 
     Uses claim_token pattern with ORDER BY rand() to prevent deadlocks.
@@ -841,6 +851,7 @@ def claim_paths_for_enriching(
               AND (p.should_enrich = true OR p.scan_relevance >= $auto_enrich_threshold)
               AND NOT (p.path_purpose IN $excluded_purposes)
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
+              AND coalesce(p.enrich_failures, 0) < $failure_limit
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime() - duration($cutoff))
               AND (p.total_dirs IS NULL OR p.total_dirs <= 500)
               {scope_clause}
@@ -853,6 +864,7 @@ def claim_paths_for_enriching(
             triaged=PathStatus.triaged.value,
             cutoff=cutoff,
             auto_enrich_threshold=auto_enrich_threshold,
+            failure_limit=ENRICH_FAILURE_LIMIT,
             excluded_purposes=sorted(DATA_PURPOSES | SKIPPED_PURPOSES),
             token=claim_token,
             **scope_params,
@@ -1055,12 +1067,14 @@ def mark_enrichment_complete(
                 """
                 UNWIND $items AS item
                 MATCH (p:FacilityPath {id: item.id})
+                WITH p, item
                 SET p.claimed_at = null,
                     p.enrich_error = item.error,
-                    p.should_enrich = CASE WHEN item.permanent
-                        THEN false ELSE p.should_enrich END
+                    p.enrich_failures = CASE WHEN item.permanent THEN $failure_limit
+                        ELSE coalesce(p.enrich_failures, 0) + 1 END
                 """,
                 items=error_items,
+                failure_limit=ENRICH_FAILURE_LIMIT,
             )
 
         if success_items:
@@ -1078,6 +1092,8 @@ def mark_enrichment_complete(
                     p.read_matches = item.read_matches,
                     p.write_matches = item.write_matches,
                     p.enrich_warnings = item.enrich_warnings,
+                    p.enrich_failures = 0,
+                    p.enrich_error = null,
                     p.claimed_at = null
                 """,
                 items=success_items,
@@ -2167,6 +2183,7 @@ async def enrich_worker(
     from imas_codex.discovery.paths.enrichment import async_enrich_paths
 
     loop = asyncio.get_running_loop()
+    unreachable_count = 0
 
     while not state.should_stop():
         # Claim work from graph (run in executor to avoid blocking event loop)
@@ -2207,6 +2224,7 @@ async def enrich_worker(
                 path_purposes=path_purposes,
                 pool=pool,
             )
+            unreachable_count = 0
             state.enrich_stats.last_batch_time = time.time() - start
 
             # Convert EnrichmentResult to dict for persistence and display
@@ -2243,6 +2261,10 @@ async def enrich_worker(
             logger.exception(f"Enrich error: {e}")
             state.enrich_stats.errors += len(paths)
             _revert_path_claims(state.facility, path_strs)
+            if host_unreachable(e):
+                unreachable_count += 1
+                await wait_for_reachable_host(state, unreachable_count)
+                continue
             if is_infrastructure_error(e):
                 raise
 

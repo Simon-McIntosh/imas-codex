@@ -266,6 +266,7 @@ def get_discovery_stats(facility: str) -> dict[str, Any]:
         Dict with counts: total, discovered, scanned, scored, skipped, excluded,
         max_depth, claimed (paths with active claims)
     """
+    from imas_codex.discovery.paths.parallel import ENRICH_FAILURE_LIMIT
     from imas_codex.discovery.paths.scorer import (
         DATA_PURPOSES,
         PATH_EXPAND_THRESHOLD,
@@ -294,6 +295,7 @@ def get_discovery_stats(facility: str) -> dict[str, Any]:
                     AND NOT (p.path_purpose IN $excluded_purposes)
                     AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
                     AND (p.is_enriched IS NULL OR p.is_enriched = false)
+                    AND coalesce(p.enrich_failures, 0) < $failure_limit
                     THEN 1 ELSE 0 END) AS enrichment_ready,
                 sum(CASE WHEN p.is_enriched = true THEN 1 ELSE 0 END) AS enriched,
                 sum(CASE WHEN p.status = $triaged THEN 1 ELSE 0 END) AS triaged,
@@ -304,6 +306,7 @@ def get_discovery_stats(facility: str) -> dict[str, Any]:
                 max(coalesce(p.depth, 0)) AS max_depth
             """,
             facility=facility,
+            failure_limit=ENRICH_FAILURE_LIMIT,
             expand_statuses=[
                 PathStatus.triaged.value,
                 PathStatus.scored.value,
@@ -2823,7 +2826,7 @@ def claim_paths_for_enriching(facility: str, limit: int = 25) -> list[dict[str, 
 
     Paths ready for enrichment:
     - status = 'scored' (already valued by LLM)
-    - should_enrich = true (LLM decided it's worth deep analysis)
+    - explicit enrich decision or scan relevance above the threshold
     - is_enriched IS NULL OR is_enriched = false (not yet enriched)
 
     Uses claim_token + ORDER BY rand() to prevent deadlocks and
@@ -2837,7 +2840,9 @@ def claim_paths_for_enriching(facility: str, limit: int = 25) -> list[dict[str, 
     Returns:
         List of dicts with path info for enrichment
     """
+    from imas_codex.discovery.paths.parallel import ENRICH_FAILURE_LIMIT
     from imas_codex.graph import GraphClient
+    from imas_codex.settings import get_path_scan_threshold
 
     now = datetime.now(UTC)
     cutoff = (now - __import__("datetime").timedelta(minutes=5)).isoformat()
@@ -2849,8 +2854,9 @@ def claim_paths_for_enriching(facility: str, limit: int = 25) -> list[dict[str, 
             """
             MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
             WHERE p.status = $scored
-              AND p.should_enrich = true
+              AND (p.should_enrich = true OR p.scan_relevance >= $minimum)
               AND (p.is_enriched IS NULL OR p.is_enriched = false)
+              AND coalesce(p.enrich_failures, 0) < $failure_limit
               AND (p.claimed_at IS NULL OR p.claimed_at < datetime($cutoff))
               AND (p.total_dirs IS NULL OR p.total_dirs <= 500)
             WITH p
@@ -2860,6 +2866,8 @@ def claim_paths_for_enriching(facility: str, limit: int = 25) -> list[dict[str, 
             """,
             facility=facility,
             scored=PathStatus.scored.value,
+            minimum=get_path_scan_threshold(),
+            failure_limit=ENRICH_FAILURE_LIMIT,
             cutoff=cutoff,
             now=now_iso,
             limit=limit,
@@ -2882,101 +2890,10 @@ def mark_enrichment_complete(
     facility: str,
     results: list[dict[str, Any]],
 ) -> int:
-    """Mark paths as enriched with deep analysis results.
+    """Persist enrichment through the shared failure budget and result writer."""
+    from imas_codex.discovery.paths.parallel import mark_enrichment_complete as persist
 
-    Updates paths with:
-    - is_enriched = true
-    - enriched_at = current timestamp
-    - total_bytes, total_lines, language_breakdown from du/tokei
-    - is_multiformat from pattern analysis
-    - Clears claimed_at
-
-    Args:
-        facility: Facility ID
-        results: List of dicts with enrichment data:
-            - path: Path string
-            - total_bytes: Size from du (optional)
-            - total_lines: Lines from tokei (optional)
-            - language_breakdown: Language stats from tokei (optional, dict or JSON)
-            - is_multiformat: Multi-format detection (optional)
-            - error: Error message if enrichment failed (optional)
-
-    Returns:
-        Number of paths updated
-    """
-    import json
-
-    from imas_codex.graph import GraphClient
-
-    now = datetime.now(UTC).isoformat()
-
-    # Separate errors from successes for batch processing
-    error_items: list[dict[str, Any]] = []
-    success_items: list[dict[str, Any]] = []
-
-    for result in results:
-        path_id = f"{facility}:{result['path']}"
-
-        if result.get("error"):
-            error_items.append(
-                {
-                    "id": path_id,
-                    "reason": result["error"],
-                }
-            )
-        else:
-            lang_breakdown = result.get("language_breakdown")
-            if isinstance(lang_breakdown, dict):
-                lang_breakdown = json.dumps(lang_breakdown) if lang_breakdown else None
-
-            warnings = result.get("warnings", [])
-            warn_str = ", ".join(warnings) if warnings else None
-
-            success_items.append(
-                {
-                    "id": path_id,
-                    "now": now,
-                    "total_bytes": result.get("total_bytes"),
-                    "total_lines": result.get("total_lines"),
-                    "language_breakdown": lang_breakdown,
-                    "is_multiformat": result.get("is_multiformat"),
-                    "enrich_warnings": warn_str,
-                }
-            )
-
-    updated = 0
-    with GraphClient() as gc:
-        if error_items:
-            gc.query(
-                """
-                UNWIND $items AS item
-                MATCH (p:FacilityPath {id: item.id})
-                SET p.claimed_at = null,
-                    p.should_enrich = false,
-                    p.enrich_skip_reason = item.reason
-                """,
-                items=error_items,
-            )
-
-        if success_items:
-            gc.query(
-                """
-                UNWIND $items AS item
-                MATCH (p:FacilityPath {id: item.id})
-                SET p.is_enriched = true,
-                    p.enriched_at = item.now,
-                    p.claimed_at = null,
-                    p.total_bytes = item.total_bytes,
-                    p.total_lines = item.total_lines,
-                    p.language_breakdown = item.language_breakdown,
-                    p.is_multiformat = item.is_multiformat,
-                    p.enrich_warnings = item.enrich_warnings
-                """,
-                items=success_items,
-            )
-            updated = len(success_items)
-
-    return updated
+    return persist(facility, results)
 
 
 @retry_on_deadlock()

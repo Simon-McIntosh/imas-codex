@@ -17,6 +17,11 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
+from imas_codex.discovery.base.reachability import (
+    host_unreachable,
+    sleep_unless_stopped,
+    wait_for_reachable_host,
+)
 from imas_codex.discovery.base.supervision import is_infrastructure_error
 
 from .state import FileDiscoveryState
@@ -43,51 +48,6 @@ def _scan_progress_message(paths: list[dict[str, Any]]) -> str:
     """Build the scan progress line, rendering unscored paths as ``-``."""
     scores = [_render_score(path.get("score")) for path in paths]
     return f"scanning {len(paths)} paths (scores: {', '.join(scores[:3])}...)"
-
-
-# Longest single wait between attempts to reach an unreachable host.
-UNREACHABLE_MAX_BACKOFF = 60.0
-
-
-def _host_unreachable(exc: Exception) -> bool:
-    """True when a remote call failed because SSH could not reach the host.
-
-    ssh exits 255 when it cannot connect, and a timeout means no answer came
-    back. Neither says anything about the paths in the batch, unlike a
-    script error or unparseable output, which would recur on every attempt.
-    """
-    import subprocess
-
-    if isinstance(exc, subprocess.TimeoutExpired):
-        return True
-    return isinstance(exc, subprocess.CalledProcessError) and exc.returncode == 255
-
-
-async def _sleep_unless_stopped(state: FileDiscoveryState, seconds: float) -> None:
-    """Sleep in short steps so a stop request or deadline ends the wait."""
-    loop = asyncio.get_running_loop()
-    until = loop.time() + seconds
-    while not state.should_stop():
-        remaining = until - loop.time()
-        if remaining <= 0:
-            return
-        await asyncio.sleep(min(remaining, 1.0))
-
-
-async def _wait_for_reachable_host(state: FileDiscoveryState, attempt: int) -> None:
-    """Back off after an unreachable host, then hold until the SSH check passes.
-
-    The backoff covers the service monitor's polling lag: right after a drop
-    it may still report the host healthy. Once it reports SSH down, the
-    worker holds until it reports SSH healthy again, however long that takes,
-    so a tunnel outage pauses the scan instead of ending it.
-    """
-    await _sleep_unless_stopped(state, min(2.0**attempt, UNREACHABLE_MAX_BACKOFF))
-    monitor = state.service_monitor
-    if monitor is None:
-        return
-    while not state.should_stop() and not monitor.is_service_healthy("ssh"):
-        await _sleep_unless_stopped(state, 5.0)
 
 
 # ============================================================================
@@ -230,7 +190,7 @@ async def scan_worker(
             for p in paths:
                 await asyncio.to_thread(release_path_file_scan_claim, p["id"])
 
-            if _host_unreachable(e):
+            if host_unreachable(e):
                 unreachable_count += 1
                 logger.warning(
                     "SSH scan could not reach %s (%d in a row): %s; waiting "
@@ -245,7 +205,7 @@ async def scan_worker(
                         state.scan_stats,
                         None,
                     )
-                await _wait_for_reachable_host(state, unreachable_count)
+                await wait_for_reachable_host(state, unreachable_count)
                 continue
 
             ssh_retry_count += 1
@@ -275,7 +235,7 @@ async def scan_worker(
                     state.scan_stats,
                     None,
                 )
-            await _sleep_unless_stopped(state, backoff)
+            await sleep_unless_stopped(state, backoff)
             continue
 
         await asyncio.sleep(0.1)
