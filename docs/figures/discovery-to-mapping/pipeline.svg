@@ -87,9 +87,9 @@ L 831.2 46.261993
    </g>
    <g id="text_12">
     <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(434.601562 405.998828)">checked: 4,600</text>
-    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(415.245312 430.004297)">discovered: 10,395</text>
-    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(448.210938 454.009766)">enriched: 16</text>
-    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(411.490625 478.015234)">underspecified: 100</text>
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(415.245312 430.004297)">discovered: 10,158</text>
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(441.848437 454.009766)">enriched: 262</text>
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(417.853125 478.015234)">underspecified: 91</text>
    </g>
    <g id="patch_4">
     <path d="M 260.963306 438.25957
@@ -138,8 +138,8 @@ L 708.661277 364
     <text style="font-size: 22px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="835.2" y="545.715703" transform="rotate(-0 835.2 545.715703)">Mapping</text>
    </g>
    <g id="text_16">
-    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(776.420312 585.998828)">0 mappings</text>
-    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(783.173437 610.004297)">0 bindings</text>
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(776.420312 585.998828)">1 mappings</text>
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(783.173437 610.004297)">9 bindings</text>
    </g>
    <g id="patch_8">
     <path d="M 835.2 455.602588
@@ -154,8 +154,8 @@ L 831.2 492.658539
     <text style="font-size: 22px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="453.6" y="545.715703" transform="rotate(-0 453.6 545.715703)">Hand-off export</text>
    </g>
    <g id="text_18">
-    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(342.339062 585.998828)">4 rows; 1 unexpanded</text>
-    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(353.607812 610.002734)">CONTRACT FIXTURE</text>
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(335.976562 585.998828)">74 rows; 0 unexpanded</text>
+    <text style="font-size: 20px; font-family: 'DejaVu Sans'; fill: #242424" transform="translate(389.342187 610.002734)">LIVE EXPORT</text>
    </g>
    <g id="patch_9">
     <path d="M 717.997412 540

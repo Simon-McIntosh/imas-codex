@@ -512,8 +512,20 @@ def select_examples(reader: Reader, document: dict[str, Any]) -> list[dict[str, 
             for row in entry.get("signals", [])
             if row.get("target_path") == target
         ]
+        origin: dict[str, Any] = {}
         if not candidates:
-            raise ValueError(f"Hand-off document has no {title} row")
+            # A system the live export does not yet carry is drawn from the
+            # contract fixture and labelled as such, never left out silently.
+            fixture = json.loads(FIXTURE.read_text())
+            candidates = [
+                (entry, row)
+                for entry in fixture["ids"]
+                for row in entry.get("signals", [])
+                if row.get("target_path") == target
+            ]
+            if not candidates:
+                raise ValueError(f"Neither hand-off document has a {title} row")
+            origin = {"source_path": FIXTURE, "source_kind": "CONTRACT FIXTURE"}
         entry, row = candidates[0]
         graph = read_record(reader, row, stem)
         missing = [name for name, value in graph.items() if value is None]
@@ -531,6 +543,7 @@ def select_examples(reader: Reader, document: dict[str, Any]) -> list[dict[str, 
                 "mapping_id": entry["mapping_id"],
                 "status": entry["status"],
                 "note": note,
+                **origin,
             }
         )
     return examples
@@ -721,7 +734,12 @@ def main() -> None:
         lifecycle(args.presentation_dir),
     ]
     receipt["artifacts"].extend(
-        json_figure(example, source, source_kind, args.presentation_dir)
+        json_figure(
+            example,
+            example.get("source_path", source),
+            example.get("source_kind", source_kind),
+            args.presentation_dir,
+        )
         for example in receipt["examples"]
     )
     (FIGURES / "evidence.json").write_text(dumps(receipt) + "\n")

@@ -18,8 +18,8 @@
 <header><p class="eyebrow">JT-60SA · imas-codex chapter</p>
 <h1>Discovery to mapping</h1>
 <p class="lead">Discovery turns facility files, documentation and signal inventories into graph-backed mapping proposals. A generated mapping is a draft: imas-ambix still has to resolve machine indices, validate the rules against data and write the tokamap directory and IDS.</p></header>
-<section id="snapshot"><h2>What this snapshot establishes</h2><p>Graph reads ran from <strong>2026-10-09T02:51:36.833687+00:00</strong> to <strong>2026-10-09T02:51:46.629572+00:00</strong>. They found <strong>15,111 signals</strong>, <strong>5,180 sources</strong>, <strong>156 sources with a candidate route</strong>, <strong>0 mapping records</strong> and <strong>0 field bindings</strong> for JT-60SA. These are sequential live reads, not an atomic snapshot; concurrent discovery can change the totals.</p>
-<p><strong>Example provenance: CONTRACT FIXTURE.</strong> The JSON renders use <code>/home/ITER/mcintos/Code/imas-codex/tests/fixtures/mapping_handoff_example.json</code>, SHA-256 <code>07adcf794051238910d0227bd5174aec75f5df5af3194cb01448aba33ce84a94</code>. Its export timestamp is <code>2026-10-09T00:00:00Z</code>; it is separate from the graph observation time. Fixture values are illustrative contract data, including confidence and units, and are not measurements of live mapping quality.</p>
+<section id="snapshot"><h2>What this snapshot establishes</h2><p>Graph reads ran from <strong>2026-10-09T03:24:54.521180+00:00</strong> to <strong>2026-10-09T03:25:05.153009+00:00</strong>. They found <strong>15,111 signals</strong>, <strong>5,180 sources</strong>, <strong>156 sources with a candidate route</strong>, <strong>1 mapping records</strong> and <strong>9 field bindings</strong> for JT-60SA. These are sequential live reads, not an atomic snapshot; concurrent discovery can change the totals.</p>
+<p><strong>Example provenance: LIVE EXPORT.</strong> The JSON renders use <code>/work/projects/imas_gpu/jt60sa/handoff/jt-60sa-mapping-handoff.json</code>, SHA-256 <code>c412eb6bc96966d252865cddc838c7f2c1d83097569cd39ea51ea6ea10d22c2b</code>. Its export timestamp is <code>2026-10-09T03:23:24Z</code>; it is separate from the graph observation time. Fixture values are illustrative contract data, including confidence and units, and are not measurements of live mapping quality.</p>
 <p>No third system has a generated mapping in the hand-off available for this report. The examples cover pickup probes and PF coil currents only. Missing graph records are labelled explicitly; no record, transform, convention or machine index is invented.</p></section>
 <section id="discovery"><h2>From facility context to candidate targets</h2><p>The discovery sequence starts with paths. Code discovery reads those paths to recover source files and data-access logic; document discovery reads the same path inventory. Wiki discovery is an independent source of descriptions and operating context. Signal scanning inventories the facility data systems and creates signal identities. Enrichment adds physical meaning using code and wiki context, and access checks establish whether the signal can be read.</p><p>The diagram separates required stage inputs from context. Counts are inventories at the observation time, not an attrition funnel: files, sources, signals and bindings are different entities. Signal status counts are current states, not cumulative counts of completed transitions. In particular, checked means access was attempted; CHECKED_WITH.success holds the outcome, so checked is not a success count. Documents are part of the evidence inventory; the sequence explicitly lists code and wiki as enrichment context.</p>
 <figure><img src="/imas-codex/figures/discovery-to-mapping/pipeline.svg" alt="Discovery dependencies and measured JT-60SA inventories. Export counts belong to the labelled input document; all upstream counts come from the live graph." style="width:100%;height:auto"><figcaption>Discovery dependencies and measured JT-60SA inventories. Export counts belong to the labelled input document; all upstream counts come from the live graph.</figcaption></figure>
@@ -30,32 +30,46 @@
 </tbody></table></section><section id="lifecycle"><h2>A draft needs validation before activation</h2><p>IMASMapping records orchestrate an IDS and link to SignalSource groups; each source-to-DD edge holds a field binding. The required lifecycle is generated → validated → active. Generation records a draft. Validation checks the mapping against signals, transforms and shapes; activation is an explicit promotion after that validation succeeds.</p>
 <figure><img src="/imas-codex/figures/discovery-to-mapping/mapping-lifecycle.svg" alt="Required lifecycle and refusal of activation without validation. Commands use the intended top-level map group. This is the specified policy, not evidence that the activation guard passed a test." style="width:100%;height:auto"><figcaption>Required lifecycle and refusal of activation without validation. Commands use the intended top-level map group. This is the specified policy, not evidence that the activation guard passed a test.</figcaption></figure>
 <p>This report reads the graph and does not execute generation, validation or activation. It therefore makes no runtime claim about the activation guard. The command migration and guard implementation have their own tests; the figure records the hand-off contract they must enforce. Exporting a generated mapping is allowed and leaves its status visible in the document.</p><table><thead><tr><th>Live IDS</th><th>Mapping status</th><th>Records</th></tr></thead><tbody>
-<tr><td colspan="3">No JT-60SA IMASMapping record returned by the indexed live query.</td></tr>
+<tr><td>magnetics</td><td>generated</td><td>1</td></tr>
 </tbody></table></section><section id="handoff"><h2>What crosses the repository boundary</h2><p>The hand-off has one document per facility. Its header identifies the format and version, facility, DD version and UTC export time. Each IDS entry records mapping identity, lifecycle status, expanded signal rows and unexpanded bindings. Each signal row carries the facility signal and source identities, data system, source group and array, member identifier, index-free DD path, transformation, units, COCOS label, confidence and evidence. Missing graph values are null.</p><p>The document assigns no array index. imas-ambix owns the machine description built from the SELENE deck and resolves a signal to a concrete probe or coil. It checks the rules against actual data and writes the machine and signal mappings into the tokamap directory and then the IDS. A member identifier is a source identity, not permission to use that number as an IMAS array index.</p><table><thead><tr><th>Input IDS</th><th>Status</th><th>Expanded rows</th><th>Unexpanded</th></tr></thead><tbody>
-<tr><td>magnetics</td><td>generated</td><td>2</td><td>1</td></tr>
-<tr><td>pf_active</td><td>generated</td><td>2</td><td>0</td></tr>
+<tr><td>magnetics</td><td>generated</td><td>74</td><td>0</td></tr>
 </tbody></table>
-<p>Unexpanded <code>jt-60sa:magnetics:flux_loop</code> → <code>magnetics/flux_loop/flux/data</code>: No FacilitySignal member is linked to this source</p>
 </section><section id="examples"><h2>Two signal examples and their provenance</h2>
-<h3>Pickup probe</h3><p>Input mapping <code>jt-60sa:magnetics</code>; status <code>generated</code>. No matching live SignalSource, MAPS_TO_IMAS.</p>
-<figure><img src="/imas-codex/figures/discovery-to-mapping/pickup-probe.svg" alt="Pickup probe: CONTRACT FIXTURE signal row beside a bounded live projection of its source, binding and DD target. No matching live SignalSource, MAPS_TO_IMAS." style="width:100%;height:auto"><figcaption>Pickup probe: CONTRACT FIXTURE signal row beside a bounded live projection of its source, binding and DD target. No matching live SignalSource, MAPS_TO_IMAS.</figcaption></figure>
+<h3>Pickup probe</h3><p>Input mapping <code>jt-60sa:magnetics</code>; status <code>generated</code>. Source, binding and DD target found in the live graph.</p>
+<figure><img src="/imas-codex/figures/discovery-to-mapping/pickup-probe.svg" alt="Pickup probe: LIVE EXPORT signal row beside a bounded live projection of its source, binding and DD target. Source, binding and DD target found in the live graph." style="width:100%;height:auto"><figcaption>Pickup probe: LIVE EXPORT signal row beside a bounded live projection of its source, binding and DD target. Source, binding and DD target found in the live graph.</figcaption></figure>
 <details open><summary>Selectable hand-off row</summary><pre>{
-  &quot;signal_id&quot;: &quot;jt-60sa:general/mdac_magpbtc10&quot;,
-  &quot;source_id&quot;: &quot;jt-60sa:magnetics:pickup_probe&quot;,
+  &quot;signal_id&quot;: &quot;jt-60sa:general/mdac_magpbtc5&quot;,
+  &quot;source_id&quot;: &quot;jt-60sa:eddbreadTime(&#x27;E101173&#x27;, &#x27;MDAC&#x27;, &#x27;magPbTC5&#x27;, t1, t2)&quot;,
   &quot;data_source&quot;: &quot;edas&quot;,
   &quot;source_group&quot;: &quot;MDAC&quot;,
-  &quot;source_array&quot;: &quot;magPbTC10&quot;,
-  &quot;member_identifier&quot;: &quot;10&quot;,
+  &quot;source_array&quot;: &quot;magPbTC5&quot;,
+  &quot;member_identifier&quot;: &quot;magPbTC5&quot;,
   &quot;target_path&quot;: &quot;magnetics/b_field_pol_probe/field/data&quot;,
-  &quot;transform_expression&quot;: null,
+  &quot;transform_expression&quot;: &quot;value&quot;,
   &quot;source_units&quot;: &quot;T&quot;,
   &quot;target_units&quot;: &quot;T&quot;,
   &quot;cocos_label&quot;: null,
-  &quot;confidence&quot;: 0.87,
-  &quot;evidence&quot;: &quot;EDAS MDAC pickup probe channel&quot;
+  &quot;confidence&quot;: 0.92,
+  &quot;evidence&quot;: &quot;&quot;
 }</pre></details><details open><summary>Selectable live graph projection</summary><pre>{
-  &quot;SignalSource&quot;: null,
-  &quot;MAPS_TO_IMAS&quot;: null,
+  &quot;SignalSource&quot;: {
+    &quot;description&quot;: &quot;Magnetic field measurement from probe TC-5 used for real-time plasma control. Measures the local poloidal magnetic field to provide feedback for plasma position and shape control.&quot;,
+    &quot;id&quot;: &quot;jt-60sa:eddbreadTime(&#x27;E101173&#x27;, &#x27;MDAC&#x27;, &#x27;magPbTC5&#x27;, t1, t2)&quot;,
+    &quot;group_key&quot;: &quot;eddbreadTime(&#x27;E101173&#x27;, &#x27;MDAC&#x27;, &#x27;magPbTC5&#x27;, t1, t2)&quot;,
+    &quot;status&quot;: &quot;enriched&quot;
+  },
+  &quot;MAPS_TO_IMAS&quot;: {
+    &quot;source_units&quot;: &quot;T&quot;,
+    &quot;mapping_type&quot;: &quot;direct&quot;,
+    &quot;evidence&quot;: &quot;&quot;,
+    &quot;confidence&quot;: 0.92,
+    &quot;error_type&quot;: null,
+    &quot;transform_expression&quot;: &quot;value&quot;,
+    &quot;derived_from&quot;: null,
+    &quot;cocos_label&quot;: null,
+    &quot;target_units&quot;: &quot;T&quot;,
+    &quot;source_property&quot;: &quot;value&quot;
+  },
   &quot;IMASNode&quot;: {
     &quot;data_type&quot;: &quot;FLT_1D&quot;,
     &quot;cocos_transformation_type&quot;: null,
@@ -64,7 +78,7 @@
   }
 }</pre></details>
 <h3>PF coil current</h3><p>Input mapping <code>jt-60sa:pf_active</code>; status <code>generated</code>. No matching live SignalSource, MAPS_TO_IMAS.</p>
-<figure><img src="/imas-codex/figures/discovery-to-mapping/pf-coil-current.svg" alt="PF coil current: CONTRACT FIXTURE signal row beside a bounded live projection of its source, binding and DD target. No matching live SignalSource, MAPS_TO_IMAS." style="width:100%;height:auto"><figcaption>PF coil current: CONTRACT FIXTURE signal row beside a bounded live projection of its source, binding and DD target. No matching live SignalSource, MAPS_TO_IMAS.</figcaption></figure>
+<figure><img src="/imas-codex/figures/discovery-to-mapping/pf-coil-current.svg" alt="PF coil current: LIVE EXPORT signal row beside a bounded live projection of its source, binding and DD target. No matching live SignalSource, MAPS_TO_IMAS." style="width:100%;height:auto"><figcaption>PF coil current: LIVE EXPORT signal row beside a bounded live projection of its source, binding and DD target. No matching live SignalSource, MAPS_TO_IMAS.</figcaption></figure>
 <details open><summary>Selectable hand-off row</summary><pre>{
   &quot;signal_id&quot;: &quot;jt-60sa:general/mmsys_curcs1lkat&quot;,
   &quot;source_id&quot;: &quot;jt-60sa:pf_active:coil_current&quot;,
@@ -91,9 +105,9 @@
 }</pre></details>
 <p>JSON syntax uses Pygments <code>friendly</code> on white. The style is not yet matched to imas-ambix. Node projections show selected schema-declared fields; the edge projection shows the persisted transform, units, convention, confidence and evidence fields. Null records mean the exact source or edge was not found, not that another source with a similar name is equivalent. The same excerpt appears as selectable text above.</p></section>
 <section id="method"><h2>Reproduce and inspect the evidence</h2><p>Run the single script below. It prefers the live hand-off when present and otherwise uses the contract fixture in the main checkout. It regenerates all four SVGs, all four slide PNGs, the evidence receipt and this report. It never accesses the facility over SSH or writes the graph.</p><pre>UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" uv run --no-sync python scripts/figures_discovery_to_mapping.py</pre>
-<p>Repository base revision <code>6079a971c0c3f20decd205e38543e9bb25d38c0d</code>; script SHA-256 <code>aeaff32230231b92ba0fa66cec5e81b26e64371e453f615b3c687811f25288a5</code>. Schema property checks are recorded with schema hashes in <a href="/imas-codex/figures/discovery-to-mapping/evidence.json">the machine-readable evidence receipt</a>. Each query uses a nine-second server timeout and is rejected if measured wall time reaches ten seconds. Online range indexes are checked first; facility and identity hints enforce indexed starts. The known JT-60SA Facility and nonzero signals/sources act as positive controls. A zero inventory triggers an identity-index witness lookup for that label, and the schema check prevents a misspelled facility or status property from masquerading as an empty result.</p>
+<p>Repository base revision <code>926e5a021922211b6390879c434eb6c92afb14c6</code>; script SHA-256 <code>85bf4bfb2881a74804c8c828879819125c07a441408a0155b4ac16f67c2cff09</code>. Schema property checks are recorded with schema hashes in <a href="/imas-codex/figures/discovery-to-mapping/evidence.json">the machine-readable evidence receipt</a>. Each query uses a nine-second server timeout and is rejected if measured wall time reaches ten seconds. Online range indexes are checked first; facility and identity hints enforce indexed starts. The known JT-60SA Facility and nonzero signals/sources act as positive controls. A zero inventory triggers an identity-index witness lookup for that label, and the schema check prevents a misspelled facility or status property from masquerading as an empty result.</p>
 <p>Every query, parameters, result and elapsed time is printed by the script and preserved below. A zero with no identity witness means that label has no indexed identity to inspect; it is explicitly weaker evidence than a populated positive control.</p>
-<details><summary>index_inventory · 0.0100 s</summary><pre>SHOW INDEXES YIELD labelsOrTypes, properties, state, type WHERE any(label IN labelsOrTypes WHERE
+<details><summary>index_inventory · 0.0125 s</summary><pre>SHOW INDEXES YIELD labelsOrTypes, properties, state, type WHERE any(label IN labelsOrTypes WHERE
 label IN $labels) AND type IN [&#x27;RANGE&#x27;, &#x27;TEXT&#x27;] RETURN labelsOrTypes, properties, state, type LIMIT
 100
 PARAMS {
@@ -668,7 +682,7 @@ RESULT [
     &quot;id&quot;: &quot;jt-60sa&quot;
   }
 ]</pre></details>
-<details><summary>FacilityPath · 0.0327 s</summary><pre>MATCH (n:FacilityPath {facility_id: $facility}) USING INDEX n:FacilityPath(facility_id) RETURN
+<details><summary>FacilityPath · 0.0329 s</summary><pre>MATCH (n:FacilityPath {facility_id: $facility}) USING INDEX n:FacilityPath(facility_id) RETURN
 count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -680,7 +694,7 @@ RESULT [
     &quot;with_status&quot;: 9916
   }
 ]</pre></details>
-<details><summary>CodeFile · 0.1199 s</summary><pre>MATCH (n:CodeFile {facility_id: $facility}) USING INDEX n:CodeFile(facility_id) RETURN count(n) AS
+<details><summary>CodeFile · 0.1209 s</summary><pre>MATCH (n:CodeFile {facility_id: $facility}) USING INDEX n:CodeFile(facility_id) RETURN count(n) AS
 total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -692,7 +706,7 @@ RESULT [
     &quot;with_status&quot;: 68268
   }
 ]</pre></details>
-<details><summary>Document · 0.0032 s</summary><pre>MATCH (n:Document {facility_id: $facility}) USING INDEX n:Document(facility_id) RETURN count(n) AS
+<details><summary>Document · 0.0038 s</summary><pre>MATCH (n:Document {facility_id: $facility}) USING INDEX n:Document(facility_id) RETURN count(n) AS
 total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -704,7 +718,7 @@ RESULT [
     &quot;with_status&quot;: 1057
   }
 ]</pre></details>
-<details><summary>WikiPage · 0.0116 s</summary><pre>MATCH (n:WikiPage {facility_id: $facility}) USING INDEX n:WikiPage(facility_id) RETURN count(n) AS
+<details><summary>WikiPage · 0.0119 s</summary><pre>MATCH (n:WikiPage {facility_id: $facility}) USING INDEX n:WikiPage(facility_id) RETURN count(n) AS
 total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -716,7 +730,7 @@ RESULT [
     &quot;with_status&quot;: 4484
   }
 ]</pre></details>
-<details><summary>FacilitySignal · 0.0216 s</summary><pre>MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN
+<details><summary>FacilitySignal · 0.0220 s</summary><pre>MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN
 count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -728,7 +742,7 @@ RESULT [
     &quot;with_status&quot;: 15111
   }
 ]</pre></details>
-<details><summary>SignalSource · 0.0049 s</summary><pre>MATCH (n:SignalSource {facility_id: $facility}) USING INDEX n:SignalSource(facility_id) RETURN
+<details><summary>SignalSource · 0.0057 s</summary><pre>MATCH (n:SignalSource {facility_id: $facility}) USING INDEX n:SignalSource(facility_id) RETURN
 count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -740,28 +754,19 @@ RESULT [
     &quot;with_status&quot;: 5180
   }
 ]</pre></details>
-<details><summary>IMASMapping · 0.0006 s</summary><pre>MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN
+<details><summary>IMASMapping · 0.0013 s</summary><pre>MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN
 count(n) AS total, count(n.facility_id) AS with_facility_id, count(n.status) AS with_status
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
 RESULT [
   {
-    &quot;total&quot;: 0,
-    &quot;with_facility_id&quot;: 0,
-    &quot;with_status&quot;: 0
+    &quot;total&quot;: 1,
+    &quot;with_facility_id&quot;: 1,
+    &quot;with_status&quot;: 1
   }
 ]</pre></details>
-<details><summary>IMASMapping_identity_control · 0.0006 s</summary><pre>MATCH (n:IMASMapping) USING INDEX n:IMASMapping(id) WHERE n.id IS NOT NULL RETURN n.id AS id,
-n.facility_id AS facility_id LIMIT 1
-PARAMS {}
-RESULT [
-  {
-    &quot;id&quot;: &quot;jet:balance_of_plant&quot;,
-    &quot;facility_id&quot;: &quot;jet&quot;
-  }
-]</pre></details>
-<details><summary>signal_statuses · 0.0204 s</summary><pre>MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN
+<details><summary>signal_statuses · 0.0203 s</summary><pre>MATCH (n:FacilitySignal {facility_id: $facility}) USING INDEX n:FacilitySignal(facility_id) RETURN
 n.status AS status, count(n) AS count ORDER BY status LIMIT 30
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -773,18 +778,18 @@ RESULT [
   },
   {
     &quot;status&quot;: &quot;discovered&quot;,
-    &quot;count&quot;: 10395
+    &quot;count&quot;: 10158
   },
   {
     &quot;status&quot;: &quot;enriched&quot;,
-    &quot;count&quot;: 16
+    &quot;count&quot;: 262
   },
   {
     &quot;status&quot;: &quot;underspecified&quot;,
-    &quot;count&quot;: 100
+    &quot;count&quot;: 91
   }
 ]</pre></details>
-<details><summary>candidate_routes · 0.0047 s</summary><pre>MATCH (n:SignalSource {facility_id: $facility}) USING INDEX n:SignalSource(facility_id) RETURN
+<details><summary>candidate_routes · 0.0052 s</summary><pre>MATCH (n:SignalSource {facility_id: $facility}) USING INDEX n:SignalSource(facility_id) RETURN
 n.candidate_route AS route, count(n) AS count ORDER BY route LIMIT 20
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
@@ -803,46 +808,70 @@ RESULT [
     &quot;count&quot;: 5024
   }
 ]</pre></details>
-<details><summary>bindings · 0.0045 s</summary><pre>MATCH (s:SignalSource {facility_id: $facility}) USING INDEX s:SignalSource(facility_id) MATCH
+<details><summary>bindings · 0.0046 s</summary><pre>MATCH (s:SignalSource {facility_id: $facility}) USING INDEX s:SignalSource(facility_id) MATCH
 (s)-[r:MAPS_TO_IMAS]-&gt;(n:IMASNode) RETURN count(r) AS count
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
 RESULT [
   {
-    &quot;count&quot;: 0
+    &quot;count&quot;: 9
   }
 ]</pre></details>
-<details><summary>binding_control · 0.0034 s</summary><pre>MATCH (s:SignalSource {facility_id: $facility}) USING INDEX s:SignalSource(facility_id) MATCH
-(s)-[:MAPS_TO_IMAS]-&gt;(n:IMASNode) RETURN s.id AS source_id, n.id AS target_path LIMIT 1
-PARAMS {
-  &quot;facility&quot;: &quot;jet&quot;
-}
-RESULT []</pre></details>
-<details><summary>mapping_statuses · 0.0006 s</summary><pre>MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN
+<details><summary>mapping_statuses · 0.0009 s</summary><pre>MATCH (n:IMASMapping {facility_id: $facility}) USING INDEX n:IMASMapping(facility_id) RETURN
 n.ids_name AS ids, n.status AS status, count(n) AS count ORDER BY ids, status LIMIT 30
 PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
-RESULT []</pre></details>
-<details><summary>pickup-probe_source · 0.0007 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) RETURN s
+RESULT [
+  {
+    &quot;ids&quot;: &quot;magnetics&quot;,
+    &quot;status&quot;: &quot;generated&quot;,
+    &quot;count&quot;: 1
+  }
+]</pre></details>
+<details><summary>pickup-probe_source · 0.0008 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) RETURN s
 {.id, .group_key, .status, .description} AS record LIMIT 1
 PARAMS {
-  &quot;source&quot;: &quot;jt-60sa:magnetics:pickup_probe&quot;,
+  &quot;source&quot;: &quot;jt-60sa:eddbreadTime(&#x27;E101173&#x27;, &#x27;MDAC&#x27;, &#x27;magPbTC5&#x27;, t1, t2)&quot;,
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
-RESULT []</pre></details>
-<details><summary>pickup-probe_edge · 0.0009 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) MATCH
+RESULT [
+  {
+    &quot;record&quot;: {
+      &quot;description&quot;: &quot;Magnetic field measurement from probe TC-5 used for real-time plasma control. Measures the local poloidal magnetic field to provide feedback for plasma position and shape control.&quot;,
+      &quot;id&quot;: &quot;jt-60sa:eddbreadTime(&#x27;E101173&#x27;, &#x27;MDAC&#x27;, &#x27;magPbTC5&#x27;, t1, t2)&quot;,
+      &quot;group_key&quot;: &quot;eddbreadTime(&#x27;E101173&#x27;, &#x27;MDAC&#x27;, &#x27;magPbTC5&#x27;, t1, t2)&quot;,
+      &quot;status&quot;: &quot;enriched&quot;
+    }
+  }
+]</pre></details>
+<details><summary>pickup-probe_edge · 0.0010 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) MATCH
 (s)-[r:MAPS_TO_IMAS]-&gt;(n:IMASNode {id: $target}) RETURN r {.source_property, .transform_expression,
 .source_units, .target_units, .cocos_label, .confidence, .evidence, .mapping_type, .error_type,
 .derived_from} AS record LIMIT 2
 PARAMS {
-  &quot;source&quot;: &quot;jt-60sa:magnetics:pickup_probe&quot;,
+  &quot;source&quot;: &quot;jt-60sa:eddbreadTime(&#x27;E101173&#x27;, &#x27;MDAC&#x27;, &#x27;magPbTC5&#x27;, t1, t2)&quot;,
   &quot;target&quot;: &quot;magnetics/b_field_pol_probe/field/data&quot;,
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
-RESULT []</pre></details>
-<details><summary>pickup-probe_target · 0.0008 s</summary><pre>MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit,
+RESULT [
+  {
+    &quot;record&quot;: {
+      &quot;source_units&quot;: &quot;T&quot;,
+      &quot;mapping_type&quot;: &quot;direct&quot;,
+      &quot;evidence&quot;: &quot;&quot;,
+      &quot;confidence&quot;: 0.92,
+      &quot;error_type&quot;: null,
+      &quot;transform_expression&quot;: &quot;value&quot;,
+      &quot;derived_from&quot;: null,
+      &quot;cocos_label&quot;: null,
+      &quot;target_units&quot;: &quot;T&quot;,
+      &quot;source_property&quot;: &quot;value&quot;
+    }
+  }
+]</pre></details>
+<details><summary>pickup-probe_target · 0.0006 s</summary><pre>MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit,
 .cocos_transformation_type} AS record LIMIT 1
 PARAMS {
   &quot;target&quot;: &quot;magnetics/b_field_pol_probe/field/data&quot;
@@ -857,14 +886,14 @@ RESULT [
     }
   }
 ]</pre></details>
-<details><summary>pf-coil-current_source · 0.0006 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) RETURN s
+<details><summary>pf-coil-current_source · 0.0039 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) RETURN s
 {.id, .group_key, .status, .description} AS record LIMIT 1
 PARAMS {
   &quot;source&quot;: &quot;jt-60sa:pf_active:coil_current&quot;,
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
 RESULT []</pre></details>
-<details><summary>pf-coil-current_edge · 0.0007 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) MATCH
+<details><summary>pf-coil-current_edge · 0.0008 s</summary><pre>MATCH (s:SignalSource {id: $source, facility_id: $facility}) USING INDEX s:SignalSource(id) MATCH
 (s)-[r:MAPS_TO_IMAS]-&gt;(n:IMASNode {id: $target}) RETURN r {.source_property, .transform_expression,
 .source_units, .target_units, .cocos_label, .confidence, .evidence, .mapping_type, .error_type,
 .derived_from} AS record LIMIT 2
@@ -874,7 +903,7 @@ PARAMS {
   &quot;facility&quot;: &quot;jt-60sa&quot;
 }
 RESULT []</pre></details>
-<details><summary>pf-coil-current_target · 0.0009 s</summary><pre>MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit,
+<details><summary>pf-coil-current_target · 0.0018 s</summary><pre>MATCH (n:IMASNode {id: $target}) USING INDEX n:IMASNode(id) RETURN n {.id, .data_type, .unit,
 .cocos_transformation_type} AS record LIMIT 1
 PARAMS {
   &quot;target&quot;: &quot;pf_active/coil/current/data&quot;
@@ -890,8 +919,8 @@ RESULT [
   }
 ]</pre></details>
 <h3>Slide-ready PNG set</h3><p>SVGs use a 14-inch canvas at 100 dpi. PNGs have twice the pixel dimensions and live outside the repository.</p><table><thead><tr><th>Figure</th><th>PNG path</th><th>Pixels</th><th>Bytes</th></tr></thead><tbody>
-<tr><td>pipeline</td><td><code>/work/projects/imas_gpu/jt60sa/presentation/pipeline.png</code></td><td>2800 × 2000</td><td>257,116</td></tr>
+<tr><td>pipeline</td><td><code>/work/projects/imas_gpu/jt60sa/presentation/pipeline.png</code></td><td>2800 × 2000</td><td>254,117</td></tr>
 <tr><td>mapping-lifecycle</td><td><code>/work/projects/imas_gpu/jt60sa/presentation/mapping-lifecycle.png</code></td><td>2800 × 1060</td><td>106,233</td></tr>
-<tr><td>pickup-probe</td><td><code>/work/projects/imas_gpu/jt60sa/presentation/pickup-probe.png</code></td><td>2800 × 1400</td><td>255,426</td></tr>
+<tr><td>pickup-probe</td><td><code>/work/projects/imas_gpu/jt60sa/presentation/pickup-probe.png</code></td><td>2800 × 2064</td><td>395,278</td></tr>
 <tr><td>pf-coil-current</td><td><code>/work/projects/imas_gpu/jt60sa/presentation/pf-coil-current.png</code></td><td>2800 × 1400</td><td>247,190</td></tr>
 </tbody></table><p>Related records: <a href="/imas-codex/generated-map-handoff.html">generated mapping hand-off contract</a>; <a href="/imas-ambix/jt60sa-tokamap-from-generated-maps.html">imas-ambix tokamap work</a>.</p></section></main></body></html>
