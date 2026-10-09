@@ -234,6 +234,11 @@ def map_run(
         setup_logging,
         use_rich_output,
     )
+    from imas_codex.settings import get_dd_version
+
+    # The pipeline maps against the configured DD when none is named, so the
+    # persisted mapping records that version rather than an empty string.
+    dd_version = dd_version or get_dd_version()
 
     use_rich = use_rich_output()
     console = setup_logging("map", facility, use_rich, verbose=verbose)

@@ -54,6 +54,7 @@ def mapping_engine(monkeypatch, mapping_graph):
 
     async def run(state, **kwargs):
         mapping_graph.status = "active" if state.activate else "generated"
+        mapping_graph.dd_version = state.dd_version
         state.ids_results["magnetics"] = {"bindings": 1, "escalations": 0}
 
     monkeypatch.setattr(workers, "run_mapping_engine", run)
@@ -66,6 +67,15 @@ def test_map_run_keeps_generated_status(mapping_engine):
     assert result.exit_code == 0, result.output
     assert mapping_engine.status == "generated"
     assert "--no-activate" not in CliRunner().invoke(map_cmd, ["run", "--help"]).output
+
+
+def test_map_run_records_configured_dd_version(mapping_engine, monkeypatch):
+    monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.1")
+
+    result = CliRunner().invoke(map_cmd, ["run", "jet", "-i", "magnetics"])
+
+    assert result.exit_code == 0, result.output
+    assert mapping_engine.dd_version == "4.1.1"
 
 
 def test_activate_refuses_generated_mapping(mapping_graph):
