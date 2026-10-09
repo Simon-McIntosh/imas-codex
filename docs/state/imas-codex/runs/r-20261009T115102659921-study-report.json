@@ -587,6 +587,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "2f5721d7d3b0489e41bfc7eb647e2c8be562a077",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 82118,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261009T115102659921-study-report",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 82118,
+        "path": "/tmp/reckon-crew-scratch/r-20261009T115102659921-study-report"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/e8e8b071-0bd3-4f32-a90b-3476d18716fe/study-report",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "full",
