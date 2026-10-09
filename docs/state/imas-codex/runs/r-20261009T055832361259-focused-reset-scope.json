@@ -1,0 +1,1497 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "1838c759fe0f88cb28f00e98dd4f35ca57d968d8",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6676760,
+      "input_tokens_cumulative": 6676760,
+      "output_tokens": 33113,
+      "output_tokens_cumulative": 33113,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 262,
+    "files": 3,
+    "removed": 3
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 64,
+        "name": "_named_sources",
+        "path": "tests/discovery/test_signals_focus.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "_named_sources",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 441,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 418,
+        "name": "test_composite_is_the_largest_of_five_nouls",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 1030,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 1763,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 392,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 292,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_unnamed_source_signal_keeps_its_status",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "run_function": {
+        "line": 157,
+        "name": "test_focused_reset_passes_focus_filter_into_reset",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 158
+    },
+    {
+      "existing_function": {
+        "line": 193,
+        "name": "test_reset_without_focus_leaves_no_focus_filter",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "run_function": {
+        "line": 157,
+        "name": "test_focused_reset_passes_focus_filter_into_reset",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 158
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_focused_reset_passes_focus_filter_into_reset",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "run_function": {
+        "line": 175,
+        "name": "test_unnamed_source_signal_keeps_its_status",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 176
+    },
+    {
+      "existing_function": {
+        "line": 193,
+        "name": "test_reset_without_focus_leaves_no_focus_filter",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "run_function": {
+        "line": 175,
+        "name": "test_unnamed_source_signal_keeps_its_status",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 176
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_focused_reset_passes_focus_filter_into_reset",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "run_function": {
+        "line": 193,
+        "name": "test_reset_without_focus_leaves_no_focus_filter",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 194
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_unnamed_source_signal_keeps_its_status",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "run_function": {
+        "line": 193,
+        "name": "test_reset_without_focus_leaves_no_focus_filter",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "window_line": 194
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "e3ac8d011fe4f996435f771081243d71771fed42"
+  ],
+  "completed_at": "2026-10-09T06:13:25.144Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-09T05:58:41Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_signals_focus_reset.py tests/discovery/test_signals_focus.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T055832361259-focused-reset-scope/manifest.md"
+  },
+  "impl_move": {
+    "at_complete": 0.4118,
+    "at_dispatch": 0.25,
+    "plan": "jt60sa-mapping-study-expansion",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-09T06:28:32.455782+00:00",
+    "horizon_seconds": 1800,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-09T05:58:32Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 26,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 8,
+    "mean_context": 133333,
+    "observed_at": "2026-10-09T05:58:06Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 26,
+      "aggregate_tokens_per_second": 331.776,
+      "detail": "",
+      "mean_tokens_per_second": 72.125,
+      "observed_at": "2026-10-09T05:58:06Z",
+      "runs": 4.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-09T06:13:25.144Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T055832361259-focused-reset-scope/manifest.md",
+  "member": "disposable-r-20261009T055832361259-focused-reset-scope",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/discovery/test_signals_focus_reset.py::test_focused_reset_passes_focus_filter_into_reset",
+      "tests/discovery/test_signals_focus_reset.py::test_unnamed_source_signal_keeps_its_status"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/discovery/test_signals_focus_reset.py::test_focused_reset_passes_focus_filter_into_reset",
+      "tests/discovery/test_signals_focus_reset.py::test_unnamed_source_signal_keeps_its_status"
+    ],
+    "declaration": "drop the focus filter from the reset branch; the unnamed-source test must then fail",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T055832361259-focused-reset-scope/negative_control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T055832361259-focused-reset-scope/negative_control.log",
+    "test_paths": [
+      "tests/discovery/test_signals_focus_reset.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "focused-reset-scope",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1412,
+          "cached_input_tokens": 334295,
+          "input_tokens": 335709,
+          "output_tokens": 1060,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 336769,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "e8e8b071-0bd3-4f32-a90b-3476d18716fe",
+      "session_id": "e8e8b071-0bd3-4f32-a90b-3476d18716fe"
+    },
+    "done_when": "tests/discovery/test_signals_focus_reset.py shows a focused reset passes a build_focus_predicate filter and the focus items into reset_to_status while an unnamed source's signal keeps its status, tests/discovery/test_signals_focus.py still passes, and a read-only live count of FacilitySignals the focused reset filter selects for --focus with the MDAC magPbTCNNN SignalSource id equals that source's member count, recorded in the evidence fragment without executing any reset",
+    "estimated_hours": null,
+    "goal": "make the signals --reset-to branch apply the --focus filter so a focused reset touches only the focused sources",
+    "id": "focused-reset-scope",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-09T05:58:32Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 26,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 8,
+      "mean_context": 133333,
+      "observed_at": "2026-10-09T05:58:06Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 26,
+        "aggregate_tokens_per_second": 331.776,
+        "detail": "",
+        "mean_tokens_per_second": 72.125,
+        "observed_at": "2026-10-09T05:58:06Z",
+        "runs": 4.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T055832361259-focused-reset-scope/manifest.md",
+    "negative_control": "drop the focus filter from the reset branch; the unnamed-source test must then fail",
+    "plan": "jt60sa-mapping-study-expansion",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/cli/discover/signals.py",
+      "tests/discovery/test_signals_focus_reset.py",
+      "docs/evidence/fragments/jt60sa-mapping-study-expansion/focused-reset-scope.html",
+      "docs/figures/jt60sa-mapping-study-expansion/focused-reset-scope"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 924944.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "focused-reset-scope",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-09T05:58:36.599390+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.91,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 533.995,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1003.231,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1497200.962763,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55112,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 1497200.962763,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55112,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 1497200.962763,
+        "budget_reason": null,
+        "burn_multiple": 0.14,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55112,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.9460000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-09-28T20:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 14.000000000000002,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 4,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 55112,
+          "headroom_pct": 76.1,
+          "peak_utilisation_p50_pct": 60.1,
+          "peak_utilisation_p90_pct": 76.3,
+          "peak_utilisation_runs": 435,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 104,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 12
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 1407.613763,
+        "budget_reason": null,
+        "burn_multiple": 2.413516283181408,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55112,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.969764933298611,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 3,
+          "passed": 53,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3190365879715609,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 70.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 1407.613763,
+        "budget_reason": null,
+        "burn_multiple": 2.413516283181408,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55112,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.969764933298611,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3190365879715609,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 70.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 1407.613763,
+        "budget_reason": null,
+        "burn_multiple": 2.413516283181408,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 55112,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.969764933298611,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3190365879715609,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 70.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0,
+      "claude:claude-sonnet-5-5": 0,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0,
+      "codex:gpt-6-sol": 0.04,
+      "hold": 0.04,
+      "local:deepseek-v4.1-flash": 0.92
+    },
+    "rendered_token_estimate": 1877,
+    "usage": {
+      "cost": 0.000223818,
+      "input_tokens": 5329,
+      "output_tokens": 150
+    }
+  },
+  "plan": "jt60sa-mapping-study-expansion",
+  "plan_impl_at_dispatch": 0.25,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "e3ac8d011fe4f996435f771081243d71771fed42",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5015,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261009T055832361259-focused-reset-scope",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5015,
+        "path": "/tmp/reckon-crew-scratch/r-20261009T055832361259-focused-reset-scope"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/e8e8b071-0bd3-4f32-a90b-3476d18716fe/focused-reset-scope",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "review_waiver": {
+    "reason": "lead asked to skip work reviews for speed; coordinator read the diff and ran the focus tests on the merged head"
+  },
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261009T055832361259-focused-reset-scope",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "e8e8b071-0bd3-4f32-a90b-3476d18716fe",
+  "session_harness": "claude",
+  "session_id": "f28fbbb1-c09b-4157-8533-d6118e2e5e61",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 6676760,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 874.051,
+    "generated_tokens": 33113,
+    "generation_seconds": 694.341,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 63.0,
+    "machine_seconds": 179.71,
+    "peak_input_tokens": 144907,
+    "tokens_per_second": 47.69,
+    "wall_tokens_per_second": 37.88
+  },
+  "time_budget": "30m",
+  "tool_steps": 57.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 884,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-09T06:13:28Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-09T05:58:46Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261009T055832361259-focused-reset-scope",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 5259,
+    "worker_pid": 3029401
+  },
+  "worker_seconds": 862,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

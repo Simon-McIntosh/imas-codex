@@ -1,0 +1,68 @@
+<!-- Error-signal matching reads the run's own data mappings.
+     match_error_signals_to_imas cross-references the in-memory bindings the
+     caller passes instead of persisted MAPS_TO_IMAS edges; the
+     include_direct_error_signals flag is removed. Gate and negative-control
+     logs: ~/.config/reckon/crew/runs/r-20261009T060714613522-error-matching-reads-run-mappings/logs/ -->
+<section id="error-matching-reads-run-mappings" data-reckon="evidence">
+  <h2 id="error-matching-reads-run-mappings-heading">Error-signal matching reads the run's own data mappings</h2>
+
+  <p id="error-matching-reads-run-mappings-intro">
+    <code>match_error_signals_to_imas</code> in <code>imas_codex/ids/mapping.py</code>
+    cross-referenced error signals against <em>persisted</em> direct
+    <code>MAPS_TO_IMAS</code> edges. The pipeline calls <code>derive_error_mappings</code>
+    from <code>imas_codex/ids/workers.py</code> before <code>persist_mapping_result</code>
+    runs, so on a first pass after <code>map clear</code> no data binding existed in the
+    graph and no error signal was ever mapped — the run's own <code>data_mappings</code>
+    argument was ignored. The matcher now builds its parent lookup from the in-memory
+    <code>data_mappings</code> the caller passes, deriving each binding's group key from its
+    <code>source_id</code>. The graph supplies only the <code>HAS_ERROR</code> children of the
+    matched target, a data-dictionary relationship. The <code>include_direct_error_signals</code>
+    flag is removed: error-signal matching is the only pass, so its name no longer gated a
+    stage that could be switched off.
+  </p>
+
+  <h3 id="error-matching-reads-run-mappings-measure-heading">Measure — the controls</h3>
+  <table id="error-matching-reads-run-mappings-measure-table">
+    <caption>Gate: <code>uv run --no-sync pytest -p no:cacheprovider tests/ids</code></caption>
+    <thead>
+      <tr><th>Test</th><th>Establishes</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr id="error-matching-reads-run-mappings-pos">
+        <td><code>test_match_error_signals_to_imas_basic</code></td>
+        <td>An in-memory direct binding plus a matching error signal yields a binding against a graph holding no persisted bindings (the matcher issues only the <code>HAS_ERROR</code> query)</td>
+        <td>pass</td>
+      </tr>
+      <tr id="error-matching-reads-run-mappings-pos-derive">
+        <td><code>test_derive_error_mappings_error_signal_yields_binding</code></td>
+        <td>The cross-reference works end to end when only the <code>HAS_ERROR</code> rows come from the graph</td>
+        <td>pass</td>
+      </tr>
+      <tr id="error-matching-reads-run-mappings-neg">
+        <td><code>test_derive_error_mappings_value_target_with_error_children_is_unmapped</code></td>
+        <td>A value target the graph gives <code>HAS_ERROR</code> children still yields no value-derived binding when no error signal stands behind it</td>
+        <td>pass</td>
+      </tr>
+      <tr id="error-matching-reads-run-mappings-total">
+        <td>Gate total</td>
+        <td><code>tests/ids</code></td>
+        <td>565 passed, 5 skipped, 4 deselected</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="error-matching-reads-run-mappings-negative">
+    The negative control makes the matcher read persisted edges only, ignoring the passed
+    bindings (declared mutation: "make the matcher read persisted edges only; the in-memory
+    test must then fail"). With the in-memory lookup replaced by a persisted-edge query,
+    <code>test_match_error_signals_to_imas_basic</code> fails and the run exits non-zero —
+    the check is not vacuous:
+  </p>
+  <pre id="error-matching-reads-run-mappings-negative-log"><code>FAILED tests/ids/test_error_derivation.py::test_match_error_signals_to_imas_basic
+1 failed, 1 warning in 7.95s
+EXIT=1</code></pre>
+  <p id="error-matching-reads-run-mappings-negative-path">
+    Logs: <code>~/.config/reckon/crew/runs/r-20261009T060714613522-error-matching-reads-run-mappings/logs/negctl.log</code>
+    and <code>logs/head_gate.log</code>.
+  </p>
+</section>

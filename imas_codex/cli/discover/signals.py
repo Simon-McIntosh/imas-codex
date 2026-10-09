@@ -46,7 +46,7 @@ class SignalsStageOptions:
     scanners: str | None = None
     categories: str | None = None
     reference_shot: int | None = None
-    enrich_workers: int = 2
+    enrich_workers: int = 8
     check_workers: int = 4
     reset_to: str | None = None
 
@@ -56,9 +56,12 @@ def _validate_focus(facility: str, focus_items: list[str]) -> None:
 
     A focus item may name a FacilitySignal by id or accessor, a SignalSource
     by id, or a source array by a ``data_source_path`` segment (such as
-    ``magPbTC10``). Anything that resolves to none of those is a typo the
-    claim would silently honour by selecting nothing, so it is refused up
-    front with the offending identities named.
+    ``magPbTC10``). A segment reaches the catalogue only through a member of
+    a ``SignalSource`` — the same path ``build_focus_predicate`` resolves it —
+    so a source-less signal carrying the segment names nothing and is
+    refused. Anything that resolves to none of those is a typo the claim
+    would silently honour by selecting nothing, so it is refused up front
+    with the offending identities named.
     """
     from imas_codex.graph import GraphClient
 
@@ -66,17 +69,23 @@ def _validate_focus(facility: str, focus_items: list[str]) -> None:
         rows = gc.query(
             "MATCH (n) WHERE (n:FacilitySignal OR n:SignalSource) "
             "AND n.facility_id = $facility "
-            "AND (n.id IN $ids OR n.accessor IN $ids "
-            "OR ANY(segment IN split(coalesce(n.data_source_path, ''), '/') "
-            "WHERE segment IN $ids)) "
-            "RETURN n.id AS id, n.accessor AS accessor, "
-            "n.data_source_path AS data_source_path",
+            "AND (n.id IN $ids OR n.accessor IN $ids) "
+            "RETURN n.id AS id, n.accessor AS accessor",
+            facility=facility,
+            ids=focus_items,
+        )
+        segment_rows = gc.query(
+            "MATCH (member:FacilitySignal)-[:MEMBER_OF]->(:SignalSource) "
+            "WHERE member.facility_id = $facility "
+            "AND ANY(segment IN split(coalesce(member.data_source_path, ''), '/') "
+            "WHERE segment IN $ids) "
+            "RETURN member.data_source_path AS data_source_path",
             facility=facility,
             ids=focus_items,
         )
     matched = {row["id"] for row in rows}
     matched.update(row["accessor"] for row in rows if row["accessor"])
-    for row in rows:
+    for row in segment_rows:
         if row["data_source_path"]:
             matched.update(
                 segment
@@ -183,11 +192,14 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
     )
 
     # Handle --reset-to: reset signals back to the target state. The reset
-    # takes the same scanner and category scope as the claims that follow it,
-    # so a scoped run never resets rows it will not then process.
+    # takes the same scanner, category and focus scope as the claims that
+    # follow it, so a scoped run never resets rows it will not then process.
     if options.reset_to:
         from imas_codex.discovery.base.reset import SIGNAL_RESET_SPECS, reset_to_status
-        from imas_codex.discovery.signals.parallel import build_category_predicate
+        from imas_codex.discovery.signals.parallel import (
+            build_category_predicate,
+            build_focus_predicate,
+        )
 
         spec = SIGNAL_RESET_SPECS[options.reset_to]
         extra_filter = ""
@@ -198,6 +210,9 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
         if category_list:
             extra_filter += f" AND {build_category_predicate('n')}"
             extra_params["categories"] = category_list
+        if focus_items:
+            extra_filter += f" {build_focus_predicate('n', focus_items)}"
+            extra_params["focus_items"] = focus_items
 
         reset_count = reset_to_status(
             spec, facility, extra_filter=extra_filter, extra_params=extra_params
@@ -207,6 +222,8 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
             scope_parts.append(f"scanner: {options.scanners}")
         if category_list:
             scope_parts.append(f"categories: {', '.join(category_list)}")
+        if focus_items:
+            scope_parts.append(f"focus: {', '.join(focus_items)}")
         scope = f" ({'; '.join(scope_parts)})" if scope_parts else ""
         log_print(
             f"[yellow]Reset {reset_count} signals to '{options.reset_to}'{scope}[/yellow]"

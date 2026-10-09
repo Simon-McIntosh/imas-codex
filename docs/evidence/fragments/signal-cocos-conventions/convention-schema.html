@@ -1,0 +1,12 @@
+<section id="convention-schema" data-reckon="fragment">
+  <h2 id="convention-schema-title">Convention schema verification</h2>
+  <table id="convention-schema-gates">
+    <thead><tr><th>Gate</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Generated models</td><td>build-models --force succeeded</td></tr>
+      <tr><td>Convention model round trips</td><td>4 passed</td></tr>
+      <tr><td>Invalid class negative control</td><td>1 failed with EXIT=1 after outside_enum was temporarily allowed</td></tr>
+      <tr><td>Live graph schema compliance</td><td>5 passed, 4 failed on unrelated graph/schema drift</td></tr>
+    </tbody>
+  </table>
+</section>

@@ -1,0 +1,95 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. baseline_suite revision 6c7be873 (schema-compliance-base.log): 4 failed, 5 passed, EXIT=1; after_suite revision 5aa665fb (schema-compliance-head-absolute.log): 4 failed, 5 passed, EXIT=1. The two failure sets are identical (test_all_labels_in_schema, test_all_relationship_types_in_schema, test_no_undeclared_properties, test_required_fields_present), so head - base is empty: added_failure_count=0 and added_failure_ids=[].",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/c7766bfc-314a-4d4b-b9b9-e88decdf5d5b/convention-schema uv run --no-sync pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/c7766bfc-314a-4d4b-b9b9-e88decdf5d5b/convention-schema/tests/graph/test_schema_compliance.py -m graph -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 4,
+    "failure_ids": [
+      "tests/graph/test_schema_compliance.py::TestLabelsAndRelationships::test_all_labels_in_schema",
+      "tests/graph/test_schema_compliance.py::TestLabelsAndRelationships::test_all_relationship_types_in_schema",
+      "tests/graph/test_schema_compliance.py::TestLabelsAndRelationships::test_no_undeclared_properties",
+      "tests/graph/test_schema_compliance.py::TestRequiredFields::test_required_fields_present"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T015838385209-convention-schema/schema-compliance-head-absolute.log",
+    "revision": "5aa665fb36ef1d673eaf9020fffcb752789c1e78"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/convention-schema-base-CxU6KozD uv run --no-sync pytest /tmp/convention-schema-base-CxU6KozD/tests/graph/test_schema_compliance.py -m graph -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 4,
+    "failure_ids": [
+      "tests/graph/test_schema_compliance.py::TestLabelsAndRelationships::test_all_labels_in_schema",
+      "tests/graph/test_schema_compliance.py::TestLabelsAndRelationships::test_all_relationship_types_in_schema",
+      "tests/graph/test_schema_compliance.py::TestLabelsAndRelationships::test_no_undeclared_properties",
+      "tests/graph/test_schema_compliance.py::TestRequiredFields::test_required_fields_present"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T015838385209-convention-schema/schema-compliance-base.log",
+    "revision": "6c7be87309ba5736c5d4263f6d9d37c293eb79d4"
+  },
+  "blockers": "none",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-09T06:43:51.016Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-09T06:33:40Z",
+  "evidence_inputs": "Range 6c7be87309ba5736c5d4263f6d9d37c293eb79d4..5aa665fb36ef1d673eaf9020fffcb752789c1e78 (single commit 5aa665fb). Focused gate (focused-committed.log): 4 passed, 1 warning, EXIT=0 at revision 5aa665fb. Negative control (negative-control.log): temporarily declaring outside_enum in the COCOSClass enum makes test_cocos_class_rejects_undeclared_value fail with EXIT=1, so the enum guard fires. Paired live-graph compliance arms complete to summary lines with four identical failure ids and EXIT=1 on both base and head. Build-models --force regenerated imas_codex/graph/models.py, which now defines COCOSClass, ConventionObservation and ConventionStatus, the OBSERVED_FOR edge and channel_sign.",
+  "findings": [
+    {
+      "file": "tests/graph/test_signal_convention_schema.py",
+      "line": "61",
+      "severity": "follow-on",
+      "text": "follow-on: the assertions `assert \"value\" not in data` and `assert \"values\" not in data` (lines 61-62) are plan s3's done-when clause that no signal value property was touched, but they cannot fail against that regression: FacilitySignal (imas_codex/schemas/facility.yaml, class FacilitySignal) declares neither a value nor a values attribute, and data is built with model_dump(mode=\"json\", exclude_none=True) which drops unset optionals, so a newly declared value property would be dropped before the assertion and the test would stay green."
+    },
+    {
+      "file": "imas_codex/schemas/facility.yaml",
+      "line": "242",
+      "severity": "follow-on",
+      "text": "follow-on: the new COCOSClass enum re-declares the seven non-trivial COCOS labels (psi_like, dodpsi_like, ip_like, b0_like, q_like, tor_angle_like, pol_angle_like) that imas_codex/schemas/imas_dd.yaml:100 COCOSLabelTransformation already owns, as an independent parallel list, so the two can drift if either label's spelling or meaning changes; plan s3 fixes this facility-side enum as the design, so it is recorded rather than repaired here."
+    }
+  ],
+  "follow_ons": "Two node-local follow-ons, both non-blocking and neither requiring repair in this review's write scope: (1) strengthen tests/graph/test_signal_convention_schema.py:61-62 so the 'no signal value property touched' claim is asserted by a mechanism that could fail (assert on the SignalSource/FacilitySignal field set directly instead of on a dump that drops unset optional fields); (2) note the deliberate duplication between COCOSClass (imas_codex/schemas/facility.yaml:242) and COCOSLabelTransformation (imas_codex/schemas/imas_dd.yaml:100) so label spelling stays in step. Separately, the four live-graph compliance failures are pre-existing and outside this node's declared scope (StandardName deletion labels/properties, WikiPage.embed_failed_at, DDResolution/FacilityPath/Unit nulls), reported by the node under its own follow_ons, and belong to the schema/data owners it named.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read commit 5aa665fb against base 6c7be873: three files, +238 insertions and 0 deletions, all declarations plus one focused test file and a 12-line evidence fragment, with no change to any signal value property.",
+    "done_when": "The done-when names build-models --force, tests/graph/test_signal_convention_schema.py and tests/graph/test_schema_compliance.py -m graph; the regenerated models define COCOSClass and ConventionObservation, focused-committed.log shows 4 passed EXIT=0, and both compliance arms complete 4 failed / 5 passed EXIT=1 with identical ids, so the third clause 'passes against the live graph' is unmet only by four pre-existing failures the node reported under follow_ons.",
+    "goal": "The goal is convention properties on SignalSource plus a ConventionObservation node in the facility schema; commit 5aa665fb adds the SignalSource convention fields (facility.yaml:2157), the ConventionObservation class with its OBSERVED_FOR edge (facility.yaml:2285, edge annotation at :2302), the COCOSClass and ConventionStatus enums (facility.yaml:242 and :256) and FacilitySignal.channel_sign (:2710), so every element plan s3 names landed.",
+    "manifest": "The reviewed manifest reads status complete, names commit 5aa665fb, the three gate commands and the paired compliance arms, and carries populated baseline_suite/after_suite JSON with measurement_module and measurement_cwd for the scratch base arm.",
+    "write_paths": "The manifest declares facility.yaml, the test file, the evidence fragment and the figures directory; the diff touches the first three and nothing else, so the change stays inside the granted fence."
+  },
+  "justifications": {
+    "durability": "The enum refusal at tests/graph/test_signal_convention_schema.py:91 reddens under the recorded negative control, the OBSERVED_FOR edge assertion at :82 fails if the relationship annotation is dropped, and the field round trip and observation-equality assertions are real, but the value/values absence assertions at :61-62 are vacuous.",
+    "evidence": "Both compliance arms of tests/graph/test_schema_compliance.py complete to their summary lines with identical four failure ids (schema-compliance-base.log revision 6c7be873, schema-compliance-head-absolute.log revision 5aa665fb, 4 failed/5 passed EXIT=1 each), so added_failure_count is 0 and the focused gate is green, but the literal done-when clause that the live-graph run passes is unmet by four pre-existing failures.",
+    "fit": "COCOSClass (facility.yaml:242) and ConventionObservation (facility.yaml:2285) follow the surrounding LinkML idiom of relationship_type annotations used across the file, and every name is mechanism-named with no plan, sprint or ticket identifier.",
+    "goal_fidelity": "Every element plan s3 names is present, in imas_codex/schemas/facility.yaml:2157 (SignalSource convention fields), :2285 (ConventionObservation with OBSERVED_FOR at :2302), :242 and :256 (the COCOSClass and ConventionStatus enums) and :2710 (channel_sign), with no named element missing.",
+    "reuse": "The seven non-trivial labels of COCOSClass (facility.yaml:242) re-declare as a parallel list the COCOSLabelTransformation values owned by imas_codex/schemas/imas_dd.yaml:100, rather than extending that owner, though the facility enum adds none and compound and omits the structural labels, and plan s3 fixes the design.",
+    "scope_discipline": "The diff touches only imas_codex/schemas/facility.yaml, tests/graph/test_signal_convention_schema.py and the evidence fragment, all inside the declared write paths, and adds nothing the goal does not imply."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 6c7be87309ba5736c5d4263f6d9d37c293eb79d4\nreviewed_head_sha: 5aa665fb36ef1d673eaf9020fffcb752789c1e78\nVERDICT goal: The goal is convention properties on SignalSource plus a ConventionObservation node in the facility schema; commit 5aa665fb adds the SignalSource convention fields (facility.yaml:2157), the ConventionObservation class with its OBSERVED_FOR edge (facility.yaml:2285, edge annotation at :2302), the COCOSClass and ConventionStatus enums (facility.yaml:242 and :256) and FacilitySignal.channel_sign (:2710), so every element plan s3 names landed.\nVERDICT done_when: The done-when names build-models --force, tests/graph/test_signal_convention_schema.py and tests/graph/test_schema_compliance.py -m graph; the regenerated models define COCOSClass and ConventionObservation, focused-committed.log shows 4 passed EXIT=0, and both compliance arms complete 4 failed / 5 passed EXIT=1 with identical ids, so the third clause 'passes against the live graph' is unmet only by four pre-existing failures the node reported under follow_ons.\nVERDICT write_paths: The manifest declares facility.yaml, the test file, the evidence fragment and the figures directory; the diff touches the first three and nothing else, so the change stays inside the granted fence.\nVERDICT manifest: The reviewed manifest reads status complete, names commit 5aa665fb, the three gate commands and the paired compliance arms, and carries populated baseline_suite/after_suite JSON with measurement_module and measurement_cwd for the scratch base arm.\nVERDICT diff: Read commit 5aa665fb against base 6c7be873: three files, +238 insertions and 0 deletions, all declarations plus one focused test file and a 12-line evidence fragment, with no change to any signal value property.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: Every element plan s3 names is present, in imas_codex/schemas/facility.yaml:2157 (SignalSource convention fields), :2285 (ConventionObservation with OBSERVED_FOR at :2302), :242 and :256 (the COCOSClass and ConventionStatus enums) and :2710 (channel_sign), with no named element missing.\nSCORE evidence: 17\nJUSTIFICATION evidence: Both compliance arms of tests/graph/test_schema_compliance.py complete to their summary lines with identical four failure ids (schema-compliance-base.log revision 6c7be873, schema-compliance-head-absolute.log revision 5aa665fb, 4 failed/5 passed EXIT=1 each), so added_failure_count is 0 and the focused gate is green, but the literal done-when clause that the live-graph run passes is unmet by four pre-existing failures.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: The diff touches only imas_codex/schemas/facility.yaml, tests/graph/test_signal_convention_schema.py and the evidence fragment, all inside the declared write paths, and adds nothing the goal does not imply.\nSCORE durability: 17\nJUSTIFICATION durability: The enum refusal at tests/graph/test_signal_convention_schema.py:91 reddens under the recorded negative control, the OBSERVED_FOR edge assertion at :82 fails if the relationship annotation is dropped, and the field round trip and observation-equality assertions are real, but the value/values absence assertions at :61-62 are vacuous.\nSCORE fit: 19\nJUSTIFICATION fit: COCOSClass (facility.yaml:242) and ConventionObservation (facility.yaml:2285) follow the surrounding LinkML idiom of relationship_type annotations used across the file, and every name is mechanism-named with no plan, sprint or ticket identifier.\nSCORE reuse: 15\nJUSTIFICATION reuse: The seven non-trivial labels of COCOSClass (facility.yaml:242) re-declare as a parallel list the COCOSLabelTransformation values owned by imas_codex/schemas/imas_dd.yaml:100, rather than extending that owner, though the facility enum adds none and compound and omits the structural labels, and plan s3 fixes the design.\nFINDING tests/graph/test_signal_convention_schema.py:61 follow-on: the assertions `assert \"value\" not in data` and `assert \"values\" not in data` (lines 61-62) are plan s3's done-when clause that no signal value property was touched, but they cannot fail against that regression: FacilitySignal (imas_codex/schemas/facility.yaml, class FacilitySignal) declares neither a value nor a values attribute, and data is built with model_dump(mode=\"json\", exclude_none=True) which drops unset optionals, so a newly declared value property would be dropped before the assertion and the test would stay green.\nFINDING imas_codex/schemas/facility.yaml:242 follow-on: the new COCOSClass enum re-declares the seven non-trivial COCOS labels (psi_like, dodpsi_like, ip_like, b0_like, q_like, tor_angle_like, pol_angle_like) that imas_codex/schemas/imas_dd.yaml:100 COCOSLabelTransformation already owns, as an independent parallel list, so the two can drift if either label's spelling or meaning changes; plan s3 fixes this facility-side enum as the design, so it is recorded rather than repaired here.\n",
+  "review_run_id": "r-20261009T063330511441-review-of-convention-schema",
+  "review_scope": "incremental node: single commit 5aa665fb36ef1d673eaf9020fffcb752789c1e78 against base 6c7be87309ba5736c5d4263f6d9d37c293eb79d4; files imas_codex/schemas/facility.yaml, tests/graph/test_signal_convention_schema.py, docs/evidence/fragments/signal-cocos-conventions/convention-schema.html",
+  "reviewed_base_sha": "6c7be87309ba5736c5d4263f6d9d37c293eb79d4",
+  "reviewed_head_sha": "5aa665fb36ef1d673eaf9020fffcb752789c1e78",
+  "reviewed_run_id": "r-20261009T015838385209-convention-schema",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T06:41:12+00:00",
+  "total": 106
+}

@@ -1,0 +1,48 @@
+<section id="group-member-identity-record">
+  <h3>The TC probe group re-individualizes after a re-propagation</h3>
+  <p id="group-member-identity-cause">
+    <code>propagate_source_enrichment</code> writes a representative signal's
+    description onto every follower in its <code>SignalSource</code>. It left the
+    source's <code>members_described</code> flag set, and
+    <code>individualize_source_descriptions</code> selects only sources whose flag
+    is unset — so a source a later run re-enriched its representative for kept the
+    representative's copy on every member, and nothing replaced it. A census of
+    the live graph found twenty JT-60SA sources marked
+    <code>members_described</code> whose members shared exactly one description,
+    1,220 of them written by <code>signal_source_propagation</code>. The fix
+    clears <code>members_described</code> as the copy is written, re-arming the
+    individualization pass.
+  </p>
+  <p id="group-member-identity-live">
+    <code>discover jt-60sa --only signals --flush --focus magPbTC10 -t 6</code>
+    ran on node <code>98dci4-clu-2002</code> (job 1281970) at commit
+    <code>dd46f9c4c</code>, on the local <code>discovery-describe</code> seat at
+    USD 0.00. It enriched 28 signals, propagated from
+    <code>jt-60sa:general/mdac_magpbtc10</code> to 13 followers, and individualized
+    14 members of the <code>MDAC magPbTCNNN</code> source
+    (<code>jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)</code>). The
+    fourteen members then carried fourteen distinct descriptions, each naming its
+    own probe number.
+  </p>
+  <table id="group-member-identity-members">
+    <caption>The fourteen <code>MDAC magPbTCNNN</code> members after the run, each
+    <code>enrichment_source = individualized</code></caption>
+    <thead><tr><th>probe</th><th>description</th></tr></thead>
+    <tbody>
+      <tr><td>TC10</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC10 (channel 10 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC11</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC11 (channel 11 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC12</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC12 (channel 12 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC13</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC13 (channel 13 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC14</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC14 (channel 14 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC15</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC15 (channel 15 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC16</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC16 (channel 16 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC17</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC17 (channel 17 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC18</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC18 (channel 18 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC19</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC19 (channel 19 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC20</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC20 (channel 20 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC21</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC21 (channel 21 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC22</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC22 (channel 22 of the magPbTC array) on JT-60SA.</td></tr>
+      <tr><td>TC23</td><td>Time trace of the magnetic field measured by toroidal/poloidal magnetic probe TC23 (channel 23 of the magPbTC array) on JT-60SA.</td></tr>
+    </tbody>
+  </table>
+</section>

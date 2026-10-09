@@ -15,13 +15,14 @@ from __future__ import annotations
 import json
 import logging
 import re
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.ids.graph_ops import write_mapping_binding
+from imas_codex.ids.graph_ops import CandidateWriteError, write_mapping_binding
 
 logger = logging.getLogger(__name__)
 
@@ -581,6 +582,57 @@ class MetadataPopulationResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+@dataclass
+class BindingPersistFailure:
+    """One binding the graph refused to persist, with the reason it gave."""
+
+    source_id: str
+    target_id: str
+    reason: str
+
+
+def write_mapping_bindings(
+    bindings: list[ValidatedSignalMapping],
+    gc: GraphClient,
+) -> tuple[int, list[BindingPersistFailure]]:
+    """Persist each binding, recording the ones that fail instead of aborting.
+
+    A binding whose source or target node is absent fails alone: the writer's
+    reason is captured and its siblings are still written, so one bad binding
+    cannot sink the IDS it belongs to. Returns the number written and the
+    failures.
+
+    Args:
+        bindings: Bindings to persist.
+        gc: Graph client instance.
+
+    Returns:
+        ``(written, failures)`` — the count of edges written and one
+        :class:`BindingPersistFailure` per binding the graph refused.
+    """
+    written = 0
+    failures: list[BindingPersistFailure] = []
+    for binding in bindings:
+        try:
+            write_mapping_binding(binding, gc)
+            written += 1
+        except CandidateWriteError as exc:
+            failures.append(
+                BindingPersistFailure(
+                    source_id=binding.source_id,
+                    target_id=binding.target_id,
+                    reason=str(exc),
+                )
+            )
+            logger.error(
+                "Binding refused for %s → %s: %s",
+                binding.source_id,
+                binding.target_id,
+                exc,
+            )
+    return written, failures
+
+
 def persist_mapping_result(
     result: ValidatedMappingResult,
     *,
@@ -588,11 +640,15 @@ def persist_mapping_result(
     gc: GraphClient | None = None,
     provider: str = "imas-codex",
     status: str = "generated",
+    partial: bool = False,
+    unmapped_sources: list[str] | None = None,
+    stop_reason: str | None = None,
     extraction_script: str | None = None,
     assembly_script: str | None = None,
     validated_shot: int | None = None,
     validated_at: str | None = None,
     validation_strategy: str | None = None,
+    binding_failures: list[BindingPersistFailure] | None = None,
 ) -> str:
     """Write a validated mapping result to the graph.
 
@@ -609,11 +665,18 @@ def persist_mapping_result(
         gc: GraphClient instance (created if None).
         provider: Provider identifier.
         status: Initial status for the mapping node.
+        partial: Whether the map run stopped with selected sources remaining.
+        unmapped_sources: Selected source IDs left for a later run.
+        stop_reason: Deadline or cost limit that stopped a partial run.
         extraction_script: Generated extraction script code.
         assembly_script: Generated assembly script code.
         validated_shot: Shot used for E2E validation.
         validated_at: ISO timestamp of E2E validation.
         validation_strategy: Strategy used ("client" or "remote").
+        binding_failures: When given, a binding the graph refuses is appended
+            here and its siblings still persist. When ``None`` the first
+            refused binding raises, so a caller outside a run still fails
+            loudly on a binding the graph did not write.
 
     Returns:
         The IMASMapping node id.
@@ -632,6 +695,9 @@ def persist_mapping_result(
             m.dd_version = $dd_version,
             m.provider = $provider,
             m.status = $status,
+            m.partial = $partial,
+            m.unmapped_sources = $unmapped_sources,
+            m.stop_reason = $stop_reason,
             m.extraction_script = $extraction_script,
             m.assembly_script = $assembly_script,
             m.validated_shot = $validated_shot,
@@ -647,6 +713,9 @@ def persist_mapping_result(
         dd_version=result.dd_version,
         provider=provider,
         status=status,
+        partial=partial,
+        unmapped_sources=unmapped_sources or [],
+        stop_reason=stop_reason,
         extraction_script=extraction_script,
         assembly_script=assembly_script,
         validated_shot=validated_shot,
@@ -724,9 +793,13 @@ def persist_mapping_result(
             sg_id=sg_id,
         )
 
-    # 4. Create MAPS_TO_IMAS relationships
-    for fm in result.bindings:
-        write_mapping_binding(fm, gc)
+    # 4. Create MAPS_TO_IMAS relationships. A refused binding is recorded with
+    # its reason so its siblings and the next IDS still persist.
+    _written, failures = write_mapping_bindings(result.bindings, gc)
+    if binding_failures is not None:
+        binding_failures.extend(failures)
+    elif failures:
+        raise CandidateWriteError(failures[0].reason)
 
     # 5. Persist escalations as MappingEvidence
     for esc in result.escalations:
@@ -765,9 +838,10 @@ def persist_mapping_result(
         )
 
     logger.info(
-        "Persisted mapping %s with %d bindings, %d unmapped",
+        "Persisted mapping %s with %d bindings written, %d refused, %d unmapped",
         mapping_id,
-        len(result.bindings),
+        _written,
+        len(failures),
         len(result.unmapped),
     )
     return mapping_id

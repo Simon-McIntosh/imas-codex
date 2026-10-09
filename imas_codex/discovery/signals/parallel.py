@@ -2024,7 +2024,12 @@ def propagate_source_enrichment(
         )
         follower_count = count_result[0]["cnt"] if count_result else 0
 
-        # Update the SignalSource itself: status → enriched, copy description/keywords
+        # Update the SignalSource itself: status → enriched, copy description/keywords.
+        # The propagation below overwrites every follower's description with this
+        # representative's, so the source's members are no longer individually
+        # described. Clearing ``members_described`` re-arms the post-enrichment
+        # individualization pass, which would otherwise skip a source it has
+        # already individualized and leave the followers holding the copy.
         gc.query(
             """
             MATCH (rep:FacilitySignal {id: $rep_id})
@@ -2033,7 +2038,8 @@ def propagate_source_enrichment(
                 sg.description = $description,
                 sg.keywords = $keywords,
                 sg.physics_domain = $physics_domain,
-                sg.claimed_at = null
+                sg.claimed_at = null,
+                sg.members_described = false
             """,
             rep_id=representative_id,
             description=enrichment.get("description", ""),
@@ -5420,7 +5426,7 @@ async def run_parallel_data_discovery(
     focus: str | None = None,
     focus_items: list[str] | None = None,
     categories: list[str] | None = None,
-    num_enrich_workers: int = 2,
+    num_enrich_workers: int = 8,
     num_check_workers: int = 1,
     discover_only: bool = False,
     enrich_only: bool = False,

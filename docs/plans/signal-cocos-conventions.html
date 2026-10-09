@@ -24,7 +24,7 @@
   <title>Signal COCOS Conventions Before the Map | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="16">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -483,6 +483,15 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261009T012122506469-review-of-convention-reference-labels" data-who="reckon-build" data-when="2026-10-09T01:38:41.799Z">
     <div class="r-comment-body"><p>review-of-convention-reference-labels — stored a parsed six-dimension review of run r-20261009T005809394588-convention-reference-labels at head 1f2fe60d: total 101, verdict SOUND WITH FINDINGS, four follow-on findings (unguarded fixture, receipt cites an uncommitted log, no figure, empty suite arms in the reviewed manifest).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261009T063330511441-review-of-convention-schema" data-who="reckon-build" data-when="2026-10-09T06:43:51.016Z">
+    <div class="r-comment-body"><p>Independently reviewed commit 5aa665fb36ef1d673eaf9020fffcb752789c1e78 against base 6c7be87309ba5736c5d4263f6d9d37c293eb79d4 and stored a parsed record scoring all six dimensions (total 106) with added_failure_count=0 and two follow-on findings; no plan edit, the coordinator lands it as a comment on imas-codex signal-cocos-conventions §3.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261009T015838385209-convention-schema" data-who="reckon-build" data-when="2026-10-09T02:25:40Z">
+    <div class="r-comment-body"><p>Declared source convention fields, member channel sign and ConventionObservation edge; generated models built, focused gate 4 passed, and live graph compliance added_failure_count=0 against base (four identical failure ids).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261009-s3-merged-by-90" data-who="reckon-build" data-when="2026-10-09T06:50:00Z">
+    <div class="r-comment-body"><p>Run <code>r-20261009T015838385209-convention-schema</code> was promoted and merged to main at <code>9431f74c5</code> by imas-codex-90, at the lead's request while this plan's coordinator session was offline. Its claim on <code>facility.yaml</code> was blocking other work.</p><p>The independent review scored it 106/120 with no added failures. At the merged head, <code>tests/graph</code>, <code>tests/core</code> and <code>tests/discovery</code> showed main's single pre-existing failure and nothing more, and the main checkout's models were rebuilt.</p><p>The section's landing beat (collapse, evidence and <code>impl</code>) is left to this plan's coordinator, along with the review's two follow-ons:</p><ul><li><code>tests/graph/test_signal_convention_schema.py:61-62</code> asserts that <code>value</code> and <code>values</code> are absent from a dump that never carries them, so the assertion cannot fail;</li><li>the new <code>COCOSClass</code> enum re-declares the seven COCOS labels that <code>imas_codex/schemas/imas_dd.yaml</code> <code>COCOSLabelTransformation</code> already owns.</li></ul></div>
 </div>
 </section>
 </main>

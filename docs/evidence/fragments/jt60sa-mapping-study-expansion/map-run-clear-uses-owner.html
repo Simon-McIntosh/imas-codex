@@ -1,0 +1,69 @@
+<section>
+  <h2 id="map-run-clear-uses-owner">The engine clear path deletes bindings through the map-clear owner</h2>
+  <p id="map-run-clear-uses-owner-question">
+    <code>imas map run --clear</code> reset source status but left the previous
+    <code>MAPS_TO_IMAS</code> edges in place, so a re-run kept stale bindings
+    until a separate <code>map clear</code> ran. The engine clear branch in
+    <code>imas_codex/ids/workers.py</code> now routes its binding deletion
+    through <code>clear_mapping_bindings</code>, the single owner
+    <code>map clear</code> also uses.
+  </p>
+
+  <h3 id="map-run-clear-uses-owner-change">Change</h3>
+  <p id="map-run-clear-uses-owner-change-body">
+    Added <code>clear_mapping_bindings_for_ids(facility, ids_names)</code>, which
+    opens one <code>GraphClient</code> and applies
+    <code>clear_mapping_bindings</code> per targeted IDS, and called it from the
+    <code>state.clear</code> branch of <code>run_mapping_engine</code> before the
+    existing <code>reset_mapping_state</code>. New test file
+    <code>tests/ids/test_map_run_clear.py</code>.
+  </p>
+
+  <h3 id="map-run-clear-uses-owner-tests">Unit gate</h3>
+  <table id="map-run-clear-uses-owner-test-counts">
+    <caption>Gate commands and results in the node worktree at <code>494554722</code></caption>
+    <thead><tr><th>command</th><th>result</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>pytest tests/ids/test_map_run_clear.py</code></td>
+        <td>5 passed</td>
+      </tr>
+      <tr>
+        <td><code>pytest tests/ids/test_map_run_clear.py tests/ids/test_mapping_edge_ownership.py</code></td>
+        <td>14 passed</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="map-run-clear-uses-owner-negative-control">
+    Negative control (declared mutation: restore the engine's own partial
+    delete). Replacing the <code>clear_mapping_bindings_for_ids</code> call in
+    the clear branch with neither call and re-running makes
+    <code>test_engine_clear_path_calls_clear_mapping_bindings</code> and
+    <code>test_engine_clear_path_calls_owner_for_each_ids</code> fail
+    (<code>2 failed, 3 passed</code>, <code>EXIT=1</code>); the head arm passes
+    all five. So the owner-call test fires on the guarded thing.
+  </p>
+
+  <h3 id="map-run-clear-uses-owner-live">Live run — jt-60sa magnetics
+    <code>map run --clear</code></h3>
+  <table id="map-run-clear-uses-owner-binding-counts">
+    <caption><code>MAPS_TO_IMAS</code> edges for the jt-60sa/magnetics mapping,
+      queried from the IMASMapping's <code>USES_SIGNAL_SOURCE</code> sources,
+      around a live run in place on the fleet node (job <code>1281970</code>)</caption>
+    <thead><tr><th>point</th><th>bindings</th></tr></thead>
+    <tbody>
+      <tr><td>before the run (all predate it)</td><td>8</td></tr>
+      <tr><td>after the run</td><td>0</td></tr>
+      <tr><td>before-set edges surviving the run</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="map-run-clear-uses-owner-live-body">
+    The run <code>imas-codex imas map run jt-60sa -i magnetics --clear --time 2
+    -c 0.3</code> emitted the introduced receipt
+    <code>Cleared 8 previous mapping bindings</code> (the <code>8</code> equals
+    the before count) and exited 0. The absence of surviving edges is a real
+    read, not an empty result: the same query returned the 8 bindings before the
+    run. The time limit cancelled validation before new bindings were persisted,
+    so the after count is 0 rather than a re-mapped set.
+  </p>
+</section>

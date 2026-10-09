@@ -1,0 +1,45 @@
+<section>
+  <h2 id="focused-reset-scope-a-focused-reset-touches-only-the-focused-sources">A focused reset touches only the focused sources</h2>
+  <p id="focused-reset-scope-change">
+    <strong>What changed.</strong> The <code>--reset-to</code> branch in
+    <code>imas_codex/cli/discover/signals.py</code> scoped its reset by scanner
+    and category but ignored <code>--focus</code>, so
+    <code>discover jt-60sa --only signals --focus X --reset-to discovered</code>
+    reset every eligible JT-60SA signal before enriching only <code>X</code>.
+    The branch now renders the same predicate the §1 claims use —
+    <code>build_focus_predicate('n', focus_items)</code> — into the reset's
+    <code>extra_filter</code> and passes <code>focus_items</code> as a query
+    parameter, so the reset is narrowed to the named sources.
+  </p>
+  <p id="focused-reset-scope-test">
+    <strong>Unit measure.</strong>
+    <code>tests/discovery/test_signals_focus_reset.py</code> runs the stage with
+    <code>--focus</code> and <code>--reset-to discovered</code> against a fake
+    <code>GraphClient</code> that evaluates the reset query's focus filter. A
+    focused reset emits <code>n.id IN $focus_items</code> and passes the
+    focused source ids into <code>reset_to_status</code>; a signal of an unnamed
+    source keeps its <code>enriched</code> status. Gate:
+    <code>tests/discovery/test_signals_focus_reset.py tests/discovery/test_signals_focus.py</code>
+    → <code>16 passed</code>, <code>EXIT=0</code>.
+  </p>
+  <p id="focused-reset-scope-live">
+    <strong>Live read-only count (no reset executed).</strong> Against the
+    JT-60SA graph, rendering the reset branch's focus predicate with the MDAC
+    <code>magPbTCNNN</code> Source id
+    <code>jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)</code>
+    selects <strong>14</strong> FacilitySignals — equal to that source's member
+    count of <strong>14</strong> — where an unfocused reset of the same status
+    cohort would select <strong>4679</strong>. The 14 members are all status
+    <code>discovered</code>, so the status-gated reset-to-<code>discovered</code>
+    count for this source is <strong>0</strong> (nothing to reset); the focus
+    filter itself admits exactly the source's members.
+  </p>
+  <p id="focused-reset-scope-negative-control">
+    <strong>Negative control, and it held.</strong> Dropping the focus filter
+    from the reset branch made the unnamed-source test fail:
+    <code>2 failed, 1 passed</code>, <code>EXIT=1</code>, with
+    <code>test_unnamed_source_signal_keeps_its_status</code> among the failures
+    — the guarded defect reproduces. The filter was restored and the gate
+    re-run green.
+  </p>
+</section>

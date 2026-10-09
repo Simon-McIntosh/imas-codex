@@ -153,14 +153,19 @@ def test_derive_error_mappings_value_target_with_error_children_is_unmapped(
     result = derive_error_mappings(
         [_make_direct_mapping(target_id=parent)],
         gc=mock_gc,
-        include_direct_error_signals=False,
+        facility="jet",
     )
 
     assert result == []
 
 
 def test_derive_error_mappings_error_signal_yields_binding(mock_gc):
-    """A source classified as an error signal still produces a binding."""
+    """A source classified as an error signal still produces a binding.
+
+    The bindings to cross-reference come from the in-memory data_mappings
+    the caller passes; the graph supplies only the HAS_ERROR children, not
+    the data bindings, so this holds on a first pass after map clear.
+    """
     from imas_codex.ids.mapping import derive_error_mappings
 
     parent = "equilibrium/time_slice/global_quantities/ip"
@@ -173,17 +178,6 @@ def test_derive_error_mappings_error_signal_yields_binding(mock_gc):
                 "description": "Plasma current error upper",
                 "physics_domain": "magnetics",
                 "rep_name": "IP Error Upper",
-            }
-        ],
-        # match_error_signals_to_imas: existing direct data mapping
-        [
-            {
-                "source_id": "jet:magnetics/ip",
-                "source_group_key": "magnetics/ip",
-                "target_id": parent,
-                "source_units": "A",
-                "target_units": "A",
-                "confidence": 0.95,
             }
         ],
         # HAS_ERROR children of the parent target
@@ -211,7 +205,7 @@ def test_derive_error_mappings_empty(mock_gc):
     """Returns empty list for empty input without querying the graph."""
     from imas_codex.ids.mapping import derive_error_mappings
 
-    result = derive_error_mappings([], gc=mock_gc, include_direct_error_signals=False)
+    result = derive_error_mappings([], gc=mock_gc, facility="jet")
     assert result == []
     mock_gc.query.assert_not_called()
 
@@ -413,31 +407,26 @@ def test_classify_error_signals_empty_graph(mock_gc):
 
 
 def test_match_error_signals_to_imas_basic(mock_gc):
-    """Matches error signal to IMAS error field via parent cross-reference."""
+    """Matches error signal to IMAS error field via the run's own bindings.
+
+    The data binding lives in memory only; the graph supplies nothing but
+    the HAS_ERROR children of the matched target, so the cross-reference
+    must read the passed data_mappings rather than persisted edges.
+    """
     from imas_codex.ids.mapping import match_error_signals_to_imas
 
-    # First query: existing direct MAPS_TO_IMAS
-    # Second query: HAS_ERROR children for those targets
+    parent = "equilibrium/time_slice/global_quantities/ip"
+    # Sole query: HAS_ERROR children of the matched target.
     mock_gc.query.side_effect = [
         [
             {
-                "source_id": "jet:magnetics/ip",
-                "source_group_key": "magnetics/ip",
-                "target_id": "equilibrium/time_slice/global_quantities/ip",
-                "source_units": "A",
-                "target_units": "A",
-                "confidence": 0.95,
-            },
-        ],
-        [
-            {
-                "data_path": "equilibrium/time_slice/global_quantities/ip",
-                "error_path": "equilibrium/time_slice/global_quantities/ip_error_upper",
+                "data_path": parent,
+                "error_path": f"{parent}_error_upper",
                 "error_type": "upper",
             },
             {
-                "data_path": "equilibrium/time_slice/global_quantities/ip",
-                "error_path": "equilibrium/time_slice/global_quantities/ip_error_lower",
+                "data_path": parent,
+                "error_path": f"{parent}_error_lower",
                 "error_type": "lower",
             },
         ],
@@ -453,33 +442,36 @@ def test_match_error_signals_to_imas_basic(mock_gc):
         },
     ]
 
-    result = match_error_signals_to_imas("jet", error_signals, gc=mock_gc)
+    result = match_error_signals_to_imas(
+        "jet",
+        error_signals,
+        [_make_direct_mapping(source_id="jet:magnetics/ip", target_id=parent)],
+        gc=mock_gc,
+    )
 
     # symmetric error type should match both upper and lower
     assert len(result) == 2
     for r in result:
         assert r.source_id == "jet:magnetics/ip_error"
         assert r.mapping_type == "error_derived"
-        assert r.derived_from == "equilibrium/time_slice/global_quantities/ip"
+        assert r.derived_from == parent
     targets = {r.target_id for r in result}
-    assert "equilibrium/time_slice/global_quantities/ip_error_upper" in targets
-    assert "equilibrium/time_slice/global_quantities/ip_error_lower" in targets
+    assert f"{parent}_error_upper" in targets
+    assert f"{parent}_error_lower" in targets
 
 
 def test_match_error_signals_to_imas_empty_signals(mock_gc):
     """Returns empty list when no error signals provided."""
     from imas_codex.ids.mapping import match_error_signals_to_imas
 
-    result = match_error_signals_to_imas("jet", [], gc=mock_gc)
+    result = match_error_signals_to_imas("jet", [], [], gc=mock_gc)
     assert result == []
     mock_gc.query.assert_not_called()
 
 
-def test_match_error_signals_to_imas_no_existing_mappings(mock_gc):
-    """Returns empty list when no existing data mappings exist in graph."""
+def test_match_error_signals_to_imas_missing_data_mappings(mock_gc):
+    """No bindings to cross-reference yields no error binding."""
     from imas_codex.ids.mapping import match_error_signals_to_imas
-
-    mock_gc.query.return_value = []  # No existing MAPS_TO_IMAS
 
     error_signals = [
         {
@@ -491,7 +483,36 @@ def test_match_error_signals_to_imas_no_existing_mappings(mock_gc):
         },
     ]
 
-    result = match_error_signals_to_imas("jet", error_signals, gc=mock_gc)
+    result = match_error_signals_to_imas("jet", error_signals, [], gc=mock_gc)
+    assert result == []
+    mock_gc.query.assert_not_called()
+
+
+def test_match_error_signals_to_imas_unmatched_parent(mock_gc):
+    """An error signal whose parent is not among the run's bindings binds none."""
+    from imas_codex.ids.mapping import match_error_signals_to_imas
+
+    error_signals = [
+        {
+            "signal_id": "jet:kinetics/te_error",
+            "group_key": "kinetics/te_error",
+            "description": "Electron temperature error",
+            "physics_domain": "kinetics",
+            "probable_error_type": "symmetric",
+        },
+    ]
+
+    result = match_error_signals_to_imas(
+        "jet",
+        error_signals,
+        [
+            _make_direct_mapping(
+                source_id="jet:magnetics/ip",
+                target_id="equilibrium/time_slice/global_quantities/ip",
+            )
+        ],
+        gc=mock_gc,
+    )
     assert result == []
 
 
@@ -500,21 +521,12 @@ def test_match_error_signals_confidence_reduced(mock_gc):
     from imas_codex.ids.mapping import match_error_signals_to_imas
 
     parent_confidence = 1.0
+    parent = "equilibrium/time_slice/global_quantities/ip"
     mock_gc.query.side_effect = [
         [
             {
-                "source_id": "jet:magnetics/ip",
-                "source_group_key": "magnetics/ip",
-                "target_id": "equilibrium/time_slice/global_quantities/ip",
-                "source_units": "A",
-                "target_units": "A",
-                "confidence": parent_confidence,
-            },
-        ],
-        [
-            {
-                "data_path": "equilibrium/time_slice/global_quantities/ip",
-                "error_path": "equilibrium/time_slice/global_quantities/ip_error_upper",
+                "data_path": parent,
+                "error_path": f"{parent}_error_upper",
                 "error_type": "upper",
             },
         ],
@@ -530,7 +542,18 @@ def test_match_error_signals_confidence_reduced(mock_gc):
         },
     ]
 
-    result = match_error_signals_to_imas("jet", error_signals, gc=mock_gc)
+    result = match_error_signals_to_imas(
+        "jet",
+        error_signals,
+        [
+            _make_direct_mapping(
+                source_id="jet:magnetics/ip",
+                target_id=parent,
+                confidence=parent_confidence,
+            )
+        ],
+        gc=mock_gc,
+    )
     assert len(result) == 1
     assert result[0].confidence < parent_confidence  # Confidence is reduced
 
@@ -760,18 +783,7 @@ def test_run_error_derivation_only_matches_error_signals(mock_gc):
                 "rep_name": "IP Error Upper",
             }
         ],
-        # match_error_signals_to_imas: existing direct data mapping
-        [
-            {
-                "source_id": "jet:magnetics/ip",
-                "source_group_key": "magnetics/ip",
-                "target_id": parent,
-                "source_units": "A",
-                "target_units": "A",
-                "confidence": 0.95,
-            }
-        ],
-        # HAS_ERROR children of the parent target
+        # has_error children of the parent target
         [
             {
                 "data_path": parent,
