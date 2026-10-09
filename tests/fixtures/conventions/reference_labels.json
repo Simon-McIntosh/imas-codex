@@ -66,7 +66,7 @@
       "channel_factor": 1.0,
       "validation_state": "source-only",
       "sign_adjudicated": false,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "EDDB FAME TTCU is the plasma current Ip in A, positive at every sample on E101154 (min 2.860e5, max 9.980e5), read through fetch_channels. It carries the equilibrium half of the sign cohort's plasma-current sign and stays source-only until the cohort scores it and it is checked against the magnetics PSRC Ip. Source read and sign recorded by the equilibrium source-leads survey: docs/evidence/fragments/jt60sa-machine-map/jtmm-equilibrium-source-leads.html",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/equilibrium.json"
     },
@@ -636,7 +636,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "Raw MDAC magPbTC1 is SELENE tangential probe 1: getseldata reads probe 1 as channel 1 of PID record 1626 S006 and takes its angle from geo.in row 485; on E101154 it tracks its processed PSRC partner magPbTC1 at Pearson r=0.99999. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.971 and median |r| 0.957 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -655,7 +655,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "Raw MDAC magPbTC2 is SELENE tangential probe 2: getseldata reads probe 2 as channel 2 of PID record 1626 S006 and takes its angle from geo.in row 486; on E101154 it tracks its processed PSRC partner magPbTC2 at Pearson r=0.99999. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +1.004 and median |r| 0.967 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -674,7 +674,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "Raw MDAC magPbTC3 is SELENE tangential probe 3: getseldata reads probe 3 as channel 3 of PID record 1626 S006 and takes its angle from geo.in row 487; on E101154 it tracks its processed PSRC partner magPbTC3 at Pearson r=0.99993. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.995 and median |r| 0.977 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -693,7 +693,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "Raw MDAC magPbTC4 is SELENE tangential probe 4: getseldata reads probe 4 as channel 4 of PID record 1626 S006 and takes its angle from geo.in row 488; on E101154 it tracks its processed PSRC partner magPbTC4 at Pearson r=0.99977. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.996 and median |r| 0.979 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -712,7 +712,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "Raw MDAC magPbTC5 is SELENE tangential probe 5: getseldata reads probe 5 as channel 5 of PID record 1626 S006 and takes its angle from geo.in row 489; on E101154 it tracks its processed PSRC partner magPbTC5 at Pearson r=0.99995. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +1.061 and median |r| 0.997 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -731,7 +731,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "Raw MDAC magPbTC6 is SELENE tangential probe 6: getseldata reads probe 6 as channel 6 of PID record 1626 S006 and takes its angle from geo.in row 490; on E101154 it tracks its processed PSRC partner magPbTC6 at Pearson r=0.99989. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.997 and median |r| 0.991 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -750,7 +750,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "Raw MDAC magPbTC7 is SELENE tangential probe 7: getseldata reads probe 7 as channel 7 of PID record 1626 S006 and takes its angle from geo.in row 491; on E101154 it tracks its processed PSRC partner magPbTC7 at Pearson r=0.99979. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.999 and median |r| 0.998 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -769,7 +769,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "Raw MDAC magPbTC8 is SELENE tangential probe 8: getseldata reads probe 8 as channel 8 of PID record 1626 S006 and takes its angle from geo.in row 492; on E101154 it tracks its processed PSRC partner magPbTC8 at Pearson r=0.99999. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +1.017 and median |r| 0.994 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -788,7 +788,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "calibration",
+      "half": "held_out",
       "evidence": "Raw MDAC magPbTC9 is SELENE tangential probe 9: getseldata reads probe 9 as channel 9 of PID record 1626 S006 and takes its angle from geo.in row 493; on E101154 it tracks its processed PSRC partner magPbTC9 at Pearson r=0.99999. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.990 and median |r| 0.994 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -807,7 +807,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "Raw MDAC magPbTC10 is SELENE tangential probe 10: getseldata reads probe 10 as channel 10 of PID record 1626 S006 and takes its angle from geo.in row 494; on E101154 it tracks its processed PSRC partner magPbTC10 at Pearson r=0.99998. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +1.028 and median |r| 0.997 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -826,7 +826,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "Raw MDAC magPbTC11 is SELENE tangential probe 11: getseldata reads probe 11 as channel 11 of PID record 1626 S006 and takes its angle from geo.in row 495; on E101154 it tracks its processed PSRC partner magPbTC11 at Pearson r=0.99997. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.996 and median |r| 0.993 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -845,7 +845,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "Raw MDAC magPbTC12 is SELENE tangential probe 12: getseldata reads probe 12 as channel 12 of PID record 1626 S006 and takes its angle from geo.in row 496; on E101154 it tracks its processed PSRC partner magPbTC12 at Pearson r=1.00000. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +1.007 and median |r| 0.993 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -864,7 +864,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "Raw MDAC magPbTC13 is SELENE tangential probe 13: getseldata reads probe 13 as channel 13 of PID record 1626 S006 and takes its angle from geo.in row 497; on E101154 it tracks its processed PSRC partner magPbTC13 at Pearson r=0.99999. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +1.042 and median |r| 0.988 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -883,7 +883,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "Raw MDAC magPbTC14 is SELENE tangential probe 14: getseldata reads probe 14 as channel 14 of PID record 1626 S006 and takes its angle from geo.in row 498; on E101154 it tracks its processed PSRC partner magPbTC14 at Pearson r=0.99999. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.990 and median |r| 0.985 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -902,7 +902,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "Raw MDAC magPbTC15 is SELENE tangential probe 15: getseldata reads probe 15 as channel 15 of PID record 1626 S006 and takes its angle from geo.in row 499; on E101154 it tracks its processed PSRC partner magPbTC15 at Pearson r=0.99990. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.974 and median |r| 0.982 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -921,7 +921,7 @@
       "channel_factor": 1.0,
       "validation_state": "corpus-validated",
       "sign_adjudicated": true,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "Raw MDAC magPbTC16 is SELENE tangential probe 16: getseldata reads probe 16 as channel 16 of PID record 1626 S006 and takes its angle from geo.in row 500; on E101154 it tracks its processed PSRC partner magPbTC16 at Pearson r=0.99996. The vacuum adjudication on E100595, E100579 and E100642 measures median slope +0.972 and median |r| 0.964 over quasi-static samples (every shot the same slope sign), so the rule is identity with channel_factor +1 in this map's target COCOS 17.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -940,7 +940,7 @@
       "channel_factor": 1.0,
       "validation_state": "source-only",
       "sign_adjudicated": false,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "Raw MDAC magPbTC17 is SELENE tangential probe 17: getseldata reads probe 17 as channel 17 of PID record 1626 S006 and takes its angle from geo.in row 501; on E101154 it tracks its processed PSRC partner magPbTC17 at Pearson r=0.99998. The vacuum adjudication on E100595, E100579 and E100642 leaves this channel undecided: median |r| 0.948 does not exceed 0.95: 100579 slope +1.097 r +0.9946; 100595 slope +0.938 r +0.9481; 100642 slope +0.915 r +0.7748.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/magnetics.json"
     },
@@ -959,7 +959,7 @@
       "channel_factor": 1.0,
       "validation_state": "source-only",
       "sign_adjudicated": false,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "MMSYS coil-current chain LKAT on E101154 tracks curCS1HiTe at corr>=0.994 with max|HiTe-LKAT|/max|LKAT| 0.072; the chain choice rests on E101154 alone, because on E101173 and E060033 the coil currents sit at the noise floor (tens to a hundred A) and the chains do not corroborate it; the circuit current is A; sign convention unknown-unvalidated until the convention section proves it.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/pf_active.json"
     },
@@ -997,7 +997,7 @@
       "channel_factor": 1.0,
       "validation_state": "source-only",
       "sign_adjudicated": false,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "MMSYS coil-current chain LKAT on E101154 tracks curCS3HiTe at corr>=0.994 with max|HiTe-LKAT|/max|LKAT| 0.073; the chain choice rests on E101154 alone, because on E101173 and E060033 the coil currents sit at the noise floor (tens to a hundred A) and the chains do not corroborate it; the circuit current is A; sign convention unknown-unvalidated until the convention section proves it.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/pf_active.json"
     },
@@ -1035,7 +1035,7 @@
       "channel_factor": 1.0,
       "validation_state": "source-only",
       "sign_adjudicated": false,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "MMSYS coil-current chain LKAT on E101154 tracks curEF1HiTe at corr>=0.994 with max|HiTe-LKAT|/max|LKAT| 0.123; the chain choice rests on E101154 alone, because on E101173 and E060033 the coil currents sit at the noise floor (tens to a hundred A) and the chains do not corroborate it; the circuit current is A; sign convention unknown-unvalidated until the convention section proves it.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/pf_active.json"
     },
@@ -1073,7 +1073,7 @@
       "channel_factor": 1.0,
       "validation_state": "source-only",
       "sign_adjudicated": false,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "MMSYS coil-current chain LKAT on E101154 tracks curEF3HiTe at corr>=0.994 with max|HiTe-LKAT|/max|LKAT| 0.065; the chain choice rests on E101154 alone, because on E101173 and E060033 the coil currents sit at the noise floor (tens to a hundred A) and the chains do not corroborate it; the circuit current is A; sign convention unknown-unvalidated until the convention section proves it.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/pf_active.json"
     },
@@ -1111,7 +1111,7 @@
       "channel_factor": 1.0,
       "validation_state": "source-only",
       "sign_adjudicated": false,
-      "half": "held_out",
+      "half": "calibration",
       "evidence": "MMSYS coil-current chain LKAT on E101154 tracks curEF5HiTe at corr>=0.994 with max|HiTe-LKAT|/max|LKAT| 0.055; the chain choice rests on E101154 alone, because on E101173 and E060033 the coil currents sit at the noise floor (tens to a hundred A) and the chains do not corroborate it; the circuit current is A; sign convention unknown-unvalidated until the convention section proves it.",
       "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/pf_active.json"
     },
@@ -1141,7 +1141,7 @@
       "source_array": "cur1TFLKAT",
       "map_semantic_id": "tf_coil_TF1_current",
       "target_path": "tf/coil/current/data",
-      "dd_class": null,
+      "dd_class": "none",
       "dd_class_path": null,
       "imas_ambix_transformation": "one_like",
       "source_cocos": null,
@@ -1151,7 +1151,8 @@
       "sign_adjudicated": false,
       "half": "held_out",
       "evidence": "MMSYS TF current cur1TFLKAT carries E101154's 23.3 kA and E060033's 25.7 kA in A; cur2TFLKAT reads zero on E060033; sign convention unknown-unvalidated until the convention section proves it.",
-      "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/tf.json"
+      "map_file": "/home/ITER/mcintos/Code/imas-ambix/maps/jt-60sa/maps/tf.json",
+      "dd_class_reason": "The DD carries no COCOS label on tf/coil/current/data or any ancestor."
     }
   ],
   "jet": [
