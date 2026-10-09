@@ -7,8 +7,8 @@
     It carries a five-number row (exported, imported, agreeing, unplaced, refused) for
     each of §8 to §13, drawn from the plan's landing comments and the imas-ambix score
     JSONs those comments cite; lists every disagreement imas-ambix reported with the
-    pipeline stage it traces to; and marks the §10 flux-loop row pending imas-ambix's
-    index and scale check.
+    pipeline stage it traces to; and scores the §10 flux-loop row, whose three
+    disagreements are cross-structure (same channel, other store element).
   </p>
 
   <h3 id="study-report-agreement">Agreement rows</h3>
@@ -18,7 +18,7 @@
     <tbody>
       <tr><td>§8 PF and TF coils</td><td>46</td><td>33</td><td>7</td><td>12</td><td>1</td></tr>
       <tr><td>§9 Magnetics</td><td>26</td><td>17</td><td>10</td><td>7</td><td>2</td></tr>
-      <tr><td>§10 Flux loops</td><td>6</td><td>6</td><td>pending</td><td>0</td><td>0</td></tr>
+      <tr><td>§10 Flux loops</td><td>6</td><td>6</td><td>0</td><td>0</td><td>0</td></tr>
       <tr><td>§11 Electron cyclotron heating</td><td>21</td><td>0</td><td>no reference</td><td>18</td><td>3</td></tr>
       <tr><td>§12 Gas injection</td><td>5</td><td>0</td><td>no reference</td><td>5</td><td>0</td></tr>
       <tr><td>§13 Cryogenic group</td><td>326</td><td>0</td><td>no reference</td><td>326</td><td>0</td></tr>
@@ -28,10 +28,12 @@
   <h3 id="study-report-disagreements">Disagreements by stage</h3>
   <p id="study-report-disagreements-text">
     The document lists seven disagreement rows: §8's six HiTe/LKAT chain conflicts
-    (mapping); §9's <code>magPbTC2</code> mistarget, whose cause is the "tangential
-    probe" text lost at enrichment (enrichment); §9's <code>TMagReS</code> value bound
-    onto a time path (mapping); §10's three flux-loop cross-structure rows
-    (mapping, pending); §11's three deprecated-path refusals (candidates); §9's six
+    (mapping) — the same coil on the other acquisition chain, with which chain is
+    canonical an open decision for the lead; §9's <code>magPbTC2</code> mistarget, whose
+    cause is the "tangential probe" text lost at enrichment (enrichment); §9's
+    <code>TMagReS</code> value bound onto a time path (mapping); §10's three flux-loop
+    cross-structure rows, same channel in a different store element (enrichment); §11's
+    three deprecated-path refusals (candidates); §9's six
     unmatched probe identifiers 18–23 (hand-off); and the no-store/no-pattern unplaced
     rows of §11–§13 (hand-off). All four stages appear.
   </p>
