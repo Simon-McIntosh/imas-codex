@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs; its manifest leaves baseline_suite and after_suite empty, so the two arms are the run's own gate logs (fixture-gate.log, whose first line names bd7bfa139, and fixture-balance-gate.log at f3b58963f), both EXIT=0 with no pytest FAILED or ERROR id on either side, giving a set difference of 0 added failures",
+  "after_suite": {
+    "command": "uv run --no-sync python - (inline fixture-balance gate)",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T005809394588-convention-reference-labels/fixture-balance-gate.log",
+    "revision": "f3b58963f9d3bb2b3ab70498c1a5b4e025f09a7f"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "uv run --no-sync python - (inline fixture gate)",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T005809394588-convention-reference-labels/fixture-gate.log",
+    "revision": "bd7bfa139fa5a8a338a515c9929cd1fd4b0bb268"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-09T01:38:41.799Z",
+  "dispatched_at": "2026-10-09T01:21:33Z",
+  "findings": [
+    {
+      "file": "tests/fixtures/conventions/reference_labels.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fixture has no committed test that consumes it, so a later edit to its rows, counts or dd_class values reddens nothing in-tree; the plan defers the consumer to a later node, leaving this fixture unguarded in the interim."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html",
+      "line": "78",
+      "severity": "follow-on",
+      "text": "follow-on: the receipt cites the gate log as fixture-balance-gate.log in the worker run directory, which is not committed, so a reader of the committed fragment cannot open the receipt it points at."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html",
+      "line": "25",
+      "severity": "follow-on",
+      "text": "follow-on: the source-level split (psi_like 18/9, one_like 8/9, ip_like 6/6) is carried in prose and two tables; a figures path under docs/figures/signal-cocos-conventions/ was available and the class-by-half balance would read with less effort as a figure."
+    },
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's own manifest leaves baseline_suite and after_suite empty, so a reader deriving a suite delta from the run's own evidence finds no arms; the run's six gate logs sit beside it instead."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against bd7bfa139fa5a8a338a515c9929cd1fd4b0bb268; the four commits touch only the fixture and the evidence fragment.",
+    "done_when": "the done_when requires the bundle version and per-file sha256, one row per joining binding with a DD-derived class, a false sign-adjudicated flag on every flux-loop row, and 60 JET rows of which at least 20 are convention-independent controls; all are present, and I independently reproduced bundle version v0.2.0-rc4, the five recorded sha256 digests against the live maps, 27 flux-loop rows with sign_adjudicated false, and 30 JET none-class rows with convention_dependent false.",
+    "goal": "the node goal is a frozen reference-label fixture from the imas-ambix JT-60SA maps plus 60 hand-labelled JET sources; tests/fixtures/conventions/reference_labels.json holds 60 joined JT-60SA rows and 60 JET rows, and I counted 61 signals across maps/jt-60sa/maps/ with GEQDSK PSI the sole unjoined binding.",
+    "manifest": "read; it records the gate results and the joined counts; its baseline_suite and after_suite fields are empty, so the run's own manifest carries no two-arm suite delta.",
+    "write_paths": "the node was fenced to tests/fixtures/conventions/reference_labels.json and docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html; the four-commit diff bd7bfa139 to 1f2fe60d writes only those two files."
+  },
+  "justifications": {
+    "durability": "no committed test consumes tests/fixtures/conventions/reference_labels.json, so an edit to the fixture reddens nothing in-tree; the six gate scripts were inline and not committed.",
+    "evidence": "the run recorded six gate logs at revisions e27ab642f through f3b58963f in its own run directory, and my independent recomputation of the five maps/jt-60sa sha256 digests and the 61-signal count reproduces the fixture's join claims exactly.",
+    "fit": "tests/fixtures/conventions/reference_labels.json and docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html follow the repository fixture and evidence-fragment idioms, and no version, plan or ticket label appears in either path.",
+    "goal_fidelity": "tests/fixtures/conventions/reference_labels.json carries 60 jt60sa rows with source id, target path, dd_class and half, and jet rows with a class and a one-line reason, matching the goal.",
+    "reuse": "a capability search over tests/ and imas_codex/ found no existing reference-label fixture or convention-classification owner, and the fixture reuses the graph SignalSource join rather than re-deriving it.",
+    "scope_discipline": "git diff --stat bd7bfa139 to 1f2fe60d lists only tests/fixtures/conventions/reference_labels.json and the evidence fragment, both inside the declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is a frozen reference-label fixture from the imas-ambix JT-60SA maps plus 60 hand-labelled JET sources; tests/fixtures/conventions/reference_labels.json holds 60 joined JT-60SA rows and 60 JET rows, and I counted 61 signals across maps/jt-60sa/maps/ with GEQDSK PSI the sole unjoined binding.\nVERDICT done_when: the done_when requires the bundle version and per-file sha256, one row per joining binding with a DD-derived class, a false sign-adjudicated flag on every flux-loop row, and 60 JET rows of which at least 20 are convention-independent controls; all are present, and I independently reproduced bundle version v0.2.0-rc4, the five recorded sha256 digests against the live maps, 27 flux-loop rows with sign_adjudicated false, and 30 JET none-class rows with convention_dependent false.\nVERDICT write_paths: the node was fenced to tests/fixtures/conventions/reference_labels.json and docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html; the four-commit diff bd7bfa139 to 1f2fe60d writes only those two files.\nVERDICT manifest: read; it records the gate results and the joined counts; its baseline_suite and after_suite fields are empty, so the run's own manifest carries no two-arm suite delta.\nVERDICT diff: read commit by commit against bd7bfa139fa5a8a338a515c9929cd1fd4b0bb268; the four commits touch only the fixture and the evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/fixtures/conventions/reference_labels.json carries 60 jt60sa rows with source id, target path, dd_class and half, and jet rows with a class and a one-line reason, matching the goal.\nSCORE evidence: 17\nJUSTIFICATION evidence: the run recorded six gate logs at revisions e27ab642f through f3b58963f in its own run directory, and my independent recomputation of the five maps/jt-60sa sha256 digests and the 61-signal count reproduces the fixture's join claims exactly.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --stat bd7bfa139 to 1f2fe60d lists only tests/fixtures/conventions/reference_labels.json and the evidence fragment, both inside the declared write paths.\nSCORE durability: 10\nJUSTIFICATION durability: no committed test consumes tests/fixtures/conventions/reference_labels.json, so an edit to the fixture reddens nothing in-tree; the six gate scripts were inline and not committed.\nSCORE fit: 17\nJUSTIFICATION fit: tests/fixtures/conventions/reference_labels.json and docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html follow the repository fixture and evidence-fragment idioms, and no version, plan or ticket label appears in either path.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over tests/ and imas_codex/ found no existing reference-label fixture or convention-classification owner, and the fixture reuses the graph SignalSource join rather than re-deriving it.\nFINDING tests/fixtures/conventions/reference_labels.json:1 follow-on: the fixture has no committed test that consumes it, so a later edit to its rows, counts or dd_class values reddens nothing in-tree; the plan defers the consumer to a later node, leaving this fixture unguarded in the interim.\nFINDING docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html:78 follow-on: the receipt cites the gate log as fixture-balance-gate.log in the worker run directory, which is not committed, so a reader of the committed fragment cannot open the receipt it points at.\nFINDING docs/evidence/fragments/signal-cocos-conventions/convention-reference-labels.html:25 follow-on: the source-level split (psi_like 18/9, one_like 8/9, ip_like 6/6) is carried in prose and two tables; a figures path under docs/figures/signal-cocos-conventions/ was available and the class-by-half balance would read with less effort as a figure.\nFINDING manifest.md:21 follow-on: the reviewed run's own manifest leaves baseline_suite and after_suite empty, so a reader deriving a suite delta from the run's own evidence finds no arms; the run's six gate logs sit beside it instead.",
+  "review_run_id": "r-20261009T012122506469-review-of-convention-reference-labels",
+  "reviewed_base_sha": "bd7bfa139fa5a8a338a515c9929cd1fd4b0bb268",
+  "reviewed_head_sha": "1f2fe60d090f4163f4f2e15da10b5bb518f9c514",
+  "reviewed_run_id": "r-20261009T005809394588-convention-reference-labels",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T01:45:00+00:00",
+  "total": 101,
+  "verdict": "SOUND WITH FINDINGS"
+}
