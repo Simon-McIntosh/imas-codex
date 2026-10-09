@@ -1023,7 +1023,7 @@ allow-direct-references = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = [".", "tests"]
 timeout = 30
 faulthandler_timeout = 60
 addopts = [
