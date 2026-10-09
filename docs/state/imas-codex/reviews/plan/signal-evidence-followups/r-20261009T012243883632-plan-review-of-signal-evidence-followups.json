@@ -40,7 +40,24 @@
   "plan_slug": "signal-evidence-followups",
   "plan_version": 2,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-09T01:36:55.658286+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T01:36:55.658286+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/signal-evidence-followups/r-20261009T012243883632-plan-review-of-signal-evidence-followups.json",
   "review_run_id": "r-20261009T012243883632-plan-review-of-signal-evidence-followups",
   "reviewed_blob_sha": "3e642cc2f09f77a636c453280a3a3df08523817b",
   "rubric": "design",
