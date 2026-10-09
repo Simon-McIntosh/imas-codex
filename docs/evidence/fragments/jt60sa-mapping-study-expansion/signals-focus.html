@@ -1,0 +1,50 @@
+<section>
+  <h2 id="signals-focus-land-discovery-focus">Signals discovery gains <code>--focus</code> so a cohort enriches only its named sources</h2>
+  <p id="signals-focus-scope">
+    <code>discover &lt;facility&gt; --only signals --focus &lt;id&gt;</code> now
+    scopes enrichment and check claims to the named signal or
+    <code>SignalSource</code> identities, resolved through the shared
+    <code>resolve_focus_items</code> (manifests included). The previous
+    unconditional refusal is gone.
+  </p>
+  <p id="signals-focus-change">
+    <strong>What changed.</strong>
+    <code>imas_codex/discovery/signals/parallel.py</code> gains
+    <code>build_focus_predicate</code>, rendered into the four claim queries
+    (enrichment channel-skip and claim, check claim) and the two pending-work
+    probes, and threaded as <code>focus_items</code> through the claim
+    functions, both workers and the engine entry point. An empty focus renders
+    no predicate, leaving the claim unfiltered.
+    <code>imas_codex/cli/discover/signals.py</code> replaces the refusal with
+    <code>resolve_focus_items</code> plus a new <code>_validate_focus</code>
+    that refuses an item naming no signal or source at the facility, naming the
+    offending identities.
+  </p>
+  <p id="signals-focus-measure">
+    <strong>Measure.</strong> The focused suite
+    <code>tests/discovery/test_signals_focus.py</code> (12 tests) passes with
+    <code>-n 8</code>: <code>12 passed in 16.73s</code>, <code>EXIT=0</code>.
+    Adjacent signals modules
+    (<code>test_signals_pipeline</code>, <code>test_parallel</code>,
+    <code>test_signal_checking</code>,
+    <code>test_signal_check_carry_forward</code>,
+    <code>test_singleton_sources</code>) pass <code>137 passed</code>.
+  </p>
+  <p id="signals-focus-negative-control">
+    <strong>Negative control, and it held.</strong> Dropping the focus filter
+    from the claim query (<code>build_focus_predicate</code> returning empty)
+    turns the suite red: <code>6 failed, 6 passed</code>, including
+    <code>test_unnamed_source_in_the_same_facility_stays_unclaimed</code> for
+    both the enrichment and check claims — the unnamed source's signal is then
+    admitted. <code>EXIT=1</code>. Red log:
+    <code>negative_control.log</code> under the run directory.
+  </p>
+  <p id="signals-focus-followon">
+    <strong>Fenced follow-on.</strong> Two tests outside this node's write
+    scope still encode the removed refusal and now fail:
+    <code>tests/cli/test_discover_signals_stage.py::test_focus_items_are_refused_stating_the_mechanism</code>
+    and <code>::test_cli_focus_is_refused</code>. Both must be replaced with
+    the new behaviour (focus reaches the engine; an unknown focus id is a usage
+    error). Log: <code>followon_cli_signals_stage.log</code>.
+  </p>
+</section>
