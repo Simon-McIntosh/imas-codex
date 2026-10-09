@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "reviewed manifest declares neither baseline_suite nor after_suite; base revision read from the commit's parent ab71c99 and the head arm from the run's own tests/ids gate log at rev 40d384889 reporting 571 passed, 0 failed, EXIT=0, so no failure was added relative to any baseline",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/ids/workers.py:1505",
+    "imas_codex/ids/workers.py:1555"
+  ],
+  "completed_at": "2026-10-09T08:25:19.252Z",
+  "dispatched_at": "2026-10-09T08:15:41Z",
+  "findings": [
+    {
+      "file": "tests/ids/test_assign_phase_handled.py",
+      "line": "80",
+      "severity": "follow-on",
+      "text": "follow-on: the test replaces has_pending_assignment_work with the _pending stand-in, so the real function's new handled_source_ids argument and its 'AND NOT n.id IN $handled_source_ids' predicate clause carry no test that reddens; the declared mutation removes only assign_worker's break block, so removing the exclusion from the real predicate (workers.py:488-490) would leave every test green while the hang returns."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the production call sites of the two changed symbols",
+    "diff": "read the single commit 40d384889 against base ab71c99; workers.py carries the new argument plus predicate clause and the new break, the test file is new, and the message has a substantive body and no attribution.",
+    "done_when": "the plan's done-when is a unit test driving one escalated source whose choice raises, with the assign phase reaching done, the map phase completing and validation persisting the other source, with a negative control that drops the handled exclusion and times out; tests/ids/test_assign_phase_handled.py::test_assign_phase_reaches_done_with_one_escalated_source_that_raises asserts all three and the reviewed run's negative control log records the TimeoutError at EXIT=1.",
+    "goal": "\u00a721 makes the assign phase reach done once only sources this run handled remain, so the map loop stops waiting and validation runs; workers.py:759-765 plus the post-loop mark_done at :851 does exactly that.",
+    "manifest": "read; it records status complete, the single change commit, tests/ids at 571 passed, the head test at 1 passed and a negative control at EXIT=1, and it holds no baseline_suite or after_suite field.",
+    "write_paths": "declared paths are imas_codex/ids/workers.py, tests/ids/test_assign_phase_handled.py, the evidence fragment and a figures dir; the commit touches the first three and no path outside the declaration."
+  },
+  "justifications": {
+    "durability": "the test replaces has_pending_assignment_work with the _pending stand-in at tests/ids/test_assign_phase_handled.py:80, so the real predicate clause 'AND NOT n.id IN $handled_source_ids' added at workers.py:488-490 carries no test that reddens; the declared mutation removes only assign_worker's break block, so deleting the real exclusion from the predicate would leave every test green.",
+    "evidence": "the reviewed run records tests/ids at 571 passed, 0 failed, EXIT=0 at rev 40d384889 in assign_phase_tests_ids.log and gate.log, the single test at 1 passed in assign_phase_head.log, and the negative control at EXIT=1; its manifest declares no baseline_suite and no after_suite, so the added-failure derivation rests on the head arm's own zero failures.",
+    "fit": "the handled exclusion mirrors the map phase's own pattern exactly \u2014 has_pending_mapping_work's handled_filter at workers.py:506 and map_worker's handled_ids call at workers.py:1036 \u2014 uses the existing asyncio.to_thread idiom and carries no plan or ticket identifier in symbols, comments or the test module name.",
+    "goal_fidelity": "assign_worker at workers.py:759 passes the run's handled set to has_pending_assignment_work and breaks at workers.py:761-765 when no unhandled escalated source remains, so the phase reaches done once only handled sources are left and state.assign_phase.mark_done() at workers.py:851 forces it; this is \u00a721's fix and the done-when test drives it end to end.",
+    "reuse": "has_pending_assignment_work's new handled_source_ids argument and its 'AND NOT n.id IN $handled_source_ids' clause reproduce has_pending_mapping_work's guarded handled_filter at workers.py:504-519 rather than inventing a second spelling, and the assign_worker idle path calls it the same way map_worker calls the map-phase test.",
+    "scope_discipline": "the commit's three changed files (imas_codex/ids/workers.py, tests/ids/test_assign_phase_handled.py, the evidence fragment) sit inside the run's declared write paths, and no write path outside the declaration was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: \u00a721 makes the assign phase reach done once only sources this run handled remain, so the map loop stops waiting and validation runs; workers.py:759-765 plus the post-loop mark_done at :851 does exactly that.\nVERDICT done_when: the plan's done-when is a unit test driving one escalated source whose choice raises, with the assign phase reaching done, the map phase completing and validation persisting the other source, with a negative control that drops the handled exclusion and times out; tests/ids/test_assign_phase_handled.py::test_assign_phase_reaches_done_with_one_escalated_source_that_raises asserts all three and the reviewed run's negative control log records the TimeoutError at EXIT=1.\nVERDICT write_paths: declared paths are imas_codex/ids/workers.py, tests/ids/test_assign_phase_handled.py, the evidence fragment and a figures dir; the commit touches the first three and no path outside the declaration.\nVERDICT manifest: read; it records status complete, the single change commit, tests/ids at 571 passed, the head test at 1 passed and a negative control at EXIT=1, and it holds no baseline_suite or after_suite field.\nVERDICT diff: read the single commit 40d384889 against base ab71c99; workers.py carries the new argument plus predicate clause and the new break, the test file is new, and the message has a substantive body and no attribution.\nCALL_SITES: imas_codex/ids/workers.py:1505, imas_codex/ids/workers.py:1555\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: assign_worker at workers.py:759 passes the run's handled set to has_pending_assignment_work and breaks at workers.py:761-765 when no unhandled escalated source remains, so the phase reaches done once only handled sources are left and state.assign_phase.mark_done() at workers.py:851 forces it; this is \u00a721's fix and the done-when test drives it end to end.\nSCORE evidence: 16\nJUSTIFICATION evidence: the reviewed run records tests/ids at 571 passed, 0 failed, EXIT=0 at rev 40d384889 in assign_phase_tests_ids.log and gate.log, the single test at 1 passed in assign_phase_head.log, and the negative control at EXIT=1; its manifest declares no baseline_suite and no after_suite, so the added-failure derivation rests on the head arm's own zero failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the commit's three changed files (imas_codex/ids/workers.py, tests/ids/test_assign_phase_handled.py, the evidence fragment) sit inside the run's declared write paths, and no write path outside the declaration was touched.\nSCORE durability: 14\nJUSTIFICATION durability: the test replaces has_pending_assignment_work with the _pending stand-in at tests/ids/test_assign_phase_handled.py:80, so the real predicate clause 'AND NOT n.id IN $handled_source_ids' added at workers.py:488-490 carries no test that reddens; the declared mutation removes only assign_worker's break block, so deleting the real exclusion from the predicate would leave every test green.\nSCORE fit: 19\nJUSTIFICATION fit: the handled exclusion mirrors the map phase's own pattern exactly \u2014 has_pending_mapping_work's handled_filter at workers.py:506 and map_worker's handled_ids call at workers.py:1036 \u2014 uses the existing asyncio.to_thread idiom and carries no plan or ticket identifier in symbols, comments or the test module name.\nSCORE reuse: 18\nJUSTIFICATION reuse: has_pending_assignment_work's new handled_source_ids argument and its 'AND NOT n.id IN $handled_source_ids' clause reproduce has_pending_mapping_work's guarded handled_filter at workers.py:504-519 rather than inventing a second spelling, and the assign_worker idle path calls it the same way map_worker calls the map-phase test.\nFINDING tests/ids/test_assign_phase_handled.py:80 follow-on: the test replaces has_pending_assignment_work with the _pending stand-in, so the real function's new handled_source_ids argument and its 'AND NOT n.id IN $handled_source_ids' predicate clause carry no test that reddens; the declared mutation removes only assign_worker's break block, so removing the exclusion from the real predicate (workers.py:488-490) would leave every test green while the hang returns.",
+  "review_run_id": "r-20261009T081532319292-review-of-assign-phase-ends-on-handled",
+  "reviewed_base_sha": "ab71c99fe0858ea756dedab73bfa3b23d41d0651",
+  "reviewed_head_sha": "40d38488998cc0a5a5ec6221e38e921cf043981a",
+  "reviewed_run_id": "r-20261009T075646473455-assign-phase-ends-on-handled",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T08:23:26.506008+00:00",
+  "total": 106,
+  "verdict": "SOUND WITH FINDINGS"
+}
