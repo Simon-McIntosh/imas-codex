@@ -128,34 +128,43 @@ def _nearest_cocos_labels(
 
     A DD transformation class is stored on the structure that carries it, so a
     data target reads the class from the target itself (hop 0) or the closest
-    ancestor along ``HAS_PARENT``. A target with no labelled node on that chain
-    maps to the explicit absence token for both the label and its source.
+    ancestor along ``HAS_PARENT``. A time coordinate is never transformed, so a
+    target whose final segment is ``time`` carries the absence token whatever its
+    ancestors hold. Any other target with no labelled node on that chain maps to
+    the explicit absence token for both the label and its source.
     """
     unique = list(dict.fromkeys(target_ids))
     if not unique:
         return {}
-    rows = gc.query(
-        """
-        MATCH (t:IMASNode)
-        WHERE t.id IN $target_ids
-        MATCH path = (t)-[:HAS_PARENT*0..]->(a:IMASNode)
-        WHERE a.cocos_transformation_type IS NOT NULL
-        WITH t.id AS target_id, a.cocos_transformation_type AS label,
-             a.cocos_label_source AS label_source, length(path) AS hops
-        ORDER BY target_id, hops ASC
-        WITH target_id, collect(label)[0] AS cocos_label,
-             collect(label_source)[0] AS cocos_label_source
-        RETURN target_id, cocos_label, cocos_label_source
-        """,
-        target_ids=unique,
-    )
-    return {
-        row["target_id"]: (
-            row["cocos_label"] or COCOS_ABSENT,
-            row["cocos_label_source"] or COCOS_ABSENT,
+    time_targets = {name for name in unique if name.rsplit("/", 1)[-1] == "time"}
+    queried = [name for name in unique if name not in time_targets]
+    labels: dict[str, tuple[str, str]] = {}
+    if queried:
+        rows = gc.query(
+            """
+            MATCH (t:IMASNode)
+            WHERE t.id IN $target_ids
+            MATCH path = (t)-[:HAS_PARENT*0..]->(a:IMASNode)
+            WHERE a.cocos_transformation_type IS NOT NULL
+            WITH t.id AS target_id, a.cocos_transformation_type AS label,
+                 a.cocos_label_source AS label_source, length(path) AS hops
+            ORDER BY target_id, hops ASC
+            WITH target_id, collect(label)[0] AS cocos_label,
+                 collect(label_source)[0] AS cocos_label_source
+            RETURN target_id, cocos_label, cocos_label_source
+            """,
+            target_ids=queried,
         )
-        for row in rows
-    }
+        labels = {
+            row["target_id"]: (
+                row["cocos_label"] or COCOS_ABSENT,
+                row["cocos_label_source"] or COCOS_ABSENT,
+            )
+            for row in rows
+        }
+    for name in time_targets:
+        labels[name] = (COCOS_ABSENT, COCOS_ABSENT)
+    return labels
 
 
 def build_mapping_handoff(

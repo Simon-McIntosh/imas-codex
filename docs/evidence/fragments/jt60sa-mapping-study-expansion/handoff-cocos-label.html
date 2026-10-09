@@ -4,19 +4,25 @@
     <code>build_mapping_handoff</code> in <code>imas_codex/ids/handoff.py</code>
     resolves each signal row's <code>cocos_label</code> and <code>cocos_label_source</code>
     from the target itself or its nearest ancestor along <code>HAS_PARENT</code> that
-    carries <code>cocos_transformation_type</code>. Both keys are additive, so
-    <code>format_version</code> stays <code>1</code>. A target with no labelled node
-    on that chain carries the DD absence token <code>none</code> for both. The export
+    carries <code>cocos_transformation_type</code>. A time coordinate is never
+    COCOS-transformed, so a target whose final segment is <code>time</code> carries
+    <code>none</code> for both keys whatever its ancestors hold, while its sibling
+    <code>data</code> and error fields keep the inherited label. Both keys are
+    additive, so <code>format_version</code> stays <code>1</code>. Any other target
+    with no labelled node on that chain carries the DD absence token <code>none</code>
+    for both. The export
     no longer reads the binding's own <code>cocos_label</code>; it reads only the
     repaired graph label.
   </p>
   <p id="handoff-cocos-label-rows">
-    Gate: <code>uv run pytest tests/ids/test_mapping_handoff.py</code> — 5 passed
+    Gate: <code>uv run pytest tests/ids/test_mapping_handoff.py</code> — 6 passed
     (EXIT=0). The mocked-graph tests show a target labelled on its own node keeping
     its own label over its parent's, a target under a labelled parent
     (<code>magnetics/b_field_pol_probe/field/data</code>) carrying
-    <code>one_like</code> from <code>xml</code>, and a target with no labelled node
-    on its chain (<code>none</code>) carrying <code>none</code> for both.
+    <code>one_like</code> from <code>xml</code>, a <code>time</code> target under an
+    <code>ip_like</code> parent carrying <code>none</code> for both while its
+    <code>data</code> sibling carries <code>ip_like</code>, and a target with no
+    labelled node on its chain carrying <code>none</code> for both.
   </p>
   <p id="handoff-cocos-label-live">
     Live export of <code>jt-60sa</code> <code>magnetics</code> gives the pickup-probe
