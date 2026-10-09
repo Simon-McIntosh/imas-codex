@@ -1,0 +1,58 @@
+<section id="study-report-record" data-reckon="evidence">
+  <h2 id="study-report-heading">Study report: agreement across six JT-60SA systems</h2>
+
+  <p id="study-report-intro">
+    The study report is
+    <a href="/imas-codex/research/jt60sa-mapping-study.html">docs/research/jt60sa-mapping-study.html</a>.
+    It carries a five-number row (exported, imported, agreeing, unplaced, refused) for
+    each of §8 to §13, drawn from the plan's landing comments and the imas-ambix score
+    JSONs those comments cite; lists every disagreement imas-ambix reported with the
+    pipeline stage it traces to; and marks the §10 flux-loop row pending imas-ambix's
+    index and scale check.
+  </p>
+
+  <h3 id="study-report-agreement">Agreement rows</h3>
+  <table id="study-report-agreement-table">
+    <caption>Five-number row per system</caption>
+    <thead><tr><th>System</th><th>Exported</th><th>Imported</th><th>Agreeing</th><th>Unplaced</th><th>Refused</th></tr></thead>
+    <tbody>
+      <tr><td>§8 PF and TF coils</td><td>46</td><td>33</td><td>7</td><td>12</td><td>1</td></tr>
+      <tr><td>§9 Magnetics</td><td>26</td><td>17</td><td>10</td><td>7</td><td>2</td></tr>
+      <tr><td>§10 Flux loops</td><td>6</td><td>6</td><td>pending</td><td>0</td><td>0</td></tr>
+      <tr><td>§11 Electron cyclotron heating</td><td>21</td><td>0</td><td>no reference</td><td>18</td><td>3</td></tr>
+      <tr><td>§12 Gas injection</td><td>5</td><td>0</td><td>no reference</td><td>5</td><td>0</td></tr>
+      <tr><td>§13 Cryogenic group</td><td>326</td><td>0</td><td>no reference</td><td>326</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="study-report-disagreements">Disagreements by stage</h3>
+  <p id="study-report-disagreements-text">
+    The document lists seven disagreement rows: §8's six HiTe/LKAT chain conflicts
+    (mapping); §9's <code>magPbTC2</code> mistarget, whose cause is the "tangential
+    probe" text lost at enrichment (enrichment); §9's <code>TMagReS</code> value bound
+    onto a time path (mapping); §10's three flux-loop cross-structure rows
+    (mapping, pending); §11's three deprecated-path refusals (candidates); §9's six
+    unmatched probe identifiers 18–23 (hand-off); and the no-store/no-pattern unplaced
+    rows of §11–§13 (hand-off). All four stages appear.
+  </p>
+
+  <h3 id="study-report-figure">Figure</h3>
+  <figure id="study-report-figure-embed">
+    <img src="/imas-codex/figures/jt60sa-mapping-study/agreement.svg"
+         alt="Normalised stacked bars per system for agreeing, disagreeing, unplaced and refused rows, with absolute counts labelled in each segment">
+    <figcaption>
+      The agreement figure, rendered by <code>scripts/figures_jt60sa_mapping_study.py</code>
+      in the data-ink style. Bars are normalised to 100&nbsp;% of each system's
+      dispositioned rows; counts and row totals are absolute.
+    </figcaption>
+  </figure>
+
+  <h3 id="study-report-gate">Gate</h3>
+  <p id="study-report-gate-text">
+    <code>reckon audit-doc docs/research/jt60sa-mapping-study.html</code> reports
+    <code>OK</code> with exit code 0. The figure was rendered and inspected; every
+    table number traces to a cited score JSON under
+    <code>~/.config/reckon/crew/runs/</code> or
+    <code>~/.config/reckon/crew/reports/imas-ambix/</code>.
+  </p>
+</section>
