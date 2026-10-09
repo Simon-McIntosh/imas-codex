@@ -90,6 +90,11 @@
     <p><code>has_pending_assignment_work</code> in <code>imas_codex/ids/workers.py</code> now takes <code>handled_source_ids</code> and excludes them. When it finds no claimable source, <code>assign_worker</code> asks that check with its own handled set, leaves its loop if nothing else is pending, and marks the assign phase done. A source whose choice was refused, or which had no shortlist, therefore ends its turn in this run and is retried on a later one. Worker commit <code>40d384889</code> is merged at <code>a758dc050</code>. <code>tests/ids/test_assign_phase_handled.py</code> drives the engine with one escalated source whose choice raises, and the run completes. On the merged head, <code>tests/ids/</code> gives 571 passed. The negative control drops the exclusion, and the test's <code>wait_for</code> then times out.</p>
   </section>
 
+  <section id="s22">
+    <h2>§22 — A binding names the source being mapped, and one bad binding does not sink the rest</h2>
+    <p><code>validate_mappings</code> in <code>imas_codex/ids/mapping.py</code> now pairs each batch with the section assignment it was built for. Each binding is persisted against that claimed source through <code>_claimed_source_id</code>. A model id with the same source key but a mistyped facility prefix resolves to the claimed source. A model id naming a different source becomes an error escalation naming both ids. <code>write_mapping_bindings</code> in <code>imas_codex/ids/models.py</code> writes bindings one at a time and records each refusal with its reason, so the IDS's other bindings and the next IDS still persist. The <code>map run</code> summary in <code>imas_codex/cli/map.py</code> reports persisted and failed bindings, not validated ones, and exits 1 when any binding failed. Worker commit <code>9daededd2</code> is merged at <code>b8c4cf3ce</code>. On the merged head, <code>tests/ids/</code> and <code>tests/cli/test_map_promotion.py</code> give 583 passed. The negative control takes the model's <code>source_id</code> again, and both identity tests then fail.</p><p>The pairing relies on <code>zip(..., strict=False)</code>. <code>validate_worker</code> is the only caller, and §20 already aligns its assignments with its batches. A <code>strict=True</code> pairing would make that guarantee explicit, and is a follow-on.</p>
+  </section>
+
 </main>
 </body>
 </html>
