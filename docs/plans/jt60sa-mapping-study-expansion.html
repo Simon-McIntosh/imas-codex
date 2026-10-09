@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc">
 <meta name="plan-impl" content="0.7083">
-<meta name="plan-version" content="65">
+<meta name="plan-version" content="66">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -575,6 +575,9 @@
 </div>
 <div class="r-comment" data-section="s24" data-id="c-run-r-20261009T095934779278-review-of-binding-targets-data-field" data-who="reckon-build" data-when="2026-10-09T10:09:42.452Z">
     <div class="r-comment-body"><p>§24 reviewed SOUND WITH FINDINGS (total 102/120): a structure binding is retargeted to its data child, a time binding to its time child, a structure with no such child refused as an ERROR escalation, and a leaf binding left unchanged; base 0ea3c2c5c 576 passed, head 6adda303e 580 passed, negative control 3 failed EXIT=1; three follow-ons recorded (stale target_units on the time retarget, a fabricated test DD fixture, and a duplicated structure-type set).</p></div>
+</div>
+<div class="r-comment" data-section="s24" data-id="c-s24-review" data-who="reckon-build" data-when="2026-10-09T10:12:00Z">
+    <div class="r-comment-body"><p>The independent review scored §24 14 to 20 with no added failures, and found three follow-ons. First, the retarget rewrites <code>target_id</code> and evidence but not <code>target_units</code> or <code>cocos_label</code>, so a time binding moved to <code>.../current/time</code> keeps the structure's units of A against a field in s. Second, the test fixture declares <code>pf_active/circuit/current</code> with no <code>data</code> child, which the live DD contradicts, so the refusal branch is tested only against a fabricated shape. Third, <code>_STRUCTURE_DATA_TYPES</code> duplicates <code>STRUCTURE_TYPES</code> in <code>imas_codex/core/node_classifier.py</code>.</p></div>
 </div>
 <div class="r-comment" data-section="s23" data-id="c-close-s23" data-who="reckon-build" data-when="2026-10-09T10:05:00Z">
     <div class="r-comment-body"><p>§23 landed: a facility pattern supplies coil member identifiers, and MMSYS rows go from 0 of 40 to 40 of 40 identified (merge <code>563463bbc</code>; 615 tests pass). The coils map run is re-running with §24's retargeting for the rescore. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s23">evidence</a></p></div>
