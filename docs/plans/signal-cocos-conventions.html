@@ -24,7 +24,7 @@
   <title>Signal COCOS Conventions Before the Map | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -331,8 +331,10 @@
       cross-checks the result against the imas-ambix machine descriptions. Write path:
       <code>imas_codex/discovery/static/geometry.py</code>, where its SELENE deck reader goes,
       <code>tests/discovery/test_sensor_geometry.py</code> and
-      <code>docs/evidence/fragments/signal-cocos-conventions/jt60sa-sensor-geometry.html</code>. <strong>Done when</strong> each JT-60SA magnetic sensor the inventory joined carries geometry per
-      operation phase with its measurement kind, flux loop 7 reads absolute and the other 26 differential with loop 7 as
+      <code>docs/evidence/fragments/signal-cocos-conventions/jt60sa-sensor-geometry.html</code>. <strong>Done when</strong>
+      <code>uv run --no-sync pytest tests/discovery/test_sensor_geometry.py -p no:cacheprovider</code> passes with a test
+      of the deck reader on a <code>geo.in</code> excerpt, each JT-60SA magnetic sensor the inventory joined carries
+      geometry per operation phase with its measurement kind, flux loop 7 reads absolute and the other 26 differential with loop 7 as
       reference, and the fragment lists every position or angle that differs from imas-ambix beyond 1 mm or 0.1°.
     </p>
 
@@ -401,8 +403,11 @@
       records whether its sensor is absolute or differential and, when differential, its reference sensor, with the
       evidence that says so. The 7 loops and 6 probes with no deck row keep an unknown kind and are not moved. The group
       key is owned by <code>detect_signal_sources</code> and its <code>_accessor_to_source_key</code> in
-      <code>imas_codex/discovery/signals/parallel.py</code>, so the key becomes kind-aware there, and a regroup beside it
-      makes each existing source hold one kind: it moves members, links
+      <code>imas_codex/discovery/signals/parallel.py</code>, so the key becomes kind-aware there for new groups. Existing
+      groups are not reached by it, because <code>detect_signal_sources</code> reads only discovered signals with no
+      source, so a <code>regroup_sources_by_kind</code> beside it runs in the same signals-discovery preflight, right after
+      <code>detect_signal_sources</code>, and every <code>imas-codex discover signals</code> pass applies it. It makes each
+      existing source hold one kind: it moves members, links
       each differential source <code>REFERENCES</code> its reference sensor's source, records <code>SPLIT_FROM</code> or
       <code>MERGED_INTO</code> with the reason and time so the change is traceable like a rename, and clears the
       convention and candidate state of every source it changed so they are judged again.
@@ -416,7 +421,7 @@
       with tests showing a mixed source split by kind, singleton sources of one kind merged, every move recorded with its
       reason, a source of one kind left untouched, and changed sources' convention and candidate state cleared; and a
       live JT-60SA run leaves flux loop 7 alone in an absolute source and the 26 differential loops in one differential
-      source linked to it, with the counts in
+      source linked to it after an <code>imas-codex discover signals jt-60sa</code> pass, with the counts in
       <code>docs/evidence/fragments/signal-cocos-conventions/measurement-kind-sources.html</code>.
     </p>
 
