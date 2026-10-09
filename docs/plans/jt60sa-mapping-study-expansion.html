@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc,0e1f1d382,43ee5a2e0,10d79f25b">
 <meta name="plan-impl" content="0.963">
-<meta name="plan-version" content="86">
+<meta name="plan-version" content="87">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -662,6 +662,9 @@
 </div>
 <div class="r-comment" data-section="s27" data-id="c-run-r-20261009T114938095149-review-of-dd-liveness-one-owner" data-who="reckon-build" data-when="2026-10-09T11:55:01.770Z">
     <div class="r-comment-body"><p>Reviewed run r-20261009T113249385486-dd-liveness-one-owner scored 101/120 across all six dimensions (goal_fidelity 16, evidence 18, scope_discipline 20, durability 18, fit 17, reuse 12); three follow-ons, zero blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s27" data-id="c-s27-review" data-who="reckon-build" data-when="2026-10-09T12:06:00Z">
+    <div class="r-comment-body"><p>The independent review scored §27 12 to 20 with no added failures (goal fidelity 16, reuse 12). The goal of one owner is only half met. Candidate retrieval now uses <code>_dd_version_clause</code>, which treats a path with no <code>INTRODUCED_IN</code> edge as not live. <code>validate_mappings</code> (<code>mapping.py</code>, around line 1815) and <code>build_mapping_handoff</code> (<code>handoff.py</code>, around line 283) still call the presence-tolerant <code>dd_path_stale_reason</code>, so the three consumers do not share one rule. The impact is low because candidate retrieval runs first and already drops such paths. Two further notes: <code>graph_ops.py</code> imports the search layer's private <code>_dd_version_clause</code>, which should become a public symbol, and the stub-row fallback re-derives the rule in Python. Open follow-on: route validation and the export through <code>dd_path_lifecycles</code>, and make the clause public.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-close-s10" data-who="reckon-build" data-when="2026-10-09T12:00:00Z">
     <div class="r-comment-body"><p>§10 landed: the flux loops import 6 of 6 with the right channels on the wrong element, because MDAC flux loops are differential to loop 7 and were mapped as absolute. The missing fact goes into the enrichment glossary. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s10">evidence</a></p></div>
