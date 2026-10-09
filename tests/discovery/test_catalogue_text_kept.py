@@ -178,10 +178,13 @@ async def test_reenumeration_only_refills_catalogue_text_on_enriched_signal():
             transaction.run(
                 """CREATE (:FacilitySignal {
                     id: $id, facility_id: $facility, status: 'enriched',
-                    description: 'Existing model wording', name: 'Existing name'
+                    description: 'Existing model wording', name: 'Existing name',
+                    accessor: $accessor, discovery_source: 'edas',
+                    data_source_name: 'edas', data_source_path: 'MMSYS/curLFPPLKAT'
                 })""",
                 id=signal_id,
                 facility=facility,
+                accessor=signal.accessor,
             ).consume()
             with patch.object(
                 parallel, "GraphClient", return_value=TransactionClient(transaction)
@@ -241,5 +244,14 @@ async def test_reenumeration_only_refills_catalogue_text_on_enriched_signal():
                 "description": None,
                 "source_description": CATALOGUE_TEXT,
             }
+            with patch.object(
+                parallel, "GraphClient", return_value=TransactionClient(transaction)
+            ):
+                claimed = parallel.claim_signals_for_enrichment(
+                    facility, scanner_types=["edas"]
+                )
+            assert len(claimed) == 1
+            assert claimed[0]["source_description"] == CATALOGUE_TEXT
+            assert claimed[0]["description"] is None
         finally:
             transaction.rollback()
