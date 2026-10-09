@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908">
 <meta name="plan-impl" content="0.2">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -369,6 +369,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261009T051656606159-handoff-cocos-label" data-who="reckon-build" data-when="2026-10-09T05:47:52.987Z">
     <div class="r-comment-body"><p>hand-off signal rows now carry cocos_label and cocos_label_source resolved from the target itself or its nearest labelled ancestor along HAS_PARENT, a time coordinate always carrying the DD absence token "none" for both whatever its ancestors hold, falling back to "none" for both when no labelled node exists; tests/ids/test_mapping_handoff.py 6 passed, and a live jt-60sa magnetics export gives pickup-probe rows one_like from xml.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261009T054128061510-review-of-handoff-cocos-label" data-who="reckon-build" data-when="2026-10-09T05:52:04.788Z">
+    <div class="r-comment-body"><p>reviewed run r-20261009T051656606159-handoff-cocos-label at reviewed_base_sha 02a98eb0e6095873282bd8cb0b8b87fd3e41ad75 and reviewed_head_sha 1fb670f332cd09b38b9bbbc933aa43d2fb1f5171; verdict SOUND WITH FINDINGS (total 107/120); the export fills cocos_label and cocos_label_source from the target or its nearest labelled HAS_PARENT ancestor with the DD absence token none as fallback, the focused gate is 5 passed EXIT=0 at the pinned head against 4 passed EXIT=0 at base (0 added failures), and the negative control reproduces; three follow-on findings recorded.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-09T05:55:00Z">
     <div class="r-comment-body"><p>§5 landed: the selected-sources map worker fix is on main (merge <code>97bff9908</code>, same patch as <code>19dd9128c</code>). <code>tests/ids/</code> passes on the merged head, and a live magnetics run bound both pre-selected sources and left the others unbound. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s5">evidence</a></p></div>
