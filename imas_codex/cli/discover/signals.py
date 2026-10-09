@@ -24,14 +24,6 @@ import click
 
 logger = logging.getLogger(__name__)
 
-# Message for the --focus refusal. The signals claim query takes no item
-# filter — it cannot select by accessor or SignalSource id — so naming items
-# cannot be honoured.
-_FOCUS_REFUSAL = (
-    "--focus is not supported for signals yet: the signals claim query takes "
-    "no item filter."
-)
-
 
 @dataclass(frozen=True)
 class SignalsStageOptions:
@@ -39,8 +31,8 @@ class SignalsStageOptions:
 
     Field names follow the settled discover option surface: ``scan_only`` and
     ``flush`` select the seeding and draining halves, ``topic`` is the
-    free-text steer the enricher reads, ``focus`` names items and is refused
-    because the claim query takes no item filter, and ``limit`` caps items.
+    free-text steer the enricher reads, ``focus`` names signals or signal
+    sources and scopes every claim to them, and ``limit`` caps items.
     """
 
     scan_only: bool = False
@@ -59,14 +51,59 @@ class SignalsStageOptions:
     reset_to: str | None = None
 
 
+def _validate_focus(facility: str, focus_items: list[str]) -> None:
+    """Refuse focus items that name no signal or source at this facility.
+
+    A focus item may name a FacilitySignal by id or accessor, a SignalSource
+    by id, or a source array by a ``data_source_path`` segment (such as
+    ``magPbTC10``). Anything that resolves to none of those is a typo the
+    claim would silently honour by selecting nothing, so it is refused up
+    front with the offending identities named.
+    """
+    from imas_codex.graph import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            "MATCH (n) WHERE (n:FacilitySignal OR n:SignalSource) "
+            "AND n.facility_id = $facility "
+            "AND (n.id IN $ids OR n.accessor IN $ids "
+            "OR ANY(segment IN split(coalesce(n.data_source_path, ''), '/') "
+            "WHERE segment IN $ids)) "
+            "RETURN n.id AS id, n.accessor AS accessor, "
+            "n.data_source_path AS data_source_path",
+            facility=facility,
+            ids=focus_items,
+        )
+    matched = {row["id"] for row in rows}
+    matched.update(row["accessor"] for row in rows if row["accessor"])
+    for row in rows:
+        if row["data_source_path"]:
+            matched.update(
+                segment
+                for segment in row["data_source_path"].split("/")
+                if segment in focus_items
+            )
+    missing = [item for item in focus_items if item not in matched]
+    if missing:
+        raise click.UsageError(
+            "--focus names unknown signal or source id(s) at "
+            f"{facility}: " + ", ".join(missing)
+        )
+
+
 def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
     """Run the signals discovery stage for a facility.
 
     Builds the engine config and calls ``run_discovery``; returns the run's
-    result dict (counts, cost, elapsed seconds).
+    result dict (counts, cost, elapsed seconds). ``--focus`` names signals or
+    ``SignalSource`` identities (or a manifest of them) and scopes every claim
+    to those; an item that names nothing at the facility is a usage error.
     """
-    if options.focus:
-        raise click.UsageError(_FOCUS_REFUSAL)
+    from imas_codex.cli.discover.common import resolve_focus_items
+
+    focus_items = resolve_focus_items(options.focus)
+    if focus_items:
+        _validate_focus(facility, focus_items)
 
     # Auto-detect rich output
     from imas_codex.cli.discover.common import (
@@ -321,6 +358,7 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
                 cost_limit=options.cost_limit,
                 signal_limit=options.limit,
                 focus=options.topic,
+                focus_items=focus_items or None,
                 categories=category_list,
                 discover_only=options.scan_only,
                 enrich_only=options.flush,

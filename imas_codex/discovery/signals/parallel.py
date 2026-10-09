@@ -508,6 +508,32 @@ def build_category_predicate(alias: str = "s") -> str:
     return f"($categories IS NULL OR split({path}, '/')[0] IN $categories)"
 
 
+def build_focus_predicate(
+    alias: str = "s", focus_items: list[str] | None = None
+) -> str:
+    """Render the focus predicate for a FacilitySignal claim.
+
+    A focus item names a ``SignalSource`` — either by its own id, or by a
+    handle its members carry: a signal id, a signal accessor, or a source
+    array (a trailing ``data_source_path`` segment a study names, such as
+    ``magPbTC10``). Every member of a named source is selected, so naming one
+    member of a grouped source reaches the whole group. A focus item that is
+    itself a signal id or accessor also selects that signal directly. An empty
+    focus renders no predicate so the claim keeps its full scope.
+    """
+    if not focus_items:
+        return ""
+    return (
+        f"AND ({alias}.id IN $focus_items "
+        f"OR {alias}.accessor IN $focus_items "
+        f"OR EXISTS {{ MATCH ({alias})-[:MEMBER_OF]->(source:SignalSource) "
+        "WHERE source.id IN $focus_items OR EXISTS { "
+        "MATCH (source)<-[:MEMBER_OF]-(named:FacilitySignal) "
+        "WHERE ANY(segment IN split(coalesce(named.data_source_path, ''), '/') "
+        "WHERE segment IN $focus_items) } })"
+    )
+
+
 def get_checkpoint_dir() -> Path:
     """Get checkpoint directory for data discovery, creating if needed.
 
@@ -552,6 +578,7 @@ class DataDiscoveryState(DiscoveryStateBase):
     cost_limit: float = 10.0
     signal_limit: int | None = None
     focus: str | None = None
+    focus_items: list[str] | None = None
     categories: list[str] | None = None
 
     # Worker stats — one per worker group for accurate display
@@ -606,13 +633,13 @@ class DataDiscoveryState(DiscoveryStateBase):
         self.enrich_phase = PipelinePhase(
             "enrich",
             has_work_fn=lambda: has_pending_enrich_work(
-                self.facility, self.scanner_types, self.categories
+                self.facility, self.scanner_types, self.categories, self.focus_items
             ),
         )
         self.check_phase = PipelinePhase(
             "check",
             has_work_fn=lambda: has_pending_check_work(
-                self.facility, self.scanner_types, self.categories
+                self.facility, self.scanner_types, self.categories, self.focus_items
             ),
         )
         # Composite scan phase — done when all sub-phases are done
@@ -737,6 +764,7 @@ def has_pending_enrich_work(
     facility: str,
     scanner_types: list[str] | None = None,
     categories: list[str] | None = None,
+    focus_items: list[str] | None = None,
 ) -> bool:
     """Check if there are signals awaiting enrichment.
 
@@ -752,6 +780,7 @@ def has_pending_enrich_work(
         WHERE s.status = $discovered
           AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
           AND {build_category_predicate("s")}
+          {build_focus_predicate("s", focus_items)}
           AND {build_enrich_claimable_predicate("s")}
         RETURN count(s) > 0 AS has_work
     """
@@ -762,6 +791,7 @@ def has_pending_enrich_work(
                 facility=facility,
                 discovered=FacilitySignalStatus.discovered.value,
                 categories=categories,
+                focus_items=focus_items,
                 **scope_params,
             )
             return result[0]["has_work"] if result else False
@@ -773,6 +803,7 @@ def has_pending_check_work(
     facility: str,
     scanner_types: list[str] | None = None,
     categories: list[str] | None = None,
+    focus_items: list[str] | None = None,
 ) -> bool:
     """Check if there are enriched signals awaiting check.
 
@@ -786,6 +817,7 @@ def has_pending_check_work(
         WHERE s.status = $enriched
           AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
           AND {build_category_predicate("s")}
+          {build_focus_predicate("s", focus_items)}
         RETURN count(s) > 0 AS has_work
     """
     try:
@@ -795,6 +827,7 @@ def has_pending_check_work(
                 facility=facility,
                 enriched=FacilitySignalStatus.enriched.value,
                 categories=categories,
+                focus_items=focus_items,
                 **scope_params,
             )
             return result[0]["has_work"] if result else False
@@ -1011,6 +1044,7 @@ def claim_signals_for_enrichment(
     batch_size: int = 10,
     scanner_types: list[str] | None = None,
     categories: list[str] | None = None,
+    focus_items: list[str] | None = None,
 ) -> list[dict]:
     """Claim a batch of discovered signals for enrichment.
 
@@ -1048,6 +1082,7 @@ def claim_signals_for_enrichment(
                 WHERE s.status = $discovered
                                     AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
                   AND __CATEGORY_PREDICATE__
+                  __FOCUS_PREDICATE__
                   AND (
                     s.accessor =~ '.*[_:]CHANNEL_?\\d{2,3}\\)?$'
                     OR s.accessor =~ '.*[_:]\\d{2,3}\\)?$'
@@ -1058,12 +1093,17 @@ def claim_signals_for_enrichment(
                 SET s.status = $skipped,
                     s.skip_reason = 'channel_element',
                     s.claimed_at = null
-                """.replace("__CATEGORY_PREDICATE__", build_category_predicate("s")),
+                """.replace(
+                    "__CATEGORY_PREDICATE__", build_category_predicate("s")
+                ).replace(
+                    "__FOCUS_PREDICATE__", build_focus_predicate("s", focus_items)
+                ),
                 facility=facility,
                 discovered=FacilitySignalStatus.discovered.value,
                 skipped=FacilitySignalStatus.skipped.value,
                 scoped_scanners=scoped_scanners,
                 categories=categories,
+                focus_items=focus_items,
                 static_sources=sorted(STATIC_DATA_SOURCES),
             )
 
@@ -1084,6 +1124,7 @@ def claim_signals_for_enrichment(
                 WHERE s.status IN [$discovered, $underspecified]
                                     AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
                   AND __CATEGORY_PREDICATE__
+                  __FOCUS_PREDICATE__
                   AND NOT EXISTS {
                     MATCH (s)-[:MEMBER_OF]->(sg:SignalSource)
                     WHERE sg.representative_id <> s.id
@@ -1092,7 +1133,11 @@ def claim_signals_for_enrichment(
                        OR s.claimed_at < datetime() - duration($cutoff))
                 WITH s ORDER BY rand() LIMIT $batch_size
                 SET s.claimed_at = datetime(), s.claim_token = $token
-                """.replace("__CATEGORY_PREDICATE__", build_category_predicate("s")),
+                """.replace(
+                    "__CATEGORY_PREDICATE__", build_category_predicate("s")
+                ).replace(
+                    "__FOCUS_PREDICATE__", build_focus_predicate("s", focus_items)
+                ),
                 facility=facility,
                 discovered=FacilitySignalStatus.discovered.value,
                 underspecified=FacilitySignalStatus.underspecified.value,
@@ -1101,6 +1146,7 @@ def claim_signals_for_enrichment(
                 token=claim_token,
                 scoped_scanners=scoped_scanners,
                 categories=categories,
+                focus_items=focus_items,
                 static_sources=sorted(STATIC_DATA_SOURCES),
             )
 
@@ -1365,6 +1411,7 @@ def claim_signals_for_check(
     reference_shot: int | None = None,
     scanner_types: list[str] | None = None,
     categories: list[str] | None = None,
+    focus_items: list[str] | None = None,
 ) -> list[dict]:
     """Claim a batch of enriched signals for check.
 
@@ -1395,11 +1442,16 @@ def claim_signals_for_check(
                 WHERE s.status = $enriched
                                     AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
                   AND __CATEGORY_PREDICATE__
+                  __FOCUS_PREDICATE__
                   AND (s.claimed_at IS NULL
                        OR s.claimed_at < datetime() - duration($cutoff))
                 WITH s ORDER BY rand() LIMIT $batch_size
                 SET s.claimed_at = datetime(), s.claim_token = $token
-                """.replace("__CATEGORY_PREDICATE__", build_category_predicate("s")),
+                """.replace(
+                    "__CATEGORY_PREDICATE__", build_category_predicate("s")
+                ).replace(
+                    "__FOCUS_PREDICATE__", build_focus_predicate("s", focus_items)
+                ),
                 facility=facility,
                 enriched=FacilitySignalStatus.enriched.value,
                 batch_size=batch_size,
@@ -1407,6 +1459,7 @@ def claim_signals_for_check(
                 token=claim_token,
                 scoped_scanners=scoped_scanners,
                 categories=categories,
+                focus_items=focus_items,
                 static_sources=sorted(STATIC_DATA_SOURCES),
             )
 
@@ -3992,6 +4045,7 @@ async def enrich_worker(
             batch_size=20,
             scanner_types=state.scanner_types,
             categories=state.categories,
+            **({"focus_items": state.focus_items} if state.focus_items else {}),
         )
 
         if not signals:
@@ -5033,6 +5087,7 @@ async def check_worker(
             reference_shot=state.reference_shot,
             scanner_types=state.scanner_types,
             categories=state.categories,
+            **({"focus_items": state.focus_items} if state.focus_items else {}),
         )
 
         if not signals:
@@ -5363,6 +5418,7 @@ async def run_parallel_data_discovery(
     cost_limit: float = 10.0,
     signal_limit: int | None = None,
     focus: str | None = None,
+    focus_items: list[str] | None = None,
     categories: list[str] | None = None,
     num_enrich_workers: int = 2,
     num_check_workers: int = 1,
@@ -5470,6 +5526,7 @@ async def run_parallel_data_discovery(
         cost_limit=cost_limit,
         signal_limit=signal_limit,
         focus=focus,
+        focus_items=focus_items,
         categories=categories,
         enrich_only=enrich_only,
         deadline=deadline,
