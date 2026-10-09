@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -108,6 +108,7 @@
     </p>
 
     <h2 id="s2">§2 — A focused reset touches only the focused sources</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s1"></section>
     <p>
       The swapped descriptions on curEF1LKAT, curEF4LKAT, magPbTC8 and magPbTC9 came from a matcher that paired
       results by prompt number against a batch in claim order. Commit <code>5406bc598</code>, "match enrichment
@@ -134,6 +135,7 @@
     </p>
 
     <h2 id="s3">§3 — Every member of a grouped source keeps its own identity</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s1"></section>
     <p>
       <code>propagate_source_enrichment</code> copies a representative's description to every member, and
       <code>individualize_source_descriptions</code> is meant to replace that copy with one description per
@@ -189,6 +191,7 @@
     </p>
 
     <h2 id="s6">§6 — <code>map run --clear</code> removes what <code>map clear</code> removes</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s5"></section>
     <p>
       In the second hand-off iteration, <code>map run --clear</code> left the previous bindings in place, and
       only a separate <code>map clear</code> followed by <code>map run</code> regenerated cleanly. The clear
@@ -235,6 +238,7 @@
     </p>
 
     <h2 id="s8">§8 — PF and TF coil currents</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s4,jt60sa-mapping-study-expansion#s5,jt60sa-mapping-study-expansion#s7"></section>
     <p>
       The MMSYS group carries the coil currents. Twelve of its 26 coil signals were unenriched at the second
       iteration, and curEF1LKAT and curEF4LKAT carried other signals' descriptions until §2. Run the loop for
@@ -260,6 +264,7 @@
     </p>
 
     <h2 id="s9">§9 — Plasma current</h2>
+<section data-reckon="section" data-id="s9" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s3"></section>
     <p>
       The DCSV group holds the plasma-control signals, including plasma current, three of which already have a
       selected route. Run the loop for <code>magnetics</code> over the DCSV sources that the candidate stage
@@ -270,6 +275,7 @@
     </p>
 
     <h2 id="s10">§10 — Flux loops</h2>
+<section data-reckon="section" data-id="s10" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s3"></section>
     <p>
       MDAC holds the flux loops beside the pickup probes. Run the loop for <code>magnetics</code> over the MDAC
       flux-loop sources. Export to <code>jt-60sa-flux-loops-handoff.json</code>. JT-60SA's COCOS is not
@@ -282,6 +288,7 @@
     </p>
 
     <h2 id="s11">§11 — Electron cyclotron heating</h2>
+<section data-reckon="section" data-id="s11" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s3"></section>
     <p>
       The ECH group has 130 of 159 sources ready, and 8 are escalated. Run the loop for
       <code>ec_launchers</code> over the ECH sources. Export to <code>jt-60sa-ech-handoff.json</code>.
@@ -291,6 +298,7 @@
     </p>
 
     <h2 id="s12">§12 — Gas injection</h2>
+<section data-reckon="section" data-id="s12" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s3"></section>
     <p>
       N2GAS has 22 ready sources. Run the loop for <code>gas_injection</code> over the gas-valve sources. If the
       candidate stage routes some of them elsewhere, the receipt says where. Export to
@@ -301,6 +309,7 @@
     </p>
 
     <h2 id="s13">§13 — A cryogenic group as the negative control</h2>
+<section data-reckon="section" data-id="s13" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s3"></section>
     <p>
       Most cryogenic plant signals have no IMAS equivalent. This section tests that the pipeline refuses as well
       as maps. Run the loop over CryoMag, which has 86 ready sources, without naming an IDS. Let the candidate
@@ -315,6 +324,7 @@
     </p>
 
     <h2 id="s14">§14 — Study report</h2>
+<section data-reckon="section" data-id="s14" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links="jt60sa-mapping-study-expansion#s8"></section>
     <p>
       Write the agreement table across the six systems into
       <code>docs/research/jt60sa-mapping-study.html</code>. Include one figure in
