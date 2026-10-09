@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T02:07:56.755Z",
+  "dispatched_at": "2026-10-09T01:59:19Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-cocos-conventions.html:404",
+      "id": "reasoning-1",
+      "reason": "without a named entry point (the CLI subcommand or stage that runs the regroup) the node's builder cannot know what invokes the regroup, and the node's done-when (\"a live JT-60SA run leaves flux loop 7 alone\u2026\") cannot be run at all.",
+      "text": "\u00a79 says the group key \"becomes kind-aware\" in `detect_signal_sources` \"and a regroup beside it makes each existing source hold one kind\", but names no production caller for the regroup, and the host it is placed beside cannot do it: `detect_signal_sources` queries only `WHERE s.status = discovered AND NOT EXISTS { (s)-[:MEMBER_OF]->(:SignalSource) }` (imas_codex/discovery/signals/parallel.py:1790), so a second invocation is a no-op on the already-grouped sources the regroup must move; its sole production caller is the signals-discovery preflight (parallel.py:5386), which runs before workers as part of a fresh scan",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-cocos-conventions.html:334",
+      "id": "done_when-1",
+      "reason": "the node extends a test file shared with the preceding node, so a builder can deliver a broken or unrun suite and still satisfy the gate; the done-when needs the pytest clause the \u00a76 edit dropped.",
+      "text": "`jt60sa-sensor-geometry` declares `tests/discovery/test_sensor_geometry.py` among its write paths but its done-when (\"each JT-60SA magnetic sensor the inventory joined carries geometry per operation phase \u2026, and the fragment lists every position or angle that differs from imas-ambix beyond 1 mm or 0.1\u00b0\") never requires those tests to run, unlike its predecessor `sensor-geometry-graph`, whose done-when opens \"the tests pass\"",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b729023b7f98a284b3d6e5a78b5c5d8182394428bb687c2ff8a3c3d8c5cd7613",
+  "plan_slug": "signal-cocos-conventions",
+  "plan_version": 12,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-09T02:11:11.395597+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-09T02:11:14.512212+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T02:11:14.512212+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T02:11:11.395597+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-signal-cocos-conventions.v12.json",
+  "review_run_id": "r-20261009T015906413258-plan-review-of-signal-cocos-conventions",
+  "reviewed_blob_sha": "964ac304f87ff858d08bcb4ca53bbaa0b79dffef",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the DD anchors \u00a79 relies on resolve (`magnetics/flux_loop/type` structure and `magnetics/flux_loop/indices_differential` INT_1D both found in the DD), the imas-ambix paths \u00a76 cites exist (maps/jt-60sa/maps/ holds magnetics.json etc., machine_description/ holds OP1 and OP2), and `detect_signal_sources`/`_accessor_to_source_key` resolve at imas_codex/discovery/signals/parallel.py:1738\u20131747.",
+    "done_when": "a finding \u2014 `jt60sa-sensor-geometry` now declares `tests/discovery/test_sensor_geometry.py` as a write path but its done-when never requires that suite to run or pass.",
+    "evidence_paths": "pass \u2014 the \u00a76 edit replaced the fragment-only write path with durable repo paths (the shared module `imas_codex/discovery/static/geometry.py`, the test file) beside the evidence fragment, and \u00a79's `measurement-kind-sources.html` sits under `docs/evidence/fragments/`; the earlier evidence_paths-1 finding is answered.",
+    "naming": "pass \u2014 \u00a76 and \u00a79 introduce no plan labels, stage names, ticket numbers or version tags; the only version strings are \u00a72's bundle snapshot, which is data.",
+    "reasoning": "a finding \u2014 \u00a79's kind-aware regroup is described but names no production caller, and the function it is placed beside structurally cannot perform it.",
+    "single_goal": "pass \u2014 each of `sensor-geometry-inventory`, `sensor-geometry-graph`, `jt60sa-sensor-geometry` and `measurement-kind-sources` names one deliverable.",
+    "wiring": "pass \u2014 the three gates carry the cross-plan wiring (g-scc-1 requires external-map-rules#s5, g-scc-3 requires external-map-rules#s3, g-scc-2 gates \u00a78 on this plan's own \u00a79), and every target resolves: external-map-rules declares \u00a7s1\u2013\u00a7s5, jt60sa-discovery-completion declares \u00a7s56, and plan-blocks names jt60sa-imas-maps."
+  },
+  "section_digests": {
+    "_document": "841f7d0b2d99154895a9e960e572e25502951a869738bb77498e7ae62fb08f34",
+    "s1": "b474f50e663d4eeb459a19ec861f44c6afd0861521b2e1ae043ae12881d43192",
+    "s2": "f3bf9d3f711147548dac78d62796f77c8ff7cb581d5836a5380c85ae16697fd1",
+    "s3": "60d12734ae36ce5fedcd3b9af30a4dabcc90d9a235fc965b559a79d6c0f6eb45",
+    "s4": "f0a2c2928d4bc9a0668a027bd6b0805a53e562bc2e31f76da819e8d9f464fd79",
+    "s5": "41d5052e3c98cbacbdeac5d198c352f683d9951a6f42a5e7c614bbbf6a33cef9",
+    "s6": "331b92d3e3389b3d364fb2ac677e1c260b457c663f28d3c47a33c3a0f218d4a0",
+    "s7": "b478b26c1a2560685846a5ec9701d8151aafbddeb18c7fceb34613467a89f092",
+    "s8": "7a17b5dd927373efb5082039905f3646e11365670d3a801411fd5e730a501eb6",
+    "s9": "795d5467b583aa6b136e7eec08b64b0ab163b6ad920c7f73daab99364e9b92a9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T02:11:08.913523+00:00"
+}
