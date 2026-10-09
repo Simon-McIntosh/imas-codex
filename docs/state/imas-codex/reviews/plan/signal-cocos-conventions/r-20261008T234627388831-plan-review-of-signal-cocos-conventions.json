@@ -1,0 +1,84 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-09T00:00:05.898Z",
+  "dispatched_at": "2026-10-08T23:46:37Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-cocos-conventions.html:180",
+      "id": "done_when-1",
+      "reason": "thresholds chosen on the same set they are scored on fit the references rather than the task, and the plan's own negative-control rows would catch that but the node never names them.",
+      "text": "`convention-judgment-calibration`'s done-when reports the AUC, class accuracy and writer accuracy and then sets the acceptance thresholds as seat keys, all against the same \u00a72 reference set, with no held-out split and no use of the convention-independent rows the \u00a72 fixture already marks as its negative control",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-cocos-conventions.html:222",
+      "id": "reasoning-1",
+      "reason": "the node writes a test to that expectation, so an implementer either encodes a wrong survivor set or fails a correct `cocos_to_parameters`-driven determination.",
+      "text": "the \u00a75 done-when says the observations \"leave survivors {3, 4} with psi_like unanimous and ip_like split to COCOS 17\", but \u00a71 (lines 73\u201374) fixes the survivor set at {3, 4} because \u03c8's factor depends on \u03c3_Bp and e_Bp alone, and COCOS 17 carries e_Bp=1 where 3 and 4 carry e_Bp=0, so 17 cannot be a survivor and would itself split \u03c8",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4d654e993231bf7880634caf10b32cc5b30e3b9c919af1e877059c22c6494b40",
+  "plan_slug": "signal-cocos-conventions",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-09T00:52:59.312228+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-09T00:53:00.347657+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T00:52:59.312228+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-09T00:53:00.347657+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-signal-cocos-conventions.v0.json",
+  "review_run_id": "r-20261008T234627388831-plan-review-of-signal-cocos-conventions",
+  "reviewed_blob_sha": "61492edb3390995673258978baf12a1eb0d96be7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 with extensionless hrefs resolved as `<path>.html`, every cited anchor resolves: the imas-ambix map dir and its four JSON files exist and carry the exact keys \u00a72 names (`source_group`, `source_array`, `target_path`, `transformation`, `source_cocos`, `channel_factor`, `validation_state`, `evidence`); `machine_description/OP1|OP2`, the `jt60sa-machine-map` evidence dir, `mapping-decision-chain` \u00a74, `jt60sa-discovery-completion` \u00a756, `discovery/base/judgment.py` (`judge_rows`, `rerank_pool`), `cocos/calculator.py` (`cocos_to_parameters`), `get_dd_cocos_fields`, `cli/discover/sequence.py`, `schemas/facility.yaml`, `remote/executor.py:run_python_script` and the `convention-network.svg` figure all resolve.",
+    "done_when": "a finding \u2014 `convention-judgment-calibration` reports accuracy and sets the acceptance thresholds on one and the same reference set, naming no held-out or convention-independent control.",
+    "evidence_paths": "pass \u2014 every evidence fragment sits under `docs/evidence/fragments/signal-cocos-conventions/` and the fixture under `tests/fixtures/conventions/`, all durable repository paths; no gate writes to a session scratchpad or node-local temporary directory.",
+    "naming": "pass \u2014 the proposed properties, the `ConventionObservation`/`SensorGeometry` nodes and the new module paths are named by mechanism; no plan label, stage name, ticket number or version tag enters a symbol or filename.",
+    "reasoning": "a finding \u2014 \u00a75 `cocos-determination-core`'s done-when asserts survivors {3, 4} with `ip_like` \"split to COCOS 17\", but COCOS 17 is not in {3, 4} and differs from them in e_Bp, which \u00a71 states is one of the two parameters \u03c8's factor depends on.",
+    "single_goal": "pass \u2014 each of the twelve nodes names one deliverable, and the two nodes sharing `pyproject.toml` (the \u00a74 seat and its calibration) are ordered so they do not run concurrently.",
+    "wiring": "pass \u2014 the cross-plan relationships are declared from the dependent side and are correct: mapping-decision-chain's `plan-section-depends-on` names `signal-cocos-conventions#s3` (for its \u00a74 and \u00a78) and `signal-cocos-conventions#s8` (for its \u00a77), and signal-evidence-followups gates on `signal-cocos-conventions#s7` and `#s8`; every target resolves to a section that exists."
+  },
+  "section_digests": {
+    "_document": "ad340c8a49fc5e9d2c30a1cd815571bcca59241dceba9ac8e5b00ad3082bc88e",
+    "s1": "b474f50e663d4eeb459a19ec861f44c6afd0861521b2e1ae043ae12881d43192",
+    "s2": "402df89180e231d520f2ff61e06d8a8283258b67c19e1baaa9873e31bd67cb2e",
+    "s3": "7ba8fb1382f51b39f3b11e53c687f02e9f1b810ccc9878b452f3093a3dd8b1f8",
+    "s4": "d06257cb495143903b6525ebc65b7dedc8345fcc4a4c6d97ef34f722d87710bf",
+    "s5": "99be5b1a77444d136d87cf89d699cbb98123e23f2be500d748372881b9347c17",
+    "s6": "05ea67e7c57ea6b851a4b1aeb80e151fb0dcb54af0bfb568b815451a98c3c459",
+    "s7": "1e220329bd61bb17841196c72a5cf6cfe849ea750394dca5297d79b622730e07",
+    "s8": "745703623e869e8b7fa5944cab1295ef26a3cafe6861612d1d6b2a7e43927f39"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T00:52:33.979008+00:00"
+}
