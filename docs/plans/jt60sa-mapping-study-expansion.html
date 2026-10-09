@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53">
 <meta name="plan-impl" content="0.4118">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-10-09">
 </head>
 <body>
@@ -428,6 +428,9 @@
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261009T051553674602-signals-focus" data-who="reckon-build" data-when="2026-10-09T05:53:29.337Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/jt60sa-mapping-study-expansion/signals-focus.html</p></div>
 </div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261009T055528506135-review-of-signals-focus" data-who="reckon-build" data-when="2026-10-09T06:13:09.190Z">
+    <div class="r-comment-body"><p>review record for run r-20261009T051553674602-signals-focus at 760ab572b stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261009T051553674602-signals-focus.json (parsed, total 109): VERDICT SOUND WITH FINDINGS.</p></div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-09T06:07:00Z">
     <div class="r-comment-body"><p>§6 landed: <code>map run --clear</code> now deletes bindings through the same owner as <code>map clear</code> (merge <code>bedcba7b8</code>; 564 tests pass on <code>tests/ids/</code>). Its bounded live run left the magnetics mapping empty, and §9 regenerates it. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s6">evidence</a></p></div>
 </div>
@@ -444,7 +447,7 @@
     <div class="r-comment-body"><p>§2 landed: <code>--reset-to</code> honours <code>--focus</code>. For the TC probe source, the filter selects its 14 members against 4,679 unfocused (merge <code>88885fa53</code>). The two stale stage tests left by §1 go to §17. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s2">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261009T055832361259-focused-reset-scope" data-who="reckon-build" data-when="2026-10-09T06:13:25.144Z">
-    <div class="r-comment-body"><p>Scoped the signals --reset-to branch to --focus: it now renders build_focus_predicate into the reset extra_filter and passes focus_items into reset_to_status, so a focused reset touches only the named sources. Unit gate tests/discovery/test_signals_focus_reset.py + test_signals_focus.py = 16 passed EXIT=0; read-only live count: the focus filter for the MDAC magPbTCNNN source id selects 14 FacilitySignals = that source&#x27;s 14 members (an unfocused reset of the same cohort would select 4679). evidence docs/evidence/fragments/jt60sa-mapping-study-expansion/focused-reset-scope.html</p></div>
+    <div class="r-comment-body"><p>Scoped the signals --reset-to branch to --focus: it now renders build_focus_predicate into the reset extra_filter and passes focus_items into reset_to_status, so a focused reset touches only the named sources. Unit gate tests/discovery/test_signals_focus_reset.py + test_signals_focus.py = 16 passed EXIT=0; read-only live count: the focus filter for the MDAC magPbTCNNN source id selects 14 FacilitySignals = that source's 14 members (an unfocused reset of the same cohort would select 4679). evidence docs/evidence/fragments/jt60sa-mapping-study-expansion/focused-reset-scope.html</p></div>
 </div>
 </section>
 </main>
