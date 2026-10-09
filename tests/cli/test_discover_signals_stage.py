@@ -134,6 +134,50 @@ def test_flush_selects_the_draining_half(engine) -> None:
     assert engine["discover_only"] is False
 
 
+def test_flush_opens_no_ssh(engine, monkeypatch) -> None:
+    """A draining run reads only the graph and the model, so it needs no SSH."""
+    from imas_codex.cli.discover import common
+
+    seen: dict = {}
+    drive = common.run_discovery
+
+    def record_config(config, async_main, *, on_complete=None):
+        seen["check_ssh"] = config.check_ssh
+        return drive(config, async_main, on_complete=on_complete)
+
+    monkeypatch.setattr(common, "run_discovery", record_config)
+
+    run_signals_stage(FACILITY, SignalsStageOptions(flush=True))
+    assert seen["check_ssh"] is False
+
+    run_signals_stage(FACILITY, SignalsStageOptions())
+    assert seen["check_ssh"] is True
+
+
+def test_reset_takes_the_category_scope(engine, monkeypatch) -> None:
+    """A category-scoped reset touches only the categories the run will claim."""
+    calls: list[dict] = []
+
+    def fake_reset(spec, facility, *, extra_filter="", extra_params=None, **kw):
+        calls.append({"filter": extra_filter, "params": extra_params or {}})
+        return 3
+
+    monkeypatch.setattr("imas_codex.discovery.base.reset.reset_to_status", fake_reset)
+
+    run_signals_stage(
+        FACILITY,
+        SignalsStageOptions(
+            reset_to="discovered", categories="MMSYS, MDAC", flush=True
+        ),
+    )
+
+    (call,) = calls
+    assert call["params"]["categories"] == ["MMSYS", "MDAC"]
+    assert "split(coalesce(n.data_source_path, n.name), '/')[0]" in call["filter"]
+    assert call["filter"].lstrip().startswith("AND ")
+    assert engine["categories"] == ["MMSYS", "MDAC"]
+
+
 def test_topic_reaches_the_enricher(engine) -> None:
     run_signals_stage(FACILITY, SignalsStageOptions(topic="equilibrium"))
     assert engine["focus"] == "equilibrium"

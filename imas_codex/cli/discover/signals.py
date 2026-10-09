@@ -136,9 +136,18 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
                     reference_shot = int(ref)
                     break
 
-    # Handle --reset-to: reset signals back to the target state
+    category_list = (
+        [c.strip() for c in options.categories.split(",") if c.strip()]
+        if options.categories
+        else None
+    )
+
+    # Handle --reset-to: reset signals back to the target state. The reset
+    # takes the same scanner and category scope as the claims that follow it,
+    # so a scoped run never resets rows it will not then process.
     if options.reset_to:
         from imas_codex.discovery.base.reset import SIGNAL_RESET_SPECS, reset_to_status
+        from imas_codex.discovery.signals.parallel import build_category_predicate
 
         spec = SIGNAL_RESET_SPECS[options.reset_to]
         extra_filter = ""
@@ -146,11 +155,19 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
         if options.scanners:
             extra_filter = "AND n.discovery_source IN $sources"
             extra_params["sources"] = scanner_types
+        if category_list:
+            extra_filter += f" AND {build_category_predicate('n')}"
+            extra_params["categories"] = category_list
 
         reset_count = reset_to_status(
             spec, facility, extra_filter=extra_filter, extra_params=extra_params
         )
-        scope = f" (scanner: {options.scanners})" if options.scanners else ""
+        scope_parts = []
+        if options.scanners:
+            scope_parts.append(f"scanner: {options.scanners}")
+        if category_list:
+            scope_parts.append(f"categories: {', '.join(category_list)}")
+        scope = f" ({'; '.join(scope_parts)})" if scope_parts else ""
         log_print(
             f"[yellow]Reset {reset_count} signals to '{options.reset_to}'{scope}[/yellow]"
         )
@@ -167,11 +184,6 @@ def run_signals_stage(facility: str, options: SignalsStageOptions) -> dict:
         log_print(f"  Time limit: {options.time_limit} min")
     if options.topic:
         log_print(f"  Topic: {options.topic}")
-    category_list = (
-        [c.strip() for c in options.categories.split(",") if c.strip()]
-        if options.categories
-        else None
-    )
     if category_list:
         log_print(f"  Categories: {', '.join(category_list)}")
     if options.rescan:
