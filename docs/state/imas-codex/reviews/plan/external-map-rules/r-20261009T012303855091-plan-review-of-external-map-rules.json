@@ -91,9 +91,22 @@
       "finding": "interface_budget-1",
       "reason": "",
       "when": "2026-10-09T01:37:32.434541+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "imas map owns source-to-IMAS bindings; a pulled rule is such a binding from another provider, so pull extends that subject rather than overloading it, and section 3 states this",
+      "when": "2026-10-09T01:37:36.659424+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "imas map owns source-to-IMAS bindings; a pulled rule is such a binding from another provider, so pull extends that subject rather than overloading it, and section 3 states this",
+      "when": "2026-10-09T01:37:36.659424+00:00"
+    },
     "duplicate_owner-2": {
       "action": "acted",
       "by": "",
