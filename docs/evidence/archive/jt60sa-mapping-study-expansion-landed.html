@@ -85,6 +85,11 @@
     <p>When the mapping engine stops on its deadline or cost limit, <code>run_mapping_engine</code> in <code>imas_codex/ids/workers.py</code> now releases the claims it still holds and calls <code>validate_worker</code> once more with the stop reason. That pass validates only the batches that exist, persists them, and marks the mapping partial. <code>unmapped_selected_sources</code> names the selected sources still unbound. The three new <code>IMASMapping</code> attributes are <code>partial</code>, <code>unmapped_sources</code> and <code>stop_reason</code>, and the coordinator's review required them to be declared in <code>imas_codex/schemas/facility.yaml</code>. A partial mapping stays at <code>generated</code> even under <code>--activate</code>. A later run maps only the remaining sources.</p><p>Worker commits <code>f5e92a7ef</code> and <code>b7a688b0c</code> are merged at <code>3ec338788</code>, and the main checkout's generated models were rebuilt. On the merged head, <code>tests/ids/</code> gives 570 passed. The negative control removed the shutdown validation, and both the deadline case and the cost case then failed at the persisted-bindings assertion. One follow-on: a source selected into several sections of one IDS can be skipped on resume once its first section gains a binding, because the per-IDS claim treats any binding as complete.</p>
   </section>
 
+  <section id="s21">
+    <h2>§21 — The assign phase ends when only handled sources remain</h2>
+    <p><code>has_pending_assignment_work</code> in <code>imas_codex/ids/workers.py</code> now takes <code>handled_source_ids</code> and excludes them. When it finds no claimable source, <code>assign_worker</code> asks that check with its own handled set, leaves its loop if nothing else is pending, and marks the assign phase done. A source whose choice was refused, or which had no shortlist, therefore ends its turn in this run and is retried on a later one. Worker commit <code>40d384889</code> is merged at <code>a758dc050</code>. <code>tests/ids/test_assign_phase_handled.py</code> drives the engine with one escalated source whose choice raises, and the run completes. On the merged head, <code>tests/ids/</code> gives 571 passed. The negative control drops the exclusion, and the test's <code>wait_for</code> then times out.</p>
+  </section>
+
 </main>
 </body>
 </html>
