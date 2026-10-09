@@ -47,11 +47,10 @@ def test_limited_host_serializes_calls_and_unlimited_host_overlaps(monkeypatch):
 
     monkeypatch.setattr(executor.subprocess, "run", fake_run)
     for host, expected_peak in (("limited", 1), ("unlimited", 2)):
-        resolved = tools._resolve_ssh_host(host)
         with ThreadPoolExecutor(max_workers=2) as pool:
             outputs = list(
                 pool.map(
-                    lambda _, host=resolved: executor.run_command("true", host),
+                    lambda _, target=host: executor.run_command("true", target),
                     range(2),
                 )
             )

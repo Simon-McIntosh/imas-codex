@@ -59,12 +59,14 @@ logger = logging.getLogger(__name__)
 
 # Track all active pools for cleanup on process exit
 _active_pools: weakref.WeakSet[SSHWorkerPool] = weakref.WeakSet()
+_active_pools_lock = threading.Lock()
 _atexit_registered = False
 
 # One process owns admission for both short SSH calls and persistent workers.
 # Separate CLI processes do not share these permits.
 _host_sessions: dict[str, tuple[int, threading.BoundedSemaphore]] = {}
 _host_sessions_lock = threading.Lock()
+_checked_host_configs: set[str] = set()
 
 
 def configure_host_session_limit(ssh_host: str, limit: int) -> None:
@@ -87,7 +89,14 @@ def host_session_limit(ssh_host: str) -> int | None:
 
 
 def _session_permit(ssh_host: str) -> threading.BoundedSemaphore | None:
-    entry = _host_sessions.get(ssh_host.lower())
+    key = ssh_host.lower()
+    entry = _host_sessions.get(key)
+    if entry is None and key not in _checked_host_configs:
+        from imas_codex.remote.tools import _resolve_ssh_host
+
+        _resolve_ssh_host(ssh_host)
+        _checked_host_configs.add(key)
+        entry = _host_sessions.get(key)
     return entry[1] if entry else None
 
 
@@ -102,10 +111,12 @@ async def acquire_host_session(ssh_host: str) -> threading.BoundedSemaphore | No
 
 def open_worker_pool(ssh_host: str) -> SSHWorkerPool | None:
     """Find an open pool so short calls can use a held connection."""
+    with _active_pools_lock:
+        pools = list(_active_pools)
     return next(
         (
             pool
-            for pool in list(_active_pools)
+            for pool in pools
             if pool.ssh_host.lower() == ssh_host.lower()
             and pool._started
             and not pool._closed
@@ -527,7 +538,8 @@ class SSHWorkerPool:
         self._owner_loop: asyncio.AbstractEventLoop | None = None
 
         # Register for cleanup
-        _active_pools.add(self)
+        with _active_pools_lock:
+            _active_pools.add(self)
         _ensure_atexit()
 
     async def start(self, initial_workers: int | None = None) -> None:
@@ -620,13 +632,17 @@ class SSHWorkerPool:
     ) -> subprocess.CompletedProcess[str]:
         """Run a shell command through a worker's existing SSH session."""
         payload = json.dumps(
-            {"command": command, "stdin": stdin_data, "timeout": timeout}
+            {
+                "command": command,
+                "has_stdin": stdin_data is not None,
+                "timeout": timeout,
+            }
         )
         script = (
-            "import json, subprocess\n"
+            "import json, subprocess, sys\n"
             f"request = json.loads({payload!r})\n"
-            "stream = ({'stdin': subprocess.DEVNULL} if request['stdin'] is None "
-            "else {'input': request['stdin']})\n"
+            "stream = ({'input': sys.stdin.read()} if request['has_stdin'] "
+            "else {'stdin': subprocess.DEVNULL})\n"
             "try:\n"
             "    result = subprocess.run(['bash', '-c', request['command']], "
             "capture_output=True, text=True, timeout=request['timeout'], "
@@ -637,7 +653,9 @@ class SSHWorkerPool:
             "    print(json.dumps({'timeout': True}))\n"
         )
         async with self.acquire() as worker:
-            response = await worker.execute(script, timeout=float(timeout + 2))
+            response = await worker.execute(
+                script, stdin_data=stdin_data or "", timeout=float(timeout + 2)
+            )
         data = json.loads(response)
         if data.get("timeout"):
             raise subprocess.TimeoutExpired(command, timeout)
@@ -862,7 +880,9 @@ def force_kill_all_pools() -> None:
     _pools.clear()
 
     # Also kill any pools tracked via WeakSet
-    for pool in list(_active_pools):
+    with _active_pools_lock:
+        active = list(_active_pools)
+    for pool in active:
         pool.force_kill_all()
 
 
