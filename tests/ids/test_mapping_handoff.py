@@ -29,6 +29,7 @@ SIGNAL_KEYS = {
     "source_group",
     "source_array",
     "member_identifier",
+    "source_property",
     "target_path",
     "transform_expression",
     "source_units",
@@ -38,6 +39,8 @@ SIGNAL_KEYS = {
     "evidence",
 }
 UNEXPANDED_KEYS = {"source_id", "target_path", "reason"}
+ERROR_TARGET = "magnetics/b_field_pol_probe/field/data_error_upper"
+SINGLETON = "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)"
 
 
 def _graph() -> MagicMock:
@@ -76,32 +79,85 @@ def _graph() -> MagicMock:
                     "target_units": None,
                     "source_property": "value",
                 },
-            ]
-        if "OPTIONAL MATCH (signal:FacilitySignal)-[:MEMBER_OF]->(source)" in statement:
-            return [
                 {
                     "source_id": "jt-60sa:magnetics:pickup_probe",
-                    "target_id": target,
-                    "signal_id": f"jt-60sa:general/mdac_magpbtc{number}",
-                    "data_source": "edas",
-                    "data_source_path": f"MDAC/magPbTC{number}",
-                    "cocos_label": None,
-                    "confidence": None,
-                    "evidence": None,
-                }
-                for number in (10, 11)
-            ] + [
+                    "target_id": ERROR_TARGET,
+                    "transform_expression": "value",
+                    "source_units": "T",
+                    "target_units": "T",
+                    "source_property": "value",
+                },
                 {
-                    "source_id": "jt-60sa:magnetics:flux_loop",
-                    "target_id": "magnetics/flux_loop/flux/data",
-                    "signal_id": None,
-                    "data_source": None,
-                    "data_source_path": None,
-                    "cocos_label": None,
-                    "confidence": None,
-                    "evidence": None,
-                }
+                    "source_id": SINGLETON,
+                    "target_id": target,
+                    "transform_expression": "value",
+                    "source_units": "T",
+                    "target_units": "T",
+                    "source_property": "value",
+                },
             ]
+        if "OPTIONAL MATCH (signal:FacilitySignal)-[:MEMBER_OF]->(source)" in statement:
+            return (
+                [
+                    {
+                        "source_id": "jt-60sa:magnetics:pickup_probe",
+                        "target_id": target,
+                        "signal_id": f"jt-60sa:general/mdac_magpbtc{number}",
+                        "data_source": "edas",
+                        "data_source_path": f"MDAC/magPbTC{number}",
+                        "source_property": "value",
+                        "mapping_type": "direct",
+                        "derived_from": None,
+                        "cocos_label": None,
+                        "confidence": None,
+                        "evidence": None,
+                    }
+                    for number in (10, 11)
+                ]
+                + [
+                    {
+                        "source_id": "jt-60sa:magnetics:pickup_probe",
+                        "target_id": ERROR_TARGET,
+                        "signal_id": f"jt-60sa:general/mdac_magpbtc{number}",
+                        "data_source": "edas",
+                        "data_source_path": f"MDAC/magPbTC{number}",
+                        "source_property": "value",
+                        "mapping_type": "error_derived",
+                        "derived_from": target,
+                        "cocos_label": None,
+                        "confidence": None,
+                        "evidence": None,
+                    }
+                    for number in (10, 11)
+                ]
+                + [
+                    {
+                        "source_id": SINGLETON,
+                        "target_id": target,
+                        "signal_id": "jt-60sa:general/mdac_magpbtc5",
+                        "data_source": "edas",
+                        "data_source_path": "MDAC/magPbTC5",
+                        "source_property": "value",
+                        "mapping_type": "direct",
+                        "derived_from": None,
+                        "cocos_label": None,
+                        "confidence": None,
+                        "evidence": None,
+                    }
+                ]
+                + [
+                    {
+                        "source_id": "jt-60sa:magnetics:flux_loop",
+                        "target_id": "magnetics/flux_loop/flux/data",
+                        "signal_id": None,
+                        "data_source": None,
+                        "data_source_path": None,
+                        "cocos_label": None,
+                        "confidence": None,
+                        "evidence": None,
+                    }
+                ]
+            )
         raise AssertionError(f"unexpected graph query: {statement}")
 
     graph.query.side_effect = query
@@ -121,8 +177,9 @@ def test_builder_expands_members_and_keeps_missing_values_as_null():
     entry = document["ids"][0]
     assert set(entry) == IDS_KEYS
     assert entry["status"] == "generated"
-    assert len(entry["signals"]) == 2
-    assert [row["member_identifier"] for row in entry["signals"]] == ["10", "11"]
+    assert len(entry["signals"]) == 3
+    assert [row["member_identifier"] for row in entry["signals"]] == ["10", "11", "5"]
+    assert {row["source_property"] for row in entry["signals"]} == {"value"}
     for row in entry["signals"]:
         assert set(row) == SIGNAL_KEYS
         assert row["data_source"] == "edas"
@@ -131,16 +188,21 @@ def test_builder_expands_members_and_keeps_missing_values_as_null():
         assert row["cocos_label"] is None
         assert row["confidence"] is None
         assert row["evidence"] is None
-        assert row["transform_expression"] is None
-    assert len(entry["unexpanded"]) == 1
-    assert set(entry["unexpanded"][0]) == UNEXPANDED_KEYS
-    assert "No FacilitySignal member" in entry["unexpanded"][0]["reason"]
+    assert len(entry["unexpanded"]) == 2
+    for row in entry["unexpanded"]:
+        assert set(row) == UNEXPANDED_KEYS
+    reasons = {row["target_path"]: row["reason"] for row in entry["unexpanded"]}
+    assert "No FacilitySignal member" in reasons["magnetics/flux_loop/flux/data"]
+    assert "no error signal exists" in reasons[ERROR_TARGET]
+    assert all(row["target_path"] != ERROR_TARGET for row in entry["signals"])
 
     expansion_query = graph.query.call_args_list[-1].args[0]
     for marker in (
         "FacilitySignal)-[:MEMBER_OF]->(source)",
         "signal.data_source_name",
         "signal.data_source_path",
+        "binding.source_property",
+        "binding.mapping_type",
         "binding.cocos_label",
         "binding.confidence",
         "binding.evidence",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from collections.abc import Sequence
 from datetime import UTC, datetime
@@ -23,6 +24,7 @@ SIGNAL_KEYS = frozenset(
         "source_group",
         "source_array",
         "member_identifier",
+        "source_property",
         "target_path",
         "transform_expression",
         "source_units",
@@ -85,6 +87,26 @@ def check_handoff_document(document: Any) -> None:
                         )
 
 
+_TRAILING_NUMBER = re.compile(r"(\d+)$")
+
+
+def _member_identifier(source_array: str, arrays: list[str]) -> str | None:
+    """The segment that tells this member apart within its source.
+
+    A grouped source keeps the numeric runs that vary across its members. A
+    singleton source has no peers to compare, so its instance number is the
+    array name's trailing number, and an array without one has no identifier.
+    """
+    from imas_codex.discovery.signals.parallel import extract_member_identifier
+
+    if len(set(arrays)) > 1:
+        identifier = extract_member_identifier(source_array, arrays)
+        if identifier and identifier != source_array:
+            return identifier
+    match = _TRAILING_NUMBER.search(source_array)
+    return match.group(1) if match else None
+
+
 def _source_parts(path: str | None) -> tuple[str, str] | None:
     if not path or "/" not in path:
         return None
@@ -101,8 +123,6 @@ def build_mapping_handoff(
     gc: GraphClient | None = None,
 ) -> dict[str, Any]:
     """Expand each bound SignalSource to its FacilitySignal members."""
-    from imas_codex.discovery.signals.parallel import extract_member_identifier
-
     if not ids_names:
         raise ValueError("at least one IDS name is required")
     if gc is None:
@@ -142,6 +162,9 @@ def build_mapping_handoff(
                    signal.id AS signal_id,
                    signal.data_source_name AS data_source,
                    signal.data_source_path AS data_source_path,
+                   binding.source_property AS source_property,
+                   binding.mapping_type AS mapping_type,
+                   binding.derived_from AS derived_from,
                    binding.cocos_label AS cocos_label,
                    binding.confidence AS confidence,
                    binding.evidence AS evidence
@@ -160,10 +183,32 @@ def build_mapping_handoff(
             "signals": [],
             "unexpanded": [],
         }
+        bound_targets = defaultdict(set)
+        for binding in existing["bindings"]:
+            bound_targets[binding["source_id"]].add(binding["target_id"])
         for binding in existing["bindings"]:
             source_id = binding["source_id"]
             target_path = binding["target_id"]
             rows = members.get((source_id, target_path), [])
+            derived_from = rows[0].get("derived_from") if rows else None
+            if (
+                rows
+                and rows[0].get("mapping_type") == "error_derived"
+                and derived_from in bound_targets[source_id]
+            ):
+                # The error field was filled from the same signal that feeds
+                # its data field, so no error signal stands behind it.
+                entry["unexpanded"].append(
+                    {
+                        "source_id": source_id,
+                        "target_path": target_path,
+                        "reason": (
+                            f"Error mapping derived from the value signal bound to "
+                            f"{derived_from}; no error signal exists"
+                        ),
+                    }
+                )
+                continue
             arrays = [
                 parts[1]
                 for row in rows
@@ -190,9 +235,7 @@ def build_mapping_handoff(
                     )
                     continue
                 source_group, source_array = parts
-                identifier = (
-                    extract_member_identifier(source_array, arrays) or source_array
-                )
+                identifier = _member_identifier(source_array, arrays)
                 entry["signals"].append(
                     {
                         "signal_id": row["signal_id"],
@@ -201,6 +244,7 @@ def build_mapping_handoff(
                         "source_group": source_group,
                         "source_array": source_array,
                         "member_identifier": identifier,
+                        "source_property": row.get("source_property"),
                         "target_path": target_path,
                         "transform_expression": binding.get("transform_expression"),
                         "source_units": binding.get("source_units"),
