@@ -346,6 +346,98 @@ def test_cocos_label_prefers_the_target_itself_over_its_parent():
     assert row["cocos_label_source"] == "xml"
 
 
+def test_time_coordinate_carries_no_cocos_label():
+    """A time coordinate is never transformed; its sibling data field keeps the parent's label."""
+    graph = MagicMock()
+    data_target = "pf_active/coil/current/data"
+    time_target = "pf_active/coil/current/time"
+
+    def query(statement: str, **params):
+        if "m.facility_id AS facility_id" in statement:
+            return [
+                {
+                    "id": "jt-60sa:pf_active",
+                    "facility_id": "jt-60sa",
+                    "ids_name": "pf_active",
+                    "dd_version": "4.1.1",
+                    "status": "generated",
+                    "provider": "imas-codex",
+                }
+            ]
+        if "r.config AS config" in statement:
+            return []
+        if "r.source_property AS source_property" in statement:
+            return [
+                {
+                    "source_id": "jt-60sa:pf_active:coil_current",
+                    "target_id": data_target,
+                    "transform_expression": None,
+                    "source_units": "A",
+                    "target_units": "A",
+                    "source_property": "value",
+                },
+                {
+                    "source_id": "jt-60sa:pf_active:coil_time",
+                    "target_id": time_target,
+                    "transform_expression": None,
+                    "source_units": "s",
+                    "target_units": "s",
+                    "source_property": "time",
+                },
+            ]
+        if "OPTIONAL MATCH (signal:FacilitySignal)-[:MEMBER_OF]->(source)" in statement:
+            return [
+                {
+                    "source_id": "jt-60sa:pf_active:coil_current",
+                    "target_id": data_target,
+                    "signal_id": "jt-60sa:general/mmcsys_coil1_current",
+                    "data_source": "edas",
+                    "data_source_path": "MMSYS/coil1_current",
+                    "source_property": "value",
+                    "mapping_type": "direct",
+                    "derived_from": None,
+                    "cocos_label": None,
+                    "confidence": None,
+                    "evidence": None,
+                },
+                {
+                    "source_id": "jt-60sa:pf_active:coil_time",
+                    "target_id": time_target,
+                    "signal_id": "jt-60sa:general/mmcsys_coil1_time",
+                    "data_source": "edas",
+                    "data_source_path": "MMSYS/coil1_time",
+                    "source_property": "time",
+                    "mapping_type": "direct",
+                    "derived_from": None,
+                    "cocos_label": None,
+                    "confidence": None,
+                    "evidence": None,
+                },
+            ]
+        if "HAS_PARENT" in statement:
+            return [
+                {
+                    "target_id": data_target,
+                    "cocos_label": "ip_like",
+                    "cocos_label_source": "xml",
+                },
+                {
+                    "target_id": time_target,
+                    "cocos_label": "ip_like",
+                    "cocos_label_source": "xml",
+                },
+            ]
+        raise AssertionError(f"unexpected graph query: {statement}")
+
+    graph.query.side_effect = query
+    document = build_mapping_handoff("jt-60sa", ["pf_active"], gc=graph)
+    rows = {row["target_path"]: row for row in document["ids"][0]["signals"]}
+    assert rows[time_target]["cocos_label"] == "none"
+    assert rows[time_target]["cocos_label_source"] == "none"
+    assert rows[data_target]["cocos_label"] == "ip_like"
+    assert rows[data_target]["cocos_label_source"] == "xml"
+
+
 def test_fixture_has_the_exact_contract_and_realistic_rows():
     document = json.loads(FIXTURE.read_text(encoding="utf-8"))
     check_handoff_document(document)
