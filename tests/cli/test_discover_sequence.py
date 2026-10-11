@@ -870,3 +870,37 @@ def test_flush_reset_runs_in_the_enrich_stage() -> None:
     assert sequence._stage_reset_to(stages["signals enrich"], flushed) == "discovered"
     assert sequence._stage_reset_to(stages["signals enrich"], whole) is None
     assert sequence._stage_reset_to(stages["signals scan"], whole) == "discovered"
+
+
+def test_repeated_category_and_scanner_options_all_reach_the_run(monkeypatch):
+    """A repeated --category keeps every value, as a comma list does."""
+    captured = {}
+
+    def fake_run_sequence(facility, *, options):
+        captured["options"] = options
+        return []
+
+    monkeypatch.setattr(sequence, "run_sequence", fake_run_sequence)
+    monkeypatch.setattr(sequence, "_report", lambda facility, outcomes: "")
+    monkeypatch.setattr(
+        "imas_codex.cli.logging.configure_cli_logging", lambda *a, **k: None
+    )
+
+    result = CliRunner().invoke(
+        sequence.run,
+        [
+            "jt-60sa",
+            "--category",
+            "MMSYS",
+            "--category",
+            "MDAC,TF",
+            "--scanners",
+            "edas",
+            "--scanners",
+            "wiki",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert captured["options"].category == "MMSYS,MDAC,TF"
+    assert captured["options"].scanners == "edas,wiki"

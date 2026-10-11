@@ -250,6 +250,12 @@ def _domains(items: tuple[str, ...]) -> tuple[str, ...]:
     return selected
 
 
+def _comma_list(items: tuple[str, ...]) -> str | None:
+    """Join repeated and comma-separated option values into one comma list."""
+    names = [name.strip() for item in items for name in item.split(",")]
+    return ",".join(name for name in names if name) or None
+
+
 def _validate_options(options: SequenceOptions) -> None:
     if options.until and options.only:
         raise click.UsageError("--until and --only are mutually exclusive")
@@ -939,8 +945,16 @@ def run_sequence(
 @click.option("--code-workers", type=int)
 @click.option("--workers", type=int)
 @click.option("--vlm-workers", type=int)
-@click.option("--category")
-@click.option("--scanners")
+@click.option(
+    "--category",
+    multiple=True,
+    help="Restrict signals to these source categories (repeat or comma-separate).",
+)
+@click.option(
+    "--scanners",
+    multiple=True,
+    help="Run only these signal scanners (repeat or comma-separate).",
+)
 @click.option("--reference-shot", type=int)
 @click.option("--physics-domain", multiple=True)
 @click.option("--ids", multiple=True)
@@ -965,6 +979,8 @@ def run(facility: str, **kwargs) -> None:
     """Run the selected discovery domains for a facility."""
     kwargs["only"] = _domains(kwargs["only"])
     kwargs["skip"] = _domains(kwargs["skip"])
+    kwargs["category"] = _comma_list(kwargs["category"])
+    kwargs["scanners"] = _comma_list(kwargs["scanners"])
     options = SequenceOptions(**kwargs)
     from imas_codex.cli.logging import configure_cli_logging, get_log_file
 
