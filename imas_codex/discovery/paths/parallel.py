@@ -2917,7 +2917,7 @@ async def run_parallel_discovery(
                 logger.info(
                     "Started persistent SSH pool for %s with %d workers",
                     ssh_host,
-                    num_ssh_workers,
+                    len(ssh_pool._workers),
                 )
             except Exception as e:
                 logger.warning(
