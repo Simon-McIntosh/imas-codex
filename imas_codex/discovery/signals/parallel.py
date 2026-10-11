@@ -82,8 +82,13 @@ logger = logging.getLogger(__name__)
 CONTEXT_CANDIDATE_POOL = 30
 
 # Wall-time budget for one context rerank. A slow rerank returns the embedding
-# order rather than delaying enrichment.
-_CONTEXT_RERANK_BUDGET_SECONDS = 5.0
+# order rather than delaying enrichment. The decision service serves one key's
+# judgements at a shared rate, so a 30-candidate pool that takes about 2.5 s
+# alone takes about 10 s while eight enrich workers rerank at once, and the
+# calls it answers all land near the end. A budget below that cancels every
+# call: the pool keeps its embedding order and the cancelled calls are spent
+# without being counted against the run's cost cap.
+_CONTEXT_RERANK_BUDGET_SECONDS = 30.0
 
 # Judgements in flight at once within one context rerank.
 _CONTEXT_RERANK_CONCURRENCY = 32
