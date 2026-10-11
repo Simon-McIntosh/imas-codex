@@ -21,8 +21,8 @@
   <title>JT-60SA IMAS Maps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="84">
-<meta name="plan-modified" content="2026-10-09">
+<meta name="plan-version" content="85">
+<meta name="plan-modified" content="2026-10-12">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
 <meta name="plan-sprint" content="S17">
 </head>
@@ -461,6 +461,9 @@
 </div>
 <div class="r-comment" data-section="s12" data-id="c-run-r-20261009T014404552885-example-map-run" data-who="reckon-build" data-when="2026-10-09T02:22:57Z">
     <div class="r-comment-body"><p>Committed a fixture-backed pickup example record: 3 candidate sources/63 edges, local map 4 selected candidate edges but 0 bindings and 0 generated or active IMASMapping nodes; target and sign agreement each 0/0 evaluated, with 45 excluded fixture entries itemized at their observed statuses.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20261012T0020-map-code-review" data-who="reckon-build" data-when="2026-10-11T22:20:00Z">
+    <div class="r-comment-body"><p>Map-code review, 2026-10-11. Two investigate runs read the generation half and the validation/persistence/export half at <code>93bfb7e9d</code>. Independent claims reviews reproduced all six top-ranked findings. Fixes on main:</p><ul><li><code>7fa932305</code>: the survival filter and <code>all_passed</code> now count every recorded error, so a COCOS-sensitive target without sign handling, or an identity transform across a unit factor, is no longer persisted. <code>imas map validate</code> passes the sign-flip set and reads each binding's <code>cocos_label</code>. The assembler stopped converting units a second time (a kA→A scalar had come out 1000× too large). The transform probe retries index expressions on an array. The loader stopped reading three properties nothing writes.</li><li><code>ac0710097</code>: error bounds are read from whole words (‘low’ inside ‘flow’ had made a lower bound), cross-IDS cluster siblings now reach the mapping prompt (the slot had always been empty), the dead <code>POPULATES.config</code> read is gone, and the section counter is renamed to match what it counts.</li></ul><p>Still open: (1) mapping state is tracked per IDS, not per selected section, so a second selected home in one IDS that got an empty answer is never retried and the source reads <code>validated</code>. (2) Error derivation's substring parent fallback depends on dict order. (3) A candidate run with <code>--ids</code> that filters out every routed IDS falls back to a whole-DD search. Each needs a design choice and is not patched.</p><p>Candidate trial: 579 unrouted sources from the regenerated cohort (PSRC, DCSV, MMSYS, TF), 59 judged before the graph service expired at midnight. The 256 MDAC/MMSYS/DCSV routes judged from scrambled pre-fix descriptions still need <code>discover clear jt-60sa -d map</code>; the auto-mode classifier refused that clear as a shared-resource change, so it waits for the lead.</p></div>
 </div>
 </section>
 </main>
