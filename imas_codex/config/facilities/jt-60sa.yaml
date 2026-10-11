@@ -237,6 +237,18 @@ signal_glossary:
       loop
   - term: magPbTC
     meaning: MDAC SELENE tangential (poloidal-field) magnetic probe
+  - term: EFCC
+    meaning: >-
+      error field correction coil, one of the in-vessel coils on the stabilizing
+      plate; not an equilibrium field coil
+  - term: RWMC
+    meaning: >-
+      resistive wall mode control coil, one of the in-vessel coils on the
+      stabilizing plate
+  - term: Com.
+    meaning: >-
+      command: a reference value set by the plasma control system (as in a PSRC
+      "Plasma Vertical Pos. (Zp0) Com."), not a measured or reconstructed value
 
 # Data access patterns discovered during facility exploration.
 data_access_patterns:
