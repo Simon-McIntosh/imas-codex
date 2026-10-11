@@ -286,7 +286,15 @@ class SSHWorker:
             self.ssh_host,
         )
 
-        self._session_permit = await acquire_host_session(self.ssh_host)
+        try:
+            self._session_permit = await asyncio.wait_for(
+                acquire_host_session(self.ssh_host), timeout=timeout
+            )
+        except TimeoutError as exc:
+            raise RuntimeError(
+                f"SSH worker {self.worker_id} for {self.ssh_host} "
+                f"got no SSH session within {timeout}s"
+            ) from exc
         try:
             self._proc = await asyncio.create_subprocess_exec(
                 *cmd,
@@ -525,6 +533,11 @@ class SSHWorkerPool:
         start_timeout: float = 60.0,
     ):
         self.ssh_host = ssh_host
+        # A host's session limit is registered when the host is first
+        # resolved, which otherwise happens only as the first worker is built.
+        # Resolve it before sizing the pool, or the pool starts more workers
+        # than the host admits and the surplus wait for a session forever.
+        _session_permit(ssh_host)
         limit = host_session_limit(ssh_host)
         self.max_workers = min(max_workers, limit) if limit is not None else max_workers
         self.setup_commands = setup_commands

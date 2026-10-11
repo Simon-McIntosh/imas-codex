@@ -229,3 +229,61 @@ async def test_pool_bridge_executes_a_command_over_its_worker(monkeypatch):
         assert len(launches) == 1
     finally:
         await pool.close()
+
+
+@pytest.mark.asyncio
+async def test_pool_sized_before_host_resolution_honours_the_limit(monkeypatch):
+    """A limit registered only when the host is resolved still caps the pool."""
+    host = "late-registered-host"
+    monkeypatch.setattr(ssh_worker, "_checked_host_configs", set())
+
+    def resolve(ssh_host):
+        configure_host_session_limit(ssh_host, 1)
+        return ssh_host
+
+    monkeypatch.setattr(tools, "_resolve_ssh_host", resolve)
+
+    async def fake_start(self, timeout=30.0):
+        self._session_permit = await acquire_host_session(self.ssh_host)
+        self._ready = True
+
+    async def fake_close(self):
+        self._ready = False
+        self._release_session()
+
+    async def no_second_session(*args, **kwargs):
+        pytest.fail("opened a second SSH session")
+
+    monkeypatch.setattr(SSHWorker, "start", fake_start)
+    monkeypatch.setattr(SSHWorker, "close", fake_close)
+    monkeypatch.setattr(ssh_worker.asyncio, "create_subprocess_exec", no_second_session)
+
+    pool = SSHWorkerPool(host, max_workers=4)
+    assert pool.max_workers == 1
+    await asyncio.wait_for(pool.start(), timeout=5)
+    try:
+        assert len(pool._workers) == 1
+    finally:
+        await pool.close()
+
+
+@pytest.mark.asyncio
+async def test_worker_without_a_session_fails_within_its_start_timeout(monkeypatch):
+    """A worker that cannot get a session fails instead of waiting forever."""
+    host = "saturated-host"
+    configure_host_session_limit(host, 1)
+    monkeypatch.setattr(tools, "_resolve_ssh_host", lambda ssh_host: ssh_host)
+    monkeypatch.setattr(executor, "_get_host_nice_level", lambda ssh_host: None)
+
+    async def never_spawned(*args, **kwargs):
+        pytest.fail("spawned ssh without a session")
+
+    monkeypatch.setattr(ssh_worker.asyncio, "create_subprocess_exec", never_spawned)
+
+    held = await acquire_host_session(host)
+    try:
+        worker = SSHWorker(host, 0)
+        with pytest.raises(RuntimeError, match="got no SSH session"):
+            await asyncio.wait_for(worker.start(timeout=0.2), timeout=5)
+    finally:
+        held.release()
