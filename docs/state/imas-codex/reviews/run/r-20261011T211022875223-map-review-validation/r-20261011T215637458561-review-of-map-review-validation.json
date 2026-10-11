@@ -1,0 +1,76 @@
+{
+  "artifacts": [
+    "/tmp/claims-review-93bfb7e9/_claims/finding1.py",
+    "/tmp/claims-review-93bfb7e9/_claims/finding2.py",
+    "/tmp/claims-review-93bfb7e9/_claims/finding3.py",
+    "/tmp/claims-review-93bfb7e9/_claims/finding3_src.py"
+  ],
+  "claim_lines": [
+    "CLAIM 1: reproduced: at 93bfb7e9 the report's reproduction gives entry.current == 0.001 for transform 'value * 0.001' over 1000.0 mA->A, the exact figure the report states it observed (correct value 1.0)",
+    "CLAIM 2: reproduced: at 93bfb7e9 the COCOS identity binding gives any(check.error) == True and all_passed == True, matching the report",
+    "CLAIM 3: reproduced: at 93bfb7e9 cli/map.py:874 calls validate_mapping(bindings, gc=gc) with no sign_flip_paths and the CLI-form call produces no check.error, so the COCOS branch is unreachable on the promotion path",
+    "CLAIM_SUMMARY: agrees: the summary line 'Findings: 6' matches the six '## Finding' sections beneath it (the report carries no table; the ranked findings list is the table)"
+  ],
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "imas_codex/ids/assembler.py:340-352",
+      "detail": "Re-ran the report's reproduction at 93bfb7e9 (_apply_mappings with transform_expression='value * 0.001', source_units='mA', target_units='A', data value=1000.0). entry.current == 0.001, exactly the figure the report states it observed; the correct value is 1.0. Both code paths read end-to-end: assembler.py:342 executes the transform, then assembler.py:346-352 re-converts because the transformed result is a scalar int|float.",
+      "finding": "units applied twice for scalar bindings whose transform already converts",
+      "verdict": "reproduced"
+    },
+    "CLAIM 2": {
+      "cites": "imas_codex/ids/mapping.py:1887-1899, imas_codex/ids/validation.py:240-249",
+      "detail": "Re-ran the report's reproduction at 93bfb7e9 (validate_mapping over an identity-transform, no-cocos_label binding on equilibrium/time_slice/global_quantities/ip with sign_flip_paths set). any(check.error) is True and check.error names the COCOS sign requirement; report.all_passed is True. The figure matches: a COCOS-violating binding both raises a check.error and passes the four-flag predicate at validation.py:243-249. The survival filter at mapping.py:1887-1899 uses the same four flags and would keep it.",
+      "finding": "the validation drop keeps a COCOS-flagged binding: both gates use the four-flag predicate and ignore check.error",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "imas_codex/cli/map.py:874",
+      "detail": "At 93bfb7e9, cli/map.py:874 reads exactly 'report = validate_mapping(bindings, gc=gc)' with no sign_flip_paths kwarg; mapping.py:1876 does pass sign_flip_paths=flip_paths. Re-ran the same binding through validate_mapping with the CLI call form (no sign_flip_paths): any(check.error) is False, so the COCOS branch at validation.py:160-168 is unreachable on the CLI promotion path while it fires on the pipeline path. Figure matches the report.",
+      "finding": "imas map validate never supplies the sign-flip set, so the COCOS check cannot fire on the promotion path",
+      "verdict": "reproduced"
+    },
+    "CLAIM_SUMMARY": {
+      "detail": "The report's summary line is '**Findings: 6** - ranked most severe first.' The report carries no markdown table (0 pipe rows); the ranked findings list beneath it is the table. It contains exactly six '## Finding' sections (Finding 1..6 at lines 19, 66, 112, 141, 180, 221). 6 == 6.",
+      "verdict": "agrees"
+    }
+  },
+  "claims": [
+    {
+      "cites": "imas_codex/ids/assembler.py:340-352",
+      "rank": 1,
+      "report_figure": "entry.current == 0.001 for transform 'value * 0.001' over 1000.0 mA->A",
+      "rerun_figure": "entry.current == 0.001",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "imas_codex/ids/mapping.py:1887-1899, imas_codex/ids/validation.py:240-249",
+      "rank": 2,
+      "report_figure": "any(check.error) True and all_passed True for a COCOS identity binding",
+      "rerun_figure": "any(check.error) True and all_passed True",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "imas_codex/cli/map.py:874",
+      "rank": 3,
+      "report_figure": "COCOS branch dead on the CLI path; map.py:874 passes no sign_flip_paths",
+      "rerun_figure": "map.py:874 has no sign_flip_paths; CLI-form validate_mapping yields no check.error",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-11T22:02:53.553Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-11T21:56:46Z",
+  "method": "The reviewed run is read-only (committed nothing past its base), so no gate suite and no diff exist. Each of the three highest-ranked findings was re-run against the reviewed revision's own source, extracted to a scratch tree (git archive 93bfb7e9 -> $TMPDIR/claims-review-93bfb7e9) so it reads the same code the run did, with the shared project .venv and the generated models copied in. Recorded against the figure each finding states, not against current main (which has since landed fix commits).",
+  "project": "imas-codex",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/reports/map-review-validation.md",
+  "review_run_id": "r-20261011T215637458561-review-of-map-review-validation",
+  "reviewed_base_sha": "93bfb7e9d3e43f115ecc9eaec404fff34d40574d",
+  "reviewed_head_sha": "93bfb7e9d3e43f115ecc9eaec404fff34d40574d",
+  "reviewed_run_id": "r-20261011T211022875223-map-review-validation",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run ran no gate suite.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T00:00:00+00:00"
+}
