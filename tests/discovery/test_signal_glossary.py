@@ -13,32 +13,9 @@ from imas_codex.discovery.signals.models import (
 )
 
 
-@pytest.mark.asyncio
-async def test_edas_prompt_scopes_category_and_term_context_to_signals():
+async def _enrichment_prompt(signals: list[dict]) -> str:
+    """Run one enrichment batch over ``signals`` and return its user prompt."""
     config = get_facility("jt-60sa")
-    signals = [
-        {
-            "id": "coil-path",
-            "accessor": "read coil",
-            "discovery_source": "edas",
-            "data_source_path": "MMSYS/curUFPLKAT",
-            "name": None,
-        },
-        {
-            "id": "coil-name",
-            "accessor": "read name",
-            "discovery_source": "edas",
-            "data_source_path": "MMSYS/other",
-            "name": "LFP coil current",
-        },
-        {
-            "id": "other",
-            "accessor": "read other",
-            "discovery_source": "edas",
-            "data_source_path": "PSRC/magFluxLp1",
-            "name": None,
-        },
-    ]
     state = parallel.DataDiscoveryState(
         facility="jt-60sa", scanner_types=["edas"], facility_config=config
     )
@@ -89,7 +66,64 @@ async def test_edas_prompt_scopes_category_and_term_context_to_signals():
         await parallel.enrich_worker(state)
 
     assert len(prompts) == 1
-    category, coil_path, coil_name, unrelated = prompts[0].split("### Signal")
+    return prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_a_term_in_the_catalogue_text_reaches_the_prompt():
+    command, compressor = (
+        await _enrichment_prompt(
+            [
+                {
+                    "id": "zp0",
+                    "accessor": "read zp0",
+                    "discovery_source": "edas",
+                    "data_source_path": "PSRC/comZp0",
+                    "name": None,
+                    "source_description": "Plasma Vertical Pos. (Zp0) Com.",
+                },
+                {
+                    "id": "compressor",
+                    "accessor": "read compressor",
+                    "discovery_source": "edas",
+                    "data_source_path": "CryoHRS/comPress1",
+                    "name": None,
+                    "source_description": "Compressor 1 discharge pressure",
+                },
+            ]
+        )
+    ).split("### Signal")[1:]
+    assert "glossary: Com. — command" in command
+    assert "glossary: Com." not in compressor
+
+
+@pytest.mark.asyncio
+async def test_edas_prompt_scopes_category_and_term_context_to_signals():
+    signals = [
+        {
+            "id": "coil-path",
+            "accessor": "read coil",
+            "discovery_source": "edas",
+            "data_source_path": "MMSYS/curUFPLKAT",
+            "name": None,
+        },
+        {
+            "id": "coil-name",
+            "accessor": "read name",
+            "discovery_source": "edas",
+            "data_source_path": "MMSYS/other",
+            "name": "LFP coil current",
+        },
+        {
+            "id": "other",
+            "accessor": "read other",
+            "discovery_source": "edas",
+            "data_source_path": "PSRC/magFluxLp1",
+            "name": None,
+        },
+    ]
+    prompt = await _enrichment_prompt(signals)
+    category, coil_path, coil_name, unrelated = prompt.split("### Signal")
     assert "MMSYS" in category
     assert "coil currents" in category
     assert "glossary: UFP — upper fast plasma position control coil" in coil_path

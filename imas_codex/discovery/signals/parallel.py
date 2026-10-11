@@ -4350,13 +4350,17 @@ async def enrich_worker(
                 if signal.get("data_source_path"):
                     user_lines.append(f"data_source_path: {signal['data_source_path']}")
                 if group_key.startswith("edas:"):
-                    catalogue_name = " ".join(
+                    # A term can appear in the catalogue's own text rather
+                    # than the signal's name: "Com." marks a command value
+                    # only in descriptions such as "Plasma Vertical Pos.
+                    # (Zp0) Com.".
+                    catalogue_text = " ".join(
                         str(signal.get(field) or "")
-                        for field in ("data_source_path", "name")
+                        for field in ("data_source_path", "name", "source_description")
                     ).casefold()
                     for entry in signal_glossary:
                         term = entry["term"]
-                        if term and term.casefold() in catalogue_name:
+                        if term and term.casefold() in catalogue_text:
                             user_lines.append(f"glossary: {term} — {entry['meaning']}")
                 if signal.get("is_static"):
                     user_lines.append("is_static: true")
