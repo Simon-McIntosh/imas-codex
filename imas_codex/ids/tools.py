@@ -616,8 +616,7 @@ def search_existing_mappings(
         sections = gc.query(
             """
             MATCH (m:IMASMapping {id: $id})-[r:POPULATES]->(ip:IMASNode)
-            RETURN ip.id AS imas_path, ip.data_type AS data_type,
-                   r.config AS config
+            RETURN ip.id AS imas_path, ip.data_type AS data_type
             """,
             id=mapping_id,
         )

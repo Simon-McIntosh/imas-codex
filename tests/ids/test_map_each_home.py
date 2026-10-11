@@ -306,7 +306,7 @@ class TestMapWorkerMapsFromSelectedEdges:
         assert len(prepared) == 1
         assert prepared[0].imas_target_path == "magnetics/flux_loop"
         assert prepared[0].source_id == "jet:s1"
-        assert state.sources_mapped == 1
+        assert state.sections_mapped == 1
 
 
 class TestMapWorkerMapsEveryIdsOfOneSource:

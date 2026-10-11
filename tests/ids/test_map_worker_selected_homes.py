@@ -116,6 +116,6 @@ def test_map_worker_waits_for_selected_source_with_assign_claim():
         asyncio.run(map_worker(state))
 
     assert mapped
-    assert state.sources_mapped == 1
+    assert state.sections_mapped == 1
     assert state.bindings_total == 1
     assert state.map_phase.done

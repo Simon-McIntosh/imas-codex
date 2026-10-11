@@ -1109,6 +1109,24 @@ def _fetch_ids_description(ids_name: str, gc: GraphClient) -> str:
     return ""
 
 
+def _cluster_context(candidates: list[dict[str, Any]]) -> str:
+    """List a source's cross-IDS cluster siblings for the mapping prompt.
+
+    The candidate stage adds each top candidate's cluster siblings in other
+    IDSs and marks them with the ``cluster`` retrieval arm; the prompt asks the
+    model to weigh those as one-to-many homes, so they are listed apart from
+    the plain semantic candidates.
+    """
+    members = [c for c in candidates if CLUSTER_ARM in (c.get("arms") or [])]
+    if not members:
+        return ""
+    return "Cross-IDS cluster members among this source's candidates:\n" + "\n".join(
+        f"  - {c['path']} (IDS {c.get('ids') or c['path'].split('/', 1)[0]}): "
+        f"{c.get('documentation') or ''}"
+        for c in members
+    )
+
+
 def map_signals(
     facility: str,
     ids_name: str,
@@ -1206,7 +1224,7 @@ def map_signals(
         source_id = assignment.source_id
         source_semantic = context.get("source_candidates", {}).get(source_id, [])
         semantic_context = ""
-        cluster_context = ""
+        cluster_context = _cluster_context(source_semantic)
         if source_semantic:
             semantic_context = "Semantic search candidates:\n" + "\n".join(
                 f"  - {cand['path']} (score={cand.get('retrieval_score') or 0.0:.2f}): "
@@ -1395,7 +1413,7 @@ def _prepare_section_context(
     source_id = assignment.source_id
     source_semantic = context.get("source_candidates", {}).get(source_id, [])
     semantic_context = ""
-    cluster_context = ""
+    cluster_context = _cluster_context(source_semantic)
     if source_semantic:
         semantic_context = "Semantic search candidates:\n" + "\n".join(
             f"  - {cand['path']} (score={cand.get('retrieval_score') or 0.0:.2f}): "
@@ -1960,6 +1978,13 @@ _STRIP_ERROR_SUFFIX = re.compile(
 )
 
 
+# An error bound named as a whole word. Underscores and digits separate words
+# ("te_min_err"), but letters do not, so "low" inside "flow", "below" or
+# "lowpass" and "high" inside "highlight" name no bound.
+_LOWER_ERROR_WORD = re.compile(r"(?<![a-z])(lower|minimum|min_err|low)(?![a-z])")
+_UPPER_ERROR_WORD = re.compile(r"(?<![a-z])(upper|maximum|max_err|high)(?![a-z])")
+
+
 def classify_error_signals(
     facility: str,
     *,
@@ -2011,9 +2036,9 @@ def classify_error_signals(
         if _ERROR_SIGNAL_PATTERNS.search(text):
             # Determine probable error type from text
             lower_text = text.lower()
-            if any(w in lower_text for w in ("lower", "minimum", "min_err", "low")):
+            if _LOWER_ERROR_WORD.search(lower_text):
                 error_type = "lower"
-            elif any(w in lower_text for w in ("upper", "maximum", "max_err", "high")):
+            elif _UPPER_ERROR_WORD.search(lower_text):
                 error_type = "upper"
             else:
                 error_type = "symmetric"  # Default: could be upper or lower

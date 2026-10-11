@@ -522,7 +522,7 @@ def _run_rich_mode(
             ds = display.state
             ds.sources_found = engine_state.sources_total
             ds.sections_assigned = engine_state.sources_assigned
-            ds.sections_mapped = engine_state.sources_mapped
+            ds.sections_mapped = engine_state.sections_mapped
             ds.bindings_total = engine_state.bindings_total
             ds.bindings_passed = engine_state.bindings_passed
             ds.escalations = engine_state.escalations

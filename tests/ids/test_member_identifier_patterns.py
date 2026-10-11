@@ -81,7 +81,7 @@ def _mmsys_graph() -> MagicMock:
                     "provider": "imas-codex",
                 }
             ]
-        if "r.config AS config" in statement:
+        if "-[r:POPULATES]->(ip:IMASNode)" in statement:
             return []
         if "r.source_property AS source_property" in statement:
             return [

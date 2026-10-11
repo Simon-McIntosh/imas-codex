@@ -61,7 +61,7 @@ def _graph() -> MagicMock:
                     "provider": "imas-codex",
                 }
             ]
-        if "r.config AS config" in statement:
+        if "-[r:POPULATES]->(ip:IMASNode)" in statement:
             return []
         if "r.source_property AS source_property" in statement:
             return [
@@ -294,7 +294,7 @@ def test_cocos_label_prefers_the_target_itself_over_its_parent():
                     "provider": "imas-codex",
                 }
             ]
-        if "r.config AS config" in statement:
+        if "-[r:POPULATES]->(ip:IMASNode)" in statement:
             return []
         if "r.source_property AS source_property" in statement:
             return [
@@ -364,7 +364,7 @@ def test_time_coordinate_carries_no_cocos_label():
                     "provider": "imas-codex",
                 }
             ]
-        if "r.config AS config" in statement:
+        if "-[r:POPULATES]->(ip:IMASNode)" in statement:
             return []
         if "r.source_property AS source_property" in statement:
             return [

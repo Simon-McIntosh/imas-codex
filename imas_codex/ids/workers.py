@@ -102,7 +102,7 @@ class MappingDiscoveryState(DiscoveryStateBase):
     # Aggregate counters (across all IDS)
     sources_total: int = 0
     sources_assigned: int = 0
-    sources_mapped: int = 0
+    sections_mapped: int = 0
     sources_validated: int = 0
     bindings_total: int = 0
     bindings_passed: int = 0
@@ -979,7 +979,7 @@ async def map_worker(
                         state.mapping_batches.setdefault(ids_name, []).append(
                             (assignment, batch),
                         )
-                        state.sources_mapped += 1
+                        state.sections_mapped += 1
                         state.bindings_total += len(batch.mappings)
                         state.map_stats.processed += 1
 

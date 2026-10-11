@@ -128,7 +128,7 @@ async def _run_pipeline(state) -> None:
     ):
         await map_worker(state)
     assert state.map_phase.done, "map phase did not complete"
-    assert state.sources_mapped == 1
+    assert state.sections_mapped == 1
 
     # --- validate: the mapped source's binding is persisted ---
     async def _no_assembly(*_a, **_kw):
