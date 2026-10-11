@@ -1,0 +1,79 @@
+{
+  "artifacts": [
+    "/tmp/repros93b/claim1.py",
+    "/tmp/repros93b/claim2.py",
+    "/tmp/repros93b/claim3.py"
+  ],
+  "claim_lines": [
+    "CLAIM 1: reproduced: at 93bfb7e9 claim_sources_for_mapping('f','magnetics') returns [] and refresh_mapping_status('f:s1','magnetics') returns 'validated' for a source whose second selected home in the same IDS is unbound, the two figures the report states; the zero-binding control returns the source and 'mapped', so the fake discriminates",
+    "CLAIM 2: reproduced: at 93bfb7e9 classify_error_signals returns probable_error_type == 'lower' for group_key 'f:pf:flow_uncertainty' / description 'plasma flow measurement error estimate', because 'low' is a substring of 'flow' (mapping.py:2018), the exact figure the report states",
+    "CLAIM 3: reproduced: at 93bfb7e9 match_error_signals_to_imas derives gas/valve1 vs gas/main depending only on the data_mappings list order for the partial group-key match 'gasc', matching the report's order-dependence claim (the cited _pm helper omits the required mapping_type field and raises as written; the figure holds once it is supplied)",
+    "CLAIM_SUMMARY: agrees: the summary line '**Finding count: 7** (ranked most severe first).' matches the seven '## Finding' sections beneath it (Finding 1..7; the report carries no pipe table, the ranked list is the table), and the coverage line '7/7' agrees"
+  ],
+  "claim_summary": {
+    "detail": "The report's summary line is '**Finding count: 7** (ranked most severe first).' The report carries no markdown pipe table (0 pipe rows); the ranked findings list beneath it is the table. It contains exactly seven '## Finding' sections (Finding 1..7 at lines 24, 76, 112, 145, 184, 211, 240), and the coverage line reads 7/7. 7 == 7.",
+    "verdict": "agrees"
+  },
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "imas_codex/ids/workers.py:286-293 (claim predicate), imas_codex/ids/workers.py:400-409 (status CASE)",
+      "detail": "Re-ran the report's reproduction at 93bfb7e9 with a fake GraphClient patched into imas_codex.graph.client.GraphClient and imas_codex.graph.GraphClient (the two import sites claim_batch and refresh_mapping_status resolve). Scenario: one source with two route=true MAPPING_CANDIDATE edges both into `magnetics` and one MAPS_TO_IMAS binding into `magnetics`. claim_sources_for_mapping('f','magnetics') returned [] (never re-claimable) and refresh_mapping_status('f:s1','magnetics') returned 'validated' \u2014 the two figures the report states. Control with the same two edges and zero bindings: claim returned [{'id':'f:s1'}] and refresh returned 'mapped', so the fake discriminates and the defect is one binding flipping both. Both statements read verbatim: predicate 'NOT EXISTS { (n)-[:MAPS_TO_IMAS]->(:IMASNode {ids: $ids_name}) }' (workers.py:291-292) and 'WITH sg, [i IN collect(DISTINCT c.ids) ...] AS unbound' per-IDS at workers.py:398-409.",
+      "finding": "a selected home that produced no bindings is never retried, and the source is reported `validated`",
+      "verdict": "reproduced"
+    },
+    "CLAIM 2": {
+      "cites": "imas_codex/ids/mapping.py:2017-2023, consumed at imas_codex/ids/mapping.py:2148",
+      "detail": "Re-ran the report's reproduction at 93bfb7e9: monkeypatched _ERROR_SIGNAL_PATTERNS=re.compile('error') and _PHYSICS_ERROR_PATTERNS=re.compile(r'(?!)') (never), then classify_error_signals('f', gc=FakeGC()) over one row group_key='f:pf:flow_uncertainty', description='plasma flow measurement error estimate' returned probable_error_type == 'lower'. The tuple at mapping.py:2018 is verbatim '(\"lower\", \"minimum\", \"min_err\", \"low\")' and 'low' is a substring of 'flow', so the figure the report states reproduces exactly. The downstream filter at mapping.py:2148 keeps an error child only when prob_type=='symmetric' or matches, so a 'lower' classification drops the upper derivation.",
+      "finding": "classify_error_signals classifies on substrings: 'low' matches inside 'flow', 'below', 'slow'",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "imas_codex/ids/mapping.py:2127-2132",
+      "detail": "Re-ran the report's reproduction at 93bfb7e9: match_error_signals_to_imas with data_mappings [gasc_valve1, gasc_main] derived targets gas/valve1/value_error_{upper,lower}; with the same two mappings in swapped list order it derived gas/main/value_error_{upper,lower}. The reserved parent differs on list order alone, i.e. the order-dependence the report states. The fallback loop at mapping.py:2129-2132 is verbatim 'if base_key and (base_key in known_key or known_key in base_key): parent_mappings = known_mappings; break' \u2014 first insertion-order hit wins. Caveat on the cited sketch only, not the figure: the report's `_pm` helper omits the required mapping_type field, so ValidatedSignalMapping(source_id=..., target_id=..., transform_expression='value', confidence=0.9) raises ValidationError('mapping_type Field required'); supplying mapping_type='direct' makes the sketch run and the order-dependence reproduces.",
+      "finding": "error derivation's substring fallback binds to the first parent in dict order, not the right one",
+      "verdict": "reproduced"
+    },
+    "CLAIM_SUMMARY": {
+      "detail": "The report's summary line is '**Finding count: 7** (ranked most severe first).' The report carries no markdown pipe table (0 pipe rows); the ranked findings list beneath it is the table, and it contains exactly seven '## Finding' sections (Finding 1..7 at lines 24, 76, 112, 145, 184, 211, 240). The Coverage section also reads '7/7'. 7 == 7.",
+      "verdict": "agrees"
+    }
+  },
+  "claims": [
+    {
+      "cites": "imas_codex/ids/workers.py:286-293, imas_codex/ids/workers.py:400-409",
+      "rank": 1,
+      "report_figure": "claim returns [] (never re-claimable) and refresh returns 'validated' for a source with one of two selected homes bound",
+      "rerun_figure": "claim -> [], refresh -> 'validated' (control with zero bindings: claim -> [{'id':'f:s1'}], refresh -> 'mapped')",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "imas_codex/ids/mapping.py:2017-2023, 2148",
+      "rank": 2,
+      "report_figure": "probable_error_type == 'lower' for text 'plasma flow ... error estimate' via substring 'low' in 'flow'",
+      "rerun_figure": "probable_error_type == 'lower'",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "imas_codex/ids/mapping.py:2127-2132",
+      "rank": 3,
+      "report_figure": "derived parent is order-dependent (gasc_valve1 vs gasc_main) for a partial group-key match",
+      "rerun_figure": "order A -> gas/valve1/value_error_*; order B -> gas/main/value_error_* (differ; sketch needs mapping_type added)",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-11T22:07:03.673Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-11T21:56:32Z",
+  "method": "The reviewed run is read-only (committed nothing past its base), so no gate suite and no diff exist. Each of the three highest-ranked findings was re-run against the reviewed revision's own source: the revision was extracted with `git archive 93bfb7e9 | tar -x -C $TMPDIR/tree93b` so it reads the same code the run did, and every reproduction script pins sys.path to that tree and prints module.__file__ to confirm which tree serves. Recorded against the figure each finding states, not against current main, which has since landed fix commits (ac0710097 'read error bounds from whole words' is exactly the whole-word repair that Finding 2's substring match needs, and it also touches the cluster-sibling prompt path Finding 5 names).",
+  "project": "imas-codex",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/reports/map-review-generation.md",
+  "review_run_id": "r-20261011T215623681430-review-of-map-review-generation",
+  "reviewed_base_sha": "93bfb7e9d3e43f115ecc9eaec404fff34d40574d",
+  "reviewed_head_sha": "93bfb7e9d3e43f115ecc9eaec404fff34d40574d",
+  "reviewed_run_id": "r-20261011T211008931790-map-review-generation",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run ran no gate suite.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T00:05:00+00:00"
+}
