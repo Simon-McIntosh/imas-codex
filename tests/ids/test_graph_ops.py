@@ -73,10 +73,8 @@ class TestLoadMapping:
                     "transform_expression": "value",
                     "source_units": "m",
                     "target_units": "m",
-                    "cocos_source": None,
-                    "cocos_target": None,
-                    "driver": "device_xml",
                     "cocos_label": None,
+                    "target_cocos_type": None,
                 }
             ],
         ]
@@ -107,10 +105,8 @@ class TestLoadSignalMappings:
                 "transform_expression": "value * 1.0",
                 "source_units": "m",
                 "target_units": "m",
-                "cocos_source": None,
-                "cocos_target": None,
-                "driver": "device_xml",
                 "cocos_label": None,
+                "target_cocos_type": None,
             }
         ]
         result = load_signal_mappings("jet:pf_active", gc)
@@ -131,22 +127,18 @@ class TestLoadSignalMappings:
                 "transform_expression": None,
                 "source_units": None,
                 "target_units": None,
-                "cocos_source": None,
-                "cocos_target": None,
-                "driver": None,
                 "cocos_label": None,
+                "target_cocos_type": None,
             }
         ]
         result = load_signal_mappings("jet:pf_active", gc)
         m = result[0]
         assert m.source_property == "value"
         assert m.transform_expression == "value"
-        assert m.driver == "device_xml"
-        assert m.cocos_source is None
-        assert m.cocos_target is None
+        assert m.cocos_label is None
 
     def test_cocos_warning_for_sensitive_path(self, caplog):
-        """Warn when IMAS path is COCOS-sensitive but mapping has no cocos_source."""
+        """Warn when the target is COCOS-sensitive but the binding has no label."""
         import logging
 
         gc = MagicMock()
@@ -158,10 +150,8 @@ class TestLoadSignalMappings:
                 "transform_expression": "value",
                 "source_units": "A",
                 "target_units": "A",
-                "cocos_source": None,
-                "cocos_target": None,
-                "driver": "device_xml",
-                "cocos_label": "ip_like",
+                "cocos_label": None,
+                "target_cocos_type": "ip_like",
             }
         ]
         with caplog.at_level(logging.WARNING):
@@ -183,10 +173,8 @@ class TestLoadSignalMappings:
                 "transform_expression": "value",
                 "source_units": "m",
                 "target_units": "m",
-                "cocos_source": None,
-                "cocos_target": None,
-                "driver": "device_xml",
                 "cocos_label": None,
+                "target_cocos_type": None,
             }
         ]
         with caplog.at_level(logging.WARNING):

@@ -158,7 +158,12 @@ class TestValidateMapping:
     def test_units_compatible(self, mock_gc):
         mock_gc.query.return_value = [{"id": "jet:ids:pf_active:pf_coil_1"}]
 
-        binding = _make_binding(source_units="mm", target_units="m")
+        # Units that differ by a factor need the conversion in the transform.
+        binding = _make_binding(
+            source_units="mm",
+            target_units="m",
+            transform_expression="convert_units(value, 'mm', 'm')",
+        )
         from unittest.mock import patch
 
         with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
@@ -608,3 +613,55 @@ class TestComputeConfidenceDistribution:
         assert dist.medium_count == 2
         assert dist.low_count == 0
         assert dist.high_count == 0
+
+
+class TestEveryRecordedErrorFailsTheBinding:
+    """A binding passes only when no check recorded an error."""
+
+    @staticmethod
+    def _validate(binding, mock_gc, **kwargs):
+        from unittest.mock import patch
+
+        mock_gc.query.return_value = [{"id": binding.source_id}]
+        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+            mock_check.return_value = [
+                {"path": binding.target_id, "exists": True, "data_type": "FLT_0D"}
+            ]
+            return validate_mapping([binding], gc=mock_gc, **kwargs)
+
+    def test_cocos_error_fails_the_report(self, mock_gc):
+        target = "equilibrium/time_slice/global_quantities/ip"
+        report = self._validate(
+            _make_binding(target_id=target), mock_gc, sign_flip_paths=[target]
+        )
+        assert "COCOS sign handling" in report.binding_checks[0].error
+        assert report.all_passed is False
+
+    def test_identity_across_a_unit_factor_fails_the_report(self, mock_gc):
+        report = self._validate(
+            _make_binding(
+                target_id="pf_active/coil/current/data",
+                source_units="kA",
+                target_units="A",
+            ),
+            mock_gc,
+        )
+        assert "Identity transform but units differ" in report.binding_checks[0].error
+        assert report.all_passed is False
+
+    def test_identity_across_unit_spellings_passes(self, mock_gc):
+        report = self._validate(
+            _make_binding(
+                target_id="pf_active/coil/current/data",
+                source_units="ampere",
+                target_units="A",
+            ),
+            mock_gc,
+        )
+        assert report.binding_checks[0].error is None
+        assert report.all_passed is True
+
+    def test_index_expression_passes_the_transform_probe(self, mock_gc):
+        report = self._validate(_make_binding(transform_expression="value[0]"), mock_gc)
+        assert report.binding_checks[0].transform_executes is True
+        assert report.all_passed is True

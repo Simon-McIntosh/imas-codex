@@ -118,13 +118,16 @@ def test_validate_records_only_a_pass(monkeypatch, mapping_graph, passed):
         units_compatible=True,
         error=None if passed else "target missing",
     )
-    monkeypatch.setattr(
-        validation,
-        "validate_mapping",
-        lambda bindings, gc: SimpleNamespace(
+    monkeypatch.setattr(tools, "get_sign_flip_paths", lambda ids: ["magnetics/path"])
+    seen_flip_paths = []
+
+    def fake_validate(bindings, gc, sign_flip_paths=None):
+        seen_flip_paths.append(sign_flip_paths)
+        return SimpleNamespace(
             binding_checks=[check], duplicate_targets=[], all_passed=passed
-        ),
-    )
+        )
+
+    monkeypatch.setattr(validation, "validate_mapping", fake_validate)
     empty_coverage = SimpleNamespace(
         total_leaf_fields=0,
         total_enriched=0,
@@ -145,6 +148,9 @@ def test_validate_records_only_a_pass(monkeypatch, mapping_graph, passed):
 
     result = CliRunner().invoke(map_cmd, ["validate", "jet", "magnetics"])
 
+    # The promotion gate validates against the IDS's COCOS sign-flip set, as
+    # the pipeline does, so its COCOS check can fire.
+    assert seen_flip_paths == [["magnetics/path"]]
     if passed:
         assert result.exit_code == 0, result.output
         assert mapping_graph.status == "validated"

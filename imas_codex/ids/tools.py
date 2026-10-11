@@ -632,7 +632,8 @@ def search_existing_mappings(
             RETURN sg.id AS source_id,
                    ip.id AS target_id, r.transform_expression AS transform_expression,
                    r.source_units AS source_units, r.target_units AS target_units,
-                   r.source_property AS source_property
+                   r.source_property AS source_property,
+                   r.cocos_label AS cocos_label
             """,
             id=mapping_id,
         )

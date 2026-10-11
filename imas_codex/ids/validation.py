@@ -73,6 +73,27 @@ def _check_sources_exist(source_ids: list[str], gc: GraphClient) -> dict[str, bo
     return result
 
 
+def _probe_transform(expression: str) -> None:
+    """Run a transform on a scalar probe, then on an array probe if that fails."""
+    try:
+        execute_transform(1.0, expression)
+    except (TypeError, IndexError):
+        import numpy as np
+
+        execute_transform(np.ones(4), expression)
+
+
+def _needs_conversion(unit_result: dict) -> bool:
+    """Whether compatible units differ by a factor other than one.
+
+    Units are compared by their conversion factor rather than their spelling,
+    so ``A`` against ``ampere`` needs no conversion while ``kA`` against ``A``
+    does.
+    """
+    factor = unit_result.get("conversion_factor")
+    return factor is not None and abs(factor - 1.0) > 1e-12
+
+
 def validate_mapping(
     bindings: list,
     *,
@@ -129,10 +150,14 @@ def validate_mapping(
                 msg += f" (renamed → {suggestion})"
             errors.append(msg)
 
-        # 3. Transform executes
+        # 3. Transform executes. The probe is a scalar first; an expression
+        # that indexes or slices its source (the index layouts
+        # compose_transform writes) cannot run on a scalar, so a failed
+        # scalar probe is retried on a one-dimensional array before the
+        # transform is refused.
         expr = getattr(b, "transform_expression", "value")
         try:
-            execute_transform(1.0, expr)
+            _probe_transform(expr)
             check.transform_executes = True
         except Exception as exc:
             check.transform_executes = False
@@ -146,7 +171,7 @@ def validate_mapping(
             check.units_compatible = unit_result.get("compatible", False)
             if not check.units_compatible:
                 errors.append(f"Units incompatible: {src_units} → {tgt_units}")
-            elif src_units and tgt_units and src_units != tgt_units and expr == "value":
+            elif expr == "value" and _needs_conversion(unit_result):
                 # Identity transform with mismatched units — needs conversion
                 errors.append(
                     f"Identity transform but units differ: "
@@ -237,15 +262,12 @@ def validate_mapping(
                     )
                 )
 
+    # A binding passes only when no check recorded an error. The four flags
+    # do not cover every check: an identity transform across differing units
+    # and a COCOS-sensitive target without sign handling are recorded only as
+    # errors.
     report.all_passed = (
-        all(
-            c.source_exists
-            and c.target_exists
-            and c.transform_executes
-            and c.units_compatible
-            for c in report.binding_checks
-        )
-        and not report.duplicate_targets
+        all(not c.error for c in report.binding_checks) and not report.duplicate_targets
     )
 
     logger.info(

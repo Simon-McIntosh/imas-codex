@@ -871,16 +871,15 @@ def map_validate(facility: str, ids_name: str) -> None:
         click.echo("No bindings to validate.")
         raise SystemExit(1)
 
-    report = validate_mapping(bindings, gc=gc)
+    from imas_codex.ids.tools import get_sign_flip_paths
 
-    passed = sum(
-        1
-        for c in report.binding_checks
-        if c.source_exists
-        and c.target_exists
-        and c.transform_executes
-        and c.units_compatible
+    # The same sign-flip set the pipeline validates against, so a binding
+    # onto a COCOS-sensitive target without sign handling is refused here too.
+    report = validate_mapping(
+        bindings, gc=gc, sign_flip_paths=get_sign_flip_paths(ids_name)
     )
+
+    passed = sum(1 for c in report.binding_checks if not c.error)
     failed = len(report.binding_checks) - passed
 
     click.echo(f"Validated {len(bindings)} bindings:")

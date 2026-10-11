@@ -42,9 +42,7 @@ class SignalMapping:
     transform_expression: str = "value"
     source_units: str | None = None
     target_units: str | None = None
-    cocos_source: int | None = None
-    cocos_target: int | None = None
-    driver: str = "device_xml"
+    cocos_label: str | None = None
 
 
 @dataclass
@@ -159,10 +157,8 @@ def load_signal_mappings(mapping_id: str, gc: GraphClient) -> list[SignalMapping
                    map.transform_expression AS transform_expression,
                    map.source_units AS source_units,
                    map.target_units AS target_units,
-                   map.cocos_source AS cocos_source,
-                   map.cocos_target AS cocos_target,
-                   map.driver AS driver,
-                   ip.cocos_transformation_type AS cocos_label
+                   map.cocos_label AS cocos_label,
+                   ip.cocos_transformation_type AS target_cocos_type
             """,
             mapping_id=mapping_id,
         )
@@ -176,16 +172,15 @@ def load_signal_mappings(mapping_id: str, gc: GraphClient) -> list[SignalMapping
             transform_expression=row.get("transform_expression") or "value",
             source_units=row.get("source_units"),
             target_units=row.get("target_units"),
-            cocos_source=row.get("cocos_source"),
-            cocos_target=row.get("cocos_target"),
-            driver=row.get("driver") or "device_xml",
+            cocos_label=row.get("cocos_label"),
         )
-        cocos_label = row.get("cocos_label")
-        if cocos_label and cocos_label != "one_like" and not fm.cocos_source:
+        target_cocos_type = row.get("target_cocos_type")
+        if target_cocos_type and target_cocos_type != "one_like" and not fm.cocos_label:
             logger.warning(
-                "COCOS-sensitive path %s (label=%s) has no cocos_source on mapping %s",
+                "COCOS-sensitive path %s (label=%s) has no COCOS label on the "
+                "binding from %s",
                 fm.target_id,
-                cocos_label,
+                target_cocos_type,
                 fm.source_id,
             )
         mappings.append(fm)

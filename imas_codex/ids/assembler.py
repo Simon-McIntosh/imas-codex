@@ -30,7 +30,7 @@ from imas_codex.ids.graph_ops import (
     select_enrichment_nodes,
     select_nodes,
 )
-from imas_codex.ids.transforms import convert_units, execute_transform, set_nested
+from imas_codex.ids.transforms import execute_transform, set_nested
 
 logger = logging.getLogger(__name__)
 
@@ -299,8 +299,10 @@ class IDSAssembler:
     ) -> None:
         """Apply field-level mappings to a struct entry.
 
-        Handles transform_expression execution and automatic unit conversion
-        when source_units != target_units.
+        Each value passes through the binding's ``transform_expression``,
+        which carries any unit conversion (``compose_transform`` writes it,
+        and validation refuses an identity transform across differing units),
+        so the value is not converted again here.
         """
         init_arrays = (section_config or {}).get("init_arrays", {})
         nested_path = (section_config or {}).get("nested_path")
@@ -321,6 +323,11 @@ class IDSAssembler:
                 if rel_path.startswith(nested_prefix):
                     rel_path = rel_path[len(nested_prefix) :]
                 else:
+                    logger.warning(
+                        "Skipping %s: outside the section's nested path %s",
+                        mapping.target_id,
+                        nested_path,
+                    )
                     continue
 
             # Convert IMAS path separators to Python attribute notation
@@ -340,20 +347,16 @@ class IDSAssembler:
             value = data.get(mapping.source_property)
             if value is not None:
                 value = execute_transform(value, mapping.transform_expression)
-                # Auto-convert units if specified and different
-                if (
-                    mapping.source_units
-                    and mapping.target_units
-                    and mapping.source_units != mapping.target_units
-                    and isinstance(value, int | float)
-                ):
-                    value = convert_units(
-                        value, mapping.source_units, mapping.target_units
-                    )
                 try:
                     set_nested(entry, rel_path, value)
-                except (AttributeError, TypeError):
-                    logger.debug("Cannot set %s on %s", rel_path, type(entry).__name__)
+                except (AttributeError, TypeError) as exc:
+                    logger.warning(
+                        "Cannot set %s on %s from %s: %s",
+                        rel_path,
+                        type(entry).__name__,
+                        mapping.source_id,
+                        exc,
+                    )
 
     def _build_graph_elements(
         self,
@@ -399,21 +402,17 @@ class IDSAssembler:
                     element_val = val[j]
                 else:
                     element_val = val
+                # The transform carries any unit conversion, as for fields.
                 element_val = execute_transform(element_val, m.transform_expression)
-                # Auto-convert units if specified and different
-                if (
-                    m.source_units
-                    and m.target_units
-                    and m.source_units != m.target_units
-                    and isinstance(element_val, int | float)
-                ):
-                    element_val = convert_units(
-                        element_val, m.source_units, m.target_units
-                    )
                 try:
                     set_nested(elem, rel_path, float(element_val))
-                except (AttributeError, TypeError, ValueError):
-                    logger.debug("Cannot set %s on element", rel_path)
+                except (AttributeError, TypeError, ValueError) as exc:
+                    logger.warning(
+                        "Cannot set %s on element from %s: %s",
+                        rel_path,
+                        m.source_id,
+                        exc,
+                    )
 
     def export(
         self,

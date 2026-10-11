@@ -169,3 +169,24 @@ def test_the_corrections_note_remains_the_summary_of_what_failed():
     result = _validate()
 
     assert any("failed validation checks" in c for c in result.corrections)
+
+
+def test_a_binding_whose_only_failure_is_a_recorded_error_is_removed():
+    """Errors outside the four flags, such as COCOS sign handling, also gate."""
+    report = _report()
+    report.binding_checks[2].error = (
+        f"Target '{GOOD_TARGET}' requires COCOS sign handling but "
+        "transform_expression is identity ('value') and no cocos_label is set"
+    )
+    gc = MagicMock()
+    gc.query.side_effect = lambda statement, **params: []
+    with (
+        patch("imas_codex.ids.validation.validate_mapping", return_value=report),
+        patch("imas_codex.ids.validation.check_coverage_threshold", return_value=[]),
+        patch("imas_codex.ids.tools.get_sign_flip_paths", return_value=set()),
+    ):
+        result = validate_mappings(
+            "jt-60sa", "ec_launchers", "4.1.1", _sections(), [_batch()], gc=gc
+        )
+
+    assert GOOD_TARGET not in [b.target_id for b in result.bindings]
