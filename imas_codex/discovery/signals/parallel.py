@@ -4628,11 +4628,13 @@ def fetch_source_member_node_descriptions(
     source_id: str,
     limit: int = 5,
 ) -> list[dict]:
-    """Fetch sample SignalNode descriptions for group members.
+    """Fetch sample member-specific descriptions for group members.
 
-    Returns a sample of member signals with their backing SignalNode
-    descriptions. For device_xml signals, these contain actual geometry
-    values (R, Z, angles).
+    A member's own text is its backing SignalNode description where one
+    exists (device_xml signals carry geometry values such as R, Z and angles
+    there), and otherwise its catalogue ``source_description``. Catalogue
+    scanners such as EDAS write no SignalNode, so without the fallback every
+    member of such a source would lose the text that tells it apart.
 
     Args:
         source_id: SignalSource ID
@@ -4647,13 +4649,16 @@ def fetch_source_member_node_descriptions(
                 """
                 MATCH (sg:SignalSource {id: $source_id})
                 MATCH (m:FacilitySignal)-[:MEMBER_OF]->(sg)
-                MATCH (m)-[:HAS_DATA_SOURCE_NODE]->(sn:SignalNode)
-                WHERE sn.description IS NOT NULL
-                WITH m, sn
+                OPTIONAL MATCH (m)-[:HAS_DATA_SOURCE_NODE]->(sn:SignalNode)
+                WITH m, [text IN [sn.description, m.source_description]
+                         WHERE text IS NOT NULL AND trim(text) <> ''][0]
+                        AS node_description
+                WHERE node_description IS NOT NULL
+                WITH m, node_description
                 ORDER BY m.accessor
                 WITH collect({
                     accessor: m.accessor,
-                    node_description: sn.description
+                    node_description: node_description
                 }) AS all_samples
                 // Take evenly spaced samples for diversity
                 WITH all_samples,
@@ -4691,10 +4696,12 @@ def fetch_source_member_node_descriptions(
 
 
 def fetch_all_member_node_descriptions(source_id: str) -> dict[str, str]:
-    """Fetch ALL member SignalNode descriptions for a source.
+    """Fetch every member-specific description for a source.
 
-    Returns a mapping from signal ID to node description for every
-    member that has a backing SignalNode with a description.
+    Returns a mapping from signal ID to the member's own text: its backing
+    SignalNode description where one exists, otherwise its catalogue
+    ``source_description``, so that members of catalogue-scanned sources
+    keep what tells them apart.
 
     Args:
         source_id: SignalSource ID
@@ -4708,9 +4715,12 @@ def fetch_all_member_node_descriptions(source_id: str) -> dict[str, str]:
                 """
                 MATCH (sg:SignalSource {id: $source_id})
                 MATCH (m:FacilitySignal)-[:MEMBER_OF]->(sg)
-                MATCH (m)-[:HAS_DATA_SOURCE_NODE]->(sn:SignalNode)
-                WHERE sn.description IS NOT NULL
-                RETURN m.id AS signal_id, sn.description AS node_description
+                OPTIONAL MATCH (m)-[:HAS_DATA_SOURCE_NODE]->(sn:SignalNode)
+                WITH m, [text IN [sn.description, m.source_description]
+                         WHERE text IS NOT NULL AND trim(text) <> ''][0]
+                        AS node_description
+                WHERE node_description IS NOT NULL
+                RETURN m.id AS signal_id, node_description
                 """,
                 source_id=source_id,
             )
