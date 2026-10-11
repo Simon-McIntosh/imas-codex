@@ -800,7 +800,12 @@ def has_pending_enrich_work(
                 **scope_params,
             )
             return result[0]["has_work"] if result else False
-    except Exception:
+    except Exception as exc:
+        # An unreachable graph is not an empty queue: reporting no work would
+        # end the phase and the run as completed. The phase keeps its last
+        # answer through the outage and workers retry with backoff.
+        if is_infrastructure_error(exc):
+            raise
         return False
 
 
@@ -836,7 +841,10 @@ def has_pending_check_work(
                 **scope_params,
             )
             return result[0]["has_work"] if result else False
-    except Exception:
+    except Exception as exc:
+        # As for has_pending_enrich_work: an outage is not an empty queue.
+        if is_infrastructure_error(exc):
+            raise
         return False
 
 
@@ -1178,6 +1186,10 @@ def claim_signals_for_enrichment(
             )
             return list(result) if result else []
     except Exception as e:
+        # An empty claim reads as an idle queue, so an outage is raised for
+        # the worker supervisor to retry with backoff instead.
+        if is_infrastructure_error(e):
+            raise
         logger.warning("Could not claim signals for enrichment: %s", e)
         return []
 
