@@ -179,6 +179,250 @@ Live: <code>find_edge_scalar_desyncs(gc=gc)</code> returns <strong>0 rows</stron
 
 </tbody>
 </table>
+
+<h2 id="sib-row-census-s3">§3 — Source coverage residue</h2>
+<table id="sib-row-census-s3-table">
+<thead><tr><th>Item</th><th>Source</th><th>Verdict</th><th>Live evidence</th><th>Owning reader</th><th>Proposed repair section</th></tr></thead>
+<tbody>
+
+<tr id="sib-row-census-s3-nine-accepted">
+<td>Nine exportable accepted names with no producing source</td>
+<td><code>unbound-source-backlog</code> <code>f-usb-accepted-names-carry-no-provenance</code></td>
+<td><strong>still true</strong> — same nine identities</td>
+<td>Recorded 2026-09-15: 2,340 unsourced, nine accepted.
+Live: <code>find_provenance_orphans(gc=gc)</code> returns <strong>21</strong> rows total; stages <code>{accepted: 9, pending: 8, reviewed: 3, drafted: 1}</code>. The nine accepted are exactly the recorded list: <code>beta</code>, <code>ion_pressure</code>, <code>equilibrium_weight_of_interferometer_beam</code>, <code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code>, <code>neutron_flux_due_to_fusion</code>, <code>parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive</code>, <code>toroidal_wave_vector_normalized_of_beam_tracing_beam</code>, <code>flux_surface_averaged_parallel_electric_field_at_separatrix</code>, <code>root_mean_square_spectral width_of_spectrometer_channel</code> (0.07 s).</td>
+<td><code>find_provenance_orphans</code> (ledger.py:96)</td>
+<td><strong>needs a ruling</strong> — the disposition of an accepted, documented, valid name with no provenance (demote, delete, or re-source) is the lead's; two of the nine (<code>beta</code>, <code>ion_pressure</code>) are catch-all bases already flagged for gating. Unblocks: whether the export producer predicate may be landed as an invariant.</td>
+</tr>
+
+<tr id="sib-row-census-s3-compose-cohort">
+<td>Size the composition pass at 1,268 and decide the 65 placeholders first</td>
+<td><code>unbound-source-backlog</code> <code>f-usb-compose-the-admissible-cohort-not-the-backlog</code></td>
+<td><strong>needs a write to confirm</strong></td>
+<td>The recorded cohort (1,268 admissible, 91 refused) is a measurement that must be re-taken at the moment of the cut, because the admission gates have moved. Reproduce with the eligibility census query at <code>docs/evidence/unbound-source-backlog/</code>. No owning reader exists in the tree for the extracted-unbound admission cohort.</td>
+<td>no owning reader</td>
+<td>measurement node: <code>sn run</code> eligibility census over the extracted-unbound set. No repair section until the figure is re-taken.</td>
+</tr>
+
+<tr id="sib-row-census-s3-six-export-tests">
+<td>Six export tests red on main, predating the export merges</td>
+<td><code>unbound-source-backlog</code> <code>f-usb-six-export-tests-are-red-and-predate-this-work</code></td>
+<td><strong>needs a write to confirm</strong></td>
+<td>Re-measure — recorded red set is four in <code>test_export_exclusion_ledger.py</code> and two in <code>test_export_release_holds.py</code>, host-dependent (6 on a debug partition vs 10 on the login node at one revision). Confirm with:
+<code>uv run pytest -p no:cacheprovider tests/standard_names/test_export_exclusion_ledger.py tests/standard_names/test_export_release_holds.py</code>.</td>
+<td>no owning reader (test suite)</td>
+<td>measurement node: re-run the two files at the current HEAD and attribute by delta.</td>
+</tr>
+
+<tr id="sib-row-census-s3-waiver-terminal">
+<td>The waiver refusal sees only a chain terminal, so a published intermediate evades it</td>
+<td><code>unbound-source-backlog</code> <code>f-usb-waiver-refusal-sees-only-the-terminal</code></td>
+<td><strong>still true</strong> (latent — no declared-waived source currently reaches it)</td>
+<td>Recorded: <code>_source_disposition</code> is handed the chain terminal while the cut publishes whatever is <code>accepted</code>; an independent audit returned SOUND with a demonstrated bypass. Error remains latent because all eleven declared-waived paths currently produce no identity. Code read confirms the shape; the repair is owed.</td>
+<td>no owning reader (code read)</td>
+<td>Section: <em>make the waiver refusal see every produced identity</em>. Path the export waiver path (<code>export.py</code>). Gate <code>tests/standard_names/test_export_release_holds.py</code>. ~3 h. Release path (the export).</td>
+</tr>
+
+<tr id="sib-row-census-s3-four-questions">
+<td>Four questions recorded for the lead</td>
+<td><code>unbound-source-backlog</code> <code>f-usb-four-questions-await-the-lead</code></td>
+<td><strong>needs a ruling</strong></td>
+<td>The four are: graph checkpoint cadence (weekly timer is the lead's standing change); whether the WEST review PR ships (recommendation: hold); which contract <code>semantic_similarity_check</code> is under (preferred: drop its <code>CRITICAL_CHECKS</code> membership); worktree back-pressure (resolved upstream, recorded for closure only).</td>
+<td>no owning reader</td>
+<td><strong>needs a ruling</strong> — ruled by the lead (cadence and the WEST PR) and by the maintainer for the embedder contract. Unblocks: the checkpoint-cadence change, the WEST cut, and f-scai-embedder-unavailability (below).</td>
+</tr>
+
+<tr id="sib-row-census-s3-chain-cap">
+<td>72 never-grounded chain-cap identities need a rebuild rather than a reattachment</td>
+<td><code>sn-release-readiness</code> §12 <code>f-srr-unsourced</code></td>
+<td><strong>needs a write to confirm</strong></td>
+<td>Recorded 2026-09-01 in <code>docs/evidence/sn-release-readiness/unsourced-ancestry.md</code>: of 78 unsourced chain-cap identities, 72 have no sourced ancestor at any depth. Re-measure the chain-cap cohort (source ancestry at any depth) on the live graph; no owning reader exists in the tree for ledger-hop ancestry.</td>
+<td>no owning reader</td>
+<td>measurement node: re-derive the unsourced-ancestry census; then a rebuild section (~12 h) on the release path if it survives.</td>
+</tr>
+
+<tr id="sib-row-census-s3-strain-gauge">
+<td>Six strain-gauge measurement-direction names wait on an ISN token</td>
+<td><code>sn-release-readiness</code> §12 <code>f-srr-unsourced</code></td>
+<td><strong>needs a ruling</strong></td>
+<td>No non-ordinal token exists in the ISN vocabulary, so either ISN gains one or the names fold onto the existing generic sensor direction-vector identities. Codex must not invent the token.</td>
+<td>needs a ruling</td>
+<td><strong>needs a ruling</strong> — ruled by the ISN maintainers. Unblocks: whether the six names are folded or held.</td>
+</tr>
+
+<tr id="sib-row-census-s3-worktree-provenance">
+<td>Twelve released manifests record a worktree path as provenance</td>
+<td><code>sn-release-readiness</code> §12</td>
+<td><strong>still true</strong></td>
+<td>The released-manifest prose still records worktree-scoped provenance: the evidence under <code>docs/evidence/sn-release-readiness/</code> carries worktree/“ln” paths throughout (e.g. <code>graph-client-slurm-resolution.md</code>, <code>batch-failure-cause.md</code>). The stale-worktree provenance in committed manifests is unchanged.</td>
+<td>no owning reader (tree search)</td>
+<td>Section: <em>normalize released-manifest provenance to the checkout</em>. Path the release manifest writer. Gate the manifest tests. ~2 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s3-regeneration">
+<td>Measure the regenerable and protected populations and the cost, then rule on regenerate-or-repair</td>
+<td><code>sn-regeneration-decision</code> <code>f-srd-001</code></td>
+<td><strong>needs a ruling</strong> (blocked until <code>origin</code> is declared)</td>
+<td>The followup is explicitly blocked until origin is declared; the scope choice is put to the lead with a recommendation rather than a menu. It absorbs the 31 born-ungrounded rows; the measurement depends on <code>f-srd-001</code>'s precondition, i.e. <code>f-sopb-002</code>.</td>
+<td>needs a ruling</td>
+<td><strong>needs a ruling</strong> — ruled by the lead (scope of regenerate vs repair). Unblocks: the regeneration section and the 31 born-ungrounded rows.</td>
+</tr>
+
+<tr id="sib-row-census-s3-mast-manifest">
+<td>Rebuild and repair the MAST source manifest on the hardened graph</td>
+<td><code>mast-semantic-source-repair</code></td>
+<td><strong>needs a ruling</strong> — new coverage, not a correctness defect</td>
+<td>The plan itself marks this "facility breadth after WEST". No measurable defect is re-confirmed here; it is new coverage for the lead to rule on.</td>
+<td>needs a ruling</td>
+<td><strong>needs a ruling</strong> — new coverage for the lead. Unblocks: a future MAST manifest build section.</td>
+</tr>
+
+<tr id="sib-row-census-s3-dd-upstream">
+<td>File each measured Data Dictionary defect upstream with its evidence, or withdraw it with a reason</td>
+<td><code>dd-defect-upstreaming</code></td>
+<td><strong>needs a ruling</strong> — new coverage (each filing is upstream, outside this repository)</td>
+<td>The item is a decision about what is currently outstanding against the DD itself; it cannot be closed by a change in this repository.</td>
+<td>needs a ruling</td>
+<td><strong>needs a ruling</strong> — new coverage for the lead; each filing goes upstream. Unblocks: a DD-defect filing section.</td>
+</tr>
+
+</tbody>
+</table>
+
+<h2 id="sib-row-census-s4">§4 — Fold and repair machinery</h2>
+<table id="sib-row-census-s4-table">
+<thead><tr><th>Item</th><th>Source</th><th>Verdict</th><th>Live evidence</th><th>Owning reader</th><th>Proposed repair section</th></tr></thead>
+<tbody>
+
+<tr id="sib-row-census-s4-fold-guard">
+<td>The fold guard reads history where it means the present, so a reverted rename refuses every later fold</td>
+<td><code>sn-grammar-refinement</code> <code>f-sgr-fold-guard-current-successor</code></td>
+<td><strong>fixed</strong></td>
+<td>Recorded: <code>_fold_guard_reason</code> refused a fold because a <code>REFINED_FROM</code> edge existed from a rename that was reverted three minutes later.
+Live: <code>imas_codex/standard_names/edit.py:2183</code> <code>_fold_successor_is_current</code> now reads the ledger — its docstring states the current successor is "the name the most recent rename or supersede event brought the meaning to, provided that event has not itself been reverted", and <code>_fold_guard_reason</code> calls it. The ledger-ordering rule the followup proposed has landed.</td>
+<td>no owning reader (code read)</td>
+<td>none — fixed. (The followup's own measure — no other fold's verdict moves — belongs to a test node if the coordinator wants it re-proved.)</td>
+</tr>
+
+<tr id="sib-row-census-s4-family-anchor">
+<td>A one-word family anchor cannot clear the name gate</td>
+<td><code>sn-grammar-refinement</code></td>
+<td><strong>still true</strong></td>
+<td>No change to the family-anchor name gate is visible; the row is carried as recorded and has no owning reader in the tree.</td>
+<td>no owning reader</td>
+<td>Section: <em>let a one-word family anchor clear the name gate</em>. Path the name gate in <code>edit.py</code>/review. Gate <code>tests/standard_names/</code>. ~3 h. Release path (name gate; <code>sn edit</code>).</td>
+</tr>
+
+<tr id="sib-row-census-s4-fold-occupied">
+<td>A fold onto an occupied identity must keep the richer prose</td>
+<td><code>sn-grammar-refinement</code></td>
+<td><strong>still true</strong></td>
+<td>Carried as recorded; no owning reader.</td>
+<td>no owning reader</td>
+<td>Section: <em>keep the richer prose on a fold onto an occupied identity</em>. Path the fold path in <code>edit.py</code>. Gate <code>tests/standard_names/</code>. ~3 h. Release path (<code>sn supersede</code>/fold).</td>
+</tr>
+
+<tr id="sib-row-census-s4-fold-postflight">
+<td>The fold postflight proof refuses a fold whose dry run succeeds</td>
+<td><code>sn-grammar-refinement</code></td>
+<td><strong>still true</strong></td>
+<td>Carried as recorded; no owning reader.</td>
+<td>no owning reader</td>
+<td>Section: <em>fix the fold postflight proof</em>. Path the fold guard/postflight. Gate <code>tests/standard_names/</code>. ~3 h. Release path (fold guard).</td>
+</tr>
+
+<tr id="sib-row-census-s4-edits-scoped">
+<td>An edits-scoped run still runs whole-graph maintenance</td>
+<td><code>sn-grammar-refinement</code></td>
+<td><strong>changed</strong> — a skip control now exists</td>
+<td>Same evidence as §2 hole 4: <code>sn.py:1762</code> defines <code>--skip-global-maintenance</code> and <code>sn.py:2087</code> forwards it, where the recorded defect was an inline runner launching <code>run_sn_pools</code> with no control.</td>
+<td>no owning reader (code read)</td>
+<td>verify-plus-test: confirm an edits-scoped run honours the flag and add a regression test. Path <code>imas_codex/cli/sn.py</code>. ~2 h. Release path (<code>sn edit</code>).</td>
+</tr>
+
+<tr id="sib-row-census-s4-compose-supersede">
+<td>The compose supersede path fails hard, and spends an attempt, when a source binds another live identity</td>
+<td><code>sn-west-catalog-release</code></td>
+<td><strong>needs a write to confirm</strong></td>
+<td>Reproduce against a source bound to a second live identity (the dual-bound cohort below) — the failure is on the write path and needs a probe, not a static read.</td>
+<td><code>find_semantic_source_invariant_violations</code> (provenance_lifecycle.py:1229) for the dual-bound cohort</td>
+<td>Section (if it survives): <em>make compose supersede survive a second live binding</em>. Path the compose supersede path. Gate <code>tests/standard_names/</code> + <code>-m graph</code> for the cypher. ~4 h. Release path (<code>sn supersede</code>).</td>
+</tr>
+
+<tr id="sib-row-census-s4-exhausted-verdicts">
+<td>Exhausted verdicts are reached across a reviewer swing wider than the deciding margin</td>
+<td><code>sn-west-catalog-release</code></td>
+<td><strong>still true</strong></td>
+<td>Carried as recorded; no owning reader.</td>
+<td>no owning reader</td>
+<td>Section: <em>widen the exhaustion margin</em>. Path the review verdict aggregation. Gate <code>tests/standard_names/</code>. ~3 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s4-domain-routes">
+<td>Domain routes and terminal stages</td>
+<td><code>sn-west-catalog-release</code></td>
+<td><strong>needs a ruling</strong></td>
+<td>A design decision about which stages are terminal under which domain routes, not a measurable defect.</td>
+<td>needs a ruling</td>
+<td><strong>needs a ruling</strong> — ruled by the lead (release plan design). Unblocks: the terminal-stage handling on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s4-ddd-path">
+<td>Whether one DD path may hold several source nodes</td>
+<td><code>sn-west-catalog-release</code></td>
+<td><strong>needs a ruling</strong> (live dual-bound cohort is 2)</td>
+<td>Live: <code>find_semantic_source_invariant_violations(gc)</code> returns <strong>3</strong> rows; filtering to <code>len(live_targets) &gt; 1</code> gives <strong>2</strong> dual-bound sources (<code>dd:core_transport/.../diamagnetic/v</code> and <code>dd:plasma_transport/.../momentum/flux/radial</code>), the third a zero-target projection. Whether a DD path may legitimately carry several source nodes is a semantic ruling that decides whether those two are defects or intended.</td>
+<td><code>find_semantic_source_invariant_violations</code> (provenance_lifecycle.py:1229)</td>
+<td><strong>needs a ruling</strong> — ruled by the lead (DD path ↔ source cardinality). Unblocks: whether the two live dual-bound rows are corrected or blessed.</td>
+</tr>
+
+<tr id="sib-row-census-s4-empty-export">
+<td>An export that filters every candidate exiting 0</td>
+<td><code>sn-west-catalog-release</code></td>
+<td><strong>needs a write to confirm</strong> (likely closed by the 2026-09-21 export refusals)</td>
+<td>The plan itself marks this "likely closed by the 2026-09-21 export refusals; confirm". Reproduce by exporting an empty candidate set and checking the exit status.</td>
+<td>no owning reader (probe)</td>
+<td>verify-plus-test: confirm an empty cut refuses; add the regression test if absent. ~2 h. Release path (the export).</td>
+</tr>
+
+<tr id="sib-row-census-s4-getattr-aperture">
+<td>The declared-attribute check can judge 13 of 18 <code>llm_out</code> sites once annotated</td>
+<td><code>sn-catalog-audit-instrument</code> <code>f-scai-getattr-aperture</code></td>
+<td><strong>still true</strong> — the check still judges 5 of 18</td>
+<td>The followup records the check at 5/18 and eight <code>llm_out</code> sites in the cost-event block unannotated. Live: <code>imas_codex/standard_names/review/pipeline.py:2008</code> still binds <code>llm_out = await acall_llm_structured(...)</code> with no annotation, and the eight <code>getattr(llm_out, ...)</code> sites remain (lines 2034–2122). Aperture still 5/18.</td>
+<td>no owning reader (code read)</td>
+<td>Section: <em>annotate the LLM result binding and raise the floor</em>. Path <code>imas_codex/standard_names/review/pipeline.py</code> + the check's floor. Gate <code>tests/standard_names/</code>. ~2 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s4-embedder">
+<td>An unreachable embedder must not become a finding at three nested sites</td>
+<td><code>sn-catalog-audit-instrument</code> <code>f-scai-embedder-unavailability-is-not-a-finding</code></td>
+<td><strong>still true</strong></td>
+<td>Recorded: three sites (the re-embed preflight in <code>review/audits.py</code>, <code>semantic_similarity_check</code> in <code>audits.py</code>, and a nested one), one of which is a member of <code>CRITICAL_CHECKS</code> (defined at <code>audits.py:267</code>); <code>audits.py:3675</code> iterates over <code>CRITICAL_CHECKS</code>). The locked decision forbids routing the signal through the critical namespace; the membership is unchanged.</td>
+<td>no owning reader (code read)</td>
+<td>Section: <em>drop the embedder signal from the critical namespace</em>. Path <code>imas_codex/standard_names/audits.py</code> (membership only — see the pending lead ruling in §3 four-questions). Gate <code>tests/standard_names/</code>. ~2 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s4-identity-adjudication">
+<td>Two identities need a physics adjudication proposed through <code>sn edit</code></td>
+<td><code>sn-identity-adjudication-residue</code> <code>f-siar-001</code></td>
+<td><strong>needs a ruling</strong></td>
+<td>Adjudicate on DD semantics and catalog convention, then propose through <code>sn edit</code> and let review score independently. <code>radial_coordinate_of_reflector</code> (a live orphan, per the orphan census) also needs its missing description and embedding. The decision is physics, not measurement.</td>
+<td>needs a ruling</td>
+<td><strong>needs a ruling</strong> — ruled by the lead (physics adjudication of the two identities). Unblocks: the <code>sn edit</code> proposals and <code>radial_coordinate_of_reflector</code>'s docs/embedding.</td>
+</tr>
+
+<tr id="sib-row-census-s4-snapshot-cost">
+<td>Measure the collateral snapshot cost, then digest server-side or narrow to owned dimensions</td>
+<td><code>signed-repair-snapshot-cost</code> <code>f-srsc-001</code></td>
+<td><strong>needs a write to confirm</strong> (measurement)</td>
+<td>Time a representative signed repair as-is to get the baseline. No owning reader; the measurement itself is the deliverable.</td>
+<td>no owning reader (probe)</td>
+<td>measurement node: time a signed repair, then choose the approach and re-time. ~4 h. Not on the release path.</td>
+</tr>
+
+</tbody>
+</table>
 </main>
 </body>
 </html>

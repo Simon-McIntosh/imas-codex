@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-row-census">
+<title>Landing record — sib-row-census</title>
+</head>
+<body>
+<main>
+<h1 id="sib-row-census-landing-title">Landing record: row census re-confirmed</h1>
+<p id="sib-row-census-landing-summary">
+Re-confirmed every item named in §2, §3 and §4 of the integrity backlog on the live
+graph at commit <code>c7b4c626e</code>, read-only. The full row table is
+<a href="/imas-codex/evidence/fragments/sn-integrity-backlog/row-census.html"><code>row-census.html</code></a>.
+</p>
+<p id="sib-row-census-landing-measure">
+Both built-in controls fire: the <code>*_density_at_pedestal_top</code> family reads
+present (20 rows, 0.004 s; restore row <em>changed</em>), and <code>schema_digest</code>
+is absent from the tree (<code>rg -l</code> returns nothing). Of the named items,
+the census reads <strong>2 fixed</strong> (the fold guard's ledger rule landed;
+<code>find_edge_scalar_desyncs</code> returns 0), <strong>five changed</strong>
+(restore partial, restore-CLI origin refusal, scaffolding population 334→412,
+import write path refused, cap-hit 216→234), <strong>ten still true</strong>, and
+<strong>eleven needing a ruling</strong> or a bounding write to confirm. Every query
+named its row set and finished under ten seconds.
+</p>
+</main>
+</body>
+</html>
