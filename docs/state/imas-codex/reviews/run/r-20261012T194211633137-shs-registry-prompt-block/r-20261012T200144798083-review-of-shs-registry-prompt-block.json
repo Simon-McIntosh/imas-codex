@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:9564",
+    "imas_codex/standard_names/workers.py:10242",
+    "imas_codex/standard_names/workers.py:10606",
+    "imas_codex/standard_names/review/pipeline.py:2042"
+  ],
+  "completed_at": "2026-10-12T20:11:01.429Z",
+  "dispatched_at": "2026-10-12T20:01:56Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": "9564",
+      "severity": "follow-on",
+      "text": "follow-on: the wiring that supplies conventions at the render sites is unasserted \u2014 tests/standard_names/test_conventions_prompt_block.py:33 hands the template its own conventions value, so removing the context key from process_generate_docs_batch (:9564), prepare_docs_review_request (:10242) or process_refine_docs_batch (:10606) leaves all nine added assertions green while the block silently leaves the live prompt."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read both commits from c51cf292f \u2014 53fb95511 adds the context function, the include, its four render-site wirings, the prompt rewrites and the test module; a7a288d30 removes the last opening advice from the system and user templates.",
+    "done_when": "the four measures are met \u2014 the rendered block carries the canonical flux-surface-average equation and no unrelated entry, argon_temperature renders no block, an include removal reddens one test (negative-control.log ends EXIT=1), and the removed passages are tabulated in the landing fragment.",
+    "goal": "the node goal is that every documentation prompt carries one block of the registry entries selected for its item, replacing free-text opening and notation advice; imas_codex/llm/prompts/sn/_conventions.md plus its four include sites deliver that, and rendering sn/generate_docs_user for flux_surface_averaged_argon_density_at_plasma_boundary emits two concepts, one notation and one template.",
+    "manifest": "read; status complete, commits 53fb95511 and a7a288d30, baseline 104 passed and after 113 passed with EXIT=0, and negative_control_log named as a bare path whose header records the revision and the module under test.",
+    "write_paths": "the manifest declares the twelve source, prompt and test paths plus the landing fragment; every path in the two-commit diff is inside them, with refine_docs_system.md declared but unchanged."
+  },
+  "justifications": {
+    "durability": "the include-removal control shows tests/standard_names/test_conventions_prompt_block.py reddens when _conventions.md leaves generate_docs_user, but no test reaches the render sites, so workers.py:9564 could drop its context key unnoticed.",
+    "evidence": "baseline-absolute.log (104 passed, EXIT=0, revision=c51cf292f) and after-final.log (113 passed, EXIT=0, revision=a7a288d30) record the gate the done_when names.",
+    "fit": "conventions_context_for sits in imas_codex/standard_names/context.py beside locus_context_for and the include follows imas_codex/llm/prompts/sn/_coordinate_conventions.md, carrying no plan-labelled name.",
+    "goal_fidelity": "imas_codex/llm/prompts/sn/_conventions.md renders only the selected entries, and rendering sn/generate_docs_user for the seeded name emits the flux-surface-average equation and no unrelated concept.",
+    "reuse": "the function delegates selection to select_conventions in imas_standard_names.grammar.terms and adds only the model_dump projection; no prompt-render capability exists to fork.",
+    "scope_discipline": "every path in git diff c51cf292f a7a288d30 is inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that every documentation prompt carries one block of the registry entries selected for its item, replacing free-text opening and notation advice; imas_codex/llm/prompts/sn/_conventions.md plus its four include sites deliver that, and rendering sn/generate_docs_user for flux_surface_averaged_argon_density_at_plasma_boundary emits two concepts, one notation and one template.\nVERDICT done_when: the four measures are met \u2014 the rendered block carries the canonical flux-surface-average equation and no unrelated entry, argon_temperature renders no block, an include removal reddens one test (negative-control.log ends EXIT=1), and the removed passages are tabulated in the landing fragment.\nVERDICT write_paths: the manifest declares the twelve source, prompt and test paths plus the landing fragment; every path in the two-commit diff is inside them, with refine_docs_system.md declared but unchanged.\nVERDICT manifest: read; status complete, commits 53fb95511 and a7a288d30, baseline 104 passed and after 113 passed with EXIT=0, and negative_control_log named as a bare path whose header records the revision and the module under test.\nVERDICT diff: read both commits from c51cf292f \u2014 53fb95511 adds the context function, the include, its four render-site wirings, the prompt rewrites and the test module; a7a288d30 removes the last opening advice from the system and user templates.\nCALL_SITES: imas_codex/standard_names/workers.py:9564, imas_codex/standard_names/workers.py:10242, imas_codex/standard_names/workers.py:10606, imas_codex/standard_names/review/pipeline.py:2042\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/llm/prompts/sn/_conventions.md renders only the selected entries, and rendering sn/generate_docs_user for the seeded name emits the flux-surface-average equation and no unrelated concept.\nSCORE evidence: 19\nJUSTIFICATION evidence: baseline-absolute.log (104 passed, EXIT=0, revision=c51cf292f) and after-final.log (113 passed, EXIT=0, revision=a7a288d30) record the gate the done_when names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff c51cf292f a7a288d30 is inside the manifest's declared write paths.\nSCORE durability: 14\nJUSTIFICATION durability: the include-removal control shows tests/standard_names/test_conventions_prompt_block.py reddens when _conventions.md leaves generate_docs_user, but no test reaches the render sites, so workers.py:9564 could drop its context key unnoticed.\nSCORE fit: 18\nJUSTIFICATION fit: conventions_context_for sits in imas_codex/standard_names/context.py beside locus_context_for and the include follows imas_codex/llm/prompts/sn/_coordinate_conventions.md, carrying no plan-labelled name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the function delegates selection to select_conventions in imas_standard_names.grammar.terms and adds only the model_dump projection; no prompt-render capability exists to fork.\nFINDING imas_codex/standard_names/workers.py:9564 follow-on: the wiring that supplies conventions at the render sites is unasserted \u2014 tests/standard_names/test_conventions_prompt_block.py:33 hands the template its own conventions value, so removing the context key from process_generate_docs_batch (:9564), prepare_docs_review_request (:10242) or process_refine_docs_batch (:10606) leaves all nine added assertions green while the block silently leaves the live prompt.\n",
+  "review_run_id": "r-20261012T200144798083-review-of-shs-registry-prompt-block",
+  "reviewed_base_sha": "c51cf292fa32aec131a45c9426c55649ce59d8f7",
+  "reviewed_head_sha": "a7a288d30dfd9b7ab42f69110029d1fde97df240",
+  "reviewed_run_id": "r-20261012T194211633137-shs-registry-prompt-block",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:09:20.376606+00:00",
+  "total": 111
+}
