@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T06:40:58.041Z",
+  "dispatched_at": "2026-10-12T06:32:56Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-house-style.html:119",
+      "id": "done_when-1",
+      "reason": "without a control the node closes on a measure that is trivially satisfied by an accessor that resolves nothing.",
+      "text": "\u00a73's done-when asserts \"the accessor run over the WEST roster reports zero tokens without an entry\" with no declared negative control: a broken or empty worklist also reports zero missing tokens, so the measure holds however the instrument behaves and the section cannot show its worklist fires",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:146",
+      "id": "evidence_paths-1",
+      "reason": "the Choice decision is stated independently of the read and would stand, so naming the evidence path corrects provenance without moving the plan.",
+      "text": "\u00a74 settles the Choice-vs-Noul decision on a \"2026-10-12 smoke read\" citing probability 1.0 and 0.53 with no path, fragment or log, so the design rationale is unopenable and unverifiable by any later reader (the same read is cited path-less in sn-selection-over-generation#s3)",
+      "type": "evidence_paths",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:127",
+      "id": "anchors_resolve-1",
+      "reason": "the wrong module sends the lint node to a path where its findings cannot ride the reviewer's AuditReport, so \u00a75's wiring would silently receive nothing.",
+      "text": "\u00a74 names `imas_codex/standard_names/audits.py` (beside `latex_def_check`) as the home of the Layer 1 audits whose findings \"ride the AuditReport that already flows to the reviewer\", but the Layer 1 audits that build `AuditReport` (`run_lexical_lint`, `run_link_integrity`, `run_duplicate_detection`) are in `imas_codex/standard_names/review/audits.py`; the cited module contains no `AuditReport` and no `lint_findings`, so a node editing the cited path produces per-candidate `run_audits` strings that never reach the reviewer's template",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:145",
+      "id": "reasoning-1",
+      "reason": "the mechanism must run on a path that owns a judge (the review-side audit that already extracts audit findings), which the plan does not identify.",
+      "text": "\u00a74 puts judgment checks that \"ask Jev one categorising Choice each\" into the same position as `latex_def_check`, i.e. inside `run_audits`, which is synchronous, per-candidate, and documented as \"Six deterministic checks\" with no judge or async context; the plan names no caller that supplies the Jev decisions owner to that path, so on the generation path (`workers.py:4932`/`:6381`) the checks either cannot run or lose the placement \u00a75 depends on",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "76abb4e98dc0571c6fa9d537015a20e656b6c2222d660c4c42a503f9578ea52d",
+  "plan_slug": "sn-house-style",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T063246058362-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "f8c20f35ac817b950456083c8b20126505d45d9d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a74 places the checks in `imas_codex/standard_names/audits.py` \"beside `latex_def_check`\" and asserts their findings ride the reviewer's `AuditReport` (snapshot lines 127\u2013131), but `AuditReport` and the Layer 1 audit run are produced in `imas_codex/standard_names/review/audits.py`, not the cited module.",
+    "done_when": "a finding \u2014 \u00a73's done-when (\"the accessor run over the WEST roster reports zero tokens without an entry\", snapshot line 119) names no negative control and cannot fail if the worklist enumerates nothing.",
+    "evidence_paths": "a finding \u2014 \u00a74 justifies its Choice-over-Noul design on numbers from \"the 2026-10-12 smoke read\" (snapshot line 146) that name no durable path, so a later reader cannot open the measurement.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach any introduced symbol; `f-scai-audit-findings-reach-no-template` appears only as a followup id in prose, not in code.",
+    "reasoning": "a finding \u2014 \u00a74's mechanism routes Jev-backed judgment checks through `run_audits` in `imas_codex/standard_names/audits.py` (a synchronous, per-candidate, deterministic function on the generation path at `workers.py:4932`/`:6381`), and names no caller that supplies a judge, so the described mechanism does not run where the plan places it.",
+    "single_goal": "pass \u2014 \u00a72 is one consumer test of the ISN accessor, \u00a73 one authoring deliverable (the entries), \u00a74 one deliverable (the conformance checks), each closable on one verdict.",
+    "wiring": "pass \u2014 the plan declares `plan-blocks: sn-harmonize-command,sn-west-prototype-release` and `plan-section-depends-on: {s2:[imas-standard-names:concept-and-notation-registry#s2]}`; both consumers declare the reciprocal edge (sn-west-prototype-release#s3 \u2192 sn-house-style#s3, sn-harmonize-command#s2/s3/#s4 \u2192 sn-house-style#s4/#s5) and the ISN plan names imas-codex:sn-house-style as its consumer, so no needed edge is missing."
+  },
+  "section_digests": {
+    "_document": "77a40e495a1bf407034434c1f885a25f404d4eda585a946eabb49fe01da0fe60",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s2": "23f227226f8b84dda9a1437a157a9860d371e5cec0c478e9cecb9d26c26f706e",
+    "s3": "fb54accb90803bc132fbee4c6de044a8f7ce98e72eb603217cf7ca62e430b6db",
+    "s4": "2abd3ef0db034fd76e3d74aa74ed7b7b38a899b4339a394cbc561a3c0bceb088",
+    "s5": "3208be29326928c4ea9f1693a1493465ae47938e6f2188f57252dd9cadbcaa0b",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T07:12:29.974295+00:00"
+}
