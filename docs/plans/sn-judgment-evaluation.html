@@ -24,7 +24,7 @@
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -117,8 +117,11 @@
       <code>tests/ids/test_candidate_judgment.py</code> asserts, while any other transport fault
       returns <code>None</code>. <code>decide_batch</code>'s own batch behaviour is unchanged.
       Surface: one seat table is added and the private wrapper is retired. Then add a <code>[tool.imas-codex.sn-judge]</code> seat
-      naming the pinned Jev version and the service tag <code>standard-names</code>, so standard
-      names' Jev spend is attributed separately from discovery's.
+      naming the pinned Jev version. The service tag is not a seat key: it is the runtime
+      <code>service</code> argument of the decisions call, as the candidate stage's
+      <code>JUDGMENT_SERVICE</code> constant is today. Standard names get their own constant,
+      <code>standard-names</code>, passed at every standard-names judge call site, so their Jev
+      spend is attributed separately from discovery's.
     </p>
     <p>
       The mapping session last touched <code>imas_codex/ids/candidates.py</code> on 2026-10-09.
