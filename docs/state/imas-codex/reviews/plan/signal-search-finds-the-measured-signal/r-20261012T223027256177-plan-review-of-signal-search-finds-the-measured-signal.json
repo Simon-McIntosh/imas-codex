@@ -46,6 +46,13 @@
       "finding": "reasoning-1",
       "reason": "",
       "when": "2026-10-12T22:39:49.016908+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "the guard exists: tests/conftest.py:415 defines the autouse fixture no_live_decisions_requests, which raises on any request to openrouter.ai/api/alpha/decisions; the reviewer read the harness on main before the labelling node's commits, which retire the SSFMS_JEV_ARMS path, were merged",
+      "when": "2026-10-12T22:39:52.523248+00:00"
     }
   ],
   "responses": {
@@ -54,6 +61,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-12T22:39:49.016908+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "the guard exists: tests/conftest.py:415 defines the autouse fixture no_live_decisions_requests, which raises on any request to openrouter.ai/api/alpha/decisions; the reviewer read the harness on main before the labelling node's commits, which retire the SSFMS_JEV_ARMS path, were merged",
+      "when": "2026-10-12T22:39:52.523248+00:00"
     },
     "single_goal-1": {
       "action": "acted",
