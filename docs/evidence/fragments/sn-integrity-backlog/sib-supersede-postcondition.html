@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-supersede-postcondition">
+<title>Supersede postcondition counts every successor edge</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-supersede-postcondition-title">Supersede postcondition: exactly one successor edge, carrying the receipt</h1>
+
+<table id="sib-supersede-postcondition-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>f04521cf86eadcd339634f995ecaa9207e2b4001</code></td></tr>
+<tr><th>Changed paths</th><td><code>imas_codex/standard_names/signed_manifest.py</code>, <code>tests/standard_names/test_signed_supersede_edge.py</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-supersede-postcondition-change">The change</h2>
+<p>The signed supersede postcondition matched only the edge whose target was the
+signed successor and grouped its rows by <code>receipt_id</code>. The successor
+relation is also rebuilt from the <code>superseded_by</code> scalar, so a
+predecessor can carry a second, unstamped <code>HAS_SUCCESSOR</code> edge beside
+the signed one. The grouped query returned one row per distinct
+<code>receipt_id</code>, each with <code>count = 1</code>, and the check read
+whichever row came first — so "exactly one successor edge, carrying this
+receipt" was not enforced. The query now counts every <code>HAS_SUCCESSOR</code>
+edge from the predecessor, without grouping, and requires the single edge to
+carry the minting receipt's id.</p>
+
+<h2 id="sib-supersede-postcondition-evidence">Evidence</h2>
+<ul>
+<li><code>gate-head.log</code> — 3 passed, <code>EXIT=0</code>, against a
+disposable Neo4j (server on bolt 127.0.0.1:27687, torn down after the run).</li>
+<li><code>gate-negative-control.log</code> — grouped query restored:
+<code>test_supersede_postcondition_refuses_a_second_successor_edge</code>
+FAILED, <code>EXIT=1</code>.</li>
+<li><code>suite-base.log</code> / <code>suite-after.log</code> — 130 passed each,
+39 and 40 deselected, both <code>EXIT=0</code>: zero added failures.</li>
+</ul>
+
+</main>
+</body>
+</html>

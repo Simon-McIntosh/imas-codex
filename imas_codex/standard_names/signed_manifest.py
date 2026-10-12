@@ -4135,19 +4135,18 @@ def _verify_postconditions(
                     successor_edge = query.query(
                         """
                         MATCH (node:StandardName {id: $id})
-                              -[relationship:HAS_SUCCESSOR]->
-                              (successor:StandardName {id: $successor_id})
-                        RETURN relationship.receipt_id AS receipt_id,
+                        OPTIONAL MATCH (node)-[relationship:HAS_SUCCESSOR]->
+                              (successor:StandardName)
+                        RETURN collect(relationship.receipt_id) AS receipt_ids,
                                count(relationship) AS count
                         """,
                         id=participant["id"],
-                        successor_id=successor_id,
                     )
                     expected_receipt_id = _change_id(manifest_sha256, row.id)
                     if (
                         not successor_edge
                         or int(successor_edge[0].get("count") or 0) != 1
-                        or successor_edge[0].get("receipt_id") != expected_receipt_id
+                        or successor_edge[0].get("receipt_ids") != [expected_receipt_id]
                     ):
                         raise SignedManifestConflict(
                             "recorded signed-manifest repair lost its successor edge"
