@@ -1,12 +1,12 @@
 """Deterministic drift detection and sibling-set assembly for SN docs.
 
-Standard names are generated per-name, so sibling families (names sharing
-a parent via ``HAS_PARENT``, or sharing a ``physical_base`` when parentless)
-can drift apart in documentation structure even though they describe
-structurally related quantities. This module computes a deterministic
-drift metric over sibling descriptions and assembles a harmonization
-worklist — families that are both large enough and drifted enough to be
-worth re-aligning.
+Standard names are generated per-name, so sibling families (names joined by
+a family-eligible ``HAS_PARENT`` edge, or — when parentless — a shared
+pattern signature over the invariant grammar segments) can drift apart in
+documentation structure even though they describe structurally related
+quantities. This module computes a deterministic drift metric over sibling
+descriptions and assembles a harmonization worklist — families that are both
+large enough and drifted enough to be worth re-aligning.
 
 This module is read-only against the graph: it never writes StandardName
 properties. See :mod:`imas_codex.cli.sn` (``sn harmonize --report``) for
@@ -24,6 +24,7 @@ from imas_codex.standard_names.context import DOCUMENTATION_FAMILY_OPERATOR_KIND
 from imas_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
+from imas_codex.standard_names.families import fetch_pattern_family
 
 #: Operator kinds eligible for parent-based family grouping.
 _FAMILY_OPERATOR_KINDS = DOCUMENTATION_FAMILY_OPERATOR_KINDS
@@ -233,18 +234,22 @@ def _close_if_owned(gc: Any, own_gc: bool) -> None:
 
 
 def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | None:
-    """Assemble the full live sibling family for *seed_name*.
+    """Assemble the full live family for *seed_name*.
 
-    Looks up the seed's parent (via ``HAS_PARENT`` with a family-eligible
-    ``operator_kind``); if found, returns the parent's full sibling set.
-    Falls back to grouping by ``physical_base`` when the seed has no such
-    parent edge.
+    Primary route: the seed's parent via ``HAS_PARENT`` with a family-eligible
+    ``operator_kind`` (or a reduction operator). The operator axis is not a
+    pattern axis, so operator-derived children are joined to their parent only
+    here.
+
+    Fallback: the seed's pattern family — every live name whose grammar parses
+    identically except along
+    :data:`~imas_codex.standard_names.families.PATTERN_VARIATION_AXES`.
 
     Returns a dict with keys ``parent`` (id or ``None``), ``grouping``
-    (``"parent"`` or ``"physical_base"``), ``operator_kinds`` (sorted list
-    of distinct kinds seen among members), ``members`` (list of member
-    dicts), and ``anchor`` (selected anchor id or ``None``). Returns
-    ``None`` if the seed itself is not found or is superseded.
+    (``"parent"`` or ``"pattern"``), ``operator_kinds`` (sorted list of
+    distinct kinds seen among members), ``members`` (list of member dicts),
+    and ``anchor`` (selected anchor id or ``None``). Returns ``None`` if the
+    seed itself is not found or is superseded.
     """
     resolved_gc, own_gc = _resolve_gc(gc)
     try:
@@ -253,7 +258,7 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                 """
                 MATCH (c:StandardName {id: $seed})
                 WHERE coalesce(c.name_stage, '') <> $superseded
-                RETURN c.id AS id, c.physical_base AS physical_base
+                RETURN c.id AS id
                 """,
                 seed=seed_name,
                 superseded=NameStage.superseded.value,
@@ -335,45 +340,17 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
         if parent_rows:
             return None
 
-        physical_base = seed_rows[0].get("physical_base")
-        if not physical_base:
-            return {
-                "parent": None,
-                "grouping": "physical_base",
-                "operator_kinds": [],
-                "members": [_row_to_member(seed_rows[0])],
-                "anchor": None,
-            }
-
-        member_rows = (
-            resolved_gc.query(
-                """
-                MATCH (c:StandardName)
-                WHERE c.physical_base = $pb
-                  AND coalesce(c.name_stage, '') <> $superseded
-                  AND c.description IS NOT NULL
-                  AND NOT EXISTS {
-                    MATCH (c)-[:HAS_PARENT]->(:StandardName)
-                  }
-                RETURN c.id AS id, c.description AS description,
-                       c.documentation AS documentation,
-                       c.docs_stage AS docs_stage,
-                       c.reviewer_score_docs AS reviewer_score_docs
-                """,
-                pb=physical_base,
-                superseded=NameStage.superseded.value,
-            )
-            or []
-        )
-        members = [_row_to_member(r) for r in member_rows]
+        rows = fetch_pattern_family(seed_name, resolved_gc)
+        members = [_row_to_member(r) for r in rows]
+        if not members:
+            return None
         anchor = select_anchor(None, None, None, members)
         return {
             "parent": None,
-            "grouping": "physical_base",
+            "grouping": "pattern",
             "operator_kinds": [],
             "members": members,
             "anchor": anchor,
-            "physical_base": physical_base,
         }
     finally:
         _close_if_owned(resolved_gc, own_gc)

@@ -757,33 +757,6 @@ DOCUMENTATION_FAMILY_OPERATOR_KINDS: tuple[str, ...] = (
     "coordinate",
 )
 
-_SIBLING_FAMILY_QUERY = """
-MATCH (sn:StandardName {id: $sn_id})-[r:HAS_PARENT]->(p:StandardName)
-WHERE r.operator_kind IN $family_kinds
-OPTIONAL MATCH (sib:StandardName)-[rs:HAS_PARENT]->(p)
-WHERE sib.id <> $sn_id
-  AND rs.operator_kind IN $family_kinds
-  AND coalesce(sib.name_stage, '') <> 'superseded'
-WITH p, r,
-     [s IN collect({
-         id: sib.id,
-         description: sib.description,
-         documentation: sib.documentation,
-         docs_stage: coalesce(sib.docs_stage, ''),
-         reviewer_score_docs: sib.reviewer_score_docs,
-         operator_kind: rs.operator_kind,
-         axis: rs.axis
-     }) WHERE s.id IS NOT NULL] AS sibs
-RETURN p.id AS parent_id,
-       p.description AS parent_description,
-       p.documentation AS parent_documentation,
-       coalesce(p.docs_stage, '') AS parent_docs_stage,
-       r.operator_kind AS member_operator_kind,
-       sibs
-ORDER BY size(sibs) DESC, parent_id
-LIMIT 1
-"""
-
 
 def _doc_opening(text: str | None, limit: int = 240) -> str:
     """First ``limit`` characters of *text*, cut at a word boundary."""
@@ -801,27 +774,37 @@ def fetch_sibling_family(
     gc: Any = None,
     max_siblings: int = 12,
 ) -> dict[str, Any] | None:
-    """Return the HAS_PARENT sibling family of *sn_id* for prompt grounding.
+    """Return the pattern family of *sn_id* for prompt grounding.
 
-    The family is the set of live (non-superseded) StandardNames sharing a
-    HAS_PARENT parent with the candidate via a structural operator edge
-    (``operator_kind`` in projection / qualifier / coordinate). When the
-    candidate has several such parents the largest family wins.
+    The family is every live (non-superseded) StandardName whose grammar
+    parses identically except along :data:`PATTERN_VARIATION_AXES` (subject /
+    component / coordinate / position / region / device). The invariant
+    segments are ``physical_base``, ``geometric_base``, ``transformation``
+    and ``process``, so a reduction operator and its unreduced parent land in
+    different families. A name with no axis sibling is a family of one.
 
-    Returns ``None`` when the name has no qualifying family (or on any
-    graph failure — never raises). Otherwise a dict:
+    Returns ``None`` when the seed is absent, superseded, or the family's only
+    live name (or on any graph failure — never raises). Otherwise a dict:
 
-    - ``parent``: ``{name, description, docs_accepted}``
-    - ``anchor``: the documentation-template authority — the parent when its
-      docs are accepted and its description is real, else the docs-accepted
-      sibling with the highest ``reviewer_score_docs``; ``None`` when the
-      family has no accepted member yet (defer semantics — siblings are
-      still returned for structural comparison).
+    - ``parent``: ``{name, description, docs_accepted}`` — the base physical
+      quantity the family is expressed over (the seed's ``physical_base``).
+    - ``anchor``: the documentation-template authority — the base quantity
+      when its docs are accepted and its description is real, else the
+      docs-accepted sibling with the highest ``reviewer_score_docs``; ``None``
+      when the family has no accepted member yet (defer semantics — siblings
+      are still returned for structural comparison).
     - ``siblings``: up to *max_siblings* entries of ``{name, operator_kind,
-      axis, description, documentation_opening, docs_stage}``.
+      axis, description, documentation_opening, docs_stage}``, where
+      ``operator_kind`` names the variation axis a member differs on and
+      ``axis`` carries its value.
     """
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+    from imas_codex.standard_names.families import (
+        PATTERN_VARIATION_AXES,
+        fetch_family_base,
+        fetch_pattern_family,
     )
 
     own_gc = False
@@ -835,18 +818,22 @@ def fetch_sibling_family(
             logger.debug("fetch_sibling_family: GraphClient unavailable")
             return None
 
+    seed: dict[str, Any] | None = None
+    base_row: dict[str, Any] = {}
+    other_rows: list[dict[str, Any]] = []
+    parent_name = sn_id
     try:
-        rows = list(
-            gc.query(
-                _SIBLING_FAMILY_QUERY,
-                sn_id=sn_id,
-                family_kinds=list(DOCUMENTATION_FAMILY_OPERATOR_KINDS),
-            )
-            or []
-        )
+        rows = fetch_pattern_family(sn_id, gc)
+        seed = next((r for r in rows if r.get("id") == sn_id), None)
+        parent_name = str((seed or {}).get("physical_base") or "") or sn_id
+        member_ids = {r.get("id") for r in rows}
+        if parent_name in member_ids:
+            base_row = next((r for r in rows if r.get("id") == parent_name), {})
+        else:
+            base_row = fetch_family_base(parent_name, gc)
+        other_rows = [r for r in rows if r.get("id") not in (sn_id, parent_name)]
     except Exception:
         logger.debug("fetch_sibling_family: query failed for %s", sn_id)
-        rows = []
     finally:
         if own_gc:
             try:
@@ -854,17 +841,7 @@ def fetch_sibling_family(
             except Exception:
                 pass
 
-    if not rows:
-        return None
-    row = rows[0]
-    if row.get("member_operator_kind") not in DOCUMENTATION_FAMILY_OPERATOR_KINDS:
-        return None
-    raw_sibs = [
-        s
-        for s in (row.get("sibs") or [])
-        if s.get("id") and s.get("operator_kind") in DOCUMENTATION_FAMILY_OPERATOR_KINDS
-    ]
-    if not raw_sibs:
+    if not seed or not other_rows:
         return None
 
     placeholder = DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
@@ -873,47 +850,59 @@ def fetch_sibling_family(
         t = (text or "").strip()
         return "" if t == placeholder else t
 
-    parent_desc = _real(row.get("parent_description"))
-    parent_docs_accepted = row.get("parent_docs_stage") == "accepted" and bool(
+    def _base_segment(segment: str) -> str:
+        return str(base_row.get(segment) or "")
+
+    parent_desc = _real(base_row.get("description"))
+    parent_docs_accepted = base_row.get("docs_stage") == "accepted" and bool(
         parent_desc
     )
 
-    siblings = [
-        {
-            "name": s["id"],
-            "operator_kind": s.get("operator_kind") or "",
-            "axis": s.get("axis") or "",
-            "description": _real(s.get("description")),
-            "documentation_opening": _doc_opening(s.get("documentation")),
-            "docs_stage": s.get("docs_stage") or "",
-        }
-        for s in sorted(raw_sibs, key=lambda s: (s.get("operator_kind") or "", s["id"]))
-    ][:max_siblings]
+    siblings = []
+    for row in other_rows:
+        differing = [
+            (segment, str(row.get(segment) or ""))
+            for segment in PATTERN_VARIATION_AXES
+            if str(row.get(segment) or "") != _base_segment(segment)
+        ]
+        siblings.append(
+            {
+                "name": row.get("id"),
+                "operator_kind": "+".join(segment for segment, _ in differing),
+                "axis": "+".join(value for _, value in differing),
+                "description": _real(row.get("description")),
+                "documentation_opening": _doc_opening(row.get("documentation")),
+                "docs_stage": row.get("docs_stage") or "",
+            }
+        )
+    siblings = sorted(siblings, key=lambda s: (s["operator_kind"], s["name"]))[
+        :max_siblings
+    ]
 
     anchor: dict[str, Any] | None = None
     if parent_docs_accepted:
         anchor = {
-            "name": row["parent_id"],
+            "name": parent_name,
             "description": parent_desc,
-            "documentation": _doc_opening(row.get("parent_documentation"), 2000),
+            "documentation": _doc_opening(base_row.get("documentation"), 2000),
             "is_parent": True,
         }
     else:
         accepted = [
-            s
-            for s in raw_sibs
-            if s.get("docs_stage") == "accepted" and _real(s.get("description"))
+            r
+            for r in other_rows
+            if r.get("docs_stage") == "accepted" and _real(r.get("description"))
         ]
         if accepted:
             best = max(
                 accepted,
-                key=lambda s: (
-                    s.get("reviewer_score_docs") or 0.0,
-                    len(_real(s.get("description"))),
+                key=lambda r: (
+                    r.get("reviewer_score_docs") or 0.0,
+                    len(_real(r.get("description"))),
                 ),
             )
             anchor = {
-                "name": best["id"],
+                "name": best.get("id"),
                 "description": _real(best.get("description")),
                 "documentation": _doc_opening(best.get("documentation"), 2000),
                 "is_parent": False,
@@ -921,7 +910,7 @@ def fetch_sibling_family(
 
     return {
         "parent": {
-            "name": row["parent_id"],
+            "name": parent_name,
             "description": parent_desc,
             "docs_accepted": parent_docs_accepted,
         },

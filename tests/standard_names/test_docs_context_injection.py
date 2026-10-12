@@ -14,6 +14,11 @@ from contextlib import contextmanager
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+from tests.standard_names.test_pattern_families import (
+    _name,
+    _PatternGraph,
+)
+
 # =============================================================================
 # Helpers
 # =============================================================================
@@ -389,72 +394,74 @@ def test_generate_docs_user_template_renders_without_dd_context():
 # =============================================================================
 
 
-class _SiblingFamilyGC:
-    """Return a canned family row while recording the read query."""
+class _PatternFamilyGC:
+    """Return pattern-family rows from an in-memory fixture graph."""
 
-    def __init__(self, row: dict[str, Any] | None):
-        self.row = row
+    def __init__(self, graph):
+        self._graph = graph
         self.calls: list[tuple[str, dict[str, Any]]] = []
 
     def query(self, cypher: str, **params: Any):
         self.calls.append((cypher, params))
-        return [self.row] if self.row is not None else []
+        return self._graph.query(cypher, **params)
 
 
-def _sibling(name: str, operator_kind: str) -> dict[str, Any]:
-    return {
-        "id": name,
-        "description": f"Description for {name}",
-        "documentation": f"Documentation for {name}",
-        "docs_stage": "accepted",
-        "reviewer_score_docs": 0.9,
-        "operator_kind": operator_kind,
-        "axis": None,
-    }
-
-
-def test_locus_ancestry_does_not_create_automatic_docs_cohort():
-    """A large locus peel is grammar ancestry, not prose parallelism."""
+def test_locus_qualified_variants_resolve_to_one_pattern_family():
+    """A locus axis is a variation axis, so per-locus variants are family-mates."""
     from imas_codex.standard_names.context import fetch_sibling_family
 
-    siblings = [
-        _sibling(f"radial_coordinate_of_distinct_owner_{index}", "locus")
-        for index in range(34)
-    ]
-    gc = _SiblingFamilyGC(
-        {
-            "parent_id": "radial_coordinate",
-            "parent_description": "Radial coordinate.",
-            "parent_documentation": "The radial coordinate locates a point.",
-            "parent_docs_stage": "accepted",
-            "member_operator_kind": "locus",
-            "sibs": siblings,
-        }
+    gc = _PatternFamilyGC(
+        _PatternGraph(
+            [
+                _name(
+                    "electron_density_at_pedestal_top",
+                    physical_base="density",
+                    subject="electron",
+                    position="pedestal_top",
+                ),
+                _name(
+                    "electron_density_at_plasma_boundary",
+                    physical_base="density",
+                    subject="electron",
+                    position="plasma_boundary",
+                ),
+            ]
+        )
     )
 
-    family = fetch_sibling_family("radial_coordinate_of_control_surface", gc=gc)
+    family = fetch_sibling_family("electron_density_at_pedestal_top", gc=gc)
 
-    assert family is None
-    assert len(siblings) + 1 == 35
-    assert "locus" not in gc.calls[0][1]["family_kinds"]
+    assert family is not None
+    assert family["parent"]["name"] == "density"
+    assert [s["name"] for s in family["siblings"]] == [
+        "electron_density_at_plasma_boundary"
+    ]
 
 
-def test_safe_projection_family_remains_available_to_docs():
-    """Axis projections remain useful parallel-structure comparators."""
+def test_projection_family_remains_available_to_docs():
+    """Component projections remain useful parallel-structure comparators."""
     from imas_codex.standard_names.context import fetch_sibling_family
 
-    gc = _SiblingFamilyGC(
-        {
-            "parent_id": "mode_number",
-            "parent_description": "Mode number components.",
-            "parent_documentation": "Mode numbers label periodic structure.",
-            "parent_docs_stage": "accepted",
-            "member_operator_kind": "projection",
-            "sibs": [
-                _sibling("poloidal_mode_number", "projection"),
-                _sibling("toroidal_mode_number", "projection"),
-            ],
-        }
+    gc = _PatternFamilyGC(
+        _PatternGraph(
+            [
+                _name(
+                    "radial_mode_number",
+                    physical_base="mode_number",
+                    component="radial",
+                ),
+                _name(
+                    "poloidal_mode_number",
+                    physical_base="mode_number",
+                    component="poloidal",
+                ),
+                _name(
+                    "toroidal_mode_number",
+                    physical_base="mode_number",
+                    component="toroidal",
+                ),
+            ]
+        )
     )
 
     family = fetch_sibling_family("radial_mode_number", gc=gc)
@@ -464,18 +471,15 @@ def test_safe_projection_family_remains_available_to_docs():
         "poloidal_mode_number",
         "toroidal_mode_number",
     ]
-    assert set(gc.calls[0][1]["family_kinds"]) == {
-        "coordinate",
-        "projection",
-        "qualifier",
-    }
 
 
 def test_source_owners_are_not_automatic_prose_family_members():
     """Attached owners never become sibling members or identity evidence."""
     from imas_codex.standard_names.context import fetch_sibling_family
 
-    gc = _SiblingFamilyGC(None)
+    gc = _PatternFamilyGC(
+        _PatternGraph([_name("vertical_outline", physical_base="vertical_outline")])
+    )
     source_owners = [f"outline_owner_{index}" for index in range(10)]
 
     assert fetch_sibling_family("vertical_outline", gc=gc) is None
