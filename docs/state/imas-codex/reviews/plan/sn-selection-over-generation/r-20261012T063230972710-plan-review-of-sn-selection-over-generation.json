@@ -47,6 +47,13 @@
       "finding": "wiring-1",
       "reason": "",
       "when": "2026-10-12T07:16:18.916048+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-2",
+      "reason": "",
+      "when": "2026-10-12T07:16:21.190065+00:00"
     }
   ],
   "responses": {
@@ -55,6 +62,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-12T07:16:18.916048+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T07:16:21.190065+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-selection-over-generation/r-20261012T063230972710-plan-review-of-sn-selection-over-generation.json",
