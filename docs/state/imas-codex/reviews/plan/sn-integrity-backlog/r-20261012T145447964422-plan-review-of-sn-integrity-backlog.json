@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T15:03:15.371Z",
+  "dispatched_at": "2026-10-12T14:54:57Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:121",
+      "id": "done_when-1",
+      "reason": "the census row granularity is this node's whole deliverable, and an undefined unit lets a worker emit a census that reads complete while omitting or merging the rows the surviving-section step depends on.",
+      "text": "\u00a76's measure is \"one row per named item\", but its next sentence speaks of \"the restore row\" as a unit, and the \u00a72 `paid-identity-deletion-protection` row it refers to carries three separately-stateable items (the partial restore, `f-pidp-the-restore-cli-re-arms-the-deletion-it-exists-to-prevent`, and `f-pidp-004`), while the `sn-lifecycle-integrity` \u00a75 row names seven footguns; \"one row per named item\" therefore does not pin a granularity, so the census can satisfy the wording while collapsing distinct verdicts into one row (or, read as one row per `f-*` id, silently omitting the rows that name no id, e.g. \"43 of 117 produced-name divergences\" and \"Three properties the schema and the live graph disagree about\")",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:121",
+      "id": "done_when-2",
+      "reason": "the sentence reads as sequencing guidance rather than the node's measure, and a worker will complete on the census artifact that precedes it.",
+      "text": "the done-when appends \"The coordinator turns the surviving rows into implementable sections of this plan, each gated, before any repair node is dispatched\", a downstream orchestrator duty the node cannot discharge or measure, so the node's own gate cannot close on it",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "368836146be63a0c0686bbf3c52520b52f2bab014f53c0950513e7ad360a6394",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 5,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-12T15:04:18.500959+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "",
+      "when": "2026-10-12T15:04:20.957287+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:04:18.500959+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:04:20.957287+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v5.json",
+  "review_run_id": "r-20261012T145447964422-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "824a9ba2a25854ea072afd0fa4a46b21def3a546",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/reuse-map-residual-closure.md`, the twelve censuses under `docs/evidence/sn-integrity-residual-closure/`, `find_provenance_orphans` and `find_edge_scalar_desyncs` (`imas_codex/standard_names/ledger.py:96,123`), `find_semantic_source_invariant_violations` (`imas_codex/standard_names/provenance_lifecycle.py:1229`) and `tests/graph/test_sn_integrity_ratchets.py` all resolve; the \u00a76 negative control holds, `schema_digest` has no code occurrence.",
+    "done_when": "a finding \u2014 \u00a76's measure says \"one row per named item\" while its own calibration sentence collapses the same set to \"the restore row\", and \u00a7\u00a72\u20134 bundle several separately-stateable items into one row; the row granularity is undefined.",
+    "evidence_paths": "pass \u2014 the census writes `docs/evidence/fragments/sn-integrity-backlog/row-census.html`, a durable repository path matching the existing `docs/evidence/fragments/<slug>/*.html` convention.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or changelog prose reach \u00a76's symbols or paths.",
+    "reasoning": "pass \u2014 \u00a76 states no root cause to check against evidence, its mechanism (call the existing read-only readers, mark rows with no reader) can produce the verdict-bearing rows it asserts, and the caller is named (the census itself invokes `find_provenance_orphans`, `find_edge_scalar_desyncs`, `find_semantic_source_invariant_violations`).",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, a read-only re-confirmation census producing one artifact.",
+    "wiring": "pass \u2014 \u00a76 is the only implementable section and its intra-plan dependency is carried by followup f-sib-002 (`/reckon-build sn-integrity-backlog \u00a76`), which names \u00a76 as the prerequisite; no missing or mispointed relationship."
+  },
+  "section_digests": {
+    "_document": "dafeebf52a1e87468aa2cabd5149aa973174c25633b2a32218519b5d980f1b14",
+    "s1": "5c436b5cc337a48171153f80f3379b295fc3cbfdf5739c277014cc16b3e8a370",
+    "s2": "7aa37c2bbbfa53cbf3145d6abf322688f1e71d8ff36605186c70a29c43e80661",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s6": "dd2311f05fcfdae0f0d0bc38bcf5819886b206d2b01c1bd588babe1849bd5d41"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:04:11.661753+00:00"
+}
