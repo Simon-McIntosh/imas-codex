@@ -18,13 +18,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="23">
 <meta name="plan-modified" content="2026-10-12">
-<meta name="plan-commits" content="045d63386,6e3b83550,196d42191">
+<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69">
 </head>
 <body>
   <main class="plan-doc">
@@ -196,14 +196,15 @@
 <section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       Replace the additive rule <code>score * 0.7 + text_score * 0.3 + 0.1</code> at the four sites a tool reaches with reciprocal
-      rank fusion. The sites are <code>_search_signals</code>, <code>_search_docs</code> and <code>_search_code</code> in
+      rank fusion. The sites are <code>_rank_signals</code>, the ranking <code>_search_signals</code> calls,
+      <code>_search_docs</code> and <code>_search_code</code> in
       <code>imas_codex/llm/search_tools.py</code>, and <code>_hybrid_ids</code> in
       <code>imas_codex/ids/slot_context.py</code>. The fusion already exists as <code>rrf_fuse</code> and
       <code>RRF_K = 60</code> in <code>imas_codex/standard_names/search.py</code>. Move it to
       <code>imas_codex/search/fusion.py</code>, which exports <code>rrf_fuse</code> and <code>RRF_K</code> and nothing
       else, and have the standard-name search and these four callers import it from there. This moves a definition
       rather than adding one. Do not write a second fusion. The code path fuses three streams: chunk vector, chunk text
-      with its reference hits, and code-example vector, which today adds 0.05 to the larger score at line 1678. Signal search over-fetches 100 vector and 50 full-text candidates before fusing, the prototype's
+      with its reference hits, and code-example vector, which today adds 0.05 to the larger of its own score and the chunk's. Signal search over-fetches 100 vector and 50 full-text candidates before fusing, the prototype's
       values, then cuts to <code>k</code>. <code>_vector_search_signals</code> duplicates
       <code>_find_signals_semantic</code> in <code>imas_codex/graph/domain_queries.py</code>: both build the
       <code>facility_id</code>-prefiltered query over <code>facility_signal_desc_embedding</code>. Raising the pool in one
@@ -359,7 +360,7 @@
     </p>
 
     <h2 id="s10">§10 — Correct the descriptions search exposed</h2>
-<section data-reckon="section" data-id="s10" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s10" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       The search reads the descriptions, so their errors are search errors. A physicist who searches "switching network
       unit" cannot find signals described as snubbers. Five defects were seen in the ripple session:
@@ -496,7 +497,10 @@
     <div class="r-comment-body"><p>stored an independent review of r-20261012T193722028601-ssfms-description-corrections covering the one commit gained since the prior review (b8a47a13..6d0847a69): goal_fidelity 18, evidence 18, scope_discipline 20, durability 19, fit 17, reuse 19 (total 111); no blocking finding — the two source-binding guards the prior review left unguarded now each fail on their own restored regression, and the fragment's negative-control count is corrected to three — with one follow-on (tests/discovery/test_signal_glossary.py:325 pins the propagated statement count).</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261012T193722028601-ssfms-description-corrections" data-who="reckon-build" data-when="2026-10-12T21:41:44.349Z">
-    <div class="r-comment-body"><p>corrected the JT-60SA signal descriptions that search exposed, through a glossary that reaches a term only across word and camel-case boundaries — EFC/EFCC wrong expansions 16 to 0 and unexpanded 11 to 0 against 155 to 182 reading error field correction coil, and SNU snubber readings 38 to 0 with superconducting unit 3 to 0 against 8 to 49 reading switching network unit; the term list in the landing record now names EFC, SNU, BPS, QPC, DR, FPPCC and HTS once each with EFCC&#x27;s meaning corrected; evidence at docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html</p></div>
+    <div class="r-comment-body"><p>corrected the JT-60SA signal descriptions that search exposed, through a glossary that reaches a term only across word and camel-case boundaries — EFC/EFCC wrong expansions 16 to 0 and unexpanded 11 to 0 against 155 to 182 reading error field correction coil, and SNU snubber readings 38 to 0 with superconducting unit 3 to 0 against 8 to 49 reading switching network unit; the term list in the landing record now names EFC, SNU, BPS, QPC, DR, FPPCC and HTS once each with EFCC's meaning corrected; evidence at docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-close-s10" data-who="reckon-build" data-when="2026-10-12T21:56:00Z">
+    <div class="r-comment-body"><p>§10 landed (merged in <code>5fadc0147</code>): glossary terms reach signals only across word, camel-case and digit boundaries; EFC/EFCC wrong expansions 16 to 0, SNU snubber readings 38 to 0; propagation binds a source by its representative id, guarded by tests that fail on revert; zero added failures in the six discovery modules that reach it. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s10">evidence</a></p></div>
 </div>
 </section>
 </main>
