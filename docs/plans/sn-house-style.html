@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -80,7 +80,7 @@
       <tbody>
         <tr><td><code>concepts.yml</code></td><td>a shared mathematical or physical concept: its canonical phrase, a one-sentence definition, exactly one canonical LaTeX equation, its symbol table, the forbidden variants as patterns, and whether a name using it restates the equation or only names the concept</td><td>operator, locus, coordinate or physical-base token (for example <code>flux_surface_averaged</code>, <code>volume_averaged</code>, <code>plasma_boundary</code>)</td></tr>
         <tr><td><code>notation.yml</code></td><td>the one symbol for a quantity or coordinate (<code>T_e</code>, <code>n_e</code>, <code>B_p</code>, <code>\psi</code>, <code>\rho_{tor}</code>, <code>R_{axis}</code>, <code>\phi</code>) and its forbidden spellings</td><td>physical base, subject, component or coordinate token</td></tr>
-        <tr><td><code>templates.yml</code></td><td>one description opening and one documentation opening per name pattern, the section order, and the sign-convention rule by COCOS transformation type</td><td>the name's pattern family (see <code>sn-catalog-grouping</code> §2)</td></tr>
+        <tr><td><code>templates.yml</code></td><td>one description opening and one documentation opening per name pattern; the section order and generic sign-convention form stay in ISN's <code>specification.yml</code>, and whether a sign-convention paragraph is required by COCOS transformation type is decided in <code>docs_gates.py</code> (§4)</td><td>the name's pattern family (see <code>sn-catalog-grouping</code> §2)</td></tr>
       </tbody>
     </table>
     <p>
