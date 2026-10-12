@@ -2062,6 +2062,7 @@ def propagate_source_enrichment(
                 sg.claimed_at = null,
                 sg.members_described = false
             """,
+            rep_id=representative_id,
             description=enrichment.get("description", ""),
             keywords=enrichment.get("keywords", []),
             physics_domain=enrichment.get("physics_domain", ""),

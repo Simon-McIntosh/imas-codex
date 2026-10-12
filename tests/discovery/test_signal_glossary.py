@@ -1,5 +1,6 @@
 """Facility glossary context in EDAS signal enrichment prompts."""
 
+import re
 from unittest.mock import patch
 
 import pytest
@@ -191,6 +192,39 @@ def test_a_source_is_swept_for_its_representative_not_its_member_edge():
 
     assert "MATCH (rep:FacilitySignal {id: sg.representative_id})" in recorded[0]
     propagate.assert_called_once_with("jt-60sa:general/cs1_temsnur11", {})
+
+
+def test_every_propagated_statement_binds_the_parameters_it_names():
+    """A repaired MATCH must still be handed the parameter it binds.
+
+    A statement that names ``$rep_id`` and is called without it fails at
+    runtime with ParameterMissing, which the pipeline reports only as a
+    non-fatal source-preparation warning — so the propagation silently stops
+    happening. The stub refuses that call, and counts how many statements ran.
+    """
+    calls = []
+
+    class BindingGraph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_exc):
+            return False
+
+        def query(self, cypher, **params):
+            missing = {name for name in re.findall(r"\$(\w+)", cypher)} - set(params)
+            assert not missing, f"statement binds {sorted(missing)} but is not given it"
+            calls.append(cypher)
+            return [{"cnt": 1, "updated": 1}]
+
+    with patch.object(parallel, "GraphClient", BindingGraph):
+        updated = parallel.propagate_source_enrichment(
+            "jt-60sa:general/cs1_temsnur11",
+            {"description": "Switching network unit (SNU)", "diagnostic": "magnetics"},
+        )
+
+    assert updated == 1
+    assert len(calls) == 4
 
 
 @pytest.mark.asyncio
