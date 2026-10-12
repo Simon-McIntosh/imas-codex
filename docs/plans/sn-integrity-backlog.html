@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -299,6 +299,9 @@
 </div>
 <div class="r-comment" data-section="s20" data-id="c-run-sib-signed-supersede-edge" data-who="reckon-build" data-when="2026-10-12T20:30:00Z">
     <div class="r-comment-body"><p>The signed supersede writes a receipt-stamped successor edge and requires it (merge <code>0d94713db</code>); review 112/120. §20 stays open until the postcondition counts every successor edge rather than grouping by receipt. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s20-edge">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s20" data-id="c-run-r-20261012T195230231486-sib-signed-supersede-edge" data-who="reckon-build" data-when="2026-10-12T20:15:54.539Z">
+    <div class="r-comment-body"><p>The signed supersede mutation now MERGEs (predecessor)-[:HAS_SUCCESSOR {receipt_id, signed_at}]-&gt;(successor) inside the same signed apply, stamped with the minting receipt&#x27;s id, and its postcondition requires exactly one such edge carrying that id; base gate 166 passed EXIT=0, after gate 168 passed EXIT=0 (zero added failures), and stubbing the edge write fails the edge test EXIT=1.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
