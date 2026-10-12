@@ -1,0 +1,146 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:19:31.263Z",
+  "dispatched_at": "2026-10-12T18:15:00Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-judgment-evaluation.html#s6",
+      "id": "reasoning-1",
+      "reason": "naming `write_reviews` as the field-carrying persistence path would put the node's write scope on the function that actually drops the fields, instead of on the builder alone.",
+      "text": "\u00a76 says the shadow records \"extend `_build_review_record` in `imas_codex/standard_names/review/pipeline.py`\", but `_build_review_record` only assembles the record; the same module persists it through `write_reviews` (imported from `imas_codex/standard_names/graph_ops.py`; called at `pipeline.py:1596` as `write_reviews(review_records, skip_cost=True)`), and the plan never names that path. A node built from \u00a76 as written touches the builder and stops \u2014 which is exactly where the staged node's blocking finding landed (\"write_reviews drops the shadow fields\").",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-judgment-evaluation.html#s2",
+      "id": "single_goal-1",
+      "reason": "\u00a72 is already `done` and both halves are landed (commits `428878833`, `b5c5c\u2026`), so splitting it now changes no future node.",
+      "text": "\u00a72 carries two deliverables under one done-when: (a) move cost booking into `judgment.py`, delete the `_call_judgment` wrapper and route its callers, and (b) add the `[tool.imas-codex.sn-judge]` seat plus the `standard-names` service constant. Its gate (`tests/ids` + `tests/discovery` add no failures; the spend assertion reddens) proves the owner-consolidation half and says nothing about the seat resolving.",
+      "type": "single_goal",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/ids/candidates.py:331",
+      "id": "anchors_resolve-1",
+      "reason": "\u00a72 is landed, so the stale anchor misleads only a historical reader; correcting the line changes no node's behaviour, though it should be re-pointed or dropped as part of the record.",
+      "text": "\u00a72 cites the private wrapper `_call_judgment` at `imas_codex/ids/candidates.py:331`, but that line is now `def _ids_criteria(...)` and no `_call_judgment` exists in the tree; \u00a72's own landing deleted it.",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-judgment-evaluation.html#s5",
+      "id": "done_when-1",
+      "reason": "the independent lead labelling of the 50-item overlap already functions as the check (a disagreement is the failure signal), so naming it a control would change nothing material.",
+      "text": "\u00a75's done-when (\"golden B holds 400 labels within the balance bounds \u2026 the coordinator-lead agreement (Cohen's kappa) on the 50-item overlap is recorded \u2026 Golden D holds at least 40 lead-ruled synonym pairs\") names no negative control, so nothing in the node shows the labelling guard fires.",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-judgment-evaluation.html#s5",
+      "id": "evidence_paths-1",
+      "reason": "the landed companion work already writes under `docs/evidence/fragments/sn-judgment-evaluation/`, so the path is settled in practice; naming it in \u00a75 would only make the record self-contained.",
+      "text": "\u00a75's done-when says the kappa, disagreements and rulings are \"recorded\" but names no durable path for them, unlike \u00a74 which names `docs/evidence/fragments/sn-judgment-evaluation/`.",
+      "type": "evidence_paths",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "1b5ef7a1637ff9976bd61a3bd95ad9d3f309c90b964c32ec9d9f88c6d4caff68",
+  "plan_slug": "sn-judgment-evaluation",
+  "plan_version": 27,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "\u00a76 is landed: the companion node routed the shadow fields through write_reviews (merge 48b16079b), so the persistence path the finding names is already carried",
+      "when": "2026-10-12T18:27:48.306259+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "\u00a72 is landed with both halves in the tree and the seat resolving through get_model; splitting a closed section changes no future node",
+      "when": "2026-10-12T18:27:49.522567+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "\u00a72's own landing deleted _call_judgment; the citation records what the section removed and \u00a72 dispatches nothing further",
+      "when": "2026-10-12T18:27:50.617543+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "\u00a75 is lead labelling: the independent lead labels on the 50-item overlap are the check, and a disagreement is the failure signal",
+      "when": "2026-10-12T18:27:51.970285+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "evidence_paths-1",
+      "reason": "\u00a75's records go to docs/evidence/fragments/sn-judgment-evaluation/, the directory every landed section of this plan writes; it waits on the lead and is not dispatched now",
+      "when": "2026-10-12T18:27:53.341941+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a72's own landing deleted _call_judgment; the citation records what the section removed and \u00a72 dispatches nothing further",
+      "when": "2026-10-12T18:27:50.617543+00:00"
+    },
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a75 is lead labelling: the independent lead labels on the 50-item overlap are the check, and a disagreement is the failure signal",
+      "when": "2026-10-12T18:27:51.970285+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a75's records go to docs/evidence/fragments/sn-judgment-evaluation/, the directory every landed section of this plan writes; it waits on the lead and is not dispatched now",
+      "when": "2026-10-12T18:27:53.341941+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a76 is landed: the companion node routed the shadow fields through write_reviews (merge 48b16079b), so the persistence path the finding names is already carried",
+      "when": "2026-10-12T18:27:48.306259+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a72 is landed with both halves in the tree and the seat resolving through get_model; splitting a closed section changes no future node",
+      "when": "2026-10-12T18:27:49.522567+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-judgment-evaluation.v27.json",
+  "review_run_id": "r-20261012T181443429352-plan-review-of-sn-judgment-evaluation",
+  "reviewed_blob_sha": "ba8a1ec98eeb022c2fa97acf84ed6e91fb71d64d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a72's line anchor `imas_codex/ids/candidates.py:331` names `_call_judgment`, but that line now holds `_ids_criteria`; the symbol `_call_judgment` exists nowhere in `imas_codex/` or `tests/`. Every other cited anchor resolves: `judgment.py`, `evaluation.py` (all eight declared functions present), `benchmark_roles.py`, `benchmark.py`, `review/pipeline.py:173`, `discovery/paths/scorer.py:84` (`judgment_model`), `tests/ids/test_candidate_judgment.py`, `tests/discovery/test_path_category_gate.py`, `labelled-path-categories.json` and `examples_curated.yaml` (`imas_codex/standard_names/examples_curated.yaml`).",
+    "done_when": "a finding \u2014 \u00a72, \u00a73, \u00a74 and \u00a76 each name a fail-when negative control, but \u00a75's done-when (400 labels, kappa, 40 synonym pairs) names none.",
+    "evidence_paths": "pass \u2014 \u00a74's fixtures live under `docs/evidence/fragments/sn-judgment-evaluation/` (`golden-name-acceptable.json`, `golden-description-object.json`, `golden-*.json` all present) and the landed section comments write to `docs/evidence/fragments/\u2026` and `docs/evidence/archive/sn-judgment-evaluation-landed.html#sN`, all durable paths; no gate log is pointed at a session scratchpad.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol or comment; the section identifiers \u00a71\u2013\u00a77 live only in the document, and `sn-judge` / `standard-names` are runtime seats and service tags, not plan labels.",
+    "reasoning": "a finding \u2014 \u00a76 names only the record *builder* (`_build_review_record`) and never the persistence *caller*, so its stated mechanism does not run on the real code path it needs.",
+    "single_goal": "a finding \u2014 \u00a72 (`sn-judgment-evaluation.html#s2`) carries two deliverables in one node: consolidate the decisions owner and add the standard-names seat.",
+    "wiring": "pass \u2014 the plan declares `plan-blocks` (sn-review-through-jev, sn-selection-over-generation, sn-catalog-grouping) and every internal dependency it names (\u00a72's scope check on `imas_codex/ids/candidates.py`, \u00a75's labelling that gates `sn-review-through-jev`) resolves to a real node or plan; no declared edge points at the wrong target."
+  },
+  "section_digests": {
+    "_document": "02df77104c1099b844a5f6b2dd5ca012d1d90ef89f1e34c7c97d37e12e17647a",
+    "s1": "5114b8af1e76d8a510b61c2e503198fd87fa18973725482c4142adbab2c2a31d",
+    "s2": "bf86aec1961d22f900873e8ececc21774e93aaaaa5b9ef447c73c1f41c995b53",
+    "s3": "e050c3a4a19a5b58f2ffb23ee0511cb7ae3a3999fa0ab3fe65bf9500cab4dab7",
+    "s4": "0de7d56aa7d37f7fd786c38ecdfd65ca83e1d4fab9f539dd851f5d4a3893981e",
+    "s5": "e96e2a5e957303794e4ca627cfbf4cb728fe0986d32392c589be55e2069a5231",
+    "s6": "d9cd2ca796b17134ec671bed226f04646abc40471521cbf7864f1479b6d55543",
+    "s7": "f7e6c5fa222a8d7b8423efc56b40e7719908581039312fdd6e1b178113433e11"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:27:35.880633+00:00"
+}
