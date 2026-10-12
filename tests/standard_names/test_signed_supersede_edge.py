@@ -24,6 +24,7 @@ from imas_codex.standard_names.signed_manifest import (
 
 _PREDECESSOR = "area_of_flux_surface"
 _SUCCESSOR = "poloidal_plane_cross_sectional_area_of_flux_surface"
+_STRAY_SUCCESSOR = "flux_surface_umbrella_area_candidate"
 _ROW_ID = f"{_PREDECESSOR}=>{_SUCCESSOR}"
 _OPERATION = "supersede_legacy_spelling"
 _SELECTION = {
@@ -256,6 +257,58 @@ def test_supersede_postcondition_refuses_missing_successor_edge(
     monkeypatch.setattr(
         signed_manifest, "_supersede_successor_edge_write", lambda _successor: ""
     )
+
+    preview = apply_signed_manifest(
+        authority_path,
+        authority_file_sha256=file_sha256,
+        authority_payload_sha256=payload_sha256,
+        reason="replace a taxonomy umbrella with its canonical quantity",
+        gc=client,
+    )
+    with pytest.raises(SignedManifestConflict) as excinfo:
+        apply_signed_manifest(
+            authority_path,
+            authority_file_sha256=file_sha256,
+            authority_payload_sha256=payload_sha256,
+            reason="replace a taxonomy umbrella with its canonical quantity",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+    assert "successor edge" in str(excinfo.value)
+
+
+@pytest.mark.graph
+def test_supersede_postcondition_refuses_a_second_successor_edge(
+    client: GraphClient, tmp_path: Path
+) -> None:
+    """A derived successor edge beside the signed one is refused.
+
+    ``HAS_SUCCESSOR`` is also rebuilt from the ``superseded_by`` scalar, so a
+    predecessor can carry an unstamped edge the signed mutation did not mint.
+    The postcondition must count every successor edge from the predecessor and
+    require the single one to carry the minting receipt; a check that reads
+    only the edge to the signed successor misses the scalar-derived edge
+    entirely.
+    """
+    _seed(client)
+    client.query(
+        """
+        MATCH (node:StandardName {id: $predecessor})
+        CREATE (twin:StandardName {
+          id: $stray,
+          name_stage: 'accepted',
+          status: 'draft',
+          validation_status: 'valid',
+          source_paths: []
+        })
+        CREATE (node)-[:HAS_SUCCESSOR]->(twin)
+        """,
+        predecessor=_PREDECESSOR,
+        stray=_STRAY_SUCCESSOR,
+    )
+    authority_path = tmp_path / "supersede-authority.json"
+    file_sha256, payload_sha256 = _write_authority(authority_path)
 
     preview = apply_signed_manifest(
         authority_path,
