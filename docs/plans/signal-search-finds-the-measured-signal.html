@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69">
 </head>
@@ -291,7 +291,7 @@
     <p>
       Route <code>_search_signals</code> through <code>rerank_candidates</code>, the owner the docs, code and DD-path
       searches already share. It gets a signal state builder: name, description up to 1,200 characters, unit, data class
-      and accessor. It also gets the role-aware question from the prototype. The question's five levels run from "a
+      and accessor. It also gets the role-aware question the harness keeps. The question's five levels run from "a
       different quantity" through "a commanded, reference or setpoint value" to "a measurement of exactly the quantity
       asked for". The pool is 60 and the budget 5 s. The seat is the existing discovery-relevance model on the
       facility-discovery service. The switch follows the DD-path rerank: on for a full or facility server, off for a
@@ -306,11 +306,13 @@
       paid requests inside a test process, so they are scored by the harness's own arm functions called from a
       measurement run outside pytest. The rerank may lift any of its 60 candidates into its top 10, and its order varies
       between runs, so this section first labels RRF's top 60 on every question, under §3's rule and into §3's fixture,
-      extending the top-10 labels §3 leaves. The generic arm uses
+      extending the top-10 labels §3 leaves. That labelling is the section's first node, sized as §3's labelling was;
+      the second scores the arms and decides the switch. The generic arm uses
       <code>_RERANK_QUESTION</code>; the role-aware arm uses the question the harness keeps.
     </p>
     <p>
-      <strong>Done when</strong> the harness reports the rerank against fusion alone on the pooled labels, with
+      <strong>Done when</strong> no candidate in RRF's top 60 on any question is unlabelled, and the harness reports the
+      rerank against fusion alone on the pooled labels, with
       per-question wins and losses, the generic question measured beside the role-aware one, and p95 wall time at pool
       60. The switch ships on only if the role-aware rerank beats fusion alone on both mean nDCG@10 and grade-3
       precision@5, with p95 within 5 s. Otherwise it ships off, and this section records why.
