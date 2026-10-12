@@ -40,7 +40,24 @@
   "plan_slug": "mapping-generation-accounts-for-every-source",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-12T05:25:31.641243+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T05:25:31.641243+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/mapping-generation-accounts-for-every-source/r-20261012T051315596244-plan-review-of-mapping-generation-accounts-for-every-source.json",
   "review_run_id": "r-20261012T051315596244-plan-review-of-mapping-generation-accounts-for-every-source",
   "reviewed_blob_sha": "0866ab9c91937bd3c70e528e117a01521ef15b27",
   "rubric": "content",
