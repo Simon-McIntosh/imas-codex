@@ -25,7 +25,7 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -72,6 +72,18 @@
       records how many live families only that route produces, so a later change can retire it
       on a number. There is one definition of a family, and the docs prompt, the harmonize
       command and the catalog ordering all read it.
+    </p>
+    <p>
+      The locus axis varies only across loci that place one quantity somewhere: the ISN locus
+      registry's <code>position</code>, <code>geometry</code> and <code>region</code> types
+      (<code>at</code>, <code>over</code>, <code>along</code>). An <code>entity</code> locus
+      (<code>of</code>) names a different object each time, so it is part of the invariant
+      signature: <code>radial_coordinate_of_&lt;owner&gt;</code> over 34 distinct owners is
+      grammar ancestry, not prose parallelism, which is why <code>f2d15655b</code> excluded
+      locus ancestry from documentation families and why that exclusion stands. An empty locus
+      is a value of the axis only beside position, geometry and region loci, so
+      <code>electron_temperature</code> and <code>electron_temperature_at_magnetic_axis</code>
+      are family-mates while no two entity owners are.
     </p>
     <p>
       This also closes the vector-component residue of the retired grammar-refinement plan:
