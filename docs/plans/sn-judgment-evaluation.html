@@ -20,13 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
   <meta name="plan-blocks" content="sn-review-through-jev,sn-selection-over-generation,sn-catalog-grouping">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-modified" content="2026-10-12">
-<meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2,e000241de910e5a4d0d21825593e12ecd6934ec5,d7e3860a7c6e85a5fbfde1103dc0bded5af7203e,77815e0ea71be4c94a0dd52d386dc0987045dc9b">
+<meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2,e000241de910e5a4d0d21825593e12ecd6934ec5,d7e3860a7c6e85a5fbfde1103dc0bded5af7203e,77815e0ea71be4c94a0dd52d386dc0987045dc9b,f2b9d9ee2e77922cd107952e8f51a2602519218d,9caea975fe223505bddf301dd8747709159232f2,03559dfe552d88192815516b3a12e3e9916f74ff,439ced57fd4422969f004797d2402211851de29a,2f9e46540ec7f67fe92969c4dd76e41aa9ad7ecb">
 </head>
 <body>
   <main class="plan-doc">
@@ -138,7 +138,7 @@
     </p>
 
     <h2 id="s3">§3 — The evaluation module</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       <code>imas_codex/discovery/base/evaluation.py</code>, beside the dependency-free judge
       core, so discovery and standard names share one copy. The metric primitives are
@@ -195,7 +195,7 @@
     </ul>
 
     <h2 id="s4">§4 — Goldens from the labels that already exist</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Three goldens can be assembled now from sources the census found independent of the
       incumbent. The counts in the table are the pools available. Each fixture subsamples
@@ -371,8 +371,14 @@
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261012T160225579817-sje-goldens-repair" data-who="reckon-build" data-when="2026-10-12T16:21:46.779Z">
     <div class="r-comment-body"><p>sje-goldens-repair — name-golden rows now carry an item-level canonical_unit (_row takes a canonical key) so 737 rows collapse onto 720 units and the paired AUC is per-item; the 140 WEST-correct positives are gone, leaving 446 negative / 291 positive within the per-source cap of 200; fragment sje-existing-goldens.html updated.</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-12T16:42:00Z">
+    <div class="r-comment-body"><p>§4 landed: goldens A (737 rows, 720 units), C (204) and D (15 distinct) load through §3 with caps holding and the leak test reddening on a planted review label (merge <code>f22cdaf27</code>); reviews 103 and 108/120. Golden C's and D's shortfalls carry to §5's labelling. <a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s4">evidence</a></p></div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261012T144956062346-sje-evaluation-module" data-who="reckon-build" data-when="2026-10-12T15:14:11.724Z">
     <div class="r-comment-body"><p>Added imas_codex/discovery/base/evaluation.py (sklearn metric primitives plus copy-group-aware bootstrap, paired AUC, split-aware operating point, stability figures and the fixture loader) and folded discrimination_metrics onto its roc_auc; gate 74 passed (base 61), the category-gate positive control reproduces AUC 0.9244 with interval [0.8869, 0.9603] seed 123, and the declared mutation turns 10 known-answer test ids red at EXIT=1.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-12T16:42:00Z">
+    <div class="r-comment-body"><p>§3 landed: the shared evaluation module reproduces discovery's category-gate AUC 0.9244 [0.8869, 0.9603] through the existing control (merge <code>fba828cac</code>); review 106/120. Follow-on: known-answer tests for copy-group resampling and the paired-difference interval. <a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s3">evidence</a></p></div>
 </div>
 </section>
 </main>
