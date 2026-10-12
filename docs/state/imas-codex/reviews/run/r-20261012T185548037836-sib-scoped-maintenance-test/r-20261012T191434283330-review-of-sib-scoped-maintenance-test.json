@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "after_suite (91775b1f5, 22 passed, completed) minus baseline_suite (345868c92, 21 passed, completed): failure_count 0 and 0, so zero added failures; the two arms differ by the new file only.",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/cli/sn.py:2188",
+    "imas_codex/cli/sn.py:2491",
+    "imas_codex/cli/sn.py:2534",
+    "imas_codex/cli/sn.py:2655",
+    "imas_codex/cli/sn.py:3010"
+  ],
+  "completed_at": "2026-10-12T19:21:29.561Z",
+  "dispatched_at": "2026-10-12T19:15:03Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_edit_scope_skips_maintenance.py",
+      "line": "75",
+      "severity": "follow-on",
+      "text": "follow-on: grammar_sync.assert_not_called() and drift_note.assert_not_called() patch imas_codex.cli.sn._auto_sync_grammar and _note_pipeline_version_drift, but _run_sn_cmd never calls them (they are invoked inside sn_run at imas_codex/cli/sn.py:2456 and :2462); the two assertions therefore pass unconditionally and pin nothing, so the test's docstring claim that the run suppresses \"the CLI's own graph-wide startup steps\" is unobserved by this test."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T185548037836-sib-scoped-maintenance-test/negative_control.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the negative control mutated imas_codex/cli/sn.py in the worktree product source rather than in a scratch copy as the brief named, because an in-tree PYTHONPATH shadow was defeated by the editable install; the product source is restored to a zero-line diff against base (verified) and the red result is valid, but the arm reached the shared editable environment and the deviation is recorded rather than silent."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/cli/sn.py:2188, 2491, 2534, 2655, 3010 are the production call sites of _run_sn_cmd; the scope-run-id/edits path passes skip_global_maintenance through at 2517/2557/2679/3035.",
+    "diff": "read against base 345868c92; the single commit 91775b1f5 adds the test (83 lines) and the fragment (22 lines), 105 insertions, no product change.",
+    "done_when": "plan section 14's done-when is unchanged: the manifest's after_suite gate is 22 passed EXIT=0 and negative_control.log shows test_edits_scoped_run_skips_global_maintenance failing EXIT=1 with the forwarding removed, satisfying it for the forwarding.",
+    "goal": "the node goal is to confirm by test that an edits-scoped sn run honours --skip-global-maintenance without changing product code; the landed test exercises _run_sn_cmd with scope_run_id+edits_only+the bypass and asserts the orchestrator receives it.",
+    "manifest": "read; it records the gate as \"22 passed\" EXIT=0 at 91775b1f5, names baseline_suite.log/after_suite.log/negative_control.log, and states product code is unchanged.",
+    "write_paths": "the manifest declares tests/standard_names/test_edit_scope_skips_maintenance.py and docs/evidence/fragments/sn-integrity-backlog/sib-scoped-maintenance-test.html; git diff --name-only 345868c92..91775b1f5 lists exactly those two files."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_edit_scope_skips_maintenance.py:83 fails when the forwarding is removed (negative_control.log EXIT=1), but :75-76 cannot fail because _run_sn_cmd never calls the names they patch.",
+    "evidence": "the manifest records after_suite 22 passed EXIT=0 at 91775b1f5 and negative_control.log shows the one test failing with EXIT=0 -> EXIT=1 when the forwarding is removed, but the two startup-step assertions at tests/standard_names/test_edit_scope_skips_maintenance.py:75-76 pin nothing (see finding).",
+    "fit": "tests/standard_names/test_edit_scope_skips_maintenance.py follows the AsyncMock/patch-run_discovery idiom of tests/standard_names/test_pool_orchestrator_integration.py:282 and carries no plan or ticket label in its name.",
+    "goal_fidelity": "imas_codex/cli/sn.py:1107 forwards skip_global_maintenance into run_sn_pools inside _run_sn_cmd, and tests/standard_names/test_edit_scope_skips_maintenance.py:33 drives that seam with scope_run_id+edits_only+the bypass, which is the node's deliverable.",
+    "reuse": "the change adds only a test file and an evidence fragment, introduces no production definition, and a search of tests/standard_names for an existing edits-scoped maintenance pin found only run_sn_pools-level and CLI-validation tests, so nothing is forked.",
+    "scope_discipline": "git diff 345868c92..91775b1f5 touches only tests/standard_names/test_edit_scope_skips_maintenance.py and docs/evidence/fragments/sn-integrity-backlog/sib-scoped-maintenance-test.html, both inside the brief's declared write scope, and imas_codex/cli/sn.py is byte-identical to base."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to confirm by test that an edits-scoped sn run honours --skip-global-maintenance without changing product code; the landed test exercises _run_sn_cmd with scope_run_id+edits_only+the bypass and asserts the orchestrator receives it.\nVERDICT done_when: plan section 14's done-when is unchanged: the manifest's after_suite gate is 22 passed EXIT=0 and negative_control.log shows test_edits_scoped_run_skips_global_maintenance failing EXIT=1 with the forwarding removed, satisfying it for the forwarding.\nVERDICT write_paths: the manifest declares tests/standard_names/test_edit_scope_skips_maintenance.py and docs/evidence/fragments/sn-integrity-backlog/sib-scoped-maintenance-test.html; git diff --name-only 345868c92..91775b1f5 lists exactly those two files.\nVERDICT manifest: read; it records the gate as \"22 passed\" EXIT=0 at 91775b1f5, names baseline_suite.log/after_suite.log/negative_control.log, and states product code is unchanged.\nVERDICT diff: read against base 345868c92; the single commit 91775b1f5 adds the test (83 lines) and the fragment (22 lines), 105 insertions, no product change.\nCALL_SITES: imas_codex/cli/sn.py:2188, imas_codex/cli/sn.py:2491, imas_codex/cli/sn.py:2534, imas_codex/cli/sn.py:2655, imas_codex/cli/sn.py:3010\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/cli/sn.py:1107 forwards skip_global_maintenance into run_sn_pools inside _run_sn_cmd, and tests/standard_names/test_edit_scope_skips_maintenance.py:33 drives that seam with scope_run_id+edits_only+the bypass, which is the node's deliverable.\nSCORE evidence: 15\nJUSTIFICATION evidence: the manifest records after_suite 22 passed EXIT=0 at 91775b1f5 and negative_control.log shows the one test failing with EXIT=1, but the two startup-step assertions at tests/standard_names/test_edit_scope_skips_maintenance.py:75-76 pin nothing (see finding).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 345868c92..91775b1f5 touches only tests/standard_names/test_edit_scope_skips_maintenance.py and docs/evidence/fragments/sn-integrity-backlog/sib-scoped-maintenance-test.html, both inside the brief's declared write scope, and imas_codex/cli/sn.py is byte-identical to base.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_edit_scope_skips_maintenance.py:83 fails when the forwarding is removed (negative_control.log EXIT=1), but :75-76 cannot fail because _run_sn_cmd never calls the names they patch.\nSCORE fit: 18\nJUSTIFICATION fit: tests/standard_names/test_edit_scope_skips_maintenance.py follows the AsyncMock/patch-run_discovery idiom of tests/standard_names/test_pool_orchestrator_integration.py:282 and carries no plan or ticket label in its name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds only a test file and an evidence fragment, introduces no production definition, and a search of tests/standard_names for an existing edits-scoped maintenance pin found only run_sn_pools-level and CLI-validation tests, so nothing is forked.\nFINDING tests/standard_names/test_edit_scope_skips_maintenance.py:75 follow-on: grammar_sync.assert_not_called() and drift_note.assert_not_called() patch imas_codex.cli.sn._auto_sync_grammar and _note_pipeline_version_drift, but _run_sn_cmd never calls them (they are invoked inside sn_run at imas_codex/cli/sn.py:2456 and :2462); the two assertions therefore pass unconditionally and pin nothing, so the test's docstring claim that the run suppresses the CLI's own graph-wide startup steps is unobserved by this test.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T185548037836-sib-scoped-maintenance-test/negative_control.log:2 follow-on: the negative control mutated imas_codex/cli/sn.py in the worktree product source rather than in a scratch copy as the brief named, because an in-tree PYTHONPATH shadow was defeated by the editable install; the product source is restored to a zero-line diff against base and the red result is valid, but the arm reached the shared editable environment and the deviation is recorded rather than silent.\n",
+  "review_run_id": "r-20261012T191434283330-review-of-sib-scoped-maintenance-test",
+  "reviewed_base_sha": "345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd",
+  "reviewed_head_sha": "91775b1f540253a9b3256415b8dac7ef91b5e60e",
+  "reviewed_run_id": "r-20261012T185548037836-sib-scoped-maintenance-test",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:25:08.930319+00:00",
+  "total": 106
+}
