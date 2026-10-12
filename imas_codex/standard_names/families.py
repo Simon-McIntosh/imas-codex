@@ -9,6 +9,10 @@ from typing import Any
 
 from imas_standard_names.grammar.model_types import Component, GeometricBase
 
+from imas_codex.standard_names.defaults import (
+    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+)
+
 # Right-handed cylindrical coordinate ordering: R̂ × φ̂ = Ẑ
 # This is the standard tokamak convention. NOT alphabetical (R, Z, φ).
 AXIS_ORDER: dict[str, int] = {
@@ -459,6 +463,80 @@ def _invariant_equality(alias: str) -> str:
     return "\n  AND ".join(
         f"coalesce({alias}.{seg}, '') = {seg}" for seg in PATTERN_INVARIANT_SEGMENTS
     )
+
+
+DOCS_STAGE_ACCEPTED = "accepted"
+"""``docs_stage`` value marking a member whose documentation is accepted."""
+
+
+def is_placeholder_description(description: str | None) -> bool:
+    """True when *description* is absent or the deterministic-parent sentinel."""
+    return (
+        not description or description == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
+    )
+
+
+def select_anchor(
+    parent_id: str | None,
+    parent_docs_stage: str | None,
+    parent_description: str | None,
+    members: list[dict[str, Any]],
+) -> str | None:
+    """Select the documentation anchor for a family.
+
+    One rule, shared by the docs prompt and the harmonize command, so both
+    readers name the same member. Priority order:
+      1. The parent itself, if ``docs_stage == 'accepted'`` and its
+         description is real (non-placeholder).
+      2. The member with the highest ``reviewer_score_docs`` among members
+         with ``docs_stage == 'accepted'`` — the best signal we have that a
+         member already meets the docs standard (accepted-but-unscored breaks
+         ties deterministically by id).
+      3. Last resort (no accepted member): a non-placeholder member chosen
+         deterministically by id — NEVER by longest description, which
+         propagates a verbose, non-canonical opening into the family.
+
+    The anchor deliberately carries NO vocabulary or phrasing knowledge: the
+    canonical opening a family should converge on is defined by the docs
+    prompt/context, not hardcoded here. Score + determinism is the data-driven
+    proxy — a member that already meets the standard scores well.
+
+    Returns ``None`` when no candidate qualifies (family is flagged
+    ``deferred`` by the caller).
+    """
+    if (
+        parent_id
+        and parent_docs_stage == DOCS_STAGE_ACCEPTED
+        and not is_placeholder_description(parent_description)
+    ):
+        return parent_id
+
+    accepted = [
+        m
+        for m in members
+        if m.get("docs_stage") == DOCS_STAGE_ACCEPTED
+        and not is_placeholder_description(m.get("description"))
+    ]
+    scored = [m for m in accepted if m.get("reviewer_score_docs") is not None]
+    if scored:
+        best = max(
+            scored,
+            key=lambda m: (m.get("reviewer_score_docs") or 0.0, m.get("id") or ""),
+        )
+        return best.get("id")
+    if accepted:
+        # Accepted but unscored — deterministic by id (NOT longest description).
+        return min(accepted, key=lambda m: m.get("id") or "").get("id")
+
+    non_placeholder = [
+        m for m in members if not is_placeholder_description(m.get("description"))
+    ]
+    if non_placeholder:
+        # Last resort — deterministic by id (NOT longest description); picking
+        # by length propagates a verbose, non-canonical opening to the family.
+        return min(non_placeholder, key=lambda m: m.get("id") or "").get("id")
+
+    return None
 
 
 # Rows for the seed's live pattern family: the seed fixes the invariant segment
