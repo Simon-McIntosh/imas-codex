@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69">
 </head>
@@ -302,10 +302,11 @@
       lowered precision@5, and most of its losses were unlabelled relevant signals. Pooled labels settle it.
     </p>
     <p>
-      The two rerank arms are this section's to score, not §3's. They spend Jev, and the suite's guard refuses paid
-      requests inside a test process, so they are scored by the harness's own arm functions called from a measurement
-      run outside pytest. The rerank may lift any of its 60 candidates into its top 10, and its order varies between
-      runs, so their labels cover RRF's top 60 on every question rather than a top-10 union. The generic arm uses
+      The two rerank arms are this section's to label and score, not §3's. They spend Jev, and the suite's guard refuses
+      paid requests inside a test process, so they are scored by the harness's own arm functions called from a
+      measurement run outside pytest. The rerank may lift any of its 60 candidates into its top 10, and its order varies
+      between runs, so this section first labels RRF's top 60 on every question, under §3's rule and into §3's fixture,
+      extending the top-10 labels §3 leaves. The generic arm uses
       <code>_RERANK_QUESTION</code>; the role-aware arm uses the question the harness keeps.
     </p>
     <p>
