@@ -1,0 +1,144 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:25:49.191Z",
+  "dispatched_at": "2026-10-12T14:20:58Z",
+  "findings": [
+    {
+      "anchor": "tests/discovery/test_path_category_gate.py:122",
+      "id": "reuse_search-1",
+      "reason": "the \u00a71 premise is factually wrong and \u00a73 must cite and reuse this reproduction rather than re-derive it as if nothing survived.",
+      "text": "\u00a71 states \"No evaluation code survived. Every AUC was a one-off stdin script\", but the exact figure the plan adopts as \u00a73's positive control \u2014 the source-label AUC 0.9244 [0.8858, 0.9608] over `docs/evidence/fragments/discovery-judgments-through-jev/labelled-path-categories.json` with `canonical_copy` units \u2014 is already asserted at tests/discovery/test_path_category_gate.py:122-146 (`assert auc == pytest.approx(0.9244, abs=0.0001)`). The plan also mis-states \u00a73's fixture path: it says `labelled-path-categories.json`, the file lives under `docs/evidence/fragments/discovery-judgments-through-jev/`, and its rows are already loaded and grouped by `canonical_copy` in that test.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "pyproject.toml:151",
+      "id": "reuse_search-2",
+      "reason": "\u00a73 should state why a re-implementation is preferred to `sklearn.metrics.roc_auc_score`/`accuracy_score`/`f1_score`/`confusion_matrix`, or call them.",
+      "text": "`scikit-learn>=1.7.2` is a declared dependency and `roc_auc_score` is already imported and used at tests/discovery/test_path_category_gate.py:142 to compute the plan's own positive control, yet \u00a73 proposes a hand-rolled rank-based `paired_auc` and does not cite the library anywhere in \u00a73. Rank AUC, accuracy, macro-F1 and the confusion table are all `sklearn.metrics` calls.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/benchmark_roles.py:1201",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73 should name the owners it will extend or fold, or justify a third location for metrics that already have two homes.",
+      "text": "census of the existing evaluation owners \u00a73 duplicates without naming: `imas_codex/standard_names/benchmark_roles.py:1201 discrimination_metrics` (rank AUC computed at :1231, \"auc \u2014 probability a random good outranks a random bad\"), `:113 RoleBenchReport` with `:108 cost_per_item` (the report+per-item-cost owner \u00a73's `cost_latency_summary` reproduces), `:205 verdict_flip_quality` (the flip-rate metric \u00a73's `option_order_stability` reproduces), `:1108 load_discrimination_corpus` and `:1170 build_advisory_paired_corpus` (the labelled-corpus loaders \u00a73's `load_labelled_fixture` reproduces), `:170 spearman_rho`; and on the SN benchmark side `imas_codex/standard_names/benchmark.py:64 ReviewerScores`, `:81 ModelResult`, `:216 BenchmarkReport`, `:2063 _render_reviewer_agreement` with `:2118 _spearman_rho` (the reviewer-agreement owner \u00a75's Cohen's-kappa reading should sit beside). \u00a73 instead places a single shared copy under `imas_codex/discovery/base/evaluation.py` and asserts it is \"one copy\" while leaving these two SN-side owners unmentioned.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/evaluation.py (plan \u00a73)",
+      "id": "thin_wrapper-1",
+      "reason": "\u00a73 must justify the wrappers or drop them in favour of the library and the existing metric owners.",
+      "text": "`paired_auc`, `bootstrap_interval` and `classification_metrics` are thin wrappers over `scikit-learn` metrics and a resample loop; \u00a73 does not say why the library cannot be extended/used or why the existing metric owners cannot absorb them, so the new module adds public surface (`public_definitions` 0 \u2192 8) without adding depth for three of its eight functions. `choose_operating_point` and `frozen_state_variation` are the two with real content.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-judgment-evaluation.html#s2",
+      "id": "interface_budget-1",
+      "reason": "each adding section must account for the interface surface it adds, which is the item's binding rule.",
+      "text": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a `[tool.imas-codex.sn-judge]` seat (the repo already carries ~20 `[tool.imas-codex.*]` seats that resolve through `get_model`, pyproject.toml:432,453), \u00a73 adds a new module of eight public functions, and \u00a76 adds schema fields plus regenerated models (imas_codex/graph/models.py) \u2014 none of the three sections states in its own text what it retires or merges, or why nothing can be. \u00a73 in particular is adding metric surface beside two existing metric owners and names neither.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c2f612f78b4ce89b6ab05fc82a30034b36a9528ac02f3ded4d606735ba903b3a",
+  "plan_slug": "sn-judgment-evaluation",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:30.545894+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-2",
+      "reason": "",
+      "when": "2026-10-12T14:32:33.169397+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:35.694041+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:37.906615+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:39.471591+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:35.694041+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:39.471591+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:30.545894+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:33.169397+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:37.906615+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-judgment-evaluation.v4.json",
+  "review_run_id": "r-20261012T142047475171-plan-review-of-sn-judgment-evaluation",
+  "reviewed_blob_sha": "c9541765b075b1cac675883691a5d72f077f827a",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a73's one module hides fixture loading, paired AUC, the bootstrap, operating-point choice and the stability checks behind eight functions, and \u00a72/\u00a76 extend their named owners (`decide_batch`, `_build_review_record`) rather than forking them.",
+    "duplicate_owner": "a finding \u2014 \u00a73 re-implements evaluation that `imas_codex/standard_names/benchmark_roles.py` and `imas_codex/standard_names/benchmark.py` already own, and does not name either.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a `[tool.imas-codex.sn-judge]` seat, \u00a73 a module of eight public functions, \u00a76 schema fields and generated models, and none of the three sections names what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan asserts \"No evaluation code survived; every AUC was a one-off stdin script\" (\u00a71) and proposes new evaluation machinery (\u00a73), but the source-label AUC it names as its positive control is already computed in-tree, and scripted metrics owners already exist.",
+    "thin_wrapper": "a finding \u2014 several \u00a73 functions are thin re-encodings of `scikit-learn`, a declared dependency already in use, and \u00a73 does not say why the library cannot be used or the existing metrics owners extended."
+  },
+  "section_digests": {
+    "_document": "02df77104c1099b844a5f6b2dd5ca012d1d90ef89f1e34c7c97d37e12e17647a",
+    "s1": "81ffea5ba72e6435b11dfded52a654d7a904d7a809be19eab813d16b3150c8e0",
+    "s2": "3565bbfa7a52dfe7b36aaadd6575f7e3b9cd188df82483e0206af4ad532d783b",
+    "s3": "f6e80c001e1fd409644609246dc79b2ed810b696cdece44773f8c32905e8f424",
+    "s4": "3de6eaf51fecb7b7b9278de355854565fcf917d8a9f2ea60490e68331b2b4590",
+    "s5": "e96e2a5e957303794e4ca627cfbf4cb728fe0986d32392c589be55e2069a5231",
+    "s6": "be28006b8882327e072f350947fe65c3b01dd73827066fdec60d54936bc3fc26",
+    "s7": "f7e6c5fa222a8d7b8423efc56b40e7719908581039312fdd6e1b178113433e11"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:32:07.410474+00:00"
+}
