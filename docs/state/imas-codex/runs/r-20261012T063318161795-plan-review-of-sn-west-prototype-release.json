@@ -581,6 +581,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "abe990f85fe1e090d122b913fb372bfe01ce0337",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5036,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261012T063318161795-plan-review-of-sn-west-prototype-release",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5036,
+        "path": "/tmp/reckon-crew-scratch/r-20261012T063318161795-plan-review-of-sn-west-prototype-release"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/6fe78f81-6052-4ec2-abc4-c4ad9a331a7d/plan-review-of-sn-west-prototype-release",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
