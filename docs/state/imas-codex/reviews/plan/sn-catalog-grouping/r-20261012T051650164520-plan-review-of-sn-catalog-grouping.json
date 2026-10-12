@@ -54,9 +54,22 @@
       "finding": "single_goal-1",
       "reason": "The re-embed and the guard are the data half and the code half of one defect, and the done-when gives each its own measure and red arm, so the node still closes on one verdict.",
       "when": "2026-10-12T05:39:10.849824+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "6fe78f81-6052-4ec2-abc4-c4ad9a331a7d",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T05:39:12.551281+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "6fe78f81-6052-4ec2-abc4-c4ad9a331a7d",
+      "reason": "",
+      "when": "2026-10-12T05:39:12.551281+00:00"
+    },
     "single_goal-1": {
       "action": "declined",
       "by": "6fe78f81-6052-4ec2-abc4-c4ad9a331a7d",
