@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:47:31.937Z",
+  "dispatched_at": "2026-10-12T14:40:01Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-judgment-evaluation.html:108",
+      "id": "reasoning-1",
+      "reason": "the plan must state that the shared owner preserves the validation-error raise (or the single-state entry point does), or the node will either break the malformed-answer contract or redden the cited test with no guidance on which behaviour is intended.",
+      "text": "\u00a72 says _call_judgment \"re-implements the fail-soft handling\" and directs that deleted callers be routed through decide_batch, but _call_judgment's handling is not the same fail-soft: imas_codex/ids/candidates.py:352 re-raises DecisionsValidationError and returns None only for other transport faults, while decide_batch (imas_codex/discovery/base/judgment.py:119-124) catches \"Exception\" wholesale and reports None; a sync entry point built on decide_batch therefore inherits the swallow, so a malformed answer becomes a silent unjudged state, and tests/ids/test_candidate_judgment.py:124 (test_malformed_answer_is_rejected) drives judge_candidates and asserts the error propagates \u2014 so the stated mechanism cannot satisfy \u00a72's own done-when (\"tests/ids and tests/discovery suites add no failures against their base\") without an unstated change to the shared owner",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a3e1acfde079fbc122a83d7d3ba10957285c1a360dde7703a1e919129d065aaf",
+  "plan_slug": "sn-judgment-evaluation",
+  "plan_version": 5,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T14:48:39.049662+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:48:39.049662+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-judgment-evaluation.v5.json",
+  "review_run_id": "r-20261012T143942535126-plan-review-of-sn-judgment-evaluation",
+  "reviewed_blob_sha": "d280fd942b4a8bd3fc41728b934b3f5649d88ef5",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 verified against the tree: decide_batch at imas_codex/discovery/base/judgment.py:69, _call_judgment at imas_codex/ids/candidates.py:331, discrimination_metrics and verdict_flip_quality in imas_codex/standard_names/benchmark_roles.py (:1201, :205), the Spearman agreement in benchmark.py, test_category_gate_reproduces_source_label_auc in tests/discovery/test_path_category_gate.py:122, and the fixture labelled-path-categories.json; the control's interval 0.8858\u20130.9608 is documented as a 1,000-resample canonical-unit bootstrap in path-category-gate.html, so \u00a73's done-when matches the recorded method.",
+    "done_when": "pass \u2014 both changed sections name a control that can fail: \u00a72 \"removing the shared owner's cost-booking line turns the candidate spend assertion red\" beside the delta-against-base suite check, and \u00a73 \"each test fails when its function is reverted to a stub\" beside the category-gate positive control.",
+    "evidence_paths": "pass \u2014 \u00a74's fixtures live under docs/evidence/fragments/sn-judgment-evaluation/ and \u00a73's control reads docs/evidence/fragments/discovery-judgments-through-jev/, both durable; neither changed unit routes evidence through a scratchpad or node-local temporary.",
+    "naming": "pass \u2014 the new symbols (load_labelled_fixture, paired_auc, bootstrap_interval, classification_metrics, choose_operating_point, frozen_state_variation, option_order_stability, cost_latency_summary, the sn-judge seat) carry no plan label, stage name, ticket number or version tag, and the changed prose is mechanism, not changelog.",
+    "reasoning": "a finding \u2014 the \u00a72 mechanism (delete the wrapper, route its callers through the shared owner, build any synchronous single-state entry point on decide_batch) loses the DecisionsValidationError contract that _call_judgment deliberately preserves, and decide_batch swallows every exception.",
+    "single_goal": "pass \u2014 \u00a73 names one module plus the single-AUC-owner fold, and \u00a72's two-part scope (owner consolidation, sn-judge seat) was already adjudicated and declined by an earlier review, with s2 changed since only in the mechanism paragraph, not its deliverables.",
+    "wiring": "pass \u2014 \u00a73 supplies the evaluation module that \u00a74's three fixtures load \"through \u00a73\", and the followup's partition of \u00a72 (scope check), \u00a73/\u00a74 (disjoint paths) and \u00a75 (coordinator labelling) names no missing external dependency for either changed unit; the block edges on the plan (sn-review-through-jev, sn-selection-over-generation, sn-catalog-grouping) are unchanged."
+  },
+  "section_digests": {
+    "_document": "02df77104c1099b844a5f6b2dd5ca012d1d90ef89f1e34c7c97d37e12e17647a",
+    "s1": "5114b8af1e76d8a510b61c2e503198fd87fa18973725482c4142adbab2c2a31d",
+    "s2": "050c64b8106a56977541bb7e1c3c5a658cdc28dcd0b97f2bd47b8f2beb8b0728",
+    "s3": "e050c3a4a19a5b58f2ffb23ee0511cb7ae3a3999fa0ab3fe65bf9500cab4dab7",
+    "s4": "3de6eaf51fecb7b7b9278de355854565fcf917d8a9f2ea60490e68331b2b4590",
+    "s5": "e96e2a5e957303794e4ca627cfbf4cb728fe0986d32392c589be55e2069a5231",
+    "s6": "d9cd2ca796b17134ec671bed226f04646abc40471521cbf7864f1479b6d55543",
+    "s7": "f7e6c5fa222a8d7b8423efc56b40e7719908581039312fdd6e1b178113433e11"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:48:33.908658+00:00"
+}
