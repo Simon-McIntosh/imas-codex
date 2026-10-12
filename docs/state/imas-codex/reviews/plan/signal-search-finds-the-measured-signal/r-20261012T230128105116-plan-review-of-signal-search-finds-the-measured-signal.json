@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T23:09:56.953Z",
+  "dispatched_at": "2026-10-12T23:01:42Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-search-finds-the-measured-signal.html:284",
+      "id": "done_when-1",
+      "reason": "the done-when can pass on exactly the population that needs the fix, so the node ships a stale-vector store while reporting success; the plan needs to state that an absent hash is treated as differing (or re-embed by `IS NULL OR <>`).",
+      "text": "\u00a75's done-when measures \"a census over all FacilitySignal nodes [that] finds none whose `embedded_text_hash` differs from the hash of its current embed text\", but `embedded_text_hash` does not exist today (grep for it returns nothing), so every pre-existing node carries a null hash when the writer lands; a Cypher `< >` comparison against a null property is NULL, not true, so a census and a re-embed predicate written as `WHERE s.embedded_text_hash <> $hash` silently drop every null-hash node and the census passes with the stale vectors \u00a75 exists to repair",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-search-finds-the-measured-signal.html:240",
+      "id": "reasoning-1",
+      "reason": "a node that runs the docs/code rerank inside the same pytest process as the signal harness has its paid requests refused and must rediscover the out-of-pytest path, an omission \u00a74's sibling \u00a77 shows the plan otherwise knows how to close.",
+      "text": "\u00a74's second node measures \"the docs and code question set at pool 60, which spends Jev on their rerank\" but names no run path, while \u00a77 states the same constraint is handled by scoring \"from a measurement run outside pytest\" because \"the suite's guard refuses paid requests inside a test process\" (tests/conftest.py:417, autouse `no_live_decisions_requests`, which raises on any request to openrouter.ai/api/alpha/decisions); the same node also runs \u00a73's signal harness, which is a pytest module",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "96b891e8aa91d5fad9330ef20d75abdab6a27fb0fd6b2092b13481bdadd762aa",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 30,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T230128105116-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "93dc445b90b9f3f4563ea691ef403b7665cb037a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `rrf_fuse`/`RRF_K=60` resolve at imas_codex/standard_names/search.py:40,243; the four additive-rule sites resolve at search_tools.py:261,936,1688 and ids/slot_context.py:70; `_find_signals_semantic` at domain_queries.py:116; `rerank_candidates` at search_tools.py:171 with the docs/code/DD-path callers; the cited 0.4821 resolves at docs/plans... search-rerank.html:61 as the pool-60 row; the DD-path rerank switch at llm/server.py:1882 reads exactly \"on for a full or facility server, off for a read-only or DD-only server\" as \u00a77 claims.",
+    "done_when": "a finding \u2014 \u00a75's census clause is stated over \"all FacilitySignal nodes\" whose `embedded_text_hash` differs, but the slot is new (no node carries it at the moment the writer lands), so a `<>`-based comparison excludes every null-hash node from both re-embed and census and the measure can pass on the unfixed data.",
+    "evidence_paths": "pass \u2014 every scoped done-when writes to a durable evidence fragment under docs/evidence/fragments/signal-search-finds-the-measured-signal/ (fusion.html, embeddings.html, rerank.html), never a scratch path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach the new symbols (\u00a74's `imas_codex/search/fusion.py`, \u00a77's `signal_role` and the state builder are named by mechanism).",
+    "reasoning": "a finding \u2014 \u00a74's second node requires a Jev-spending docs/code rerank measurement but names no run path outside the test process, while the repo's autouse guard refuses paid requests inside pytest and \u00a77 handles the same constraint explicitly.",
+    "single_goal": "pass \u2014 \u00a77 now splits labelling (node 1), the product change (node 2) and the scoring/switch decision (node 3), resolving the prior single_goal-1; \u00a74 and \u00a75 each carry one goal per node.",
+    "wiring": "pass \u2014 \u00a74/\u00a75/\u00a77 depend on \u00a73's harness and \u00a77 on \u00a74 in the followup order; the three named evidence fragments (fusion.html, embeddings.html, rerank.html) and the decisions the scoped sections settle all resolve, and no scoped relationship points at a node that does not exist."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "21cb67ae2f717525df04e4e4da39715e179eedb4bf5d77aee908cf4919b8264d",
+    "s4": "d23195177548c8158f73e76e4842bbd674a06a40794f85a2545c8694fd2d66a6",
+    "s5": "a243efb795feeb1bf35be536083587d23f76f44fb7efc996ad4bf786b2809ce4",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "62129c4513b7e17583d1210b2596dd537cdefdbbd8fddb81f175d1e6358fd0bf",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T23:12:14.582537+00:00"
+}
