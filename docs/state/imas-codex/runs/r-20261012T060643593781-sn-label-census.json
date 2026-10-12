@@ -666,6 +666,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "462d148027273b99de0f32ff1b4285ddf5a5f60e",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5011,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261012T060643593781-sn-label-census",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5011,
+        "path": "/tmp/reckon-crew-scratch/r-20261012T060643593781-sn-label-census"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/6fe78f81-6052-4ec2-abc4-c4ad9a331a7d/sn-label-census",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
