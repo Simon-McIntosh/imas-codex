@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-review-through-jev-landed">
+  <meta name="plan-title" content="Review As Named Checks: Jev Judges, The Language Model Writes — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Review As Named Checks: Jev Judges, The Language Model Writes: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="sn-review-through-jev">
+  <meta name="plan-verdict" content="qualified">
+  <title>Review As Named Checks: Jev Judges, The Language Model Writes — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Review As Named Checks: Jev Judges, The Language Model Writes — landed record</h1>
+  <p>Closure synthesis for Review As Named Checks: Jev Judges, The Language Model Writes: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2">
+    <h2>§2 — the review check taxonomy</h2>
+    <p><code>imas_codex/llm/prompts/sn/review_checks.yaml</code> holds 56 checks: 36 Noul, 4 Choice and 16 decided by an <code>AuditReport</code> finding class, 19 of them retrieval-flagged, over the name axis (grammar, semantic, convention, completeness) and the docs axis (description quality, documentation quality, completeness, physics accuracy). <code>imas_codex/standard_names/review/checks.py</code> loads and validates them; every check's evidence fields lie within the 65 review-state fields derived from <code>review/pipeline.py</code>, and a planted unknown field turns the test red. All 136 distinct human <code>StandardNameChange.reason</code> strings map to a check. Gate: 9 passed; negative control 1 failed. Merge <code>604c1b2d0</code>. Independent review 109/120. Follow-ons carried to the next node: the audit-class test asserts only what the loader already enforces, and <code>duplicate_component</code> is not a finding type any audit emits.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-check-taxonomy">srtj-check-taxonomy</a>.</p>
+  </section>
+
+</main>
+</body>
+</html>
