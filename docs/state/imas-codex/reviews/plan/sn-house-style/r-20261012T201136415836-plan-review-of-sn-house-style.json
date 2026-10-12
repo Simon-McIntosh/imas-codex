@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T20:21:12.206Z",
+  "dispatched_at": "2026-10-12T20:11:49Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-house-style.html:260",
+      "id": "done_when-1",
+      "reason": "without a measured clause a node can close \u00a79 on the other three checks while the second documentation path still drops every finding, which is the exact gap \u00a79 exists to fix and, since `_review_batch_core` has no `AuditReport` of its own, the author must also state where that path sources findings.",
+      "text": "\u00a79's mechanism declares a fourth deliverable (\"The second documentation path (`_review_batch_core` ...) passes no findings; route the batch's findings there too\") but the section's done-when measures only the cap recording, the single format owner, the absence test and the base delta \u2014 it names no clause that fails while `_review_batch_core` still calls `_review_single_batch` with `audit_findings=[]` and no `error_lint_findings`",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c7fd006316105f155b19c87857e192afb40f325ffc60c9e32af7e7d488c330c6",
+  "plan_slug": "sn-house-style",
+  "plan_version": 23,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-12T20:22:06.932925+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T20:22:06.932925+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-house-style.v23.json",
+  "review_run_id": "r-20261012T201136415836-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "c5c289ebe13fa51bc15638f788464eac8241eeae",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every file, function and test \u00a78 and \u00a79 cite resolves in the tree at HEAD: `process_generate_docs_batch`/`process_refine_docs_batch`/`prepare_docs_review_request` and `render_prompt` in `imas_codex/standard_names/workers.py`; `_review_single_batch`, `_extract_audit_findings`, `_review_batch_core` in `imas_codex/standard_names/review/pipeline.py`; and `tests/standard_names/test_review_findings_cap.py`.",
+    "done_when": "a finding \u2014 \u00a79's mechanism asks that the batch's findings be routed to the second documentation path (`_review_batch_core`), but \u00a79's done-when names no clause for that deliverable, so a node can close \u00a79 without it.",
+    "evidence_paths": "pass \u2014 no reviewed unit cites a session scratchpad or node-local temporary path; \u00a78 and \u00a79 assert against tests in `tests/standard_names/` on durable paths and name no unopenable artefact.",
+    "naming": "pass \u2014 the reviewed units carry no plan labels, stage names, ticket numbers or version tags into symbols, and \u00a79's claims are stated as mechanism, not changelog prose.",
+    "reasoning": "pass \u2014 \u00a79's three stated defects were re-verified against the code at HEAD (the cap `continue`s past an entry already below `DEFAULT_MIN_SCORE` so it records nothing, the finding-line format is written twice, and the absence test passes a marker that was never supplied so it cannot fail), and that path is in fact not production-reachable, so the section's premise holds.",
+    "single_goal": "pass \u2014 \u00a78 names one deliverable (assert the conventions block reaches each render site) and \u00a79's clauses all sit under one goal (the cap/record of error findings), each closing on a single verdict.",
+    "wiring": "pass \u2014 the plan's only cross-plan dependency (`s2` \u2192 `imas-standard-names:concept-and-notation-registry#s2`) names the node \u00a72 consumes, and the two reviewed sections (\u00a78, \u00a79) are post-\u00a75 follow-ons that declare no relationship pointing at a wrong node."
+  },
+  "section_digests": {
+    "_document": "51002368ba43bb838958e213d6a04c8e0ef73e1453ab3605ccaf54d2cea1948b",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s2": "a68b18b0a4122caff66d27ab77f0d6f94f3c046d2a034c6ef489ffc38f438ddb",
+    "s3": "50e289cff8fb10f82f4114f3e51de9e7d184bd4777b80c4f5ee7e617bbdd3c56",
+    "s4": "dca02964189096d0d6a3fb9f0ee3c9931308addf7be8f667cad98d98ca36d3a7",
+    "s5": "de1246fd734195b238de2d370de129477d7b7977b048d533e4044874a80187cd",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78",
+    "s7": "5be478ef6ae9f348a0e617cfdb5bc8b20b3a18fd8c8e652a1d97e2393f5681c3",
+    "s8": "91c69e8a7ada6945ec08807258d2ee9be051f27dd4bc9939d6da7046c479741a",
+    "s9": "e98ad9fd0b31d32b60fef6be686e51a3db23c7655f3f000187bb5a296baebff1"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:22:05.854029+00:00"
+}
