@@ -61,9 +61,22 @@
       "finding": "reasoning-1",
       "reason": "",
       "when": "2026-10-12T05:39:12.551281+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "6fe78f81-6052-4ec2-abc4-c4ad9a331a7d",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-12T05:39:14.427113+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "6fe78f81-6052-4ec2-abc4-c4ad9a331a7d",
+      "reason": "",
+      "when": "2026-10-12T05:39:14.427113+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "6fe78f81-6052-4ec2-abc4-c4ad9a331a7d",
