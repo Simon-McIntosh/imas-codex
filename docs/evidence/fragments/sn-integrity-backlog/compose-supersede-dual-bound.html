@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-compose-supersede-dual-bound">
+<title>Compose supersede over a dual-bound source — reproduced</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-compose-supersede-dual-bound-title">Compose supersede over a dual-bound source: the failure reproduces</h1>
+
+<h2 id="sib-compose-supersede-dual-bound-header">Header</h2>
+<table id="sib-compose-supersede-dual-bound-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd</code></td></tr>
+<tr><th>Worktree</th><td><code>/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-compose-supersede-dual-bound</code></td></tr>
+<tr><th>Posture</th><td>Reproduction only. No product source changed; the graph is reached through a fixture query handle, not live Neo4j.</td></tr>
+<tr><th>Test</th><td><code>tests/standard_names/test_compose_supersede_dual_bound.py</code>, committed <code>@pytest.mark.xfail(strict=True)</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-compose-supersede-dual-bound-path">The path driven</h2>
+<p>A compose pass that recomposes a name for a DD source writes the successor's
+<code>PRODUCED_NAME</code> binding, then calls
+<code>graph_ops.supersede_prior_source_names</code> to retire the predecessor and
+restore the invariant <em>one source &rarr; at most one live pipeline name</em>. That
+helper runs a preflight to enumerate the judged source set, admits the pairings via
+<code>guard_source_pairings</code>, then delegates the move to
+<code>provenance_lifecycle.retarget_standard_name_sources</code>. The fixture drives
+that whole chain over one DD source whose only binding evidence is two live
+<code>PRODUCED_NAME</code> edges: the predecessor it is meant to retire and the
+successor this pass just wrote.</p>
+
+<h2 id="sib-compose-supersede-dual-bound-repro">Reproduction</h2>
+<p>The migration's compare-and-set distinguishes two refusals:
+<code>SourceBindingConflictError</code>, a <em>named, adjudicable</em> conflict whose
+docstring states a caller should <em>withhold</em> a retry budget because repeating
+the migration changes nothing; and an anonymous <code>RuntimeError</code> for every
+other ineligible state, which callers treat as a transient fault and spend a retry
+budget on. A source bound to two live identities takes the second branch.</p>
+<p>Verbatim, forced past the xfail with <code>--runxfail</code>:</p>
+<pre id="sib-compose-supersede-dual-bound-trace">raise RuntimeError(f"source migration compare-and-set failed: {details}")
+E   RuntimeError: source migration compare-and-set failed: dd:example/predicted_path(exists=True, status='composed', claimed=False, bindings=['example_new_name', 'example_old_name'], scalar='example_new_name')
+FAILED tests/standard_names/test_compose_supersede_dual_bound.py::test_compose_supersede_over_dual_bound_source_is_not_an_anonymous_fault</pre>
+<p>Both handlers sit inside <code>retarget_standard_name_sources</code>. The
+<code>pending</code> branch admits a source only when its live bindings are exactly
+<code>[old_name]</code>; the dual-bound source carries
+<code>[new_name, old_name]</code>. The <code>completed</code> branch admits exactly
+<code>[new_name]</code>. The named-conflict branch is reached only when
+<code>_live_foreign_bindings</code> finds a live holder <em>outside</em> the migration's
+own name pair — but here both holders (<code>old_name</code> and the just-written
+<code>new_name</code>) are inside that pair, so the holder set is empty and the guard
+falls through to the anonymous branch. The failure is therefore hard: the
+<code>RuntimeError</code> escapes <code>supersede_prior_source_names</code> and rolls the
+caller's transaction back, and its type reports a transient fault where the
+condition is a decision.</p>
+
+<h2 id="sib-compose-supersede-dual-bound-controls">Controls</h2>
+<p>The test must be able to see the defect and to see a fix. Both controls fire.</p>
+<table id="sib-compose-supersede-dual-bound-controls-table">
+<thead><tr><th>Control</th><th>Expected</th><th>Measured</th><th>Log</th></tr></thead>
+<tbody>
+<tr>
+<td>Sees the defect</td>
+<td>the body's <code>pytest.fail</code> fires, so the strict xfail registers as <code>XFAIL</code></td>
+<td><strong>XFAIL</strong> — <code>1 xfailed</code></td>
+<td><code>probe_new_test2.log</code></td>
+</tr>
+<tr>
+<td>Sees a fix</td>
+<td>routing the dual binding through the adjudicable branch makes the body pass, so the strict xfail flips to <em>XPASS</em> (red)</td>
+<td><strong>PASSES</strong> — fixed behaviour makes the test pass</td>
+<td><code>negative_control.log</code></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="sib-compose-supersede-dual-bound-gate">Gate</h2>
+<p>Baseline and after, over the supersede suite the new test sits beside:
+<code>test_supersession</code>, <code>test_supersession_source_migration</code>,
+<code>test_supersession_preflight_graph</code>, <code>test_source_migration_conflict</code>,
+<code>test_retarget_supersede_guard</code>, <code>test_compose_claim_attempt_charge</code>,
+<code>test_generate_name_persist</code>.</p>
+<table id="sib-compose-supersede-dual-bound-gate-table">
+<thead><tr><th>Arm</th><th>Result</th><th>Log</th></tr></thead>
+<tbody>
+<tr><td>baseline (7 files)</td><td><code>82 passed, 3 deselected</code></td><td><code>baseline_suite.log</code></td></tr>
+<tr><td>after (7 files + new test)</td><td><code>82 passed, 3 deselected, 1 xfailed</code></td><td><code>after_suite.log</code></td></tr>
+</tbody>
+</table>
+<p>Delta: <strong>0 added failures</strong>, +1 strict xfail (the reproduction).</p>
+
+<h2 id="sib-compose-supersede-dual-bound-caveats">Caveats</h2>
+<ul>
+<li>The fixture drives the real <code>supersede_prior_source_names</code> and the real
+<code>retarget_standard_name_sources</code>; only <code>guard_source_pairings</code> is stubbed
+to admit the source, so the reproduction isolates the compare-and-set routing and is
+independent of whether the attachment guard would separately reject a dual-bound
+source. A live-graph run could reach the guard first; if it did, its refusal is a
+<code>ValueError</code> raised before the failure recorded here.</li>
+<li>The transaction runs against a fixture handle, so the rollback is read from
+<code>graph_ops.persist_generated_name_winners</code> (the <code>except BaseException</code>
+around <code>tx.commit()</code> at the call site), not observed live.</li>
+</ul>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-compose-supersede-dual-bound">
+<title>Landing record — compose supersede dual bound</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-compose-supersede-dual-bound-landing-title">Landing record</h1>
+<p id="sib-compose-supersede-dual-bound-landing-body">Reproduced the reported
+failure: compose supersede over a source bound to two live identities raises an
+anonymous <code>RuntimeError</code> from <code>retarget_standard_name_sources</code>'
+compare-and-set instead of the adjudicable <code>SourceBindingConflictError</code>,
+so the hard failure reads as a transient fault and spends a retry budget. The
+reproduction is committed as a strict xfail at
+<code>tests/standard_names/test_compose_supersede_dual_bound.py</code>; the section
+evidence and logs are in the sibling
+<code>compose-supersede-dual-bound.html</code>.</p>
+
+</main>
+</body>
+</html>
