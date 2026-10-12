@@ -65,6 +65,11 @@
     <p><code>retarget_standard_name_sources</code> in <code>imas_codex/standard_names/provenance_lifecycle.py</code> now raises <code>SourceBindingConflictError</code> naming the source and both identities when a source is bound to two identities, instead of the anonymous <code>RuntimeError</code>; an unrelated compare-and-set failure still raises the anonymous error. The strict xfail from §15 passes as an ordinary test. Gate: 69 passed against 67 and 1 xfailed at base; reverting turns a test red. Merge <code>b5a5ab30b</code>. Independent review 113/120, no added failures.</p><p>Open in §23: nothing in production catches the named error, so compose still retries it as transient; the binding check counts a retired successor as a live holder; and the error's <code>holding_identity</code> names the predecessor being retired rather than the holder.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-dual-bound-conflict">sib-dual-bound-conflict</a>.</p>
   </section>
 
+  <section id="s20-edge">
+    <h2>§20 — the signed supersede writes its successor edge</h2>
+    <p>The signed <code>supersede</code> mutation in <code>imas_codex/standard_names/signed_manifest.py</code> now MERGEs <code>(predecessor)-[:HAS_SUCCESSOR {receipt_id, signed_at}]-&gt;(successor)</code> inside the same signed apply, stamped with the minting receipt's id, and its postcondition requires that edge. Removing the edge write turns the test red. Gate: 168 passed against 166 at base, no failures. Merge <code>0d94713db</code>. Independent review 112/120, no added failures.</p><p>Open in §20: the postcondition groups by <code>receipt_id</code>, so a scalar-derived twin edge beside the signed one yields two rows and either may be read; "exactly one edge, and it is signed" is not yet enforced. §21 applies through this path, so the fix lands first.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-signed-supersede-edge">sib-signed-supersede-edge</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>
