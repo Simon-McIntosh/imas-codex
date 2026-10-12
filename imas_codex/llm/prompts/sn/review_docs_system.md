@@ -25,8 +25,8 @@ For the candidate:
 
 For sibling-comparison context:
 
-- **`vector_neighbours`** — accepted SNs with documentation nearest to the candidate's description by embedding similarity. Compare documentation **depth, equation style, and sign-convention prose** against these siblings.
-- **`same_base_neighbours`** — accepted SNs sharing the candidate's `physical_base`. Compare for **terminology consistency** (same equation symbol, same sign convention, same units).
+- **`vector_neighbours`** — accepted SNs with documentation nearest to the candidate's description by embedding similarity. Compare documentation depth and supported physical scope.
+- **`same_base_neighbours`** — accepted SNs sharing the candidate's `physical_base`. Compare physical scope and cross-references.
 - **`same_path_neighbours`** — accepted SNs from the same physics domain family. Compare for **consistency of phrasing** (coordinate frame, identifier enums, cross-reference style).
 - **`sibling_family`** (when present) — the candidate's TRUE structural family: siblings sharing a HAS_PARENT parent (a vector's projections, per-locus variants, per-species variants). This is the strongest consistency constraint of the four — see the parallel-structure rule below.
 
@@ -51,27 +51,14 @@ defect.**
 
 ## Family Parallel-Structure Rule (applies when `sibling_family` is present)
 
-Sibling-family members must read as a **matched set**: the same opening
-noun-phrase template and the same documentation section structure, differing
-only in the axis/species/zone-specific token, member-specific symbols, and
-genuinely member-specific physics.
-
-- The candidate's first sentence should be derivable from an **accepted**
-  sibling's (or the anchor's) first sentence by swapping only those
-  member-specific parts. A gratuitously different opening shape (e.g. two
-  siblings open "{Axis} mode number … is the dimensionless integer Fourier
-  harmonic…" while the candidate opens "Dimensionless non-negative integer
-  labeling…") is a structural drift defect — dock **description_quality**
-  and/or **documentation_quality**, citing the divergent sibling ids.
+Compare section structure and physical scope with accepted siblings. Judge
+the opening against a selected registry template when one applies.
 - Do NOT dock for real per-member physics differences expressed inside the
   shared template (different defining relation, different symbol such as $m$
   vs $n$, axis-specific boundary behaviour). Those are correct.
 - Conversely, false uniformity is worse than drift: if the candidate copies a
   sibling's physics claim that does not hold for this member, that is a
   **physics_accuracy** failure (contradiction rules below apply).
-- When NO family member has accepted docs yet, judge the candidate's opening
-  as a template the whole family could adopt — dock if it is so
-  member-idiosyncratic that no sibling could reuse its shape.
 
 ## Scoring Dimensions (0–20 each, total 0–80)
 

@@ -19,6 +19,7 @@ addresses the reviewer's concerns.
 - **Unit:** {{ unit or "—" }}
 - **Kind:** {{ kind or "scalar" }}
 - **Physics domain:** {{ physics_domain or "—" }}
+{% include ("sn/_conventions.md") %}
 {% if description and "description pending LLM enrichment" not in description %}
 - **One-line description:** {{ description }}
 {% endif %}
@@ -64,11 +65,9 @@ strictly on what the children attest.
 ### Sibling family — converge on the family template{% if sibling_family.parent %} (shared parent `{{ sibling_family.parent.name }}`){% else %} (shared pattern){% endif %}
 
 `{{ sn_name }}` is one member of a matched sibling set. Your rewrite must be
-**structurally parallel** to the family: same opening noun-phrase template and
-section structure as the anchor / accepted siblings, varying ONLY the
-axis/species/zone-specific token, member-specific symbols, and genuinely
-member-specific physics. Never copy a sibling's physics claim that does not
-hold for this member — harmonize the structure, not the physics.
+**structurally parallel** to the family in section order and scope. Use the
+selected registry opening when one applies. Never copy a sibling's physics
+claim that does not hold for this member.
 
 {% if sibling_family.anchor %}Template anchor **`{{ sibling_family.anchor.name }}`**{% if sibling_family.anchor.is_parent %} (the family parent){% endif %}:
 - Anchor description: {{ sibling_family.anchor.description }}
@@ -174,15 +173,6 @@ Rules:
   An equation whose symbols are each a named quantity is already dimensionally
   unambiguous, so no unit is needed. If the existing doc carries any unit in
   prose, strip it — that is a primary goal of the refinement.
-- **One canonical opening per family (HARD).** When the context above places
-  this entry in a sibling family, open BOTH `description` and `documentation`
-  with the SAME noun-phrase template as the family anchor, substituting only the
-  member-specific token(s) the context supplies (species, axis, locus). The
-  short `description` is NOT exempt. Do not invent a per-member opening shape
-  (a leading "Total…"/"Unweighted…"/"Charge-state-summed…" adjective) for what
-  is one quantity kind. This applies to number-density families (a particle
-  count per volume): a bare species defaults to the charge-state-summed reading;
-  an explicitly charge-state-resolved member states its specific state.
 - **Charge-state aggregation (HARD).** A species-level quantity aggregated over
   charge states MUST state the convention: extensive quantities (a per-volume
   amount) are charge-state-summed ("summed over all charge states"); intensive
