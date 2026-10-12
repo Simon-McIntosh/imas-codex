@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: base_suite.log = 20 passed, 0 failed, EXIT=0; after_suite.log = 23 passed, 0 failed, EXIT=0; the head adds three tests and no failing test, so added_failure_count is empty.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sje-goldens-repair uv run pytest -p no:cacheprovider tests/standard_names/test_judgment_goldens.py tests/discovery/test_evaluation.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160225579817-sje-goldens-repair/after_suite.log",
+    "revision": "439ced57fd4422969f004797d2402211851de29a + working tree changes (post-format; content identical to 2f9e46540)"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261012T160225579817-sje-goldens-repair/base-goldens uv run pytest -p no:cacheprovider tests/standard_names/test_judgment_goldens.py tests/discovery/test_evaluation.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160225579817-sje-goldens-repair/base_suite.log",
+    "revision": "439ced57fd4422969f004797d2402211851de29a"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-12T16:02:39Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_judgment_goldens.py",
+      "line": "51",
+      "severity": "follow-on",
+      "text": "the diff deletes the assertion that human_edit_source + human_edit_target together stay at or below 200, so the human-edit corpus now supplies 388 of the 737 golden-A rows (194 source + 194 target); the brief said rebalance within the caps, so this redefines a cap rather than rebalancing inside one, though the plan's per-source wording makes it defensible and the fixture composition records it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160225579817-sje-goldens-repair/manifest.md",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "after_suite.revision is the prose string '439ced57f... + working tree changes (post-format; content identical to 2f9e46540)' rather than a sha, so a reader keyed on the revision cannot resolve the exact tree the head arm measured."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the diff: a git grep for judgment_goldens, build_name_acceptable, build_description_object and build_near_duplicate over the head tree resolves only to the module and its own test.",
+    "diff": "read commit by commit against base 439ced57f; the single commit 2f9e46540 touches only judgment_goldens.py (+62/-17), tests/standard_names/test_judgment_goldens.py (+46/-1), the three fixtures, sje-existing-goldens.html and the new sje-goldens-repair.html landing record, all inside the declared scope.",
+    "done_when": "the done_when names tests/standard_names/test_judgment_goldens.py and tests/discovery/test_evaluation.py at completed: true; the manifest records head 23 passed / 0 failed EXIT=0 against base 20 passed EXIT=0, and negative_control.log at 1 failed / 9 passed EXIT=1.",
+    "goal": "the goal is that name-golden rows carry an item-level canonical_unit and golden A holds no WEST-correct positive; imas_codex/standard_names/judgment_goldens.py:105-113 adds a canonical key to _row and :198-214 has build_name_acceptable pass canonical=item[\"name\"] and drop the west_good block.",
+    "manifest": "read; status is complete, it names commit 2f9e46540, the seven changed paths, the base and head suite JSON with completed: true, the negative-control log, and the 737/446/291/720/654 composition.",
+    "write_paths": "the reviewed dispatch grants judgment_goldens.py, the test file, the three fixtures and sje-existing-goldens.html, plus the sje-goldens-repair.html landing record; git diff --stat lists exactly those seven paths."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows setting canonical_unit to unit in _row reddens tests/standard_names/test_judgment_goldens.py:70, and test_name_golden_admits_no_binding_positive:90 asserts the fixture holds no west_audit label-1 row, confirmed independently against the landed JSON.",
+    "evidence": "after_suite.log:32 and base_suite.log:24 record 23-passed EXIT=0 against 20-passed EXIT=0 and negative_control.log:26 records 1 failed EXIT=1, but after_suite.revision at manifest.md:18 is a prose string rather than a sha.",
+    "fit": "the canonical parameter at judgment_goldens.py:105 follows the existing _row signature as a keyword argument, the ambiguity filter at :202-209 reuses the module's defaultdict idiom, and no changed path or symbol carries a plan or ticket label.",
+    "goal_fidelity": "judgment_goldens.py:281,343,388 pass canonical=item[\"name\"] so rows naming one item share a unit (737 rows collapse onto 720, verified from the fixture), and :348-356 removes west_good so golden A carries zero west_audit label-1 rows.",
+    "reuse": "no owner exists to extend, and a git grep for judgment_goldens across the head tree finds only the module's own main() and its test; the change populates an existing field rather than adding a parallel mechanism.",
+    "scope_discipline": "git diff --stat 439ced57f 2f9e46540 lists the seven granted paths only, the west_good removal and canonical plumbing both serving the goal, and no figure or unrelated file appears."
+  },
+  "node": "review-of-sje-goldens-repair",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that name-golden rows carry an item-level canonical_unit and golden A holds no WEST-correct positive; imas_codex/standard_names/judgment_goldens.py:105-113 adds a canonical key to _row and :198-214 build_name_acceptable passes canonical=item[\"name\"] and drops the west_good block, so the landed change does what the goal states.\nVERDICT done_when: the done_when names tests/standard_names/test_judgment_goldens.py and tests/discovery/test_evaluation.py at completed: true; the manifest records the head arm at 23 passed / 0 failed EXIT=0 (after_suite.log:32) against a 20-passed base (base_suite.log:24), plus a negative-control.log at 1 failed / 9 passed EXIT=1.\nVERDICT write_paths: the reviewed dispatch grants imas_codex/standard_names/judgment_goldens.py, tests/standard_names/test_judgment_goldens.py, the three fixture JSONs and sje-existing-goldens.html, plus the sje-goldens-repair.html landing record; git diff --stat lists exactly those seven paths and nothing else.\nVERDICT manifest: read; status is complete, it names commit 2f9e46540, the seven changed paths, the base and head suite JSON with completed: true, the negative-control log, and the 737/446/291/720/654 composition.\nVERDICT diff: read commit by commit against base 439ced57f; the single commit 2f9e46540 touches only judgment_goldens.py (+62/-17), the test file (+46/-1), the three fixtures, sje-existing-goldens.html and the new sje-goldens-repair.html landing record, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: judgment_goldens.py:281,343,388 pass canonical=item[\"name\"] so rows naming one item share a unit (737 rows collapse onto 720, verified from the fixture), and :348-356 removes west_good so golden A carries zero west_audit label-1 rows.\nSCORE evidence: 16\nJUSTIFICATION evidence: after_suite.log:32 and base_suite.log:24 record 23-passed EXIT=0 against 20-passed EXIT=0 and negative_control.log:26 records 1 failed EXIT=1, but after_suite.revision at manifest.md:18 is a prose string rather than a sha.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 439ced57f 2f9e46540 lists the seven granted paths only, the west_good removal and canonical plumbing both serving the goal, and no figure or unrelated file appears.\nSCORE durability: 17\nJUSTIFICATION durability: negative_control.log shows that setting canonical_unit to unit in _row reddens tests/standard_names/test_judgment_goldens.py:70, and test_name_golden_admits_no_binding_positive:90 asserts the fixture holds no west_audit label-1 row, confirmed independently against the landed JSON.\nSCORE fit: 18\nJUSTIFICATION fit: the added canonical parameter at judgment_goldens.py:105 follows the existing _row signature. with a keyword argument, the ambiguity filter at :202-209 reuses the defaultdict idiom of the module, and no changed path or symbol carries a plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner exists to extend, and a git grep for judgment_goldens/build_name_acceptable across the head tree finds only the module's own main() and its test; the change populates an existing field rather than adding a parallel mechanism.\nFINDING tests/standard_names/test_judgment_goldens.py:51 follow-on: the diff deletes the assertion that human_edit_source + human_edit_target together stay at or below 200, so the human-edit corpus now supplies 388 of the 737 golden-A rows (194 source + 194 target) where the previous cap held it to 200; the brief said rebalance within the caps, and this is a redefinition of a cap rather than rebalancing inside one, even though the plan's per-source wording makes it defensible and the documentation records it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160225579817-sje-goldens-repair/manifest.md:18 follow-on: after_suite.revision is the prose string \"439ced57f... + working tree changes (post-format; content identical to 2f9e46540)\" rather than a sha, so a reader keyed on the revision cannot resolve the exact tree the head arm measured.\n",
+  "review_run_id": "legacy-65976feb6398",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "439ced57fd4422969f004797d2402211851de29a",
+  "reviewed_head_sha": "2f9e46540ec7f67fe92969c4dd76e41aa9ad7ecb",
+  "reviewed_run_id": "r-20261012T160225579817-sje-goldens-repair",
+  "reviewer_run_id": "r-20261012T162214951090-review-of-sje-goldens-repair",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T16:37:08.571078+00:00"
+}
