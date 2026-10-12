@@ -1,0 +1,79 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:48:22.352Z",
+  "dispatched_at": "2026-10-12T18:44:06Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/graph/dd_search.py:253",
+      "id": "reuse_search-1",
+      "reason": "\u00a74's scope would grow to a named fifth (and sixth) blend site, or the plan must say in its own text why the DD-path blend is exempt.",
+      "text": "`hybrid_dd_search` blends vector and text by an additive rule (`_VEC_WEIGHT = 0.6`, `_TEXT_WEIGHT = 0.4` at lines 93-94, blended at 253) \u2014 the same defect class \u00a71 identifies \u2014 yet the plan's \u00a71 cause table and \u00a74 site list name only search_tools.py:287/915/1667 and slot_context.py `_hybrid_ids`. The plan's own \u00a77 cites dd_search as a sibling search path, and imas_codex/tools/graph_search.py:437 delegates to it, so a \"one rank fusion for every search tool\" that skips it leaves the DD-path search on the mixed-scale rule. Census of the additive-blend family: imas_codex/llm/search_tools.py:287 (signals), imas_codex/llm/search_tools.py:915 (docs), imas_codex/llm/search_tools.py:1667 (code), imas_codex/llm/search_tools.py:1678 (code-example `max(...) + 0.05` boost, also uncited), imas_codex/ids/slot_context.py:70 (`_hybrid_ids`), imas_codex/graph/dd_search.py:245 (`hybrid_dd_search`), imas_codex/standard_names/workers.py:2028 (`_hybrid_search_neighbours_batch`, which calls into dd_search).",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/dd_search.py:245",
+      "id": "duplicate_owner-1",
+      "reason": "a named second fusion owner is exactly the drift the section exists to prevent; naming it lets the author route it in the same pass.",
+      "text": "\u00a74 proposes lifting rrf_fuse to \"one shared owner\" for every search tool, but imas_codex/graph/dd_search.py remains a second owner of the fusion rule with its own weights and tie-breakers; the owner to extend is `hybrid_dd_search` in imas_codex/graph/dd_search.py, whose `_VEC_WEIGHT/_TEXT_WEIGHT` (lines 93-94) and post-hoc boosts (lines 275-293) would need to move onto the shared mechanism or the plan must record why the DD-path search keeps its own.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/core/node_classifier.py:290",
+      "id": "reuse_search-2",
+      "reason": "\u00a78 should cite the existing commanded/reference classifier and say whether it is reused, extended to signals, or deliberately not \u2014 three uncited precedents for the same judgment is a reuse gap.",
+      "text": "\u00a78 proposes the Jev Choice `signal_role` (measured / commanded / reference-or-setpoint / status / configuration / derived) as new machinery, but the repository already distinguishes a commanded/reference quantity from a measured one: `_PULSE_SCHEDULE_REFERENCE_RE` classifies `pulse_schedule/.../reference` subtrees as \"the commanded waveform representation of an underlying physics quantity\" (imas_codex/core/node_classifier.py:290-298), and imas_codex/discovery/paths/enrichment.py:111 already carries a control/setpoint/actuator pattern. The plan says the distinction \"is the same distinction the DD-path labels grade as 2 against 3\" but does not cite either existing classifier.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/search.py:243",
+      "id": "deep_module-1",
+      "reason": "the plan should name the module path and its exported surface; leaving the decision to review makes the section un-implementable as written.",
+      "text": "\u00a74 lifts `rrf_fuse` to \"one shared owner that the standard-name search and these four callers import; the plan's design review settles the module.\" The plan delegates the placement and interface of the new owner to this review rather than naming it, so the section's depth (what the module hides, and its interface) is unspecified in the plan's own text.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/llm/search_tools.py:171",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added option and property in its own text, per the interface-budget rule.",
+      "text": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 adds a `role=` filter on `search_signals` (a new CLI/MCP option) and a new stored `signal_role` property without naming what it retires or merges, or stating why nothing can be. \u00a74 by contrast does account for its added surface (\"Do not write a second fusion \u2026 lift it to one shared owner\"), which merges four call sites into one.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f260a465e0eef5d89a8604ca5425754bb214d726786443231fa32349db0fc0c7",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T184345071553-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "b5fdfaf6492be3c4446e9d4be2dda9b423d22310",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a74 creates the shared fusion owner but defers its placement and shape to \"the plan's design review\" instead of naming the module in its own text.",
+    "duplicate_owner": "a finding \u2014 \u00a74 titled \"One rank fusion for every search tool\" leaves a second additive fusion owner in imas_codex/graph/dd_search.py un-routed and un-retired.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 adds a `role=` filter and a stored `signal_role` without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan searched the modules it names and cites rrf_fuse, rerank_candidates, the DD-path label rule and signal_glossary, but it did not find the parallel additive blend in imas_codex/graph/dd_search.py nor the existing commanded/reference representation classifier.",
+    "thin_wrapper": "pass \u2014 \u00a77 extends the existing rerank_candidates owner and justifies it; \u00a76 widens the index definition in place; no wrapper is proposed over machinery that could simply be extended."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "481c7d9952ca4af18afa8855d91bb1dde23fc4ec0743ed482ecc2e6c103f1de6",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "0a63658b05ce2989fcc88fc3d5785350900bcd1ca01c3ed006c0352081f5124d",
+    "s4": "d46fd1658cb6fb02fcd46a052541d1be913eff34260745e2e368488d903f3ad3",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "4c4aa85bb83ca8a1e6ddca3e35a88085df2cd964d8989ee3010b5d26037d5775",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:52:00.668366+00:00"
+}
