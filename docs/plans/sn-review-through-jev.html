@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -47,8 +47,8 @@
       The inventory of 2026-10-12 (run <code>sn-judgment-inventory</code>) traces review end to
       end. Name review (<code>_run_rd_quorum_cycles</code>, defined at
       <code>imas_codex/standard_names/workers.py:7758</code>) and docs review
-      (<code>_review_single_batch</code>, defined at
-      <code>imas_codex/standard_names/review/pipeline.py:1882</code>)
+      (<code>_review_single_batch</code>, defined in
+      <code>imas_codex/standard_names/review/pipeline.py</code>)
       each score four dimensions from 0 to 20. The total over 80 is the accept gate, computed in
       code. A primary and a secondary model run, and an escalator runs when any dimension
       disagrees by more than 0.20.
@@ -80,7 +80,9 @@
     <p>
       Every failure the reviewer can find becomes a check with an id, an axis, the dimension it
       docks, one Jev question (a Noul whose true case is the defect, or a categorising Choice
-      where the defect is one of several forms), and the evidence fields it reads. Sources:
+      where the defect is one of several forms), the evidence fields it reads, and whether
+      its failure calls for retrieval (the flag the fanout trigger of §5 reduces over).
+      Sources:
     </p>
     <ul>
       <li>the defect list in <code>review_names.md</code>: malformed physical base, novel token
@@ -101,8 +103,8 @@
       seats.
     </p>
     <p>
-      <strong>Done when:</strong> every check has evidence fields, and either a Jev question or
-      the audit finding class that decides it. The 136
+      <strong>Done when:</strong> every check has evidence fields, a retrieval flag, and either
+      a Jev question or the audit finding class that decides it. The 136
       human edit reasons are each mapped to a check or listed as unmapped, and at least 80% map.
       A test fails when a check names an evidence field that the review state does not carry.
     </p>
@@ -179,7 +181,7 @@
     <p>
       The refine prompts render the failed checks as their instruction list: id, the criterion
       text, the evidence it pointed at, and the segment or sentence concerned. The fanout trigger
-      becomes the maximum probability over the checks that call for retrieval, compared with a
+      becomes the maximum probability over the checks whose retrieval flag (§2) is set, compared with a
       calibrated threshold, which retires the keyword list in <code>refine-trigger-keywords</code> and the field that
       holds it in <code>imas_codex/standard_names/fanout/config.py</code>.
       The free-text comment field remains for people and no code path reads it.

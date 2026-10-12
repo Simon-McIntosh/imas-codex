@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;imas-standard-names:concept-and-notation-registry#s2&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="16">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -169,7 +169,8 @@
       <code>review/audits.py</code>, whose contract is deterministic checks runnable without
       model access. They run as their own asynchronous judge stage in the review pipeline,
       beside the audit stage, and add their findings to the same per-name list the reviewer
-      receives. A Choice is used rather than a narrow Noul because of the 2026-10-12 smoke read
+      receives. §7 builds that stage; this section's done-when covers the deterministic checks
+      only. A Choice is used rather than a narrow Noul because of the 2026-10-12 smoke read
       (<a href="/imas-codex/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke">the
       flux-surface-average smoke read</a>, with its script beside it):
     </p>
@@ -206,12 +207,22 @@
       sit beside it. The reviewer receives the lint findings as deterministic input. The
       route half exists and is unwired: <code>imas_codex/standard_names/review/pipeline.py</code>
       extracts Layer 1 audit findings and sets <code>audit_findings</code> on the render
-      context at line 1964, but no template under <code>imas_codex/llm/prompts/sn/</code>
+      context (near line 1989, in <code>_review_single_batch</code>), but no template under <code>imas_codex/llm/prompts/sn/</code>
       reads that variable. So no audit finding has ever reached a reviewer. That defect was
       recorded as <code>f-scai-audit-findings-reach-no-template</code>, resolved into this
       section when <code>sn-catalog-audit-instrument</code> was superseded.
       Render the findings, the lint's among them, in the review templates. An unresolved
-      lint error caps the documentation score below the acceptance threshold.
+      lint error caps the documentation score below the acceptance threshold. The cap lives
+      where the review pipeline writes a reviewer's score onto the entry (the scored-entry
+      loop in <code>imas_codex/standard_names/review/pipeline.py</code> that sets
+      <code>reviewer_score</code>, near line 1826): a name carrying an error-severity lint
+      finding in the <code>AuditReport</code> has its score capped there, and the entry
+      records that the cap applied. A prompt cannot enforce it.
+    </p>
+    <p>
+      This section's mechanism is built and gated on entries the registry already carries
+      (the flux-surface-average concept and the plasma-boundary entry). The entries authored
+      in §3 widen coverage for the WEST run; they are not what this section's tests need.
     </p>
     <p>
       <strong>Done when:</strong> a rendered prompt for a flux-surface-averaged name carries
@@ -233,6 +244,10 @@
       supersedes — are not this plan's. They go through <code>sn edit</code> under
       <code>sn-catalog-grouping</code> §4.
     </p>
+
+    <h2 id="s7">§7 — The Jev-backed judge stage, report-only</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>The checks a pattern cannot decide (which form an equation takes when it is written several equivalent ways, whether a gloss equates two loci, which template an opening follows) ask Jev one categorising Choice each, as §4 sets out. They run as an asynchronous stage in the review pipeline (<code>imas_codex/standard_names/review/pipeline.py</code>), beside the audit stage, and add their results to the same per-name findings list the reviewer receives. Every call goes through the shared decisions owner (<code>decide_one</code> in <code>imas_codex/discovery/base/judgment.py</code>), which books its cost. The stage reads the entries <code>select_conventions</code> returns and asks nothing when no selected entry needs judgment.</p><p>Each result is marked report-only. A report-only result reaches the reviewer as information and never caps a score. Lifting a check out of report-only is a separate measurement, made through the evaluation module of <code>sn-judgment-evaluation</code> §3 once a coordinator-labelled sample exists.</p><p><strong>Done when:</strong> with the decisions owner stubbed, the stage asks one Choice per judged entry per name, and its results appear in the reviewer's per-name findings marked report-only; the test fails when the stage is unwired from the pipeline. A report-only result leaves the score uncapped (test). A live run over the four boundary-entry fixtures, eight calls at most, classifies the carbon entry's <code>dl/B</code> equation as a forbidden form, the beryllium entry's surface form as canonical, and a "separatrix" gloss as forbidden, with the booked cost recorded in <code>docs/evidence/fragments/sn-house-style/</code>. A name with no judged entry makes no call (test).</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
