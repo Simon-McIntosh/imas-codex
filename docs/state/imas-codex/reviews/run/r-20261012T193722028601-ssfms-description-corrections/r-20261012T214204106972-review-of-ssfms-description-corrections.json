@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest records no baseline_suite or after_suite gate log, so no baseline/head failure pair exists to subtract",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:2038 (propagate_source_enrichment binds the source by representative_id)",
+    "imas_codex/discovery/signals/parallel.py:2170 (sweep_source_enrichment calls propagate_source_enrichment)",
+    "imas_codex/discovery/signals/parallel.py:2178 (prepare_signal_sources calls sweep_source_enrichment)",
+    "imas_codex/discovery/signals/parallel.py:4161 (the idle-cycle path calls prepare_signal_sources)",
+    "imas_codex/discovery/signals/parallel.py:5848 (the end-of-run path calls prepare_signal_sources)"
+  ],
+  "completed_at": "2026-10-12T21:50:50.436Z",
+  "dispatched_at": "2026-10-12T21:42:15Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_glossary.py",
+      "line": "325",
+      "severity": "follow-on",
+      "text": "follow-on: \"assert len(statements) == 4\" pins the number of Cypher statements propagate_source_enrichment issues, so a later benign query addition reddens the guard even when the representative_id binding is intact, and the count says nothing about the regression it sits beside."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit from b8a47a13 to 6d0847a69 -- a single commit 6d0847a69, +70/-1 over two paths: descriptions.html:221 corrects the negative-control count from two failing tests to three and restores the omitted test_a_term_reaches_across_a_digit_to_letter_turn, and the test file adds a shared recording-graph helper (_issued_statements) with two shape guards.",
+    "done_when": "the section's done-when is the before/after census plus that the boundary test passes while the substring matcher fails it; the gain's own gate is tests/discovery/test_signal_glossary.py, and its log gate_signal_glossary_final.log records rev 6d0847a69 and 10 passed, EXIT=0, while the two new tests guard the source-binding path the SNU census (census_after_final.json, 49 switching network unit / 0 snubber) depends on.",
+    "goal": "the reviewed node's goal is to correct the JT-60SA signal descriptions search exposed, and the one commit gained since the prior review (6d0847a69) hardens the source binding that correction rests on -- tests/discovery/test_signal_glossary.py:310 and :332 now hold propagate_source_enrichment and sweep_source_enrichment to MATCH (sg:SignalSource {representative_id: $rep_id}) (imas_codex/discovery/signals/parallel.py:2038, :2153), the repair that reached the seven residual CS1 members the first review left blocking.",
+    "manifest": "read; status complete at head 6d0847a69 with twelve commits, the gate and three negative-control logs named by path, and no baseline_suite or after_suite field, so added_failure_count is not derivable from it.",
+    "write_paths": "the node declared six write paths; the incremental diff b8a47a13..6d0847a69 touches exactly two of them -- docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html and tests/discovery/test_signal_glossary.py -- and the other three files named in this review's goal (imas_codex/discovery/signals/parallel.py, ssfms-description-corrections.html, reach-and-census.svg) gained no commit since the prior review."
+  },
+  "justifications": {
+    "durability": "each added guard is shown to redden on its own regression -- restoring the MEMBER_OF binding in the propagate sites fails test_propagation_binds_the_source_by_representative_id_alone and in the sweep site fails test_the_sweep_reads_each_signal_source_by_its_representative_id (tests/discovery/test_signal_glossary.py:327 and :342) -- closing both prior review findings, though the guards assert query spelling rather than behaviour.",
+    "evidence": "gate_signal_glossary_final.log records rev 6d0847a69 with 10 passed, EXIT=0, and each new guard's negative control is recorded (logs/negative_control_member_edge_propagate.log and -sweep.log, 1 failed 9 passed EXIT=1), while added_failure_count stays unmeasured because the reviewed manifest carries no baseline/after suite.",
+    "fit": "the new helpers (_normalized_statement, _issued_statements) and RecordingGraph follow the per-file stub-graph idiom already used across tests/discovery, and name nothing a plan or ticket identifies, though the hard-coded row shape in RecordingGraph must track the queries it serves.",
+    "goal_fidelity": "the commit does what its subject states -- tests/discovery/test_signal_glossary.py:310,332 hold both the propagation and the sweep to the representative_id match (imas_codex/discovery/signals/parallel.py:2038,2153) -- though it adds guard rather than correction, so it strengthens rather than extends the node's corrected descriptions.",
+    "reuse": "a search of tests/ for an existing statement-recording graph found no shared owner -- CypherRecorder at tests/discovery/test_claims_honour_exclusions.py:144 is file-local and no tests/conftest.py or shared stub module exists -- so the addition follows the established per-file pattern rather than forking an owned capability.",
+    "scope_discipline": "the diff b8a47a13..6d0847a69 touches only docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html and tests/discovery/test_signal_glossary.py, both inside the node's declared write paths, and adds no plan, sprint or index state."
+  },
+  "limitations": [
+    "The added guards were read, not re-run; their negative controls are the reviewed run's own scratch-copy runs (logs/negative_control_member_edge_propagate.log and -sweep.log), each showing the corresponding new test fails when the old MEMBER_OF binding is restored.",
+    "The three files this review's goal lists beyond the two in the incremental diff (parallel.py, ssfms-description-corrections.html, reach-and-census.svg) gained no commit since the prior review at b8a47a13 and were not re-read."
+  ],
+  "node": "review-of-ssfms-description-corrections",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to correct the JT-60SA signal descriptions search exposed, and the one commit gained since the prior review (6d0847a69) hardens the source binding that correction rests on -- tests/discovery/test_signal_glossary.py:310 and :332 now hold propagate_source_enrichment and sweep_source_enrichment to MATCH (sg:SignalSource {representative_id: $rep_id}) (imas_codex/discovery/signals/parallel.py:2038, :2153), the repair that reached the seven residual CS1 members the first review left blocking.\nVERDICT done_when: the section's done-when is the before/after census plus that the boundary test passes while the substring matcher fails it; the gain's own gate is tests/discovery/test_signal_glossary.py, and its log gate_signal_glossary_final.log records rev 6d0847a69 and 10 passed, EXIT=0, while the two new tests guard the source-binding path the SNU census (census_after_final.json, 49 switching network unit / 0 snubber) depends on.\nVERDICT write_paths: the node declared six write paths; the incremental diff b8a47a13..6d0847a69 touches exactly two of them -- docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html and tests/discovery/test_signal_glossary.py -- and the other three files named in this review's goal (imas_codex/discovery/signals/parallel.py, ssfms-description-corrections.html, reach-and-census.svg) gained no commit since the prior review.\nVERDICT manifest: read; status complete at head 6d0847a69 with twelve commits, the gate and three negative-control logs named by path, and no baseline_suite or after_suite field, so added_failure_count is not derivable from it.\nVERDICT diff: read commit by commit from b8a47a13 to 6d0847a69 -- a single commit 6d0847a69, +70/-1 over two paths: descriptions.html:221 corrects the negative-control count from two failing tests to three and restores the omitted test_a_term_reaches_across_a_digit_to_letter_turn, and the test file adds a shared recording-graph helper (_issued_statements) with two shape guards.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:2038 (propagate_source_enrichment binds the source by representative_id), imas_codex/discovery/signals/parallel.py:2170 (sweep_source_enrichment calls propagate_source_enrichment), imas_codex/discovery/signals/parallel.py:2178 (prepare_signal_sources calls sweep_source_enrichment), imas_codex/discovery/signals/parallel.py:4161 (the idle-cycle path calls prepare_signal_sources), imas_codex/discovery/signals/parallel.py:5848 (the end-of-run path calls prepare_signal_sources)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the commit does what its subject states -- tests/discovery/test_signal_glossary.py:310,332 hold both the propagation and the sweep to the representative_id match (imas_codex/discovery/signals/parallel.py:2038,2153) -- though it adds guard rather than correction, so it strengthens rather than extends the node's corrected descriptions.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate_signal_glossary_final.log records rev 6d0847a69 with 10 passed, EXIT=0, and each new guard's negative control is recorded (logs/negative_control_member_edge_propagate.log and -sweep.log, 1 failed 9 passed EXIT=1), while added_failure_count stays unmeasured because the reviewed manifest carries no baseline/after suite.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff b8a47a13..6d0847a69 touches only docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html and tests/discovery/test_signal_glossary.py, both inside the node's declared write paths, and adds no plan, sprint or index state.\nSCORE durability: 19\nJUSTIFICATION durability: each added guard is shown to redden on its own regression -- restoring the MEMBER_OF binding in the propagate sites fails test_propagation_binds_the_source_by_representative_id_alone and in the sweep site fails test_the_sweep_reads_each_signal_source_by_its_representative_id (tests/discovery/test_signal_glossary.py:327 and :342) -- closing both prior review findings, though the guards assert query spelling rather than behaviour.\nSCORE fit: 17\nJUSTIFICATION fit: the new helpers (_normalized_statement, _issued_statements) and RecordingGraph follow the per-file stub-graph idiom already used across tests/discovery, and name nothing a plan or ticket identifies, though the hard-coded row shape in RecordingGraph must track the queries it serves.\nSCORE reuse: 19\nJUSTIFICATION reuse: a search of tests/ for an existing statement-recording graph found no shared owner -- CypherRecorder at tests/discovery/test_claims_honour_exclusions.py:144 is file-local and no tests/conftest.py or shared stub module exists -- so the addition follows the established per-file pattern rather than forking an owned capability.\nFINDING tests/discovery/test_signal_glossary.py:325 follow-on: \"assert len(statements) == 4\" pins the number of Cypher statements propagate_source_enrichment issues, so a later benign query addition reddens the guard even when the representative_id binding is intact, and the count says nothing about the regression it sits beside.",
+  "review_run_id": "r-20261012T214204106972-review-of-ssfms-description-corrections",
+  "review_scope": "Independent review of the ssfms-description-corrections node (plan signal-search-finds-the-measured-signal section 10), covering only the one commit gained since the prior review at b8a47a13: the test commit 6d0847a69 that guards the representative_id source binding the propagation and the sweep use and corrects the fragment's negative-control test count. Read-only from outside the reviewed worktree: the diff was read from the shared object store at 6d0847a69, the cited gate and negative-control logs were opened, and the reviewed run's own manifest was read; no test was re-run.",
+  "reviewed_base_sha": "b8a47a1324c52dc22c51838c2c8861e3fb437d5d",
+  "reviewed_commits": [
+    "6d0847a69bb94df1b251c430bc9a6af1b425fa28"
+  ],
+  "reviewed_head_sha": "6d0847a69bb94df1b251c430bc9a6af1b425fa28",
+  "reviewed_run_id": "r-20261012T193722028601-ssfms-description-corrections",
+  "reviewer": "review-of-ssfms-description-corrections",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:51:34.476899+00:00",
+  "total": 111,
+  "verification_logs": []
+}

@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191">
 </head>
@@ -491,6 +491,9 @@
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261012T211608969514-review-of-ssfms-description-corrections" data-who="reckon-build" data-when="2026-10-12T21:26:50.205Z">
     <div class="r-comment-body"><p>reviewed a2069d5aa..b8a47a132 (nine commits gained since the prior review) and stored a parsed six-dimension record -- goal_fidelity 18, evidence 15, scope_discipline 18, durability 8, fit 17, reuse 20 (total 96); no blocking finding: the SNU correction the prior review left blocking is complete (census_after_final.json 49 switching network unit, 0 snubber), the gate (8 passed EXIT=0) and negative control (3 failed EXIT=1) are recorded, but three follow-on findings stand -- the sweep assertion at tests/discovery/test_signal_glossary.py:193 and the propagate rebind at imas_codex/discovery/signals/parallel.py:2038 have no assertion that fails when reverted, and descriptions.html:221 undercounts the negative-control failures.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261012T214204106972-review-of-ssfms-description-corrections" data-who="reckon-build" data-when="2026-10-12T21:50:50.436Z">
+    <div class="r-comment-body"><p>stored an independent review of r-20261012T193722028601-ssfms-description-corrections covering the one commit gained since the prior review (b8a47a13..6d0847a69): goal_fidelity 18, evidence 18, scope_discipline 20, durability 19, fit 17, reuse 19 (total 111); no blocking finding — the two source-binding guards the prior review left unguarded now each fail on their own restored regression, and the fragment&#x27;s negative-control count is corrected to three — with one follow-on (tests/discovery/test_signal_glossary.py:325 pins the propagated statement count).</p></div>
 </div>
 </section>
 </main>
