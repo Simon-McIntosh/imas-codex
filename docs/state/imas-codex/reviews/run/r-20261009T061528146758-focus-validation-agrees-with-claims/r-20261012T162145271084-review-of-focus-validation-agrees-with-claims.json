@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite or after_suite gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/discover/sequence.py:424",
+    "imas_codex/cli/discover/signals.py:115"
+  ],
+  "completed_at": "2026-10-12T16:36:47.007Z",
+  "dispatched_at": "2026-10-12T16:21:57Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/discover/signals.py",
+      "line": "77",
+      "severity": "follow-on",
+      "text": "follow-on: `_validate_focus` now resolves a focus array segment through `MEMBER_OF` with its own Cypher (imas_codex/cli/discover/signals.py:77-84) that duplicates the segment-resolution rule `build_focus_predicate` owns (imas_codex/discovery/signals/parallel.py:534-537); the docstring calls it \"the same path `build_focus_predicate` resolves it\", so the two are a hand-maintained mirror with no shared owner, and a future change to the predicate's resolution leaves validation silently disagreeing again \u2014 the exact Class of defect this node exists to close."
+    }
+  ],
+  "head_log_revision": null,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s): imas_codex/cli/discover/sequence.py:424 dispatches run_signals_stage, and imas_codex/cli/discover/signals.py:115 (run_signals_stage) calls _validate_focus.",
+    "diff": "read commit by commit against the base 9f4bf1d3; the single commit 997941042 splits _validate_focus's one query into an id/accessor query and a MEMBER_OF segment query (signals.py), replaces the two stale stage tests with tests of the new refusal and the focus_items pass-through plus three more, and adds the graph-marked predicate test and the evidence fragment.",
+    "done_when": "the done-when names tests/cli/test_discover_signals_stage.py passing at the merged head with the new refusal and the pass-through, then validation resolving array segments exactly as the predicate and a graph-marked test selecting the MDAC magPbTCNNN members; the manifest records stage_tests.log (17 passed, EXIT=0), graph_tests.log (1 passed, EXIT=0) and a non-zero-EXIT negative control.",
+    "goal": "the node's goal is to replace the two stale 'claim query takes no item filter' stage tests with tests of what the stage now does, and to make _validate_focus resolve a data_source_path array segment exactly as build_focus_predicate does, pinning the predicate with a graph-marked test.",
+    "manifest": "read; it records both gate commands with EXIT=0 and their summary lines, test_logs naming stage_tests.log and graph_tests.log, and negative_control_log naming negative_control.log whose last line is EXIT=1.",
+    "write_paths": "the manifest declares imas_codex/cli/discover/signals.py, tests/cli/test_discover_signals_stage.py, tests/discovery/test_signals_focus_graph.py and the evidence fragment (plus a docs/figures directory); git show --stat 997941042 lists exactly those four files."
+  },
+  "justifications": {
+    "durability": "test_validate_focus_refuses_a_sourceless_signal_carrying_the_segment reddens (DID NOT RAISE) when the MEMBER_OF join is dropped, shown in negative_control.log (1 failed, 16 passed, EXIT=1), and the graph-marked test_rendered_predicate_selects_the_named_source_members guards the predicate validation now mirrors; docked one point because the stage tests drive a fake GraphClient that branches on the Cypher text ('MEMBER_OF' in cypher), so a query rewrite that preserved the defect could pass the mock.",
+    "evidence": "the done-when's gate is tests/cli/test_discover_signals_stage.py; the manifest records 17 passed EXIT=0 and stage_tests.log holds the summary line, the graph arm's graph_tests.log holds '1 passed' EXIT=0, and I reproduced both at the reviewed head (17 passed in 6.07s; 1 passed in 7.18s).",
+    "fit": "the change edits an existing per-stage private helper and mirrors its neighbour's idiom; no version, plan, sprint or ticket identifier and no attribution appear in the changed names, which describe mechanism (_validate_focus, segment_rows) as the surrounding imas_codex/cli/discover/ modules do.",
+    "goal_fidelity": "imas_codex/cli/discover/signals.py:77-84 now resolves a segment only through a segment_rows query that joins MEMBER_OF, matching imas_codex/discovery/signals/parallel.py:534-537, and the replaced tests assert the new refusal and the focus_items pass-through, so validation now agrees with the claim.",
+    "reuse": "the change does not add a new definition, but it re-implements the predicate's segment-through-MEMBER_OF resolution as a second Cypher query (signals.py:77-84) instead of extending build_focus_predicate (parallel.py:516), so the capability has a hand-maintained mirror rather than one owner.",
+    "scope_discipline": "git show --stat 997941042 lists only imas_codex/cli/discover/signals.py, tests/cli/test_discover_signals_stage.py, tests/discovery/test_signals_focus_graph.py and the evidence fragment, all inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261012T162145271084-review-of-focus-validation-agrees-with-claims",
+  "reviewed_base_sha": "9f4bf1d38eaf8d3761539d597ccfbb9ae3625563",
+  "reviewed_head_sha": "997941042253b599e8447d1ffd2a34b807500f4c",
+  "reviewed_run_id": "r-20261009T061528146758-focus-validation-agrees-with-claims",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T16:30:00+00:00",
+  "total": 114
+}

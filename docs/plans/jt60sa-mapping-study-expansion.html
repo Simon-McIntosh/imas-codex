@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc,0e1f1d382,43ee5a2e0,10d79f25b,615da419b">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="94">
+<meta name="plan-version" content="96">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -527,6 +527,9 @@
 <div class="r-comment" data-section="s17" data-id="c-run-r-20261009T061528146758-focus-validation-agrees-with-claims" data-who="reckon-build" data-when="2026-10-09T06:30:52.861Z">
     <div class="r-comment-body"><p>Focus validation now resolves a `data_source_path` array segment only through a `FacilitySignal` that is `MEMBER_OF` a `SignalSource`, exactly as `build_focus_predicate` does; the stage tests assert the new refusal and the `focus_items` pass-through, and a graph-marked test selects the 14 MDAC `magPbTCNNN` members through the rendered predicate (17 passed stage / 1 passed graph).</p></div>
 </div>
+<div class="r-comment" data-section="s17" data-id="c-run-r-20261012T162145271084-review-of-focus-validation-agrees-with-claims" data-who="reckon-build" data-when="2026-10-12T16:36:47.007Z">
+    <div class="r-comment-body"><p>Stored a parsed six-dimension review of r-20261009T061528146758-focus-validation-agrees-with-claims (base 9f4bf1d3, head 997941042) at reviews/imas-codex/r-20261009T061528146758-focus-validation-agrees-with-claims.json and its .at-997941042 sibling; total 114/120 (goal_fidelity 20, evidence 20, scope_discipline 20, durability 19, fit 20, reuse 15), one follow-on finding that _validate_focus re-implements the segment-through-MEMBER_OF rule build_focus_predicate owns.</p></div>
+</div>
 <div class="r-comment" data-section="s19" data-id="c-close-s19" data-who="reckon-build" data-when="2026-10-09T06:47:00Z">
     <div class="r-comment-body"><p>§19 landed: <code>map clear</code> and <code>map run --clear</code> now delete bindings, evidence and the mapping node through one owner (merge <code>08a6ae16f</code>; 575 tests and the live graph test pass). Evidence of a source shared by two IDS mappings is still removed by clearing either; that is pre-existing. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s19">evidence</a></p></div>
 </div>
@@ -535,6 +538,9 @@
 </div>
 <div class="r-comment" data-section="s19" data-id="c-run-r-20261012T162215544695-review-of-one-mapping-delete-owner" data-who="reckon-build" data-when="2026-10-12T16:35:14.285Z">
     <div class="r-comment-body"><p>independent review of run r-20261009T062713623953-one-mapping-delete-owner (§19) stored as a parsed record at reviews/imas-codex/r-20261009T062713623953-one-mapping-delete-owner.json and its .at-8546ff6229cfc1c33867f4447f67191b70269156.json sibling: all 6 dimensions scored in 0..20 (goal_fidelity 20, evidence 20, scope_discipline 20, durability 18, fit 20, reuse 20; total 118), reviewed_base_sha 24d536235b6297c39f5f39153fd4d0b90850a186, reviewed_head_sha 8546ff6229cfc1c33867f4447f67191b70269156, added_failure_count 0, no absent items, one follow-on finding.</p></div>
+</div>
+<div class="r-comment" data-section="s19" data-id="c-s19-review" data-who="reckon-build" data-when="2026-10-12T16:40:00Z">
+    <div class="r-comment-body"><p>The independent review of §19 (2026-10-12) scored 18 to 20 with no added failures. It refined the shared-source caveat recorded at landing. <code>delete_mapping</code> in <code>imas_codex/ids/graph_ops.py</code> (around line 829) removes the <code>MappingEvidence</code> of every source the mapping uses. Clearing mapping A therefore deletes the evidence of a source that IDS mapping B also uses. That was already true of <code>map clear</code>, and §19 now routes <code>map run --clear</code> through the same delete, so the effect reaches the engine path too. Open follow-on: scope the evidence delete to evidence written for this mapping's IDS.</p></div>
 </div>
 <div class="r-comment" data-section="s18" data-id="c-close-s18" data-who="reckon-build" data-when="2026-10-09T06:57:00Z">
     <div class="r-comment-body"><p>§18 landed: <code>tests/</code> is now a regular package, and pytest's pythonpath names the root and <code>tests/</code>. With the lead's reckon <code>PYTHONPATH</code>, suite collection goes from 17 errors to none (merge <code>26f7197b1</code>). Follow-on: rewrite four top-level test imports, then drop the <code>tests</code> path entry. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s18">evidence</a></p></div>
