@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="fragment">
+  <title>Conventions selection returns nothing for a name the grammar cannot parse</title>
+</head>
+<body>
+  <section id="shs-conventions-parse-guard-summary">
+    <h2>One parse guard in the conventions owner</h2>
+    <p>
+      <code>conventions_context_for</code> in
+      <code>imas_codex/standard_names/context.py</code> now catches the public
+      grammar's <code>ParseError</code> and returns <code>None</code>, logging
+      the name at DEBUG, so a name the local build cannot parse yields no
+      conventions instead of raising. Only the parse error is caught; any other
+      failure still propagates. The per-call-site helper
+      <code>_conventions_for_prompt</code> was removed from
+      <code>workers.py</code>, whose three render sites call
+      <code>conventions_context_for</code> directly, and the fourth site in
+      <code>review/pipeline.py</code> was already unguarded and now inherits the
+      guard.
+    </p>
+  </section>
+  <section id="shs-conventions-parse-guard-evidence">
+    <h2>Evidence</h2>
+    <p>
+      Four new tests in <code>tests/standard_names/test_conventions_parse_guard.py</code>:
+      an unparseable name returns <code>None</code>; a parseable name still
+      selects; a non-parse failure propagates; and a docs review batch driven
+      through <code>_review_single_batch</code> with an unparseable name
+      completes with <code>conventions is None</code>. Against the base revision
+      with the guard removed, two of the four fail (the guard tests) while the
+      review batch raises out; the log at
+      <code>logs/negative_control.log</code> records 2 failed, EXIT=1. Its
+      passing arm runs 962 tests with zero failures at base and 966 (the four
+      new tests included) with zero failures at head.
+    </p>
+  </section>
+</body>
+</html>
