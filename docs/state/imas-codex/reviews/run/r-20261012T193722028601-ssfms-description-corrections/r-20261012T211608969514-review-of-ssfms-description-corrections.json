@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest records no baseline_suite or after_suite gate log, so no baseline/head failure pair exists to subtract",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:2178 (prepare_signal_sources calls sweep_source_enrichment)",
+    "imas_codex/discovery/signals/parallel.py:2170 (sweep_source_enrichment calls propagate_source_enrichment)",
+    "imas_codex/discovery/signals/parallel.py:4427 (the enrichment prompt builder calls glossary_term_reaches)",
+    "imas_codex/discovery/signals/parallel.py:5848 (signal discovery runs prepare_signal_sources)"
+  ],
+  "completed_at": "2026-10-12T21:26:50.205Z",
+  "dispatched_at": "2026-10-12T21:16:20Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_glossary.py",
+      "line": "193",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion \"MATCH (rep:FacilitySignal {id: sg.representative_id})\" in recorded[0] is a prefix of the pre-fix query MATCH (rep:FacilitySignal {id: sg.representative_id})-[:MEMBER_OF]->(sg), so restoring that MEMBER_OF edge leaves the assertion true and the sweep fix unguarded."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "2038",
+      "severity": "follow-on",
+      "text": "follow-on: the propagation queries rebind the source to (sg:SignalSource {representative_id: $rep_id}) -- the change that reaches the seven CS1 members -- and no added assertion fails if it is reverted to (rep)-[:MEMBER_OF]->(sg); test_every_propagated_statement_binds_the_parameters_it_names checks only parameter binding, never the match shape."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html",
+      "line": "221",
+      "severity": "follow-on",
+      "text": "follow-on: the prose says two tests fail against the substring matcher but the recorded negative control (logs/negative_control_substring_matcher.log) shows three failing tests, omitting test_a_term_reaches_across_a_digit_to_letter_turn, which the same commit added."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit from a2069d5aa to b8a47a132 -- nine commits: 1fc59fa52 and 768b7de47 repair the source-binding path and its parameters, 155d152ee and a75130d50 refine the matcher and its test, and five doc/figure commits record the census and draw reach-and-census.svg.",
+    "done_when": "the done_when asks that the boundary test pass while the substring matcher fails it, that no eligible description expand SNU as anything but switching network unit, and that the before/after counts sit in descriptions.html; the recorded gate (8 passed, EXIT=0) and negative control (3 failed, EXIT=1) satisfy the first, census_after_final.json reads 49/0/0/7 for the SNU family and satisfies the second, and the fragment carries the counts.",
+    "goal": "the node goal is to correct the JT-60SA signal descriptions search exposed through a boundary-respecting glossary and a scoped re-enrichment; the commits since the prior review finish the SNU correction by binding a SignalSource by its representative_id (imas_codex/discovery/signals/parallel.py:2038) and by refining the matcher's digit-to-letter turn, and census_after_final.json now reads 49 switching network unit, 0 snubber.",
+    "manifest": "read; it names the head sha b8a47a132, the six changed paths, the gate and negative-control logs by path, the census artifacts, and one landing line.",
+    "write_paths": "read the six declared paths; all five paths in the diff a2069d5aa..b8a47a132 (imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_glossary.py, the two fragments and the figure under docs/figures/signal-search-finds-the-measured-signal/ssfms-description-corrections/) are inside them."
+  },
+  "justifications": {
+    "durability": "the parameter-binding guard at tests/discovery/test_signal_glossary.py:216 reddens on the parameter-restoration regression, but the sweep assertion at line 193 and the propagate rebind at imas_codex 2038 have no assertion that fails when reverted.",
+    "evidence": "the gate log (8 passed, EXIT=0) and the negative control (3 failed, EXIT=1) are recorded and census_after_final.json backs every reach-table figure, but descriptions.html:221 still says two tests fail where the log records three.",
+    "fit": "glossary_term_reaches (imas_codex/discovery/signals/parallel.py:3757) keeps the surrounding module-level style and the stub GraphClient tests match the file's idiom, though the fragment's stale test count is a drift the node's own edit did not correct.",
+    "goal_fidelity": "the SNU correction the prior review left blocking is now complete -- census_after_final.json reads 49 switching network unit against 0 snubber and 0 superconducting unit -- reached by binding the source at imas_codex/discovery/signals/parallel.py:2038.",
+    "reuse": "a search of imas_codex/ for word-boundary and camel-case matching found no existing owner of this capability -- only pattern-specific backslash-b regexes and the spelling tokenizer -- so imas_codex/discovery/signals/parallel.py:3757 is the first owner and the propagation changes extend existing functions rather than fork them.",
+    "scope_discipline": "every path in the diff is inside the six declared write paths, though the drawn figure (docs/figures/signal-search-finds-the-measured-signal/ssfms-description-corrections/reach-and-census.svg) is beyond what the done_when names even though its directory is fenced."
+  },
+  "limitations": [
+    "The census reads the live JT-60SA graph; the after counts were read from the reviewed run's own census_after_final.json (SNU family 49/0/0/7), not re-measured.",
+    "The EFCC family-restricted after counts (182/0/0) in the fragment rest on the older census_family_scope.json, whose SNU half predates the representative_id repair; census_after_final.json records only the all-buckets EFCC split (183/5/15).",
+    "The representative_id propagation and sweep queries were read, not mutated or re-run; the durability finding is a reading of the assertions, not an experiment."
+  ],
+  "node": "review-of-ssfms-description-corrections",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to correct the JT-60SA signal descriptions search exposed through a boundary-respecting glossary and a scoped re-enrichment; the commits since the prior review finish the SNU correction by binding a SignalSource by its representative_id (imas_codex/discovery/signals/parallel.py:2038) and by refining the matcher's digit-to-letter turn, and census_after_final.json now reads 49 switching network unit, 0 snubber.\nVERDICT done_when: the done_when asks that the boundary test pass while the substring matcher fails it, that no eligible description expand SNU as anything but switching network unit, and that the before/after counts sit in descriptions.html; the recorded gate (8 passed, EXIT=0) and negative control (3 failed, EXIT=1) satisfy the first, census_after_final.json reads 49/0/0/7 for the SNU family and satisfies the second, and the fragment carries the counts.\nVERDICT write_paths: read the six declared paths; all five paths in the diff a2069d5aa..b8a47a132 (imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_glossary.py, the two fragments and the figure under docs/figures/signal-search-finds-the-measured-signal/ssfms-description-corrections/) are inside them.\nVERDICT manifest: read; it names the head sha b8a47a132, the six changed paths, the gate and negative-control logs by path, the census artifacts, and one landing line.\nVERDICT diff: read commit by commit from a2069d5aa to b8a47a132 -- nine commits: 1fc59fa52 and 768b7de47 repair the source-binding path and its parameters, 155d152ee and a75130d50 refine the matcher and its test, and five doc/figure commits record the census and draw reach-and-census.svg.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:2178 (prepare_signal_sources calls sweep_source_enrichment), imas_codex/discovery/signals/parallel.py:2170 (sweep_source_enrichment calls propagate_source_enrichment), imas_codex/discovery/signals/parallel.py:4427 (the enrichment prompt builder calls glossary_term_reaches), imas_codex/discovery/signals/parallel.py:5848 (signal discovery runs prepare_signal_sources)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the SNU correction the prior review left blocking is now complete -- census_after_final.json reads 49 switching network unit against 0 snubber and 0 superconducting unit -- reached by binding the source at imas_codex/discovery/signals/parallel.py:2038.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate log (8 passed, EXIT=0) and the negative control (3 failed, EXIT=1) are recorded and census_after_final.json backs every reach-table figure, but descriptions.html:221 still says two tests fail where the log records three.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the diff is inside the six declared write paths, though the drawn figure (docs/figures/signal-search-finds-the-measured-signal/ssfms-description-corrections/reach-and-census.svg) is beyond what the done_when names even though its directory is fenced.\nSCORE durability: 8\nJUSTIFICATION durability: the parameter-binding guard at tests/discovery/test_signal_glossary.py:216 reddens on the parameter-restoration regression, but the sweep assertion at line 193 and the propagate rebind at imas_codex 2038 have no assertion that fails when reverted.\nSCORE fit: 17\nJUSTIFICATION fit: glossary_term_reaches (imas_codex/discovery/signals/parallel.py:3757) keeps the surrounding module-level style and the stub GraphClient tests match the file's idiom, though the fragment's stale test count is a drift the node's own edit did not correct.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of imas_codex/ for word-boundary and camel-case matching found no existing owner of this capability -- only pattern-specific backslash-b regexes and the spelling tokenizer -- so imas_codex/discovery/signals/parallel.py:3757 is the first owner and the propagation changes extend existing functions rather than fork them.\nFINDING tests/discovery/test_signal_glossary.py:193 follow-on: the assertion \"MATCH (rep:FacilitySignal {id: sg.representative_id})\" in recorded[0] is a prefix of the pre-fix query MATCH (rep:FacilitySignal {id: sg.representative_id})-[:MEMBER_OF]->(sg), so restoring that MEMBER_OF edge leaves the assertion true and the sweep fix unguarded.\nFINDING imas_codex/discovery/signals/parallel.py:2038 follow-on: the propagation queries rebind the source to (sg:SignalSource {representative_id: $rep_id}) -- the change that reaches the seven CS1 members -- and no added assertion fails if it is reverted to (rep)-[:MEMBER_OF]->(sg); test_every_propagated_statement_binds_the_parameters_it_names checks only parameter binding, never the match shape.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html:221 follow-on: the prose says two tests fail against the substring matcher but the recorded negative control (logs/negative_control_substring_matcher.log) shows three failing tests, omitting test_a_term_reaches_across_a_digit_to_letter_turn, which the same commit added.\n",
+  "review_run_id": "r-20261012T211608969514-review-of-ssfms-description-corrections",
+  "review_scope": "Independent review of the ssfms-description-corrections node (plan signal-search-finds-the-measured-signal section 10), covering only the nine commits gained since the prior review at a2069d5aa: the representative_id source-binding repair and its parameter restoration, the glossary digit-to-letter turn, and the census/figure record. Read-only from outside the reviewed worktree: the diff was read from the shared object store, the cited gate and negative-control logs and census_after_final.json were opened, and the reviewed run's own manifest was read; no test was re-run.",
+  "reviewed_base_sha": "a2069d5aa870cd634beac57e47f565ac5f1ae401",
+  "reviewed_commits": [
+    "1fc59fa5227a8ea603834fa1d1591d4d5077b1c4",
+    "155d152eeeb187f9ee7e78cb879d29a152c2585a",
+    "768b7de47c5aa5d4ef5e3d19e00919051e6f7b97",
+    "a75130d5072fccabb8d64563100c65a2c3b272b5",
+    "b1b08f9cb56842bec21792bc6c6cd2d9322a434d",
+    "66b8deea1ec1ae167f681fbff4e60185a39f6b7a",
+    "1fae6766460c52facc074aa3a15a48bf2557dafd",
+    "585d69a40f9762c79e09757f8b506ae7556c38e5",
+    "b8a47a1324c52dc22c51838c2c8861e3fb437d5d"
+  ],
+  "reviewed_head_sha": "b8a47a1324c52dc22c51838c2c8861e3fb437d5d",
+  "reviewed_run_id": "r-20261012T193722028601-ssfms-description-corrections",
+  "reviewer": "review-of-ssfms-description-corrections",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:24:46.595651+00:00",
+  "total": 96,
+  "verification_logs": []
+}

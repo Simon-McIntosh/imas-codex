@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191">
 </head>
@@ -487,6 +487,9 @@
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261012T201711013933-review-of-ssfms-description-corrections" data-who="reckon-build" data-when="2026-10-12T20:29:36.564Z">
     <div class="r-comment-body"><p>independent review of ssfms-description-corrections (base 78397b48f, head a2069d5aa) stored under the review store — six dimensions parsed (goal_fidelity 16, evidence 17, scope_discipline 20, durability 19, fit 17, reuse 20; total 109), six item verdicts, one blocking finding (seven CS1 signals still read snubber (SNU), so the done-when's SNU clause is unmet at 7 of 56) and one follow-on (the landing fragment names SNU twice and omits FPPCC); added_failure_count unmeasured because the reviewed manifest names no baseline gate log</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261012T211608969514-review-of-ssfms-description-corrections" data-who="reckon-build" data-when="2026-10-12T21:26:50.205Z">
+    <div class="r-comment-body"><p>reviewed a2069d5aa..b8a47a132 (nine commits gained since the prior review) and stored a parsed six-dimension record -- goal_fidelity 18, evidence 15, scope_discipline 18, durability 8, fit 17, reuse 20 (total 96); no blocking finding: the SNU correction the prior review left blocking is complete (census_after_final.json 49 switching network unit, 0 snubber), the gate (8 passed EXIT=0) and negative control (3 failed EXIT=1) are recorded, but three follow-on findings stand -- the sweep assertion at tests/discovery/test_signal_glossary.py:193 and the propagate rebind at imas_codex/discovery/signals/parallel.py:2038 have no assertion that fails when reverted, and descriptions.html:221 undercounts the negative-control failures.</p></div>
 </div>
 </section>
 </main>
