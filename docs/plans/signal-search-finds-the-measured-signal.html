@@ -22,8 +22,9 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-10-12">
+<meta name="plan-commits" content="045d63386">
 </head>
 <body>
   <main class="plan-doc">
@@ -149,7 +150,7 @@
       the fleet allocation, not the login node.
     </p>
     <p>
-      The section is two nodes. The first writes the held-out questions. Its worker gets a brief, not this plan, because
+      The section is three nodes. The first writes the held-out questions. Its worker gets a brief, not this plan, because
       §1 and its figure show the orderings. It may enumerate the eligible population by Cypher over categories, data names
       and descriptions. It must not run any search tool or open the prototype directory. It writes at least eight
       questions, so that six survive if pooled labelling finds one ill-posed, spread over at least four EDDB categories,
@@ -450,6 +451,11 @@
     <h4 class="r-gate-measure">JET FacilitySignals re-enriched by the Jev-era signal pipeline, with enriched_at at or after 2026-10-11T19:08:21Z</h4>
     <p class="r-gate-required-evidence">a census receipt counting JET FacilitySignals enriched after the cutover, recorded in this plan's evidence fragment for §11</p>
     </div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20261012T1938-s3-heldout" data-who="reckon-build" data-when="2026-10-12T19:38:00Z">
+    <div class="r-comment-body"><p>First of three nodes landed: <code>tests/llm/fixtures/signal_search_questions.json</code> (commit <code>045d63386</code>, merged in <code>25d8a7235</code>) holds 11 held-out questions written by a worker briefed without this plan, the prototype data or any search tool, with 65 grade-3 seeds across ten EDDB categories (CAM, DHC, GAS, MAG, N2GAS, PSRC, QMS, SXR, TCIFW, VV). All 65 seeds are eligible; no query carries a facility name or any of the 87 category codes; both checks fail on a mutated copy. The harness and labelling nodes remain.</p></div>
+</div>
 </section>
 </main>
 </body>
