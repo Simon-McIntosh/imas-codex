@@ -4,50 +4,61 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-integrity-backlog">
-  <meta name="plan-title"     content="Standard Name Integrity Backlog, Parked Behind The WEST Release">
-  <meta name="plan-summary"   content="The live residue of sixteen retired standard-name plans, one row per open item, deferred until the WEST prototype ships.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="mid">
-  <meta name="plan-effort-hours" content="40">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-integrity-backlog">
+  <meta name="plan-title" content="Standard Name Integrity Backlog, Fixed Before The WEST Release">
+  <meta name="plan-summary" content="Residue of sixteen retired standard-name plans, re-confirmed on the live graph and fixed before the WEST release, whose path several rows sit on.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort-hours" content="40.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="standard-names">
-  <meta name="plan-after"     content="sn-west-prototype-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;}">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-10-12">
+<meta name="plan-sprint" content="S18">
+<meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
 <body>
   <main class="plan-doc">
     <header>
-      <p class="eyebrow">Plan &middot; standard names &middot; backlog, unscheduled</p>
-      <h1>The integrity backlog, parked</h1>
+      <p class="eyebrow">Plan &middot; standard names &middot; S18, ahead of the WEST release</p>
+      <h1>The integrity backlog, fixed before the release</h1>
       <p class="lead">
         From August to late September the standard-name work was mostly about the machinery
         that manages names: lifecycle axes, provenance, scalar mirrors, deletion guards and
         repair receipts. Sixteen plans carried that work, and between them they held 53 open
-        followups while the WEST batch waited. The guards that mattered landed. What remains
-        is real but not urgent, so it is gathered here, one row per item, and deferred until
-        the WEST prototype ships.
+        followups while the WEST batch waited. The guards that mattered most landed. What remains
+        is gathered here, one row per item. The lead ruled on 2026-10-12 that it is worked
+        before the WEST release, not after it.
       </p>
     </header>
 
-    <h2 id="s1">§1 — Why this is parked rather than worked</h2>
+    <h2 id="s1">§1 — Why it comes before the release</h2>
     <p>
-      The portfolio review of 2026-10-12 found no standard-name commit after 2026-09-21. It
-      also found the WEST release plan at 538 KB and 293 commits with thirteen open
-      followups, half of them about release tooling rather than the release. Every deferred
-      row below was read against its source plan and kept only if it describes a defect or
-      decision that still exists. Each row names the plan and followup it came from, so the
-      full measurement is one click away in that plan's frozen text. When the WEST prototype
-      ships, this plan is re-sprinted, and each row is re-confirmed against the live graph
-      before any node is dispatched, since adjacent work has fixed recorded defects before.
+      The portfolio review of 2026-10-12 first parked this residue behind the WEST release, to
+      keep a one-week release in reach. The lead reversed that the same day. Several rows sit
+      on the path the release itself takes. WEST's name repairs and the grouping plan's synonym
+      rulings go through <code>sn edit</code> and <code>sn supersede</code>. The fold guard
+      reads history where it means the present, and four sanctioned paths refuse an orphaned
+      identity's state (§4, §2). The restore command can re-arm the origin value that caused a
+      deletion, and 334 live names are labelled scaffolding while carrying reviewed
+      documentation (§2). A catalog built on machinery with those holes would be released on
+      trust rather than on evidence.
+    </p>
+    <p>
+      Every row below was read against its source plan and kept only if it described a
+      defect or decision that still existed. Each row names the plan and followup it came
+      from, so the full measurement is one click away in that plan's frozen text. The
+      measurements are weeks old, and adjacent work has fixed recorded defects before, so no
+      row is dispatched as written: §6 re-confirms every row on the live graph first.
     </p>
     <p>
       A row needed by the WEST release has already moved to
@@ -105,19 +116,24 @@
       </tbody>
     </table>
 
+    <h2 id="s6">§6 — First: re-confirm every row on the live graph</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Before any repair is dispatched, re-measure every item named in §2 to §4 against the live graph and the current tree. This is read-only: no graph write, no code change. It needs Neo4j, so it runs as an execution-capable node on a compute partition, never as a review or investigate node. Each item gets one verdict:</p><ul><li><strong>still true</strong>, with the live count or the failing command that shows it;</li><li><strong>fixed</strong>, naming the commit or the measurement that shows it gone;</li><li><strong>changed</strong>, with both the recorded and the live figure.</li></ul><p>Each item that survives is assigned to one proposed repair section with its write paths, its gate and an effort estimate. Items that touch a path the release takes come first: anything reached through <code>sn edit</code>, <code>sn supersede</code>, the restore command, the fold guard or the export. An item that is new coverage rather than a correctness defect (the MAST source manifest, the 1,268-source composition pass, upstream Data Dictionary filings) is marked as such and listed for the lead's ruling. The worker does not defer it.</p><p><strong>Done when:</strong> <code>docs/evidence/fragments/sn-integrity-backlog/row-census.html</code> holds one row per named item, with its verdict, the query or command that produced it, and its proposed section. The census is shown able to see a fix. The <code>*_density_at_pedestal_top</code> family, rebuilt on 2026-09-09, reads present, so the restore row reads changed rather than still true. It is also shown able to see a defect: <code>schema_digest</code> is still absent from the tree. Every query names its row set and is bounded under ten seconds. The coordinator turns the surviving rows into implementable sections of this plan, each gated, before any repair node is dispatched.</p>
+
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-sib-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="orchestrator"
-               data-written-by="reckon-review" data-written-at="2026-10-12"
-               data-recommends-skill="/reckon-build sn-integrity-backlog">
-        <h4 class="r-fu-title">After WEST ships: re-confirm every row, then re-sprint what survives</h4>
-        <div class="r-fu-body">
-          <p>Do not dispatch from this table as written. Each row is a pointer to a measurement that is weeks old. Re-measure it on the live graph, drop what adjacent work has fixed, and turn what remains into sections of a new sprint.</p>
-        </div>
-        <pre class="r-fu-prompt">/reckon-build sn-integrity-backlog</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sib-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-integrity-backlog" data-resolved-at="2026-10-12T07:32:34+00:00" data-resolved-by="Simon McIntosh">
+    <h4 class="r-fu-title">After WEST ships: re-confirm every row, then re-sprint what survives</h4>
+    <div class="r-fu-body"><p>Do not dispatch from this table as written. Each row is a pointer to a measurement that is weeks old. Re-measure it on the live graph, drop what adjacent work has fixed, and turn what remains into sections of a new sprint.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-integrity-backlog</pre>
+    <p class="r-fu-outcome">Superseded by the lead's 2026-10-12 ruling that this backlog comes before the WEST release. The re-confirmation it asked for is now §6, which runs first in S18 and is followed by f-sib-002.</p>
+    </article>
+<article class="r-fu" data-id="f-sib-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="Simon McIntosh" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-integrity-backlog §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-confirm every row first, then section what survives</h4>
+    <div class="r-fu-body"><p>Build §6 before anything else in this plan. It is read-only and needs the live graph, so it goes to an execution-capable node on a compute partition. When its census lands, the coordinator turns each surviving row into a gated, implementable section. Rows on the release path (<code>sn edit</code>, <code>sn supersede</code>, the restore command, the fold guard and the export) come first, and the grouping plan's synonym folds in §4 wait on the fold rows. New-coverage rows go to the lead for a ruling.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-integrity-backlog §6</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
