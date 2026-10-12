@@ -85,6 +85,11 @@
     <p>Cause: three export fixtures predated two intended refusals, the producing-source predicate (<code>b161235bb</code>) and the manifest-generability refusal (<code>e0c2d5ef3</code> among others). Restoring the old predicate in a scratch copy turned the seven tests green, which confirmed it. The fixtures in <code>test_export_exclusion_ledger.py</code>, <code>test_export_release_holds.py</code> and <code>test_docs_review_eligibility.py</code> now carry producing-source evidence, and the seven pass at head. No product code changed. Merge <code>3743c2aa9</code>. Independent review 109/120. Its one added failure id, <code>test_review_release.py::test_pr_target_fork_uses_origin_slug</code>, is a load-dependent timeout in a file this node did not touch; it passes in isolation, where a different test times out instead (§26). One assertion in the ledger test compares <code>rows</code> with itself.</p><p>The 47-file export set at head still fails 24 tests and errors 3, against 32 failures at base: 12 in <code>test_review_release.py</code> (§26) and 15 across eight export and catalog files (§25).</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-export-tests-red">sib-export-tests-red</a>.</p>
   </section>
 
+  <section id="s21-partial">
+    <h2>§21 — two of three scalar-only names have their signed edge</h2>
+    <p>On the live graph, the signed supersede path wrote receipt-stamped <code>HAS_SUCCESSOR</code> edges for <code>flux_due_to_thermal_fusion</code> and <code>lower_energy</code>; <code>HAS_SUCCESSOR</code> went from 48 to 50. The preview admitted 2 of 3 rows, the apply changed 2 with 4 persistent writes, and the manifest's sha256 is <code>38c5ce50e4fb2ce797eca34b11c00696cfd1aa4be4e6f966c7a5c30361489279</code>. The structural-legitimacy guard refused the third, <code>area_of_flux_surface</code>, with "target has a live structural child": although superseded, it still parents three accepted names through <code>HAS_PARENT</code>. The second dry run lists that one name. Manifest, receipt and both dry runs are in the worker record. Merge <code>8511a72f0</code>; the run is held open and resumable for the decision below.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill">sib-scalar-only-backfill</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>

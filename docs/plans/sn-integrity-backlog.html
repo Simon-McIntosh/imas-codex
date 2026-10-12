@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="61">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -344,6 +344,9 @@
 </div>
 <div class="r-comment" data-section="s24" data-id="c-run-r-20261012T210825835612-review-of-sib-export-tests-red" data-who="reckon-build" data-when="2026-10-12T21:19:44.471Z">
     <div class="r-comment-body"><p>Independent review of r-20261012T195617718658-sib-export-tests-red complete: goal_fidelity 18, evidence 17, scope_discipline 20, durability 15, fit 19, reuse 20 (total 109); the seven export tests are stale fixtures repaired without a product change, all inside the declared write paths; two follow-on findings recorded (a self-comparing rows key, and one load-fragile added failure id).</p></div>
+</div>
+<div class="r-comment" data-section="s21" data-id="c-run-sib-scalar-only-backfill" data-who="reckon-build" data-when="2026-10-12T21:48:00Z">
+    <div class="r-comment-body"><p>Two of three signed edges written (merge <code>8511a72f0</code>). <code>area_of_flux_surface</code> is refused by the structural-legitimacy guard: it is superseded but still parents three accepted names. Decision for the lead: reparent those three children to its successor first and then sign its edge, or keep its scalar and exclude it from §16's removal. Until then §21 and §16 stay open, and the run is held resumable. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s21-partial">evidence</a></p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
