@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -302,6 +302,9 @@
 </div>
 <div class="r-comment" data-section="s23" data-id="c-run-r-20261012T204621537278-review-of-sib-dual-bound-no-retry" data-who="reckon-build" data-when="2026-10-12T20:57:12.036Z">
     <div class="r-comment-body"><p>independent review of r-20261012T202101462884-sib-dual-bound-no-retry stored at the run-keyed review path and its head-keyed twin</p></div>
+</div>
+<div class="r-comment" data-section="s23" data-id="c-run-sib-dual-bound-no-retry" data-who="reckon-build" data-when="2026-10-12T21:02:00Z">
+    <div class="r-comment-body"><p>Compose withholds a live dual-bound source without spending an attempt (merge <code>b9c128a92</code>); review 101/120. Open: a live predecessor with a retired successor still takes the retried path, and the source-id rule is duplicated. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s23-no-retry">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s20" data-id="c-run-sib-signed-supersede-edge" data-who="reckon-build" data-when="2026-10-12T20:30:00Z">
     <div class="r-comment-body"><p>The signed supersede writes a receipt-stamped successor edge and requires it (merge <code>0d94713db</code>); review 112/120. §20 stays open until the postcondition counts every successor edge rather than grouping by receipt. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s20-edge">evidence</a></p></div>
