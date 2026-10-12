@@ -1,0 +1,56 @@
+<!-- Landing record: one per-call unit shared by both decision entry points, 2026-10-12.
+     Node judgment-per-call-unit. Base revision 1c099e9badd6806e335d4249de7e9e32531094e4. -->
+<section id="judgment-per-call-unit" data-reckon="evidence">
+  <h2 id="judgment-per-call-unit-heading">One per-call unit for both decision entry points</h2>
+
+  <p id="judgment-per-call-unit-summary">
+    <code>decide_one</code> and <code>decide_batch</code> each carried their own
+    copy of the per-call work — make the call, classify the exception, book the
+    cost through <code>_book_cost</code> — so the two could drift in how a fault
+    is read. Both now rest on one unit,
+    <code>ima_codex/discovery/base/judgment.py:_settle_call</code>, which
+    performs the call, classifies its outcome (see below). Each entry point keeps only its own policy
+    on top of that classification: the batch maps both faults to
+    <code>None</code>; the single-state caller raises the malformed answer
+    (<code>DecisionsValidationError</code>) and maps the transport fault to
+    <code>None</code>. Both entry points' behaviour is unchanged.
+  </p>
+
+  <p id="judgment-per-call-unit-classification">
+    The classification is a three-value <code>CallStatus</code> — <code>OK</code>,
+    <code>MALFORMED</code> (a <code>DecisionsValidationError</code>), and
+    <code>TRANSPORT</code> (any other failure) — returned alongside the answers
+    and reported cost in a <code>CallOutcome</code>. The batch's async transport
+    awaits and captures (<code>_await_call</code>) and re-presents the outcome
+    to the shared unit (<code>_resume</code>); neither adapter classifies
+    anything. Cost booking moved from a single summed entry to a per successful
+    call; the tracker's accumulated step total is identical.
+  </p>
+
+  <h3 id="judgment-per-call-unit-gates-heading">Gates</h3>
+
+  <p id="judgment-per-call-unit-gates">
+    Gate covers the judgment-core suite and every test file that imports the
+    module: <code>tests/discovery/test_judgment.py</code>,
+    <code>tests/ids/test_candidate_judgment.py</code>,
+    <code>tests/ids/test_candidates.py</code>,
+    <code>tests/discovery/test_decisions_key_skip.py</code>,
+    <code>tests/llm/test_search_tools.py</code>,
+    <code>tests/graph/test_domain_queries.py</code>,
+    <code>tests/ids/test_slot_context.py</code>,
+    <code>tests/discovery/test_path_description.py</code>, and
+    <code>tests/discovery/test_enrichment_context_rerank.py</code>.
+    Baseline: 192 passed, 8 skipped, 0 failed. After: 193 passed, 8 skipped,
+    0 failed — the added test is this node's, no added failures.
+  </p>
+
+  <h3 id="judgment-per-call-unit-negative-control-heading">Negative control</h3>
+
+  <p id="judgment-per-call-unit-negative-control">
+    Making the shared unit classify a malformed answer as a transport fault
+    turns the four-outcome test red: exit 1, with
+    <code>test_both_entry_points_share_one_fault_classification</code> failing
+    on <code>DID NOT RAISE DecisionsValidationError</code> — the single-state
+    caller stopped raising. The source was restored and the test passes again.
+  </p>
+</section>

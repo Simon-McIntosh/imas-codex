@@ -21,7 +21,8 @@ import asyncio
 import inspect
 import logging
 from collections.abc import Callable, Mapping, Sequence
-from typing import Any
+from enum import Enum
+from typing import Any, NamedTuple
 
 from imas_codex.discovery.base.llm import (
     DecisionsValidationError,
@@ -57,6 +58,62 @@ def _book_cost(cost: Any | None, step: str, spent: float) -> None:
         cost.add(step, spent, 0)
 
 
+class CallStatus(Enum):
+    """How one decisions call ended, before an entry point applies its policy.
+
+    A *malformed answer* is deterministic — the endpoint returned a body that
+    violates the question contract — so it is never retried or read as an
+    absent judgement. A *transport fault* is any other failure of the call.
+    """
+
+    OK = "ok"
+    MALFORMED = "malformed"
+    TRANSPORT = "transport"
+
+
+class CallOutcome(NamedTuple):
+    """One decisions call, settled: its status and, when OK, its result.
+
+    ``fault`` carries the exception a non-OK call raised, so a caller that
+    rejects a malformed answer re-raises the error the call layer produced
+    rather than a freshly built one.
+    """
+
+    status: CallStatus
+    answers: dict[str, Any] | None
+    spent: float
+    fault: BaseException | None
+
+
+def _settle_call(
+    call: Callable[[], tuple[dict[str, Any], float]],
+    *,
+    cost: Any | None,
+    step: str,
+) -> CallOutcome:
+    """Make one decisions call, classify its fault, and book its cost.
+
+    The one per-call unit both entry points rest on. ``call`` performs the
+    transport — ``call_decisions`` for the synchronous caller, an awaited
+    ``acall_decisions`` for the batch — and returns ``(answers, spent)``. This
+    unit is the only place a fault is classified, so the two entry points
+    cannot disagree on whether a failure is a malformed answer or a transport
+    fault, and the only place a reported cost is booked, so neither can drop
+    the spend. A successful call's cost is added to ``cost`` under ``step``; a
+    failed call books nothing. Each entry point applies its own policy to the
+    returned status: the batch maps both faults to ``None``, the single-state
+    caller raises the malformed answer and maps the transport fault to ``None``.
+    """
+    try:
+        answers, spent = call()
+    except DecisionsValidationError as exc:
+        return CallOutcome(CallStatus.MALFORMED, None, 0.0, exc)
+    except Exception as exc:  # noqa: BLE001 - a failed judgement is data
+        return CallOutcome(CallStatus.TRANSPORT, None, 0.0, exc)
+    _book_cost(cost, step, spent)
+    return CallOutcome(CallStatus.OK, answers, spent, None)
+
+
 def decide_one(
     model: str,
     state: Mapping[str, Any],
@@ -69,12 +126,15 @@ def decide_one(
     """Judge a single state, returning ``None`` when the call itself fails.
 
     The synchronous single-state counterpart of :func:`decide_batch` for a
-    caller that judges one item and needs its answer now. It differs from the
-    batch in one deliberate way: a malformed answer raises
-    :class:`DecisionsValidationError` rather than being swallowed, because a
-    contract violation is deterministic and must be rejected, never mistaken
-    for a retryable transport fault. Any other failure returns ``None``, so a
-    caller that ranks rather than gates leaves the item unjudged for a retry.
+    caller that judges one item and needs its answer now. The call, its fault
+    classification and its cost booking are the shared unit's (:func:`_settle_call`);
+    this entry point only applies the single-state policy on top of that
+    classification. It differs from the batch in one deliberate way: a
+    malformed answer raises :class:`DecisionsValidationError` rather than being
+    swallowed, because a contract violation is deterministic and must be
+    rejected, never mistaken for a retryable transport fault. Any other failure
+    returns ``None``, so a caller that ranks rather than gates leaves the item
+    unjudged for a retry.
 
     Args:
         model: Decisions model id.
@@ -89,15 +149,18 @@ def decide_one(
         The validated answers keyed by question name, or ``None`` when the
         transport failed.
     """
-    try:
-        answers, spent = call_decisions(model, state, questions, service=service)
-    except DecisionsValidationError:
-        raise
-    except Exception as exc:  # noqa: BLE001 - a failed judgement is data
-        logger.warning("decision call failed: %s", exc)
+    outcome = _settle_call(
+        lambda: call_decisions(model, state, questions, service=service),
+        cost=cost,
+        step=step,
+    )
+    if outcome.status is CallStatus.MALFORMED:
+        assert outcome.fault is not None
+        raise outcome.fault
+    if outcome.status is CallStatus.TRANSPORT:
+        logger.warning("decision call failed: %s", outcome.fault)
         return None
-    _book_cost(cost, step, spent)
-    return answers
+    return outcome.answers
 
 
 def decisions_key_present() -> bool:
@@ -128,6 +191,40 @@ def decisions_key_absent_reason() -> str | None:
     except ValueError as exc:
         return str(exc)
     return None
+
+
+async def _await_call(
+    call: Any,
+) -> tuple[dict[str, Any] | None, float, BaseException | None]:
+    """Await one decisions call, returning its result or its fault as data.
+
+    The transport half of the batch's per-call unit. It awaits and captures
+    and classifies nothing, so the fault reaches :func:`_settle_call` — the one
+    place a fault is classified — rather than being read here. A cancellation
+    is a ``BaseException`` and is left to propagate, so it is never mistaken
+    for a transport fault.
+    """
+    try:
+        answers, spent = await call
+    except Exception as exc:  # noqa: BLE001 - the fault is classified downstream
+        return None, 0.0, exc
+    return answers, spent, None
+
+
+def _resume(
+    answers: dict[str, Any] | None,
+    spent: float,
+    fault: BaseException | None,
+) -> tuple[dict[str, Any], float]:
+    """Re-present an awaited call's outcome to :func:`_settle_call` as a thunk.
+
+    A captured fault is re-raised here so the shared unit — and not this
+    adapter — decides whether it is a malformed answer or a transport fault.
+    """
+    if fault is not None:
+        raise fault
+    assert answers is not None
+    return answers, spent
 
 
 async def decide_batch(
@@ -173,9 +270,14 @@ async def decide_batch(
 
     semaphore = asyncio.Semaphore(max(1, concurrency))
 
-    async def _judge(state: Mapping[str, Any]) -> DecisionResult:
+    async def _judge(state: Mapping[str, Any]) -> CallOutcome:
         async with semaphore:
-            return await acall_decisions(model, state, questions, service=service)
+            answers, spent, fault = await _await_call(
+                acall_decisions(model, state, questions, service=service)
+            )
+            return _settle_call(
+                lambda: _resume(answers, spent, fault), cost=cost, step=step
+            )
 
     tasks = [asyncio.ensure_future(_judge(state)) for state in states]
     results: list[DecisionResult | None] = [None] * len(tasks)
@@ -186,20 +288,19 @@ async def decide_batch(
     for index, task in enumerate(tasks):
         if task not in done:
             continue
-        try:
-            answers, spent = task.result()
-        except Exception as exc:  # noqa: BLE001 - a failed judgement is data
-            logger.warning("decision batch item %d failed: %s", index, exc)
+        outcome = task.result()
+        if outcome.status is not CallStatus.OK:
+            logger.warning("decision batch item %d failed: %s", index, outcome.fault)
             continue
-        results[index] = (answers, spent)
-        total_cost += spent
+        assert outcome.answers is not None
+        results[index] = (outcome.answers, outcome.spent)
+        total_cost += outcome.spent
 
     for task in pending:
         task.cancel()
     if pending:
         await asyncio.gather(*pending, return_exceptions=True)
 
-    _book_cost(cost, step, total_cost)
     return results, total_cost
 
 
