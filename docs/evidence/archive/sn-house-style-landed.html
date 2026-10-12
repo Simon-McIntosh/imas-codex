@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-house-style-landed">
+  <meta name="plan-title" content="One Definition, One Notation: The Standard Names House Style — landed record">
+  <meta name="plan-summary" content="Closure synthesis for One Definition, One Notation: The Standard Names House Style: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="sn-house-style">
+  <meta name="plan-verdict" content="qualified">
+  <title>One Definition, One Notation: The Standard Names House Style — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>One Definition, One Notation: The Standard Names House Style — landed record</h1>
+  <p>Closure synthesis for One Definition, One Notation: The Standard Names House Style: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2">
+    <h2>§2 — imas-codex reads the conventions registry through ISN</h2>
+    <p>The registry landed in ISN under <code>concept-and-notation-registry</code> §2 (merged at <code>14655e9</code> on imas-standard-names <code>main</code>). Commit <code>4c83ff4</code> adds <code>tests/standard_names/test_conventions_registry.py</code>: <code>select_conventions</code> for <code>flux_surface_averaged_argon_density_at_plasma_boundary</code> returns exactly the concepts <code>flux_surface_averaged</code> and <code>plasma_boundary</code>, the <code>density</code> notation and the density-over-subject template, and the same assertion fails against a scratch registry with the flux-surface-average concept removed (EXIT=1). imas-codex holds no copy of the registry. Independent review 112/120, no added failures.</p>
+  </section>
+
+</main>
+</body>
+</html>

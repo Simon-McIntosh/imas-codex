@@ -21,12 +21,13 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;imas-standard-names:concept-and-notation-registry#s2&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;}">
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-12">
+<meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b">
 </head>
 <body>
   <main class="plan-doc">
@@ -62,7 +63,7 @@
     </p>
 
     <h2 id="s2">§2 — The conventions registry, carried by the grammar</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       The lead ruled on 2026-10-12 that the registry lives in ISN now, beside the vocabularies
       it is keyed by, and is released before the WEST re-cut. Its files, model, loader and
@@ -283,6 +284,11 @@
     <pre class="r-fu-prompt">/reckon-build sn-house-style §2</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-12T16:02:00Z">
+    <div class="r-comment-body"><p>§2 landed: the ISN registry is on its <code>main</code> and imas-codex selects exactly the four expected entries through <code>select_conventions</code> (commit <code>4c83ff4</code>); the removed-entry control fails; review 112/120. §3 authoring and §4 checks can now read it. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s2">evidence</a></p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
