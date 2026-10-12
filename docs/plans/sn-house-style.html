@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -257,7 +257,7 @@
 
     <h2 id="s9">§9 — The score cap records every error finding, from one format</h2>
 <section data-reckon="section" data-id="s9" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>The §5 review found three gaps in the cap in <code>_review_single_batch</code> (<code>imas_codex/standard_names/review/pipeline.py</code>). An entry already scored below acceptance carries an error-severity lint finding that the record drops, although §5 asks every such entry to record it. The one-line finding format is written twice, in <code>_extract_audit_findings</code> and in the cap's extraction, so the prompt and the record can drift. One absence test in <code>tests/standard_names/test_review_findings_cap.py</code> cannot fail. Record the finding on every entry that holds one whether or not the cap changed its score, give the format one owner, and make the absence test bite. The second documentation path (<code>_review_batch_core</code>, reached by tests only today) passes no findings; route the batch's findings there too.</p><p><strong>Done when:</strong> an entry below acceptance with an error finding records it, and the test fails with the recording removed; one function formats a finding line, used by both the prompt and the record; the absence test fails when the template's guard is removed; the review-pipeline tests add no failure against their base.</p>
+<p>The §5 review found three gaps in the cap in <code>_review_single_batch</code> (<code>imas_codex/standard_names/review/pipeline.py</code>). An entry already scored below acceptance carries an error-severity lint finding that the record drops, although §5 asks every such entry to record it. The one-line finding format is written twice, in <code>_extract_audit_findings</code> and in the cap's extraction, so the prompt and the record can drift. One absence test in <code>tests/standard_names/test_review_findings_cap.py</code> cannot fail. Record the finding on every entry that holds one whether or not the cap changed its score, give the format one owner, and make the absence test bite. The second documentation path (<code>_review_batch_core</code>) passes no findings, but it has no audit report of its own and is reached only by tests today, so it is out of scope here; it gains findings when it gains a production caller.</p><p><strong>Done when:</strong> an entry below acceptance with an error finding records it, and the test fails with the recording removed; one function formats a finding line, used by both the prompt and the record; the absence test fails when the template's guard is removed; the review-pipeline tests add no failure against their base.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
