@@ -362,6 +362,17 @@ class TestDiscoveryFunctionSeats:
         monkeypatch.setenv("IMAS_CODEX_DISCOVERY_SCORE_MODEL", "test-score-model")
         assert settings.get_model("discovery-score") == "test-score-model"
 
+    def test_standard_name_judge_seat_resolves_the_pinned_jev_model(self):
+        """The standard-name judge seat resolves its configured model.
+
+        Its own seat so the standard-names stage's model changes independently
+        of the discovery and mapping seats; it pins the same Jev version they
+        do, through the decisions endpoint rather than the chat-routing path.
+        """
+        settings._load_pyproject_settings.cache_clear()
+
+        assert settings.get_model("sn-judge") == "typesafe/jev-1.13"
+
     def test_discovery_seats_register_local_endpoint(self):
         """The discovery seats bind their model to the ambix-local route."""
         settings._load_pyproject_settings.cache_clear()

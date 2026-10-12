@@ -102,7 +102,10 @@ def test_candidate_stage_leaves_every_source_unjudged(monkeypatch, caplog):
         calls.append(state)
         raise AssertionError("the decisions transport must not be entered")
 
-    monkeypatch.setattr(cand, "call_decisions", refusing_transport)
+    # The candidate stage now reaches the sync decisions transport through the
+    # shared judgment owner, so the recorder patches it there; entering it would
+    # still be caught by the assertion on ``calls``.
+    monkeypatch.setattr(judgment, "call_decisions", refusing_transport)
 
     with caplog.at_level(logging.WARNING):
         routed = [cand.route_ids(f"source {i}", gc=_FakeGraph()) for i in range(4)]

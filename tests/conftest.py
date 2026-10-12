@@ -399,6 +399,18 @@ def disable_caching():
             yield
 
 
+@pytest.fixture
+def _decisions_key(monkeypatch):
+    """Set the decisions API key for a test that drives a decisions call.
+
+    Shared by the judgment-core and candidate-judgment suites. The decision core
+    skips its calls when the key is absent, so a test that measures an ordering
+    or a booking rather than the skip requests this fixture; it is not autouse
+    because a suite that asserts the absent-key path needs the variable unset.
+    """
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+
+
 @pytest.fixture(autouse=True)
 def no_live_decisions_requests(monkeypatch):
     """Fail any test that opens the live decisions endpoint.
