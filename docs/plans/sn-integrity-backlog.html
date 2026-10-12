@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -235,6 +235,9 @@
 </div>
 <div class="r-comment" data-section="s15" data-id="c-close-s15" data-who="reckon-build" data-when="2026-10-12T19:30:00Z">
     <div class="r-comment-body"><p>§15 landed: the dual-bound failure reproduces as an anonymous <code>RuntimeError</code> that is retried as transient, held as a strict xfail (merge <code>bb1357ff5</code>); review 111/120. Repair in §23. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s15">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s15" data-id="c-run-r-20261012T185852762530-sib-compose-supersede-dual-bound" data-who="reckon-build" data-when="2026-10-12T19:19:43.331Z">
+    <div class="r-comment-body"><p>§15 — compose supersede over a dual-bound source reproduces: a source bound to two live identities (predecessor and the just-written successor) makes retarget_standard_name_sources&#x27; compare-and-set raise an anonymous RuntimeError (`bindings=[&#x27;example_new_name&#x27;, &#x27;example_old_name&#x27;]`) instead of the adjudicable SourceBindingConflictError, so the hard failure is classified as a transient fault and spends a retry budget; committed as strict xfail in tests/standard_names/test_compose_supersede_dual_bound.py, gate delta 0 added failures.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
