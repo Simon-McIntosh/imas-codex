@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-export-set-red">
+<title>Fifteen export and catalog tests restored by carrying producer topology in their fixtures</title>
+</head>
+<body>
+<main>
+<h1 id="sib-export-set-red-title">The fifteen red export and catalog tests were stale fixtures, not a regression</h1>
+
+<table id="sib-export-set-red-summary">
+<tbody>
+<tr><th>Cause</th><td>All fifteen fixtures build eligibility rows that carry none of the five producing-source topology flags (<code>_has_dd_source_binding</code>, <code>_has_derived_producer</code>, <code>_has_non_derived_producer</code>, <code>_has_live_child</code>, <code>_is_parent</code>). The eligibility classifier withholds such a row at <code>no_producing_source</code> before the branch under test is reached, so the cut either emits nothing the assertion names or is refused wholesale with <code>no_producing_source</code> / <code>fully_excluded_population</code>.</td></tr>
+<tr><th>Introduced by</th><td><code>b161235bb</code> (2026-09-18): the producing-source predicate's key-presence form admitted any candidate carrying none of the flags; it was changed to treat an absent flag as an absent observation, the same repair the catalog-status and validation-observation branches already took. (<code>617fdaca9</code> earlier the same day added the predicate in its key-presence form.) Intended hardening — no product regression.</td></tr>
+<tr><th>Repair</th><td>Fixtures only, no product change (83 insertions, 0 deletions): each synthetic population row now carries the topology the population query projects onto a real row — a Data Dictionary source binding with a non-derived producer.</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-export-set-red-rows">The fifteen, by cause and repair</h2>
+<table id="sib-export-set-red-rows-table">
+<thead><tr><th>Test id</th><th>Observed failure at head</th><th>Cause</th><th>Introduced by</th><th>Repair</th></tr></thead>
+<tbody>
+<tr><td><code>test_export_exit_accounting.py::test_reconciling_cut_passes</code></td><td><code>StopIteration</code>: no <code>exclusion_accounting</code> gate</td><td>every fixture row withheld at <code>no_producing_source</code>; whole population refused</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_exit_accounting.py::test_retired_stage_batch_member_is_counted_not_vanished</code></td><td><code>assert [] == ['emitted_batch_member']</code></td><td>the one live row withheld, so nothing is emitted</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_exit_accounting.py::test_retired_batch_member_without_counter_refuses</code></td><td><code>StopIteration</code>: no accounting gate</td><td>same; cut refused before the gate under test runs</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_exit_accounting.py::test_score_filter_is_applied_to_pipeline_names</code></td><td><code>assert 'below_name_score' in {'no_producing_source'}</code></td><td>withheld at eligibility before the score threshold is reached</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_exit_accounting.py::test_exempt_origin_can_publish_below_declared_min_score</code></td><td><code>assert False</code> on <code>all_gates_passed</code></td><td>exempt row withheld before the auto-accept exemption is reached</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_deprecation.py::TestExportOmitsSupersessionLineage::test_released_entries_contain_no_supersession_lineage</code></td><td>setup error: <code>FileNotFoundError</code> for <code>general.yml</code></td><td>live row withheld, <code>excluded</code> row the only survivor, cut refused</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_deprecation.py::test_export_accounting_still_closes</code></td><td>setup error: <code>FileNotFoundError</code> for <code>general.yml</code></td><td>same fixture gap</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_deprecation.py::test_report_and_manifest_have_no_stub_counter</code></td><td>setup error: <code>FileNotFoundError</code> for <code>general.yml</code></td><td>same fixture gap</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_domain_resolution.py::test_accepted_name_with_source_domain_never_resolves_to_the_bucket</code></td><td><code>assert [] == ['etendue_of_soft_xray_detector']</code></td><td>withheld at eligibility before source-domain resolution</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_domain_resolution.py::test_name_with_no_resolvable_domain_is_reported_not_emitted</code></td><td><code>assert 'no_producing_source' == 'missing_physics_domain'</code></td><td>withheld at eligibility before the domain-resolution stage names its reason</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_status_authority.py::test_draft_graph_status_is_exported_as_draft</code></td><td><code>FileNotFoundError</code> for <code>catalog.yml</code></td><td>single row withheld, cut refused</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_sidecar_surface.py::test_valid_without_observed_validation_is_withheld</code></td><td><code>assert ['electron_temperature','ion_temperature','plasma_density'] == ['electron_temperature','ion_temperature']</code></td><td>the observed row <code>plasma_density</code> withheld too, so it is excluded for the wrong reason</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_export_bound_adjacent.py::test_bound_adjacent_is_distinct_and_ledger_closes</code></td><td><code>assert False</code> on <code>all_gates_passed</code></td><td>all three rows withheld; cut refused before the score ledger runs</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_catalog_status_reconcile.py::test_export_reader_withholds_valid_but_exhausted_names</code></td><td><code>assert [] == ['accepted_valid']</code></td><td>the accepted row withheld at eligibility instead of eligible</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+<tr><td><code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet</code></td><td><code>assert [] == ['independent']</code></td><td>every row withheld before the ordering/cycle stage</td><td><code>b161235bb</code></td><td>fixture update</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-export-set-red-measure">Measure</h2>
+<table id="sib-export-set-red-measure-table">
+<thead><tr><th>Arm</th><th>Scope</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>baseline (base <code>1d5af84bd</code>, worktree)</td><td>the eight export/catalog files, 60 selected</td><td>12 failed, 45 passed, 3 errors, EXIT=1 (63 s)</td></tr>
+<tr><td>before the change (scratch copy of <code>b468bfb5c</code> = <code>b161235bb^</code>, HEAD test files)</td><td>same eight files, 60 selected</td><td>60 passed, EXIT=0 (107 s)</td></tr>
+<tr><td>after (head, worktree, fixtures repaired)</td><td>same eight files, 60 selected</td><td>60 passed, EXIT=0 (116 s)</td></tr>
+<tr><td>negative control (repairs reverted = baseline tree)</td><td>same eight files</td><td>the fifteen named ids fail, EXIT=1</td></tr>
+</tbody>
+</table>
+<p>The before-the-change arm is the identifying measurement: at <code>b161235bb^</code> all sixty pass over the same eight files, so the fifteen regressed at <code>b161235bb</code> and nowhere else. The scratch tree carries no <code>.git</code>, so the arm sets <code>SOURCE_DATE_EPOCH</code> to reach the manifest write; without it the cut raises the provenance-timestamp error and the arm measures nothing about the classifier.</p>
+<p>Logs in the run directory: <code>base_export_set.log</code>, <code>prechange_scratch.log</code> (contaminated by the absent <code>.git</code>), <code>prechange_scratch2.log</code>, <code>head_export_set.log</code>.</p>
+</main>
+</body>
+</html>

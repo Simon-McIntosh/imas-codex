@@ -772,6 +772,16 @@ class TestOrderingCycleDetection:
                 "unit": "1",
                 "physics_domain": "general",
                 "links": [],
+                # The producing-source topology the population query projects
+                # onto every candidate: a Data Dictionary extraction reached
+                # this name directly. Without producer evidence the
+                # eligibility classifier withholds the candidate before the
+                # ordering branches under test are reached.
+                "_has_dd_source_binding": True,
+                "_has_derived_producer": True,
+                "_has_non_derived_producer": False,
+                "_has_live_child": False,
+                "_is_parent": False,
             }
             for name in ("a", "b", "independent")
         ]
