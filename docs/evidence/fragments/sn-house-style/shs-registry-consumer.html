@@ -1,0 +1,25 @@
+<section id="shs-registry-consumer" data-reckon="evidence">
+  <h2 id="shs-registry-consumer-heading">The conventions registry reaches imas-codex through the ISN accessor</h2>
+
+  <p id="shs-registry-consumer-landing">
+    <code>tests/standard_names/test_conventions_registry.py</code> calls
+    <code>imas_standard_names.grammar.terms.select_conventions</code> for
+    <code>flux_surface_averaged_argon_density_at_plasma_boundary</code> and asserts the
+    four entries the parse selects, identified by key alone: the concepts
+    <code>flux_surface_averaged</code> and <code>plasma_boundary</code>, the notation
+    <code>density</code>, and the <code>density</code> template over the
+    <code>subject</code> segment. imas-codex holds no copy of the registry; the entries
+    come from the shipped files under the installed grammar package.
+  </p>
+
+  <p id="shs-registry-consumer-control">
+    The registry is pointed at another directory through the loader's own
+    <code>load_conventions(directory=…)</code> argument — no monkeypatch is needed. The
+    control test builds a scratch copy under <code>tmp_path</code>, deletes the
+    <code>flux_surface_averaged</code> concept entry, and confirms the accessor then
+    returns concepts <code>('plasma_boundary',)</code> alone. Pointing the positive
+    assertion at that scratch registry is the declared mutation, and it fails on
+    <code>concepts</code> — <code>('plasma_boundary',)</code> against
+    <code>('flux_surface_averaged', 'plasma_boundary')</code>.
+  </p>
+</section>
