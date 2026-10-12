@@ -23,6 +23,8 @@
   <title>Mapping Generation Accounts for Every Source | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -84,19 +86,20 @@
     <p>The rules that follow from it:</p>
     <ul>
       <li><strong>Claim:</strong> a source is claimable for an IDS while it has a selected edge into a section that is neither bound nor carries an outcome.</li>
-      <li><strong>Status:</strong> <code>refresh_mapping_status</code> writes <code>validated</code> only when every selected section is <code>bound</code> or <code>declined</code>. An <code>unanswered</code> home leaves the source short of validated, and the validate stage's partial report names each one.</li>
+      <li><strong>Status:</strong> <code>refresh_mapping_status</code> writes <code>validated</code> only when every selected section is <code>bound</code> or <code>declined</code>. An <code>unanswered</code> home leaves the source short of validated.</li>
+      <li><strong>Partial report:</strong> <code>unmapped_selected_sources</code> (<code>imas_codex/ids/workers.py</code>) feeds the validate stage's partial report. Today it names only sources with no binding in the IDS; it now also names every source holding an <code>unanswered</code> home.</li>
       <li><strong>Coverage:</strong> the map stage judges whether an answer covers an assignment. A mapping whose target lies in the section counts, and so does an <code>unmapped</code> entry naming the source. The model's output schema does not change.</li>
     </ul>
     <p>
-      The new edge properties go wherever the <code>MAPPING_CANDIDATE</code> edge's properties are declared: the
-      relationship description in <code>imas_codex/schemas/facility.yaml</code>, and
-      <code>imas_codex/graph/cypher_property_check.py</code> if it adjudicates edge properties. That way the property
-      checker passes the new Cypher.
+      The new edge properties are declared in the <code>MAPPING_CANDIDATE</code> relationship description in
+      <code>imas_codex/schemas/facility.yaml</code>, where the edge's other properties are listed. The property checker
+      resolves node bindings only, so it cannot inspect edge properties. The edited Cypher is proved instead by running
+      each statement under <code>EXPLAIN</code> against the live graph, and by tests that read the written properties back.
     </p>
     <p>
       Node <code>every-selected-home</code>, role implement, 2.5 h. Write paths: <code>imas_codex/ids/workers.py</code>,
       <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/schemas/facility.yaml</code>,
-      <code>imas_codex/graph/cypher_property_check.py</code>, <code>tests/ids/test_every_selected_home.py</code> and
+      <code>tests/ids/test_every_selected_home.py</code> and
       <code>docs/evidence/fragments/mapping-generation-accounts-for-every-source/every-selected-home.html</code>.
       <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> adds no failure
       against its base, and <code>tests/ids/test_every_selected_home.py</code> fails on the base revision and passes on
@@ -107,10 +110,11 @@
       <li>After a second empty answer that home reads <code>unanswered</code>, and the source does not read <code>validated</code>.</li>
       <li>A second section answered with an <code>unmapped</code> entry reads <code>declined</code>, its reason is stored, and the source reads <code>validated</code>.</li>
       <li>A source whose every selected section is bound behaves as it does today.</li>
+      <li><code>unmapped_selected_sources</code> names a source that holds one bound and one <code>unanswered</code> home.</li>
     </ul>
     <p>
-      Every Cypher statement the node edits runs under <code>EXPLAIN</code> against the live graph, and the property
-      checker reports no undeclared property. <strong>Negative control:</strong> restoring the per-IDS claim predicate
+      Every Cypher statement the node edits runs under <code>EXPLAIN</code> against the live graph, and the fragment
+      records each plan. <strong>Negative control:</strong> restoring the per-IDS claim predicate
       makes the re-claim test fail, and the node records that run.
     </p>
 
@@ -133,7 +137,7 @@
       <li>Otherwise the fallback collects every known key that shares a whole <code>_</code>- or <code>:</code>-delimited token sequence with the stripped key.</li>
       <li>Exactly one such key gives that parent.</li>
       <li>None gives no derivation.</li>
-      <li>Several give no derivation. The stage reports the error signal as ambiguous, naming the candidate parent keys, in its log and in the count it returns.</li>
+      <li>Several give no derivation. The stage logs the error signal at WARNING as ambiguous, naming the candidate parent keys. The return type stays <code>list[ValidatedSignalMapping]</code>, which <code>tests/ids/test_error_derivation.py</code> pins.</li>
     </ul>
     <p>
       Node <code>error-parent-is-determined</code>, role implement, 0.75 h. Write paths:
@@ -144,7 +148,7 @@
       things:
     </p>
     <ul>
-      <li>The <code>gasc</code> example derives no binding in either list order, and reports the ambiguity naming both parent keys.</li>
+      <li>The <code>gasc</code> example derives no binding in either list order, and a captured WARNING names both parent keys.</li>
       <li>A unique partial match still derives its binding.</li>
       <li>An exact match is unchanged.</li>
     </ul>
@@ -213,7 +217,9 @@
       <strong>Done when</strong> two runs are recorded.
     </p>
     <ul>
-      <li><code>uv run --no-sync imas-codex imas map run jt-60sa -i magnetics -i pf_active --no-activate</code> completes. Its fragment lists every claimed source with each selected home's section, <code>home_outcome</code> and evidence, beside the source's <code>mapping_status</code>. No home is left without an outcome, and a Cypher count shows no mapping above status <code>generated</code> and none active.</li>
+      <li>Before the run, a Cypher query lists the cohort's sources that hold selected homes in two sections of one IDS; the fragment records the query and its rows. If it returns none, the node stops and reports that, because the repaired path would not be exercised.</li>
+      <li><code>uv run --no-sync imas-codex imas map run jt-60sa -i magnetics -i pf_active --no-activate</code> completes. Its fragment lists every claimed source with each selected home's section, <code>home_outcome</code> and evidence, beside the source's <code>mapping_status</code>. A Cypher count shows no mapping above status <code>generated</code> and none active.</li>
+      <li><strong>Negative control:</strong> the same query before the run shows those homes with no outcome. Any of them still without an outcome after the run fails the proof.</li>
       <li>A candidate pass filtered to <code>magnetics</code> logs a nonzero filtered-out count. The fragment shows, by a before-and-after Cypher count, that it wrote no route outside <code>magnetics</code>.</li>
     </ul>
     <p>
@@ -221,27 +227,27 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="silent-home-answer" data-choice="" data-by="" data-when="" data-recommended="retry-once-then-unanswered" data-recommended-by="coordinator">
-        <p class="r-dec-q">What happens to a selected home whose answer does not account for it?</p>
-        <p class="r-dec-ctx">An explicit unmapped entry with a reason is an answer: it records the home as declined and is never asked again. Silence is different. It may be a dropped batch, a truncated answer or a model that skipped the item. Retrying for ever spends calls on a home the model will not answer; never retrying turns one bad batch into a permanent gap.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="retry-once-then-unanswered">Retry once, then record unanswered</button>
-          <button class="r-opt" data-value="retry-until-cleared">Retry on every pass until an answer arrives</button>
-          <button class="r-opt" data-value="unanswered-at-once">Record unanswered on the first silence</button>
-        </p>
-        <p class="r-dec-rat">Recommended: retry once, then record unanswered. One retry absorbs a dropped or truncated batch. The recorded outcome keeps the home visible in the partial report and out of the claim set until <code>imas map clear</code> resets it.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="silent-home-answer" data-choice="" data-by="" data-when="" data-recommended="retry-once-then-unanswered" data-recommended-by="coordinator">
+    <p class="r-dec-q">What happens to a selected home whose answer does not account for it?</p>
+    <p class="r-dec-ctx">An explicit unmapped entry with a reason is an answer: it records the home as declined and is never asked again. Silence is different. It may be a dropped batch, a truncated answer or a model that skipped the item. Retrying for ever spends calls on a home the model will not answer; never retrying turns one bad batch into a permanent gap.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="retry-once-then-unanswered">Retry once, then record unanswered</button>
+      <button class="r-opt" data-value="retry-until-cleared">Retry on every pass until an answer arrives</button>
+      <button class="r-opt" data-value="unanswered-at-once">Record unanswered on the first silence</button>
+      </p>
+    <p class="r-dec-rat">Recommended: retry once, then record unanswered. One retry absorbs a dropped or truncated batch. The recorded outcome keeps the home visible in the partial report and out of the claim set until imas map clear resets it.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-mgaes-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-12" data-recommends-skill="/reckon-build mapping-generation-accounts-for-every-source">
-        <h4 class="r-fu-title">Repair the three open generation-side findings, then prove them on JT-60SA</h4>
-        <div class="r-fu-body"><p>§2 to §4 are independent repairs; §2 and §4 share <code>imas_codex/ids/workers.py</code> and run one after the other. §5 follows all three.</p></div>
-        <pre class="r-fu-prompt">/reckon-build mapping-generation-accounts-for-every-source</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mgaes-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-12" data-recommends-skill="/reckon-build mapping-generation-accounts-for-every-source" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair the three open generation-side findings, then prove them on JT-60SA</h4>
+    <div class="r-fu-body"><p>§2 to §4 are independent repairs; §2 and §4 share <code>imas_codex/ids/workers.py</code> and run one after the other. §5 follows all three.</p></div>
+    <pre class="r-fu-prompt">/reckon-build mapping-generation-accounts-for-every-source</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

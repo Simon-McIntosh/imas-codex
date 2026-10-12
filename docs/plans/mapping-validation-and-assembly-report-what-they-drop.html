@@ -23,6 +23,8 @@
   <title>Mapping Validation and Assembly Report What They Drop | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -42,7 +44,7 @@
         <tr><td>The assembler converted units a second time after a transform that already converts</td><td>fixed</td><td>—</td></tr>
         <tr><td>The survival filter and <code>all_passed</code> ignored a recorded COCOS error</td><td>fixed</td><td>—</td></tr>
         <tr><td><code>imas map validate</code> never passed the sign-flip set</td><td>fixed</td><td>—</td></tr>
-        <tr><td>Assembly dropped mappings that fit no section prefix and swallowed set failures</td><td>partly fixed: each drop now logs a warning</td><td>§3: the caller still cannot see what was dropped</td></tr>
+        <tr><td>Assembly dropped mappings that fit no section prefix and swallowed set failures</td><td>partly fixed: the nested-path skip and the set failure now log a warning; the outside-section skip is still a bare <code>continue</code></td><td>§3: the caller still cannot see what was dropped</td></tr>
         <tr><td>The transform probe used a scalar and never compared the result with the target</td><td>partly fixed: index expressions retry on an array</td><td>§2: a result whose dimensionality cannot fill the target still passes</td></tr>
         <tr><td>The loader read three mapping properties nothing writes</td><td>fixed</td><td>—</td></tr>
         <tr><td><code>create_imas_mapping</code> writes <code>status='active'</code> at creation; only a test calls it</td><td>open</td><td>§5</td></tr>
@@ -95,22 +97,23 @@
 <section data-reckon="section" data-id="s3" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
       <code>IDSAssembler._apply_mappings</code> (<code>imas_codex/ids/assembler.py</code>) skips three kinds of active
-      mapping, and now logs a warning for each:
+      mapping:
     </p>
     <ul>
-      <li>one whose target lies outside the section;</li>
-      <li>one outside the configured nested path;</li>
-      <li>one whose final set fails.</li>
+      <li>one whose target lies outside the section, with a bare <code>continue</code> and no log at all;</li>
+      <li>one outside the configured nested path, now logged as a warning;</li>
+      <li>one whose final set fails, now logged as a warning.</li>
     </ul>
     <p>
-      A warning in a log still leaves the built IDS silently missing those fields. The extraction path reports success,
+      A warning in a log still leaves the built IDS silently missing those fields, and the first kind leaves no trace. The extraction path reports success,
       and the commands that call the assembler (<code>imas_codex/cli/imas_dd.py</code>, the IDS show and export
       commands) print nothing about it.
     </p>
     <p>
-      The repair makes every skip part of the result. The assembler collects one entry per unplaced mapping, giving the
-      mapping id, the target path and the reason (<code>outside_section</code>, <code>outside_nested_path</code> or
-      <code>set_failed</code> with the error text), and exposes the list after <code>assemble()</code>. The CLI commands
+      The repair makes every skip part of the result. The assembler collects one entry per unplaced item and exposes the list after
+      <code>assemble()</code>. Each entry carries the reason (<code>outside_section</code>, <code>outside_nested_path</code>,
+      <code>set_failed</code> with the error text, or §4's <code>missing_member</code>) and the target path. A mapping's
+      entry also carries the mapping id; a gap carries the member number instead, because no mapping exists for it. The CLI commands
       print the count and the entries, and how a non-empty list ends an export is the decision below.
     </p>
     <p>
@@ -177,33 +180,33 @@
     </p>
     <ul>
       <li><code>rg -n "create_imas_mapping" imas_codex tests</code> prints nothing.</li>
-      <li><code>rg -n "status = 'active'|status='active'" imas_codex/ids</code> lists only the guarded activation statement in <code>imas_codex/cli/map.py</code>.</li>
+      <li><code>rg -n "m\.status = 'active'" imas_codex/ids/graph_ops.py</code> prints only the read filter <code>WHERE m.status = 'active'</code> near line 77. On the base revision it also prints the creation write near line 333.</li>
     </ul>
     <p>
       <code>uv run --no-sync pytest tests/ids tests/cli -p no:cacheprovider</code> adds no failure against its base.
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="export-with-skips" data-choice="" data-by="" data-when="" data-recommended="fail-unless-allowed" data-recommended-by="coordinator">
-        <p class="r-dec-q">Does an IDS export that skipped an active mapping succeed?</p>
-        <p class="r-dec-ctx">An IDS built without an active mapping's field is wrong output, not degraded output. But a facility may carry an active mapping for a section the recipe does not build yet, and an operator may want the rest of the IDS anyway.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="fail-unless-allowed">Exit non-zero unless --allow-skipped is given</button>
-          <button class="r-opt" data-value="report-only">Report the skips and exit zero</button>
-        </p>
-        <p class="r-dec-rat">Recommended: exit non-zero unless <code>--allow-skipped</code> is given. A script calling export then cannot mistake an incomplete IDS for a complete one, and the flag records that the operator accepted the gap.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="export-with-skips" data-choice="" data-by="" data-when="" data-recommended="fail-unless-allowed" data-recommended-by="coordinator">
+    <p class="r-dec-q">Does an IDS export that skipped an active mapping succeed?</p>
+    <p class="r-dec-ctx">An IDS built without an active mapping&#x27;s field is wrong output, not degraded output. But a facility may carry an active mapping for a section the recipe does not build yet, and an operator may want the rest of the IDS anyway.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="fail-unless-allowed">Exit non-zero unless --allow-skipped is given</button>
+      <button class="r-opt" data-value="report-only">Report the skips and exit zero</button>
+      </p>
+    <p class="r-dec-rat">Recommended: exit non-zero unless --allow-skipped is given. A script calling export then cannot mistake an incomplete IDS for a complete one, and the flag records that the operator accepted the gap.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-mvar-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-12" data-recommends-skill="/reckon-build mapping-validation-and-assembly-report-what-they-drop">
-        <h4 class="r-fu-title">Close the residual validation and assembly findings</h4>
-        <div class="r-fu-body"><p>§2 and §5 are independent; §3 then §4 share <code>imas_codex/ids/assembler.py</code>. §3 waits on the export decision.</p></div>
-        <pre class="r-fu-prompt">/reckon-build mapping-validation-and-assembly-report-what-they-drop</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mvar-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-12" data-recommends-skill="/reckon-build mapping-validation-and-assembly-report-what-they-drop" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the residual validation and assembly findings</h4>
+    <div class="r-fu-body"><p>§2 and §5 are independent; §3 then §4 share <code>imas_codex/ids/assembler.py</code>. §3 waits on the export decision.</p></div>
+    <pre class="r-fu-prompt">/reckon-build mapping-validation-and-assembly-report-what-they-drop</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

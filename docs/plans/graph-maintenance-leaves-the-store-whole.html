@@ -23,6 +23,8 @@
   <title>Graph Maintenance Leaves the Store Whole | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -186,7 +188,10 @@
       temporary Neo4j, test instance or admin run. <code>_stop_login_services</code> runs
       <code>pgrep -f 'neo4j_.*community.*\.sif'</code> inside a <code>bash -c</code> whose argv carries the same pattern,
       and kills the first match. On 2026-10-12 it reported <em>Killed login Neo4j process (PID 501330)</em>, and nothing
-      recorded what that process was.
+      recorded what that process was. The remote lifecycle script that <code>_neo4j_lifecycle_bash</code>
+      (<code>imas_codex/graph/remote.py</code>) generates for five export, load and restart paths runs
+      <code>pkill -u "$USER" -f "java.*neo4j"</code> in its <code>stop_neo4j</code>, which takes every Neo4j JVM the account
+      runs on that host, including temporary and throwaway instances.
     </p>
     <p>
       The repair resolves each kill to pids it can attribute: the instance's own pid file, or processes whose working
@@ -196,7 +201,7 @@
     <p>
       Node <code>no-login-pattern-kill</code>, role implement, 0.75 h. Write paths:
       <code>imas_codex/graph/neo4j_ops.py</code>, <code>imas_codex/cli/services.py</code>,
-      <code>tests/graph/test_login_kill_is_attributed.py</code> and
+      <code>imas_codex/graph/remote.py</code>, <code>tests/graph/test_login_kill_is_attributed.py</code> and
       <code>docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/no-login-pattern-kill.html</code>.
       §5 also edits <code>imas_codex/cli/services.py</code>, so the two run one after the other.
       <strong>Done when</strong> <code>rg -n "pkill" imas_codex/graph imas_codex/cli/services.py</code> prints nothing.
@@ -250,26 +255,26 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="node-command-route" data-choice="" data-by="" data-when="" data-recommended="srun-overlap" data-recommended-by="coordinator">
-        <p class="r-dec-q">How do lifecycle commands reach the graph node?</p>
-        <p class="r-dec-ctx">The SIGTERM and lock cleanup run on the node that hosts the job. On 2026-10-12, ssh to that node was refused from both a compute node and the login node.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="srun-overlap">srun --overlap --jobid into the graph job</button>
-          <button class="r-opt" data-value="ssh-via-login">ssh through the login node, as today</button>
-        </p>
-        <p class="r-dec-rat">Recommended: <code>srun --overlap --jobid</code>. It needs no ssh route, runs inside the job's own cgroup, and works from wherever the scheduler answers.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="node-command-route" data-choice="" data-by="" data-when="" data-recommended="srun-overlap" data-recommended-by="coordinator">
+    <p class="r-dec-q">How do lifecycle commands reach the graph node?</p>
+    <p class="r-dec-ctx">The SIGTERM and lock cleanup run on the node that hosts the job. On 2026-10-12, ssh to that node was refused from both a compute node and the login node.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="srun-overlap">srun --overlap --jobid into the graph job</button>
+      <button class="r-opt" data-value="ssh-via-login">ssh through the login node, as today</button>
+      </p>
+    <p class="r-dec-rat">Recommended: srun --overlap --jobid . It needs no ssh route, runs inside the job&#x27;s own cgroup, and works from wherever the scheduler answers.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-gmlsw-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-12" data-recommends-skill="/reckon-build graph-maintenance-leaves-the-store-whole">
-        <h4 class="r-fu-title">Put the recovered store in service, install the daily timer, then harden the remaining lifecycle paths</h4>
-        <div class="r-fu-body"><p>§3 is first and needs the lead to start the graph; §4 follows it. §5 to §8 are independent repairs, with §5 and §6 sharing <code>imas_codex/cli/services.py</code>.</p></div>
-        <pre class="r-fu-prompt">/reckon-build graph-maintenance-leaves-the-store-whole</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-gmlsw-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-12" data-recommends-skill="/reckon-build graph-maintenance-leaves-the-store-whole" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Put the recovered store in service, install the daily timer, then harden the remaining lifecycle paths</h4>
+    <div class="r-fu-body"><p>§3 is first and needs the lead to start the graph; §4 follows it. §5 to §8 are independent repairs, with §5 and §6 sharing <code>imas_codex/cli/services.py</code>.</p></div>
+    <pre class="r-fu-prompt">/reckon-build graph-maintenance-leaves-the-store-whole</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
