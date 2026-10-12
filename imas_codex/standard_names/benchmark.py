@@ -18,6 +18,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
+from imas_codex.standard_names.benchmark_roles import spearman_rho
 from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 from imas_codex.standard_names.models import StandardNameComposeBatch
 from imas_codex.standard_names.physics_judge import PhysicsVerdict
@@ -2107,38 +2108,12 @@ def _render_reviewer_agreement(
             # Spearman rank correlation
             scores_a = [reviewer_scores[rev_a][m] for m in shared]
             scores_b = [reviewer_scores[rev_b][m] for m in shared]
-            rho = _spearman_rho(scores_a, scores_b)
+            rho = spearman_rho(scores_a, scores_b)
             row.append(f"{rho:.3f}")
         table.add_row(*row)
 
     console.print()
     console.print(table)
-
-
-def _spearman_rho(x: list[float], y: list[float]) -> float:
-    """Compute Spearman rank correlation coefficient."""
-    n = len(x)
-    if n < 2:
-        return 0.0
-
-    def _rank(vals: list[float]) -> list[float]:
-        indexed = sorted(enumerate(vals), key=lambda iv: iv[1])
-        ranks = [0.0] * n
-        i = 0
-        while i < n:
-            j = i
-            while j < n - 1 and indexed[j + 1][1] == indexed[j][1]:
-                j += 1
-            avg_rank = (i + j) / 2.0 + 1.0
-            for k in range(i, j + 1):
-                ranks[indexed[k][0]] = avg_rank
-            i = j + 1
-        return ranks
-
-    rx = _rank(x)
-    ry = _rank(y)
-    d_sq = sum((a - b) ** 2 for a, b in zip(rx, ry, strict=True))
-    return 1.0 - 6.0 * d_sq / (n * (n * n - 1))
 
 
 def _render_quality_distribution(console: Any, report: BenchmarkReport) -> None:
