@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="58">
+<meta name="plan-version" content="59">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -198,7 +198,7 @@
 
     <h2 id="s26">§26 — The release-review tests shed a different test on every loaded run</h2>
 <section data-reckon="section" data-id="s26" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>Every test in <code>tests/standard_names/test_review_release.py</code> shells out to git and takes 17 to 25 seconds against the repository's 30-second per-test bound, so under concurrent load a different test times out on each run (12 of them at §24's head). A suite cannot then be judged by its red count. Make the file's tests fit their bound by cheapening the git fixtures, for example one shared repository per module instead of one per test. Raise the per-file timeout only for what remains, and state the remaining cost.</p><p><strong>Done when:</strong> the file passes twice in a row under the same concurrent load that made it shed tests (state the load), its slowest test is reported with its duration, and the release tests add no failure against base.</p>
+<p>Every test in <code>tests/standard_names/test_review_release.py</code> shells out to git and takes 17 to 25 seconds against the repository's 30-second per-test bound, so under concurrent load a different test times out on each run (12 of them at §24's head). A suite cannot then be judged by its red count. Make the file's tests fit their bound by cheapening the git fixtures, for example one shared repository per module instead of one per test. Raise the per-file timeout only for what remains, and state the remaining cost.</p><p><strong>Done when:</strong> <code>pytest --durations=0</code> over the file reports every test under 10 seconds, a third of the 30-second bound, so ordinary load cannot push one over; the file passes twice in a row; and the release tests add no failure against base.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
