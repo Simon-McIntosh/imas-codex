@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;}">
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -117,8 +117,52 @@
     </table>
 
     <h2 id="s6">§6 — First: re-confirm every row on the live graph</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s6" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>Before any repair is dispatched, re-measure every item named in §2 to §4 against the live graph and the current tree. This is read-only: no graph write, no code change. It needs Neo4j, so it runs as an execution-capable node on a compute partition, never as a review or investigate node. Each item gets one verdict:</p><ul><li><strong>still true</strong>, with the live count or the failing command that shows it;</li><li><strong>fixed</strong>, naming the commit or the measurement that shows it gone;</li><li><strong>changed</strong>, with both the recorded and the live figure;</li><li><strong>needs a ruling</strong>, for an item that is a decision or waits on something outside this repository rather than a measurable defect (the questions recorded for the lead, the strain-gauge names waiting on an ISN token, whether one DD path may hold several source nodes, domain routes and terminal stages). It names who rules and what the ruling unblocks, and gets no repair section.</li></ul><p>Reuse the census conventions that already exist rather than inventing a parallel shape. The row format and its anchor-resolution count follow <code>docs/evidence/reuse-map-residual-closure.md</code>, and each census header records the invocation commit and the row-set predicate, as the censuses under <code>docs/evidence/sn-integrity-residual-closure/</code> do. Where a row's cohort already has a read-only reader, the census calls it and cites it rather than writing a fresh query: <code>find_provenance_orphans</code> and <code>find_edge_scalar_desyncs</code> in <code>imas_codex/standard_names/ledger.py</code>, <code>find_semantic_source_invariant_violations</code> in <code>imas_codex/standard_names/provenance_lifecycle.py</code>, and the thresholds pinned in <code>tests/graph/test_sn_integrity_ratchets.py</code>, which the census reads and never recomputes. A row with no owning reader is marked as such, since that is where new code would be needed.</p><p>Each item that survives is assigned to one proposed repair section with its write paths, its gate and an effort estimate. Items that touch a path the release takes come first: anything reached through <code>sn edit</code>, <code>sn supersede</code>, the restore command, the fold guard or the export. An item that is new coverage rather than a correctness defect (the MAST source manifest, the 1,268-source composition pass, upstream Data Dictionary filings) is marked as such and listed for the lead's ruling. The worker does not defer it.</p><p><strong>Done when:</strong> <code>docs/evidence/fragments/sn-integrity-backlog/row-census.html</code> holds one row per separately stateable item: every followup id and every separately named defect or figure inside a table row of §2 to §4 is its own row, so the seven footguns of the lifecycle row are seven rows and the restore row's three items are three. Each row carries its verdict, the query or command that produced it, and its proposed section. The census is shown able to see a fix. The <code>*_density_at_pedestal_top</code> family, rebuilt on 2026-09-09, reads present, so the restore row reads changed rather than still true. It is also shown able to see a defect: <code>schema_digest</code> is still absent from the tree. Every query names its row set and is bounded under ten seconds. </p><p>After the census lands, and outside this node, the coordinator turns the surviving rows into implementable sections of this plan, each gated, before any repair node is dispatched.</p>
+
+    <h2 id="s7">§7 — The sanctioned surface reaches an orphaned identity</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p>Three of the four holes recorded in <code>f-sli-the-sanctioned-surface-has-four-holes</code> remain (census, §2 lifecycle row): a rename that collides with a superseded row, <code>sn rescore</code> leaving <code>status='superseded'</code>, and <code>sn edit --docs</code> refusing while <code>docs_stage='pending'</code>. The fourth, unscoped global maintenance, is closed by <code>--skip-global-maintenance</code>. WEST repairs go through <code>sn edit</code>, so this is on the release path. Paths: <code>imas_codex/cli/sn.py</code>, <code>imas_codex/standard_names/edit.py</code>.</p><p><strong>Done when:</strong> one test per hole drives the sanctioned command against a fixture identity in that exact state and shows it proceeds, and each test fails with its fix reverted.</p>
+
+    <h2 id="s8">§8 — The restore remainder</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="10.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p><code>power_due_to_fusion</code>, <code>plasma_energy</code> and <code>etendue_of_spectrometer_channel</code> read absent on the live graph (census, §2 restore row), while the pedestal-top family is rebuilt. Restore them through the restore adapter with a per-identity origin judgement, never by hand. Paid identities fall under the deletion-protection guard in <code>imas_codex/standard_names/protection.py</code>.</p><p><strong>Done when:</strong> the three identities read present with their sources and an origin stated at compose time, the restore parity tests pass, and <code>find_provenance_orphans</code> reports none of them.</p>
+
+    <h2 id="s9">§9 — Restore never re-arms the origin that caused a deletion</h2>
+<section data-reckon="section" data-id="s9" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>The restore composer now refuses an archived origin (<code>imas_codex/cli/sn.py</code>, "archive reconstruction origin must be stated at compose time"), where the recorded defect carried it through. No test pins it.</p><p><strong>Done when:</strong> a test composes a restore from an archive carrying <code>origin: catalog_edit</code> and sees the refusal, and fails with the refusal removed.</p>
+
+    <h2 id="s10">§10 — The name gate admits a one-word family anchor</h2>
+<section data-reckon="section" data-id="s10" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>A one-word family anchor cannot clear the name gate (census, §4 grammar-refinement row; no owning reader). The gate is on the <code>sn edit</code> path WEST repairs take.</p><p><strong>Done when:</strong> a one-word anchor that the grammar parses clears the gate in a test, a one-word token the grammar rejects still fails it, and the first test fails with the fix reverted.</p>
+
+    <h2 id="s11">§11 — A fold onto an occupied identity keeps the richer prose</h2>
+<section data-reckon="section" data-id="s11" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p>Folding one spelling into an identity that already exists can overwrite the better documentation (census, §4). The grouping plan's synonym folds take this path.</p><p><strong>Done when:</strong> a fold of a sparse source onto a richly documented target keeps the target's documentation, a fold of a rich source onto a sparse target carries the source's, and the first test fails with the fix reverted.</p>
+
+    <h2 id="s12">§12 — The fold postflight accepts a fold its dry run accepts</h2>
+<section data-reckon="section" data-id="s12" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>The fold postflight proof refuses a fold whose dry run succeeds (census, §4). The two must agree.</p><p><strong>Done when:</strong> a fixture fold that passes its dry run passes its postflight, a fold the dry run refuses is still refused, and the first test fails with the fix reverted.</p>
+
+    <h2 id="s13">§13 — The export waiver refusal sees every produced identity</h2>
+<section data-reckon="section" data-id="s13" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p><code>_source_disposition</code> is handed only a chain's terminal while the cut publishes whatever is accepted, so a published intermediate evades the waiver refusal (census, §3; latent today because no declared-waived source produces an identity). Path: the export waiver path in <code>imas_codex/standard_names/export.py</code>.</p><p><strong>Done when:</strong> a test with a declared-waived source whose chain publishes an intermediate is refused, a chain whose intermediates are all unwaived passes, and <code>tests/standard_names/test_export_release_holds.py</code> adds no failure.</p>
+
+    <h2 id="s14">§14 — Regression tests for two release-path fixes</h2>
+<section data-reckon="section" data-id="s14" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Two recorded defects read fixed in code but carry no test: an edits-scoped <code>sn run</code> now honours <code>--skip-global-maintenance</code> (<code>imas_codex/cli/sn.py</code>), and an export that filters every candidate should now refuse rather than exit 0 (likely closed by the 2026-09-21 export refusals). Confirm each by test; if either is not in fact fixed, report it rather than fixing it here.</p><p><strong>Done when:</strong> one test shows an edits-scoped run skips global maintenance and one shows an empty export cut exits non-zero, and each fails with its guard removed.</p>
+
+    <h2 id="s15">§15 — Two measurements before repair</h2>
+<section data-reckon="section" data-id="s15" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Two release-path rows need a measurement before any repair is shaped. (a) Compose supersede reportedly fails hard and spends an attempt when a source binds another live identity: reproduce it in a test over a fixture graph with a dual-bound source (the live dual-bound cohort, from <code>find_semantic_source_invariant_violations</code>, is 2). (b) 72 chain-cap identities had no sourced ancestor at any depth on 2026-09-01: re-derive that unsourced-ancestry census read-only on the live graph. Each result decides whether a repair section follows.</p><p><strong>Done when:</strong> an evidence fragment records both: the reproduced failure or its absence with the test that shows it, and the current unsourced-ancestry count with its bounded query.</p>
+
+    <h2 id="s16">§16 — Retire the successor scalar</h2>
+<section data-reckon="section" data-id="s16" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p>18 of 2,163 superseded names carry <code>superseded_by</code>, and for 3 it is the only pointer (census, §2). The scalar is read on the fold and supersede path. Move those 3 to the successor edge, then remove the scalar and its readers across the modules the successor-derivation record names, with a migration over the superseded population.</p><p><strong>Done when:</strong> the 3 identities resolve their successor through the edge, <code>superseded_by</code> has no reader in the tree, a migration dry run reports 18 properties to remove and 0 orphaned successors, and the supersede tests add no failure.</p>
+
+    <h2 id="s17">§17 — Off-path repairs, held behind the WEST release</h2>
+<section data-reckon="section" data-id="s17" data-effort-hours="30.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="deferred" data-links=""></section>
+<p>Surviving rows the census places off the release path, each with its proposed repair in the census: the parked-disposition net has no caller; the parked census cohort is wider than its writer's; the parked refusal raises the wrong exception; four bypasses of the defaulted-attribute guard; 412 names labelled scaffolding while carrying reviewed documentation; recovering origin and status from generation evidence; a schema digest node; released manifests recording worktree paths; reviewer swings wider than the exhaustion margin; the declared-attribute check judging 5 of 18 sites; an unreachable embedder becoming a finding. They wait until the WEST release is cut, then each becomes a section of its own.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -144,6 +188,39 @@
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T145528571333-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:44:35.966Z">
     <div class="r-comment-body"><p>row-census.html re-confirms every §2-§4 item read-only at c7b4c626e — controls fire (pedestal-top family present, 20 rows; schema_digest absent); 38 rows (13 §2, 11 §3, 14 §4): 2 fixed, 7 changed, 15 still true, 8 needing a ruling, 6 needing a write to confirm</p></div>
 </div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-12T18:05:00Z">
+    <div class="r-comment-body"><p>§6 landed: 38 rows re-confirmed read-only (2 fixed, 7 changed, 15 still true, 8 for a ruling, 6 needing a write to confirm), both controls firing (merge <code>013ce4859</code>); reviews 93 then 104/120. Survivors sectioned as §7–§16 on the release path and §17 deferred; eight rulings recorded as questions. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s6">evidence</a></p></div>
+</div>
+</section>
+<section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="q-sib-nine-unsourced-names" data-section="s6" data-status="open" data-opened-by="reckon-build" data-opened-at="2026-10-12T18:06:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Nine accepted, documented, valid names have no producing source (the same nine as recorded; <code>find_provenance_orphans</code>). Demote, delete or re-source each? Two of them carry spend.</p></p>
+    </div>
+<div class="r-q" data-id="q-sib-four-lead-questions" data-section="s6" data-status="open" data-opened-by="reckon-build" data-opened-at="2026-10-12T18:06:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>The four questions <code>unbound-source-backlog</code> recorded for the lead remain open: graph checkpoint cadence, the WEST pull request, and the embedder contract among them (census, §3).</p></p>
+    </div>
+<div class="r-q" data-id="q-sib-strain-gauge-token" data-section="s6" data-status="open" data-opened-by="reckon-build" data-opened-at="2026-10-12T18:06:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Six strain-gauge measurement-direction names wait on a non-ordinal ISN token. Does ISN gain one, or are the six folded or held?</p></p>
+    </div>
+<div class="r-q" data-id="q-sib-regeneration-scope" data-section="s6" data-status="open" data-opened-by="reckon-build" data-opened-at="2026-10-12T18:06:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Regenerate or repair: the scope decision of <code>sn-regeneration-decision</code>, which also absorbs the 31 born-ungrounded rows. It was blocked until origin is declared.</p></p>
+    </div>
+<div class="r-q" data-id="q-sib-new-coverage" data-section="s6" data-status="open" data-opened-by="reckon-build" data-opened-at="2026-10-12T18:06:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>New coverage, not defects: rebuild the MAST source manifest on the hardened graph, size the 1,268-source composition pass (and decide the 65 placeholders first), and file the measured Data Dictionary defects upstream. Which, and when?</p></p>
+    </div>
+<div class="r-q" data-id="q-sib-terminal-stages" data-section="s6" data-status="open" data-opened-by="reckon-build" data-opened-at="2026-10-12T18:06:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Which stages are terminal under which domain routes on the release path?</p></p>
+    </div>
+<div class="r-q" data-id="q-sib-path-source-cardinality" data-section="s6" data-status="open" data-opened-by="reckon-build" data-opened-at="2026-10-12T18:06:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>May one DD path hold several source nodes? Two live rows are dual-bound today; the ruling decides whether they are corrected or blessed, and shapes §15(a).</p></p>
+    </div>
+<div class="r-q" data-id="q-sib-two-identities" data-section="s6" data-status="open" data-opened-by="reckon-build" data-opened-at="2026-10-12T18:06:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Two identities need a physics adjudication on DD semantics and catalog convention before their <code>sn edit</code> proposals (<code>f-siar-001</code>), among them <code>radial_coordinate_of_reflector</code>.</p></p>
+    </div>
+<div class="r-q" data-id="q-sib-schema-allowances" data-section="s6" data-status="open" data-opened-by="reckon-build" data-opened-at="2026-10-12T18:06:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Three properties the schema and the live graph disagree about sit in a permanent allowance. Either repair widens durable schema authority to operational state; keep the allowance or decide the wider authority?</p></p>
+    </div>
 </section>
 </main>
 </body>
