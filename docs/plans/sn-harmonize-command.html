@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-house-style#s4&quot;],&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -61,7 +61,7 @@
     </p>
 
     <h2 id="s2">§2 — One surface, and the two it replaces</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       <code>imas-codex sn harmonize</code> takes one scope — <code>--batch &lt;manifest&gt;</code>
       (a roster token such as <code>v0.4.0rc7+west-task-2e</code>, resolved by
@@ -224,6 +224,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261012T194530256153-review-of-shc-command-surface" data-who="reckon-build" data-when="2026-10-12T19:57:33.029Z">
     <div class="r-comment-body"><p>review-of-shc-command-surface: independent review of r-20261012T190251885585-shc-command-surface at 3ec6cfb25, total 95, four follow-on findings, no blocking defect</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-12T20:39:00Z">
+    <div class="r-comment-body"><p>§2 landed: <code>sn harmonize --report</code> over pattern families counts every finding once, enumeration lives in <code>families.py</code>, and the two retired routes are gone from code and documentation (merges <code>e7184e3aa</code>, <code>4d2761ab7</code>); reviews 95 and 110/120. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s2">evidence</a></p></div>
 </div>
 </section>
 </main>
