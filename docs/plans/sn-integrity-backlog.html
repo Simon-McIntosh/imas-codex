@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -225,6 +225,9 @@
 </div>
 <div class="r-comment" data-section="s19" data-id="c-run-r-20261012T190000550736-sib-unsourced-ancestry-census" data-who="reckon-build" data-when="2026-10-12T19:07:54.818Z">
     <div class="r-comment-body"><p>sib-unsourced-ancestry-census — re-derived §19 read-only: 102 unsourced chain-cap identities split 10 with a sourced ancestor + 92 with none, summing to the independently counted total (cross-check 72 sourced-in-cohort + 102 = 174 chain-cap, disjoint); 2026-09-01's 78/72 has drifted, live matches the 2026-09-17 re-measure; every query depth-bounded at *1..10 and under 0.07 s.</p></div>
+</div>
+<div class="r-comment" data-section="s19" data-id="c-run-r-20261012T191107065349-review-of-sib-unsourced-ancestry-census" data-who="reckon-build" data-when="2026-10-12T19:22:14.585Z">
+    <div class="r-comment-body"><p>review-of-sib-unsourced-ancestry-census — independent review of r-20261012T190000550736-sib-unsourced-ancestry-census at 41cd8ff3a (base 345868c92): goal met and evidence strong (live 174/102/10/92 matches the cited 2026-09-17 re-measure exactly, controls fire, split closes); scores goal19/evidence16/scope20/durability12/fit16/reuse20 total 103; one follow-on finding — the census fragment records its four queries with a &quot; -- N&quot; annotation Cypher does not accept, so the durable query returns 2x if pasted.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

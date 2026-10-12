@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite or after_suite gate log (it ran no suite), so the added-failure count was not taken",
+  "backend": "clive",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T19:22:14.585Z",
+  "dispatched_at": "2026-10-12T19:11:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html",
+      "line": "73",
+      "severity": "follow-on",
+      "text": "follow-on: the four recorded queries each end with a \"-- <value>\" annotation, which is not a Cypher comment (Cypher uses //), so a reader who pastes a recorded query gets a silently wrong answer: \"RETURN count(sn) -- 174\" parses as count(sn) - (-174) and returns 2x the annotated value (348 where the doc asserts 174, and likewise for the 102/10/92 queries). The doc's own inline values contradict what its recorded query returns. The exact executed query is preserved in the reviewed run's census.log:17, so the counts remain reproducible from the log, but the durable artifact done_when names does not carry a runnable query."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the single commit 41cd8ff3a commit by commit against base 345868c92; it adds 135 lines across the two HTML files and changes nothing else, and the recorded numbers reconcile with census.log and confirm.log line for line.",
+    "done_when": "The done_when names docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html recording the current count, its bounded query and the query's elapsed time, with the split summing to an independently counted total; the fragment records the count and per-query elapsed times, states the depth bound (*1..10) and row set, and the split closes (10+92=102, and 72 sourced-in-cohort + 102 = 174 chain-cap).",
+    "goal": "Read plan \u00a719 (imas-codex:sn-integrity-backlog, section s19) with its goal to re-derive, read-only, how many unsourced chain-cap identities have no sourced ancestor and report the split; the landed fragment docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html reports 102 unsourced = 10 with a sourced ancestor + 92 with none against live counts 174 / 102 / 10 / 92.",
+    "manifest": "Read the reviewed run's manifest: it states \"no gate suite (read-only census)\", cites census.log and confirm.log, records the live counts and controls, and carries follow_ons: none and blockers: none.",
+    "write_paths": "Read the manifest's declared write paths; git diff --stat 345868c92..41cd8ff3a is exactly two files, docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html and docs/evidence/fragments/sn-integrity-backlog/sib-unsourced-ancestry-census.html, both inside the fence, with no other path touched."
+  },
+  "justifications": {
+    "durability": "the census adds no test (manifest: \"no gate suite (read-only census)\"); its only control is the partition assertion at census.log:21-26, which would surface a population the queries cannot see, and no guard pins the fragment's numbers against drift.",
+    "evidence": "census.log:26 shows the split's two parts summing to the independently counted total (\"sum == independent total : True\"), but the durable queries at unsourced-ancestry-census.html:73 carry a trailing \" -- 174\" that is not a Cypher comment, so the recorded query is not faithfully reproducible.",
+    "fit": "the fragment follows the node-id-anchored fragment convention of its sibling docs/evidence/fragments/sn-integrity-backlog/sib-row-census.html, docked because unsourced-ancestry-census.html:73 writes a Cypher annotation in a form Cypher does not accept.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html:73 records the chain-cap total 174 as the row set the split ranges over, matching the live 174/102/10/92 the plan \u00a719 asks for.",
+    "reuse": "the change adds no definition and reuses the definitions verbatim from the cited records; a search over imas_codex/ for a reader that computes ledger-hop sourced ancestry found none (the plan \u00a719 states the same), so no owner is forked.",
+    "scope_discipline": "git diff --stat 345868c92..41cd8ff3a shows exactly the two declared write paths and no other path."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Read plan \u00a719 (imas-codex:sn-integrity-backlog, section s19) with its goal to re-derive, read-only, how many unsourced chain-cap identities have no sourced ancestor and report the split; the landed fragment docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html reports 102 unsourced = 10 with a sourced ancestor + 92 with none against live counts 174 / 102 / 10 / 92.\nVERDICT done_when: The done_when names docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html recording the current count, its bounded query and the query's elapsed time, with the split summing to an independently counted total; the fragment records the count and per-query elapsed times, states the depth bound (*1..10) and row set, and the split closes (10+92=102, and 72 sourced-in-cohort + 102 = 174 chain-cap).\nVERDICT write_paths: Read the manifest's declared write paths; git diff --stat 345868c92..41cd8ff3a is exactly two files, docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html and docs/evidence/fragments/sn-integrity-backlog/sib-unsourced-ancestry-census.html, both inside the fence, with no other path touched.\nVERDICT manifest: Read the reviewed run's manifest: it states \"no gate suite (read-only census)\", cites census.log and confirm.log, records the live counts and controls, and carries follow_ons: none and blockers: none.\nVERDICT diff: Read the single commit 41cd8ff3a commit by commit against base 345868c92; it adds 135 lines across the two HTML files and changes nothing else, and the recorded numbers reconcile with census.log and confirm.log line for line.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html:73 records the chain-cap total 174 as the row set the split ranges over, matching the live 174/102/10/92 the plan \u00a719 asks for.\nSCORE evidence: 16\nJUSTIFICATION evidence: census.log:26 shows the split's two parts summing to the independently counted total (\"sum == independent total : True\"), but the durable queries at unsourced-ancestry-census.html:73 carry a trailing \" -- 174\" that is not a Cypher comment, so the recorded query is not faithfully reproducible.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 345868c92..41cd8ff3a shows exactly the two declared write paths and no other path.\nSCORE durability: 12\nJUSTIFICATION durability: the census adds no test (manifest: \"no gate suite (read-only census)\"); its only control is the partition assertion at census.log:21-26, which would surface a population the queries cannot see, and no guard pins the fragment's numbers against drift.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment follows the node-id-anchored fragment convention of its sibling docs/evidence/fragments/sn-integrity-backlog/sib-row-census.html, docked because unsourced-ancestry-census.html:73 writes a Cypher annotation in a form Cypher does not accept.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition and reuses the definitions verbatim from the cited records; a search over imas_codex/ for a reader that computes ledger-hop sourced ancestry found none (the plan \u00a719 states the same), so no owner is forked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html:73 follow-on: the four recorded queries each end with a \"-- <value>\" annotation, which is not a Cypher comment (Cypher uses //), so a reader who pastes a recorded query gets a silently wrong answer: \"RETURN count(sn) -- 174\" parses as count(sn) - (-174) and returns 2x the annotated value (348 where the doc asserts 174, and likewise for the 102/10/92 queries). The doc's own inline values contradict what its recorded query returns. The exact executed query is preserved in the reviewed run's census.log:17, so the counts remain reproducible from the log, but the durable artifact done_when names does not carry a runnable query.\n",
+  "review_run_id": "r-20261012T191107065349-review-of-sib-unsourced-ancestry-census",
+  "reviewed_base_sha": "345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd",
+  "reviewed_head_sha": "41cd8ff3a478daf5f8a4907dc474a36420450dc8",
+  "reviewed_run_id": "r-20261012T190000550736-sib-unsourced-ancestry-census",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:20:37.655523+00:00",
+  "total": 103
+}
