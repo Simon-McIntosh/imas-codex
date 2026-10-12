@@ -1,0 +1,78 @@
+{
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T061813771747-review-of-sn-label-census/rerun-graph_census3.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T061813771747-review-of-sn-label-census/rerun-west_join.log"
+  ],
+  "claim_lines": [
+    "CLAIM 1: reproduced: at 462d1480 graph_census3.py [human_edit.coverage] returns names=331 and [snc.ops] returns human_edit c=339, the two figures the report's Headline (331) and table row 1 (339 ops / 331 names) state",
+    "CLAIM 2: reproduced: at 462d1480 graph_census3.py [quarantine.count] returns c=659 for StandardName {validation_status:'quarantined'}, the figure the report's Headline and table row 2 state",
+    "CLAIM 3: reproduced: at 462d1480 west_join.py returns 'found=61 of 61' for the 51 rename + 10 split repaired identities (all name_stage=accepted, validation_status=valid), the figure the report's Headline and table row 4 state",
+    "CLAIM_SUMMARY: agrees: the Headline's 28,887 / 331 / 659 / 61 / 16,282 and its '</200 docs-axis independence' all match the table beneath it (28,887 snr rows; row 1 count 331; row 2 count 659; row 4 count 61; docs 16,282; docs overlaps 155 and 131)"
+  ],
+  "claim_summary": {
+    "detail": "The report's summary line is the Headline paragraph naming 28,887 incumbent review rows, 331 human `sn edit` corrections, 659 deterministic quarantines, 61 WEST-audited name repairs, <200 independent docs-acceptability items and 16,282 incumbent docs reviews. Every figure matches the table beneath it (28,887 snr; row 1 331 names; row 2 659 names; row 4 61 repairs; docs 16,282 rows; docs overlaps 155 and 131), and the three cohort figures reproduce independently.",
+    "verdict": "agrees"
+  },
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "graph_census3.py [human_edit.coverage] (and graph_census3.py [snc.ops] for the 339 op count)",
+      "detail": "Re-ran graph_census3.py from the run directory. [human_edit.coverage] returned {'names': 331} and [snc.ops] returned human_edit c=339 \u2014 the two figures the report's table row 1 states ('339 ops, 337 distinct from->to pairs, 331 names': 339 ops here, 331 names via HAS_INTERNAL_CHANGE). The Headline's '331 human sn edit corrections' is exactly this names figure. Reproduced.",
+      "finding": "331 human `sn edit` corrections are an independent name-acceptability label source",
+      "verdict": "reproduced"
+    },
+    "CLAIM 2": {
+      "cites": "graph_census3.py [quarantine.count] (and graph_census2.py [sn.validation_status])",
+      "detail": "Re-ran graph_census3.py from the run directory. [quarantine.count] returned {'c': 659} for MATCH (sn:StandardName {validation_status:'quarantined'}), the figure the report's table row 2 and Headline both state (659 names). Reproduced.",
+      "finding": "659 deterministic validation quarantines are an all-negative name-validity label source",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "west_join.py [west.exist] (renames/splits parsed from west-name-repair-worklist.md)",
+      "detail": "Re-ran west_join.py from the run directory. Output: 'worklist rejected(part1): 51 proposed: 51 splits: 10' (51+10=61 ids) and '[west.exist] found=61 of 61' \u2014 every one of the 61 repaired/rejected identities exists in the graph, all name_stage=accepted, validation_status=valid, matching the report's table row 4 ('61 repairs = 51 renames + 10 splits') and its calibration-gap note that all 61 sit accepted/valid. [west.reviews] returned docs 483 / name 236 reviews over 61 names, matching the row's '236 name-axis, 483 docs-axis'. Reproduced.",
+      "finding": "61 WEST-audited name repairs (51 renames + 10 splits) are an independent name-correctness label source, each rejected name carrying incumbent reviews",
+      "verdict": "reproduced"
+    },
+    "CLAIM_SUMMARY": {
+      "detail": "The report's summary line is the Headline paragraph: 'The usable independently-labelled set is real but far smaller than the incumbent's 28,887 review rows, and it is concentrated on the negative side. Three cohorts are immediately computable as paired AUC input: 331 human `sn edit` corrections, 659 deterministic quarantines, and 61 WEST-audited name repairs. The binding weakness is documentation-acceptability: everything independent of the incumbent totals well under 200 items there, against 16,282 incumbent docs reviews.' Every figure it quotes is carried by the table beneath it: 28,887 StandardNameReview rows (\u00a70 'snr.count', table row citing it), 331 (row 1 count '331 names'), 659 (row 2 count '659 names'), 61 (row 4 count '61 repairs'), 16,282 incumbent docs reviews (\u00a70 'docs 16,282 rows'), and the docs-axis independence '<200' (row 2 docs overlap 155, row 1 docs overlap 131). All agree; the three cohort figures were independently reproduced in CLAIM 1-3.",
+      "verdict": "agrees"
+    }
+  },
+  "claims": [
+    {
+      "cites": "graph_census3.py [human_edit.coverage], [snc.ops]",
+      "rank": 1,
+      "report_figure": "331 human sn edit correction names (339 human_edit ops)",
+      "rerun_figure": "human_edit.coverage names=331; snc.ops human_edit c=339",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "graph_census3.py [quarantine.count]",
+      "rank": 2,
+      "report_figure": "659 quarantined StandardName nodes",
+      "rerun_figure": "quarantine.count c=659",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "west_join.py [west.exist]",
+      "rank": 3,
+      "report_figure": "61 WEST-audited name repairs (51 renames + 10 splits), all present and accepted/valid",
+      "rerun_figure": "found=61 of 61; rejected(part1)=51, splits=10; all accepted, all valid",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-12T06:22:21.851Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-12T06:18:22Z",
+  "method": "The reviewed run is read-only (committed nothing past its base 462d1480), so no gate suite and no diff exist. The report is a graph/file census whose cited instruments are the scripts in the run's own directory (~/.config/reckon/crew/runs/r-20261012T060643593781-sn-label-census/): graph_census{,2,3,4,5}.py, file_census.py, west_join.py. Each of the three highest-ranked findings (the Headless 'immediately computable as paired AUC input' cohorts) was re-run by executing its cited script from that directory with the same environment the run used (UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=<reviewed worktree> /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -I <script>), so each reads the same live graph (bolt://98dci4-gpu-0002:7687) and the same repo the run did. Re-run logs: rerun-graph_census3.log and rerun-west_join.log under r-20261012T061813771747-review-of-sn-label-census/. Recorded against the figure each finding states, not against current main, which is unmodified since this read-only run (base == head).",
+  "project": "imas-codex",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/jev-sn-study/sn-label-census/report.md",
+  "review_run_id": "r-20261012T061813771747-review-of-sn-label-census",
+  "reviewed_base_sha": "462d148027273b99de0f32ff1b4285ddf5a5f60e",
+  "reviewed_head_sha": "462d148027273b99de0f32ff1b4285ddf5a5f60e",
+  "reviewed_run_id": "r-20261012T060643593781-sn-label-census",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run ran no gate suite.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T06:21:03+00:00"
+}
