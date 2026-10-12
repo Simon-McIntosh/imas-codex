@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T15:05:02.685Z",
+  "dispatched_at": "2026-10-12T14:55:12Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:178",
+      "id": "wiring-1",
+      "reason": "without a declared dependency on sn-house-style \u00a72 the Distinct arm has no reachable template to edit, and the same missing-dependency defect was already corrected once for \u00a73.",
+      "text": "\u00a74's \"Distinct\" ruling is \"The house-style template for each gains the sentence that separates them\", but that template is `templates.yml` delivered by sn-house-style \u00a72 (keyed by the pattern family \u00a72 of this plan produces), and \u00a74 declares only `sn-integrity-backlog#s6`, so a node built from \u00a74 either edits an artifact another plan owns or stalls on one that has not landed",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "fa8fb2097cd0735d94bcdeb0e334bb2acfa951f5b231b0a2aef90becc10e4f77",
+  "plan_slug": "sn-catalog-grouping",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-12T15:07:24.753729+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:07:24.753729+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-catalog-grouping.v4.json",
+  "review_run_id": "r-20261012T145502794749-plan-review-of-sn-catalog-grouping",
+  "reviewed_blob_sha": "a13affc067e15d2dd321ca8ba26056903eb46e65",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `domain_priority.py`, `workers.py`, `consolidation.py`, `audits.py`, `context.py`, `vocab_semantic_dedup.py`, `dd_domain_classifier.py`, census \u00a74\u2013\u00a77, sn-judgment-evaluation \u00a75/\u00a77 and sn-integrity-backlog \u00a76 all resolve.",
+    "done_when": "pass \u2014 \u00a73's done-when now carries a negative control (\"it fails with the lookup removed\"), and \u00a74's control declination stands unchanged since it delivers recorded rulings rather than a guard.",
+    "evidence_paths": "pass \u2014 no gate or worklist is routed to a scratchpad or node-local temporary path; \u00a73 records a before/after census and \u00a74 a recorded ruling per overlap.",
+    "naming": "pass \u2014 no plan label, ticket number or version tag reaches a code symbol; the only version-like strings are the live model seat `gpt-5.5` and plan-section references in prose.",
+    "reasoning": "pass \u2014 \u00a73's root cause matches census \u00a75 (domains follow the source), its mechanism reaches the confirmed single approval point, and the caller (`consolidate_candidates`' approved-list loop) is named.",
+    "single_goal": "pass \u2014 \u00a73 delivers domain assignment by quantity and \u00a74 delivers near-duplicate adjudication, each on one verdict.",
+    "wiring": "a finding \u2014 \u00a74 rules \"Distinct\" overlaps by editing \"the house-style template\", which is `templates.yml` delivered by sn-house-style \u00a72, but \u00a74 declares only `sn-integrity-backlog#s6`."
+  },
+  "section_digests": {
+    "_document": "502a2bfa69c4863a9cd34bcc0968e350e314683f2c0e58fd0858bdf994c91f0e",
+    "s1": "6bc3b44a7fd794158b4e454dd07668ea7d805f53ea1a5e11fac0c4b9a32edd70",
+    "s2": "9829b62e199aad73fe00988b32b523e91b14bb1e6717aae8cd2c24cf36ca5e86",
+    "s3": "f8ba2b4ac660e567e3d78d3fbc54a5db99d4a2d395a2b8f3f516ec70c4d74632",
+    "s4": "7cd0454d13ab9a70c3e44752b5b15dcc7a96f90ed71f0fe117a7874db5ca5459",
+    "s5": "6a583a112984f320b52d30c670be604713b3d4204e41c7dd12230c311f9ff0e3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:07:21.733649+00:00"
+}
