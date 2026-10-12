@@ -2213,6 +2213,36 @@ def extract_member_identifier(accessor: str, member_accessors: Sequence[str]) ->
     return "/".join(parts) if len(parts) > 1 else parts[0]
 
 
+# A member placeholder with an optional conversion and format spec, such as
+# ``{member_id}`` or ``{member_id:02d}``. The model writes templates, so a spec
+# meant for an integer can arrive beside an identifier held as a string.
+_MEMBER_PLACEHOLDER = re.compile(
+    r"\{(member_id|node_description)(?:![rsa])?(?::([^{}]*))?\}"
+)
+
+
+def _fill_member_template(template: str, values: dict[str, str]) -> str:
+    """Substitute member placeholders, honouring a format spec where it applies.
+
+    A numeric spec formats a digit-only identifier as an integer, so
+    ``{member_id:02d}`` renders member ``3`` as ``03``. A spec the value cannot
+    take leaves the plain value, and an unknown placeholder stays literal, so a
+    template never fails the pass.
+    """
+
+    def substitute(match: re.Match[str]) -> str:
+        value = values[match.group(1)]
+        spec = match.group(2)
+        if not spec:
+            return value
+        try:
+            return format(int(value) if value.isdigit() else value, spec)
+        except ValueError:
+            return value
+
+    return _MEMBER_PLACEHOLDER.sub(substitute, template)
+
+
 def individualize_members(
     name_template: str,
     description_template: str,
@@ -2221,8 +2251,9 @@ def individualize_members(
     """Apply name/description templates to each member signal.
 
     Extracts the member-specific identifier from each accessor from the
-    numeric runs that vary across the source's members, then formats the
-    templates. Supports {member_id} and {node_description} placeholders.
+    numeric runs that vary across the source's members, then fills the
+    templates. Supports {member_id} and {node_description} placeholders, with
+    an optional format spec.
 
     Args:
         name_template: Name template with {member_id} placeholder.
@@ -2238,19 +2269,12 @@ def individualize_members(
     results = []
     for member in members:
         member_id = extract_member_identifier(member["accessor"], accessors)
-        node_desc = member.get("node_description", "")
-        try:
-            name = name_template.format(member_id=member_id, node_description=node_desc)
-        except (KeyError, IndexError):
-            name = name_template.replace("{member_id}", member_id)
-        try:
-            description = description_template.format(
-                member_id=member_id, node_description=node_desc
-            )
-        except (KeyError, IndexError):
-            description = description_template.replace(
-                "{member_id}", member_id
-            ).replace("{node_description}", node_desc)
+        values = {
+            "member_id": member_id,
+            "node_description": member.get("node_description", "") or "",
+        }
+        name = _fill_member_template(name_template, values)
+        description = _fill_member_template(description_template, values)
         results.append(
             {
                 "id": member["id"],

@@ -9,6 +9,7 @@ the group and must not appear in the name or description.
 from __future__ import annotations
 
 from imas_codex.discovery.signals.parallel import (
+    _fill_member_template,
     extract_member_identifier,
     individualize_members,
 )
@@ -59,3 +60,29 @@ def test_individualize_members_uses_varying_runs():
     assert names["s86"] == "Channel 86"
     assert all("101173" not in r["name"] for r in out)
     assert all("101173" not in r["description"] for r in out)
+
+
+def test_a_numeric_format_spec_fills_instead_of_failing():
+    """A model-written ``{member_id:02d}`` renders; it must not abort the pass.
+
+    Negative control: fill with ``str.format`` again; member identifiers are
+    strings, so this raises ``Unknown format code 'd' for object of type 'str'``.
+    """
+    members = [
+        {"id": f"s{n}", "accessor": a, "node_description": "valve"}
+        for n, a in enumerate(_jt60sa_members(), start=81)
+    ]
+    out = individualize_members(
+        "Channel {member_id:03d}",
+        "{node_description} {member_id:>4} of {unknown}",
+        members,
+    )
+    by_id = {r["id"]: r for r in out}
+    assert by_id["s81"]["name"] == "Channel 081"
+    assert by_id["s81"]["description"] == "valve   81 of {unknown}"
+
+
+def test_a_spec_the_identifier_cannot_take_leaves_the_plain_value():
+    values = {"member_id": "A1", "node_description": ""}
+    assert _fill_member_template("Coil {member_id:d}", values) == "Coil A1"
+    assert _fill_member_template("Coil {member_id!r:>3}", values) == "Coil  A1"
