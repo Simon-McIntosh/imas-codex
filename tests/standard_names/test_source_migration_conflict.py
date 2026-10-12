@@ -149,6 +149,54 @@ def test_transient_fault_still_raises_an_anonymous_fault(
     assert gc.query.call_count == 1
 
 
+def test_dual_bound_conflict_names_the_successor_as_the_holder() -> None:
+    """The conflict names the identity that holds the binding, not the one
+    being retired.
+
+    A source bound to the live predecessor and its live successor is held by
+    the successor: the migration is retiring the predecessor, so naming it as
+    the holder would point the operator at the identity being removed.
+    """
+    row = _migration_row(
+        [_binding("old_name", "drafted"), _binding("replacement_name", "drafted")]
+    )
+    gc = MagicMock()
+    gc.query.return_value = [row]
+
+    with pytest.raises(SourceBindingConflictError) as raised:
+        _retarget(gc, row)
+
+    assert [item.holding_identity for item in raised.value.conflicts] == [
+        "replacement_name"
+    ]
+
+
+def test_retired_successor_is_not_a_dual_bound_conflict() -> None:
+    """A retired identity no longer holds the source.
+
+    A source bound to a live predecessor and a retired successor is the
+    ordinary single-predecessor case: the retired name has already been
+    settled, so it is not a second live claim requiring adjudication.
+    """
+    row = _migration_row(
+        [
+            _binding("old_name", "drafted"),
+            _binding("replacement_name", "superseded"),
+        ]
+    )
+    gc = MagicMock()
+    gc.query.return_value = [row]
+
+    try:
+        _retarget(gc, row)
+    except SourceBindingConflictError as exc:
+        pytest.fail(
+            f"a retired successor was classified as a dual-bound conflict: {exc}"
+        )
+    except RuntimeError:
+        pass
+
+
 def test_single_live_binding_is_not_a_dual_bound_conflict() -> None:
     """A source carrying one live identity is not a dual-bound conflict.
 

@@ -600,6 +600,16 @@ def retarget_standard_name_sources(
             if binding_state is not None
             else sorted(set(row.get("current_bindings") or []))
         )
+        # The dual-bound classification counts only identities that are still
+        # live. A name at a retired stage no longer holds the source, so a
+        # source bound to a live successor and a retired predecessor is not a
+        # decision for an already-settled identity.
+        live_expected_holders = [
+            entry["id"]
+            for entry in (binding_state or ())
+            if entry.get("id") in comparison_expected_names
+            and entry.get("name_stage") not in _RETIRED_NAME_STAGES
+        ]
         scalar = row.get("scalar_binding")
         if (
             row.get("source_exists")
@@ -646,7 +656,7 @@ def retarget_standard_name_sources(
             row.get("source_exists")
             and row.get("source_status") != "stale"
             and not row.get("actively_claimed")
-            and len(bindings) > 1
+            and len(live_expected_holders) > 1
             and set(bindings) <= comparison_expected_names
         ):
             live_stages = {
@@ -654,14 +664,21 @@ def retarget_standard_name_sources(
                 for entry in (binding_state or ())
                 if entry.get("id") is not None
             }
+            # Name the identity that actually holds the binding: the live
+            # expected holder other than the predecessor this migration retires.
+            successor_holders = [
+                name for name in live_expected_holders if name != old_name
+            ]
+            holding_identity = successor_holders[0] if successor_holders else old_name
             binding_conflicts.append(
                 SourceBindingConflict(
                     source_id=source_id,
-                    holding_identity=old_name,
-                    holding_stage=live_stages.get(old_name),
+                    holding_identity=holding_identity,
+                    holding_stage=live_stages.get(holding_identity),
                     source_status=row.get("source_status"),
                     detail=(
-                        f"{source_id} is bound to {len(bindings)} live identities "
+                        f"{source_id} is bound to {len(live_expected_holders)} live "
+                        f"identities "
                         f"{bindings!r} at stages "
                         f"{[live_stages.get(name) for name in bindings]!r} "
                         f"(source status={row.get('source_status')!r}, "
