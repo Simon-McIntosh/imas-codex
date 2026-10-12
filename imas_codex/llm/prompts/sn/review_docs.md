@@ -105,6 +105,20 @@ patterns and call them out explicitly in `comments`:
 {% endfor %}
 {% endif %}
 
+{% if audit_findings %}
+## Layer 1 Audit Findings — deterministic input
+
+The catalog audit has already inspected these candidates and reports the
+following. Each line is a fact about catalog state, not an opinion to weigh:
+take every finding into account when you score. An unresolved error-severity
+lint finding is disqualifying — a documentation carrying one is held below the
+acceptance threshold, so score it down and say so in `comments`.
+
+{% for finding in audit_findings %}
+- {{ finding }}
+{% endfor %}
+{% endif %}
+
 {% if batch_context %}
 ## Source Context (same as composer received)
 
