@@ -1,0 +1,79 @@
+{
+  "artifacts": [
+    "/tmp/reckon-crew-scratch/r-20261012T061602182866-review-of-sn-judgment-inventory/tree-462d1480 (extracted reviewed revision)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T061602182866-review-of-sn-judgment-inventory/repro-462d1480.log"
+  ],
+  "claim_lines": [
+    "CLAIM 1: differs: the report cites pipeline.py:1971-1983 for the state fields the docs-review prompt renders, but at 462d1480 those lines are the cached system-context dict (\"items\": [], \"existing_names\": []); the populated candidate render context carrying the named state fields is pipeline.py:1957-1967, 14 lines earlier (identical text at HEAD 27bf94a9, so an off-by-one-context-block citation, not revision drift)",
+    "CLAIM 2: reproduced: at 462d1480 review_names.md:108-160 is the Grammar Correctness (110) and Semantic Accuracy (148) rubric block and carries the named defect classes the report lists as codifiable (malformed physical_base 112, novel token 114, non-canonical join 116-118, advisory-alias collapse 133-137, isolation ambiguity 155-157)",
+    "CLAIM 3: reproduced: at 462d1480 workers.py:7069 reads reviewer_comments_per_dim_name and 7070-7077 calls should_trigger_fanout with refine_trigger_keywords/refine_trigger_comment_dims, and refine_name_user.md:104 reads the field and :110 parses it with fromjson, matching the report's keyword-scan and JSON-blob claims",
+    "CLAIM_SUMMARY: agrees: the run's summary line (manifest artifacts) reads '21 call-site rows each citing file:line ... exactly 10 numbered Jev question designs ... 4 sections as briefed', and from the report's directory `grep -cE '^\\|.*\\.py:[0-9]+' report.md` gives 21, `grep -cE '^### [0-9]+\\.' report.md` gives 10, `grep -cE '^## [0-9]\\.' report.md` gives 4 - the summary's figures are the table's figures"
+  ],
+  "claim_summary": {
+    "detail": "Re-run from the report's directory: 21 pipe-rows matching '^\\|.*\\.py:[0-9]+', 10 '### N.' numbered designs, 4 '## N.' sections. 21==21, 10==10, 4==4. Secondary: the report's 'Review is 54% of all spend' (line 16) does not reconcile with the phase figures beside it (review_docs 848 + review_name 299 = 1147/1887 = 60.8%), but it is copied verbatim from the dispatch brief.",
+    "summary_line": "21 call-site rows each citing file:line; exactly 10 numbered Jev question designs; 4 sections as briefed (the run's headline metrics in its manifest artifacts; the report itself carries no numeric summary line over a table)",
+    "verdict": "agrees"
+  },
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "imas_codex/standard_names/review/pipeline.py:1971-1983",
+      "detail": "The report cites pipeline.py:1971-1983 for 'the fields the prompt already renders'. At 462d1480 those lines are the cached system-context dict and its render call: 1970 `system_context = {`, 1971 `**base_ctx,`, 1972 `\"items\": []`, 1973 `\"existing_names\": []`, 1974 `\"review_scored_examples\": _scored_examples,`, 1976 `\"nearby_existing_names\": []`, 1977 `\"audit_findings\": []`, 1978 `\"prior_reviews\": prior_reviews or [],`, 1981 `system_prompt = render_prompt(prompt_name, system_context)` - i.e. the items and existing_names the design needs are empty literals there. The populated candidate render context carrying the state fields the design lists is 14 lines earlier: 1957 `context = {`, 1959 `\"items\": items_with_issues,`, 1960 `\"existing_names\": (existing_names or [])[:200],`, 1963 `\"nearby_existing_names\": neighborhood,`, 1984 `user_prompt = render_prompt(prompt_name, context)`. The field set the design names (name/description/documentation/unit/kind/physics_domain/source DD definitions via base_ctx+items, sibling/child names via nearby_existing_names, validation_issues, scored exemplars via review_scored_examples) is present, but at 1957-1967, not 1971-1983. Identical text at HEAD 27bf94a9, so this is an off-by-one-context-block citation, not revision drift.",
+      "finding": "rank 1 - Docs review, the docs-axis quorum: the state fields the Jev judgment needs are 'the fields the prompt already renders'",
+      "verdict": "differs"
+    },
+    "CLAIM 2": {
+      "cites": "imas_codex/llm/prompts/sn/review_names.md:108-160",
+      "detail": "At 462d1480 review_names.md:108-160 is the grammar+semantic rubric block: 108 opens the tail of '## Scoring Dimensions' (99), 110 '### 1. Grammar Correctness (0-20)' runs to 147, 148 '### 2. Semantic Accuracy (0-20)' runs to 160. It carries the named defect classes the report's section 2 lists as codifiable: malformed `physical_base` (112), novel token in a closed vocabulary segment (114), non-canonical operator join (116-118), grammar-owned advisory-alias collapse (133-137), and ambiguity in isolation / self-descriptiveness (155-157). Reproduced. Note the range is the grammar+semantic block; '### 3. Naming Convention Adherence' is at 196 and '### 4. Completeness' at 203, outside the cited range, which the design does not claim to cover.",
+      "finding": "rank 2 - Name review, the names-axis quorum: the rubric's own defect definitions become the Noul texts",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "imas_codex/standard_names/workers.py:7065-7071, imas_codex/llm/prompts/sn/refine_name_user.md:104",
+      "detail": "At 462d1480 workers.py:7069 reads `reviewer_comments = item.get(\"reviewer_comments_per_dim_name\")` and 7070-7077 calls `should_trigger_fanout(reviewer_comments_per_dim=reviewer_comments, chain_length=..., chain_history=..., keywords=fanout_settings.refine_trigger_keywords, dims=fanout_settings.refine_trigger_comment_dims, char_cap=fanout_settings.refine_trigger_comment_chars)` - the keyword scan over the per-dim comments as claimed. refine_name_user.md:104 reads the same field (`{% set _cur_comments = item.reviewer_comments_per_dim_name | default(none, true) %}`) and :110 parses it with fromjson (`{% set _per_dim = (_cur_comments | fromjson) if _cur_comments else {} %}`); the report's section 2 cites the 104-116 range, which contains both. Reproduced.",
+      "finding": "rank 3 - Structured review verdict replacing free-text comments: refine_name/refine_docs parse a JSON comment blob and the fanout trigger keyword-scans it",
+      "verdict": "reproduced"
+    },
+    "CLAIM_SUMMARY": {
+      "detail": "The report's own file carries no numeric summary line over a table; the run's summary line - its headline metrics in the manifest artifacts - reads '21 call-site rows each citing file:line (gate-head.log line \"head rows: 21\"), exactly 10 numbered Jev question designs ... 4 sections as briefed'. Re-run from the report's directory: `grep -cE '^\\|.*\\.py:[0-9]+' report.md` = 21 (the section 1 call-site table carries rows numbered 1..21), `grep -cE '^### [0-9]+\\.' report.md` = 10 (exactly ten '### N.' Jev designs), `grep -cE '^## [0-9]\\.' report.md` = 4 (four sections). 21==21, 10==10, 4==4, so the summary agrees with the tables beneath it. Secondary observation, not the count check: the report's only derived percentage, 'Review is 54% of all spend' (line 16), does not reconcile with the six phase figures listed beside it - the two phases literally named review (review_docs USD 848 + review_name USD 299) are 1147/1887 = 60.8%; the line is carried verbatim from the dispatch brief, which states the same 54%.",
+      "verdict": "agrees"
+    }
+  },
+  "claims": [
+    {
+      "cites": "imas_codex/standard_names/review/pipeline.py:1971-1983",
+      "rank": 1,
+      "report_figure": "the state fields the docs-review prompt renders are at pipeline.py:1971-1983",
+      "rerun_figure": "1971-1983 is the cached system-context dict (\"items\": [], \"existing_names\": []); the populated candidate render context carrying the listed state fields is at pipeline.py:1957-1967 (14 lines earlier)",
+      "verdict": "differs"
+    },
+    {
+      "cites": "imas_codex/llm/prompts/sn/review_names.md:108-160",
+      "rank": 2,
+      "report_figure": "review_names.md:108-160 carries the rubric's named defect definitions",
+      "rerun_figure": "108-160 is the Grammar Correctness (110-147) + Semantic Accuracy (148-160) rubric block, carrying malformed physical_base, novel-token, non-canonical-join, advisory-alias, and isolation-ambiguity defect classes",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "imas_codex/standard_names/workers.py:7065-7071, imas_codex/llm/prompts/sn/refine_name_user.md:104",
+      "rank": 3,
+      "report_figure": "refine_name reads reviewer_comments_per_dim_name, the fanout trigger keyword-scans it, and the prompt parses it with fromjson",
+      "rerun_figure": "workers.py:7069-7077 reads the field and calls should_trigger_fanout(keywords=refine_trigger_keywords, dims=refine_trigger_comment_dims); refine_name_user.md:104 reads the field and :110 parses it with fromjson",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-12T06:23:33.352Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-12T06:16:10Z",
+  "method": "The reviewed run is read-only (committed nothing past its base), so no gate suite and no diff exist. Its report is a code-read inventory that cites source locations (file:line) rather than shell commands, so each of the three highest-ranked findings (report section 4, 'Ranked candidates for Jev', the report's only ranked list) was re-run against the reviewed revision's own source: the revision was extracted with `git archive 462d1480 | tar -x -C $TMPDIR/tree-462d1480` so it reads the same code the run did, and the cited lines were opened in that tree. The report's own count summary (recorded by the run in its manifest artifacts) was checked from the report's directory by re-running the two gate counts the run recorded. Recorded against the figure each finding states, not against current main (HEAD 27bf94a9), which is not the revision the report was read at.",
+  "project": "imas-codex",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/jev-sn-study/sn-judgment-inventory/report.md",
+  "review_run_id": "r-20261012T061602182866-review-of-sn-judgment-inventory",
+  "reviewed_base_sha": "462d148027273b99de0f32ff1b4285ddf5a5f60e",
+  "reviewed_head_sha": "462d148027273b99de0f32ff1b4285ddf5a5f60e",
+  "reviewed_run_id": "r-20261012T060613508415-sn-judgment-inventory",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run ran no gate suite.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T06:24:00+00:00"
+}
