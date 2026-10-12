@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T06:40:12.092Z",
+  "dispatched_at": "2026-10-12T06:32:25Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html:198",
+      "id": "done_when-1",
+      "reason": "with no negative control the node cannot show the incumbent path is actually gone, and \"listed with line counts\" is satisfied by any list, including one of paths it failed to delete.",
+      "text": "\u00a77's done-when is \"the deleted paths and seats are listed with line counts, and the LLMCost phase split ... shows review spend by judge kind\"; neither clause can fail, so a partial deletion that leaves the quorum path callable passes the node",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html:59",
+      "id": "anchors_resolve-1",
+      "reason": "each citation still resolves to the function or its usage the section names, so a reader reaches the mechanism without being sent to a deleted or renamed target.",
+      "text": "the plan cites `should_trigger_fanout` at `workers.py:7070`, but that line is a call site; the function is defined at `imas_codex/standard_names/fanout/trigger.py:105`, and the two adjacent citations (`_run_rd_quorum...` `workers.py:7881`, `_review_single_batch` `pipeline.py:2008`) land inside the named functions' bodies (defs at 7758 and 1882), not on their definition lines",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html:155",
+      "id": "single_goal-1",
+      "reason": "\u00a75 makes the trigger read no comment text and \u00a77 removes its code, a deliberate make-then-delete split of one dependency named in \u00a71, so no node is closed on an ambiguous verdict.",
+      "text": "\u00a75 carries two deliverables: re-rendering the refine prompts from failed checks and retiring the fanout keyword list, and \u00a77:193 separately claims the comment-keyword trigger's deletion, so one deletion is owned by two sections",
+      "type": "single_goal",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html:118",
+      "id": "reasoning-1",
+      "reason": "\u00a73 can still report the paired difference and its 95% interval, so the measurement runs; the unlocked margin gates the later wiring decision, not \u00a73's evidence fragment.",
+      "text": "\u00a73's done-when requires \"the verdict under the deployment rule of `sn-judgment-evaluation` \u00a77\", but in that plan the governing decision `non-inferiority-margin` carries no choice (`data-choice=\"\"`), so the margin the rule compares the paired-AUC lower bound against is not locked",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "f6cf60cf2cadd0f4dc186725d0ef4009408a27403b0a7f6c70bf88980b88be36",
+  "plan_slug": "sn-review-through-jev",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T063215270678-plan-review-of-sn-review-through-jev",
+  "reviewed_blob_sha": "874af74c57171dd4473f3872427764384a147022",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the `should_trigger_fanout` citation names a call site, and the two other file:line anchors point into function bodies rather than their definitions.",
+    "done_when": "a finding \u2014 \u00a77's done-when is an observation that cannot fail.",
+    "evidence_paths": "pass \u2014 no scratchpad, node-local or temporary path is named; the sibling plan's `docs/evidence/fragments/<plan>/` convention carries the fragments.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach symbols, and there is no changelog prose.",
+    "reasoning": "a finding \u2014 \u00a73's done-when asks for a verdict under a rule whose margin is unlocked.",
+    "single_goal": "a finding \u2014 \u00a75 bundles two changes (refine prompt and fanout trigger).",
+    "wiring": "pass \u2014 the three declared depends-on groups resolve to real sections (`sn-judgment-evaluation#s3`,`#s4`,`#s5`,`#s6` and `sn-house-style#s4`), and no edge points at a wrong node."
+  },
+  "section_digests": {
+    "_document": "26cecc972562e5888e1a0fbf1dcae2f0b5e2fbd0abda6f02be0d0f1348b659fa",
+    "s1": "e00b420f98d04762824243df2e3bcf94431cbc0eeabd257b3a15218b49a5e95b",
+    "s2": "aef487eb41532a66249de3a9bffca7a6b5296e631916efc6a1a7b13fff4c4e57",
+    "s3": "0fcd227853cfa723d86d5b86a63e45c6f25662fcb21d7448345e22ea1a7c3170",
+    "s4": "e78806378f26a26e205e71908b31a7cc50522c0f562ceab8c62c76181e212f2e",
+    "s5": "7372d3ea4c0cc45c27bc84ae639373267837ed859544552b37f1b746d860dc7c",
+    "s6": "302fcd03fbde84ccac2e27b1a967b5abe0865d72c784a3232ff0113f5720b038",
+    "s7": "e09ddc4150494bd306d0e0d9b1ea3357664276c68b4e80cc97f969818ffd7227"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T07:11:49.999545+00:00"
+}
