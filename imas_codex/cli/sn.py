@@ -812,6 +812,37 @@ def _compute_pool_pending(
     return {k: v["pending"] for k, v in progress.items()}
 
 
+def _docs_drain_factory(**run_kwargs: Any) -> Callable[[str, float], float | None]:
+    """Build a campaign drain that runs one docs-only flush and returns its spend.
+
+    Both the six-pool campaign drain and the harmonize apply drain invoke the
+    same ``_run_sn_cmd`` docs-only flush; only their run-command kwargs differ
+    (the campaign forwards the CLI's review caps, harmonize keeps the defaults).
+    """
+
+    def _drain(run_id: str, batch_cost_cap: float) -> float | None:
+        row = _run_sn_cmd(
+            cost_limit=batch_cost_cap,
+            per_domain_limit=None,
+            dry_run=False,
+            skip_generate=True,
+            docs_only=True,
+            flush=True,
+            source="dd",
+            scope_run_id=run_id,
+            **run_kwargs,
+        )
+        # The pool session bills LLMCost under its own run_id, not the campaign
+        # scope run_id — return the session's measured spend so the ceiling
+        # accounts real dollars.
+        if row is None:
+            return None
+        cost = row.get("cost_spent")
+        return float(cost) if cost is not None else None
+
+    return _drain
+
+
 def _run_sn_cmd(
     *,
     cost_limit: float,
@@ -2794,35 +2825,19 @@ def sn_run(
         # attributable without being mistaken for a drain's measured cost.
         campaign_gate_run_id = str(_uuid.uuid4())
 
-        def _campaign_drain(run_id: str, batch_cost_cap: float) -> float | None:
-            row = _run_sn_cmd(
-                cost_limit=batch_cost_cap,
-                time_limit=time_limit,
-                compose_model=compose_model,
-                per_domain_limit=None,
-                dry_run=False,
-                quiet=quiet,
-                domains=domains,
-                verbose=verbose,
-                min_score=min_score,
-                rotation_cap=rotation_cap,
-                escalation_model=escalation_model,
-                review_name_backlog_cap=review_name_backlog_cap,
-                review_docs_backlog_cap=review_docs_backlog_cap,
-                skip_generate=True,
-                skip_review=skip_review,
-                docs_only=True,
-                flush=True,
-                source="dd",
-                scope_run_id=run_id,
-            )
-            # The pool session bills LLMCost under its own run_id, not the
-            # campaign scope run_id — return the session's measured spend so
-            # the campaign cost ceiling accounts real dollars.
-            if row is None:
-                return None
-            cost = row.get("cost_spent")
-            return float(cost) if cost is not None else None
+        _campaign_drain = _docs_drain_factory(
+            time_limit=time_limit,
+            compose_model=compose_model,
+            quiet=quiet,
+            domains=domains,
+            verbose=verbose,
+            min_score=min_score,
+            rotation_cap=rotation_cap,
+            escalation_model=escalation_model,
+            review_name_backlog_cap=review_name_backlog_cap,
+            review_docs_backlog_cap=review_docs_backlog_cap,
+            skip_review=skip_review,
+        )
 
         from imas_codex.standard_names.campaign import default_audit_revalidate
         from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
@@ -5929,7 +5944,7 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
     "report_mode",
     is_flag=True,
     default=False,
-    help="Report mode (the default and, for now, the only mode).",
+    help="Report mode (the default): list each family's members, anchor, drift and lint counts.",
 )
 @click.option(
     "--apply",
@@ -5946,6 +5961,15 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
     "dry_run",
     is_flag=True,
     help="With --apply: print the planned calls and estimated cost, write nothing.",
+)
+@click.option(
+    "--force",
+    "force_reason",
+    default=None,
+    help=(
+        "With --apply: apply even to names recommended into a catalog pull "
+        "request, recording REASON on the run. Without it such names are refused."
+    ),
 )
 @click.option(
     "-c",
@@ -5972,16 +5996,25 @@ def sn_harmonize(
     report_mode: bool,
     apply_mode: bool,
     dry_run: bool,
+    force_reason: str | None,
     cost_limit: float,
     as_json: bool,
 ) -> None:
-    """Read-only pattern-family harmonization report.
+    """Pattern-family harmonization: report by default, apply with ``--apply``.
 
-    Reports every pattern family in scope: its members, its documentation
-    anchor, its description drift, and its lint finding counts by class, then
-    a scope total. Writes nothing to the graph — the report runs the
-    deterministic lint composition directly and never the embedding-writing
-    audit preflight.
+    In report mode (the default) it lists every pattern family in scope: its
+    members, its documentation anchor, its description drift, and its lint
+    finding counts by class, then a scope total. Writes nothing to the graph —
+    the report runs the deterministic lint composition directly and never the
+    embedding-writing audit preflight.
+
+    With ``--apply`` it drains each family anchor-first through the
+    anchor-gated campaign, halting a family whose anchor does not converge.
+    An apply refuses any name already recommended into a catalog pull request
+    (a member of an open frozen review roster, or a name at ``approved`` or
+    ``contested``), naming each one, unless ``--force REASON`` records the
+    operator's reason on the run. ``--dry-run`` prints the plan and writes
+    nothing.
 
     Exactly one scope is required: ``--batch``, ``--family``, ``--concept``
     or ``--all``.
@@ -5992,6 +6025,8 @@ def sn_harmonize(
       imas-codex sn harmonize --family ion_temperature
       imas-codex sn harmonize --concept temperature
       imas-codex sn harmonize --all --json
+      imas-codex sn harmonize --family ion_temperature --apply
+      imas-codex sn harmonize --family ion_temperature --apply --force "typo in anchor"
     """
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.harmonize import (
@@ -6056,6 +6091,7 @@ def sn_harmonize(
             apply_families,
             plan_family_applies,
         )
+        from imas_codex.standard_names.protection import RecommendedNameError
 
         with GraphClient() as gc:
             plans = plan_family_applies(gc, seeds=seeds, min_size=min_size)
@@ -6076,34 +6112,23 @@ def sn_harmonize(
                 )
                 return
 
-            def _harmonize_drain(run_id: str, batch_cost_cap: float) -> float | None:
-                row = _run_sn_cmd(
-                    cost_limit=batch_cost_cap,
-                    per_domain_limit=None,
-                    dry_run=False,
-                    quiet=False,
-                    skip_generate=True,
-                    docs_only=True,
-                    flush=True,
-                    source="dd",
-                    scope_run_id=run_id,
-                )
-                if row is None:
-                    return None
-                cost = row.get("cost_spent")
-                return float(cost) if cost is not None else None
+            _harmonize_drain = _docs_drain_factory(quiet=False)
 
-            outcome = apply_families(
-                gc,
-                seeds=seeds,
-                min_size=min_size,
-                drain_fn=_harmonize_drain,
-                plan=plans,
-                budget=CampaignBudget(
-                    per_batch_cost_cap=cost_limit,
-                    campaign_cost_ceiling=cost_limit,
-                ),
-            )
+            try:
+                outcome = apply_families(
+                    gc,
+                    seeds=seeds,
+                    min_size=min_size,
+                    drain_fn=_harmonize_drain,
+                    force=force_reason,
+                    plan=plans,
+                    budget=CampaignBudget(
+                        per_batch_cost_cap=cost_limit,
+                        campaign_cost_ceiling=cost_limit,
+                    ),
+                )
+            except RecommendedNameError as exc:
+                raise click.ClickException(str(exc)) from exc
 
         if as_json:
             summary = [

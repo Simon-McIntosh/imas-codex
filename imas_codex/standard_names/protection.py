@@ -166,6 +166,100 @@ def refuse_protected_automatic_deletion(
         )
 
 
+class RecommendedNameError(RuntimeError):
+    """An apply targeted a name already recommended into a catalog request."""
+
+
+def _frozen_roster_requests(reviews_dir: Any | None) -> dict[str, str]:
+    """Map each name of an opened frozen review roster to its request evidence.
+
+    A frozen review roster under ``manifests/reviews/`` is the reproducible
+    batch identity carried through export → PR → merge. Once the roster has
+    recorded the candidate pull request it recomposed (``pr_number``/``pr_url``),
+    its members are text a physicist has been asked to review. Folding the
+    request back promotes those members to ``name_stage=approved``, which
+    :func:`recommended_name_protections` reads from the graph; until then the
+    roster itself is the only record that they are committed.
+
+    Returns ``{standard_name_id: "candidate_request=<url>"}``. Reads files, not
+    the graph; a missing or unreadable roster contributes no evidence.
+    """
+    from pathlib import Path
+
+    import yaml
+
+    from imas_codex.standard_names.catalog_release import default_reviews_dir
+
+    directory = Path(reviews_dir) if reviews_dir else default_reviews_dir()
+    evidence: dict[str, str] = {}
+    if not directory.is_dir():
+        return evidence
+    for path in sorted(directory.glob("*.sn_names.yaml")):
+        try:
+            doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        except (OSError, yaml.YAMLError):
+            continue
+        if not isinstance(doc, dict):
+            continue
+        if not (doc.get("pr_number") or doc.get("pr_url")):
+            # No candidate request recorded: the batch was never recommended.
+            continue
+        pr_ref = doc.get("pr_url") or f"pr_number={doc.get('pr_number')}"
+        for name in doc.get("names") or []:
+            evidence.setdefault(str(name), f"candidate_request={pr_ref}")
+    return evidence
+
+
+def recommended_name_protections(
+    gc: Any,
+    name_ids: list[str],
+    *,
+    reviews_dir: Any | None = None,
+) -> dict[str, str]:
+    """Return evidence that a name is recommended into a catalog request.
+
+    Three classes make a name committed, so a documentation rewrite would
+    change text a physicist has been asked to review, or has already reviewed:
+
+    * a member of a frozen review roster whose candidate request is open;
+    * a name at ``name_stage=approved`` (accepted through a merged request);
+    * a name at ``name_stage=contested`` (edited by a reviewer during one).
+
+    The result is keyed by identity so a caller can name the exact evidence
+    that refused a move. Reads the roster files once and the graph once.
+    """
+    names = sorted({name for name in name_ids if name})
+    if not names:
+        return {}
+    evidence: dict[str, set[str]] = {}
+    wanted = set(names)
+    for name_id, reason in _frozen_roster_requests(reviews_dir).items():
+        if name_id in wanted:
+            evidence.setdefault(name_id, set()).add(reason)
+    rows = (
+        gc.query(
+            """
+            UNWIND $names AS name
+            MATCH (sn:StandardName {id: name})
+            RETURN sn.id AS id, sn.name_stage AS name_stage
+            """,
+            names=names,
+        )
+        or []
+    )
+    for row in rows:
+        stage = row.get("name_stage")
+        if stage == "approved":
+            evidence.setdefault(str(row["id"]), set()).add("name_stage=approved")
+        elif stage == "contested":
+            evidence.setdefault(str(row["id"]), set()).add("name_stage=contested")
+    return {
+        name_id: ", ".join(sorted(reasons))
+        for name_id, reasons in evidence.items()
+        if reasons
+    }
+
+
 def _authority_value(value: Any) -> Any:
     """Normalize relationship collections without changing scalar meaning."""
     if isinstance(value, list | tuple | set | frozenset):
