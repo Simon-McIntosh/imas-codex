@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="fragment">
+  <title>The documentation prompt change broke six tests; each is repaired at its cause</title>
+</head>
+<body>
+  <section id="shs-prompt-regressions-landing">
+    <h2>The documentation prompt change broke six tests; each is repaired at its cause</h2>
+    <p>Two merges changed the documentation prompts and the review path. Six
+    tests outside their gates stopped passing. Measuring the old revision from
+    a <code>git archive</code> tree (never a checkout in the node's worktree):
+    all six pass at <code>776b372e6</code> and at <code>742809ddb</code>, the
+    first parent of the breaking merge, and all six fail at
+    <code>7977270a4</code> — the merge that renders the selected conventions
+    registry entries in the documentation prompts. That merge carries both the
+    conventions wiring in <code>workers.py</code> and the probe-order/advice
+    template edits; it is the only merge in the range that breaks any of the
+    six.</p>
+
+    <table id="shs-prompt-regressions-tests">
+      <caption>Gate: <code>uv run pytest -p no:cacheprovider -q &lt;six ids&gt;</code>. Passes-before measured in a <code>git archive</code> copy of
+      <code>776b372e6</code>; the merge column is the first revision in the range at which the test fails.</caption>
+      <thead><tr><th>Test</th><th>Passes before</th><th>Merge that broke it</th><th>Cause</th><th>Repair kind</th></tr></thead>
+      <tbody>
+        <tr id="shs-prompt-regressions-golden"><td><code>test_edit_prompt_injection.py::test_no_edit_render_matches_golden</code></td><td>yes (776b372e6)</td><td>7977270a4</td><td>the no-edit text of <code>sn/generate_docs_user</code>, <code>sn/refine_docs_user</code> and <code>sn/review_docs_user</code> changed (conventions block, removed family-opening advice), so the render no longer matches the pre-change golden capture</td><td>golden update — the three captures recaptured by rendering the templates with a no-edit context</td></tr>
+        <tr id="shs-prompt-regressions-clipped"><td><code>test_pool_batch_processors.py::TestOnEventPayloadsNotTruncated::test_review_docs_comment_not_clipped</code></td><td>yes (776b372e6)</td><td>7977270a4</td><td><code>prepare_docs_review_request</code> called <code>conventions_context_for("magnetic_flux_density")</code> unguarded; <code>select_conventions</code> parses the name strictly and raised <code>ParseError</code> for a name the grammar does not carry, aborting the batch before the reviewer ran</td><td>product fix — the render site routes through a helper that treats an unparseable name as an empty selection</td></tr>
+        <tr id="shs-prompt-regressions-stages"><td><code>test_review_docs_stages.py::TestWorkerStreamsPerItemDocs::test_worker_streams_per_item</code></td><td>yes (776b372e6)</td><td>7977270a4</td><td>same unguarded selection on the fixture id <code>sn_0</code> (<code>ParseError</code>), so the worker emitted no stream item</td><td>product fix (same helper)</td></tr>
+        <tr id="shs-prompt-regressions-quorum-two"><td><code>test_review_quorum_pool.py::test_docs_two_models_agreement_writes_two_cycles</code></td><td>yes (776b372e6)</td><td>7977270a4</td><td>same unguarded selection on the fixture id <code>test_field</code> (<code>ParseError</code>) aborted the docs batch before either reviewer cycle</td><td>product fix (same helper)</td></tr>
+        <tr id="shs-prompt-regressions-quorum-three"><td><code>test_review_quorum_pool.py::test_docs_three_models_disagreement_runs_escalator</code></td><td>yes (776b372e6)</td><td>7977270a4</td><td>same cause, fixture id <code>test_field</code></td><td>product fix (same helper)</td></tr>
+        <tr id="shs-prompt-regressions-quorum-parent"><td><code>test_review_quorum_pool.py::test_derived_parent_docs_use_the_complete_reviewer_chain</code></td><td>yes (776b372e6)</td><td>7977270a4</td><td>same cause, fixture id <code>test_field</code></td><td>product fix (same helper)</td></tr>
+      </tbody>
+    </table>
+
+    <p>The four review-path tests are unchanged between the base and the breaking merge, so they pin intended behaviour: a name the local grammar
+    cannot parse must cost the conventions block and nothing else, matching the
+    neighbouring neighbour-fetch and dd-context loads that already degrade
+    rather than abort. The fix adds one helper,
+    <code>_conventions_for_prompt</code>, in
+    <code>imas_codex/standard_names/workers.py</code>, used at the generate,
+    refine and review render sites.</p>
+
+    <h3 id="shs-prompt-regressions-measures-heading">The six pass at head, and the wider gate adds no failure</h3>
+    <table id="shs-prompt-regressions-measures">
+      <caption>All runs on the fleet allocation, from the node worktree at the stated revision, one log file each.</caption>
+      <thead><tr><th>Run</th><th>Revision</th><th>Result</th><th>Log</th></tr></thead>
+      <tbody>
+        <tr id="shs-prompt-regressions-m-base-six"><td>six tests, base arm</td><td>776b372e6 (<code>git archive</code>, module <code>/tmp/shsbase.gFStuR/imas_codex/__init__.py</code>)</td><td>6 passed, EXIT=0</td><td><code>logs/base_six.log</code></td></tr>
+        <tr id="shs-prompt-regressions-m-head-six"><td>six tests, after repair</td><td>HEAD</td><td>6 passed, EXIT=0</td><td><code>logs/head_six_after.log</code></td></tr>
+        <tr id="shs-prompt-regressions-m-negative"><td>negative control: revert each repair</td><td>pre-repair content of the four files</td><td>6 failed, EXIT=1 — the same six ids</td><td><code>logs/negative_control.log</code></td></tr>
+        <tr id="shs-prompt-regressions-m-base-suite"><td>prompt/review/pool gate, base arm</td><td>776b372e6 (141 files)</td><td>33 failed, 1891 passed, 29 errors, EXIT=1</td><td><code>logs/baseline_suite.log</code></td></tr>
+        <tr id="shs-prompt-regressions-m-after-suite"><td>prompt/review/pool gate, after</td><td>HEAD (143 files)</td><td>21 failed, 1916 passed, 29 errors, EXIT=1</td><td><code>logs/after_suite.log</code></td></tr>
+      </tbody>
+    </table>
+
+    <p>The gate file set is
+    <code>rg -l "generate_docs|refine_docs|review_docs|review\.pipeline|quorum|pool_batch" tests/standard_names/</code>.
+    Comparing the head failure ids against the base arm's, the head arm adds no
+    failure: every head failure is also a base failure, and twelve ids that fail
+    at base pass at head from peer merges in the range. The 21 remaining
+    failures are all in <code>test_export_*</code>,
+    <code>test_catalog_*</code>, <code>test_docs_review_eligibility.py</code>
+    and <code>test_sn_approve_tag.py</code>, outside this node's scope and
+    reported as follow-ons.</p>
+  </section>
+</body>
+</html>
