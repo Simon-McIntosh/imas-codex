@@ -174,20 +174,18 @@ class Neo4jOperation:
             )
 
             # GPFS doesn't propagate POSIX locks across nodes, so the
-            # check above misses Neo4j running on a SLURM compute node.
+            # check above misses Neo4j running on a SLURM compute node.  A
+            # job in any state may still hold the store, and an squeue that
+            # cannot answer raises rather than reading as no job.
             if not needs_stop:
-                try:
-                    from imas_codex.cli.services import (
-                        _get_neo4j_job,
-                        _is_graph_compute_target,
-                    )
+                from imas_codex.cli.services import (
+                    _NEO4J_JOB,
+                    _get_service_job,
+                    _is_graph_compute_target,
+                )
 
-                    if _is_graph_compute_target():
-                        job = _get_neo4j_job()
-                        if job and job["state"] == "RUNNING":
-                            needs_stop = True
-                except Exception:
-                    pass
+                if _is_graph_compute_target():
+                    needs_stop = _get_service_job(_NEO4J_JOB, strict=True) is not None
 
             if needs_stop:
                 self.was_running = True
@@ -269,25 +267,19 @@ class Neo4jOperation:
             return False
 
     def _stop_neo4j(self) -> None:
-        # Try SLURM-based stop first (Neo4j on compute node)
-        try:
-            from imas_codex.cli.services import _is_graph_compute_target
+        # SLURM-hosted Neo4j: the store files are touched only after the job
+        # has left the scheduler, and a failed stop raises so nothing dumps or
+        # replaces files under a database that is still flushing.
+        from imas_codex.cli.services import (
+            _clean_neo4j_locks,
+            _is_graph_compute_target,
+            stop_neo4j_job,
+        )
 
-            if _is_graph_compute_target():
-                from imas_codex.cli.services import (
-                    _NEO4J_JOB,
-                    _cancel_service_job,
-                    _clean_neo4j_locks,
-                    _get_neo4j_job,
-                )
-
-                job = _get_neo4j_job()
-                if job and job["state"] == "RUNNING":
-                    node = job["node"]
-                    _cancel_service_job(_NEO4J_JOB)
-                    _clean_neo4j_locks(node)
-        except Exception:
-            pass
+        if _is_graph_compute_target():
+            node = stop_neo4j_job()
+            if node:
+                _clean_neo4j_locks(node)
 
         # Always kill local orphans — recovery cycles or manual starts
         # can leave Neo4j processes running directly on the login node

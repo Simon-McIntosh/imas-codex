@@ -424,16 +424,21 @@ def _run_on_node(node: str, cmd: str, timeout: int = 30) -> str:
 # ── Per-service SLURM job management ─────────────────────────────────────
 
 
-def _get_service_job(job_name: str) -> dict | None:
+def _get_service_job(job_name: str, *, strict: bool = False) -> dict | None:
     """Get the active SLURM job for a named service.
 
     Returns dict with job_id, state, node, gres, time, cpus — or None.
+    With ``strict``, a failed ``squeue`` raises instead of reading as no job,
+    for callers that are about to act on the answer.
     """
     try:
         out = _run_remote(
-            f'squeue -n {job_name} -u "$USER" --format="%A|%T|%M|%N|%b|%C" --noheader'
+            f'squeue -n {job_name} -u "$USER" --format="%A|%T|%M|%N|%b|%C" --noheader',
+            check=strict,
         )
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        if strict:
+            raise
         return None
     for line in out.strip().split("\n"):
         line = line.strip()
@@ -666,6 +671,91 @@ def _cancel_service_job(job_name: str) -> bool:
         return False
 
 
+# The bracketed dot keeps the pattern from matching the remote shell whose
+# argv carries this very text, so pgrep finds only the JVMs.
+_NEO4J_STORE_HOLDERS = "org[.]neo4j[.](server[.]Neo4jCommunity|cli[.]AdminTool)"
+_NEO4J_TERM_GRACE_SECONDS = 120
+_NEO4J_EXIT_TIMEOUT_SECONDS = 180.0
+
+
+def _job_listed(job_id: str) -> bool:
+    """Whether the scheduler still lists ``job_id`` in any state."""
+    out = _run_remote('squeue -u "$USER" --noheader --format="%A"', check=True)
+    return job_id in {line.strip() for line in out.splitlines()}
+
+
+def _wait_for_job_exit(job_id: str, node: str, timeout: float) -> None:
+    """Return once ``job_id`` has left the scheduler; raise at the deadline.
+
+    A failed ``squeue`` counts as still listed: the caller is about to touch
+    the store files, and an unanswered question is not an empty queue.
+    """
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            listed = _job_listed(job_id)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            listed = True
+        if not listed:
+            return
+        if time.monotonic() >= deadline:
+            raise click.ClickException(
+                f"Neo4j job {job_id} on {node} is still listed {timeout:.0f} s "
+                "after it was cancelled; its store files are not safe to touch"
+            )
+        time.sleep(2)
+
+
+def _term_neo4j_on_node(
+    node: str, grace_seconds: int = _NEO4J_TERM_GRACE_SECONDS
+) -> None:
+    """SIGTERM the Neo4j server JVM on ``node`` and wait for it to exit.
+
+    The scheduler's own SIGTERM is followed by SIGKILL after its KillWait,
+    which a shutdown checkpoint can outlast, so the JVM is asked first and
+    given the grace period to finish flushing.
+    """
+    script = (
+        f'pid=$(pgrep -u "$USER" -f "{_NEO4J_STORE_HOLDERS}" | head -1)\n'
+        'if [ -n "$pid" ]; then\n'
+        '    echo "TERM neo4j $pid"\n'
+        '    kill -TERM "$pid"\n'
+        f"    for i in $(seq 1 {grace_seconds}); do\n"
+        '        kill -0 "$pid" 2>/dev/null || { echo "neo4j exited after ${i}s"; break; }\n'
+        "        sleep 1\n"
+        "    done\n"
+        "fi\n"
+    )
+    try:
+        result = _run_on_node(node, script, timeout=grace_seconds + 30)
+        if result.strip():
+            click.echo(f"  {result.strip()}")
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+        click.echo(f"  SIGTERM on {node} did not confirm exit ({exc}); cancelling")
+
+
+def stop_neo4j_job(timeout: float = _NEO4J_EXIT_TIMEOUT_SECONDS) -> str | None:
+    """Stop the Neo4j SLURM job; return its node once the job has gone.
+
+    ``scancel`` only signals the job and returns at once, while Neo4j goes on
+    flushing its shutdown checkpoint for tens of seconds.  Replacing or
+    dumping the store files inside that window tears them: the flushes land
+    in the inode being replaced and are lost.  So this returns only after the
+    job id has left ``squeue``, and raises if it is still listed at the
+    deadline.  Returns None when no Neo4j job is listed.
+    """
+    job = _get_service_job(_NEO4J_JOB, strict=True)
+    if job is None:
+        return None
+    job_id, node = job["job_id"], job["node"]
+    if job["state"] == "RUNNING":
+        _term_neo4j_on_node(node)
+    _run_remote(f"scancel {job_id}", check=False)
+    _wait_for_job_exit(job_id, node, timeout)
+    click.echo(f"  Neo4j job {job_id} on {node} has exited")
+    return node
+
+
 def _stop_service(node: str, name: str) -> bool:
     """Stop a named service by canceling its SLURM job.
 
@@ -890,8 +980,16 @@ def _clean_neo4j_locks(node: str) -> None:
     Never delete Lucene ``write.lock`` files (inside ``schema/index/``
     directories) — doing so corrupts vector indexes and can cause
     total data loss via checkpoint failure.
+
+    Refuses while any Neo4j server or admin JVM is alive on the node.  A
+    running database keeps writing into the inode it opened, so replacing
+    the file under it discards every later flush and tears the store.
     """
     clean = (
+        f'if pids=$(pgrep -u "$USER" -f "{_NEO4J_STORE_HOLDERS}"); then\n'
+        '    echo "neo4j_alive" $pids\n'
+        "    exit 0\n"
+        "fi\n"
         "DATA=$HOME/.local/share/imas-codex/neo4j/data\n"
         "# Remove coordination lock files\n"
         'rm -f "$DATA"/databases/store_lock "$DATA"/databases/*/database_lock '
@@ -910,9 +1008,14 @@ def _clean_neo4j_locks(node: str) -> None:
         "echo locks_cleaned\n"
     )
     try:
-        _run_on_node(node, clean, timeout=120)
+        result = _run_on_node(node, clean, timeout=120)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-        pass
+        return
+    if "neo4j_alive" in result:
+        raise click.ClickException(
+            f"Neo4j is still running on {node} ({result.strip()}); "
+            "refusing to touch its store files"
+        )
 
 
 def _kill_neo4j_on_node(node: str) -> None:
@@ -922,15 +1025,20 @@ def _kill_neo4j_on_node(node: str) -> None:
     (e.g. after a failed deploy with health check timeout).
     """
     kill_cmd = (
-        'pids=$(pgrep -u $USER -f "neo4j.*console|Neo4jCommunity" 2>/dev/null)\n'
+        f'pids=$(pgrep -u "$USER" -f "{_NEO4J_STORE_HOLDERS}")\n'
         'if [ -n "$pids" ]; then\n'
-        '    echo "Killing orphaned neo4j: $pids"\n'
-        '    echo "$pids" | xargs kill -9 2>/dev/null || true\n'
-        "    sleep 2\n"
+        '    echo "Killing orphaned neo4j:" $pids\n'
+        "    kill -9 $pids 2>/dev/null || true\n"
+        "    for i in $(seq 1 30); do\n"
+        "        alive=0\n"
+        '        for p in $pids; do kill -0 "$p" 2>/dev/null && alive=1; done\n'
+        '        [ "$alive" = 0 ] && break\n'
+        "        sleep 1\n"
+        "    done\n"
         "fi\n"
     )
     try:
-        result = _run_on_node(node, kill_cmd, timeout=15)
+        result = _run_on_node(node, kill_cmd, timeout=45)
         if "Killing" in result:
             click.echo(f"  {result.strip()}")
     except subprocess.CalledProcessError:
@@ -1089,6 +1197,10 @@ def deploy_neo4j() -> dict:
             f"({job['cpus']} CPUs, {job['time']})"
         )
         return job
+
+    # A job still completing is flushing its shutdown checkpoint
+    if job and job["state"] == "COMPLETING":
+        _wait_for_job_exit(job["job_id"], job["node"], _NEO4J_EXIT_TIMEOUT_SECONDS)
 
     # Kill orphaned Neo4j processes on the target node
     _partition, gpu = _embedding_target()

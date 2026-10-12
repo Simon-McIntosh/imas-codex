@@ -311,19 +311,11 @@ def graph_stop(data_dir: str | None) -> None:
     loc_info = resolve_location(location)
 
     if loc_info.is_compute:
-        from imas_codex.cli.services import (
-            _NEO4J_JOB,
-            _cancel_service_job,
-            _get_neo4j_job,
-        )
+        from imas_codex.cli.services import stop_neo4j_job
 
-        job = _get_neo4j_job()
-        if job and job["state"] == "RUNNING":
-            node = job["node"]
-            if _cancel_service_job(_NEO4J_JOB):
-                click.echo(f"✓ Neo4j [{profile.name}] stopped on {node}")
-            else:
-                click.echo(f"Failed to stop Neo4j [{profile.name}]")
+        node = stop_neo4j_job()
+        if node:
+            click.echo(f"✓ Neo4j [{profile.name}] stopped on {node}")
         else:
             click.echo(f"Neo4j [{profile.name}] not running (no SLURM job)")
         return
