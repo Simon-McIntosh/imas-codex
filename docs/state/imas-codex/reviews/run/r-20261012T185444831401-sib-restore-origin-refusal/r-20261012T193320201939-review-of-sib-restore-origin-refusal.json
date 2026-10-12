@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/sn.py:8623",
+    "imas_codex/cli/sn.py:8638"
+  ],
+  "completed_at": "2026-10-12T19:42:29.376Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "sib-restore-archived-origin",
+      "recorded_at": "2026-10-12T19:44:09.908429+00:00"
+    },
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "sib-restore-archived-origin",
+      "recorded_at": "2026-10-12T19:44:08.991234+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "sib-restore-archived-origin",
+      "recorded_at": "2026-10-12T19:44:10.836799+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-12T19:33:31Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_archive_reconstruction_entry_point.py",
+      "line": "197",
+      "severity": "blocking",
+      "text": "blocking: the withdrawal at 8987d7312 left no test that composes a restore from an archive carrying origin: catalog_edit and observes the composer's own refusal; test_composition_requires_an_explicit_current_origin (line 197) calls compose_archive_reconstruction_authority(_extraction(), origin=None) over a record whose properties carry no origin (_extraction at :41-53), so it exercises only the no-origin case and stays green under a composer that falls back to the archived origin \u2014 the exact re-arm defect plan \u00a79 names and that imas_codex/cli/sn.py:8429 discards the archived origin to prevent; the CLI test test_cli_compose_requires_an_origin is refused by click's mandatory --origin option before the composer runs, so it does not reach the refusal either."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "follow-on: the record asserts the archived value adds no coverage; that holds only for the refusal-removal mutation at imas_codex/cli/sn.py:8424, not for a composer that sources properties['origin'] when none is stated, so the fragment overstates the surviving coverage."
+    }
+  ],
+  "head_log_revision": "8987d7312245020864e8dd3aa0a262515827408e",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit from 345868c92 to 8987d7312; the net change is one file, docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html, +46 lines, no product code changed.",
+    "done_when": "plan \u00a79's done-when is pinned only for its refusal-removal half; refusal_removed_preexisting.log shows 1 failed, EXIT=1, but no surviving test composes from a catalog_edit-carrying archive and reaches the composer's refusal.",
+    "goal": "the source node's goal is to pin the restore composer's unstated-origin refusal with tests/standard_names/test_restore_origin_refusal.py; that file is absent from the net diff at 8987d7312.",
+    "manifest": "read; it records status complete, the three commits, the gate at 89 passed EXIT=0 before and after, negative_control_log as a bare path, and a follow-on that \u00a79's premise is stale.",
+    "write_paths": "the manifest declares tests/standard_names/test_restore_origin_refusal.py and the sn-integrity-backlog evidence paths; the sole file in the net diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_archive_reconstruction_entry_point.py:197 passes an extraction from _extraction() at :41 that carries no archived origin, so it stays green under a composer that sources properties['origin'] when none is stated, and no surviving test fails on that regression.",
+    "evidence": "baseline.log (header revision 345868c92, 89 passed) and after_repair.log (header revision 8987d7312, 89 passed, EXIT=0) record the gate at both revisions.",
+    "fit": "the fragment at docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html follows the evidence-fragment convention of its directory with the required meta fields.",
+    "goal_fidelity": "tests/standard_names/test_restore_origin_refusal.py is absent from the net diff at 8987d7312, so the file the goal names was withdrawn.",
+    "reuse": "the landed change adds no definition and instead removes a module that duplicated tests/standard_names/test_archive_reconstruction_entry_point.py, so it forks no capability the repository owns.",
+    "scope_discipline": "the net diff 345868c92..8987d7312 touches only docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html, inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is to pin the restore composer's refusal of an unstated archive origin by writing tests/standard_names/test_restore_origin_refusal.py; that file is absent from the net diff at 8987d7312, which leaves only the evidence fragment, so the named deliverable was withdrawn rather than delivered.\nVERDICT done_when: plan \u00a79's done-when \u2014 'a test composes a restore from an archive carrying origin: catalog_edit and sees the refusal, and fails with the refusal removed' \u2014 is pinned only for its second half; refusal_removed_preexisting.log shows test_composition_requires_an_explicit_current_origin reddens (1 failed, EXIT=1) with imas_codex/cli/sn.py:8424 removed, but no surviving test composes from a catalog_edit-carrying archive and reaches the composer's refusal.\nVERDICT write_paths: the reviewed manifest declares tests/standard_names/test_restore_origin_refusal.py and the sn-integrity-backlog evidence paths; the net diff base..head contains exactly one file, docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html, which is inside them.\nVERDICT manifest: read; it records status complete, commits 8987d7312/bba2206bd/97f4dcc26, the gate at 89 passed EXIT=0 before and after, negative_control_log as a bare path, and a follow-on that \u00a79's 'No test pins it' premise is stale at the base.\nVERDICT diff: read commit by commit from 345868c92 to 8987d7312 \u2014 bba2206bd adds tests/standard_names/test_restore_origin_refusal.py (+83), 97f4dcc26 adds the fragment (+37), 8987d7312 removes the test module (-83) and rewrites the fragment; the net change is one file, +46 lines, no product code.\nCALL_SITES: imas_codex/cli/sn.py:8623, imas_codex/cli/sn.py:8638\nSCORE goal_fidelity: 6\nJUSTIFICATION goal_fidelity: tests/standard_names/test_restore_origin_refusal.py is absent from the net diff at 8987d7312, so the file the goal names was withdrawn and no coverage gap was closed in its place.\nSCORE evidence: 15\nJUSTIFICATION evidence: baseline.log (header revision 345868c92, 89 passed) and after_repair.log (header revision 8987d7312, 89 passed, EXIT=0) record the gate at both revisions, though the negative control at refusal_removed_preexisting.log exercises the pre-existing test rather than the withdrawn module's condition.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the net diff 345868c92..8987d7312 touches only docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html, inside the declared write paths, and changes no product code.\nSCORE durability: 6\nJUSTIFICATION durability: tests/standard_names/test_archive_reconstruction_entry_point.py:197 passes an extraction built by _extraction() at :41 that carries no archived origin, so it stays green under a composer that sources properties['origin'] when none is stated \u2014 the re-arm regression \u00a79 names \u2014 and no surviving test fails on it.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment at docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html follows the evidence-fragment convention of its directory with the required meta fields and introduces no name the repository naming rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: the landed change adds no definition and instead removes a module that duplicated tests/standard_names/test_archive_reconstruction_entry_point.py, so it forks no capability the repository owns.\nFINDING tests/standard_names/test_archive_reconstruction_entry_point.py:197 blocking: the withdrawal at 8987d7312 left no test that composes a restore from an archive carrying origin: catalog_edit and observes the composer's own refusal; test_composition_requires_an_explicit_current_origin (line 197) calls compose_archive_reconstruction_authority(_extraction(), origin=None) over a record whose properties carry no origin (_extraction at :41-53), so it exercises only the no-origin case and stays green under a composer that falls back to the archived origin \u2014 the exact re-arm defect that plan \u00a79 names and that imas_codex/cli/sn.py:8429 discards the archived origin to prevent; the cited CLI test test_cli_compose_requires_an_origin is refused by click's mandatory --origin option before the composer runs, so it does not reach the refusal either.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html:23 follow-on: the record states the archived archived value adds no coverage; that holds only for the refusal-removal mutation at imas_codex/cli/sn.py:8424, not for a composer that sources properties['origin'] when none is stated, so the fragment overstates the surviving coverage.",
+  "review_run_id": "r-20261012T193320201939-review-of-sib-restore-origin-refusal",
+  "reviewed_base_sha": "345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd",
+  "reviewed_head_sha": "8987d7312245020864e8dd3aa0a262515827408e",
+  "reviewed_run_id": "r-20261012T185444831401-sib-restore-origin-refusal",
+  "scores": {
+    "durability": 6,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 6,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:41:31.570823+00:00",
+  "total": 81
+}
