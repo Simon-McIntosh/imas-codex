@@ -23,6 +23,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Literal
 
+from imas_codex.search.fusion import RRF_K, rrf_fuse
 from imas_codex.standard_names.grammar_query import (
     ALL_TIER_SEGMENTS,
     TIER_WEIGHT,
@@ -35,9 +36,6 @@ logger = logging.getLogger(__name__)
 
 # Shared executor — module-scoped to avoid per-call thread churn.
 _STREAM_POOL = ThreadPoolExecutor(max_workers=8, thread_name_prefix="sn-search")
-
-#: Default RRF damping constant (Cormack et al. 2009).
-RRF_K: int = 60
 
 
 # ---------------------------------------------------------------------------
@@ -233,28 +231,6 @@ def grammar_stream(
 
     scored.sort(key=lambda r: (-r[1], r[0]))
     return [{"id": sn_id, "score": mass} for sn_id, mass in scored]
-
-
-# ---------------------------------------------------------------------------
-# RRF fusion
-# ---------------------------------------------------------------------------
-
-
-def rrf_fuse(streams: list[list[dict]], k: int = RRF_K) -> list[tuple[str, float]]:
-    """Reciprocal Rank Fusion over multiple ranked id-lists.
-
-    Each stream contributes ``1 / (k + rank + 1)`` per id. Tie-break on
-    descending fused mass, then ascending id.
-    """
-    mass: dict[str, float] = {}
-    for stream in streams:
-        for rank, row in enumerate(stream):
-            sn_id = row.get("id") if isinstance(row, dict) else row
-            if not sn_id:
-                continue
-            mass[sn_id] = mass.get(sn_id, 0.0) + 1.0 / (k + rank + 1)
-    fused = sorted(mass.items(), key=lambda r: (-r[1], r[0]))
-    return fused
 
 
 # ---------------------------------------------------------------------------
