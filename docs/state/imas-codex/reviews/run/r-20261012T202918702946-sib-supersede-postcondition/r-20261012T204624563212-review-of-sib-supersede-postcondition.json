@@ -1,0 +1,55 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:8698"
+  ],
+  "completed_at": "2026-10-12T20:52:27.860Z",
+  "dispatched_at": "2026-10-12T20:46:38Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T202918702946-sib-supersede-postcondition/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "baseline_suite and after_suite record their command with the angle-bracket placeholder <the 20 rg -l signed_manifest tests/ files> in place of the literal file list that ran, so the recorded gate cannot be re-run from the manifest alone; the literal list survives in each log's header line and the 130 passed EXIT=0 summary is the operative evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read 9bce4e4a4031d2621dd4664fb5897ce57c41059b against base f04521cf86eadcd339634f995ecaa9207e2b4001 commit by commit; one commit changing signed_manifest.py (+4/-5, the successor-edge postcondition query and its comparison), tests/standard_names/test_signed_supersede_edge.py (+53, one new graph-marked refusal test), and the landing fragment (+47).",
+    "done_when": "the done_when asks that a test with a derived twin edge beside the signed one be refused, that it fail with the old grouped query restored, that the existing edge tests still pass, and that the signed-manifest tests plus tests/graph/test_cypher_property_check.py add no failure against base; gate-head.log records 3 passed EXIT=0, gate-negative-control.log records 1 failed/2 passed EXIT=1, and suite-base.log/suite-after.log record 130 passed EXIT=0 each.",
+    "goal": "the node goal is for the supersede postcondition to count every HAS_SUCCESSOR edge from the predecessor without grouping and require exactly one carrying the minting receipt; imas_codex/standard_names/signed_manifest.py:4138 OPTIONAL-MATCHes every HAS_SUCCESSOR edge from the node and line 4149 requires count==1 and receipt_ids==[expected_receipt_id].",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T202918702946-sib-supersede-postcondition/manifest.md; status complete, one landed revision 9bce4e4a4, changed_paths listing the three declared files, four test_logs, and negative_control_log a bare path whose last line is EXIT=1.",
+    "write_paths": "the declared scope is imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_signed_supersede_edge.py and the fragment docs/evidence/fragments/sn-integrity-backlog/sib-supersede-postcondition.html; the diff touches exactly those three files and no other path."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_signed_supersede_edge.py:330 raises the refusal only under the widened count, and gate-negative-control.log records the exact regression reinstated (grouped query) as DID NOT RAISE with EXIT=1.",
+    "evidence": "the gate, negative-control and both suite arms are each recorded whole in a log whose final line is 3 passed EXIT=0, 1 failed 2 passed EXIT=1, and 130 passed EXIT=0 twice, so the done_when's added-failure measure of 0 is measured rather than claimed.",
+    "fit": "imas_codex/standard_names/signed_manifest.py:4136 keeps the query inline in the postcondition as its predecessor did, and the added test name and _STRAY_SUCCESSOR constant (tests/standard_names/test_signed_supersede_edge.py:27) carry no plan or section label.",
+    "goal_fidelity": "imas_codex/standard_names/signed_manifest.py:4138 OPTIONAL MATCHes every HAS_SUCCESSOR edge from the predecessor and line 4149 requires the single edge's collected receipt to equal the minting receipt, which is exactly the one-sentence deliverable.",
+    "reuse": "no repository owner counts HAS_SUCCESSOR edges from a node for a postcondition (imas_codex/standard_names/signed_manifest.py:2381 and graph_ops.py:3375 only write the edge, search.py:693 traverses it), and the widened query stays in the module the dispatch rule assigns it rather than graph_ops.py.",
+    "scope_discipline": "every path in the diff (imas_codex/standard_names/signed_manifest.py:4136-4150, tests/standard_names/test_signed_supersede_edge.py:282-330, docs/evidence/fragments/sn-integrity-backlog/sib-supersede-postcondition.html) is inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is for the supersede postcondition to count every HAS_SUCCESSOR edge from the predecessor without grouping and require exactly one carrying the minting receipt; imas_codex/standard_names/signed_manifest.py:4138 OPTIONAL-MATCHes every HAS_SUCCESSOR edge from the node and line 4149 requires count==1 and receipt_ids==[expected_receipt_id].\nVERDICT done_when: the done_when asks that a test with a derived twin edge beside the signed one be refused, that it fail with the old grouped query restored, that the existing edge tests still pass, and that the signed-manifest tests plus tests/graph/test_cypher_property_check.py add no failure against base; gate-head.log records 3 passed EXIT=0, gate-negative-control.log records 1 failed/2 passed EXIT=1, and suite-base.log/suite-after.log record 130 passed EXIT=0 each.\nVERDICT write_paths: the declared scope is imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_signed_supersede_edge.py and the fragment docs/evidence/fragments/sn-integrity-backlog/sib-supersede-postcondition.html; the diff touches exactly those three files and no other path.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T202918702946-sib-supersede-postcondition/manifest.md; status complete, one landed revision 9bce4e4a4, changed_paths listing the three declared files, four test_logs, and negative_control_log a bare path whose last line is EXIT=1.\nVERDICT diff: read 9bce4e4a4031d2621dd4664fb5897ce57c41059b against base f04521cf86eadcd339634f995ecaa9207e2b4001 commit by commit; one commit changing signed_manifest.py (+4/-5, the successor-edge postcondition query and its comparison), tests/standard_names/test_signed_supersede_edge.py (+53, one new graph-marked refusal test), and the landing fragment (+47).\nCALL_SITES: imas_codex/cli/sn.py:8698\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/signed_manifest.py:4138 OPTIONAL MATCHes every HAS_SUCCESSOR edge from the predecessor and line 4149 requires the single edge's collected receipt to equal the minting receipt, which is exactly the one-sentence deliverable.\nSCORE evidence: 19\nJUSTIFICATION evidence: the gate, negative-control and both suite arms are each recorded whole in a log whose final line is 3 passed EXIT=0, 1 failed 2 passed EXIT=1, and 130 passed EXIT=0 twice, so the done_when's added-failure measure of 0 is measured rather than claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (imas_codex/standard_names/signed_manifest.py:4136-4150, tests/standard_names/test_signed_supersede_edge.py:282-330, docs/evidence/fragments/sn-integrity-backlog/sib-supersede-postcondition.html) is inside the manifest's declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_signed_supersede_edge.py:330 raises the refusal only under the widened count, and gate-negative-control.log records the exact regression reinstated (grouped query) as DID NOT RAISE with EXIT=1.\nSCORE fit: 20\nJUSTIFICATION fit: imas_codex/standard_names/signed_manifest.py:4136 keeps the query inline in the postcondition as its predecessor did, and the added test name and _STRAY_SUCCESSOR constant (tests/standard_names/test_signed_supersede_edge.py:27) carry no plan or section label.\nSCORE reuse: 20\nJUSTIFICATION reuse: no repository owner counts HAS_SUCCESSOR edges from a node for a postcondition (imas_codex/standard_names/signed_manifest.py:2381 and graph_ops.py:3375 only write the edge, search.py:693 traverses it), and the widened query stays in the module the dispatch rule assigns it rather than graph_ops.py.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T202918702946-sib-supersede-postcondition/manifest.md:21 follow-on: baseline_suite and after_suite record their command with the angle-bracket placeholder <the 20 rg -l signed_manifest tests/ files> in place of the literal file list that ran, so the recorded gate cannot be re-run from the manifest alone; the literal list survives in each log's header line and the 130 passed EXIT=0 summary is the operative evidence.",
+  "review_run_id": "r-20261012T204624563212-review-of-sib-supersede-postcondition",
+  "reviewed_base_sha": "f04521cf86eadcd339634f995ecaa9207e2b4001",
+  "reviewed_head_sha": "9bce4e4a4031d2621dd4664fb5897ce57c41059b",
+  "reviewed_run_id": "r-20261012T202918702946-sib-supersede-postcondition",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:52:00+00:00",
+  "total": 118
+}
