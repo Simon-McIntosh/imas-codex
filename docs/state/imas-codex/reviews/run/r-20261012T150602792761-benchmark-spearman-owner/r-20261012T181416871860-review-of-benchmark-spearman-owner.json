@@ -1,0 +1,51 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/sn.py:3650",
+    "imas_codex/cli/sn.py:3780",
+    "imas_codex/standard_names/benchmark.py:1958",
+    "imas_codex/standard_names/benchmark.py:1960"
+  ],
+  "completed_at": "2026-10-12T18:20:51.479Z",
+  "dispatched_at": "2026-10-12T18:14:35Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against base 427d872af \u2014 9ad45e2af deletes _spearman_rho and swaps the call at benchmark.py:2111, 3a84819ad adds the evidence fragment; changed_paths are the three declared files only.",
+    "done_when": "the done_when names the deletion, the re-routed import, and a new tied-input test that fails when the shortcut is restored; the manifest records tests/standard_names/test_benchmark_spearman.py plus the eleven benchmark.py-importing test files at 180 passed (head) vs 179 (base), and negative-control.log shows the restored shortcut reddening the test at EXIT=1.",
+    "goal": "the node goal is to delete the no-ties local _spearman_rho from imas_codex/standard_names/benchmark.py and route _render_reviewer_agreement through the tie-correct owner; benchmark.py:21 now imports spearman_rho from benchmark_roles and benchmark.py:2111 calls it, with no _spearman_rho defined anywhere in imas_codex at head.",
+    "manifest": "read; it reports status complete, the two commits 9ad45e2af and 3a84819ad, the head gate at 180 passed EXIT=0, and names base-gate.log, head-gate.log and negative-control.log on disk.",
+    "write_paths": "the declared write paths are imas_codex/standard_names/benchmark.py, tests/standard_names/test_benchmark_spearman.py and docs/evidence/fragments/sn-judgment-evaluation/benchmark-spearman-owner.html; every file in git diff 427d872af..3a84819ad is one of those three."
+  },
+  "justifications": {
+    "durability": "negative-control.log shows the restored shortcut printing 0.950 against the assertion's 0.949 and exiting 1, so tests/standard_names/test_benchmark_spearman.py:62 fails under the guarded regression.",
+    "evidence": "the gate recorded in the manifest covers all nine tests/ importers of benchmark.py plus the new test, and head-gate.log shows 180 passed EXIT=0 against base-gate.log's 179.",
+    "fit": "the new top-level import at imas_codex/standard_names/benchmark.py:21 joins the existing standard_names import block, and the test file name carries no plan or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/benchmark.py:2111 now calls the imported benchmark_roles.spearman_rho and git grep \"_spearman_rho\" HEAD finds no definition in imas_codex.",
+    "reuse": "imas_codex/standard_names/benchmark_roles.py:170 spearman_rho is the sole rank-correlation owner (rg \"def spearman_rho\" finds one definition) and the change deletes the forked copy to extend it.",
+    "scope_discipline": "git diff 427d872af..3a84819ad --stat touches only the three declared paths, and benchmark_roles.py is left untouched as the brief required."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to delete the no-ties local _spearman_rho from imas_codex/standard_names/benchmark.py and route _render_reviewer_agreement through the tie-correct owner; benchmark.py:21 now imports spearman_rho from benchmark_roles and benchmark.py:2111 calls it, with no _spearman_rho defined anywhere in imas_codex at head.\nVERDICT done_when: the done_when names the deletion, the re-routed import, and a new tied-input test that fails when the shortcut is restored; the manifest records tests/standard_names/test_benchmark_spearman.py plus the eleven benchmark.py-importing test files at 180 passed (head) vs 179 (base), and negative-control.log shows the restored shortcut reddening the test at EXIT=1.\nVERDICT write_paths: the declared write paths are imas_codex/standard_names/benchmark.py, tests/standard_names/test_benchmark_spearman.py and docs/evidence/fragments/sn-judgment-evaluation/benchmark-spearman-owner.html; every file in git diff 427d872af..3a84819ad is one of those three.\nVERDICT manifest: read; it reports status complete, the two commits 9ad45e2af and 3a84819ad, the head gate at 180 passed EXIT=0, and names base-gate.log, head-gate.log and negative-control.log on disk.\nVERDICT diff: read commit by commit against base 427d872af \u2014 9ad45e2af deletes _spearman_rho and swaps the call at benchmark.py:2111, 3a84819ad adds the evidence fragment; changed_paths are the three declared files only.\nCALL_SITES: imas_codex/cli/sn.py:3650, imas_codex/cli/sn.py:3780, imas_codex/standard_names/benchmark.py:1958, imas_codex/standard_names/benchmark.py:1960\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/benchmark.py:2111 now calls the imported benchmark_roles.spearman_rho and git grep \"_spearman_rho\" HEAD finds no definition in imas_codex.\nSCORE evidence: 20\nJUSTIFICATION evidence: the gate recorded in the manifest covers all nine tests/ importers of benchmark.py plus the new test, and head-gate.log shows 180 passed EXIT=0 against base-gate.log's 179.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 427d872af..3a84819ad --stat touches only the three declared paths, and benchmark_roles.py is left untouched as the brief required.\nSCORE durability: 19\nJUSTIFICATION durability: negative-control.log shows the restored shortcut printing 0.950 against the assertion's 0.949 and exiting 1, so tests/standard_names/test_benchmark_spearman.py:62 fails under the guarded regression.\nSCORE fit: 20\nJUSTIFICATION fit: the new top-level import at imas_codex/standard_names/benchmark.py:21 joins the existing standard_names import block, and the test file name carries no plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: imas_codex/standard_names/benchmark_roles.py:170 spearman_rho is the sole rank-correlation owner (rg \"def spearman_rho\" finds one definition) and the change deletes the forked copy to extend it.\n",
+  "review_run_id": "r-20261012T181416871860-review-of-benchmark-spearman-owner",
+  "reviewed_base_sha": "427d872afc96eab56f250d54437bd66d6abde0a0",
+  "reviewed_head_sha": "3a84819ada38652db878bdf1def766dc0688f7a5",
+  "reviewed_run_id": "r-20261012T150602792761-benchmark-spearman-owner",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:20:00.620006+00:00",
+  "total": 119
+}
