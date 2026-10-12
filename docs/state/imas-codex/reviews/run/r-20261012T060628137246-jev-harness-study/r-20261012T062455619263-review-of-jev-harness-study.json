@@ -1,0 +1,76 @@
+{
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T062455619263-review-of-jev-harness-study/repro-claims.log",
+    "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/jev-sn-study/jev-harness-study/report.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T065131134683-path-category-goldens (frozen-judgments.jsonl, canonical-judgments.json, stream.jsonl, graph-snapshot.json, candidate-selection.json)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T054628859296-wiki-jev-judgments/wiki-ablation.jsonl"
+  ],
+  "claim_lines": [
+    "CLAIM 1: reproduced: ran the run's own recovered metrics script from the report's directory against labelled-path-categories.json (the committed equivalent of the run's labelled-paths-v2.json) plus graph-snapshot.json/candidate-selection.json/canonical-judgments.json, and got canonical_units 222, facet-gate AUC 0.6672, category-gate AUC 0.9244, category accuracy 0.6216 and macro-F1 0.5544 - identical to the report",
+    "CLAIM 2: reproduced: recomputed from frozen-judgments.jsonl (684 lines) and got 228 paths x 3 calls, all three state_sha256 identical per path, Choice changed on 14, code-bearing probability on 110, children-worth-listing on 187, median children range 0.020 and 95th percentile 0.060, total cost USD 0.05286355 - every figure matches the report",
+    "CLAIM 3: reproduced: recomputed AUC from wiki-ablation.jsonl (n=80, 50 positives) and got old_score 0.929333, without_matches 0.992667, with_matches 0.989333, delta with-minus-without -0.003334 - matches the report's 0.992667/0.989333 and its stated 0.003334 magnitude",
+    "CLAIM_SUMMARY: agrees: the report carries no numeric summary line over a table (its three tables are introduced by section headings, not a summary figure); the run's recorded summary line - the citation-count gate in its manifest, '77 (gate requires >= 20); 74 unique file:line citations' - reproduces from the report's directory (grep -cE '\\.py:[0-9]+' report.md = 77, unique .py:lineno = 74), and the report's two count-leads match their tables ('the five components below' -> 5 rows, 'The six TypeSafe cookbooks' -> 6 rows)"
+  ],
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "r-20261008T065131134683-path-category-goldens/metrics.json (new_canonical.category.auc 0.9244, new_canonical.facet.auc 0.6672); producing command recorded in that run's stream.jsonl",
+      "detail": "Ran the run's own recovered script from the report's directory: source_rows 244, scored_rows 238, canonical_units 222, category_units 222, new_positive 134, category_accuracy 0.6216, category_macro_f1 0.5544, new_canonical facet AUC 0.6672, new_canonical category AUC 0.9244 - every figure equals the report's. A hand reconstruction that read canonical-judgments.json directly (rather than the run's D = graph-snapshot['known'] plus candidate-selection.json updated by canonical-judgments.json) produced category AUC 0.9275, 0.0031 off; running the run's actual script verbatim closes that to an exact match, so the reported figure stands and the earlier discrepancy was the reviewer's data assembly, not the report's.",
+      "finding": "rank 1 (section 5 lead, sourced from section 2.2 and the path-category-goldens fragment): on 222 canonical paths the category gate scores AUC 0.9244 [0.8858, 0.9608] against the facet gate's 0.6672 [0.5898, 0.7414]; the stored Choice's category accuracy is 0.6216 and macro-F1 0.5544",
+      "verdict": "reproduced"
+    },
+    "CLAIM 2": {
+      "cites": "r-20261008T065131134683-path-category-goldens/frozen-judgments.jsonl (684 lines)",
+      "detail": "Recomputed from frozen-judgments.jsonl: paths 228, calls 684; state_sha256 identical across all three repeats for every path; Choice changed on 14; the summed code-bearing probability changed on 110; children_worth_listing changed on 187; median children range 0.020, 95th percentile 0.060; total cost_usd 0.05286355. Every figure matches the report.",
+      "finding": "rank 2 (section 2.2): three frozen-state judgments per canonical path over 228 paths = 684 calls for USD 0.05286355, all three state digests identical per path, the Choice changed on 14 paths, the code-bearing probability on 110 and the children-worth-listing probability on 187, median children range 0.02 and 95th percentile 0.06",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "r-20261008T054628859296-wiki-jev-judgments/wiki-ablation.jsonl and wiki-ablation.log",
+      "detail": "Recomputed AUC from wiki-ablation.jsonl (n=80, 50 positives) with sklearn: old_score 0.929333, without_matches 0.992667, with_matches 0.989333, delta with-minus-without -0.003334. Matches the report's 0.992667/0.989333 and its stated 0.003334 magnitude.",
+      "finding": "rank 3 (section 2.3, sourced from section 1.3): the wiki ablation changed AUC by 0.003334 - from 0.992667 without the local tool matches to 0.989333 with them (stored old score 0.929333) on 80 pages with 50 positives",
+      "verdict": "reproduced"
+    },
+    "CLAIM_SUMMARY": {
+      "detail": "The report carries no numeric summary line above any table: the tables at report lines 331, 382 and 480 are each introduced by a section heading, not a summary figure. The run's own recorded summary line - the citation-count gate in its manifest, tests: '77 (gate requires >= 20); 74 unique file:line citations' - reproduces exactly from the report's directory: grep -cE '\\.py:[0-9]+' report.md = 77 and unique .py:linenumber = 74. The report's two count-stating leads also agree with the tables beneath them ('the five components below' -> 5 rows; 'The six TypeSafe cookbooks' -> 6 rows). No summary figure contradicts its table.",
+      "verdict": "agrees"
+    }
+  },
+  "claims": [
+    {
+      "cites": "r-20261008T065131134683-path-category-goldens/metrics.json (new_canonical); producing script recovered verbatim from that run's stream.jsonl",
+      "rank": 1,
+      "report_figure": "category gate AUC 0.9244 [0.8858,0.9608] vs facet gate 0.6672 [0.5898,0.7414] on 222 canonical paths; category accuracy 0.6216, macro-F1 0.5544",
+      "rerun_figure": "canonical_units 222, facet AUC 0.6672, category AUC 0.9244, accuracy 0.6216, macro-F1 0.5544",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "r-20261008T065131134683-path-category-goldens/frozen-judgments.jsonl (684 lines)",
+      "rank": 2,
+      "report_figure": "228 paths / 684 calls, USD 0.05286355, digests identical, Choice changed 14, code-bearing prob 110, children 187, median range 0.02, p95 0.06",
+      "rerun_figure": "228 paths / 684 calls, USD 0.05286355, all digests identical, Choice 14, code-bearing 110, children 187, median range 0.020, p95 0.060",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "r-20261008T054628859296-wiki-jev-judgments/wiki-ablation.jsonl (80 rows)",
+      "rank": 3,
+      "report_figure": "AUC 0.992667 without matches vs 0.989333 with (stored old score 0.929333); delta 0.003334",
+      "rerun_figure": "old_score 0.929333, without_matches 0.992667, with_matches 0.989333, delta with-minus-without -0.003334",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-12T06:37:39.023Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-12T06:25:04Z",
+  "method": "The reviewed run is read-only (its manifest records 'commits: (none - read-only study node)'), so no gate suite and no diff exist and the landed-node rubric's six dimensions measure nothing. Its report is a narrative study whose numeric findings are backed by metric receipts in three cited crew run directories, produced by one-off scripts run through stdin. For each of the three highest-ranked findings (the section 5 / section 2.2 category-vs-facet gate comparison, the section 2.2 frozen-state variation measurement, and the section 2.3 wiki ablation) the reported figure was re-run from the report's own directory against the same inputs the run used. Rank 1's producing script was recovered verbatim from r-20261008T065131134683-path-category-goldens/stream.jsonl and executed with the repo environment interpreter (/home/ITER/mcintos/Code/imas-codex/.venv/bin/python, sklearn roc_auc_score); its only input not committed under the name the script used is labelled-paths-v2.json, whose committed 244-row equivalent is docs/evidence/fragments/discovery-judgments-through-jev/labelled-path-categories.json. Ranks 2 and 3 were recomputed from the run's own raw judgment files with the same interpreter. Recorded against the figure each finding states, not against current main (worktree HEAD fb07c17cf), which is not the revision the report was read at.",
+  "project": "imas-codex",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/jev-sn-study/jev-harness-study/report.md",
+  "review_run_id": "r-20261012T062455619263-review-of-jev-harness-study",
+  "reviewed_base_sha": "462d148027273b99de0f32ff1b4285ddf5a5f60e",
+  "reviewed_head_sha": "462d148027273b99de0f32ff1b4285ddf5a5f60e",
+  "reviewed_run_id": "r-20261012T060628137246-jev-harness-study",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run ran no gate suite (read-only study node).",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T06:36:53+00:00"
+}
