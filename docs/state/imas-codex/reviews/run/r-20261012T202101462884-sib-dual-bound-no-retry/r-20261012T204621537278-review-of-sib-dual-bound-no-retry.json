@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:6580",
+    "imas_codex/standard_names/graph_ops.py:7820",
+    "imas_codex/standard_names/graph_ops.py:7808",
+    "imas_codex/standard_names/graph_ops.py:19851",
+    "imas_codex/standard_names/provenance_lifecycle.py:527"
+  ],
+  "completed_at": "2026-10-12T20:57:12.036Z",
+  "dispatched_at": "2026-10-12T20:46:34Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/provenance_lifecycle.py",
+      "line": "659",
+      "severity": "follow-on",
+      "text": "follow-on: narrowing the branch to len(live_expected_holders) > 1 drops the live-predecessor/retired-successor row (a retired successor named in comparison_expected_names) out of the named conflict into the else branch at :692, which a caller treats as transient and answers with a retry, so this exact row now spends the attempt the plan means to withhold; the guard at tests/standard_names/test_source_migration_conflict.py:191 cannot see it because it passes on any RuntimeError."
+    },
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": "954",
+      "severity": "follow-on",
+      "text": "follow-on: _candidate_source_node_id restates the source-node-id expression already inline at workers.py:1009 in the same function rather than the caller delegating to it, so the dd: prefix rule now has two definitions that can drift."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T202101462884-sib-dual-bound-no-retry/after_suite.log",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: base_suite.log and after_suite.log both end with no EXIT=<n> line and after_suite.log also carries no command header, so the recorded gate result is not in an admitted form and `reckon crew check-manifest --run r-20261012T202101462884-sib-dual-bound-no-retry` returns ok:false, which refuses the run's promotion until its gate logs are repaired; the run's own manifest is outside this review's write scope."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read 672c8ecf9 against base 1ba30411; five files change - a live-holder list and successor holder in retarget_standard_name_sources, a new catch plus _withhold_binding_conflicted_sources in workers.py, two new tests, and the landing fragment.",
+    "done_when": "the done_when asks for a compose test showing no attempt spent (negative control with EXIT=), a test that a live-predecessor/retired-successor source is not a dual-bound conflict, a test naming the real holder, and recorded baseline/after suites; the manifest records baseline_suite 60 collected/0 failed and after_suite 63 collected/0 failed, and negative_control.log ends EXIT=1.",
+    "goal": "the node goal is to make a compose pass over a dual-bound source withhold the retry instead of spending it; imas_codex/standard_names/workers.py:1057 catches SourceBindingConflictError at the persist boundary and imas_codex/standard_names/provenance_lifecycle.py:607/672 narrow the classification and name the live successor, and the compose path reaches the raise through graph_ops.py:7820 -> :7808 -> :19851.",
+    "manifest": "read at the run directory; status complete, one landed revision 672c8ecf9, a tests line naming the four gate files, test_logs naming base_suite.log and after_suite.log, and negative_control_log a bare path whose last line is EXIT=1.",
+    "write_paths": "read the manifest's declared scope (provenance_lifecycle.py, workers.py, test_compose_supersede_dual_bound.py, test_source_migration_conflict.py, the sib-dual-bound-no-retry.html fragment); every path in the diff is inside it."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_compose_supersede_dual_bound.py:206 reddens with the consumer removed (negative_control.log EXIT=1) and test_source_migration_conflict.py:158/180 redden at base, but test_source_migration_conflict.py:191 accepts any RuntimeError and so cannot detect the anonymous-fault fallthrough it actually produces.",
+    "evidence": "base_suite.log records 58 passed and after_suite.log records 61 passed with 0 added failures, but neither gate log ends with an EXIT=<n> line and after_suite.log carries no command header, so the node's own `reckon crew check-manifest --run r-20261012T202101462884-sib-dual-bound-no-retry` returns ok:false on its gate logs.",
+    "fit": "the new helper follows the surrounding logger/branch idiom and both new test names describe behaviour with no plan or gate label, though _candidate_source_node_id at workers.py:954 restates the inline expression at workers.py:1009.",
+    "goal_fidelity": "imas_codex/standard_names/workers.py:1057 withholds the conflicted source and names the live successor at provenance_lifecycle.py:672, but the point-2 narrowing also turns the live-predecessor/retired-successor row from a withholding named conflict into a spending anonymous fault at provenance_lifecycle.py:692.",
+    "reuse": "no prior compose-withhold mechanism exists; the helper reuses encode_source_path and the SourceBindingConflict payload, and _withhold_binding_conflicted_sources at workers.py:900 is the first owner of the withholding, but the id mapping it wraps is duplicated rather than shared with workers.py:1009.",
+    "scope_discipline": "every path in the diff between 1ba30411 and 672c8ecf9 is one of the four declared code/test paths plus the named landing fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make a compose pass over a dual-bound source withhold the retry instead of spending it; imas_codex/standard_names/workers.py:1057 catches SourceBindingConflictError at the persist boundary and imas_codex/standard_names/provenance_lifecycle.py:607/672 narrow the classification and name the live successor, and the compose path reaches the raise through graph_ops.py:7820 -> :7808 -> :19851.\nVERDICT done_when: the done_when asks for a compose test showing no attempt spent (negative control with EXIT=), a test that a live-predecessor/retired-successor source is not a dual-bound conflict, a test naming the real holder, and recorded baseline/after suites; the manifest records baseline_suite 60 collected/0 failed and after_suite 63 collected/0 failed, and negative_control.log ends EXIT=1.\nVERDICT write_paths: read the manifest's declared scope (provenance_lifecycle.py, workers.py, test_compose_supersede_dual_bound.py, test_source_migration_conflict.py, the sib-dual-bound-no-retry.html fragment); every path in the diff is inside it.\nVERDICT manifest: read at the run directory; status complete, one landed revision 672c8ecf9, a tests line naming the four gate files, test_logs naming base_suite.log and after_suite.log, and negative_control_log a bare path whose last line is EXIT=1.\nVERDICT diff: read 672c8ecf9 against base 1ba30411; five files change - a live-holder list and successor holder in retarget_standard_name_sources, a new catch plus _withhold_binding_conflicted_sources in workers.py, two new tests, and the landing fragment.\nCALL_SITES: imas_codex/standard_names/workers.py:6580, imas_codex/standard_names/graph_ops.py:7820, imas_codex/standard_names/graph_ops.py:7808, imas_codex/standard_names/graph_ops.py:19851, imas_codex/standard_names/provenance_lifecycle.py:527\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/workers.py:1057 withholds the conflicted source and names the live successor at provenance_lifecycle.py:672, but the point-2 narrowing also turns the live-predecessor/retired-successor row from a withholding named conflict into a spending anonymous fault at provenance_lifecycle.py:692.\nSCORE evidence: 14\nJUSTIFICATION evidence: base_suite.log records 58 passed and after_suite.log records 61 passed with 0 added failures, but neither gate log ends with an EXIT=<n> line and after_suite.log carries no command header, so the node's own `reckon crew check-manifest --run r-20261012T202101462884-sib-dual-bound-no-retry` returns ok:false on its gate logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff between 1ba30411 and 672c8ecf9 is one of the four declared code/test paths plus the named landing fragment.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_compose_supersede_dual_bound.py:206 reddens with the consumer removed (negative_control.log EXIT=1) and test_source_migration_conflict.py:158/180 redden at base, but test_source_migration_conflict.py:191 accepts any RuntimeError and so cannot detect the anonymous-fault fallthrough it actually produces.\nSCORE fit: 17\nJUSTIFICATION fit: the new helper follows the surrounding logger/branch idiom and both new test names describe behaviour with no plan or gate label, though _candidate_source_node_id at workers.py:954 restates the inline expression at workers.py:1009.\nSCORE reuse: 17\nJUSTIFICATION reuse: no prior compose-withhold mechanism exists; the helper reuses encode_source_path and the SourceBindingConflict payload, and _withhold_binding_conflicted_sources at workers.py:900 is the first owner of the withholding, but the id mapping it wraps is duplicated rather than shared with workers.py:1009.\nFINDING imas_codex/standard_names/provenance_lifecycle.py:659 follow-on: narrowing the branch to len(live_expected_holders) > 1 drops the live-predecessor/retired-successor row (a retired successor named in comparison_expected_names) out of the named conflict into the else branch at :692, which a caller treats as transient and answers with a retry, so this exact row now spends the attempt the plan means to withhold; the guard at tests/standard_names/test_source_migration_conflict.py:191 cannot see it because it passes on any RuntimeError.\nFINDING imas_codex/standard_names/workers.py:954 follow-on: _candidate_source_node_id restates the source-node-id expression already inline at workers.py:1009 in the same function rather than the caller delegating to it, so the dd: prefix rule now has two definitions that can drift.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T202101462884-sib-dual-bound-no-retry/after_suite.log:1 blocking: base_suite.log and after_suite.log both end with no EXIT=<n> line and after_suite.log also carries no command header, so the recorded gate result is not in an admitted form and `reckon crew check-manifest --run r-20261012T202101462884-sib-dual-bound-no-retry` returns ok:false, which refuses the run's promotion until its gate logs are repaired; the run's own manifest is outside this review's write scope.",
+  "review_run_id": "r-20261012T204621537278-review-of-sib-dual-bound-no-retry",
+  "reviewed_base_sha": "1ba304116c0defeae3c4e00e94694cff39cb2893",
+  "reviewed_head_sha": "672c8ecf9e6b3213dc3294f64c693038cbed6a2f",
+  "reviewed_run_id": "r-20261012T202101462884-sib-dual-bound-no-retry",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:56:38.455267+00:00",
+  "total": 101
+}
