@@ -70,26 +70,26 @@ disjoint: no id in both parts            = true</pre>
 <h2 id="sib-unsourced-ancestry-census-census-queries">The bounded queries</h2>
 <pre id="sib-unsourced-ancestry-census-census-cypher">// chain-cap total
 MATCH (sn:StandardName) WHERE sn.chain_length &gt;= 3
-RETURN count(sn)  -- 174
+RETURN count(sn)  // 174
 
 // unsourced (independent total)
 MATCH (sn:StandardName) WHERE sn.chain_length &gt;= 3
   AND NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn) }
-RETURN count(sn)  -- 102
+RETURN count(sn)  // 102
 
 // has a sourced ancestor at any depth (depth bound 10)
 MATCH (sn:StandardName) WHERE sn.chain_length &gt;= 3
   AND NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn) }
   AND EXISTS { MATCH (sn)-[:REFINED_FROM*1..10]-&gt;(a:StandardName)
                WHERE EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(a) } }
-RETURN count(sn)  -- 10
+RETURN count(sn)  // 10
 
 // has no sourced ancestor at any depth
 MATCH (sn:StandardName) WHERE sn.chain_length &gt;= 3
   AND NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn) }
   AND NOT EXISTS { MATCH (sn)-[:REFINED_FROM*1..10]-&gt;(a:StandardName)
                    WHERE EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(a) } }
-RETURN count(sn)  -- 92</pre>
+RETURN count(sn)  // 92</pre>
 
 <h2 id="sib-unsourced-ancestry-census-census-result">Result</h2>
 <p id="sib-unsourced-ancestry-census-census-verdict">

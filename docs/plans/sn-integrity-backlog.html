@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;implementable&quot;,&quot;s19&quot;:&quot;implementable&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;implementable&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;implementable&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;}">
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -149,7 +149,7 @@
 <p><code>_source_disposition</code> is handed only a chain's terminal while the cut publishes whatever is accepted, so a published intermediate evades the waiver refusal (census, §3; latent today because no declared-waived source produces an identity). Path: the export waiver path in <code>imas_codex/standard_names/export.py</code>.</p><p><strong>Done when:</strong> a test with a declared-waived source whose chain publishes an intermediate is refused, a chain whose intermediates are all unwaived passes, and <code>tests/standard_names/test_export_release_holds.py</code> adds no failure.</p>
 
     <h2 id="s14">§14 — An edits-scoped run skips global maintenance, by test</h2>
-<section data-reckon="section" data-id="s14" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s14" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>A recorded defect reads fixed in code but carries no test: an edits-scoped <code>sn run</code> now honours <code>--skip-global-maintenance</code> (<code>imas_codex/cli/sn.py</code>). Confirm it by test; if it is not in fact fixed, report it rather than fixing it here.</p><p><strong>Done when:</strong> a test shows an edits-scoped run skips global maintenance, and fails with the flag's forwarding removed.</p>
 
     <h2 id="s15">§15 — Does compose supersede fail on a dual-bound source?</h2>
@@ -169,7 +169,7 @@
 <p>An export that filters every candidate used to exit 0; the 2026-09-21 export refusals likely closed it (census, §4). Confirm by test; if it is not in fact fixed, report it rather than fixing it here.</p><p><strong>Done when:</strong> a test exports an empty candidate set and sees a non-zero exit, and fails with the refusal removed.</p>
 
     <h2 id="s19">§19 — How many chain-cap identities have no sourced ancestor now?</h2>
-<section data-reckon="section" data-id="s19" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s19" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>On 2026-09-01, 72 of 78 unsourced chain-cap identities had no sourced ancestor at any depth (<code>docs/evidence/sn-release-readiness/unsourced-ancestry.md</code>). No reader in the tree computes ledger-hop ancestry. Re-derive the count read-only on the live graph; the result decides whether a rebuild section (about 12 hours, release path) follows. This section changes nothing.</p><p><strong>Done when:</strong> <code>docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html</code> records the current count, its bounded query and the query's elapsed time. The count is reported as a split: every unsourced chain-cap identity the query ranges over falls into either "has a sourced ancestor" or "has none", and the two parts sum to an independently counted total of unsourced chain-cap identities. A query that cannot see the population then shows as a total that does not match, never as a zero read as "the 72 are gone".</p>
 
     <h2 id="s20">§20 — The successor edge comes from the supersede operation</h2>
@@ -179,6 +179,10 @@
     <h2 id="s21">§21 — The three names whose only successor pointer is the scalar get their edge</h2>
 <section data-reckon="section" data-id="s21" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
 <p>3 superseded names reach their successor only through <code>superseded_by</code>: no <code>REFINED_FROM</code> lineage route leads from them to the successor the scalar names (census, §2, and <a href="/imas-codex/evidence/sn-lifecycle-integrity/successor-without-the-scalar.md">the successor-without-the-scalar record</a>). They do carry a <code>HAS_SUCCESSOR</code> edge today, but only because the derivation builds it from the scalar, so it would not survive §16. Once §20 lands, write each a signed <code>HAS_SUCCESSOR</code> edge through the signed supersede path, stamped as §20 stamps its edges. This is a live-graph write and runs only after §20 merges; §16 cannot remove the scalar until it lands.</p><p><strong>Done when:</strong> a dry run over superseded names whose scalar names a successor, with no <code>REFINED_FROM</code> route to it and no signed <code>HAS_SUCCESSOR</code> edge, lists exactly these 3; the same instrument reports the live <code>HAS_SUCCESSOR</code> and <code>REFINED_FROM</code> edge counts (48 and 1,850 when recorded), so a query blind to either relation shows as a zero count rather than an empty worklist; after the apply, each of the 3 carries a signed edge to its successor; a second dry run lists none; and the applied manifest and receipt are recorded in <code>docs/evidence/fragments/sn-integrity-backlog/</code>.</p>
+
+    <h2 id="s22">§22 — The 92 chain-cap identities with no sourced ancestor</h2>
+<section data-reckon="section" data-id="s22" data-effort-hours="12.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="deferred" data-links=""></section>
+<p>§19 measured 92 unsourced chain-cap identities with no sourced ancestor at any depth (72 when recorded on 2026-09-01). Each is a name at chain length three or more that no source produced and whose refinement lineage reaches no sourced name, so nothing in the graph says which DD quantity it stands for. Two treatments are possible and they are not equivalent: rebuild each identity's provenance from the ledger and its lineage (about 12 hours, and only where the ledger holds the answer), or hold the identities out of the WEST cut until they are re-derived through compose. The choice is the lead's; this section is deferred until it is made.</p><p><strong>Done when:</strong> the chosen treatment is applied and a re-run of the §19 census reports zero unsourced chain-cap identities with no sourced ancestor among those the WEST cut would publish, with the same controls.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -206,6 +210,12 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-12T18:05:00Z">
     <div class="r-comment-body"><p>§6 landed: 38 rows re-confirmed read-only (2 fixed, 7 changed, 15 still true, 8 for a ruling, 6 needing a write to confirm), both controls firing (merge <code>013ce4859</code>); reviews 93 then 104/120. Survivors sectioned as §7–§16 on the release path and §17 deferred; eight rulings recorded as questions. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s6">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-close-s14" data-who="reckon-build" data-when="2026-10-12T19:25:00Z">
+    <div class="r-comment-body"><p>§14 landed: an edits-scoped run's maintenance bypass is pinned by a test that fails with the forwarding removed (merge <code>0f694fa07</code>); review 106/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s14">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s19" data-id="c-close-s19" data-who="reckon-build" data-when="2026-10-12T19:25:00Z">
+    <div class="r-comment-body"><p>§19 landed: 92 of 102 unsourced chain-cap identities have no sourced ancestor (72 when recorded), with a split that sums to the independent total (merge <code>81af07164</code>); review 103/120. §22 carries the treatment, deferred to the lead. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s19">evidence</a></p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

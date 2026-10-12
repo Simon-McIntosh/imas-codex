@@ -25,6 +25,16 @@
     <p>Merged at <code>013ce4859</code> (commits <code>2a5bacad9</code>, <code>a7a70db00</code>, <code>5b0f62ece</code>). <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/row-census">The row census</a> re-measures 38 items read-only at <code>c7b4c626e</code>: 2 fixed (the 43-of-117 scalar-edge divergences now read 0; the fold guard reads the present), 7 changed, 15 still true, 8 needing a ruling and 6 needing a write to confirm. Both controls fire: the rebuilt <code>*_density_at_pedestal_top</code> family reads present (20 rows) and <code>schema_digest</code> is still absent. Its first review (93/120) found the summary counts and the row count misstated; the resumed run corrected them (104/120). Record-keeping follow-ons: the control script was deleted as scratch, the header lacks the anchor-resolution count, and the lifecycle source maps to six rows where the plan's wording said seven. The surviving rows are sectioned below, release path first.</p>
   </section>
 
+  <section id="s14">
+    <h2>§14 — an edits-scoped run skips global maintenance, pinned</h2>
+    <p><code>tests/standard_names/test_edit_scope_skips_maintenance.py</code> drives an edits-scoped <code>sn run</code> (scope run id plus edits only) with <code>--skip-global-maintenance</code> and shows the flag reaches the pools and the run skips the graph-wide startup steps; removing the forwarding turns it red. Merge <code>0f694fa07</code>. Independent review 106/120, no added failures. Follow-on: two of its assertions patch helpers the code path never calls and so pin nothing; the forwarding assertion is the one that bites.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-scoped-maintenance-test">sib-scoped-maintenance-test</a>.</p>
+  </section>
+
+  <section id="s19">
+    <h2>§19 — the unsourced chain-cap ancestry census</h2>
+    <p>Read-only on the live graph with the 2026-09-01 definitions: 174 chain-cap identities, 102 of them unsourced; of those, 10 have a sourced ancestor at any depth and 92 have none. The split sums to the independently counted total, and the predicates are shown to fire (2,790 sourced names, 5,494 producer edges). Every query is depth-bounded and ran under 0.07 s. The population grew from 72 to 92 since it was recorded, so a rebuild section follows (§22). The recorded queries' result annotations were corrected at integration from <code>--</code>, which Cypher reads as subtraction, to <code>//</code>. Merge <code>81af07164</code>. Independent review 103/120.</p><p>Evidence: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census">unsourced-ancestry census</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>
