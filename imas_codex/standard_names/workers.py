@@ -897,6 +897,69 @@ def _filter_persist_candidates_to_claimed_sources(
     return kept
 
 
+def _withhold_binding_conflicted_sources(
+    conflict: object,
+    candidates: list[dict[str, Any]],
+    *,
+    source_type: str,
+    phase: str,
+    compose_model: str,
+    dd_version: str | None,
+    cocos_version: int | None,
+    run_id: str | None,
+) -> list[str]:
+    """Record a compose refusal for a source already bound to a live identity.
+
+    A source held by a live identity outside the migration's predecessor is an
+    adjudicable state: recomposing cannot settle it, so releasing the claim to
+    retry would spend an attempt on a decision only an operator can make. The
+    conflicted source is therefore left claimed and withheld, its holding
+    identity and stage recorded, and no winner id is returned for it. Every
+    other candidate in the batch persists normally.
+    """
+    conflicted_source_ids = {
+        item.source_id for item in getattr(conflict, "conflicts", ())
+    }
+    for item in getattr(conflict, "conflicts", ()):
+        logger.warning(
+            "Pool %s: source %s bound to live identity %r at stage %r — "
+            "withheld for adjudication, no attempt spent",
+            phase,
+            item.source_id,
+            item.holding_identity,
+            item.holding_stage,
+        )
+
+    remaining = [
+        candidate
+        for candidate in candidates
+        if _candidate_source_node_id(candidate, source_type)
+        not in conflicted_source_ids
+    ]
+    if not remaining:
+        return []
+
+    from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+    return persist_generated_name_batch(
+        remaining,
+        compose_model=compose_model,
+        dd_version=dd_version,
+        cocos_version=cocos_version,
+        run_id=run_id,
+        return_winner_ids=True,
+    )
+
+
+def _candidate_source_node_id(candidate: dict[str, Any], source_type: str) -> str:
+    source_id = candidate.get("source_id")
+    if not isinstance(source_id, str) or not source_id:
+        return ""
+    if source_type == "dd" and source_id.startswith("dd:"):
+        return source_id
+    return encode_source_path(source_type, source_id)
+
+
 def _persist_description_checked_candidates(
     candidates: list[dict[str, Any]],
     *,
@@ -978,14 +1041,30 @@ def _persist_description_checked_candidates(
     if not eligible:
         return []
 
-    return persist_generated_name_batch(
-        eligible,
-        compose_model=compose_model,
-        dd_version=dd_version,
-        cocos_version=cocos_version,
-        run_id=run_id,
-        return_winner_ids=True,
+    from imas_codex.standard_names.provenance_lifecycle import (
+        SourceBindingConflictError,
     )
+
+    try:
+        return persist_generated_name_batch(
+            eligible,
+            compose_model=compose_model,
+            dd_version=dd_version,
+            cocos_version=cocos_version,
+            run_id=run_id,
+            return_winner_ids=True,
+        )
+    except SourceBindingConflictError as conflict:
+        return _withhold_binding_conflicted_sources(
+            conflict,
+            eligible,
+            source_type=source_type,
+            phase=phase,
+            compose_model=compose_model,
+            dd_version=dd_version,
+            cocos_version=cocos_version,
+            run_id=run_id,
+        )
 
 
 def _mark_source_prevalidation_failed(
@@ -6757,9 +6836,7 @@ RETURN coalesce(sn.refine_attempts, 0) AS refine_attempts
 """
 
 
-def _return_unspent_refine_attempt(
-    gc: Any, *, sn_id: str, token: str
-) -> int | None:
+def _return_unspent_refine_attempt(gc: Any, *, sn_id: str, token: str) -> int | None:
     """Give back the rotation an unchanged resubmission did not spend.
 
     Returns the counter the name is left holding, or ``None`` when the fence

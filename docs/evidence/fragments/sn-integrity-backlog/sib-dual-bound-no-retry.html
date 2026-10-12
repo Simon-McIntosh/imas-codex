@@ -1,0 +1,38 @@
+<section id="sib-dual-bound-no-retry">
+  <h2>Dual-bound source compose refuses without spending an attempt</h2>
+  <p>
+    A compose pass that meets a source already bound to two live identities is
+    an adjudicable conflict, not a transient fault, so it must not spend a
+    retry attempt. Three defects in the compare-and-set refusal are repaired.
+  </p>
+  <ul>
+    <li>
+      <strong>The named refusal now has a consumer.</strong>
+      <code>_persist_description_checked_candidates</code> in
+      <code>imas_codex/standard_names/workers.py</code> catches
+      <code>SourceBindingConflictError</code> at the persist boundary, records
+      the holding identity and stage, and withholds the source — no claim is
+      released to retry, so no attempt is spent; the source is left for
+      adjudication.
+    </li>
+    <li>
+      <strong>A retired holder no longer counts as live.</strong> The dual-bound
+      classification in <code>retarget_standard_name_sources</code> counts only
+      identities at a non-retired stage, so a source bound to a live predecessor
+      and a retired successor is not reported as a conflict.
+    </li>
+    <li>
+      <strong>The holder is named correctly.</strong> For a dual-bound source the
+      refusal names the live successor holding the binding rather than the
+      predecessor being retired.
+    </li>
+  </ul>
+  <p>
+    Gates: <code>tests/standard_names/test_compose_supersede_dual_bound.py</code>,
+    <code>tests/standard_names/test_source_migration_conflict.py</code>,
+    <code>tests/standard_names/test_provenance_lifecycle.py</code>,
+    <code>tests/standard_names/test_supersession.py</code> — 61 passed.
+    Negative control: removing the conflict consumer fails the no-attempt test
+    (<code>EXIT=1</code>).
+  </p>
+</section>

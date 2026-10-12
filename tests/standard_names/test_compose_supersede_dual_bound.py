@@ -151,3 +151,71 @@ def test_compose_supersede_over_dual_bound_source_raises_adjudicable_conflict() 
     assert _SOURCE_NODE in message
     assert _OLD_NAME in message
     assert _NEW_NAME in message
+
+
+def test_compose_persist_withholds_a_dual_bound_source_without_spending_an_attempt(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A compose pass over a dual-bound source spends no attempt.
+
+    The persist boundary is where a compose failure for a source is recorded.
+    A named ``SourceBindingConflictError`` means the source is already held by
+    a live identity, so releasing the claim to retry would spend an attempt on
+    a decision only an operator can make. The boundary must instead record the
+    conflict and leave the source claimed and withheld, returning no winner id
+    and releasing no claim.
+    """
+    from imas_codex.standard_names import workers
+    from imas_codex.standard_names.provenance_lifecycle import SourceBindingConflict
+
+    conflict = SourceBindingConflictError(
+        [
+            SourceBindingConflict(
+                source_id=_SOURCE_NODE,
+                holding_identity=_NEW_NAME,
+                holding_stage="drafted",
+                source_status="composed",
+                detail="dual bound",
+            )
+        ]
+    )
+    candidates = [
+        {
+            "source_id": _DD_PATH,
+            "description": "a composed description for the source",
+            "source_claim_token": "claim-token-1",
+        }
+    ]
+    releases: list[dict[str, object]] = []
+
+    def _release(**kwargs: object) -> int:
+        releases.append(kwargs)
+        return 0
+
+    with (
+        caplog.at_level("WARNING"),
+        patch(
+            "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+            side_effect=conflict,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.release_generate_name_failed_claims",
+            side_effect=_release,
+        ),
+    ):
+        result = workers._persist_description_checked_candidates(
+            candidates,
+            source_type="dd",
+            phase="generate_name",
+            compose_model="test-model",
+            dd_version="4.0.0",
+            cocos_version=1,
+            run_id=None,
+        )
+
+    assert result == []
+    assert releases == []
+    assert any(
+        _SOURCE_NODE in record.getMessage() and _NEW_NAME in record.getMessage()
+        for record in caplog.records
+    )
