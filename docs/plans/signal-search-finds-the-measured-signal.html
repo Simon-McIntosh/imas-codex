@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="signal-search-finds-the-measured-signal">
   <meta name="plan-title" content="Signal Search Finds the Measured Signal">
   <meta name="plan-summary" content="Signal search ranks the measurement first at any facility: one rank fusion for all search tools, current embeddings, a role-aware rerank, pooled goldens">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="24.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="045d63386">
 </head>
@@ -464,6 +464,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-20261012T1938-s3-heldout" data-who="reckon-build" data-when="2026-10-12T19:38:00Z">
     <div class="r-comment-body"><p>First of three nodes landed: <code>tests/llm/fixtures/signal_search_questions.json</code> (commit <code>045d63386</code>, merged in <code>25d8a7235</code>) holds 11 held-out questions written by a worker briefed without this plan, the prototype data or any search tool, with 65 grade-3 seeds across ten EDDB categories (CAM, DHC, GAS, MAG, N2GAS, PSRC, QMS, SXR, TCIFW, VV). All 65 seeds are eligible; no query carries a facility name or any of the 87 category codes; both checks fail on a mutated copy. The harness and labelling nodes remain.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261012T193647014017-ssfms-golden-harness" data-who="reckon-build" data-when="2026-10-12T20:07:12.496Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-golden-harness.html</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261012T1958-s11-cutover" data-who="reckon-build" data-when="2026-10-12T19:58:00Z">
     <div class="r-comment-body"><p>Gate <code>g-ssfms-1</code> states its cutover as 2026-10-11T19:08:21Z, which is two hours early. The cutover is 2026-10-11T21:08:54Z, the start of the first run with <code>93bfb7e9d</code> loaded (§3 gives the derivation). Count JET re-enrichment against 21:08:54Z when closing the gate; reckon offers no op to rewrite a declared gate's measure.</p></div>
