@@ -80,7 +80,9 @@
         "jt-60sa:general/psrc_calndmagcor": 3,
         "jt-60sa:general/psrc_cals1": 2,
         "jt-60sa:general/psrc_cals2": 2,
-        "jt-60sa:general/psrc_cals2cor": 2
+        "jt-60sa:general/psrc_cals2cor": 2,
+        "jt-60sa:general/lcdb_b260008_ofmc.o014_fast_ion_store_energy1": 1,
+        "jt-60sa:general/lcdb_b260008_ofmc.o008_fast_ion_store_energy1": 1
       }
     },
     {
@@ -170,7 +172,18 @@
         "jt-60sa:general/uddb_2842ua003": 3,
         "jt-60sa:general/uddb_3590ua211": 3,
         "jt-60sa:general/uddb_4760ua070": 3,
-        "jt-60sa:general/uddb_4760ua073": 3
+        "jt-60sa:general/uddb_4760ua073": 3,
+        "jt-60sa:general/uddb_2212ua001": 3,
+        "jt-60sa:general/uddb_2212ua003": 3,
+        "jt-60sa:general/uddb_2442ua001": 3,
+        "jt-60sa:general/uddb_2211ua004": 3,
+        "jt-60sa:general/uddb_2212ua008": 3,
+        "jt-60sa:general/uddb_2311ua001": 3,
+        "jt-60sa:general/uddb_2112ua012": 3,
+        "jt-60sa:general/uddb_2432ua001": 3,
+        "jt-60sa:general/uddb_2615ua007": 3,
+        "jt-60sa:general/uddb_2212ua009": 3,
+        "jt-60sa:general/uddb_2211ua006": 3
       }
     },
     {
@@ -204,7 +217,8 @@
         "jt-60sa:general/prb_telplowp09": 1,
         "jt-60sa:general/prb_telplowp15": 1,
         "jt-60sa:general/tcud_temdu1": 2,
-        "jt-60sa:general/tcud_temdu3": 2
+        "jt-60sa:general/tcud_temdu3": 2,
+        "jt-60sa:general/cam_irmp06roi4": 3
       }
     },
     {
@@ -245,7 +259,11 @@
         "jt-60sa:general/vv_temp03p04ih": 2,
         "jt-60sa:general/vv_temp04p05ih": 2,
         "jt-60sa:general/vv_temp060p7ilo": 2,
-        "jt-60sa:general/vv_temp12p13ilo": 2
+        "jt-60sa:general/vv_temp12p13ilo": 2,
+        "jt-60sa:general/fame_dl180": 0,
+        "jt-60sa:general/fame_dl240": 0,
+        "jt-60sa:general/fame_dl270": 0,
+        "jt-60sa:general/tcifw_temfw4in": 3
       }
     },
     {
@@ -288,7 +306,8 @@
         "jt-60sa:general/vv_temuvp08b": 3,
         "jt-60sa:general/vv_temuvp14b": 3,
         "jt-60sa:general/vv_temuvp14c": 3,
-        "jt-60sa:general/vv_temvvave": 2
+        "jt-60sa:general/vv_temvvave": 2,
+        "jt-60sa:general/vv_temuvp14a": 3
       }
     },
     {
@@ -368,7 +387,14 @@
         "jt-60sa:general/qms_mz46c": 0,
         "jt-60sa:general/qms_mz57c": 0,
         "jt-60sa:general/qms_mzrv2arat": 3,
-        "jt-60sa:general/qms_preqmsa": 2
+        "jt-60sa:general/qms_preqmsa": 2,
+        "jt-60sa:general/qms_mz38a": 0,
+        "jt-60sa:general/qms_mz37a": 0,
+        "jt-60sa:general/qms_mz45a": 0,
+        "jt-60sa:general/qms_mz21a": 0,
+        "jt-60sa:general/qms_mz19a": 0,
+        "jt-60sa:general/qms_mz31a": 0,
+        "jt-60sa:general/qms_mz30a": 0
       }
     },
     {
@@ -804,7 +830,14 @@
         "jt-60sa:general/cryoctb_m1tpg54": 3,
         "jt-60sa:general/cryoctb_m1tpg56": 3,
         "jt-60sa:general/cryoctb_m1tpg58": 3,
-        "jt-60sa:general/cryoctb_mb5ft5": 3
+        "jt-60sa:general/cryoctb_mb5ft5": 3,
+        "jt-60sa:general/cryoctb_m1tpg55": 3,
+        "jt-60sa:general/cryoctb_m1tpg16": 3,
+        "jt-60sa:general/cryoctb_m1tpg52": 3,
+        "jt-60sa:general/cryoctb_m1tpg21": 3,
+        "jt-60sa:general/cryoctb_m1tpg32": 3,
+        "jt-60sa:general/cryoctb_mb5et5": 3,
+        "jt-60sa:general/cryoctb_m1tad05": 3
       }
     },
     {
@@ -1123,7 +1156,11 @@
         "jt-60sa:general/cryomag_me4thi1": 2,
         "jt-60sa:general/cryomc_mttpfmin": 3,
         "jt-60sa:general/cryomc_mtttfmax": 2,
-        "jt-60sa:general/cryomc_mtttfmin": 2
+        "jt-60sa:general/cryomc_mtttfmin": 2,
+        "jt-60sa:general/cryomag_m1tab26": 3,
+        "jt-60sa:general/cryomag_m1tab23": 3,
+        "jt-60sa:general/cryomag_m1tab29": 3,
+        "jt-60sa:general/cryomag_m1tab30": 3
       }
     },
     {
@@ -1159,7 +1196,9 @@
         "jt-60sa:general/psrc_curef6coil": 1,
         "jt-60sa:general/tf_tfts01c": 0,
         "jt-60sa:general/tf_tfts07c": 0,
-        "jt-60sa:general/tf_tfts13c": 0
+        "jt-60sa:general/tf_tfts13c": 0,
+        "jt-60sa:general/mmsys_vol3tf": 1,
+        "jt-60sa:general/mmsys_vol1tf": 1
       }
     },
     {
