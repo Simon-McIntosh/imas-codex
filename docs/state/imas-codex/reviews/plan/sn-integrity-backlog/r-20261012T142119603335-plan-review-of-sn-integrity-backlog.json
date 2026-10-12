@@ -1,0 +1,80 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:25:46.389Z",
+  "dispatched_at": "2026-10-12T14:21:29Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:121",
+      "id": "reuse_search-1",
+      "reason": "\u00a76 should adopt the row format and anchor-resolution check used by `docs/evidence/reuse-map-residual-closure.md` and cite the two existing evidence directories rather than inventing a parallel census shape.",
+      "text": "\u00a71 states this plan is the residue of sixteen retired plans and \u00a76 asks for \"one row per named item, with its verdict, the query or command that produced it, etc.\", yet \u00a76 cites no prior search of the tree; the repository already holds the exact artifact for this activity at `docs/evidence/reuse-map-residual-closure.md`, a reuse map of \"one row per required capability\" carrying repository path, invocable symbol, a `reuse-as-is` / `extend` fitness verdict and a one-line rationale, closed with a \"6 capability rows / 6 repository paths / 6 invocable anchors ... 6 resolved, 0 unresolved\" anchor check; the same retired-plan family left a worked census convention under `docs/evidence/sn-integrity-residual-closure/` (twelve censuses, e.g. `extracted-source-census.md`, `below-threshold-census.md`, whose header records the invocation commit and the row-set predicate), so the plan proposes to re-derive a format and an anchor discipline that already exist and are unmentioned; the plan's own \u00a76 negative-control pair (the `*_density_at_pedestal_top` family reads present; `schema_digest` absent) is good design, but its predecessor already generalised that discipline into the reuse map's anchor-resolution count, which \u00a76 does not reuse",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:119",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a76 should name each row's owning reader (`ledger.py`, `provenance_lifecycle.py`, the ratchet tests) and cite the function or threshold it re-runs, so that a row whose measurement has no owner is identified as the one place new code is genuinely needed.",
+      "text": "\u00a76 will re-measure \"every item named in \u00a72 to \u00a74 ... read-only: no graph write, no code change\" with fresh per-item queries, but the live graph already has dedicated read-only census readers that own these cohorts, and the predecessor's own reuse map (`docs/evidence/reuse-map-residual-closure.md`) already resolved them as `reuse-as-is`: `imas_codex/standard_names/ledger.py:96` (`find_provenance_orphans`, every materialized live name lacking an incoming `PRODUCED_NAME` source, which is \u00a72's origin-provenance and \u00a73's unsourced rows) and `imas_codex/standard_names/ledger.py:123` (`find_edge_scalar_desyncs`, reattachable scalar/edge desyncs, which is \u00a72's scalar-edge-authority row); `imas_codex/standard_names/provenance_lifecycle.py:1229` (`find_semantic_source_invariant_violations`, the composed/attached source with its complete live-target set and projections, which is \u00a74's dual-bound / supersede rows); and the live-child and unsourced thresholds already pinned in the ratchet tests `tests/graph/test_sn_integrity_ratchets.py:22`, `:126`, `:136`, `:146`, which \u00a76 would either duplicate or silently change if it recomputes them ad hoc; the plan is right to route the census to an execution-capable node, and the evidence-fragment placement `docs/evidence/fragments/<plan>/<name>.html` is the correct existing convention (a real declared write path, e.g. `docs/evidence/fragments/facility-discovery-sequence/focus-needs-one-domain.html`), so placement is not the defect \u2014 the defect is measuring rows whose readers already exist instead of calling them",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "06a76c2fe9dcd0afbec8c2c406dfdf624a28a01f1146a5d48c0040bea5afce7b",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:47.969528+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:49.372738+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:49.372738+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:47.969528+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v3.json",
+  "review_run_id": "r-20261012T142119603335-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "2242456e4afdaf0537c5179354cde61bfecacf8d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds no module; \u00a76 is one read-only section whose output is one evidence artifact, and \u00a72\u2013\u00a75 are index tables with no behaviour to hide.",
+    "duplicate_owner": "a finding \u2014 \u00a76 will measure rows with ad-hoc per-item queries although read-only census readers already own several of these cohorts and are named to extend rather than fork.",
+    "interface_budget": "pass \u2014 this week's figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a76 adds none of the four (it adds an evidence artifact and a plan section, neither of which is in those families), and it proposes no new command, so nothing needs retiring or merging. Noted for later: there is no `sn audit` subcommand today, so if the census is later hardened into a CLI it will add to `cli_options` and must be accounted for then.",
+    "reuse_search": "a finding \u2014 \u00a76's re-confirmation census cites no prior mechanism, while the direct predecessor artifact `docs/evidence/reuse-map-residual-closure.md` and the twelve censuses under `docs/evidence/sn-integrity-residual-closure/` already enact exactly this task in a settled format.",
+    "thin_wrapper": "pass \u2014 no wrapper is proposed; \u00a76 is explicitly \"no graph write, no code change\", so there is no new layer over existing machinery to justify. The reuse risk in this plan lands as reuse_search / duplicate_owner instead."
+  },
+  "section_digests": {
+    "_document": "dafeebf52a1e87468aa2cabd5149aa973174c25633b2a32218519b5d980f1b14",
+    "s1": "5c436b5cc337a48171153f80f3379b295fc3cbfdf5739c277014cc16b3e8a370",
+    "s2": "7aa37c2bbbfa53cbf3145d6abf322688f1e71d8ff36605186c70a29c43e80661",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "a458ff5439a63685250ff94ecd8219233512a6cb4c1774e5634aa35e0d1780b2",
+    "s6": "f7f7c8c1bc2684b3010a923f824e1fa8eb54b9f46a453f413cf17a0f57f73a4e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:32:16.410353+00:00"
+}
