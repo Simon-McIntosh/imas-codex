@@ -32,7 +32,6 @@ from imas_codex.settings import get_embedding_dimension
 from .cache import EmbeddingCache
 from .client import RemoteEmbeddingClient
 from .config import EmbeddingBackend, EncoderConfig
-from .openrouter_embed import EmbeddingResult
 
 
 class EmbeddingBackendError(Exception):
@@ -427,88 +426,6 @@ class Encoder:
             encode_kwargs["prompt_name"] = prompt_name
         return self._reject_identical_vectors(
             texts, model.encode(texts, **encode_kwargs)
-        )
-
-    def embed_texts_with_result(
-        self, texts: list[str], *, prompt_name: str | None = None, **kwargs
-    ) -> EmbeddingResult:
-        """Embed ad-hoc texts and return result with source tracking.
-
-        Returns EmbeddingResult with:
-        - source: "local" or "remote"
-        - cost_usd: always 0.0 (local/remote are free)
-        - total_tokens: always 0
-
-        Raises:
-            EmbeddingBackendError: If the backend is unavailable.
-        """
-        if not texts:
-            return EmbeddingResult(
-                embeddings=np.array([]),
-                total_tokens=0,
-                cost_usd=0.0,
-                model=self.config.model_name,
-                elapsed_seconds=0.0,
-                source="local",
-            )
-
-        backend = self.config.backend or EmbeddingBackend.LOCAL
-        start = time.time()
-
-        if backend == EmbeddingBackend.REMOTE:
-            with self._lock:
-                self._validate_remote_backend()
-
-            try:
-                embeddings = self._remote_client.embed(  # type: ignore[union-attr]
-                    texts,
-                    normalize=self.config.normalize_embeddings,
-                    prompt_name=prompt_name,
-                    dimension=get_embedding_dimension(),
-                )
-            except ConnectionError:
-                if self._reconnect_remote():
-                    with self._lock:
-                        self._validate_remote_backend()
-                    embeddings = self._remote_client.embed(  # type: ignore[union-attr]
-                        texts,
-                        normalize=self.config.normalize_embeddings,
-                        prompt_name=prompt_name,
-                        dimension=get_embedding_dimension(),
-                    )
-                else:
-                    raise
-            embeddings = self._truncate_embeddings(embeddings)
-            elapsed = time.time() - start
-            return EmbeddingResult(
-                embeddings=embeddings,
-                total_tokens=0,
-                cost_usd=0.0,
-                model=self.config.model_name,
-                elapsed_seconds=elapsed,
-                source=self._resolve_remote_source(),
-            )
-
-        # Local backend — truncate_dim set on model at init
-        model = self.get_model()
-        encode_kwargs = {
-            "convert_to_numpy": True,
-            "normalize_embeddings": self.config.normalize_embeddings,
-            "batch_size": self.config.batch_size,
-            "show_progress_bar": False,
-            **kwargs,
-        }
-        if prompt_name is not None:
-            encode_kwargs["prompt_name"] = prompt_name
-        embeddings = model.encode(texts, **encode_kwargs)
-        elapsed = time.time() - start
-        return EmbeddingResult(
-            embeddings=embeddings,
-            total_tokens=0,
-            cost_usd=0.0,
-            model=self.config.model_name,
-            elapsed_seconds=elapsed,
-            source="local",
         )
 
     @property
