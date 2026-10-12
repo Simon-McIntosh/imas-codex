@@ -14,15 +14,20 @@ Five ranking arms and a seeded random control are scored on the questions in
 The two Jev arms spend money on the discovery-relevance seat, so a default run
 does not build them: ``arm_ranking`` returns the fused order for a Jev arm and
 records that the rerank permutation was not applied, unless the environment
-sets ``SSFMS_JEV_ARMS=1``. A stub rerank is used only where a test needs the
-arm to produce an order without spending.
+sets ``SIGNAL_SEARCH_JEV_ARMS=1``. A stub rerank is used only where a test needs
+the arm to produce an order without spending.
 
 Every question's candidates that an arm places in its top 10 must be labelled
-under the section's grading rule before that arm is scored. A candidate with no
+under the fixture's grading rule before that arm is scored. A candidate with no
 label is not the same as one read and judged irrelevant (grade 0): the first is
 a gap in the fixture and makes the arm refuse, naming the candidate; the second
 is scored. Labelling is pooled across all arms, so an arm is never penalised
 for lifting a relevant signal a sibling arm found and no other arm had labelled.
+
+The fixture declares the enrichment cutover its labels were drawn against, and
+every labelled signal must lie at or after it: a label on a signal the Jev-era
+pipeline has not enriched is a stale seed the population does not contain, and
+the eligibility gate fails by name rather than skipping it.
 
 Reports mean nDCG@10, grade-3 precision@5, grade-3 recall@30 and the count of
 questions with no grade-3 hit in the top 30, per arm. The control is a seeded
@@ -37,6 +42,7 @@ import math
 import os
 import random
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -50,14 +56,26 @@ K = 30
 TOP_K = 10
 CONTROL_SEED = 20261012
 
+# The cutover the golden population is enumerated against: the first run whose
+# signal pipeline reranked enrichment context within its budget. The fixture
+# carries this value as data; the gate below pins it so a fixture that declares
+# an earlier cutover (and so admits signals enriched before the fix) fails
+# rather than silently widening the population.
+CANONICAL_ENRICHED_AT_CUTOVER = "2026-10-11T21:08:54Z"
+
+# Set to "1" to build and score the two Jev rerank arms, which spend on the
+# discovery-relevance seat. A default run leaves this unset and spends nothing.
+JEV_ARMS_ENV = "SIGNAL_SEARCH_JEV_ARMS"
+
 # Arms whose ranking is reordered by a Jev judgement and therefore spends on the
 # discovery-relevance seat. A default run does not build them.
 JEV_ARMS = ("rrf_rerank", "rrf_rerank_role")
 
-# The role-aware relevance question, written to the five levels §7 names: a
-# different quantity, through a commanded or reference value, to a measurement
-# of exactly the quantity asked for. Kept here until the rerank ships and it
-# moves into the product beside the generic question.
+# The role-aware relevance question, written to five relevance levels: a
+# measurement of the quantity asked for, through a measurement of a related
+# quantity, a commanded or reference value of it, related hardware, to a
+# different quantity. Kept here until the rerank ships and it moves into the
+# product beside the generic question.
 _ROLE_RERANK_LEVELS = [
     "a different quantity, unrelated to the one asked for",
     "related hardware: a status flag, configuration value or neighbouring measurement",
@@ -404,6 +422,58 @@ def test_every_question_is_phrased_without_facility_or_source_vocabulary() -> No
         ), (q.id, q.query)
 
 
+def _as_utc(value: object) -> datetime | None:
+    if value is None:
+        return None
+    try:
+        return datetime.fromisoformat(str(value)).astimezone(timezone.utc)
+    except ValueError:
+        return None
+
+
+def _label_enrichment(ids: list[str]) -> dict[str, object]:
+    """``enriched_at`` per id, or None where the signal is absent or unset."""
+    from imas_codex.graph.client import GraphClient
+
+    rows = GraphClient().query(
+        "UNWIND $ids AS sid OPTIONAL MATCH (s:FacilitySignal {id: sid}) "
+        "RETURN sid AS id, s.enriched_at AS enriched_at",
+        ids=ids,
+    )
+    return {r["id"]: r["enriched_at"] for r in rows}
+
+
+@pytest.mark.graph
+def test_every_labelled_signal_is_eligible() -> None:
+    """Every labelled signal lies at or after the Jev-era enrichment cutover.
+
+    A label on a signal the pipeline enriched before the cutover is a seed the
+    golden population does not contain, so the fixture fails by name rather than
+    skipping it. The check pins the cutover the fixture declares: an earlier
+    value readmits the seeds enriched in the window before the fix, so it must
+    fail rather than silently widen the population.
+    """
+    declared = json_fixture["eligibility"]["enriched_at_cutover"]
+    assert declared == CANONICAL_ENRICHED_AT_CUTOVER, (
+        f"fixture declares enrichment cutover {declared!r}; the canonical "
+        f"cutover is {CANONICAL_ENRICHED_AT_CUTOVER!r}"
+    )
+    cutover = _as_utc(CANONICAL_ENRICHED_AT_CUTOVER)
+    labelled = sorted({sid for q in QUESTIONS for sid in q.relevant})
+    enrichment = _label_enrichment(labelled)
+    ineligible = [
+        sid
+        for sid in labelled
+        if _as_utc(enrichment.get(sid)) is None
+        or _as_utc(enrichment[sid]) < cutover
+    ]
+    assert not ineligible, (
+        f"fixture labels {len(ineligible)} signal(s) enriched before the cutover "
+        f"{CANONICAL_ENRICHED_AT_CUTOVER}, or absent from the graph: "
+        + ", ".join(ineligible)
+    )
+
+
 # ---------------------------------------------------------------------------
 # Metrics on a hand-computed case (no graph)
 # ---------------------------------------------------------------------------
@@ -501,7 +571,7 @@ def test_each_arm_refuses_the_incompletely_labelled_fixture() -> None:
     pool holding unlabelled candidates, so it fires for them as it does for the
     free arms.
     """
-    spend_jev = os.environ.get("SSFMS_JEV_ARMS") == "1"
+    spend_jev = os.environ.get(JEV_ARMS_ENV) == "1"
     arms = ["current_tool", "vector_only", "rrf", *JEV_ARMS]
     shared = _open_context("current_tool", spend_jev=spend_jev)
     refusals: dict[str, list[str]] = {}
@@ -530,21 +600,17 @@ def test_each_arm_refuses_the_incompletely_labelled_fixture() -> None:
 def test_five_arm_table_matches_the_control_below_every_arm() -> None:
     """Five-arm table on pooled labels; the control sits below every arm.
 
-    Skipped until the fixture is fully labelled (pooling is a separate node);
-    the refusal test above is what runs on the fixture as it stands. When the
-    labels are complete this scores all five arms and the control and asserts
-    the control is below each arm on mean nDCG@10.
+    Scores all five arms and the control and asserts the control is below each
+    arm on mean nDCG@10. An unlabelled candidate in any arm's top 10 fails the
+    test, naming it, rather than skipping: a skipped table would read as a pass.
     """
-    spend_jev = os.environ.get("SSFMS_JEV_ARMS") == "1"
+    spend_jev = os.environ.get(JEV_ARMS_ENV) == "1"
     arms = ["current_tool", "vector_only", "rrf"]
     if spend_jev:
         arms += list(JEV_ARMS)
     rows: list[dict] = []
-    try:
-        for arm in arms:
-            rows.extend(score_arm(arm, _open_context(arm, spend_jev=spend_jev)))
-    except UnlabelledCandidates as exc:
-        pytest.skip(f"fixture not yet fully labelled: {exc}")
+    for arm in arms:
+        rows.extend(score_arm(arm, _open_context(arm, spend_jev=spend_jev)))
     rows.extend(score_control())
     table = {
         a: mean([r for r in rows if r["arm"] == a], "ndcg@10")
