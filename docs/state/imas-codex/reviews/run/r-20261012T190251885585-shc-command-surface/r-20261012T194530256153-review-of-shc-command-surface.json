@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "a76020e640e64b108f7d04864841bf5c794cb1d3",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6025",
+    "imas_codex/cli/sn.py:4132",
+    "imas_codex/standard_names/harmonize.py:411",
+    "imas_codex/standard_names/review/audits.py:787"
+  ],
+  "completed_at": "2026-10-12T19:57:33.029Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-12T19:45:42Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_harmonize_command.py",
+      "line": "131",
+      "severity": "follow-on",
+      "text": "follow-on: `assert set(family[\"members\"]) == {m[\"id\"] for m in _MEMBERS}` compares the report's member list against _MEMBERS, the exact fixture the test handed the stub, which returns that same list, so it holds whatever the report's family enumeration does; the count assertions at :130 and :167 have the same shape. The assertion that does bite is tests/standard_names/test_harmonize.py:531 (`assert shared in issued`), which fails if build_worklist re-inlines the grouping."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "491",
+      "severity": "follow-on",
+      "text": "follow-on: the node adds Cypher (the pattern-family enumeration) but its recorded after_suite omits tests/graph/test_cypher_property_check.py and the review/audits tests that the node's own done_when names as gate files, so the recorded gate does not assert property existence for the new literals; I ran the property check at 3ec6cfb25 and it passes (4 passed, EXIT=0), so no defect shipped, but the record is incomplete against the done_when."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "646",
+      "severity": "follow-on",
+      "text": "follow-on: report_family_rows keys lint findings by finding.name_id into by_name at :647, then attributes them per family via by_name.get(member id) at :659; run_lexical_lint emits its cross-name position-form findings under the synthetic id `[domain:<d>]` (imas_codex/standard_names/review/audits.py:387) which matches no member id, so those findings are dropped from every family row and from the scope total the plan calls the number every later step is judged against."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "531",
+      "severity": "follow-on",
+      "text": "follow-on: fetch_pattern_families reuses families.py's primitives (_invariant_projection/_invariant_equality/PATTERN_INVARIANT_SEGMENTS) but its seeded branch re-derives the invariant grouping families.py already owns in _PATTERN_FAMILY_MEMBERS_QUERY/fetch_pattern_family (imas_codex/standard_names/families.py:547,605), and the bulk form places a family-enumeration capability in harmonize.py rather than beside that owner; it extends rather than forks the primitives, so it is not a full duplicate, but the multi-seed and all-families forms belong in the module that owns family enumeration."
+    }
+  ],
+  "head_log_revision": "3ec6cfb25348f06bb8ddae333a035e85ee2af4d3",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit from a76020e6 to 3ec6cfb25; 6e3d838d5 adds sn_harmonize plus the harmonize.py/audits.py additions and deletions, 3ec6cfb25 adds the evidence fragment and figure; twelve files, all inside the declared scope.",
+    "done_when": "the done_when names a fixture-graph run of `sn harmonize --report --batch v0.4.0rc7+west-task-2e` printing per-family rows and a scope total, a no-write test, deleted-flag rejections, and named gate files; the recorded after_suite (188 passed / 0 failed, EXIT=0) covers the command, but omits tests/graph/test_cypher_property_check.py and the review/audits tests the same done_when names.",
+    "goal": "the node's goal is a read-only `sn harmonize` family report over exactly one of --batch/--family/--concept/--all, plus deletion of `sn run --families` and `sn review --target groups`; sn_harmonize (imas_codex/cli/sn.py:5941) provides the report and both flags are absent from sn.py at 3ec6cfb25, so the goal is delivered.",
+    "manifest": "read; it records status complete, commits 6e3d838d5 and 3ec6cfb25, baseline 176/0 and after 188/0 both completed:true, negative_control_log as a bare path, and a follow-on that graph_ops.py:25029 still names the deleted flag.",
+    "write_paths": "the manifest declares eleven product/test/doc paths plus the evidence fragment; the diff a76020e6..3ec6cfb25 touches only those plus one figure the manifest's orientation_write_paths carry."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize.py:531 fails if build_worklist re-inlines the parentless grouping and the negative-control log reddens when the report reaches run_all_audits, but the member/count assertions at tests/standard_names/test_harmonize_command.py:130-131 compare against the fixture the test itself passed in.",
+    "evidence": "the manifest records baseline a76020e6 (176 passed) and after 3ec6cfb25 (188 passed, EXIT=0), but its recorded after_suite omits tests/graph/test_cypher_property_check.py and the review/audits tests the done_when names as gate files.",
+    "fit": "imas_codex/cli/sn.py:5941 follows the surrounding click-command and _resolve_gc/_close_if_owned idiom and introduces no name the repository naming rules forbid.",
+    "goal_fidelity": "imas_codex/cli/sn.py:5941 implements sn_harmonize over exactly one of --batch/--family/--concept/--all and the deleted flags are gone from sn.py at head.",
+    "reuse": "imas_codex/standard_names/harmonize.py:531 reuses families.py's shared primitives but re-derives the single-seed grouping families.py owns in fetch_pattern_family (families.py:605).",
+    "scope_discipline": "every path in the diff a76020e6..3ec6cfb25 is inside the manifest's declared write paths plus the figure its orientation paths carry."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a read-only `sn harmonize` family report over exactly one of --batch/--family/--concept/--all, plus deletion of `sn run --families` and `sn review --target groups`; sn_harmonize (imas_codex/cli/sn.py:5941) provides the report and both flags are absent from sn.py at 3ec6cfb25, so the goal is delivered.\nVERDICT done_when: the done_when names a fixture-graph run of `sn harmonize --report --batch v0.4.0rc7+west-task-2e` printing per-family rows and a scope total, a no-write test, deleted-flag rejections, and named gate files; the recorded after_suite (188 passed / 0 failed, EXIT=0) covers the command, but omits tests/graph/test_cypher_property_check.py and the review/audits tests the same done_when names.\nVERDICT write_paths: the manifest declares eleven product/test/doc paths plus the evidence fragment; the diff a76020e6..3ec6cfb25 touches only those plus one figure the manifest's orientation_write_paths carry.\nVERDICT manifest: read; it records status complete, commits 6e3d838d5 and 3ec6cfb25, baseline 176/0 and after 188/0 both completed:true, negative_control_log as a bare path, and a follow-on that graph_ops.py:25029 still names the deleted flag.\nVERDICT diff: read commit by commit from a76020e6 to 3ec6cfb25; 6e3d838d5 adds sn_harmonize plus the harmonize.py/audits.py additions and deletions, 3ec6cfb25 adds the evidence fragment and figure; twelve files, all inside the declared scope.\nCALL_SITES: imas_codex/cli/sn.py:6025, imas_codex/cli/sn.py:4132, imas_codex/standard_names/harmonize.py:411, imas_codex/standard_names/review/audits.py:787\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/cli/sn.py:5941 implements sn_harmonize over exactly one of --batch/--family/--concept/--all and the deleted flags are gone from sn.py at head.\nSCORE evidence: 13\nJUSTIFICATION evidence: the manifest records baseline a76020e6 (176 passed) and after 3ec6cfb25 (188 passed, EXIT=0), but its recorded after_suite omits tests/graph/test_cypher_property_check.py and the review/audits tests the done_when names as gate files.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff a76020e6..3ec6cfb25 is inside the manifest's declared write paths plus the figure its orientation_write_paths carry.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_harmonize.py:531 fails if build_worklist re-inlines the parentless grouping and the negative-control log reddens when the report reaches run_all_audits, but the member/count assertions at tests/standard_names/test_harmonize_command.py:130-131 compare against the fixture the test itself passed in.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/cli/sn.py:5941 follows the surrounding click-command and _resolve_gc/_close_if_owned idiom and introduces no name the repository naming rules forbid.\nSCORE reuse: 13\nJUSTIFICATION reuse: imas_codex/standard_names/harmonize.py:531 reuses families.py's shared primitives but re-derives the single-seed grouping families.py owns in fetch_pattern_family (families.py:605) instead of extending it.\nFINDING tests/standard_names/test_harmonize_command.py:131 follow-on: `assert set(family[\"members\"]) == {m[\"id\"] for m in _MEMBERS}` compares the report's member list against _MEMBERS, the exact fixture the test handed the stub, which returns that same list, so it holds whatever the report's family enumeration does; the count assertions at :130 and :167 have the same shape. The assertion that does bite is tests/standard_names/test_harmonize.py:531 (`assert shared in issued`), which fails if build_worklist re-inlines the grouping.\nFINDING imas_codex/standard_names/harmonize.py:491 follow-on: the node adds Cypher (the pattern-family enumeration) but its recorded after_suite omits tests/graph/test_cypher_property_check.py and the review/audits tests that the node's own done_when names as gate files, so the recorded gate does not assert property existence for the new literals; I ran the property check at 3ec6cfb25 and it passes (4 passed, EXIT=0), so no defect shipped, but the record is incomplete against the done_when.\nFINDING imas_codex/standard_names/harmonize.py:646 follow-on: report_family_rows keys lint findings by finding.name_id into by_name at :647, then attributes them per family via by_name.get(member id) at :659; run_lexical_lint emits its cross-name position-form findings under the synthetic id `[domain:<d>]` (imas_codex/standard_names/review/audits.py:387) which matches no member id, so those findings are dropped from every family row and from the scope total the plan calls the number every later step is judged against.\nFINDING imas_codex/standard_names/harmonize.py:531 follow-on: fetch_pattern_families reuses families.py's primitives (_invariant_projection/_invariant_equality/PATTERN_INVARIANT_SEGMENTS) but its seeded branch re-derives the invariant grouping families.py already owns in _PATTERN_FAMILY_MEMBERS_QUERY/fetch_pattern_family (imas_codex/standard_names/families.py:547,605), and the bulk form places a family-enumeration capability in harmonize.py rather than beside that owner; it extends rather than forks the primitives, so it is not a full duplicate, but the multi-seed and all-families forms belong in the module that owns family enumeration.",
+  "review_run_id": "r-20261012T194530256153-review-of-shc-command-surface",
+  "reviewed_base_sha": "a76020e640e64b108f7d04864841bf5c794cb1d3",
+  "reviewed_head_sha": "3ec6cfb25348f06bb8ddae333a035e85ee2af4d3",
+  "reviewed_run_id": "r-20261012T190251885585-shc-command-surface",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:56:00.237782+00:00",
+  "total": 95
+}
