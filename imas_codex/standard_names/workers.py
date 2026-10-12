@@ -9498,24 +9498,6 @@ def _nearby_names_for_docs_gen(gc: Any, items: list[dict]) -> list[dict]:
     return nearby
 
 
-def _conventions_for_prompt(name: Any) -> dict[str, Any] | None:
-    """Return the registry conventions selected for ``name``, or ``None``.
-
-    ``select_conventions`` parses the name with the public grammar and raises
-    for a name the local build cannot parse — a legacy id, or one whose
-    vocabulary an ISN release has not yet reached this checkout. The
-    documentation prompts render a missing selection as an empty block, so a
-    parse failure must leave the block out rather than abort the batch.
-    """
-    from imas_codex.standard_names.context import conventions_context_for
-
-    try:
-        return conventions_context_for(str(name))
-    except Exception:
-        logger.debug("conventions selection failed for %r", name, exc_info=True)
-        return None
-
-
 async def process_generate_docs_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -9640,6 +9622,7 @@ async def process_generate_docs_batch(
         # (otherwise the grammar block is empty). Cached after first call.
         from imas_codex.standard_names.context import (
             build_compose_context,
+            conventions_context_for,
             locus_context_for,
         )
 
@@ -9655,7 +9638,7 @@ async def process_generate_docs_batch(
             # normalized_poloidal_flux_coordinate_of_pedestal. None when the name
             # has no locus or the locus carries no gloss/defining quantity.
             "locus_context": locus_context_for(sn_id),
-            "conventions": _conventions_for_prompt(sn_id),
+            "conventions": conventions_context_for(sn_id),
         }
 
         try:
@@ -10254,7 +10237,10 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
         get_sn_review_names_models,
         get_sn_review_reasoning_effort,
     )
-    from imas_codex.standard_names.context import fetch_review_neighbours
+    from imas_codex.standard_names.context import (
+        conventions_context_for,
+        fetch_review_neighbours,
+    )
     from imas_codex.standard_names.models import (
         StandardNameQualityReviewDocsBatch,
         StandardNameQualityReviewDocsParentBatch,
@@ -10331,7 +10317,7 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
         **neighbours,
         "review_scored_examples": review_examples,
     }
-    prompt_context["conventions"] = _conventions_for_prompt(prepared_item["id"])
+    prompt_context["conventions"] = conventions_context_for(prepared_item["id"])
     is_parent = bool(prepared_item.get("derived_children"))
     user_template = "sn/review_docs_parent_user" if is_parent else "sn/review_docs_user"
     system_template = (
@@ -10638,6 +10624,7 @@ async def process_refine_docs_batch(
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
+    from imas_codex.standard_names.context import conventions_context_for
     from imas_codex.standard_names.defaults import (
         DEFAULT_ESCALATION_MODEL,
         DEFAULT_REFINE_ROTATIONS,
@@ -10693,7 +10680,7 @@ async def process_refine_docs_batch(
             "edit_reason": item.get("edit_reason"),
             "edit_origin": item.get("edit_origin"),
         }
-        prompt_context["conventions"] = _conventions_for_prompt(sn_id)
+        prompt_context["conventions"] = conventions_context_for(sn_id)
 
         # Best-effort DD path enrichment
         from imas_codex.standard_names.dd_resolutions import DDResolutionError

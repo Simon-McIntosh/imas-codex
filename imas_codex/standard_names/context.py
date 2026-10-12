@@ -26,10 +26,22 @@ _CONTEXT_CACHE: dict[str, Any] | None = None
 
 
 def conventions_context_for(name: str) -> dict[str, list[dict[str, Any]]] | None:
-    """Return only the registry conventions selected for this name's prompt."""
+    """Return only the registry conventions selected for this name's prompt.
+
+    ``select_conventions`` parses the name with the public grammar and raises
+    for a name the local build cannot parse — a legacy id, or one whose
+    vocabulary an ISN release has not yet reached this checkout. The prompts
+    that render these conventions render a missing selection as an empty block,
+    so a parse failure yields no conventions rather than aborting the caller.
+    """
+    from imas_standard_names.grammar.parser import ParseError
     from imas_standard_names.grammar.terms import select_conventions
 
-    selected = select_conventions(name)
+    try:
+        selected = select_conventions(name)
+    except ParseError:
+        logger.debug("conventions selection failed for %r", name, exc_info=True)
+        return None
     if not (selected.concepts or selected.notation or selected.templates):
         return None
     return {
