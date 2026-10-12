@@ -46,6 +46,15 @@ def _candidate(name: str, **overrides) -> dict:
         "unit": "1",
         "physics_domain": "general",
         "links": [],
+        # The topology the population query projects onto every candidate: a
+        # Data Dictionary extraction reached this name directly. Without
+        # producer evidence the eligibility classifier withholds the candidate,
+        # so a fixture that stands for a real population row carries it.
+        "_has_dd_source_binding": True,
+        "_has_derived_producer": False,
+        "_has_non_derived_producer": True,
+        "_has_live_child": False,
+        "_is_parent": False,
     }
     candidate.update(overrides)
     return candidate
@@ -776,13 +785,24 @@ def test_manifest_sources_reconcile_emitted_excluded_and_non_nameable(
     reconciliation = report.to_dict()["source_reconciliation"]
     rows = {row["source_path"]: row for row in reconciliation["rows"]}
 
-    assert report.all_gates_passed
+    # A manifest cut promises every source becomes a name; three of these four
+    # reach none -- an exhausted terminal, an unusable terminal, and a
+    # documented refusal -- so the cut is refused rather than publishing a
+    # count of exclusions no reader can act on. The reconciliation below still
+    # accounts for all four.
+    assert not report.all_gates_passed
+    failed_gates = [
+        gate for gate in report.gate_results if not gate.passed and not gate.skipped
+    ]
+    assert [gate.gate for gate in failed_gates] == ["manifest_generability"]
+    assert report.manifest_generability["carried_sources"] == ["equilibrium/accepted"]
     assert reconciliation == {
         "manifest_size": 4,
         "accounted": 4,
         "emitted": 1,
         "excluded": 2,
         "documented_non_nameable": 1,
+        "waived": 0,
         "rows": reconciliation["rows"],
     }
     assert rows["equilibrium/accepted"]["disposition"] == "emitted"
