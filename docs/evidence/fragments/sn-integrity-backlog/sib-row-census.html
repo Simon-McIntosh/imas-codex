@@ -18,13 +18,13 @@ graph at commit <code>c7b4c626e</code>, read-only. The full row table is
 <p id="sib-row-census-landing-measure">
 Both built-in controls fire: the <code>*_density_at_pedestal_top</code> family reads
 present (20 rows, 0.004 s; restore row <em>changed</em>), and <code>schema_digest</code>
-is absent from the tree (<code>rg -l</code> returns nothing). Of the named items,
-the census reads <strong>2 fixed</strong> (the fold guard's ledger rule landed;
-<code>find_edge_scalar_desyncs</code> returns 0), <strong>five changed</strong>
-(restore partial, restore-CLI origin refusal, scaffolding population 334→412,
-import write path refused, cap-hit 216→234), <strong>ten still true</strong>, and
-<strong>eleven needing a ruling</strong> or a bounding write to confirm. Every query
-named its row set and finished under ten seconds.
+is absent from the tree (<code>rg -l</code> returns nothing). The census holds
+<strong>38 verdict rows</strong> — 13 in §2, 11 in §3, 14 in §4 — and they read
+<strong>2 fixed</strong> (the fold guard's ledger rule landed;
+<code>find_edge_scalar_desyncs</code> returns 0), <strong>7 changed</strong>,
+<strong>15 still true</strong>, <strong>8 needing a ruling</strong>, and
+<strong>6 needing a write to confirm</strong>. Every query named its row set and
+finished under ten seconds.
 </p>
 </main>
 </body>
