@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/sn.py:8623",
+    "imas_codex/cli/sn.py:8638"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-12T18:55:18Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_restore_origin_refusal.py",
+      "line": "47",
+      "severity": "blocking",
+      "text": "blocking: test_an_archived_origin_does_not_satisfy_the_compose_time_requirement duplicates test_composition_requires_an_explicit_current_origin at tests/standard_names/test_archive_reconstruction_entry_point.py:198, which already pins the same refusal at the reviewed base; imas_codex/cli/sn.py:8424 never reads the archived properties origin, so composing from a catalog_edit archive reaches the identical origin-is-None branch and the archived value adds no coverage."
+    },
+    {
+      "file": "tests/standard_names/test_restore_origin_refusal.py",
+      "line": "55",
+      "severity": "blocking",
+      "text": "blocking: test_the_cli_requires_the_signer_to_state_the_origin duplicates test_cli_compose_requires_an_origin at tests/standard_names/test_archive_reconstruction_entry_point.py:398, which already invokes sn restore compose on an extraction carrying origin catalog_edit with no --origin and asserts exit code 2 with --origin named in the output."
+    },
+    {
+      "file": "tests/standard_names/test_restore_origin_refusal.py",
+      "line": "77",
+      "severity": "blocking",
+      "text": "blocking: test_a_stated_origin_still_replaces_the_archived_one duplicates test_composition_replaces_archived_origin_with_the_stated_origin at tests/standard_names/test_archive_reconstruction_entry_point.py:188, which already states origin pipeline over an archive carrying catalog_edit and asserts the composed node origin is pipeline."
+    },
+    {
+      "file": "tests/standard_names/test_restore_origin_refusal.py",
+      "line": "27",
+      "severity": "follow-on",
+      "text": "follow-on: _extraction_carrying_origin forks the _extraction factory at tests/standard_names/test_archive_reconstruction_entry_point.py:41 for the same synthetic record shape, so the new module carries a second copy of a fixture its owner already parameterised by origin."
+    }
+  ],
+  "head_log_revision": "345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit from 345868c92 to 97f4dcc26; two new files, 120 added lines, no product code changed.",
+    "done_when": "the done_when names the new test file, a compose from an archive carrying origin catalog_edit, a shown failure with the refusal removed, and no added failures; tests/standard_names/test_restore_origin_refusal.py:47, negative_control.log (1 failed, EXIT=1) and after.log (92 passed, EXIT=0) supply each.",
+    "goal": "the reviewed node's goal is to pin the restore composer's refusal of an unstated archive origin with a test; tests/standard_names/test_restore_origin_refusal.py:47 exercises that refusal at imas_codex/cli/sn.py:8424, but the brief's premise that no test pinned it was already false at the reviewed base.",
+    "manifest": "read; it records status complete, the two commits bba2206bdf and 97f4dcc26, the gate at 92 passed EXIT=0, and negative_control_log as a bare path.",
+    "write_paths": "the reviewed manifest declares tests/standard_names/test_restore_origin_refusal.py and the sn-integrity-backlog evidence paths; both files in the diff are inside them."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows test_an_archived_origin_does_not_satisfy_the_compose_time_requirement reddens when imas_codex/cli/sn.py:8424 is removed, but that guard was already pinned by tests/standard_names/test_archive_reconstruction_entry_point.py:198, so the added assertions protect nothing new.",
+    "evidence": "baseline.log (89 passed) and after.log (92 passed) at revision 345868c92 plus negative_control.log (1 failed, EXIT=1) record the gate the done_when names, though the after arm's own header names the base revision rather than the committed head 97f4dcc26.",
+    "fit": "the new module follows the click/CliRunner idiom of tests/standard_names/test_archive_reconstruction_entry_point.py:398 and introduces no name the repository naming rules forbid.",
+    "goal_fidelity": "tests/standard_names/test_restore_origin_refusal.py:47 does pin imas_codex/cli/sn.py:8424, but the goal's stated premise that the refusal was unpinned is false at the reviewed base, so no coverage gap was closed.",
+    "reuse": "all three added tests and the helper at tests/standard_names/test_restore_origin_refusal.py:27 duplicate the owner tests/standard_names/test_archive_reconstruction_entry_point.py rather than extending it.",
+    "scope_discipline": "the diff touches only tests/standard_names/test_restore_origin_refusal.py and docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html, both inside the declared paths, with no product code changed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to pin the restore composer's refusal of an unstated archive origin with a test; tests/standard_names/test_restore_origin_refusal.py:47 exercises that refusal at imas_codex/cli/sn.py:8424, but the brief's premise that no test pinned it was already false at the reviewed base.\nVERDICT done_when: the done_when names the new test file, a compose from an archive carrying origin catalog_edit, a shown failure with the refusal removed, and no added failures; tests/standard_names/test_restore_origin_refusal.py:47, negative_control.log (1 failed, EXIT=1) and after.log (92 passed, EXIT=0) supply each.\nVERDICT write_paths: the reviewed manifest declares tests/standard_names/test_restore_origin_refusal.py and the sn-integrity-backlog evidence paths; both files in the diff are inside them.\nVERDICT manifest: read; it records status complete, the two commits bba2206bdf and 97f4dcc26, the gate at 92 passed EXIT=0, and negative_control_log as a bare path.\nVERDICT diff: read commit by commit from 345868c92 to 97f4dcc26; two new files, 120 added lines, no product code changed.\nCALL_SITES: imas_codex/cli/sn.py:8623, imas_codex/cli/sn.py:8638\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: tests/standard_names/test_restore_origin_refusal.py:47 does pin imas_codex/cli/sn.py:8424, but the goal's stated premise that the refusal was unpinned is false at the reviewed base, so no coverage gap was closed.\nSCORE evidence: 16\nJUSTIFICATION evidence: baseline.log (89 passed) and after.log (92 passed) at revision 345868c92 plus negative_control.log (1 failed, EXIT=1) record the gate the done_when names, though the after arm's own header names the base revision rather than the committed head 97f4dcc26.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff touches only tests/standard_names/test_restore_origin_refusal.py and docs/evidence/fragments/sn-integrity-backlog/sib-restore-origin-refusal.html, both inside the declared paths, with no product code changed.\nSCORE durability: 12\nJUSTIFICATION durability: negative_control.log shows test_an_archived_origin_does_not_satisfy_the_compose_time_requirement reddens when imas_codex/cli/sn.py:8424 is removed, but that guard was already pinned by tests/standard_names/test_archive_reconstruction_entry_point.py:198, so the added assertions protect nothing new.\nSCORE fit: 16\nJUSTIFICATION fit: the new module follows the click/CliRunner idiom of tests/standard_names/test_archive_reconstruction_entry_point.py:398 and introduces no name the repository naming rules forbid.\nSCORE reuse: 3\nJUSTIFICATION reuse: all three added tests and the helper at tests/standard_names/test_restore_origin_refusal.py:27 duplicate the owner tests/standard_names/test_archive_reconstruction_entry_point.py rather than extending it.\nFINDING tests/standard_names/test_restore_origin_refusal.py:47 blocking: test_an_archived_origin_does_not_satisfy_the_compose_time_requirement duplicates test_composition_requires_an_explicit_current_origin at tests/standard_names/test_archive_reconstruction_entry_point.py:198, which already pins the same refusal at the reviewed base; imas_codex/cli/sn.py:8424 never reads the archived properties origin, so composing from a catalog_edit archive reaches the identical origin-is-None branch and the archived value adds no coverage.\nFINDING tests/standard_names/test_restore_origin_refusal.py:55 blocking: test_the_cli_requires_the_signer_to_state_the_origin duplicates test_cli_compose_requires_an_origin at tests/standard_names/test_archive_reconstruction_entry_point.py:398, which already invokes sn restore compose on an extraction carrying origin catalog_edit with no --origin and asserts exit code 2 with --origin named in the output.\nFINDING tests/standard_names/test_restore_origin_refusal.py:77 blocking: test_a_stated_origin_still_replaces_the_archived_one duplicates test_composition_replaces_archived_origin_with_the_stated_origin at tests/standard_names/test_archive_reconstruction_entry_point.py:188, which already states origin pipeline over an archive carrying catalog_edit and asserts the composed node origin is pipeline.\nFINDING tests/standard_names/test_restore_origin_refusal.py:27 follow-on: _extraction_carrying_origin forks the _extraction factory at tests/standard_names/test_archive_reconstruction_entry_point.py:41 for the same synthetic record shape, so the new module carries a second copy of a fixture its owner already parameterised by origin.\n",
+  "review_run_id": "legacy-eb6ff86e0c45",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd",
+  "reviewed_head_sha": "97f4dcc26e65d984d6fe75c4123a381f9565049d",
+  "reviewed_run_id": "r-20261012T185444831401-sib-restore-origin-refusal",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 3,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:24:11.655742+00:00",
+  "total": 80
+}
