@@ -48,7 +48,24 @@
   "plan_slug": "sn-west-prototype-release",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "6fe78f81-6052-4ec2-abc4-c4ad9a331a7d",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T05:39:23.120904+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "6fe78f81-6052-4ec2-abc4-c4ad9a331a7d",
+      "reason": "",
+      "when": "2026-10-12T05:39:23.120904+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-west-prototype-release/r-20261012T051718804479-plan-review-of-sn-west-prototype-release.json",
   "review_run_id": "r-20261012T051718804479-plan-review-of-sn-west-prototype-release",
   "reviewed_blob_sha": "3b89126d139a6d4001ede3636ef408d80ee191d7",
   "rubric": "content",
