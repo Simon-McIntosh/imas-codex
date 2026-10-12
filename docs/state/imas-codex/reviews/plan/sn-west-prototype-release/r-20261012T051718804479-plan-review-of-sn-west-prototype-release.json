@@ -1,0 +1,78 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T05:23:51.187Z",
+  "dispatched_at": "2026-10-12T05:17:29Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-west-prototype-release.html:136",
+      "id": "reasoning-1",
+      "reason": "a node implementing \u00a75 as written would invoke the existing module, get hierarchy order, and write a contiguity test against a property the mechanism never produces.",
+      "text": "\u00a75 says entries are \"ordered by pattern family\" and that `imas_codex/standard_names/catalog_ordering.py` \"applies that ordering\", but that module's `order_entries_by_hierarchy` performs a topological sort over HAS_PARENT/HAS_ERROR graph edges (see its docstring and export.py:3281 \u2014 `order_entries_by_hierarchy(entries, edges, ...)`, grouped by `sorted(domain_entries.items())`), and the module contains no notion of a pattern family \u2014 so the named mechanism produces parent-hierarchy order, not family contiguity, and \u00a75's done-when (\"every pattern family appears contiguously within its domain\") cannot be asserted over its output",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-west-prototype-release.html:180",
+      "id": "reasoning-2",
+      "reason": "the section's stated measure rests on work its cited evidence says has never run, so the node needs the writing code path (or a re-scoped done-when) named before dispatch.",
+      "text": "\u00a77's done-when requires the accepted edit to be \"in the graph and traceable to its author and pull request\", but its own source, catalog-review-surface \u00a74a, records a controlled census over 4,666 StandardName rows in which `catalog_approved_at`, `catalog_pr_number`, `catalog_merge_commit_sha` and `exported_at` are all zero, states \"no run has ever written the traceability fields\", and says \"which code path is supposed to write them, and whether it does, is part of the work\" \u2014 \u00a77 names no such mechanism",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-west-prototype-release.html:108",
+      "id": "wiring-1",
+      "reason": "without the edge the build order runs \u00a74 before the ordering it needs exists, and \u00a74's own note that it is \"the one step that sees the batch the way its reviewer will\" is only true in \u00a75's order.",
+      "text": "\u00a74 instructs the reader to work \"in pattern-family order\", which \u00a75 alone establishes (\"Within a domain, entries are ordered by pattern family\"), yet \u00a74 declares no relation to \u00a75 and carries a lower section number, so the reading step depends on a later node's deliverable",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-west-prototype-release.html:126",
+      "id": "done_when-1",
+      "reason": "a gate that only the author of the judgement can ever turn red measures the coordinator's confidence, not the catalog, so the node should carry an independent re-read sample as its negative control.",
+      "text": "\u00a74's done-when is a ledger with \"one row per roster name (pass, edited, or withheld)\" filled by the coordinator who performed the reading, so a \"pass\" is pure self-report and no mutation, fixture or second reader is named that would make a wrong pass fail",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-west-prototype-release.html:59",
+      "id": "anchors_resolve-1",
+      "reason": "the document exists and a node will find it, so the work proceeds; linking it is a one-line fix that does not redirect a node.",
+      "text": "\u00a71 attributes to \"the shared-identity description judgement\" the seven wrong-object bindings and \u00a72 says they \"take the replacement sentences already written for them\", but no anchor cites that judgement while the worklist and census beside them are linked; the sentences live in the uncited `docs/evidence/sn-west-catalog-release/west-name-description-truthfulness.md`",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "3e3e8cf3fedcdba57c77d8c385ceb77abb5ab485483ad35895f17c65eb7580c5",
+  "plan_slug": "sn-west-prototype-release",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T051718804479-plan-review-of-sn-west-prototype-release",
+  "reviewed_blob_sha": "3b89126d139a6d4001ede3636ef408d80ee191d7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the description judgement \u00a71/\u00a72 build on is cited by no anchor, unlike the worklist and census beside it; the worklist, census, roster, module and plan-section anchors otherwise resolve (the extensionless worklist href resolves under the house `.html` convention, matching its use in the shipped sn-west-catalog-release plan).",
+    "done_when": "a finding \u2014 \u00a74's polish ledger is filled by the same reader it grades, with no negative control that could make a wrong \"pass\" row fail.",
+    "evidence_paths": "pass \u2014 the one explicit evidence path (`docs/evidence/sn-west-prototype-release/polish-ledger.md`) is a durable repository path, and \u00a72/\u00a73/\u00a77's gates write to the graph and the roster rather than a session scratchpad.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach code or symbols; `v0.4.0rc7+west-task-2e` and `west-task-2e` appear only as artifact/batch names.",
+    "reasoning": "two findings \u2014 \u00a75 names an ordering mechanism that cannot produce its done-when, and \u00a77 asserts a traceability its cited evidence records as never yet produced.",
+    "single_goal": "pass \u2014 each node names one deliverable (repair, harmonize, read, group, cut, rehearse), and the multi-item residue in \u00a76 is a single cut-and-open-PR goal.",
+    "wiring": "a finding \u2014 \u00a74 reads the roster in pattern-family order, a property \u00a75 produces, yet \u00a74 declares no depends-on \u00a75 and is sequenced before it."
+  },
+  "section_digests": {
+    "_document": "da5d8fa38db30700897884f02b5caa1e6c5dc6c23b65ee97b8c5e61e5d7c92b6",
+    "s1": "8aaee7529cb4723b54c29540881ca3a6c3689fcaeed1b6c05267338f586fec11",
+    "s2": "4c3c2257794515982e521d35347f2fc1915e70799fcc05afef9e030c80fe59da",
+    "s3": "70d73723b0f229053fa8edc6333cf010650957cb42e850b6d0016a0deb45420c",
+    "s4": "d7934c43479fe80ad9ce99372bd34acd0d34a0acd488cdfd929977bd9388af2f",
+    "s5": "538c3180347a69e896e5f1e434bb3c35d998ffcc2bf1496f6c052002752377a3",
+    "s6": "0cad5e70f0eebd431aed6c6f2b9a13922360e142a4ba0797064b0232394c68e4",
+    "s7": "8e91f218dc062efd17b20cad4c4871a413514e8661aa7be4bb808e40f9692074",
+    "s8": "771210eabc5d8e24b17f7a23dcc03e3d5abf74f78b34e2dbb0f5b259aacd7104"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T05:34:37.191647+00:00"
+}
