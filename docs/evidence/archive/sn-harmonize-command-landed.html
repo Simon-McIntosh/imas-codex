@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-harmonize-command-landed">
+  <meta name="plan-title" content="sn harmonize: Apply the House Style Family by Family — landed record">
+  <meta name="plan-summary" content="Closure synthesis for sn harmonize: Apply the House Style Family by Family: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="sn-harmonize-command">
+  <meta name="plan-verdict" content="qualified">
+  <title>sn harmonize: Apply the House Style Family by Family — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>sn harmonize: Apply the House Style Family by Family — landed record</h1>
+  <p>Closure synthesis for sn harmonize: Apply the House Style Family by Family: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2-report">
+    <h2>§2 — the read-only report, and the two routes it replaces</h2>
+    <p><code>imas-codex sn harmonize --report</code> takes one of <code>--batch</code>, <code>--family</code>, <code>--concept</code> or <code>--all</code>, and lists per pattern family its members, anchor, drift and lint findings by class, with a scope total; it writes nothing. The lint composition moved into one function in <code>review/audits.py</code> that <code>run_all_audits</code> calls after its preflight and the report calls directly. <code>sn run --families</code> and <code>sn review --target groups</code> are deleted with the helpers only they reached, and <code>build_worklist</code> delegates its parentless grouping. Gate: 188 passed against 176 at base, no failures; pointing the report at <code>run_all_audits</code> turns the no-write test red. Merge <code>e7184e3aa</code>. Independent review 95/120, no added failures.</p><p>Open in §2, carried to the next node: lint findings filed under a domain id (<code>[domain:&lt;d&gt;]</code>) match no member and drop out of family rows and the scope total; the multi-seed and all-families enumeration sits in <code>harmonize.py</code> rather than beside its owner in <code>families.py</code>; <code>docs/architecture/standard-names.md</code> still documents <code>--families</code>; and three test assertions compare the report with the fixture it was handed.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-command-surface">shc-command-surface</a>.</p>
+  </section>
+
+</main>
+</body>
+</html>
