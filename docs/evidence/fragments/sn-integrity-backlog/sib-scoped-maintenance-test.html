@@ -1,0 +1,22 @@
+<section id="sib-scoped-maintenance-test">
+  <h2 id="sib-scoped-maintenance-test-heading">An edits-scoped run skips global maintenance, by test</h2>
+  <p id="sib-scoped-maintenance-test-claim">
+    A run scoped to an edit (<code>--scope-run-id</code>) with
+    <code>--skip-global-maintenance</code> forwards the bypass to
+    <code>run_sn_pools</code> and skips the CLI's own graph-wide startup steps.
+  </p>
+  <p id="sib-scoped-maintenance-test-test">
+    Pinned by
+    <code>tests/standard_names/test_edit_scope_skips_maintenance.py::test_edits_scoped_run_skips_global_maintenance</code>.
+  </p>
+  <p id="sib-scoped-maintenance-test-negative-control">
+    Removing the <code>skip_global_maintenance</code> forwarding inside
+    <code>_run_sn_cmd</code> (the <code>run_sn_pools</code> call) makes the test
+    fail (<code>EXIT=1</code>); log at <code>negative_control.log</code>. Product
+    code is unchanged.
+  </p>
+  <p id="sib-scoped-maintenance-test-gate">
+    Gate (four files): base 21 passed, after 22 passed, EXIT=0 both arms — the
+    scoped-run tests add no failures against base.
+  </p>
+</section>
