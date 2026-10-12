@@ -55,6 +55,11 @@
     <p><code>_source_disposition</code> in <code>imas_codex/standard_names/export.py</code> now weighs every identity a waived source's successor chain would publish (<code>_fetch_waived_source_chain_identities</code>), not only the terminal. A waived source whose chain publishes an intermediate is refused, and an all-unwaived chain passes; reverting the change turns two of the four new tests red. Gate: 105 passed against 101 at base, with the same seven export failures at both (§24). Merge <code>56510dc86</code>. Independent review 113/120, no added failures. Follow-on: the chain traversal stops at depth 25, so a deeper chain would evade the refusal; it should refuse rather than truncate at its bound.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-export-waiver-intermediates">sib-export-waiver-intermediates</a>.</p>
   </section>
 
+  <section id="s9">
+    <h2>§9 — the restore composer refuses an archive&#x27;s own origin, pinned</h2>
+    <p>The refusal itself was in the tree, and an existing test pinned it only for an archive carrying no origin, so a composer that fell back to the archived origin would have stayed green. One case in <code>tests/standard_names/test_archive_reconstruction_entry_point.py</code> now composes from an archive carrying <code>origin: catalog_edit</code> with none stated and sees the refusal; it fails, while the no-origin case still passes, when a scratch composer falls back to the archived origin. Gate: 22 passed against 21. Merge <code>02e45ea33</code>. Independent review 117/120. A first attempt added three tests that duplicated existing coverage; it was discarded unmerged after two reviews.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-restore-archived-origin">sib-restore-archived-origin</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>

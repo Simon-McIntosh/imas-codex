@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;,&quot;s24&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;,&quot;s24&quot;:&quot;implementable&quot;}">
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -129,7 +129,7 @@
 <p><code>power_due_to_fusion</code>, <code>plasma_energy</code> and <code>etendue_of_spectrometer_channel</code> read absent on the live graph (census, §2 restore row), while the pedestal-top family is rebuilt. Restore them through the restore adapter with a per-identity origin judgement, never by hand. Paid identities fall under the deletion-protection guard in <code>imas_codex/standard_names/protection.py</code>.</p><p><strong>Done when:</strong> the three identities read present with their sources and an origin stated at compose time, the restore parity tests pass, and <code>find_provenance_orphans</code> reports none of them.</p>
 
     <h2 id="s9">§9 — Restore never re-arms the origin that caused a deletion</h2>
-<section data-reckon="section" data-id="s9" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s9" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>The restore composer now refuses an archived origin (<code>imas_codex/cli/sn.py</code>, "archive reconstruction origin must be stated at compose time"), where the recorded defect carried it through. No test pins it.</p><p><strong>Done when:</strong> a test composes a restore from an archive carrying <code>origin: catalog_edit</code> and sees the refusal, and fails with the refusal removed.</p>
 
     <h2 id="s10">§10 — The name gate admits a one-word family anchor</h2>
@@ -260,6 +260,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261012T193320201939-review-of-sib-restore-origin-refusal" data-who="reckon-build" data-when="2026-10-12T19:42:29.376Z">
     <div class="r-comment-body"><p>review-of-sib-restore-origin-refusal: independent review of r-20261012T185444831401-sib-restore-origin-refusal at head 8987d7312245020864e8dd3aa0a262515827408e scored goal_fidelity 6, evidence 15, scope_discipline 18, durability 6, fit 16, reuse 20; one blocking finding — the withdrawal removed the only test that composes from a catalog_edit archive and observes the composer's refusal, which plan §9's done-when names.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-close-s9" data-who="reckon-build" data-when="2026-10-12T20:02:00Z">
+    <div class="r-comment-body"><p>§9 landed: the composer's refusal of an archive's own origin is pinned by a case that fails on a fallback to the archived origin (merge <code>02e45ea33</code>); review 117/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s9">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-close-s11" data-who="reckon-build" data-when="2026-10-12T19:47:00Z">
     <div class="r-comment-body"><p>§11 landed: a fold keeps whichever side carries the richer documentation, in the mutation and in its receipt (merge <code>24484a91d</code>); review 110/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s11">evidence</a></p></div>
