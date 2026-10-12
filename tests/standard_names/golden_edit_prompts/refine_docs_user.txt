@@ -12,6 +12,7 @@ addresses the reviewer's concerns.
 - **Kind:** scalar
 - **Physics domain:** equilibrium
 
+
 - **One-line description:** Electron temperature at the last closed flux surface
 
 
@@ -72,15 +73,6 @@ Rules:
   An equation whose symbols are each a named quantity is already dimensionally
   unambiguous, so no unit is needed. If the existing doc carries any unit in
   prose, strip it — that is a primary goal of the refinement.
-- **One canonical opening per family (HARD).** When the context above places
-  this entry in a sibling family, open BOTH `description` and `documentation`
-  with the SAME noun-phrase template as the family anchor, substituting only the
-  member-specific token(s) the context supplies (species, axis, locus). The
-  short `description` is NOT exempt. Do not invent a per-member opening shape
-  (a leading "Total…"/"Unweighted…"/"Charge-state-summed…" adjective) for what
-  is one quantity kind. This applies to number-density families (a particle
-  count per volume): a bare species defaults to the charge-state-summed reading;
-  an explicitly charge-state-resolved member states its specific state.
 - **Charge-state aggregation (HARD).** A species-level quantity aggregated over
   charge states MUST state the convention: extensive quantities (a per-volume
   amount) are charge-state-summed ("summed over all charge states"); intensive

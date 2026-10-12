@@ -5,6 +5,7 @@ registry or parser error text; do not score the name's grammar here.
 ## Candidate
 
 - **Standard name**: electron_temperature_at_lcfs
+
 - **Unit**: eV
 - **Kind**: scalar
 
@@ -24,7 +25,7 @@ The electron temperature $T_e$ at the LCFS.
 
 Use these accepted, in-catalog names as your **third-party reference set**.
 They are NOT to be re-reviewed. Compare the candidate's documentation
-*depth*, *terminology*, and *conventions* to them. Cite specific sibling
+*depth* and physical scope to them. Cite specific sibling
 `id`s when you dock points.
 
 
