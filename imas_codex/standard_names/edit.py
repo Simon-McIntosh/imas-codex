@@ -1530,6 +1530,12 @@ SET old.superseded_from_stage = $predecessor_stage,
     END,
     old.updated_at = datetime($changed_at),
     target.source_paths = $target_paths,
+    // The surviving spelling keeps or takes the richer documentation (see
+    // _fold_carries_source_documentation); the caller computes both values so
+    // the receipt's expected post-state names exactly what this writes. A
+    // non-carry fold passes the target's own values back, a no-op.
+    target.documentation = $target_documentation,
+    target.docs_stage = $target_docs_stage,
     target.name_stage = coalesce($target_revived_stage, target.name_stage),
     target.updated_at = datetime($changed_at)
 MERGE (target)-[:REFINED_FROM]->(old)
@@ -2141,6 +2147,71 @@ def _fold_tombstone_target_reason(
 _FOLD_REVIVAL_STAGE_CAP = {"accepted": "reviewed"}
 
 
+#: Rank of a docs_stage by the authority of the documentation it carries. A
+#: fold only consults it to break a tie between two sides that both hold
+#: prose; the stage a reviewer reached is a stronger signal of the text's
+#: quality than any length comparison, and an 'exhausted' docs cycle ranks
+#: lowest because its text never cleared review.
+_FOLD_DOCS_STAGE_RANK = {
+    "accepted": 4,
+    "reviewed": 3,
+    "drafted": 2,
+    "pending": 1,
+    "exhausted": 0,
+}
+
+
+def _fold_holds_documentation(properties: dict[str, Any]) -> bool:
+    """Whether a name carries real documentation text.
+
+    Whitespace-only prose is a placeholder, not documentation, so it counts
+    as empty here — the same way a name with no ``documentation`` slot does.
+    """
+    return bool((properties.get("documentation") or "").strip())
+
+
+def _fold_carries_source_documentation(
+    target_properties: dict[str, Any], source_properties: dict[str, Any]
+) -> bool:
+    """Whether a fold overwrites the target's documentation with the source's.
+
+    A fold asserts the two spellings name one quantity, so the surviving
+    identity should hold whichever side's documentation is richer rather than
+    whichever spelling happened to be the target. The rule is stated as prose
+    so it can be exercised: a documented side beats an undocumented or
+    placeholder one; when both sides carry documentation the accepted docs
+    stage beats a lower one. The incumbent target wins every tie — a fold
+    never silently prefers the source's prose unless it is demonstrably
+    richer, and prose is carried whole, never averaged or merged.
+    """
+    target_documented = _fold_holds_documentation(target_properties)
+    source_documented = _fold_holds_documentation(source_properties)
+    if target_documented != source_documented:
+        return source_documented
+    if not source_documented:
+        return False
+    target_rank = _FOLD_DOCS_STAGE_RANK.get(target_properties.get("docs_stage"), 0)
+    source_rank = _FOLD_DOCS_STAGE_RANK.get(source_properties.get("docs_stage"), 0)
+    return source_rank > target_rank
+
+
+def _fold_target_documentation(
+    target_properties: dict[str, Any], source_properties: dict[str, Any]
+) -> tuple[Any, Any]:
+    """The documentation and docs_stage the surviving target should hold.
+
+    Both values come wholly from one side — the source when its documentation
+    is the richer, the target otherwise — so the mutation query and the
+    receipt's expected post-state write and compare the same pair.
+    """
+    if _fold_carries_source_documentation(target_properties, source_properties):
+        return (
+            source_properties.get("documentation"),
+            source_properties.get("docs_stage"),
+        )
+    return target_properties.get("documentation"), target_properties.get("docs_stage")
+
+
 def _fold_revival_stage(target_properties: dict[str, Any]) -> str:
     """The name_stage a tombstoned fold target is revived to.
 
@@ -2533,6 +2604,21 @@ def _fold_expected_state(
             old_properties["edit_status"] = "applied"
         expected["names"]["target"]["source_paths"] = target_paths
         expected["names"]["target"]["updated_at"] = stamped_at
+        # The surviving spelling keeps or takes the richer documentation; the
+        # mutation query writes exactly these values, so the expected
+        # post-state names the same choice. A None value removes the slot,
+        # matching SET x = null, so an undocumented side leaves none behind.
+        target_documentation, target_docs_stage = _fold_target_documentation(
+            snapshot["target_properties"], snapshot["old_properties"]
+        )
+        for field, value in (
+            ("documentation", target_documentation),
+            ("docs_stage", target_docs_stage),
+        ):
+            if value is None:
+                expected["names"]["target"].pop(field, None)
+            else:
+                expected["names"]["target"][field] = value
         if target_revived_stage is not None:
             expected["names"]["target"]["name_stage"] = target_revived_stage
         target_reference = {
@@ -2988,6 +3074,9 @@ def supersede_into(
                 if moved_projections != receipt["projection_count"]:
                     raise RuntimeError("fold projection set changed during migration")
 
+                target_documentation, target_docs_stage = _fold_target_documentation(
+                    snapshot["target_properties"], snapshot["old_properties"]
+                )
                 name_rows = list(
                     transaction.run(
                         _FOLD_NAME_MUTATION_QUERY,
@@ -2997,6 +3086,8 @@ def supersede_into(
                         target_element_id=snapshot["target_element_id"],
                         predecessor_stage=predecessor_stage,
                         target_paths=target_paths,
+                        target_documentation=target_documentation,
+                        target_docs_stage=target_docs_stage,
                         target_revived_stage=target_revived_stage,
                         changed_at=changed_at,
                     )
