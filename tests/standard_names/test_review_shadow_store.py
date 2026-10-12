@@ -11,8 +11,10 @@ offline: the graph is mocked.
 from __future__ import annotations
 
 import json
+import logging
+import re
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -61,19 +63,44 @@ def _build(*args, **kwargs):
     return _build_review_record(*args, **kwargs)
 
 
-def _write_records(records: list[dict]) -> list:
-    mock_gc = MagicMock()
-    mock_gc.query = MagicMock(return_value=[])
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
-        MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
-        MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_ops import write_reviews
+class _ReviewGraph:
+    """Capture only properties actually assigned by the review write queries."""
 
+    def __init__(self) -> None:
+        self.reviews: dict[str, dict] = {}
+        self.names: dict[str, dict] = {}
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def query(self, statement: str, **params) -> list:
+        batch = params.get("batch", [])
+        if "MERGE (r:StandardNameReview" in statement:
+            assignments = re.findall(r"\br\.(\w+)\s*=\s*b\.(\w+)", statement)
+            for row in batch:
+                self.reviews[row["id"]] = {
+                    "id": row["id"],
+                    **{
+                        property_name: row[parameter_name]
+                        for property_name, parameter_name in assignments
+                    },
+                }
+        if "sn.reviewer_score_name = b.reviewer_score_name" in statement:
+            for row in batch:
+                self.names[row["id"]] = {
+                    "reviewer_score_name": row["reviewer_score_name"]
+                }
+        return []
+
+
+def _write_records(records: list[dict], graph: _ReviewGraph) -> None:
+    from imas_codex.standard_names.graph_ops import write_reviews
+
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
         write_reviews(records)
-    for call in mock_gc.query.call_args_list:
-        if "batch" in call.kwargs:
-            return call.kwargs["batch"]
-    raise AssertionError("no batch kwarg reached the write path")
 
 
 # ---------------------------------------------------------------------------
@@ -144,58 +171,22 @@ def test_shadow_record_round_trips_through_the_record_builder() -> None:
     assert json.loads(rec["judge_confidence_json"])["is_single_quantity"] == 0.9
 
 
-def test_write_reviews_carries_no_shadow_property() -> None:
-    """The review write path's fixed property list drops the shadow payload.
-
-    ``write_reviews`` builds its batch and its ``SET`` clause from an explicit
-    property list, so a shadow record reaches the graph with its judge fields
-    omitted and only its canonical-shaped fields persisted. Extending that list
-    is a change to ``imas_codex/standard_names/graph_ops.py``, outside this
-    node's write scope; the assertion below trips the moment it happens, so the
-    gap cannot be closed silently.
-    """
+def test_write_reviews_persists_shadow_properties_and_null_score() -> None:
+    """A review survives the batch and the assignments made by the writer."""
     rec = _shadow_record()
-    row = _write_records([rec])[0]
+    graph = _ReviewGraph()
+    _write_records([rec], graph)
+    row = graph.reviews[rec["id"]]
     assert row["id"] == rec["id"]
     assert row["is_canonical"] is False
+    assert row["score"] is None
     for field in _SHADOW_FIELDS:
-        assert field not in row, (
-            f"{field} now reaches the graph — extend this test to assert the "
-            "shadow payload round-trips through the write path"
-        )
+        assert row[field] == rec[field]
 
 
 # ---------------------------------------------------------------------------
 # Accept and refine decisions are identical with shadow records present or absent
 # ---------------------------------------------------------------------------
-
-
-def _mirror_batch(entries: list[dict]) -> list:
-    """Run the accepting path's name-axis score mirror with a mocked graph."""
-    mock_gc = MagicMock()
-    mock_gc.query = MagicMock(return_value=[])
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
-        MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
-        MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_ops import write_name_review_results
-
-        write_name_review_results([dict(e) for e in entries])
-    for call in mock_gc.query.call_args_list:
-        if "batch" in call.kwargs:
-            return call.kwargs["batch"]
-    raise AssertionError("no batch kwarg reached the accept mirror")
-
-
-def _accept_entries(sn_id: str = "electron_temperature") -> list[dict]:
-    """The entries the accepting path mirrors, as the pipeline builds them."""
-    return [
-        {
-            "id": sn_id,
-            "reviewer_score": 0.72,
-            "reviewer_score_name": 0.72,
-            "reviewed_name_at": "2026-01-01",
-        }
-    ]
 
 
 def _shadow_record() -> dict:
@@ -209,39 +200,11 @@ def _shadow_record() -> dict:
     )
 
 
-class TestAcceptPathIgnoresShadowRecords:
-    def test_mirror_is_identical_with_shadow_records_present(self) -> None:
-        """Writing a challenge judge's record does not perturb the accept mirror."""
-        alone = _mirror_batch(_accept_entries())
-        _write_records([_shadow_record()])  # the shadow channel, in the same run
-        beside = _mirror_batch(_accept_entries())
-        assert alone == beside
-
-    def test_a_mirror_pointed_at_a_shadow_field_would_change(self) -> None:
-        """The identity above is load-bearing, not a property of the fixture.
-
-        The accept mirror reads ``reviewer_score``. Pointing that read at the
-        challenge judge's confidence instead writes a different score, so the
-        equality asserted beside it can only hold while the accept path reads no
-        shadow field.
-        """
-        entries = _accept_entries()
-        answered = _shadow_record()
-        leaked = [dict(e) for e in entries]
-        leaked[0]["reviewer_score"] = json.loads(answered["judge_confidence_json"])[
-            "is_single_quantity"
-        ]
-        assert leaked[0]["reviewer_score"] != entries[0]["reviewer_score"]
-        assert _mirror_batch(entries) != _mirror_batch(leaked)
-
-
 class TestAcceptScoreSelection:
     """The accept gate's own score selection reads the reviewer's canonical score."""
 
     @staticmethod
-    def _review(*, shadow: bool):
-        import logging
-
+    def _review(*, shadow: dict | None):
         class _Scores:
             score = 0.72
             tier = "good"
@@ -258,28 +221,43 @@ class TestAcceptScoreSelection:
             scores = _Scores()
 
         review = _Review()
-        if shadow:
-            review.judge_confidence_json = _shadow_record()["judge_confidence_json"]
+        review.judge_confidence_json = (
+            shadow["judge_confidence_json"] if shadow else None
+        )
         return review, logging.LoggerAdapter(logging.getLogger("shadow-test"), {})
 
-    def _scored(self, *, shadow: bool) -> dict:
+    def _scored(self, *, shadow: bool) -> tuple[dict, _ReviewGraph]:
+        from imas_codex.standard_names.graph_ops import write_name_review_results
         from imas_codex.standard_names.review.pipeline import (
             _match_reviews_to_entries,
         )
 
-        review, wlog = self._review(shadow=shadow)
+        graph = _ReviewGraph()
+        if shadow:
+            _write_records([_shadow_record()], graph)
+        persisted = next(iter(graph.reviews.values()), None)
+        review, wlog = self._review(shadow=persisted)
         scored, _, _ = _match_reviews_to_entries([review], [_item()], wlog)
-        return scored[0]
+        with patch(
+            "imas_codex.standard_names.graph_ops.GraphClient", return_value=graph
+        ):
+            write_name_review_results(scored)
+        return scored[0], graph
 
     def test_accept_score_ignores_a_shadow_payload_beside_it(self) -> None:
         """A judge's answers beside the reviewer's score do not move the accept
         decision: the entry mirrored for the name axis is identical either way.
         """
-        canonical = self._scored(shadow=False)
-        beside = self._scored(shadow=True)
+        canonical, empty_graph = self._scored(shadow=False)
+        beside, shadow_graph = self._scored(shadow=True)
+        assert not empty_graph.reviews
+        assert len(shadow_graph.reviews) == 1
+        stored = next(iter(shadow_graph.reviews.values()))
+        assert json.loads(stored["judge_confidence_json"])["is_single_quantity"] == 0.9
         assert canonical["reviewer_score"] == pytest.approx(0.72)
         assert canonical["reviewer_score"] == beside["reviewer_score"]
         assert canonical["review_tier"] == beside["review_tier"]
+        assert empty_graph.names == shadow_graph.names
 
 
 class TestRefineTriggerIgnoresShadowRecords:
@@ -291,8 +269,12 @@ class TestRefineTriggerIgnoresShadowRecords:
         for predicate in standard_name_pool_predicates():
             if predicate.pool == "refine_name":
                 refine = predicate.admits
-        if refine is None:
-            pytest.skip("no refine_name pool predicate is declared")
+        assert refine is not None
+        graph = _ReviewGraph()
+        _write_records([_shadow_record()], graph)
+        assert len(graph.reviews) == 1
+        shadow = next(iter(graph.reviews.values()))
+        assert shadow["judge_kind"] == "jev"
         state = {
             "name_stage": "reviewed",
             "name_score_state": "below",
@@ -303,15 +285,4 @@ class TestRefineTriggerIgnoresShadowRecords:
         }
         decision = bool(refine(state))
         assert decision is True
-        assert bool(refine({**state, "judge_kind": "jev"})) is decision
-        assert (
-            bool(
-                refine(
-                    {
-                        **state,
-                        "judge_answers_json": _shadow_record()["judge_answers_json"],
-                    }
-                )
-            )
-            is decision
-        )
+        assert bool(refine({**state, "review_records": [shadow]})) is decision

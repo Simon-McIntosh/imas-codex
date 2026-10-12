@@ -6115,6 +6115,11 @@ def write_reviews(
                 r.model_family = b.model_family,
                 r.is_canonical = b.is_canonical,
                 r.score = b.score,
+                r.judge_kind = b.judge_kind,
+                r.judgment_model = b.judgment_model,
+                r.judge_answers_json = b.judge_answers_json,
+                r.judge_probs_json = b.judge_probs_json,
+                r.judge_confidence_json = b.judge_confidence_json,
                 r.scores_json = b.scores_json,
                 r.tier = b.tier,
                 r.comments = b.comments,
@@ -6156,7 +6161,16 @@ def write_reviews(
                     "reviewer_model": r.get("reviewer_model") or r.get("model") or "",
                     "model_family": r.get("model_family") or "other",
                     "is_canonical": bool(r.get("is_canonical", False)),
-                    "score": float(r.get("score") or 0.0),
+                    "score": None
+                    if r.get("judge_kind") == "jev"
+                    else float(r.get("score") or 0.0),
+                    "judge_kind": r.get("judge_kind"),
+                    "judgment_model": r.get("judgment_model"),
+                    "judge_answers_json": _ensure_json(r.get("judge_answers_json")),
+                    "judge_probs_json": _ensure_json(r.get("judge_probs_json")),
+                    "judge_confidence_json": _ensure_json(
+                        r.get("judge_confidence_json")
+                    ),
                     "scores_json": _ensure_json(r.get("scores_json") or "{}"),
                     "tier": r.get("tier") or "unknown",
                     "comments": r.get("comments") or "",
