@@ -1,0 +1,166 @@
+<section id="scg-pattern-families">
+  <h2>Pattern families — grammar-identical cohorts of live standard names</h2>
+
+  <p>
+    A <strong>pattern family</strong> is the set of live standard names whose
+    grammar parses identically except along one variation axis. The invariant
+    segments are <code>physical_base</code>, <code>geometric_base</code>,
+    <code>transformation</code> and <code>process</code>; the variation axes
+    are <code>subject</code>, <code>component</code>, <code>coordinate</code>,
+    <code>position</code>, <code>region</code> and <code>device</code>. An
+    empty segment is a value of its axis, so a parent with no locus and its
+    locus-qualified variants share a family. <code>transformation</code> is
+    deliberately invariant: it carries the reduction operator, so a reduced
+    quantity and its unreduced parent are joined only by the explicit
+    <code>HAS_PARENT</code> route.
+  </p>
+
+  <p>
+    The definition lives in
+    <code>imas_codex/standard_names/families.py</code>
+    (<code>pattern_signature</code>, <code>fetch_pattern_family</code>,
+    <code>fetch_family_base</code>, <code>count_pattern_families</code>).
+    <code>fetch_sibling_family</code> (context) and <code>assemble_family</code>
+    (harmonize) read it; both keep their return shapes, so
+    <code>workers.py</code> and <code>cli/sn.py</code> are unchanged. The
+    <code>physical_base</code> fallback in <code>assemble_family</code> is
+    retired; the family-eligible <code>HAS_PARENT</code> route is retained for
+    operator-derived children.
+  </p>
+
+  <h3 id="scg-pattern-families-census">Bounded live census</h3>
+
+  <p>
+    Read from the live graph on 2026-10-12. Every query scans the
+    <code>:StandardName</code> label with equality predicates and excludes
+    <code>name_stage = 'superseded'</code>; the seed family is bounded by one
+    node, the census and the live-name scan by the label (2967 live nodes).
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>measure</th>
+        <th>query / row-set predicate</th>
+        <th>value</th>
+        <th>elapsed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="scg-pattern-families-census-seed">
+        <td>seed cohort (the 17 reduced-density names)</td>
+        <td><code>fetch_pattern_family</code>: seed fixes
+          <code>(physical_base, geometric_base, transformation, process)</code>;
+          every live name with an equal tuple is a member</td>
+        <td>17 rows, 17 live</td>
+        <td>0.119 s</td>
+      </tr>
+      <tr id="scg-pattern-families-census-pattern">
+        <td>pattern families with &ge;3 members</td>
+        <td><code>count_pattern_families(min_members=3)</code>: live names grouped
+          by the invariant tuple, groups with <code>count(m) &ge; 3</code></td>
+        <td><strong>171 families, 2643 members</strong></td>
+        <td>0.084 s</td>
+      </tr>
+      <tr id="scg-pattern-families-census-has-parent">
+        <td>HAS_PARENT families with &ge;3 members (the route it replaces)</td>
+        <td>eligible edges <code>c-[:HAS_PARENT]-&gt;p</code> where
+          <code>r.operator_kind IN (projection, qualifier, coordinate)</code> or
+          <code>_FAMILY_REDUCTION_OPERATORS</code>; family = parent + eligible
+          live children</td>
+        <td><strong>220 families</strong> (486 parents, 1236 eligible edges)</td>
+        <td>0.084 s</td>
+      </tr>
+      <tr id="scg-pattern-families-census-only-has-parent">
+        <td>families only the retained HAS_PARENT route produces</td>
+        <td>HAS_PARENT families (&ge;3) whose members span more than one pattern
+          family — the operator axis is not a pattern axis</td>
+        <td><strong>7 families</strong></td>
+        <td>in-memory, from the two scans above</td>
+      </tr>
+      <tr id="scg-pattern-families-census-live">
+        <td>live standard names scanned</td>
+        <td><code>coalesce(m.name_stage,'') &lt;&gt; 'superseded'</code></td>
+        <td>2967 nodes</td>
+        <td>0.117 s</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    The seven HAS_PARENT-only families are
+    <code>current_density_due_to_wave_driven_current_drive</code> (3),
+    <code>flux_at_wall_due_to_surface_emission</code> (3),
+    <code>flux_limiter_coefficient</code> (7),
+    <code>ion_density_at_plasma_boundary</code> (3),
+    <code>magnetic_field_magnitude</code> (3),
+    <code>major_radius</code> (4) and <code>velocity_due_to_convection</code>
+    (3). Each is a group whose members differ in <code>transformation</code>
+    (or another invariant segment), which is why the pattern route alone does
+    not produce them. Whether to retire the HAS_PARENT route outright is left
+    to the coordinator; the count is recorded here.
+  </p>
+
+  <figure id="scg-pattern-families-figure">
+    <img src="/imas-codex/figures/sn-catalog-grouping/scg-pattern-families/family-census.svg"
+         alt="Bar chart: 171 pattern families, 220 HAS_PARENT families, 7 families only the HAS_PARENT route produces" />
+    <figcaption>
+      Live family counts with three or more members. The pattern definition
+      yields 171 families (2643 members); the HAS_PARENT route it replaces
+      yields 220 (over a smaller member set, since reduced and unreduced names
+      are joined there). Seven families are produced only by the retained
+      HAS_PARENT route. Read from the live graph, 2026-10-12.
+    </figcaption>
+  </figure>
+
+  <h3 id="scg-pattern-families-gates">Gates</h3>
+
+  <ul>
+    <li id="scg-pattern-families-gate-base">
+      Base arm at <code>c7b4c626e</code> in a scratch tree:
+      <strong>81 passed</strong> (the six gate files that exist at base).
+    </li>
+    <li id="scg-pattern-families-gate-after">
+      After-change arm: <strong>97 passed</strong>, 0 added failures —
+      +16 tests from the new <code>test_pattern_families.py</code>.
+    </li>
+    <li id="scg-pattern-families-gate-negative">
+      <strong>Negative control</strong>: reverting the family lookup to the
+      HAS_PARENT route (walking <code>seed-[:HAS_PARENT]-&gt;p&lt;-[:HAS_PARENT]-m</code>)
+      makes the family-of-17 test fail — 10 failed, 6 passed, recall <code>EXIT=1</code>.
+      The fixture graph carries no operator edges, so a HAS_PARENT lookup
+      resolves nothing. Log: <code>logs/negative-control.log</code>.
+    </li>
+  </ul>
+
+  <h3 id="scg-pattern-families-tests">Tests updated to the new definition</h3>
+
+  <ul>
+    <li><code>test_review_neighbours.py</code> — the five
+      <code>fetch_sibling_family</code> tests previously asserted the
+      HAS_PARENT parent/anchor shape; they now drive the fixture graph and
+      assert the base-quantity parent, the defer case and the placeholder case
+      under the pattern definition.</li>
+    <li><code>test_docs_context_injection.py</code> — the three "documentation
+      family safety" tests asserted that locus ancestry and attached owners do
+      not form a prose cohort. A locus axis is a variation axis, so
+      per-locus variants are now family-mates by construction; the tests now
+      assert that, and keep the source-owner exclusion.</li>
+    <li><code>test_family_harmonization_auto.py</code> — its locus-seed test
+      asserted <code>assemble_family</code> did not regroup by
+      <code>physical_base</code>; renamed and re-pointed to the pattern-family
+      fallback (a locus seed still yields <code>None</code>).</li>
+    <li><code>test_families.py</code>, <code>test_harmonize.py</code> and
+      <code>tests/graph/test_cypher_property_check.py</code> were unchanged —
+      they cover detection/axis ordering and query-string property checking,
+      none of which moved.</li>
+  </ul>
+
+  <p id="scg-pattern-families-residual">
+    One residual drift is out of this node's write scope: the docs-review
+    system prompt (<code>imas_codex/llm/prompts/sn/review_docs_system.md</code>)
+    describes <code>sibling_family</code> as "siblings sharing a HAS_PARENT
+    parent". The keys it names are unchanged, so the prompt still binds; only
+    its prose description of how the family is found is now imprecise.
+  </p>
+</section>
