@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-dual-bound-conflict">
+<title>A dual-bound source raises the adjudicable conflict</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-dual-bound-conflict-title">A dual-bound source raises the adjudicable conflict</h1>
+
+<p id="sib-dual-bound-conflict-landing">A source still bound to two live identities
+now fails <code>retarget_standard_name_sources</code>' compare-and-set with the named
+<code>SourceBindingConflictError</code> — naming the source and both bound
+identities — instead of the anonymous <code>RuntimeError</code> callers retry.</p>
+
+<table id="sib-dual-bound-conflict-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>18d19d7301110828d9ee31a428ca728a1b767703</code></td></tr>
+<tr><th>Gate</th><td>69 passed, 3 deselected, 0 failed (after); 67 passed, 1 xfailed, 0 failed (base)</td></tr>
+<tr><th>Negative control</th><td>EXIT=1 — the dual-bound test fails with the classification reverted to base</td></tr>
+</tbody>
+</table>
+
+</main>
+</body>
+</html>

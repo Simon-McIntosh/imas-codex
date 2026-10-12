@@ -147,3 +147,24 @@ def test_transient_fault_still_raises_an_anonymous_fault(
 
     assert not isinstance(raised.value, SourceBindingConflictError)
     assert gc.query.call_count == 1
+
+
+def test_single_live_binding_is_not_a_dual_bound_conflict() -> None:
+    """A source carrying one live identity is not a dual-bound conflict.
+
+    The dual-bound classification fires only when a source holds more than one
+    live identity. A source whose single live binding is already the successor,
+    with the manifest not yet recorded, is an in-flight state rather than a
+    decision for an operator, so it keeps raising the anonymous fault.
+    """
+    row = _migration_row(
+        [_binding("replacement_name", "drafted")],
+        scalar="replacement_name",
+    )
+    gc = MagicMock()
+    gc.query.return_value = [row]
+
+    with pytest.raises(RuntimeError) as raised:
+        _retarget(gc, row)
+
+    assert not isinstance(raised.value, SourceBindingConflictError)

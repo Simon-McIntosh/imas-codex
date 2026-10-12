@@ -19,9 +19,8 @@ withholds a retry budget, an anonymous fault spends one. This fixture pins down
 which branch a dual-bound source takes.
 
 The header records the observed behaviour at the base revision; the module is
-committed as a strict xfail while the defect reproduces, so it flips green the
-day compose supersede routes a dual-bound source through the adjudicable
-conflict rather than an anonymous fault.
+committed as an ordinary test requiring compose supersede to route a dual-bound
+source through the adjudicable conflict rather than an anonymous fault.
 """
 
 from __future__ import annotations
@@ -127,45 +126,28 @@ class _Client:
         return _Session(self._tx)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "compose supersede over a source bound to two live identities raises an "
-        "anonymous RuntimeError from retarget_standard_name_sources' compare-and-set "
-        "(`source migration compare-and-set failed: dd:example/predicted_path("
-        "exists=True, status='composed', claimed=False, "
-        "bindings=['example_new_name', 'example_old_name'], "
-        "scalar='example_new_name')`) instead of an adjudicable "
-        "SourceBindingConflictError, so the hard failure reads as a transient fault "
-        "and spends a retry budget"
-    ),
-)
-def test_compose_supersede_over_dual_bound_source_is_not_an_anonymous_fault() -> None:
-    """A dual-bound source must not fail compose supersede as a transient fault.
+def test_compose_supersede_over_dual_bound_source_raises_adjudicable_conflict() -> None:
+    """A dual-bound source must raise the named conflict, not a transient fault.
 
     The migration's two refusals are not equivalent: a named
     ``SourceBindingConflictError`` withholds a retry budget because repeating the
     migration changes nothing, while an anonymous ``RuntimeError`` is treated as
     a transient fault and spends one. A source bound to two live identities must
-    not take the anonymous branch — either the supersession completes, or the
-    conflict is named. Asserting the negative keeps the test independent of which
-    repair the section decides on.
+    take the adjudicable branch, naming the source and both bound identities, so
+    the hard failure reaches an operator instead of a retry loop.
     """
     tx = _Tx()
     with patch(
         "imas_codex.standard_names.attachment_audit.guard_source_pairings",
         return_value=AttachmentPairingGuardResult((_SOURCE_NODE,), ()),
     ):
-        try:
+        with pytest.raises(SourceBindingConflictError) as raised:
             supersede_prior_source_names(
                 [{"new_name": _NEW_NAME, "source_id": _DD_PATH}],
                 gc=_Client(tx),
             )
-        except SourceBindingConflictError:
-            return
-        except RuntimeError as exc:
-            pytest.fail(
-                "compose supersede over a dual-bound source raised an anonymous "
-                "fault instead of an adjudicable conflict or a completed "
-                f"supersession: {exc!r}"
-            )
+
+    message = str(raised.value)
+    assert _SOURCE_NODE in message
+    assert _OLD_NAME in message
+    assert _NEW_NAME in message
