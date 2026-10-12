@@ -1,0 +1,45 @@
+<!-- Reviewer-agreement Spearman routing, 2026-10-12. Node benchmark-spearman-owner.
+     Commit 9ad45e2af. Gate: tests/standard_names/test_benchmark_spearman.py plus every
+     test file importing imas_codex.standard_names.benchmark. Evidence only; no graph write. -->
+<section id="benchmark-spearman-owner" data-reckon="evidence">
+  <h2 id="benchmark-spearman-owner-heading">Reviewer agreement now uses the tie-correct Spearman implementation</h2>
+
+  <p id="benchmark-spearman-owner-intro">
+    The reviewer-agreement table in <code>imas_codex/standard_names/benchmark.py</code> computed a
+    local <code>_spearman_rho</code> that derived average ranks for ties but then fed them to the
+    no-ties shortcut <code>1 - 6*sum(d**2)/(n*(n**2-1))</code>. That shortcut is exact only when
+    no rank ties; review scores tie constantly, so the printed agreement disagreed with the
+    tie-correct <code>spearman_rho</code> that the rest of the suite already uses. The local
+    helper is deleted and <code>_render_reviewer_agreement</code> now calls
+    <code>spearman_rho</code> from <code>benchmark_roles</code>, which correlates the average
+    ranks directly.
+  </p>
+
+  <p id="benchmark-spearman-owner-measure">
+    On the tied input <code>x=[1,1,2,3]</code>, <code>y=[1,2,3,4]</code> the two figures separate:
+    the tie-correct rank correlation is <code>0.9487</code> (rendered <code>0.949</code>) while the
+    shortcut gives <code>0.950</code>. The new test
+    <code>tests/standard_names/test_benchmark_spearman.py</code> builds a two-reviewer
+    <code>BenchmarkReport</code> at exactly those scores, renders the table, and asserts the
+    tie-correct value is present and the shortcut's is not.
+  </p>
+
+  <p id="benchmark-spearman-owner-negative">
+    Restoring the shortcut (a local helper recomputing <code>1 - 6*sum(d**2)/(n*(n**2-1))</code> and
+    calling it) turns the test red: the table prints <code>0.950</code>, the assertion for
+    <code>0.949</code> fails, and the run exits <code>1</code>. Restoring the correct module returns
+    the suite to green.
+  </p>
+
+  <table id="benchmark-spearman-owner-table">
+    <caption>Gate: <code>tests/standard_names/test_benchmark_spearman.py</code> plus the eleven test files importing <code>benchmark.py</code>.</caption>
+    <thead>
+      <tr><th>Arm</th><th>Result</th><th>Log</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>base (rev 427d872af)</td><td>179 passed, EXIT=0</td><td>base-gate.log</td></tr>
+      <tr><td>head (shortcut deleted, caller routed)</td><td>180 passed, EXIT=0</td><td>head-gate.log</td></tr>
+      <tr><td>negative control (shortcut restored)</td><td>1 failed, EXIT=1</td><td>negative-control.log</td></tr>
+    </tbody>
+  </table>
+</section>
