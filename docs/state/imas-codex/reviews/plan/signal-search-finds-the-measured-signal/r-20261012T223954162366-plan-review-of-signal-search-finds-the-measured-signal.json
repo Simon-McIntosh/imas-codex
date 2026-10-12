@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T22:47:40.875Z",
+  "dispatched_at": "2026-10-12T22:40:08Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-search-finds-the-measured-signal.html:314",
+      "id": "evidence_paths-1",
+      "reason": "the section should name an evidence fragment (its own or \u00a73's goldens.html) so the decision record survives and a later reader can open it.",
+      "text": "\u00a77's done-when requires the harness to report the rerank-vs-fusion table, per-question wins/losses, the generic and role-aware questions side by side, and p95 wall time, yet names no durable path for any of it while \u00a73 points at `docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html` and \u00a710 at `descriptions.html`; a node has no path to write to and may emit the section's evidence into a scratch run directory",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-search-finds-the-measured-signal.html:293",
+      "id": "reasoning-1",
+      "reason": "the section must say the harness arm is pointed at the shipped signal state builder (or state that its measure is on a proxy) so the switch is decided on the mechanism that ships.",
+      "text": "\u00a77 states the product's rerank \"gets a signal state builder: name, description up to 1,200 characters, unit, data class and accessor\", but the arms \u00a77 relies on to decide the switch are the harness's own (`tests/llm/test_signal_search_goldens.py:267` `_rerank_arm`), which builds its state with the generic `_rerank_state` over `_signal_texts` (name + description + unit only, `:306`) \u2014 so the ship-on decision is measured on a candidate state that is not the one the product ships, and a role-aware rerank that clears the gate on the harness state may not clear it on the shipped state",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ecd9e46934c0e0a2daf4ff0e21d7971614012ffe03a3f7cb10518e3b0b276fb8",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 26,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T223954162366-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "e44f4b9f8ce35984fde378a7cfb9116d16218595",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every \u00a77 anchor resolves: `rerank_candidates`, `_RERANK_QUESTION`, the harness's kept role-aware question (`tests/llm/test_signal_search_goldens.py:56` `_ROLE_RERANK_LEVELS`), and the server switch at `imas_codex/llm/server.py:1882` `_rerank_dd_paths = not (self.read_only or self.dd_only)`, consumed at `:375`. No extensionless href in \u00a77.",
+    "done_when": "pass \u2014 \u00a77's measure is falsifiable: the switch ships on only if the role-aware rerank beats fusion alone on both mean nDCG@10 and grade-3 precision@5 with p95 \u2264 5 s and otherwise ships off, and the generic-question arm measured beside the role-aware one (which \u00a71 shows loses to fusion on precision) is the comparison that can return a non-improvement.",
+    "evidence_paths": "a finding \u2014 \u00a77's done-when requires the harness to report per-question wins and losses, the two questions beside each other, and p95 wall time, but names no durable evidence path, unlike \u00a73 (`goldens.html`) and \u00a710 (`descriptions.html`).",
+    "naming": "pass \u2014 \u00a77 introduces no plan label or ticket number into a symbol or comment. The plan-named env var `SSFMS_JEV_ARMS` and the \"\u00a77 names\" comment in the landed harness are \u00a73 artifacts already carried as a follow-on; \u00a77's own text does not restate them.",
+    "reasoning": "a finding \u2014 \u00a77's ship-on decision is taken on a candidate state the product does not use, so the measured mechanism is not the shipped one (root-cause check passes: \u00a71's table shows the rerank raised recall@30 and lowered precision@5 and its caption attributes the falls to ungraded candidates, matching \u00a77; caller check passes: `_search_signals` is the named production caller).",
+    "single_goal": "pass \u2014 \u00a77's labelling node and scoring node both serve the one deliverable, the role-aware rerank and its switch, and \u00a73 now assigns the two rerank arms to \u00a77 explicitly (\"\u00a77 adds the two reranks\").",
+    "wiring": "pass \u2014 \u00a77's followup ordering (\u00a77 follows \u00a74, \u00a73 first) resolves, \u00a78's third reader points at \u00a77, and the code it names exists: `rerank_candidates` at `imas_codex/llm/search_tools.py:171` is shared by docs (`:991`), code (`:1722`) and the DD-path search (`imas_codex/ids/slot_context.py:224`), and `_RERANK_QUESTION` is at `imas_codex/llm/search_tools.py:84`."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "21cb67ae2f717525df04e4e4da39715e179eedb4bf5d77aee908cf4919b8264d",
+    "s4": "ff798997815d5f566c82571e887c792ba4db14c9b54cd6306c43a26e35044551",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "4b68ed0ae98cdf6602c34cd439216c9160c29053b0bbd1127585cb51c62bd71a",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:48:55.876472+00:00"
+}
