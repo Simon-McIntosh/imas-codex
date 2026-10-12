@@ -22,8 +22,8 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="23">
-<meta name="plan-modified" content="2026-10-12">
+<meta name="plan-version" content="24">
+<meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69">
 </head>
 <body>
@@ -153,8 +153,8 @@
     <p>
       Fourth, pooled labelling. Every candidate that any arm places in its top 10 is labelled under that rule before
       arms are compared. The arms are the product tool at the head being measured, the additive rule frozen in the
-      harness, vector only, RRF, and both reranks, plus any arm a later section adds. Until §4 lands, the first two
-      return the same order. Each label is enumerated by Cypher and confirmed by reading the name and description. This removes the
+      harness, vector only and RRF, plus any arm a later section adds; §7 adds the two reranks. Until §4 lands,
+      the first two return the same order. Each label is enumerated by Cypher and confirmed by reading the name and description. This removes the
       prototype's bias, where an arm that lifted an unlabelled but relevant signal was scored as wrong.
     </p>
     <p>
@@ -171,7 +171,7 @@
       and records for each the grade-3 signals it found by enumeration. It commits them to the fixture marked
       <code>held_out</code>. The harness then takes two nodes, because labelling and code do not fit one hour together.
       The second node builds the harness and adds the eleven draft questions; it shows the refusal naming the unlabelled
-      candidates of the fixture as it stands. The third pools and labels every arm's top 10, runs the six arms and the
+      candidates of the fixture as it stands. The third pools and labels every arm's top 10, runs the four arms and the
       control, and writes the evidence.
     </p>
     <p>
@@ -179,8 +179,7 @@
       from an irrelevant one. The tool arm calls the product ranking, so each later section measures its own head:
       extract the ranking inside <code>_search_signals</code> into a function that returns ordered signal ids, with no
       change in behaviour. The other arms live in the harness. The additive rule among them is frozen there, as its own
-      arm beside the product arm, so the baseline survives §4 rewriting the product ranking. The two rerank arms spend Jev, so they run only when the harness is asked for them, and a default
-      graph run spends nothing. The prototype did not keep its role-aware question text, so write it from §7's five
+      arm beside the product arm, so the baseline survives §4 rewriting the product ranking. The prototype did not keep its role-aware question text, so write it from §7's five
       levels and keep it in the harness; §7 moves it into the product beside <code>_RERANK_QUESTION</code>. The random
       control is a seeded permutation of each question's labelled pool.
     </p>
@@ -301,6 +300,13 @@
     <p>
       The prototype could not settle whether the rerank earns its place. On the draft labels it raised recall@30 and
       lowered precision@5, and most of its losses were unlabelled relevant signals. Pooled labels settle it.
+    </p>
+    <p>
+      The two rerank arms are this section's to score, not §3's. They spend Jev, and the suite's guard refuses paid
+      requests inside a test process, so they are scored by the harness's own arm functions called from a measurement
+      run outside pytest. The rerank may lift any of its 60 candidates into its top 10, and its order varies between
+      runs, so their labels cover RRF's top 60 on every question rather than a top-10 union. The generic arm uses
+      <code>_RERANK_QUESTION</code>; the role-aware arm uses the question the harness keeps.
     </p>
     <p>
       <strong>Done when</strong> the harness reports the rerank against fusion alone on the pooled labels, with
