@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T23:20:22.309Z",
+  "dispatched_at": "2026-10-12T23:13:57Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-search-finds-the-measured-signal.html:283",
+      "id": "reasoning-1",
+      "reason": "node 3's selection must name missing hashes (or the re-embed and the census must share one predicate), else the section re-embeds nothing and its own census can never pass.",
+      "text": "the third node re-embeds \"every FacilitySignal whose stored hash differs from the hash of its current text\" (line 282) while the done-when (line 287) says \"A missing hash counts as a mismatch\"; under Cypher `s.embedded_text_hash <> $h` is null for a null property, so a filter written as \"differs\" selects no null-hash rows \u2014 the exact rows the census fails on, and on the first run every pre-existing node's hash is missing",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "2eb1242f341b5030e7ba87672a440b0d041841513d2b147eb25fdf1545c8c4ca",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 34,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T231343770638-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "6be13814d24841a9666aa3ef13cdf48781a47012",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `GraphClient.create_nodes` (imas_codex/graph/client.py:605), `imas_codex/discovery/signals/`, \u00a71's cosine probe (plan line 75) and \u00a73's rule and harness all resolve.",
+    "done_when": "pass \u2014 \u00a75's done-when is measurable (a census over all FacilitySignal nodes) and names a negative control (\"A test shows that an individualisation write re-embeds, and the same test fails against the current writer\"); the added \"missing hash counts as a mismatch\" clause makes the census fail on the pre-fix graph rather than pass vacuously.",
+    "evidence_paths": "pass \u2014 the measurement and the census are placed in `docs/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html`, a durable in-repo path beside the fragments \u00a73 and \u00a74 already write.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach the new surface; `embedded_text_hash` is named for the mechanism it stores.",
+    "reasoning": "a finding \u2014 \u00a75's third node re-embeds \"every FacilitySignal whose stored hash differs from the hash of its current text\", but the section's own done-when treats a missing hash as a mismatch; the two predicates select different row sets and the re-embed will skip the rows the census fails on.",
+    "single_goal": "pass \u2014 \u00a75 names three nodes and each carries one deliverable (the embed-text measurement, the single description writer, the re-embed and census).",
+    "wiring": "pass \u2014 \u00a75's ordering is declared in followup `f-ssfms-001` (\"\u00a73 comes first \u2026 \u00a74 and \u00a75 \u2026 once \u00a73 lands. \u00a76 follows \u00a75\"), and the harness, labels and rule it consumes all resolve to \u00a73."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "1533ed956bc1105d3a28eea6cace5d094f539bc91b4ff32e0ee2de78682938e9",
+    "s4": "188bb41592bd1c5edac35672b88404769cb673da2fddfa3191d068f0effabd67",
+    "s5": "6b947de26c55d49f0541056ef91a6e3c1463e4b640e9eec6fe243eb55471c2e0",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "62129c4513b7e17583d1210b2596dd537cdefdbbd8fddb81f175d1e6358fd0bf",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T23:21:44.477495+00:00"
+}
