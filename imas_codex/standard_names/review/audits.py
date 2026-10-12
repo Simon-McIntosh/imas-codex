@@ -712,12 +712,56 @@ def run_house_style_checks(names: list[dict[str, Any]]) -> list[LintFinding]:
     return findings
 
 
+def run_documentation_gate_checks(
+    names: list[dict[str, Any]],
+) -> list[LintFinding]:
+    """Route the deterministic documentation gates into the audit report.
+
+    Each name's own fields supply the physics context a gate reads: its COCOS
+    transformation type decides whether a sign-convention paragraph is required,
+    and its declared unit anchors the defining-equation gate. A gate lacking the
+    field it needs is not evaluable and raises no finding, so absence of
+    authority is never reported as a contradiction; each gate that does
+    contradict the name raises one finding naming that gate. A name without
+    documentation is skipped.
+    """
+
+    from imas_codex.standard_names.docs_gates import (
+        DocumentationGateOutcome,
+        DocumentationPhysicsContext,
+        score_documentation,
+    )
+
+    findings: list[LintFinding] = []
+    for name in names:
+        documentation = (name.get("documentation") or "").strip()
+        if not documentation:
+            continue
+        context = DocumentationPhysicsContext(
+            declared_unit=name.get("unit") or None,
+            cocos_transformation_type=name.get("cocos_transformation_type") or None,
+        )
+        score = score_documentation(documentation, physics_context=context)
+        for gate, result in score.gate_vector.items():
+            if result.outcome is DocumentationGateOutcome.FAIL:
+                findings.append(
+                    LintFinding(
+                        name_id=name.get("id", ""),
+                        finding_type=gate,
+                        detail=f"{gate}: {result.reason}",
+                        severity="error",
+                    )
+                )
+    return findings
+
+
 def run_all_audits(names: list[dict[str, Any]]) -> AuditReport:
     """Run all Layer 1 deterministic audits and return a combined report.
 
     Execution order:
       1. Embedding preflight (ensures fresh embeddings for duplicate detection)
-      2. Lexical lint, including the registry conformance checks
+      2. Lexical lint, the registry conformance checks, and the deterministic
+         documentation gates
       3. Link integrity
       4. Duplicate detection
     """
@@ -725,7 +769,11 @@ def run_all_audits(names: list[dict[str, Any]]) -> AuditReport:
 
     embedding = run_embedding_preflight(names)
     lint_findings = run_lexical_lint(names)
-    lint_findings = [*lint_findings, *run_house_style_checks(names)]
+    lint_findings = [
+        *lint_findings,
+        *run_house_style_checks(names),
+        *run_documentation_gate_checks(names),
+    ]
     link_findings = run_link_integrity(names)
     duplicate_components = run_duplicate_detection(names)
 

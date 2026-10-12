@@ -629,26 +629,32 @@ def _template_opening_findings(
     templates: tuple[Any, ...],
     documentation: str,
 ) -> list[HouseStyleFinding]:
-    """Flag a documentation opening that does not follow the selected template."""
+    """Flag a documentation opening that follows none of the selected templates.
+
+    One pattern can select several templates, and an opening need only follow
+    one of them. Only an opening matching none is a finding, so a name with two
+    selected templates is not reported for the one it did not follow.
+    """
 
     opening = _opening_line(documentation)
-    findings: list[HouseStyleFinding] = []
+    compiled: list[tuple[Any, re.Pattern[str]]] = []
     for template in templates:
         pattern = _template_opening_pattern(template.documentation)
-        if pattern is None:
-            continue
-        if not pattern.match(opening):
-            findings.append(
-                HouseStyleFinding(
-                    finding_class=HouseStyleFindingClass.TEMPLATE_OPENING,
-                    registry_entry=f"template:{template.base}",
-                    detail=(
-                        f"documentation opens as '{opening[:60]}', which does "
-                        f"not follow the '{template.documentation}' template"
-                    ),
-                )
-            )
-    return findings
+        if pattern is not None:
+            compiled.append((template, pattern))
+    if not compiled or any(pattern.match(opening) for _, pattern in compiled):
+        return []
+    required = "; ".join(template.documentation for template, _ in compiled)
+    return [
+        HouseStyleFinding(
+            finding_class=HouseStyleFindingClass.TEMPLATE_OPENING,
+            registry_entry=f"template:{compiled[0][0].base}",
+            detail=(
+                f"documentation opens as '{opening[:60]}', which does not "
+                f"follow any selected template: {required}"
+            ),
+        )
+    ]
 
 
 def house_style_findings(

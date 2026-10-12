@@ -11,7 +11,11 @@ from __future__ import annotations
 from collections import Counter
 
 import pytest
-from imas_standard_names.grammar.terms import select_conventions
+from imas_standard_names.grammar.terms import (
+    AppliedConventions,
+    AppliedTemplate,
+    select_conventions,
+)
 
 from imas_codex.standard_names.docs_gates import (
     HouseStyleFindingClass,
@@ -42,15 +46,6 @@ def _documentation(equation: str, *, opening: str = _CANONICAL_OPENING) -> str:
         f"{equation}\n\n"
         "See [electron_density](name:electron_density) for the related quantity."
     )
-
-
-def _classes(name: str, *, description: str = "", documentation: str) -> set[str]:
-    return {
-        finding.finding_class.value
-        for finding in conformance_findings(
-            name, description=description, documentation=documentation
-        )
-    }
 
 
 def test_line_form_equation_is_a_forbidden_variant() -> None:
@@ -212,3 +207,121 @@ def _live_name_rows(names: list[str]) -> list[dict]:
 
 def test_audit_checks_skip_unparseable_names() -> None:
     assert run_house_style_checks([{"id": "not_a_standard_name!!"}]) == []
+
+
+def _two_density_templates() -> tuple[AppliedTemplate, AppliedTemplate]:
+    return (
+        AppliedTemplate(
+            base="density",
+            segments=("subject",),
+            description="",
+            documentation="Number density of {subject}",
+        ),
+        AppliedTemplate(
+            base="density",
+            segments=("subject",),
+            description="",
+            documentation="The number density of {subject}",
+        ),
+    )
+
+
+def test_opening_matching_one_of_two_templates_is_not_flagged() -> None:
+    findings = house_style_findings(
+        AppliedConventions(templates=_two_density_templates()),
+        documentation=_CANONICAL_OPENING,
+    )
+    template_findings = [
+        finding
+        for finding in findings
+        if finding.finding_class is HouseStyleFindingClass.TEMPLATE_OPENING
+    ]
+    assert template_findings == []
+
+
+def test_opening_matching_no_template_is_flagged_once() -> None:
+    findings = house_style_findings(
+        AppliedConventions(templates=_two_density_templates()),
+        documentation="The argon density at the boundary.",
+    )
+    template_findings = [
+        finding
+        for finding in findings
+        if finding.finding_class is HouseStyleFindingClass.TEMPLATE_OPENING
+    ]
+    assert len(template_findings) == 1
+
+
+_SIGN_SENSITIVE_NAME = "poloidal_magnetic_flux"
+
+
+def _flux_documentation(*, sign_convention: bool) -> str:
+    sign_paragraph = (
+        "\n\nSign convention: Positive when the poloidal flux increases "
+        "outward from the magnetic axis."
+    )
+    return (
+        "Poloidal magnetic flux through a surface spanning the magnetic axis."
+        "\n\nThe poloidal magnetic flux $\\psi_p$ is the magnetic flux across a "
+        "poloidal cross-section, defined by the surface integral of the "
+        "poloidal field."
+        "\n\nSee [magnetic_field_poloidal](name:magnetic_field_poloidal) for "
+        "the related field." + (sign_paragraph if sign_convention else "")
+    )
+
+
+def _flux_name(*, sign_convention: bool) -> dict:
+    return {
+        "id": _SIGN_SENSITIVE_NAME,
+        "description": "Poloidal magnetic flux through a surface.",
+        "documentation": _flux_documentation(sign_convention=sign_convention),
+        "cocos_transformation_type": "psi_like",
+        "unit": "Wb",
+    }
+
+
+def _gate_finding_types(report) -> set[str]:
+    return {finding.finding_type for finding in report.lint_findings}
+
+
+def test_audit_report_carries_the_sign_convention_gate() -> None:
+    report = run_all_audits([_flux_name(sign_convention=False)])
+    assert "sign_convention" in _gate_finding_types(report)
+
+
+def test_sign_convention_gate_is_silent_when_the_paragraph_is_present() -> None:
+    report = run_all_audits([_flux_name(sign_convention=True)])
+    assert "sign_convention" not in _gate_finding_types(report)
+
+
+def test_fixture_census_counts_each_class_once() -> None:
+    written = [
+        {"name": _CARBON, "documentation": _documentation(_LINE_FORM)},
+        {
+            "name": _BERYLLIUM,
+            "description": "Beryllium density on the separatrix.",
+            "documentation": _documentation(_SURFACE_FORM),
+        },
+        {
+            "name": _ARGON,
+            "documentation": _documentation(
+                _SURFACE_FORM, opening="The argon density at the boundary."
+            ),
+        },
+        {"name": _ARGON, "documentation": _documentation(_SURFACE_FORM)},
+    ]
+    counts: Counter[str] = Counter()
+    for entry in written:
+        for finding in conformance_findings(
+            entry["name"],
+            description=entry.get("description", ""),
+            documentation=entry["documentation"],
+        ):
+            counts[finding.finding_class.value] += 1
+    assert counts == Counter(
+        {
+            "forbidden_equation_variant": 1,
+            "forbidden_locus_gloss": 1,
+            "template_opening": 1,
+        }
+    )

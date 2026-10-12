@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="fragment">
+  <title>Documentation gates reach the review audit report</title>
+</head>
+<body>
+  <section id="shs-documentation-gates-in-audit-summary">
+    <h2>The documentation gates now reach the reviewer's report</h2>
+    <p>
+      <code>run_all_audits</code> in
+      <code>imas_codex/standard_names/review/audits.py</code> now calls the
+      deterministic documentation gates through
+      <code>run_documentation_gate_checks</code>, beside
+      <code>run_house_style_checks</code>. Each documented name supplies the
+      physics context a gate reads: its COCOS transformation type decides
+      whether a sign-convention paragraph is required, and its declared unit
+      anchors the defining equation. A gate with no field to evaluate against
+      is not evaluable and raises no finding; each gate that contradicts the
+      name adds one <code>LintFinding</code> whose <code>finding_type</code>
+      is that gate's name, so sign-convention, defining-equation and
+      symbol-definition decisions are visible on the <code>AuditReport</code>
+      the review pipeline reads.
+    </p>
+  </section>
+
+  <section id="shs-documentation-gates-in-audit-template">
+    <h2>One opening, several templates</h2>
+    <p>
+      <code>_template_opening_findings</code> reports a
+      <code>template_opening</code> finding only when the documentation opening
+      matches none of the selected templates. A name selecting two templates is
+      no longer flagged for the one its opening did not follow, which removes
+      the over-firing the single-template registry has not yet exercised.
+    </p>
+  </section>
+
+  <section id="shs-documentation-gates-in-audit-measure">
+    <h2>Measure</h2>
+    <p>
+      Gate suite at the base revision
+      <code>eeed04f25</code>: 85 passed, 11 deselected, 0 failed
+      (<code>EXIT=0</code>). The same command at the change head: 90 passed,
+      11 deselected, 0 failed (<code>EXIT=0</code>) — five added tests, no
+      added failures.
+    </p>
+    <p>
+      The declared negative control removes the documentation-gate call from
+      <code>run_all_audits</code>; the sign-convention audit test
+      <code>test_audit_report_carries_the_sign_convention_gate</code> then
+      fails (<code>EXIT=1</code>), and it passes in the head arm. Reverting the
+      template-opening change to per-template reporting fails both template
+      tests.
+    </p>
+  </section>
+</body>
+</html>
