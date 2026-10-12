@@ -1,0 +1,81 @@
+{
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T155404500887-gate-sje-decisions-owner/manifest.md (the report; summary line 'added failures: 0' over the two-row arm table)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T155404500887-gate-sje-decisions-owner/head-gate.log ('800 passed, 13 skipped, 10 deselected, 1 warning in 57.57s', EXIT=0)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T155404500887-gate-sje-decisions-owner/base-gate.log ('799 passed, 13 skipped, 10 deselected, 1 warning in 26.64s', EXIT=0)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T155404500887-gate-sje-decisions-owner/base-preexisting-check.log ('1 failed, 1 warning in 7.65s', EXIT=1)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T155404500887-gate-sje-decisions-owner/head-preexisting-check.log ('1 failed, 1 warning in 8.17s', EXIT=1)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T161306500989-review-of-gate-sje-decisions-owner/rerun-head-gate.log (this review; '800 passed, 13 skipped, 10 deselected, 1 warning in 33.46s', EXIT=0)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T161306500989-review-of-gate-sje-decisions-owner/rerun-base-gate.log (this review; '799 passed, 13 skipped, 10 deselected, 1 warning in 24.42s', EXIT=0)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T161306500989-review-of-gate-sje-decisions-owner/rerun-head-single.log (this review; 1 failed, EXIT=1)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T161306500989-review-of-gate-sje-decisions-owner/rerun-base-single.log (this review; 1 failed, EXIT=1)"
+  ],
+  "claim_lines": [
+    "CLAIM 1: reproduced: reconstructed b6038aa02 (the cited worktree sje-decisions-owner is gone) and ran the manifest's head-arm command verbatim from the report's directory; exit 0, '800 passed, 13 skipped, 10 deselected', collected 823/10 deselected/813 selected - matches the report's head figure exactly",
+    "CLAIM 2: reproduced: reconstructed 427d872af (the cited /tmp scratch base tree was removed) and ran the same command verbatim from the report's directory; exit 0, '799 passed, 13 skipped, 10 deselected', collected 822/10 deselected/812 selected - matches the report's base figure exactly, so head-minus-base is +1 passed and 0 added failures",
+    "CLAIM 3: reproduced: ran the single-test command in each reconstructed tree from the report's directory; both exit 1 on tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping with 'TypeError: _run_rich_mode() got an unexpected keyword argument no_activate' (base test_settings.py:497, head :508) - same failure at both revisions, so pre-existing as the report states",
+    "CLAIM_SUMMARY: agrees: the summary line 'added failures: 0' matches the table beneath it - base 427d872af exit 0 / 799 passed and head b6038aa02 exit 0 / 800 passed, both 13 skipped / 10 deselected, with no failures in either arm so 0 added and +1 passed; the re-run produces the same two arm summaries"
+  ],
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "manifest.md after_suite.command (the head-arm gate command); head-gate.log header in the reviewed run directory",
+      "detail": "Reconstructed b6038aa02 into $TMPDIR/rev-b6038aa02 (the cited worktree sje-decisions-owner no longer exists) and ran the manifest's head-arm command verbatim from the report's directory: exit 0, '800 passed, 13 skipped, 10 deselected, 1 warning in 33.46s', header 'collected 823 items / 10 deselected / 813 selected'. Matches the report's head figure (800 passed / 13 skipped / 10 deselected, exit 0) and its collected 823 exactly. Log: rerun-head-gate.log.",
+      "finding": "rank 1 (the headline measurement result, head arm): the head arm at b6038aa02 exits 0 with '800 passed, 13 skipped, 10 deselected'",
+      "verdict": "reproduced"
+    },
+    "CLAIM 2": {
+      "cites": "manifest.md baseline_suite.command (the same command pointed at the base tree); base-gate.log header in the reviewed run directory",
+      "detail": "Reconstructed 427d872af into $TMPDIR/rev-427d872af (the cited scratch tree /tmp/reckon-crew-scratch/r-20261012T155404500887-gate-sje-decisions-owner/base-427d872af was removed) and ran the base-arm command verbatim from the report's directory: exit 0, '799 passed, 13 skipped, 10 deselected, 1 warning in 24.42s', header 'collected 822 items / 10 deselected / 812 selected'. Matches the report's base figure (799 passed / 13 skipped / 10 deselected, exit 0) and its collected 822 exactly. Log: rerun-base-gate.log.",
+      "finding": "rank 2 (base arm): the base arm at 427d872af exits 0 with '799 passed, 13 skipped, 10 deselected', so head-minus-base is one passing test and zero added failures",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "manifest.md artifacts and follow_ons; base-preexisting-check.log and head-preexisting-check.log in the reviewed run directory",
+      "detail": "Ran the same single-test command in each reconstructed tree from the report's directory. Head (b6038aa02) exit 1: 'FAILED tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping', 'TypeError: _run_rich_mode() got an unexpected keyword argument no_activate' at tests/core/test_settings.py:508. Base (427d872af) exit 1: same FAILED id and same TypeError at tests/core/test_settings.py:497. Same failure and same message at both revisions, matching the two cited preexisting-check logs. Logs: rerun-head-single.log, rerun-base-single.log.",
+      "finding": "rank 3 (why the prior head gate read exit 1): the deselected test tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping fails at both revisions with 'TypeError: _run_rich_mode() got an unexpected keyword argument no_activate', so the failure is pre-existing and not attributable to the run",
+      "verdict": "reproduced"
+    },
+    "CLAIM_SUMMARY": {
+      "detail": "The report's summary line 'Measurement result - added failures: 0' (restated in the manifest checkpoint line as 'head exit 0, base exit 0, added failures 0') is exactly what the table beneath it carries: base 427d872af exit 0 / '799 passed, 13 skipped, 10 deselected'; head b6038aa02 exit 0 / '800 passed, 13 skipped, 10 deselected'. Neither arm reports a failure, so added failures (head failures not at base) is 0, and head-minus-base passed is +1, both as stated. The re-run produces the same two arm summaries (head 800 passed, base 799 passed, both exit 0), so the summary and the table agree and the re-run confirms them.",
+      "verdict": "agrees"
+    }
+  },
+  "claims": [
+    {
+      "cites": "manifest.md head-arm command (after_suite.command); head-gate.log in the reviewed run directory",
+      "rank": 1,
+      "report_figure": "head b6038aa02, exit 0, '800 passed, 13 skipped, 10 deselected'; collected 823",
+      "rerun_figure": "head b6038aa02 (reconstructed), exit 0, '800 passed, 13 skipped, 10 deselected'; collected 823 items / 10 deselected / 813 selected",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "manifest.md base-arm command (baseline_suite.command); base-gate.log in the reviewed run directory",
+      "rank": 2,
+      "report_figure": "base 427d872af, exit 0, '799 passed, 13 skipped, 10 deselected'; collected 822",
+      "rerun_figure": "base 427d872af (reconstructed), exit 0, '799 passed, 13 skipped, 10 deselected'; collected 822 items / 10 deselected / 812 selected",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "manifest.md artifacts / follow_ons; base-preexisting-check.log and head-preexisting-check.log in the reviewed run directory",
+      "rank": 3,
+      "report_figure": "the deselected test fails at both revisions (each exit 1) with TypeError: _run_rich_mode() got an unexpected keyword argument no_activate (tests/core/test_settings.py line 497)",
+      "rerun_figure": "both reconstructed trees exit 1 on the same test with the same TypeError (base test_settings.py:497, head test_settings.py:508)",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-12T16:25:02.742Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-12T16:13:17Z",
+  "method": "The reviewed run is read-only (its manifest records 'commits: none (measurement node; no repository writes)' and changed_paths []), so there is no diff and no gate suite of its own to count; the landed-node rubric's six dimensions and its added-failure count measure nothing. Its report is the manifest.md in its own run directory, whose found figure is the summary line 'Measurement result - added failures: 0' carried over a two-row arm table. The three highest-ranked findings were re-run from the report's own directory: the head-arm figure, the base-arm figure, and the pre-existing-failure reproduction. Each cites the arm pytest command recorded in the manifest (tests / baseline_suite.command / after_suite.command) and in the gate-log headers. Both cited arm trees are gone - the head worktree /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sje-decisions-owner no longer exists and the base scratch tree /tmp/reckon-crew-scratch/r-20261012T155404500887-gate-sje-decisions-owner/base-427d872af was removed at the end of the reviewed run - so each arm was reconstructed at the same revision with 'git archive <rev> | tar -x' into $TMPDIR/rev-<rev>, the five generated files copied from the main checkout and .env linked, exactly as the reviewed run's brief prescribes for the base arm. Each command was then run verbatim (UV_NO_SYNC=1, UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv, PYTHONPATH and --directory pointed at the reconstructed tree) from the report's own directory. Reported against the figures the report states, not against current main (worktree HEAD a79a459f8).",
+  "project": "imas-codex",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T155404500887-gate-sje-decisions-owner/manifest.md",
+  "review_run_id": "r-20261012T161306500989-review-of-gate-sje-decisions-owner",
+  "reviewed_base_sha": "36ebddb775800d576773bdc9a0843014d9f5eb38",
+  "reviewed_head_sha": "36ebddb775800d576773bdc9a0843014d9f5eb38",
+  "reviewed_run_id": "r-20261012T155404500887-gate-sje-decisions-owner",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run is read-only and ran no gate suite of its own (its manifest records commits: none and changed_paths []).",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T16:20:08+00:00"
+}
