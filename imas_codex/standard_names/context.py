@@ -788,6 +788,9 @@ def fetch_sibling_family(
 
     - ``parent``: ``{name, description, docs_accepted}`` — the base physical
       quantity the family is expressed over (the seed's ``physical_base``).
+      ``name`` is the base quantity's own StandardName id; when the token
+      names no node the parent is ``None``, never a bare token with no node
+      behind it.
     - ``anchor``: the documentation-template authority — the base quantity
       when its docs are accepted and its description is real, else the
       docs-accepted sibling with the highest ``reviewer_score_docs``; ``None``
@@ -821,17 +824,17 @@ def fetch_sibling_family(
     seed: dict[str, Any] | None = None
     base_row: dict[str, Any] = {}
     other_rows: list[dict[str, Any]] = []
-    parent_name = sn_id
+    base_token = ""
     try:
         rows = fetch_pattern_family(sn_id, gc)
         seed = next((r for r in rows if r.get("id") == sn_id), None)
-        parent_name = str((seed or {}).get("physical_base") or "") or sn_id
+        base_token = str((seed or {}).get("physical_base") or "")
         member_ids = {r.get("id") for r in rows}
-        if parent_name in member_ids:
-            base_row = next((r for r in rows if r.get("id") == parent_name), {})
-        else:
-            base_row = fetch_family_base(parent_name, gc)
-        other_rows = [r for r in rows if r.get("id") not in (sn_id, parent_name)]
+        if base_token and base_token in member_ids:
+            base_row = next((r for r in rows if r.get("id") == base_token), {})
+        elif base_token:
+            base_row = fetch_family_base(base_token, gc)
+        other_rows = [r for r in rows if r.get("id") not in (sn_id, base_token)]
     except Exception:
         logger.debug("fetch_sibling_family: query failed for %s", sn_id)
     finally:
@@ -853,6 +856,10 @@ def fetch_sibling_family(
     def _base_segment(segment: str) -> str:
         return str(base_row.get(segment) or "")
 
+    # A parent is the base quantity's own StandardName. When the seed's
+    # ``physical_base`` names no node, there is no parent to report: exposing
+    # the bare token would hand the docs prompt a phantom with no description.
+    parent_name = base_row.get("id") if base_row else None
     parent_desc = _real(base_row.get("description"))
     parent_docs_accepted = base_row.get("docs_stage") == "accepted" and bool(
         parent_desc
@@ -909,11 +916,15 @@ def fetch_sibling_family(
             }
 
     return {
-        "parent": {
-            "name": parent_name,
-            "description": parent_desc,
-            "docs_accepted": parent_docs_accepted,
-        },
+        "parent": (
+            {
+                "name": parent_name,
+                "description": parent_desc,
+                "docs_accepted": parent_docs_accepted,
+            }
+            if parent_name
+            else None
+        ),
         "anchor": anchor,
         "siblings": siblings,
     }

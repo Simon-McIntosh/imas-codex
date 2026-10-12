@@ -1,9 +1,13 @@
 """Pattern-family resolution over a fixture graph.
 
 A pattern family is the set of live standard names whose grammar parses
-identically except along the variation axes (subject, component, coordinate,
-position, region, device). The invariant segments are ``physical_base``,
-``geometric_base``, ``transformation`` and ``process``.
+identically except along the variation axes. The invariant segments are the
+base quantity, its transformation and process, plus the entity locus
+(``object``): two names describing different entities are never family-mates.
+The variation axes are ``subject``, ``component``, ``coordinate``,
+``position``, ``geometry``, ``region`` and ``device``; the empty value of an
+axis is one of its values, so ``electron_temperature`` and
+``electron_temperature_at_magnetic_axis`` share a family.
 
 The fixture graph answers the three queries the resolver issues:
 :func:`~imas_codex.standard_names.families.fetch_pattern_family` (members),
@@ -13,11 +17,15 @@ and :func:`~imas_codex.standard_names.families.count_pattern_families`.
 
 from __future__ import annotations
 
+import re
 from typing import Any
+
+from imas_standard_names.grammar.vocab_loaders import load_locus_registry
 
 from imas_codex.standard_names.context import fetch_sibling_family
 from imas_codex.standard_names.families import (
     PATTERN_INVARIANT_SEGMENTS,
+    PATTERN_SEGMENTS,
     PATTERN_VARIATION_AXES,
     count_pattern_families,
     fetch_family_base,
@@ -49,6 +57,27 @@ _FLUX_SPECIES = (
 _BOUNDARY = "plasma_boundary"
 
 
+# The family queries compare the invariant columns through ``coalesce(m.COL,
+# '') = COL`` (members) and project them the same way in the census. The
+# fixture reads those columns back out of the query text so that dropping one
+# from the query changes what the fixture does — a test that recomputed the
+# signature in Python would stay green while the Cypher lost a column.
+_MEMBER_COMPARE_RE = re.compile(r"coalesce\(m\.(\w+), ''\)\s*=\s*\w+")
+_MEMBER_PROJECT_RE = re.compile(r"coalesce\(m\.(\w+), ''\)\s+AS\s+\w+")
+
+
+def _compared_columns(cypher: str) -> tuple[str, ...]:
+    """The invariant columns a family is keyed on, read from the Cypher text.
+
+    The members query states them as equality predicates against the seed's
+    projection; the census projects them from each member and groups. Either
+    spelling is the query's own statement of what makes a family.
+    """
+    return tuple(_MEMBER_COMPARE_RE.findall(cypher)) or tuple(
+        _MEMBER_PROJECT_RE.findall(cypher)
+    )
+
+
 class _PatternGraph:
     """In-memory StandardName graph answering the pattern-family queries.
 
@@ -56,6 +85,11 @@ class _PatternGraph:
     lookup that walks operator ancestry returns nothing — which is what makes
     the negative control bite: reverting the family lookup to the HAS_PARENT
     route leaves the 17-species cohort unresolved.
+
+    Membership is decided by the columns the issued Cypher compares, not by a
+    Python re-derivation of the signature: the fixture is the query's behaviour
+    under test, so a query that stops comparing the entity locus stops
+    separating entity owners here too.
     """
 
     def __init__(self, nodes: list[dict[str, Any]]):
@@ -66,20 +100,25 @@ class _PatternGraph:
     def _live(node: dict[str, Any], superseded: str) -> bool:
         return (node.get("name_stage") or "") != superseded
 
+    @staticmethod
+    def _key(node: dict[str, Any], columns: tuple[str, ...]) -> tuple[str, ...]:
+        return tuple(str(node.get(col) or "") for col in columns)
+
     def query(self, cypher: str, **params: Any):
         self.calls.append((cypher, params))
         superseded = params.get("superseded", "superseded")
         if "HAS_PARENT" in cypher:
             return []  # no operator edges in the fixture
+        columns = _compared_columns(cypher)
         if "MATCH (seed:StandardName {id: $sn_id})" in cypher:
             seed = self.nodes.get(params["sn_id"])
             if seed is None or not self._live(seed, superseded):
                 return []
-            key = pattern_signature(seed)
+            key = self._key(seed, columns)
             return [
                 dict(n)
                 for n in self.nodes.values()
-                if self._live(n, superseded) and pattern_signature(n) == key
+                if self._live(n, superseded) and self._key(n, columns) == key
             ]
         if "MATCH (b:StandardName {id: $base_id})" in cypher:
             base = self.nodes.get(params["base_id"])
@@ -91,9 +130,8 @@ class _PatternGraph:
             for node in self.nodes.values():
                 if not self._live(node, superseded):
                     continue
-                sizes[pattern_signature(node)] = (
-                    sizes.get(pattern_signature(node), 0) + 1
-                )
+                key = self._key(node, columns)
+                sizes[key] = sizes.get(key, 0) + 1
             kept = [n for n in sizes.values() if n >= params["min_members"]]
             return [{"families": len(kept), "members": sum(kept)}]
         return []
@@ -110,8 +148,10 @@ def _name(
     component: str = "",
     coordinate: str = "",
     position: str = "",
+    geometry: str = "",
     region: str = "",
     device: str = "",
+    object: str = "",
     name_stage: str = "drafted",
     description: str | None = None,
     documentation: str | None = None,
@@ -128,8 +168,10 @@ def _name(
         "component": component,
         "coordinate": coordinate,
         "position": position,
+        "geometry": geometry,
         "region": region,
         "device": device,
+        "object": object,
         "name_stage": name_stage,
         "description": f"Docs for {node_id}." if description is None else description,
         "documentation": (
@@ -171,22 +213,61 @@ def _flux_fixture() -> _PatternGraph:
     return _PatternGraph(nodes)
 
 
+# A slice of the ISN entity-locus vocabulary, read from the registry so the
+# fixture is the registry's own notion of an entity, not a hand-picked list.
+_ENTITY_TOKENS = tuple(
+    sorted(
+        token
+        for token, locus in load_locus_registry().loci.items()
+        if locus.type == "entity"
+    )
+)[:34]
+
+_BASE_OF_ENTITY = "cross_section"
+
+
+def _entity_owner_id(entity: str) -> str:
+    return f"{_BASE_OF_ENTITY}_of_{entity}"
+
+
+def _entity_owner_fixture() -> _PatternGraph:
+    nodes = [
+        _name(
+            _entity_owner_id(entity),
+            physical_base=_BASE_OF_ENTITY,
+            object=entity,
+        )
+        for entity in _ENTITY_TOKENS
+    ]
+    return _PatternGraph(nodes)
+
+
 # ---------------------------------------------------------------------------
 # Segment definition
 # ---------------------------------------------------------------------------
 
 
-def test_variation_axes_are_the_six_given():
+def test_variation_axes_are_the_non_locus_owner_segments():
     assert PATTERN_VARIATION_AXES == (
         "subject",
         "component",
         "coordinate",
         "position",
+        "geometry",
         "region",
         "device",
     )
     assert "transformation" in PATTERN_INVARIANT_SEGMENTS
     assert "physical_base" in PATTERN_INVARIANT_SEGMENTS
+    # the entity locus is invariant: entity owners are never family-mates
+    assert "object" in PATTERN_INVARIANT_SEGMENTS
+
+
+def test_variation_axes_and_invariant_segments_partition_every_segment():
+    assert set(PATTERN_VARIATION_AXES) | set(PATTERN_INVARIANT_SEGMENTS) == set(
+        PATTERN_SEGMENTS
+    )
+    assert not set(PATTERN_VARIATION_AXES) & set(PATTERN_INVARIANT_SEGMENTS)
 
 
 def test_pattern_signature_is_the_invariant_tuple():
@@ -197,8 +278,8 @@ def test_pattern_signature_is_the_invariant_tuple():
             "subject": "electron",
         }
     )
-    assert sig == ("density", "", "flux_surface_averaged", "")
-    # the variation axis does not enter the signature
+    assert sig == ("density", "", "flux_surface_averaged", "", "")
+    # the subject axis does not enter the signature
     other = pattern_signature(
         {
             "physical_base": "density",
@@ -207,6 +288,24 @@ def test_pattern_signature_is_the_invariant_tuple():
         }
     )
     assert other == sig
+
+
+def test_pattern_signature_carries_the_entity_locus():
+    """Two names describing different entities are not family-mates."""
+    copper = pattern_signature({"physical_base": "cross_section", "object": "copper"})
+    tungsten = pattern_signature(
+        {"physical_base": "cross_section", "object": "tungsten"}
+    )
+    assert copper != tungsten
+
+
+def test_members_query_compares_every_invariant_segment():
+    """Dropping an invariant column from the Cypher drops it from this set."""
+    from imas_codex.standard_names.families import _PATTERN_FAMILY_MEMBERS_QUERY
+
+    assert set(_compared_columns(_PATTERN_FAMILY_MEMBERS_QUERY)) == set(
+        PATTERN_INVARIANT_SEGMENTS
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -291,6 +390,29 @@ def test_family_base_lookup_returns_the_base_row():
     assert base["id"] == "density"
     assert base["docs_stage"] == "accepted"
     assert fetch_family_base("no_such_name", gc) == {}
+
+
+# ---------------------------------------------------------------------------
+# Entity locus (invariant)
+# ---------------------------------------------------------------------------
+
+
+def test_entity_owners_are_not_a_cohort():
+    """Names for different entities share no family, whatever else they share.
+
+    The 34 registered entity tokens all fill the same base quantity and no
+    variation axis, so they differ only in the entity locus. A family keyed on
+    anything but that locus collapses them into one 34-member cohort.
+    """
+    gc = _entity_owner_fixture()
+    for entity in _ENTITY_TOKENS:
+        family = fetch_pattern_family(_entity_owner_id(entity), gc)
+        assert [row["id"] for row in family] == [_entity_owner_id(entity)]
+
+
+def test_entity_owner_has_no_sibling_family():
+    gc = _entity_owner_fixture()
+    assert fetch_sibling_family(_entity_owner_id(_ENTITY_TOKENS[0]), gc=gc) is None
 
 
 # ---------------------------------------------------------------------------

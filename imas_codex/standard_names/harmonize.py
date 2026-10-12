@@ -24,7 +24,10 @@ from imas_codex.standard_names.context import DOCUMENTATION_FAMILY_OPERATOR_KIND
 from imas_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
-from imas_codex.standard_names.families import fetch_pattern_family
+from imas_codex.standard_names.families import (
+    PATTERN_INVARIANT_SEGMENTS,
+    fetch_pattern_family,
+)
 
 #: Operator kinds eligible for parent-based family grouping.
 _FAMILY_OPERATOR_KINDS = DOCUMENTATION_FAMILY_OPERATOR_KINDS
@@ -372,8 +375,9 @@ def build_worklist(
 
     Enumerates families grouped by shared ``HAS_PARENT`` parent (family-
     eligible ``operator_kind`` only), plus — when *include_parentless* is
-    True — a fallback bucket of parentless names grouped by
-    ``physical_base``. Filters to families with ``n >= min_size`` and
+    True — a bucket of parentless names grouped by the same pattern family
+    the sibling-family context reads (the invariant segment tuple).
+    Filters to families with ``n >= min_size`` and
     ``drift >= min_drift``, excluding families whose
     ``harmonized_group_signature`` already matches the current signature
     (a missing property is treated as "never harmonized").
@@ -465,25 +469,31 @@ def build_worklist(
             )
 
         if include_parentless:
+            invariants = ",\n".join(
+                f"     coalesce(c.{seg}, '') AS {seg}"
+                for seg in PATTERN_INVARIANT_SEGMENTS
+            )
             parentless_rows = (
                 resolved_gc.query(
-                    """
+                    f"""
                     MATCH (c:StandardName)
                     WHERE c.physical_base IS NOT NULL
                       AND coalesce(c.name_stage, '') <> $superseded
                       AND c.description IS NOT NULL
-                      AND NOT EXISTS {
+                      AND NOT EXISTS {{
                         MATCH (c)-[:HAS_PARENT]->(:StandardName)
-                      }
-                    RETURN c.physical_base AS physical_base,
-                           collect({
-                               id: c.id,
-                               description: c.description,
-                               documentation: c.documentation,
-                               docs_stage: c.docs_stage,
-                               reviewer_score_docs: c.reviewer_score_docs,
-                               harmonized_group_signature: c.harmonized_group_signature
-                           }) AS members
+                      }}
+                    WITH
+{invariants},
+                         collect({{
+                             id: c.id,
+                             description: c.description,
+                             documentation: c.documentation,
+                             docs_stage: c.docs_stage,
+                             reviewer_score_docs: c.reviewer_score_docs,
+                             harmonized_group_signature: c.harmonized_group_signature
+                         }}) AS members
+                    RETURN {", ".join(PATTERN_INVARIANT_SEGMENTS)}, members
                     """,
                     superseded=NameStage.superseded.value,
                 )
@@ -517,7 +527,7 @@ def build_worklist(
                 worklist.append(
                     {
                         "parent": None,
-                        "grouping": "physical_base",
+                        "grouping": "pattern",
                         "physical_base": row.get("physical_base"),
                         "operator_kinds": [],
                         "n": n,

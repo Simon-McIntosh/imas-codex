@@ -15,6 +15,9 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 from tests.standard_names.test_pattern_families import (
+    _ENTITY_TOKENS,
+    _entity_owner_fixture,
+    _entity_owner_id,
     _name,
     _PatternGraph,
 )
@@ -414,6 +417,11 @@ def test_locus_qualified_variants_resolve_to_one_pattern_family():
         _PatternGraph(
             [
                 _name(
+                    "density",
+                    physical_base="density",
+                    docs_stage="accepted",
+                ),
+                _name(
                     "electron_density_at_pedestal_top",
                     physical_base="density",
                     subject="electron",
@@ -432,6 +440,8 @@ def test_locus_qualified_variants_resolve_to_one_pattern_family():
     family = fetch_sibling_family("electron_density_at_pedestal_top", gc=gc)
 
     assert family is not None
+    # the base quantity backs the parent: it is a real node, not the seed's
+    # base token echoed back
     assert family["parent"]["name"] == "density"
     assert [s["name"] for s in family["siblings"]] == [
         "electron_density_at_plasma_boundary"
@@ -487,3 +497,45 @@ def test_source_owners_are_not_automatic_prose_family_members():
     cypher = gc.calls[0][0]
     assert "StandardNameSource" not in cypher
     assert "PRODUCED_NAME" not in cypher
+
+
+def test_entity_owners_are_not_an_automatic_docs_cohort():
+    """Names describing different entities never share a docs family.
+
+    The entity locus is invariant, so 34 registered entity tokens sharing a
+    base quantity form 34 families of one, not one cohort of 34.
+    """
+    from imas_codex.standard_names.context import fetch_sibling_family
+
+    gc = _PatternFamilyGC(_entity_owner_fixture())
+
+    assert len(_ENTITY_TOKENS) == 34
+    for entity in _ENTITY_TOKENS:
+        assert fetch_sibling_family(_entity_owner_id(entity), gc=gc) is None
+
+
+def test_sibling_family_omits_a_parent_the_graph_does_not_hold():
+    """A base token with no backing node yields no parent, not a phantom."""
+    from imas_codex.standard_names.context import fetch_sibling_family
+
+    gc = _PatternFamilyGC(
+        _PatternGraph(
+            [
+                _name(
+                    "radial_mode_number",
+                    physical_base="mode_number",
+                    component="radial",
+                ),
+                _name(
+                    "poloidal_mode_number",
+                    physical_base="mode_number",
+                    component="poloidal",
+                ),
+            ]
+        )
+    )
+
+    family = fetch_sibling_family("radial_mode_number", gc=gc)
+
+    assert family is not None
+    assert family["parent"] is None
