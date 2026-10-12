@@ -1,5 +1,7 @@
 <!-- Landing record for node ssfms-description-corrections, plan
-     signal-search-finds-the-measured-signal §10. Change at rev e9aac5b4a.
+     signal-search-finds-the-measured-signal §10. Changes at revs e9aac5b4a
+     (glossary and boundary matcher), 155d152ee (digit-to-letter turn),
+     1fc59fa52 and 768b7de47 (source binding and its parameters).
      Counts and evidence: docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html -->
 <section id="ssfms-description-corrections-landing" data-reckon="evidence">
   <h2 id="ssfms-description-corrections-landing-heading">Boundary-respecting signal glossary, and the JT-60SA descriptions it corrected</h2>
@@ -8,23 +10,33 @@
     <code>glossary_term_reaches</code> replaces a case-folded substring test in the
     enrichment prompt builder, and the JT-60SA glossary gains <code>EFC</code>,
     <code>SNU</code>, <code>BPS</code>, <code>QPC</code>, <code>DR</code>,
-    <code>SNU</code> and <code>HTS</code> with the missing <code>EFCC</code> meaning
-    corrected. Under the boundary matcher the glossary withdraws from 505 signals it
-    should never have reached (DR 437, LFP 25, EFC 20, FPPCC 13, HiTe 9, UFP 1).
+    <code>FPPCC</code> and <code>HTS</code> with the missing <code>EFCC</code> meaning
+    corrected. Under the boundary matcher the glossary withdraws from 494 signals it
+    should never have reached (DR 437, LFP 24, EFC 20, FPPCC 13), while a term that
+    begins a capitalised word after a digit recovers the reach an earlier form of the
+    rule had lost — <code>HiTe</code> reaches all twelve <code>mmsys_cur*hite</code>
+    coil-current chains, and <code>UFP</code> reaches <code>curUFPdisr</code>.
   </p>
   <p id="ssfms-description-corrections-landing-measure">
     Measure: in the EFC/EFCC family the descriptions expanding the abbreviation as
     "converter" or "equilibrium field coil" fall 16 → 0 and the unexpanded ones 11 → 0,
     against 155 → 182 expanding it as error field correction coil; in the SNU family
-    "snubber" falls 38 → 7 and "superconducting unit" 3 → 0, against 8 → 42 reading
-    switching network unit. The boundary test passes at head (5 passed) and fails
-    against the substring matcher (2 failed, EXIT=1), admitting the declared string
-    <code>EFC</code> reaching <code>refcurEF1</code>.
+    "snubber" falls 38 → 0 and "superconducting unit" 3 → 0, against 8 → 49 reading
+    switching network unit. The boundary test passes at head (8 passed) and fails
+    against the substring matcher, admitting the declared string <code>EFC</code>
+    reaching <code>refcurEF1</code>.
   </p>
-  <p id="ssfms-description-corrections-landing-residual">
-    Residual: seven CS1 pattern members (<code>cs1_temsnur12…222</code>) keep a stale
-    "snubber (SNU)" description because the claim path excludes a group member whose
-    representative differs and the individualisation pass did not refresh them; the
-    representative itself reads switching network unit. Recorded under follow-ons.
+  <p id="ssfms-description-corrections-landing-propagation">
+    The last seven family members needed the pipeline, not the glossary: a group's
+    members were reached through their representative's own <code>MEMBER_OF</code>
+    edge, and this representative is itself a member of a different source, so the
+    sweep and the propagation each missed the group. A <code>SignalSource</code> is now
+    located by its <code>representative_id</code>, propagation re-arms the
+    individualisation pass, and a statement that named a parameter it was never handed
+    is repaired — that one failed as a non-fatal source-preparation warning and
+    silently stopped the propagation. Resetting the seven members to
+    <code>discovered</code> and re-running the focused pass corrected all of them; the
+    census now reads 49 / 0 / 0 and no description in the family expands SNU as
+    anything but the switching network unit.
   </p>
 </section>

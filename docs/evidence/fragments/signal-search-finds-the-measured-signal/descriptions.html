@@ -1,10 +1,12 @@
 <!-- JT-60SA signal description census around a boundary-respecting glossary.
-     Before state measured at rev 78397b48f (worktree clean). Change committed at e9aac5b4a.
-     Re-enrichment ran as `imas-codex discover jt-60sa --only signals --reset-to discovered
-     --focus <affected ids> -c 5`, scoped to the signals the census flagged; 194 signals
-     enriched in the first pass and 6 in the second, at a total cost of $0.07.
+     Before state measured at rev 78397b48f (worktree clean). Glossary and matcher
+     committed at e9aac5b4a and 155d152ee.
+     Re-enrichment ran as `imas-codex discover jt-60sa --only signals [--reset-to
+     discovered] --focus <affected ids> -c 5`, scoped to the signals the census flagged:
+     194 signals enriched in the first pass, 6 in the second, and 408 enriched with 120
+     individualized when the seven remaining CS1 members were reset and re-linked.
      Census scripts and raw JSON: ~/.config/reckon/crew/runs/r-20261012T193722028601-ssfms-description-corrections/{scripts,logs}
-     (census_before.json, census_after.json, census_family_scope.json). -->
+     (census_before.json, census_family_scope.json, census_after_final.json). -->
 <section id="ssfms-description-corrections" data-reckon="evidence">
   <h2 id="ssfms-description-corrections-heading">JT-60SA signal descriptions after a boundary-respecting glossary</h2>
 
@@ -21,6 +23,18 @@
     signals the census flagged under that glossary.
   </p>
 
+  <p id="ssfms-description-corrections-intro-boundary">
+    A term begins a word at the start of the text, after a non-alphanumeric, at a
+    lower-case-to-upper-case turn, and where a capitalised word follows a capital or
+    a digit. That last clause is what keeps the reach of the abbreviation terms:
+    <code>HiTe</code> reaches <code>curCS1HiTe</code> across the digit, and the
+    <code>UFP</code> of <code>curUFPdisr</code> opens onto the word after it, because
+    an acronym written as capitals may do so. A digit inside a token's capital run
+    still starts nothing, so the <code>DR</code> of <code>mC01DR</code> ("radial
+    displacement") stays out of the dump-resistor line, and a capitalised ordinary
+    word that merely begins with the letters does not admit its term.
+  </p>
+
   <h3 id="ssfms-description-corrections-reach-heading">A term now reaches only its own signals</h3>
   <p id="ssfms-description-corrections-reach-prose">
     For every glossary term, the table gives the number of eligible JT-60SA signals the
@@ -35,9 +49,9 @@
       <tr><th>Term</th><th>Substring</th><th>Boundary</th><th>Signals withdrawn</th></tr>
     </thead>
     <tbody>
-      <tr id="ssfms-description-corrections-t-UFP"><td>UFP</td><td>15</td><td>14</td><td>1</td></tr>
-      <tr id="ssfms-description-corrections-t-LFP"><td>LFP</td><td>39</td><td>14</td><td>25</td></tr>
-      <tr id="ssfms-description-corrections-t-HiTe"><td>HiTe</td><td>12</td><td>3</td><td>9</td></tr>
+      <tr id="ssfms-description-corrections-t-UFP"><td>UFP</td><td>15</td><td>15</td><td>0</td></tr>
+      <tr id="ssfms-description-corrections-t-LFP"><td>LFP</td><td>39</td><td>15</td><td>24</td></tr>
+      <tr id="ssfms-description-corrections-t-HiTe"><td>HiTe</td><td>12</td><td>12</td><td>0</td></tr>
       <tr id="ssfms-description-corrections-t-LKAT"><td>LKAT</td><td>16</td><td>16</td><td>0</td></tr>
       <tr id="ssfms-description-corrections-t-magFlxLp"><td>magFlxLp</td><td>34</td><td>34</td><td>0</td></tr>
       <tr id="ssfms-description-corrections-t-magPbTC"><td>magPbTC</td><td>46</td><td>46</td><td>0</td></tr>
@@ -55,14 +69,47 @@
   </table>
 
   <p id="ssfms-description-corrections-reach-note">
-    505 signals (UFP 1, LFP 25, HiTe 9, EFC 20, DR 437, FPPCC 13) each carried a
-    glossary line their term should never have reached. Two examples the census
-    recorded: <code>EFC</code> reached <code>psrc_refconfig</code>,
+    494 signals (LFP 24, EFC 20, DR 437, FPPCC 13) each carried a glossary line their
+    term should never have reached. Two examples the census recorded:
+    <code>EFC</code> reached <code>psrc_refconfig</code>,
     <code>dhc_refcorerad</code> and <code>psscfst_refcurcs1bse</code>; <code>DR</code>
     reached the whole <code>cryohrs_cdpt*</code> pressure-transducer family. The
     boundary matcher keeps the legitimate continuation —
     <code>EFC</code> still reaches <code>refvcEFC1</code> across the camel-case turn,
     and the boundary test asserts both directions.
+  </p>
+
+  <h3 id="ssfms-description-corrections-substring-only-heading">The reach each term has and the boundary matcher withholds</h3>
+  <p id="ssfms-description-corrections-substring-only-prose">
+    Per term, the signals a case-folded substring test reaches and the boundary
+    matcher does not. Four terms withhold nothing, or nothing but a member of their
+    own family:
+  </p>
+  <table id="ssfms-description-corrections-substring-only-table">
+    <caption>Substring-only reach, per glossary term, after the digit-to-letter turn</caption>
+    <thead>
+      <tr><th>Term</th><th>Withheld</th><th>What the withheld signals are</th></tr>
+    </thead>
+    <tbody>
+      <tr id="ssfms-description-corrections-so-LFP"><td>LFP</td><td>24</td><td>The <code>PSC</code> and <code>PSRC</code> <code>calFP1</code>–<code>calFP10</code> flux-loop calibrations (20), the <code>dcsv_ppalfppc1/2</code> and <code>psc_comalfppc1/2</code> FPPCC power-supply algorithm parameters (4). All are calibrated flux loops or FPPCC supply parameters, not lower fast-position-coil current signals</td></tr>
+      <tr id="ssfms-description-corrections-so-EFC"><td>EFC</td><td>20</td><td>The equilibrium-field booster and base current references <code>psscfst_refcuref*bst</code>/<code>_refcuref*bse</code>, the CS1–CS4 base supplies, and the DHC/PSRC configuration references — equilibrium field and central solenoid supplies whose catalogue names carry the letters</td></tr>
+      <tr id="ssfms-description-corrections-so-DR"><td>DR</td><td>437</td><td>The <code>cryohrs_cdpt*</code> pressure-transducer family and its siblings, where the letters fall in "Pressure Drop" and other ordinary words</td></tr>
+      <tr id="ssfms-description-corrections-so-FPPCC"><td>FPPCC</td><td>13</td><td>Signals whose path spells the letters inside a longer token</td></tr>
+      <tr id="ssfms-description-corrections-so-none"><td>UFP, HiTe, LKAT, magFlxLp, magPbTC, EFCC, SNU, BPS, QPC, HTS, RWMC, Com.</td><td>0</td><td>Every signal the substring test reached is a signal the term belongs to</td></tr>
+    </tbody>
+  </table>
+  <p id="ssfms-description-corrections-recovered-note">
+    Two of those terms had lost legitimate reach to an earlier form of the boundary
+    rule, which treated a digit before a capital as still inside a word. A
+    digit-to-letter turn now starts a word, so <code>HiTe</code> reaches all twelve
+    <code>mmsys_cur*hite</code> coil-current chains — <code>curCS1HiTe</code>,
+    <code>curCS2HiTe</code>, <code>curCS3HiTe</code>, <code>curCS4HiTe</code> and
+    <code>curEF1HiTe</code>…<code>curEF6HiTe</code>, and the LFP/UFP ones — and
+    <code>UFP</code> reaches <code>curUFPdisr</code> and <code>curUFPLKAT</code>
+    again. <code>LFP</code> likewise reaches <code>curLFPdisr</code>, which the digit
+    clause had also withheld. The boundary test asserts each of these, and the four
+    refusals beside them (<code>calFP1</code>, <code>refcurEF1</code>, the two
+    cryogenic <code>DR</code> strings).
   </p>
 
   <h3 id="ssfms-description-corrections-census-heading">Description census, before and after re-enrichment</h3>
@@ -84,25 +131,34 @@
       <tr id="ssfms-description-corrections-c-efcc-correct"><td>EFC / EFCC (182)</td><td>error field correction coil</td><td>155</td><td>182</td></tr>
       <tr id="ssfms-description-corrections-c-efcc-wrong"><td>EFC / EFCC (182)</td><td>converter or "equilibrium field coil"</td><td>16</td><td>0</td></tr>
       <tr id="ssfms-description-corrections-c-efcc-unexp"><td>EFC / EFCC (182)</td><td>abbreviation used without expansion</td><td>11</td><td>0</td></tr>
-      <tr id="ssfms-description-corrections-c-snu-correct"><td>SNU (56)</td><td>switching network unit</td><td>8</td><td>42</td></tr>
-      <tr id="ssfms-description-corrections-c-snu-snubber"><td>SNU (56)</td><td>snubber</td><td>38</td><td>7</td></tr>
+      <tr id="ssfms-description-corrections-c-snu-correct"><td>SNU (56)</td><td>switching network unit</td><td>8</td><td>49</td></tr>
+      <tr id="ssfms-description-corrections-c-snu-snubber"><td>SNU (56)</td><td>snubber</td><td>38</td><td>0</td></tr>
       <tr id="ssfms-description-corrections-c-snu-scunit"><td>SNU (56)</td><td>superconducting unit</td><td>3</td><td>0</td></tr>
       <tr id="ssfms-description-corrections-c-snu-unexp"><td>SNU (56)</td><td>abbreviation used without expansion</td><td>7</td><td>7</td></tr>
     </tbody>
   </table>
 
-  <p id="ssfms-description-corrections-snu-residual">
-    <strong>Residual, one family.</strong> Seven CS1 signals —
-    <code>cs1_temsnur12, 13, 14, 211, 212, 221, 222</code> — still read "snubber (SNU)".
-    They are the pattern members of a single <code>SignalSource</code> whose
-    representative <code>cs1_temsnur11</code> now reads "switching network unit (SNU)";
-    the enrichment claim deliberately excludes a group member whose representative
-    differs, so the representative was re-enriched and these members were not, and the
-    individualisation pass the second run reported as "No sources to individualize" did
-    not refresh them. Their sibling CS2–CS4 and EF4 members were corrected because
-    their representatives were re-enriched and propagated. The remaining seven are a
-    member-propagation gap, not a glossary gap: no glossary line reached them
-    incorrectly. Reported under follow-ons.
+  <p id="ssfms-description-corrections-snu-member-propagation">
+    <strong>How the seven CS1 members were reached.</strong> Seven CS1 signals —
+    <code>cs1_temsnur12, 13, 14, 211, 212, 221, 222</code> — read "snubber (SNU)" while
+    their representative <code>cs1_temsnur11</code> read switching network unit, because
+    the member-propagation path bounded a <code>SignalSource</code> through its
+    representative's own <code>MEMBER_OF</code> edge. A representative may itself be a
+    member of a different source, and this one is, so the sweep and the propagation each
+    matched the wrong source or none. The path now locates a source by its
+    <code>representative_id</code>, and propagation clears
+    <code>members_described</code> so the post-enrichment individualisation pass is
+    re-armed rather than skipping a source it believes it has already described.
+    Resetting those seven members to <code>discovered</code> and re-running the focused
+    pass propagated the corrected description to all of them: the census now reads 49
+    switching network unit, 0 snubber, 0 superconducting unit.
+  </p>
+
+  <p id="ssfms-description-corrections-snu-unexpanded">
+    The seven descriptions that still use SNU without expanding it are the EF3
+    switching-network signals <code>ef3_temsnur11</code>–<code>ef3_temsnur22</code> and
+    <code>psc_crcs3snu</code>. None expands the abbreviation as anything else, so no
+    description in the family now reads SNU as anything but the switching network unit.
   </p>
 
   <p id="ssfms-description-corrections-efcc-note">
@@ -145,10 +201,12 @@
   <h3 id="ssfms-description-corrections-matcher-heading">The matcher and its tests</h3>
   <p id="ssfms-description-corrections-matcher-prose">
     <code>glossary_term_reaches(term, text)</code> accepts a match that begins a word —
-    at the start, after a non-alphanumeric, or at a lower-case-to-upper-case turn — and
-    does not run into a following lower-case run. The boundary test passes against it
-    and fails against the substring matcher: with the substring test restored, two tests
-    fail (<code>test_the_boundary_matcher_holds_a_term_to_whole_words</code>,
+    at the start, after a non-alphanumeric, at a term that begins a capitalised word
+    after a capital or a digit, or at a lower-case-to-upper-case turn — and does not run
+    into a following lower-case run unless the term is itself written as capitals. The
+    boundary test passes against it and fails against the substring matcher: with the
+    substring test restored, two tests fail
+    (<code>test_the_boundary_matcher_holds_a_term_to_whole_words</code>,
     <code>test_a_coil_abbreviation_reaches_its_own_signal_not_a_lookalike</code>) and the
     declared string holds — the substring test admits
     <code>EFC</code> reaching <code>refcurEF1</code>.
