@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T21:48:46.528Z",
+  "dispatched_at": "2026-10-12T21:42:21Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html#s4",
+      "id": "reasoning-1",
+      "reason": "since \u00a73 runs first, \u00a74's node must be pointed at `_rank_signals`, a one-word edit that prevents a stall or a mis-scoped edit against a function the plan has moved.",
+      "text": "\u00a74 lists \"`_search_signals`, `_search_docs` and `_search_code`\" as the three `search_tools.py` sites holding the rule `score * 0.7 + text_score * 0.3 + 0.1`, but \u00a73's own instruction (line 179) extracts the signal ranking out of `_search_signals` into \"a function that returns ordered signal ids\", and that function exists in the tree as `_rank_signals` (holding the rule at `imas_codex/llm/search_tools.py:261`, with `_search_signals` at :272 calling it at :314); \u00a74 never names the extracted function, so a node dispatched on \u00a74 finds no rule where the plan says one lives",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html#s4",
+      "id": "anchors_resolve-1",
+      "reason": "the prose names the mechanism (\"adds 0.05 to the larger score\"), so the site is found by its expression; only the line hint is stale, and the same drift affects \u00a71's cited lines (287/915/1667 against the tree's 261/936/1688); \u00a71 is out of scope.",
+      "text": "\u00a74 states the code-example stream \"today adds 0.05 to the larger score at line 1678\", but the expression `max(scores[cid], ex_score) + 0.05` is at `imas_codex/llm/search_tools.py:1699`; line 1678 is now the `# Step 1: Vector search on code chunks` comment",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "eae0a7aec3756bf9045102b51502d8939b0632c9b1080e9dcccc164ca6ce3084",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 19,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T214208296351-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "6649de36320bd6f6a9849d184dc6a04221bfe923",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a74 cites a source line that does not resolve.",
+    "done_when": "pass \u2014 \u00a73's done-when names the seeded random control (\"the random control scores below every arm on mean nDCG@10; a control that does not means the labels are wrong\") and shows the refusal firing on the unlabelled fixture; \u00a74's names the frozen additive-rule arm as the comparator and \"The old rule must fail the same test\" as its unit-level control.",
+    "evidence_paths": "pass \u2014 \u00a73's evidence lands on the durable repo path `docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html` and \u00a74's comparators are the committed `docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html` and the reports-tree prototype, none under a session scratchpad.",
+    "naming": "pass \u2014 \u00a73 and \u00a74 name files and functions by capability (`fusion.py`, `_rank_signals`, `signal_search_questions.json`); no plan label, stage name, ticket number or version tag reaches them, and the comments state mechanism.",
+    "reasoning": "a finding \u2014 \u00a74's site list for the signal-side replacement names a function that \u00a73 (same change set) has already emptied of the rule.",
+    "single_goal": "pass \u2014 \u00a73 now reads \"The section is three nodes\" and enumerates three (held-out questions; harness + draft questions; pool/label/run), each with one deliverable; \u00a74 carries one deliverable (move one fusion to one owner and route four callers through it).",
+    "wiring": "pass \u2014 \u00a73 is depended on by \u00a74/\u00a75 and the followup body (`f-ssfms-001`) orders \u00a73\u2192{\u00a74,\u00a75}, \u00a76 after \u00a75, \u00a77 after \u00a74, \u00a78 on its decision, \u00a79/\u00a710 independent, \u00a711 after a JET re-extraction; every relationship it declares points at the node named."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "678697cd4ae9726258304fb4f6cd0fa2b12cb6b3f19b3b34a052fffb3c46c8fc",
+    "s4": "2eb5cc6bcab7e711b4a256b25a419c8e1b9b8656b9d7513f9f839df377ebdc98",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:54:21.910757+00:00"
+}
