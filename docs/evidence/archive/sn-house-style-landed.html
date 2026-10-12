@@ -40,6 +40,11 @@
     <p>Both halves have landed. The documentation prompts render one include, <code>imas_codex/llm/prompts/sn/_conventions.md</code>, from the registry entries selected for the item (built in <code>imas_codex/standard_names/context.py</code> from <code>select_conventions</code>), at the generate, refine and pool-review render sites in <code>workers.py</code> and the pipeline review in <code>review/pipeline.py</code>. The free-text advice on symbols, equation forms and openings that the registry now decides is removed, with each passage listed in the worker record. A flux-surface-averaged name renders the canonical equation and no unrelated entry, and removing the include turns its test red. Gate: 113 passed against 104, no failures. Merge <code>7977270a4</code>, review 111/120. The review half (audit findings in the review prompts and the error-finding score cap) merged earlier as <code>7d9fd765b</code>, review 105/120. Follow-ons are sectioned as §8 (the render-site wiring is unasserted) and §9 (the cap's record).</p><p>Worker records: <a href="/imas-codex/evidence/fragments/sn-house-style/shs-registry-prompt-block">shs-registry-prompt-block</a>, <a href="/imas-codex/evidence/fragments/sn-house-style/shs-review-findings-cap">shs-review-findings-cap</a>.</p>
   </section>
 
+  <section id="s8">
+    <h2>§8 — the conventions block is guarded where it is wired</h2>
+    <p><code>tests/standard_names/test_conventions_wiring.py</code> drives each documentation render site (<code>process_generate_docs_batch</code>, <code>prepare_docs_review_request</code> and <code>process_refine_docs_batch</code> in <code>workers.py</code>, and <code>_review_single_batch</code> in <code>review/pipeline.py</code>) with <code>render_prompt</code> stubbed. Each test asserts that the context carries the conventions selected for the item, and each fails with <code>KeyError: 'conventions'</code> when its site's key is removed (4 of 4 controls red). Merge <code>c2d5c8417</code>. Independent review 111/120, no findings. Its broad gate of 113 files showed 2,003 passed against 1,999, with the same seven failures at base and head; §10 takes up six of them.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-house-style/shs-conventions-wiring">shs-conventions-wiring</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>
