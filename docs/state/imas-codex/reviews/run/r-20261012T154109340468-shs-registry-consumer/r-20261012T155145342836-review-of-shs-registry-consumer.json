@@ -1,0 +1,46 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T15:57:18.787Z",
+  "dispatched_at": "2026-10-12T15:51:56Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read commit by commit against 4d3762c8a65eed5c75ca73df9a8ae3a8194f8d42; the single commit 4c83ff424 adds the 84-line test file and the 25-line evidence fragment.",
+    "done_when": "the done-when asks that the test receives exactly the flux-surface-average concept, plasma-boundary entry, density notation and density template and fails against a scratch registry with the concept removed; the positive assertion is at test_conventions_registry.py:73, the scratch reduction is at :80, and the failure is shown in negative-control.log (EXIT=1).",
+    "goal": "the goal is to prove imas-codex selects the right conventions entries through the ISN accessor; tests/standard_names/test_conventions_registry.py:69 exercises select_conventions for the argon boundary name and asserts concepts, notation and templates by key.",
+    "manifest": "read; it records status complete, commit 4c83ff424, the gate command with 20 passed, baseline_suite and after_suite with completed true and 0 failures, and negative_control_log.",
+    "write_paths": "declared paths are the test file, the evidence fragment and docs/figures/sn-house-style/shs-registry-consumer; the diff touches the first two and nothing else."
+  },
+  "justifications": {
+    "durability": "the positive assertion at tests/standard_names/test_conventions_registry.py:73 compares against the module literal EXPECTED_KEYS (not a value passed in), and the scratch test at :80 fails if select_conventions ignores its registry= argument, so both guard a real regression.",
+    "evidence": "the done-when's two halves are recorded: final-gate.log shows 20 passed / EXIT=0 and negative-control.log shows EXIT=1 with the mutation red on concepts, and baseline-gate.log (test_grammar_query.py) is the measured base arm.",
+    "fit": "the helpers _entry_keys/_conventions_source/_registry_without_concept at tests/standard_names/test_conventions_registry.py:27-65 carry no plan, sprint or ticket label and follow the surrounding module's private-helper idiom.",
+    "goal_fidelity": "tests/standard_names/test_conventions_registry.py:69 calls select_conventions(NAME) for flux_surface_averaged_argon_density_at_plasma_boundary and asserts the four entries by key, proving imas-codex selects the right registry entries through the ISN accessor.",
+    "reuse": "no imas-codex owner of a conventions-registry reader exists; a search over imas_codex/ and tests/standard_names found none, and the helpers extend the ISN loader's own load_conventions(directory=...) argument rather than duplicating it.",
+    "scope_discipline": "the diff against 4d3762c8 touches only tests/standard_names/test_conventions_registry.py and docs/evidence/fragments/sn-house-style/shs-registry-consumer.html, both inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to prove imas-codex selects the right conventions entries through the ISN accessor; tests/standard_names/test_conventions_registry.py:69 exercises select_conventions for the argon boundary name and asserts concepts, notation and templates by key.\nVERDICT done_when: the done-when asks that the test receives exactly the flux-surface-average concept, plasma-boundary entry, density notation and density template and fails against a scratch registry with the concept removed; the positive assertion is at test_conventions_registry.py:73, the scratch reduction is at :80, and the failure is shown in negative-control.log (EXIT=1).\nVERDICT write_paths: declared paths are the test file, the evidence fragment and docs/figures/sn-house-style/shs-registry-consumer; the diff touches the first two and nothing else.\nVERDICT manifest: read; it records status complete, commit 4c83ff424, the gate command with 20 passed, baseline_suite and after_suite with completed true and 0 failures, and negative_control_log.\nVERDICT diff: read commit by commit against 4d3762c8a65eed5c75ca73df9a8ae3a8194f8d42; the single commit 4c83ff424 adds the 84-line test file and the 25-line evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_conventions_registry.py:69 calls select_conventions(NAME) for flux_surface_averaged_argon_density_at_plasma_boundary and asserts the four entries by key, proving imas-codex selects the right registry entries through the ISN accessor.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done-when's two halves are recorded: final-gate.log shows 20 passed / EXIT=0 and negative-control.log shows EXIT=1 with the mutation red on concepts, and baseline-gate.log (test_grammar_query.py) is the measured base arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff against 4d3762c8 touches only tests/standard_names/test_conventions_registry.py and docs/evidence/fragments/sn-house-style/shs-registry-consumer.html, both inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: the positive assertion at tests/standard_names/test_conventions_registry.py:73 compares against the module literal EXPECTED_KEYS (not a value passed in), and the scratch test at :80 fails if select_conventions ignores its registry= argument, so both guard a real regression.\nSCORE fit: 18\nJUSTIFICATION fit: the helpers _entry_keys/_conventions_source/_registry_without_concept at tests/standard_names/test_conventions_registry.py:27-65 carry no plan, sprint or ticket label and follow the surrounding module's private-helper idiom.\nSCORE reuse: 19\nJUSTIFICATION reuse: no imas-codex owner of a conventions-registry reader exists; a search over imas_codex/ and tests/standard_names found none, and the helpers extend the ISN loader's own load_conventions(directory=...) argument rather than duplicating it.\n",
+  "review_run_id": "r-20261012T155145342836-review-of-shs-registry-consumer",
+  "reviewed_base_sha": "4d3762c8a65eed5c75ca73df9a8ae3a8194f8d42",
+  "reviewed_head_sha": "4c83ff4241a80b4269329de87e0b1eb299dd591b",
+  "reviewed_run_id": "r-20261012T154109340468-shs-registry-consumer",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:57:40.000000+00:00",
+  "total": 112
+}
