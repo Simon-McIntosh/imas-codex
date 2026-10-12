@@ -1,0 +1,80 @@
+<section>
+  <h2 id="shc-live-apply">The live apply over the boundary-averaged density family is refused by the recommended-name guard</h2>
+  <p id="shc-live-apply-scope">
+    Runs the read-only report and the anchor-gated apply of
+    <code>sn harmonize</code> over the 17-member boundary-averaged density
+    family on the live graph (&#167;3 of this plan). The apply is refused by the
+    recommended-name guard, so the after state, the acceptance of every member,
+    and the second-apply zero-calls check could not be produced. The node stops
+    at the refusal and does not pass <code>--force</code>, per its brief.
+  </p>
+
+  <h3 id="shc-live-apply-before">Before state</h3>
+  <p id="shc-live-apply-before-text">
+    <code>sn harmonize --report --family
+    flux_surface_averaged_argon_density_at_plasma_boundary</code> resolves one
+    family, <code>density</code>, with 17 members and anchor
+    <code>flux_surface_averaged_iron_density_at_plasma_boundary</code>. All 17
+    members stand at <code>name_stage=accepted</code>; each carries its own
+    documentation opening and its own flux-surface-average equation.
+  </p>
+  <table id="shc-live-apply-before-table">
+    <caption>Family <code>density</code> before the apply (17 members)</caption>
+    <thead>
+      <tr><th>Measure</th><th>Before</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Members</td><td>17</td></tr>
+      <tr><td>Anchor</td><td><code>flux_surface_averaged_iron_density_at_plasma_boundary</code></td></tr>
+      <tr><td>Description drift</td><td>0.5294</td></tr>
+      <tr><td>Lint findings, total</td><td>62</td></tr>
+      <tr><td>&nbsp;&nbsp;<code>convention_violation</code></td><td>34</td></tr>
+      <tr><td>&nbsp;&nbsp;<code>link_dead_link</code></td><td>9</td></tr>
+      <tr><td>&nbsp;&nbsp;<code>link_missing_reverse</code></td><td>19</td></tr>
+      <tr><td>Distinct documentation openings</td><td>17</td></tr>
+      <tr><td>Distinct flux-surface-average equation forms</td><td>17</td></tr>
+      <tr><td><code>name_stage=accepted</code></td><td>17 of 17</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-live-apply-dryrun">The dry run plans the apply and does not run the guard</h3>
+  <p id="shc-live-apply-dryrun-text">
+    <code>sn harmonize --family &hellip; --apply --dry-run</code> returns
+    <code>decision=apply anchor=flux_surface_averaged_iron_density_at_plasma_boundary
+    members=17 calls=17</code>, an estimated cost of $0.85, and writes nothing.
+    A dry run returns before <code>apply_families</code> is entered, and the
+    recommended-name guard lives inside <code>apply_families</code>, so a dry
+    run cannot surface a refusal: its <code>decision=apply</code> is not a
+    commitment that the real apply will proceed.
+  </p>
+
+  <h3 id="shc-live-apply-refusal">The guard refuses one committed member</h3>
+  <p id="shc-live-apply-refusal-text">
+    <code>sn harmonize --family &hellip; --apply --cost-limit 5</code> exits 1
+    with:
+  </p>
+  <pre id="shc-live-apply-refusal-output">Error: Refused harmonize apply for names recommended into a catalog pull request: flux_surface_averaged_electron_density_at_plasma_boundary (candidate_request=https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3)</pre>
+  <p id="shc-live-apply-protection-text">
+    <code>refuse_recommended_members</code> runs before any family is marked
+    (<code>imas_codex/standard_names/harmonize.py</code>: the guard precedes the
+    batch loop), so no member was reset and no <code>DocsRevision</code>
+    snapshot was taken. A direct call to
+    <code>recommended_name_protections</code> over all 17 members returns
+    exactly one protected name &#8212; the electron member above &#8212; because
+    it is a member of the frozen roster
+    <code>v0.3.0rc1+west-task-2e.sn_names.yaml</code> (<code>pr_number: 3</code>).
+    The other 16 members carry no protection.
+  </p>
+
+  <h3 id="shc-live-apply-outcome">Outcome</h3>
+  <p id="shc-live-apply-outcome-text">
+    No apply ran and no after state exists. The node is blocked: the coordinator
+    must decide whether to open <code>--force &lt;reason&gt;</code> (which would
+    rewrite text on a name a physicist is reviewing, and is forbidden by this
+    node's brief) or to wait until
+    <a href="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3">catalog PR #3</a>
+    merges or closes. Every count above is recorded from the live graph;
+    the report, measurement, dry run and refusal logs are held under the run
+    directory.
+  </p>
+</section>
