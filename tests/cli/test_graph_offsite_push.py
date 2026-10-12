@@ -82,7 +82,7 @@ def test_schedule_dry_run_prints_login_node_units(monkeypatch, tmp_path):
     assert "ConditionHost=login.example.org" in result.output
     assert "imas-codex graph push --cycle" in result.output
     assert "[DRY RUN] systemd user timer:" in result.output
-    assert "OnCalendar=weekly" in result.output
+    assert "OnCalendar=daily" in result.output
     assert "No files were written and systemctl was not called" in result.output
 
 

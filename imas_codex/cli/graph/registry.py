@@ -277,12 +277,16 @@ ExecStart={uv_path} run --no-sync --project {project_dir} imas-codex graph push 
 
 
 def _push_schedule_timer_text() -> str:
-    """Build the persistent weekly timer for verified offsite pushes."""
+    """Build the persistent daily timer for verified offsite pushes.
+
+    The cycle itself decides whether a push is due (a week after the newest
+    offsite copy) and holds a due push until a day with no live graph work.
+    """
     return f"""[Unit]
-Description=Weekly IMAS Codex verified full-graph offsite push
+Description=Daily IMAS Codex verified full-graph offsite push check
 
 [Timer]
-OnCalendar=weekly
+OnCalendar=daily
 Persistent=true
 Unit={_PUSH_SERVICE_NAME}.service
 
@@ -310,7 +314,7 @@ def _manage_push_schedule(action: str, *, dry_run: bool = False) -> None:
         oras_path = shutil.which("oras")
         if not oras_path:
             raise click.ClickException(
-                "oras not found; cannot install the weekly graph push service"
+                "oras not found; cannot install the graph push service"
             )
         service_text = _push_schedule_service_text(
             project_dir,
@@ -335,14 +339,14 @@ def _manage_push_schedule(action: str, *, dry_run: bool = False) -> None:
             [systemctl, "--user", "enable", "--now", _PUSH_TIMER_NAME],
             check=True,
         )
-        click.echo("Weekly login-node graph push timer installed and enabled")
+        click.echo("Login-node graph push timer installed and enabled")
         click.echo(f"  Service: {service_file}")
         click.echo(f"  Timer:   {timer_file}")
         return
 
     if action == "status":
         if not service_file.exists() or not timer_file.exists():
-            click.echo("Weekly login-node graph push timer is not installed")
+            click.echo("Login-node graph push timer is not installed")
             return
         result = subprocess.run(
             [systemctl, "--user", "status", _PUSH_TIMER_NAME],
@@ -356,7 +360,7 @@ def _manage_push_schedule(action: str, *, dry_run: bool = False) -> None:
 
     if action == "remove":
         if not service_file.exists() and not timer_file.exists():
-            click.echo("Weekly login-node graph push timer is not installed")
+            click.echo("Login-node graph push timer is not installed")
             return
         subprocess.run(
             [systemctl, "--user", "disable", "--now", _PUSH_TIMER_NAME],
@@ -369,7 +373,7 @@ def _manage_push_schedule(action: str, *, dry_run: bool = False) -> None:
         service_file.unlink(missing_ok=True)
         timer_file.unlink(missing_ok=True)
         subprocess.run([systemctl, "--user", "daemon-reload"], check=True)
-        click.echo("Weekly login-node graph push timer removed")
+        click.echo("Login-node graph push timer removed")
         return
 
     raise ValueError(f"Unknown graph push schedule action: {action}")
@@ -524,6 +528,16 @@ def _run_offsite_cycle(
 
     if result.outcome == "no_op":
         click.echo(f"No-op receipt: {result.receipt_path}")
+    elif result.outcome == "not_due":
+        click.echo(
+            f"Not due: the newest offsite copy is under a week old; "
+            f"receipt: {result.receipt_path}"
+        )
+    elif result.outcome == "deferred":
+        click.echo(
+            f"Deferred: other clients are working on the graph; the "
+            f"timer retries tomorrow; receipt: {result.receipt_path}"
+        )
     else:
         click.echo(f"Pushed: {result.archive_ref}")
         click.echo(
@@ -540,17 +554,17 @@ def _run_offsite_cycle(
 @click.option(
     "--schedule",
     is_flag=True,
-    help="Install the weekly login-node push timer.",
+    help="Install the daily login-node push timer (pushes weekly when the graph is idle).",
 )
 @click.option(
     "--schedule-status",
     is_flag=True,
-    help="Show the weekly login-node push timer status.",
+    help="Show the login-node push timer status.",
 )
 @click.option(
     "--remove-schedule",
     is_flag=True,
-    help="Remove the weekly login-node push timer.",
+    help="Remove the login-node push timer.",
 )
 @click.option(
     "--cycle",

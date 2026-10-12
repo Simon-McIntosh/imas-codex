@@ -55,7 +55,7 @@ def test_push_help_documents_login_node_schedule() -> None:
 
     assert result.exit_code == 0
     assert "--schedule" in result.output
-    assert "Install the weekly login-node push timer." in result.output
+    assert "Install the daily login-node push timer" in result.output
     assert "--cycle" in result.output
     assert "Run one verified full-graph push cycle." in result.output
 
@@ -77,7 +77,7 @@ def test_generated_service_and_timer_run_weekly_on_login_node() -> None:
         "ExecStart=/usr/bin/uv run --no-sync --project /srv/imas-codex "
         "imas-codex graph push --cycle"
     ) in service
-    assert "OnCalendar=weekly" in timer
+    assert "OnCalendar=daily" in timer
     assert "Persistent=true" in timer
     assert "Unit=imas-codex-graph-push.service" in timer
     assert "sbatch" not in service + timer
@@ -95,7 +95,7 @@ def test_schedule_dry_run_prints_units_without_writing_or_systemctl(
     assert "ConditionHost=login.example.org" in result.output
     assert "imas-codex graph push --cycle" in result.output
     assert "[DRY RUN] systemd user timer:" in result.output
-    assert "OnCalendar=weekly" in result.output
+    assert "OnCalendar=daily" in result.output
     assert "systemctl was not called" in result.output
     assert not service_file.exists()
     assert not timer_file.exists()
@@ -111,7 +111,7 @@ def test_schedule_install_writes_and_enables_timer(monkeypatch, tmp_path) -> Non
     assert service_file.exists()
     assert timer_file.exists()
     assert "imas-codex graph push --cycle" in service_file.read_text()
-    assert "OnCalendar=weekly" in timer_file.read_text()
+    assert "OnCalendar=daily" in timer_file.read_text()
     assert calls == [
         ["/usr/bin/systemctl", "--user", "daemon-reload"],
         [
@@ -137,7 +137,7 @@ def test_schedule_install_refuses_without_oras(monkeypatch, tmp_path) -> None:
 
     assert result.exit_code != 0
     assert (
-        "oras not found; cannot install the weekly graph push service" in result.output
+        "oras not found; cannot install the graph push service" in result.output
     )
     assert not service_file.exists()
     assert not timer_file.exists()

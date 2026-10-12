@@ -15,6 +15,13 @@ from imas_codex.graph.dirs import DATA_BASE_DIR
 from imas_codex.graph.neo4j_ops import OffsiteCurrency, graph_archive_stamp
 
 OFFSITE_RECEIPTS_DIR = DATA_BASE_DIR / "offsite-push" / "receipts"
+PUSH_INTERVAL_SECONDS = 7 * 86_400.0
+ACTIVITY_WINDOW_SECONDS = 600.0
+ACTIVITY_INTERVAL_SECONDS = 60.0
+_ACTIVITY_PROBE = (
+    "SHOW TRANSACTIONS YIELD transactionId, currentQuery "
+    "RETURN transactionId, currentQuery"
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,10 +57,29 @@ class GraphCensus:
 
 
 @dataclass(frozen=True, slots=True)
+class GraphActivity:
+    """Work other clients ran on the graph during one observation window.
+
+    Transaction ids are one sequence across every session, so the gap
+    between the first and last probe counts the transactions anyone else
+    started in between, reads included; ``open_queries`` holds the other
+    transactions seen running at any probe.
+    """
+
+    window_seconds: float
+    transactions_started: int
+    open_queries: list[str]
+
+    @property
+    def busy(self) -> bool:
+        return self.transactions_started > 0 or bool(self.open_queries)
+
+
+@dataclass(frozen=True, slots=True)
 class OffsitePushResult:
     """Outcome and durable receipt path for one scheduled cycle."""
 
-    outcome: Literal["no_op", "pushed", "refused", "failed"]
+    outcome: Literal["no_op", "not_due", "deferred", "pushed", "refused", "failed"]
     receipt_path: Path
     archive_ref: str | None
     archive_bytes: int
@@ -99,6 +125,44 @@ def live_graph_census() -> GraphCensus:
     ).normalized()
 
 
+def live_graph_activity(
+    window_seconds: float = ACTIVITY_WINDOW_SECONDS,
+    interval_seconds: float = ACTIVITY_INTERVAL_SECONDS,
+    sleep: Callable[[float], None] = time.sleep,
+) -> GraphActivity:
+    """Watch the graph for other clients' transactions over one window.
+
+    Every probe runs in the same session and is itself one transaction, so
+    probes are subtracted from the id gap; an idle graph measures zero.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    probes = max(2, int(window_seconds // interval_seconds) + 1)
+    first_id = last_id = 0
+    open_queries: list[str] = []
+    with GraphClient() as graph:
+        for probe in range(probes):
+            if probe:
+                sleep(interval_seconds)
+            own_id = None
+            for row in graph.query(_ACTIVITY_PROBE):
+                query = row["currentQuery"] or ""
+                if query.startswith("SHOW TRANSACTIONS"):
+                    own_id = int(str(row["transactionId"]).rsplit("-", 1)[1])
+                elif query.strip():
+                    open_queries.append(query.strip()[:120])
+            if own_id is None:
+                raise RuntimeError("SHOW TRANSACTIONS did not list its own probe")
+            if probe == 0:
+                first_id = own_id
+            last_id = own_id
+    return GraphActivity(
+        window_seconds=(probes - 1) * interval_seconds,
+        transactions_started=max(0, last_id - first_id - (probes - 1)),
+        open_queries=open_queries,
+    )
+
+
 def read_archive_manifest(archive_path: Path) -> dict[str, Any]:
     """Read the single manifest adjacent to the dump in a graph archive."""
     with tarfile.open(archive_path, "r:gz") as archive:
@@ -132,6 +196,7 @@ def _receipt_payload(
     live_census: GraphCensus | None,
     archive_census: GraphCensus | None,
     error: str | None = None,
+    activity: GraphActivity | None = None,
 ) -> dict[str, Any]:
     return {
         "schema": "imas-codex.offsite-push-receipt",
@@ -167,7 +232,39 @@ def _receipt_payload(
             else None
         ),
         "error": error,
+        "activity": ({**asdict(activity), "busy": activity.busy} if activity else None),
     }
+
+
+def _held_cycle(
+    outcome: Literal["not_due", "deferred"],
+    stamp: str,
+    started_at: datetime,
+    started: float,
+    currency: OffsiteCurrency,
+    receipt_dir: Path,
+    clock: Callable[[], datetime],
+    monotonic: Callable[[], float],
+    observed: GraphActivity | None,
+) -> OffsitePushResult:
+    """Write the receipt of a cycle that left the graph running."""
+    elapsed = monotonic() - started
+    payload = _receipt_payload(
+        outcome=outcome,
+        stamp=stamp,
+        started_at=started_at,
+        completed_at=clock(),
+        wall_time_seconds=elapsed,
+        archive_ref=currency.offsite_ref,
+        archive_path=None,
+        archive_bytes=0,
+        currency=currency,
+        live_census=None,
+        archive_census=None,
+        activity=observed,
+    )
+    receipt = _write_receipt(receipt_dir, stamp, payload)
+    return OffsitePushResult(outcome, receipt, currency.offsite_ref, 0, elapsed)
 
 
 def _write_receipt(
@@ -189,11 +286,20 @@ def run_offsite_push_cycle(
     export_archive: Callable[[str], Path],
     push_archive: Callable[[Path, str], str],
     census: Callable[[], GraphCensus] = live_graph_census,
+    activity: Callable[[], GraphActivity] = live_graph_activity,
+    push_interval_seconds: float = PUSH_INTERVAL_SECONDS,
     receipt_dir: Path = OFFSITE_RECEIPTS_DIR,
     now: Callable[[], datetime] | None = None,
     monotonic: Callable[[], float] = time.monotonic,
 ) -> OffsitePushResult:
-    """Run one no-op-or-push cycle and write its acceptance receipt."""
+    """Run one no-op, not-due, deferred or push cycle and write its receipt.
+
+    The timer fires daily. A push falls due once the newest offsite copy is
+    ``push_interval_seconds`` old, and a due push waits for a day on which
+    no other client is working on the graph: exporting stops the database,
+    and writes landing between the census and the stop make the archive
+    disagree with the census, so a busy graph could never pass anyway.
+    """
     clock = now or (lambda: datetime.now(UTC))
     started_at = clock()
     started = monotonic()
@@ -217,6 +323,38 @@ def run_offsite_push_cycle(
         )
         receipt = _write_receipt(receipt_dir, stamp, payload)
         return OffsitePushResult("no_op", receipt, currency.offsite_ref, 0, elapsed)
+
+    offsite_age = (
+        (started_at - currency.offsite_modified_at).total_seconds()
+        if currency.offsite_modified_at
+        else None
+    )
+    if offsite_age is not None and offsite_age < push_interval_seconds:
+        return _held_cycle(
+            "not_due",
+            stamp,
+            started_at,
+            started,
+            currency,
+            receipt_dir,
+            clock,
+            monotonic,
+            None,
+        )
+
+    observed = activity()
+    if observed.busy:
+        return _held_cycle(
+            "deferred",
+            stamp,
+            started_at,
+            started,
+            currency,
+            receipt_dir,
+            clock,
+            monotonic,
+            observed,
+        )
 
     live_census = census().normalized()
     archive_path = export_archive(stamp)
