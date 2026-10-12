@@ -1,0 +1,101 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs, not by re-running: base_gate.log (revision caf9ab6d6) '61 passed', EXIT=0, no FAILED/ERROR ids; head_gate.log (revision f2b9d9ee2) '74 passed', EXIT=0, no FAILED/ERROR ids. Head-minus-base failure ids is therefore empty and the count is 0. The base log's recorded command names tests/discovery/test_evaluation.py, absent at that revision - see finding at base_gate.log:3.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sje-evaluation-module uv run pytest -p no:cacheprovider tests/discovery/test_path_category_gate.py tests/test_bench_discrimination.py tests/discovery/test_judgment.py tests/standard_names/test_benchmark_roles.py tests/discovery/test_evaluation.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T144956062346-sje-evaluation-module/head_gate.log",
+    "revision": "f2b9d9ee2e77922cd107952e8f51a2602519218d"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sje-evaluation-module uv run pytest -p no:cacheprovider tests/discovery/test_path_category_gate.py tests/test_bench_discrimination.py tests/standard_names/test_benchmark_roles.py tests/discovery/test_judgment.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T144956062346-sje-evaluation-module/base_gate.log",
+    "revision": "caf9ab6d61dac0faeb9c3806e2d2fd63e0c89c87"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/standard_names/benchmark_roles.py:1286 (the reviewer-discrimination bench _score path that consumes discrimination_metrics, now backed by imas_codex/discovery/base/evaluation.py::roc_auc); the module's remaining functions have no production call site yet - only tests import them"
+  ],
+  "completed_at": "2026-10-12T16:39:34.698Z",
+  "dispatched_at": "2026-10-12T16:23:40Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T144956062346-sje-evaluation-module/base_gate.log",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "the recorded base-arm command names tests/discovery/test_evaluation.py, which does not exist at the base revision caf9ab6d6, yet the log records '61 passed ... EXIT=0'; pytest exits 4 on an absent path argument, so the header cannot be the literal command that produced that output. The 61->74 delta is still sound (13 = the new file's tests), but the manifest's baseline_suite.command over-states the base arm's file set and is not reproducible as written."
+    },
+    {
+      "file": "tests/discovery/test_evaluation.py",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "test_interval_contains_its_point_estimate asserts out['point'] == ev.roc_auc(labels, scores), the bootstrap's internal point estimate against a direct call of the same function on the same inputs the test passed in; both sides are the code under test, so a roc_auc regression moves them together and the assertion stays green. It is a wiring check for bootstrap_interval only; the independent known answers live in TestRocAuc."
+    },
+    {
+      "file": "tests/discovery/test_evaluation.py",
+      "line": "71",
+      "severity": "follow-on",
+      "text": "assert out['difference'] == out['auc_a'] - out['auc_b'] reads paired_auc's own returned dict on both sides, so it holds for any implementation that computes the difference from its own two calls; it guards the sign, not the pairing. A known-answer control (arm B = arm A reversed therefore difference 1.0) would fail on a real regression."
+    },
+    {
+      "file": "imas_codex/discovery/base/evaluation.py",
+      "line": "144",
+      "severity": "follow-on",
+      "text": "no test passes copy_groups= to bootstrap_interval and none passes scores_b, so the module's two unique capabilities - copy-group-aware resampling and the paired-difference interval - are unguarded; a regression that ignored copy_groups and treated every observation as its own group passes the whole new suite, as does one that dropped the scores_b branch."
+    },
+    {
+      "file": "imas_codex/discovery/base/evaluation.py",
+      "line": "350",
+      "severity": "follow-on",
+      "text": "the docstring pins a model version ('jev-1.13 is documented to lean to the first option'). The repository's naming rules bar version identifiers in source comments and docstrings, because the sentence rots on the next model bump; stating the mechanism ('a judge that leans to the first option') carries the rationale without the pin."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read commit f2b9d9ee2 against base caf9ab6d6; five files, +600/-8: the new 390-line module, the fold at benchmark_roles.py:1229 replacing the hand-rolled loop with the module's roc_auc, two test edits and the evidence fragment.",
+    "done_when": "the done_when names known-answer tests in tests/discovery/test_evaluation.py, the positive control in tests/discovery/test_path_category_gate.py and value-equivalence of discrimination_metrics; the manifest records the five-file gate at 74 passed over a 61-passing base, and negative_control_stub.log shows 10 known-answer ids red at EXIT=1.",
+    "goal": "the node goal is a shared, dependency-free evaluation module beside the judge core with the fixture contract fixed and the AUC folded onto one owner; imas_codex/discovery/base/evaluation.py:1 defines every function the brief names (load_labelled_fixture, paired_auc, bootstrap_interval, classification_metrics, choose_operating_point, frozen_state_variation, option_order_stability, cost_latency_summary) over sklearn primitives.",
+    "manifest": "read at the run directory; it records commits f2b9d9ee2, status complete, gate 74 passed (base 61), the positive-control interval [0.8869, 0.9603] seed 123, and both arm commands - though its baseline_suite.command names a test file absent at base (finding 1).",
+    "write_paths": "the declared scope is imas_codex/discovery/base/evaluation.py, imas_codex/standard_names/benchmark_roles.py, tests/discovery/test_evaluation.py, tests/discovery/test_path_category_gate.py and the evidence fragment; every path in the diff is one of them and judgment.py/scorer.py are untouched."
+  },
+  "justifications": {
+    "durability": "the declared stub mutation reddens 10 known-answer ids (negative_control_stub.log, EXIT=1), but two added assertions are self-referential (tests/discovery/test_evaluation.py:57 and :71) and no test exercises copy_groups or the scores_b branch of bootstrap_interval (imas_codex/discovery/base/evaluation.py:144).",
+    "evidence": "the gate over tests/discovery/test_evaluation.py, test_path_category_gate.py, test_bench_discrimination.py, test_benchmark_roles.py and test_judgment.py is logged at 74 passed over a 61-passing base, but the base arm's recorded command names a file absent at that revision (FINDING base_gate.log:3) and the fold's 2000-case equivalence is claimed with no log.",
+    "fit": "the module follows the dependency-free style of imas_codex/discovery/base/judgment.py and names functions by mechanism, but imas_codex/discovery/base/evaluation.py:350 pins a model version in a docstring.",
+    "goal_fidelity": "every function the plan surface names is defined in imas_codex/discovery/base/evaluation.py and the fold at imas_codex/standard_names/benchmark_roles.py:1229 replaces the pairwise loop with the module's roc_auc.",
+    "reuse": "a search over imas_codex for an existing roc_auc, bootstrap/percentile-resample or fixture-loader owner found none, and the fold makes imas_codex/standard_names/benchmark_roles.py:46 consume the new roc_auc owner rather than duplicate it.",
+    "scope_discipline": "every path in the diff (imas_codex/discovery/base/evaluation.py, imas_codex/standard_names/benchmark_roles.py, the two test files and the fragment) is inside the manifest's declared write paths, and judgment.py and scorer.py are untouched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is a shared, dependency-free evaluation module beside the judge core with the fixture contract fixed and the AUC folded onto one owner; imas_codex/discovery/base/evaluation.py:1 defines every function the brief names (load_labelled_fixture, paired_auc, bootstrap_interval, classification_metrics, choose_operating_point, frozen_state_variation, option_order_stability, cost_latency_summary) over sklearn primitives.\nVERDICT done_when: the done_when names known-answer tests in tests/discovery/test_evaluation.py, the positive control in tests/discovery/test_path_category_gate.py and value-equivalence of discrimination_metrics; the manifest records the five-file gate at 74 passed over a 61-passing base, and negative_control_stub.log shows 10 known-answer ids red at EXIT=1.\nVERDICT write_paths: the declared scope is imas_codex/discovery/base/evaluation.py, imas_codex/standard_names/benchmark_roles.py, tests/discovery/test_evaluation.py, tests/discovery/test_path_category_gate.py and the evidence fragment; every path in the diff is one of them and judgment.py/scorer.py are untouched.\nVERDICT manifest: read at the run directory; it records commits f2b9d9ee2, status complete, gate 74 passed (base 61), the positive-control interval [0.8869, 0.9603] seed 123, and both arm commands - though its baseline_suite.command names a test file absent at base (finding 1).\nVERDICT diff: read commit f2b9d9ee2 against base caf9ab6d6; five files, +600/-8: the new 390-line module, the fold at benchmark_roles.py:1229 replacing the hand-rolled loop with the module's roc_auc, two test edits and the evidence fragment.\nCALL_SITES: imas_codex/standard_names/benchmark_roles.py:1286\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every function the plan surface names is defined in imas_codex/discovery/base/evaluation.py and the fold at imas_codex/standard_names/benchmark_roles.py:1229 replaces the pairwise loop with the module's roc_auc.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate over tests/discovery/test_evaluation.py, test_path_category_gate.py, test_bench_discrimination.py, test_benchmark_roles.py and test_judgment.py is logged at 74 passed over a 61-passing base, but the base arm's recorded command names a file absent at that revision (FINDING base_gate.log:3) and the fold's 2000-case equivalence is claimed with no log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (imas_codex/discovery/base/evaluation.py, imas_codex/standard_names/benchmark_roles.py, the two test files and the fragment) is inside the manifest's declared write paths, and judgment.py and scorer.py are untouched.\nSCORE durability: 15\nJUSTIFICATION durability: the declared stub mutation reddens 10 known-answer ids (negative_control_stub.log, EXIT=1), but two added assertions are self-referential (tests/discovery/test_evaluation.py:57 and :71) and no test exercises copy_groups or the scores_b branch of bootstrap_interval (imas_codex/discovery/base/evaluation.py:144).\nSCORE fit: 17\nJUSTIFICATION fit: the module follows the dependency-free style of imas_codex/discovery/base/judgment.py and names functions by mechanism, but imas_codex/discovery/base/evaluation.py:350 pins a model version in a docstring.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search over imas_codex for an existing roc_auc, bootstrap/percentile-resample or fixture-loader owner found none, and the fold makes imas_codex/standard_names/benchmark_roles.py:46 consume the new roc_auc owner rather than duplicate it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T144956062346-sje-evaluation-module/base_gate.log:3 follow-on: the recorded base-arm command names tests/discovery/test_evaluation.py, which does not exist at the base revision caf9ab6d6, yet the log records '61 passed ... EXIT=0'; pytest exits 4 on an absent path argument, so the header cannot be the literal command that produced that output. The 61->74 delta is still sound (13 = the new file's tests), but the manifest's baseline_suite.command over-states the base arm's file set and is not reproducible as written.\nFINDING tests/discovery/test_evaluation.py:57 follow-on: test_interval_contains_its_point_estimate asserts out['point'] == ev.roc_auc(labels, scores), the bootstrap's internal point estimate against a direct call of the same function on the same inputs the test passed in; both sides are the code under test, so a roc_auc regression moves them together and the assertion stays green. It is a wiring check for bootstrap_interval only; the independent known answers live in TestRocAuc.\nFINDING tests/discovery/test_evaluation.py:71 follow-on: assert out['difference'] == out['auc_a'] - out['auc_b'] reads paired_auc's own returned dict on both sides, so it holds for any implementation that computes the difference from its own two calls; it guards the sign, not the pairing. A known-answer control (arm B = arm A reversed therefore difference 1.0) would fail on a real regression.\nFINDING imas_codex/discovery/base/evaluation.py:144 follow-on: no test passes copy_groups= to bootstrap_interval and none passes scores_b, so the module's two unique capabilities - copy-group-aware resampling and the paired-difference interval - are unguarded; a regression that ignored copy_groups and treated every observation as its own group passes the whole new suite, as does one that dropped the scores_b branch.\nFINDING imas_codex/discovery/base/evaluation.py:350 follow-on: the docstring pins a model version ('jev-1.13 is documented to lean to the first option'). The repository's naming rules bar version identifiers in source comments and docstrings, because the sentence rots on the next model bump; stating the mechanism ('a judge that leans to the first option') carries the rationale without the pin.",
+  "review_run_id": "r-20261012T162326624992-review-of-sje-evaluation-module",
+  "reviewed_base_sha": "caf9ab6d61dac0faeb9c3806e2d2fd63e0c89c87",
+  "reviewed_head_sha": "f2b9d9ee2e77922cd107952e8f51a2602519218d",
+  "reviewed_run_id": "r-20261012T144956062346-sje-evaluation-module",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T16:37:52.761627+00:00",
+  "total": 106,
+  "verdict": "SOUND WITH FINDINGS"
+}
