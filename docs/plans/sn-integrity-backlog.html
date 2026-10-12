@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -334,6 +334,9 @@
 </div>
 <div class="r-comment" data-section="s24" data-id="c-close-s24" data-who="reckon-build" data-when="2026-10-12T21:22:00Z">
     <div class="r-comment-body"><p>§24 landed: the seven export tests were red because their fixtures predated two intended refusals; the fixtures now carry producing-source evidence (merge <code>3743c2aa9</code>); review 109/120. The rest of the export set's red is §25, and the timeout-fragile release tests are §26. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s24">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s24" data-id="c-run-r-20261012T195617718658-sib-export-tests-red" data-who="reckon-build" data-when="2026-10-12T21:08:10.108Z">
+    <div class="r-comment-body"><p>Repaired three export fixtures that predated the producing-source predicate (b161235bb) and the manifest-generability refusal (e.g. e0c2d5ef3); the seven named export tests pass at head, and the 47-file export set adds no failure against base (head 24 failed / 428 passed against base 32 failed / 419 passed).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
