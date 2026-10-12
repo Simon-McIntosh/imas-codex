@@ -200,6 +200,19 @@ def test_composition_requires_an_explicit_current_origin():
         compose_archive_reconstruction_authority(_extraction(), origin=None)
 
 
+def test_composition_refuses_the_archived_origin_when_none_is_stated():
+    """An archive carrying its own origin cannot supply the current one.
+
+    The archived origin may predate a provenance repair, so a composer that
+    fell back to ``properties['origin']`` when none is stated would sign the
+    archive's stale archived provenance in as the current one.
+    """
+    with pytest.raises(click.UsageError, match="origin must be stated"):
+        compose_archive_reconstruction_authority(
+            _extraction(origin="catalog_edit"), origin=None
+        )
+
+
 def test_composition_refuses_an_unknown_origin():
     with pytest.raises(click.UsageError, match="unknown origin"):
         compose_archive_reconstruction_authority(_extraction(), origin="restored")

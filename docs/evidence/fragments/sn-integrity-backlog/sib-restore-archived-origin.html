@@ -1,0 +1,19 @@
+<section id="sib-restore-archived-origin">
+  <h2>Restore composer refuses an archive's own origin, archive carries one</h2>
+  <p>
+    A case composes an extraction whose properties carry <code>origin: catalog_edit</code>
+    with no stated origin and requires refusal. The composer already raises
+    <code>origin must be stated at compose time</code> when <code>origin is None</code>,
+    independent of the archived field, so the archive's stale provenance cannot be
+    signed in as the current one.
+  </p>
+  <ul>
+    <li id="sib-restore-archived-origin-baseline">Baseline <code>test_archive_reconstruction_entry_point.py</code> at <code>c51cf292f</code>: 21 passed.</li>
+    <li id="sib-restore-archived-origin-head">Head with the added case: 22 passed.</li>
+    <li id="sib-restore-archived-origin-nc">
+      Mutation (scratch copy): composer falls back to <code>properties['origin']</code>
+      when none is stated. New case fails, existing no-origin case passes —
+      <code>EXIT=1</code>, 1 failed, 1 passed.
+    </li>
+  </ul>
+</section>
