@@ -273,3 +273,71 @@ def test_facility_glossary_is_declared_and_loaded():
     assert config["signal_member_patterns"]["MMSYS"] == (
         r"^cur(?P<member>.+?)(?:TFLKAT|LKAT|HiTe)$"
     )
+
+
+def _normalized_statement(cypher: str) -> str:
+    """A statement with its whitespace collapsed, so a shape check reads plainly."""
+    return " ".join(cypher.split())
+
+
+def _issued_statements(call) -> list[str]:
+    """Run ``call`` against a recording graph and return the statements it issues."""
+    recorded: list[str] = []
+
+    class RecordingGraph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_exc):
+            return False
+
+        def query(self, cypher, **params):
+            recorded.append(_normalized_statement(cypher))
+            return [
+                {
+                    "cnt": 1,
+                    "updated": 1,
+                    "representative_id": "jt-60sa:general/cs1_temsnur11",
+                    "enrichment": {},
+                }
+            ]
+
+    with patch.object(parallel, "GraphClient", RecordingGraph):
+        call()
+    return recorded
+
+
+def test_propagation_binds_the_source_by_representative_id_alone():
+    """A group is located by its representative_id, never through a member edge.
+
+    Binding the source through the representative's own ``MEMBER_OF`` edge reaches
+    the wrong group whenever the representative is itself a member of another
+    source, and skips the group it represents altogether. Every statement the
+    propagation issues carries the bound-by-id match instead.
+    """
+    statements = _issued_statements(
+        lambda: parallel.propagate_source_enrichment(
+            "jt-60sa:general/cs1_temsnur11",
+            {"description": "Switching network unit (SNU)", "diagnostic": "magnetics"},
+        )
+    )
+
+    assert len(statements) == 4
+    for statement in statements:
+        assert "MATCH (sg:SignalSource {representative_id: $rep_id})" in statement
+        assert "(sg:SignalSource)" not in statement
+        assert "-[:MEMBER_OF]->(sg:SignalSource)" not in statement
+
+
+def test_the_sweep_reads_each_signal_source_by_its_representative_id():
+    """The sweep's own lookup names the representative id and no member edge."""
+    with patch.object(parallel, "propagate_source_enrichment", return_value=0):
+        statements = _issued_statements(
+            lambda: parallel.sweep_source_enrichment("jt-60sa")
+        )
+
+    assert len(statements) == 1
+    statement = statements[0]
+    assert "MATCH (rep:FacilitySignal {id: sg.representative_id})" in statement
+    assert "sg.representative_id})-[:MEMBER_OF]" not in statement
+    assert "-[:MEMBER_OF]->(sg:SignalSource)" not in statement

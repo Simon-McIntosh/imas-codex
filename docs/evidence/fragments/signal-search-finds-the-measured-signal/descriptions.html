@@ -218,8 +218,9 @@
     after a capital or a digit, or at a lower-case-to-upper-case turn — and does not run
     into a following lower-case run unless the term is itself written as capitals. The
     boundary test passes against it and fails against the substring matcher: with the
-    substring test restored, two tests fail
+    substring test restored, three tests fail
     (<code>test_the_boundary_matcher_holds_a_term_to_whole_words</code>,
+    <code>test_a_term_reaches_across_a_digit_to_letter_turn</code>,
     <code>test_a_coil_abbreviation_reaches_its_own_signal_not_a_lookalike</code>) and the
     declared string holds — the substring test admits
     <code>EFC</code> reaching <code>refcurEF1</code>.
