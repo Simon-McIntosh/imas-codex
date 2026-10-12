@@ -1,0 +1,98 @@
+<section>
+  <h2 id="shc-report-findings">The family report counts every lint finding</h2>
+  <p id="shc-report-findings-scope">
+    Closes the four review findings left open on the read-only report of
+    <code>sn harmonize</code> (§2 of this plan). Write paths:
+    <code>imas_codex/standard_names/harmonize.py</code>,
+    <code>imas_codex/standard_names/families.py</code>,
+    <code>tests/standard_names/test_harmonize_command.py</code>,
+    <code>docs/architecture/standard-names.md</code>.
+  </p>
+
+  <h3 id="shc-report-findings-domain">Domain-scoped findings reach the family rows</h3>
+  <p id="shc-report-findings-domain-text">
+    The lexical lint detects mixed position forms across a physics domain's
+    names and keys the finding on the synthetic id <code>[domain:&lt;d&gt;]</code>
+    (<code>review.audits.run_lexical_lint</code>), which matches no member id.
+    <code>report_family_rows</code> keyed every finding by
+    <code>finding.name_id</code>, so those findings were dropped from every
+    family row and from the scope total the plan judges later steps against.
+    The report now splits findings into member-scoped and domain-scoped and
+    attributes a domain-scoped finding by the domain its members carry.
+  </p>
+  <table id="shc-report-findings-rule">
+    <caption>The attribution and counting rule for a domain-scoped finding</caption>
+    <thead>
+      <tr><th>Where</th><th>Rule</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Family rows (<code>domain_lint</code>)</td>
+        <td>Attributed to every family in scope with at least one member whose
+          <code>physics_domain</code> resolves (via
+          <code>domain_key</code>) to the finding's domain — so a domain that
+          spans families shows in each of their rows.</td>
+      </tr>
+      <tr>
+        <td>Scope total (<code>lint</code>, <code>lint_total</code>)</td>
+        <td>Counted exactly once: at the first family in report order
+          (<code>-drift, -n, physical_base</code>) that belongs to the domain.
+          Summing the rows' <code>lint_total</code> is then the number of
+          distinct findings.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-report-findings-domain-cli">
+    The scope total the CLI prints is <code>sum(row["lint_total"])</code>, so
+    counting a shared finding in one owning row keeps that figure equal to the
+    distinct-finding count while every qualifying row still shows the finding
+    in <code>domain_lint</code>.
+  </p>
+
+  <h3 id="shc-report-findings-enumeration">Enumeration beside its owner</h3>
+  <p id="shc-report-findings-enumeration-text">
+    <code>fetch_pattern_families</code> and its query builders
+    (<code>_pattern_family_rows_query</code>, <code>_family_member_collect</code>)
+    moved from <code>harmonize.py</code> to <code>families.py</code>, beside the
+    family queries they are built on (<code>_PATTERN_FAMILY_MEMBERS_QUERY</code>,
+    <code>fetch_pattern_family</code>), and <code>harmonize.py</code> calls it.
+    <code>rg -n "def fetch_pattern_families" imas_codex/standard_names/</code>
+    now finds it only in <code>families.py</code>. The worklist test compares
+    the query <code>build_worklist</code> issues against the shared one, so
+    <code>harmonize.py</code> re-exports <code>_pattern_family_rows_query</code>
+    rather than redefining it.
+  </p>
+
+  <h3 id="shc-report-findings-assertions">Assertions that bite</h3>
+  <p id="shc-report-findings-assertions-text">
+    The member-set and count assertions in
+    <code>test_harmonize_command.py</code> compared the report against the
+    fixture the stub returned. They now state the expected member ids, family
+    size and drift as literals written independently of <code>_MEMBERS</code>,
+    so a stubbed or dropped enumeration fails the test instead of moving both
+    sides together. The stale <code>sn run --families</code> documentation was
+    already corrected in the landed report: <code>rg -n -- "--families"
+    docs/architecture/standard-names.md</code> finds nothing, and the
+    <code>sn run</code> option row carries no such flag.
+  </p>
+
+  <h3 id="shc-report-findings-negative-control">Negative control</h3>
+  <p id="shc-report-findings-negative-control-text">
+    Declared mutation: remove the domain-scoped attribution and the scope-total
+    test fails. <code>_domain_scoped_finding</code> was patched to return
+    <code>None</code> so domain findings fall back into the per-member bucket
+    (matching no member) — the pre-fix behaviour — and
+    <code>test_domain_scoped_finding_is_attributed_and_counted_once</code> went
+    red: 1 failed, EXIT=1.
+  </p>
+
+  <h3 id="shc-report-findings-gate">Gate</h3>
+  <p id="shc-report-findings-gate-text">
+    Base revision <code>649795961</code> in a scratch tree: 135 passed, 1
+    deselected, EXIT=0. After the change in the worktree
+    (<code>c3d968453</code>): 136 passed, 1 deselected, EXIT=0 — one added test,
+    no added failures. The gate covers the harmonize, family, command, audit and
+    Cypher-property-check files the done-when names, including
+    <code>tests/graph/test_cypher_property_check.py</code> for the moved query.
+  </p>
+</section>

@@ -835,8 +835,9 @@ or human read) before acting.
 stamped, awaiting docs, drift worklist + top entries);
 `sn status --family <seed>` prints one assembled family (parent, anchor,
 members). The `harmonize.py` library (`build_worklist`, `assemble_family`,
-`fetch_pattern_families`, `report_family_rows`,
-`restamp_harmonized_families`) remains the programmatic surface.
+`report_family_rows`, `restamp_harmonized_families`) remains the programmatic
+surface; `fetch_pattern_families`, the family enumeration it builds on, lives
+beside the family queries in `families.py`.
 
 
 ## Edit Side-Car

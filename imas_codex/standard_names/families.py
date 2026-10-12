@@ -644,6 +644,124 @@ def count_pattern_families(gc: Any, *, min_members: int = 3) -> dict[str, int]:
     return {"families": row.get("families") or 0, "members": row.get("members") or 0}
 
 
+def _family_member_collect() -> str:
+    """Cypher collecting one family's member rows with the report columns.
+
+    The documentation columns drive anchor selection and drift; the lint
+    columns (unit, COCOS type, physics domain, position, links, link status)
+    are what the review lint reads, so an enumerating caller hands it rows it
+    can score without a second read.
+    """
+    return """collect({
+        id: m.id,
+        description: m.description,
+        documentation: m.documentation,
+        docs_stage: m.docs_stage,
+        reviewer_score_docs: m.reviewer_score_docs,
+        harmonized_group_signature: m.harmonized_group_signature,
+        unit: m.unit,
+        cocos_transformation_type: m.cocos_transformation_type,
+        physics_domain: m.physics_domain,
+        position: m.position,
+        links: m.links,
+        link_status: m.link_status
+    }) AS members"""
+
+
+def _pattern_family_rows_query(*, seeded: bool, node_filter: str) -> str:
+    """Cypher enumerating pattern families, keyed on the invariant segments.
+
+    *seeded* groups only the families that contain one of ``$seeds`` (two
+    hops: the seeds' signatures, then every live name sharing one). Otherwise
+    every live family is grouped. *node_filter* is an extra predicate on the
+    member alias ``m``, so a caller narrows the population without restating
+    the grouping.
+
+    The grouping is the invariant segment tuple that
+    :data:`_PATTERN_FAMILY_MEMBERS_QUERY` keys a single family on — the same
+    :func:`_invariant_projection` / :func:`_invariant_equality` primitives —
+    so the two spellings cannot disagree about what makes a family.
+    """
+    segments = ", ".join(PATTERN_INVARIANT_SEGMENTS)
+    projection = _invariant_projection("m")
+    collect = _family_member_collect()
+    extra = f"\n  AND {node_filter}" if node_filter else ""
+    if seeded:
+        seed_projection = _invariant_projection("seed")
+        equality = _invariant_equality("m")
+        return f"""
+MATCH (seed:StandardName)
+WHERE seed.id IN $seeds AND coalesce(seed.name_stage, '') <> $superseded
+WITH DISTINCT
+{seed_projection}
+MATCH (m:StandardName)
+WHERE coalesce(m.name_stage, '') <> $superseded
+  AND {equality}{extra}
+WITH
+{projection},
+     {collect}
+RETURN {segments}, members
+"""
+    return f"""
+MATCH (m:StandardName)
+WHERE coalesce(m.name_stage, '') <> $superseded{extra}
+WITH
+{projection},
+     {collect}
+RETURN {segments}, members
+"""
+
+
+def fetch_pattern_families(
+    gc: Any | None = None,
+    *,
+    seeds: list[str] | None = None,
+    node_filter: str = "",
+    min_size: int = 1,
+) -> list[dict[str, Any]]:
+    """Enumerate live pattern families grouped by invariant grammar signature.
+
+    Pass *seeds* to keep only the families containing at least one seed id;
+    ``None`` enumerates every live family with at least *min_size* members.
+    *node_filter* is an extra predicate on the member alias, so a caller
+    selects a population without restating the grouping.
+
+    Returns one dict per family: ``invariant`` (the tuple of invariant
+    segment values), ``physical_base``, ``members`` (member rows carrying the
+    documentation and lint columns) and ``n``. Read-only: it never writes.
+    """
+    if seeds is not None and not seeds:
+        return []
+    rows = (
+        gc.query(
+            _pattern_family_rows_query(
+                seeded=seeds is not None, node_filter=node_filter
+            ),
+            seeds=sorted(set(seeds or [])),
+            superseded=_LIVE_STAGE_EXCLUSION,
+        )
+        or []
+    )
+
+    families: list[dict[str, Any]] = []
+    for row in rows:
+        members = [dict(m) for m in (row.get("members") or [])]
+        if len(members) < min_size:
+            continue
+        families.append(
+            {
+                "invariant": tuple(
+                    row.get(seg) or "" for seg in PATTERN_INVARIANT_SEGMENTS
+                ),
+                "physical_base": row.get("physical_base") or "",
+                "members": members,
+                "n": len(members),
+            }
+        )
+    families.sort(key=lambda f: (f["physical_base"], f["invariant"]))
+    return families
+
+
 # The base physical quantity a family is expressed over — the row whose id is
 # the family's ``physical_base``. It is a member of the family only when the
 # family's ``transformation`` is empty; an operator-reduced family
