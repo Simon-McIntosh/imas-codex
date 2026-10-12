@@ -25,7 +25,7 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -64,10 +64,14 @@
       detection and axis ordering, from the canonical segment columns the graph carries.
       Then make <code>fetch_sibling_family</code> in
       <code>imas_codex/standard_names/context.py</code> and <code>assemble_family</code> in
-      <code>imas_codex/standard_names/harmonize.py</code> use it, keeping a family-eligible
-      <code>HAS_PARENT</code> edge as a second, explicit route. There is one definition of a
-      family, and the docs prompt, the harmonize command and the catalog ordering all read
-      it.
+      <code>imas_codex/standard_names/harmonize.py</code> use it. The
+      <code>physical_base</code> fallback in <code>assemble_family</code> is retired: a seed with
+      no parent edge gets its pattern family. A family-eligible <code>HAS_PARENT</code> edge stays
+      as a second, explicit route only because the operator axis is not one of the five pattern
+      axes, so a parent and its operator-derived children have no other route. The section
+      records how many live families only that route produces, so a later change can retire it
+      on a number. There is one definition of a family, and the docs prompt, the harmonize
+      command and the catalog ordering all read it.
     </p>
     <p>
       This also closes the vector-component residue of the retired grammar-refinement plan:
@@ -104,11 +108,17 @@
       The incumbent is the third arm in the comparison: the domain inherited from the source,
       which a <code>gpt-5.5</code> classifier in
       <code>imas_codex/graph/dd_domain_classifier.py</code> assigned to the DD path. Source IDS
-      only breaks a tie the winner leaves open. The domain is assigned in two places today, and
-      the winner must be consulted at both. The compose path in <code>imas_codex/standard_names/workers.py</code>
-      injects the DD source item's <code>physics_domain</code> as authoritative ("Inject
-      physics_domain from DD"). <code>_resolve_physics_domains</code> in
-      <code>imas_codex/standard_names/consolidation.py</code> merges the candidates' values.
+      only breaks a tie the winner leaves open. The domain is assigned in two places today. The
+      compose path in <code>imas_codex/standard_names/workers.py</code> injects the DD source
+      item's <code>physics_domain</code> as authoritative ("Inject physics_domain from DD"), and
+      <code>_resolve_physics_domains</code> in <code>imas_codex/standard_names/consolidation.py</code>
+      merges the candidates' values into the primary. The adopted mechanism sets the primary at
+      one owner, <code>_resolve_physics_domains</code>, through which every composed candidate
+      passes. The compose injection keeps the DD value only as the <code>source_domains</code>
+      provenance and the tie-breaker. If a compose path reaches persistence without passing
+      consolidation, it is routed through it rather than given a second consult site. The rule
+      table's loader lives in <code>imas_codex/standard_names/domain_priority.py</code>, which
+      already owns domain ranking and coercion, not in a new module.
       Export's <code>pick_primary_domain</code> reads the stored value and is unchanged.
       Repair the 207 null domains and the misfiled live names through the same rule,
       writing through the ordinary graph-ops path with no hand Cypher.
@@ -129,9 +139,14 @@
     <h2 id="s4">§4 — Near-duplicate spellings, adjudicated once</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Generate the worklist: live pairs with the same unit, embedding cosine at or above
-      0.95, and more than a one-token difference, excluding the §5 vectors. Scope it to
-      pairs with at least one WEST member first.
+      Generate the worklist by extending <code>synonym_check</code> in
+      <code>imas_codex/standard_names/audits.py</code>, the existing name near-duplicate detector,
+      with the unit filter and the threshold as parameters. Do not add a fourth near-duplicate
+      pass beside it, <code>fetch_review_neighbours</code> in <code>context.py</code> and
+      <code>nearest_registered_token</code> in <code>vocab_semantic_dedup.py</code>. The worklist
+      holds live pairs with the same unit, embedding cosine at or above 0.95, and more than a
+      one-token difference, excluding the §5 vectors. Scope it to pairs with at least one WEST
+      member first.
     </p>
     <p>
       Jev first judges each pair in the shape of the
@@ -176,10 +191,13 @@
     <section data-reckon="section" data-id="s5" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
       Re-embed the 38 names in the four identical-vector clusters through the ordinary
-      embedding path. Then add a guard on that path, in
-      <code>imas_codex/embeddings/description.py</code>, that refuses to return a vector
-      identical to one it returned in the same batch for different input text. A silent
-      constant vector is how 38 names became unfindable.
+      embedding path. Then add a guard in the shared owner, <code>Encoder.embed_texts</code> in
+      <code>imas_codex/embeddings/encoder.py</code>, that refuses to return identical vectors for
+      different input texts in one call. Every wrapper in
+      <code>imas_codex/embeddings/description.py</code> (<code>embed_descriptions_batch</code>,
+      <code>embed_description</code>, <code>embed_query_texts</code>) reaches it, so none is left
+      unguarded. A silent constant vector is how 38 names became unfindable. Surface: one
+      refusal is added and nothing is retired, because no guard on this failure exists.
     </p>
     <p>
       <strong>Done when:</strong> the identical-vector cluster count over live accepted

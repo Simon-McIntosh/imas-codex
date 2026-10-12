@@ -24,7 +24,7 @@
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -76,7 +76,10 @@
       <li>Goldens written from the text the judge reads were skewed and inconsistent.</li>
       <li>Repeat calls on a frozen state changed the Choice on 14 of 228 paths.</li>
       <li>Two operating points were calibrated on the same sample they were reported on.</li>
-      <li>No evaluation code survived. Every AUC was a one-off stdin script.</li>
+      <li>Only one point estimate survived as code: <code>tests/discovery/test_path_category_gate.py</code>
+        asserts the category-gate AUC with <code>sklearn.metrics.roc_auc_score</code>. The interval,
+        the paired difference, the operating point and the stability figures were one-off stdin
+        scripts.</li>
     </ul>
     <p>
       <strong>A smoke test on standard-name content, 2026-10-12</strong> (USD 0.00018, four
@@ -100,10 +103,15 @@
       The 2026-10-12 code review of the discovery judgment neighbourhood (run
       <code>review-code-f64de2151701</code>) found the decisions-call contract owned twice.
       <code>decide_batch</code> in <code>imas_codex/discovery/base/judgment.py</code> owns the
-      fail-soft transport handling and the cost booking. <code>_call_judgment</code> at
-      <code>imas_codex/ids/candidates.py:331</code> is a single synchronous call that
-      re-implements both. Delete the wrapper and route its callers through the shared owner before a third
-      owner appears for standard names. Then add a <code>[tool.imas-codex.sn-judge]</code> seat
+      fail-soft transport handling and returns the total reported cost, but books it into no
+      tracker. <code>_call_judgment</code> at <code>imas_codex/ids/candidates.py:331</code> is a
+      single synchronous call that re-implements the fail-soft handling and books the cost into
+      the caller's <code>PipelineCost</code>. Move the booking into the shared owner, which takes
+      an optional cost tracker and step and books the reported cost there. Then delete the wrapper
+      and route its callers through the shared owner, before a third owner appears for standard
+      names. If the synchronous callers need a single-state entry point, it is built on
+      <code>decide_batch</code> inside <code>judgment.py</code>, not beside it.
+      Surface: one seat table is added and the private wrapper is retired. Then add a <code>[tool.imas-codex.sn-judge]</code> seat
       naming the pinned Jev version and the service tag <code>standard-names</code>, so standard
       names' Jev spend is attributed separately from discovery's.
     </p>
@@ -124,7 +132,18 @@
     <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       <code>imas_codex/discovery/base/evaluation.py</code>, beside the dependency-free judge
-      core, so discovery and standard names share one copy. It holds:
+      core, so discovery and standard names share one copy. The metric primitives are
+      <code>sklearn.metrics</code> calls (<code>roc_auc_score</code>, <code>accuracy_score</code>,
+      <code>f1_score</code>, <code>confusion_matrix</code>, <code>cohen_kappa_score</code>), since
+      scikit-learn is already a dependency and the category-gate test already uses it. The module
+      adds what the library lacks: copy-group-aware resampling, the paired difference, an
+      operating point that respects the split, and the stability figures.
+      Surface: one module is added. The hand-rolled pairwise AUC loop in
+      <code>discrimination_metrics</code> (<code>imas_codex/standard_names/benchmark_roles.py</code>)
+      is folded onto the module's AUC, so one AUC owner remains. <code>verdict_flip_quality</code>
+      in the same file measures whether a review flip improved the verdict, which is a different
+      quantity from the option-order flip rate, so it stays. So does the Spearman reviewer
+      agreement in <code>imas_codex/standard_names/benchmark.py</code>. It holds:
     </p>
     <ul>
       <li><code>load_labelled_fixture</code> — rows of unit, label, canonical unit, copy group,
@@ -154,9 +173,16 @@
         when its function is reverted to a stub.</li>
       <li><code>choose_operating_point</code> raises when asked to report on its calibration
         split.</li>
-      <li>As a positive control, the module reproduces discovery's category-gate result,
-        0.9244 [0.8858, 0.9608], from <code>labelled-path-categories.json</code> and the stored
-        judgments. That shows it computes the method discovery used, not a near relative.</li>
+      <li>As a positive control, the existing
+        <code>test_category_gate_reproduces_source_label_auc</code> in
+        <code>tests/discovery/test_path_category_gate.py</code> computes its AUC and interval
+        through the module, over
+        <code>docs/evidence/fragments/discovery-judgments-through-jev/labelled-path-categories.json</code>.
+        It gets 0.9244, with each bound within 0.01 of 0.8858 and 0.9608. That shows the module
+        computes the method discovery used, not a near relative, and no second copy of the
+        control is written.</li>
+      <li><code>discrimination_metrics</code> returns the same AUC as before through the module,
+        and its existing tests pass unchanged.</li>
     </ul>
 
     <h2 id="s4">§4 — Goldens from the labels that already exist</h2>
@@ -231,6 +257,10 @@
       <code>_build_review_record</code> in <code>imas_codex/standard_names/review/pipeline.py</code>.
       Until a deployment decision is made under §7, no accept, refine or export path reads them.
       That lets shadow comparisons accumulate on live traffic without changing a single outcome.
+      Surface: the review record gains the shadow fields and nothing is retired, because no
+      existing field carries a judge's distribution or the model that produced it. The
+      <code>judgment_model</code> property follows the convention discovery already writes
+      (<code>imas_codex/discovery/paths/scorer.py</code>).
     </p>
     <p>
       <strong>Done when:</strong> the schema declares the fields and the generated models carry
