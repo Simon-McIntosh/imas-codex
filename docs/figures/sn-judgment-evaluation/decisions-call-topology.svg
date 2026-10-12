@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620" font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <rect width="1400" height="620" fill="#ffffff"/>
+
+  <!-- BEFORE panel -->
+  <text x="40" y="52" font-size="26" fill="#111111">Before — candidate stage owns a private copy</text>
+
+  <rect x="40" y="90" width="300" height="96" rx="4" fill="none" stroke="#555555" stroke-width="1.2" stroke-width="1.2"/>
+  <text x="60" y="128" font-size="20" fill="#111111">route_ids</text>
+  <text x="60" y="158" font-size="20" fill="#111111">judge_candidates</text>
+
+  <rect x="420" y="90" width="320" height="96" rx="4" fill="#5a7d9a" fill-opacity="0.25" stroke="#3f5f7a" stroke-width="1.4"/>
+  <text x="440" y="128" font-size="20" fill="#111111">candidates._call_judgment</text>
+  <text x="440" y="158" font-size="18" fill="#555555">transport retry + cost booking,</text>
+  <text x="440" y="180" font-size="18" fill="#555555">duplicated from the shared owner</text>
+
+  <rect x="820" y="90" width="260" height="96" rx="4" fill="none" stroke="#555555" stroke-width="1.2"/>
+  <text x="840" y="128" font-size="20" fill="#111111">llm.call_decisions</text>
+  <text x="840" y="158" font-size="18" fill="#555555">the transport</text>
+
+  <line x1="340" y1="138" x2="420" y2="138" stroke="#555555" stroke-width="2.4" marker-end="url(#a)"/>
+  <line x1="740" y1="138" x2="820" y2="138" stroke="#555555" stroke-width="2.4" marker-end="url(#a)"/>
+
+  <text x="60" y="232" font-size="19" fill="#7a4b1e">the private copy books cost itself; the shared owner does not</text>
+
+  <!-- AFTER panel -->
+  <text x="40" y="322" font-size="26" fill="#111111">After — one shared owner, one booking point</text>
+
+  <rect x="40" y="360" width="300" height="96" rx="4" fill="none" stroke="#555555" stroke-width="1.2"/>
+  <text x="60" y="398" font-size="20" fill="#111111">route_ids</text>
+  <text x="60" y="428" font-size="20" fill="#111111">judge_candidates</text>
+
+  <rect x="420" y="350" width="340" height="116" rx="4" fill="#5a7d9a" fill-opacity="0.25" stroke="#3f5f7a" stroke-width="1.4"/>
+  <text x="440" y="386" font-size="20" fill="#111111">judgment.decide_one</text>
+  <text x="440" y="414" font-size="18" fill="#555555">shared owner — synchronous single state</text>
+  <text x="440" y="436" font-size="18" fill="#555555">validation raised, other faults None</text>
+
+  <rect x="420" y="486" width="340" height="72" rx="4" fill="#5a7d9a" fill-opacity="0.25" stroke="#3f5f7a" stroke-width="1.4"/>
+  <text x="440" y="516" font-size="20" fill="#111111">judgment.decide_batch</text>
+  <text x="440" y="542" font-size="18" fill="#555555">shared owner — batched callers</text>
+
+  <rect x="840" y="400" width="320" height="88" rx="4" fill="#3f5f7a" fill-opacity="0.22" stroke="#3f5f7a" stroke-width="1.4"/>
+  <text x="860" y="436" font-size="20" fill="#111111">_book_cost</text>
+  <text x="860" y="462" font-size="18" fill="#555555">the one place spend is recorded</text>
+
+  <rect x="1200" y="400" width="160" height="88" rx="4" fill="none" stroke="#555555" stroke-width="1.2"/>
+  <text x="1216" y="436" font-size="19" fill="#111111">PipelineCost</text>
+  <text x="1216" y="462" font-size="18" fill="#555555">cost tracker</text>
+
+  <line x1="340" y1="408" x2="420" y2="408" stroke="#555555" stroke-width="2.4" marker-end="url(#a)"/>
+  <line x1="760" y1="408" x2="840" y2="438" stroke="#555555" stroke-width="2.4" marker-end="url(#a)"/>
+  <line x1="760" y1="520" x2="840" y2="452" stroke="#555555" stroke-width="2.4" marker-end="url(#a)"/>
+  <line x1="1160" y1="444" x2="1200" y2="444" stroke="#555555" stroke-width="2.4" marker-end="url(#a)"/>
+
+  <text x="860" y="588" font-size="18" fill="#555555">both entry points book through the same helper; neither can drift</text>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#555555"/>
+    </marker>
+  </defs>
+</svg>
