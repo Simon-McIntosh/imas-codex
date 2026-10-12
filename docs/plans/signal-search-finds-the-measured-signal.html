@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -178,7 +178,7 @@
     <h2 id="s4">§4 — One rank fusion for every search tool</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Replace the additive rule <code>score * 0.7 + text_score * 0.3 + 0.1</code> at its four sites with reciprocal
+      Replace the additive rule <code>score * 0.7 + text_score * 0.3 + 0.1</code> at the four sites a tool reaches with reciprocal
       rank fusion. The sites are <code>_search_signals</code>, <code>_search_docs</code> and <code>_search_code</code> in
       <code>imas_codex/llm/search_tools.py</code>, and <code>_hybrid_ids</code> in
       <code>imas_codex/ids/slot_context.py</code>. The fusion already exists as <code>rrf_fuse</code> and
@@ -204,6 +204,13 @@
       <code>imas_codex/tools/graph_search.py</code>, so it does not have the mixed-scale defect, and its tie-breakers are
       tuned against <code>tests/tools/fixtures/dd_mapping_questions.json</code>. Moving it to RRF is a change to measure
       on that fixture, not part of this section.
+    </p>
+    <p>
+      The same expression also appears in <code>HybridSearchStrategy</code> in
+      <code>imas_codex/search/search_strategy.py</code> and <code>HybridSearchEngine</code> in
+      <code>imas_codex/search/engines/hybrid_engine.py</code>. No tool constructs either: <code>SearchService</code> has no
+      production caller and defaults to mock engines. Both are left as they are, because nothing that reaches them could
+      measure a change.
     </p>
     <p>
       <strong>Done when</strong> all of the following hold:
@@ -289,7 +296,7 @@
     </p>
     <ul>
       <li>a <code>role=</code> filter on <code>search_signals</code>;</li>
-      <li>the rerank state in §7;</li>
+      <li>the rerank state in §7, to which this section adds the role once it is stored;</li>
       <li>the mapping stage, where a reference belongs in <code>pulse_schedule</code> and a measurement belongs in the measured IDS. This is the same distinction the DD-path labels grade as 2 against 3.</li>
     </ul>
     <p>
@@ -310,7 +317,8 @@
       <strong>Done when</strong> the prototype's agreement with the hand labels and its cost per signal are recorded. If
       the lead accepts them, every eligible signal carries <code>signal_role</code>, and <code>search_signals</code>
       accepts a <code>role=</code> filter. A <code>role=measured</code> query on §3's questions returns no grade-2
-      reference in its top 5. The same query without the filter is the control.
+      reference in its top 5. The same query without the filter is the control: on at least one question its top 5 holds a
+      grade-2 reference.
     </p>
 
     <h2 id="s9">§9 — Results an agent can read</h2>
@@ -357,6 +365,20 @@
       from the enrichment judgment that
       <a href="/imas-codex/plans/discovery-judgments-through-jev">discovery-judgments-through-jev</a> §6 moves to Jev.
       That part is that plan's, so this section only records the census that shows it.
+    </p>
+    <p>
+      The glossary matches a term as a case-folded substring of the path, name and catalogue text, so a short term reaches
+      unrelated signals: <code>efc</code> occurs inside <code>refcurEF1</code>, and a two-letter term such as
+      <code>DR</code> occurs inside many words. Make the match respect word and camel-case boundaries, and prove it with a
+      test: <code>EFC</code> reaches <code>refvcEFC1</code> and not <code>refcurEF1</code>, and the substring matcher fails
+      the same test. Before and after, count the eligible signals each glossary term reaches and read a sample of each new
+      term's matches; a term that reaches signals outside the family it describes is a defect.
+    </p>
+    <p>
+      Re-enrich with <code>imas-codex discover signals jt-60sa --reset-to discovered --focus</code> naming the affected
+      signals, under the command's default cost limit of USD 5. The catalogue's wording and unit are stored on each signal
+      as <code>source_description</code> and <code>unit</code>; compare the LFPPCC references against those. A swap those
+      fields cannot settle is recorded as unresolved, not corrected.
     </p>
     <p>
       <strong>Done when</strong> a census over eligible JT-60SA signals finds no description that expands SNU as anything
