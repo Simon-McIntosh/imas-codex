@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite (revision eeed04f25a535a33169e5115a89e49f296ce8bbf, 11 gate files, completed true, failure_count 0) and after_suite (same command, completed true, failure_count 0). after_suite_house_style.log ends '90 passed, 11 deselected ... EXIT=0' and baseline_suite_house_style.log ends '85 passed, 11 deselected ... EXIT=0', so head adds five passing tests and no failing test; added_failure_ids is empty.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_embedding_preflight_stamping.py tests/standard_names/test_house_style_checks.py tests/standard_names/test_docs_gates.py tests/standard_names/test_review_report_only.py tests/standard_names/test_cli_preview.py tests/standard_names/test_docs_lifecycle.py tests/standard_names/test_docs_holdout_eval.py tests/standard_names/test_review_pipeline.py tests/standard_names/test_quarantine_instrument_agreement.py tests/standard_names/test_audit_findings_reach_the_prompt.py tests/graph/test_cypher_property_check.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T172844325767-shs-documentation-gates-in-audit/after_suite_house_style.log",
+    "revision": "eeed04f25a535a33169e5115a89e49f296ce8bbf"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261012T172844325767-shs-documentation-gates-in-audit/shs-base uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_embedding_preflight_stamping.py tests/standard_names/test_house_style_checks.py tests/standard_names/test_docs_gates.py tests/standard_names/test_review_report_only.py tests/standard_names/test_cli_preview.py tests/standard_names/test_docs_lifecycle.py tests/standard_names/test_docs_holdout_eval.py tests/standard_names/test_review_pipeline.py tests/standard_names/test_quarantine_instrument_agreement.py tests/standard_names/test_audit_findings_reach_the_prompt.py tests/graph/test_cypher_property_check.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T172844325767-shs-documentation-gates-in-audit/baseline_suite_house_style.log",
+    "revision": "eeed04f25a535a33169e5115a89e49f296ce8bbf"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6316:run_all_audits",
+    "imas_codex/standard_names/review/pipeline.py:1752:_extract_audit_findings",
+    "imas_codex/standard_names/review/audits.py:696:run_house_style_checks"
+  ],
+  "completed_at": "2026-10-12T17:55:31.253Z",
+  "dispatched_at": "2026-10-12T17:46:29Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_house_style_checks.py",
+      "line": 292,
+      "severity": "follow-on",
+      "summary": "test_sign_convention_gate_is_silent_when_the_paragraph_is_present asserts only the absence of the sign_convention finding, so it passes unchanged if run_documentation_gate_checks is deleted from run_all_audits; it is a companion to :287, not an independent guard on the silence path."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T172844325767-shs-documentation-gates-in-audit/manifest.md",
+      "line": 17,
+      "severity": "follow-on",
+      "summary": "after_suite records revision eeed04f25a535a33169e5115a89e49f296ce8bbf (the base) although the arm ran in the worktree carrying 363a1ea56, and after_suite_house_style.log header line 1 repeats that revision, so the head arm's recorded revision does not name the tree it measured."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against base eeed04f25a535a33169e5115a89e49f296ce8bbf; 363a1ea56 adds run_documentation_gate_checks and calls it from run_all_audits (imas_codex/standard_names/review/audits.py), rewrites _template_opening_findings to report only when no selected template matches (imas_codex/standard_names/docs_gates.py:628), and extends the test file; 03d2b6f5b adds the 58-line evidence fragment; nothing else moves.",
+    "done_when": "the done_when asks for an AuditReport test whose sign-convention class appears for a COCOS-sensitive fixture missing its sign paragraph, reddening when run_all_audits stops calling the gates; tests/standard_names/test_house_style_checks.py:287 does exactly that, and the run's negative_control.log shows removing the call reddens it (1 failed, EXIT=1). The two-template no-finding case is :229 (negative_template_multi.log, 2 failed EXIT=1 on revert) and the unasserted census is now asserted at :321 against a fixture. The manifest records baseline_suite and after_suite with revision, exit_status and completed:true.",
+    "goal": "the goal routes the documentation gates docs_gates.py already owned into the AuditReport a reviewer reads; imas_codex/standard_names/review/audits.py:775 appends run_documentation_gate_checks(names) beside run_house_style_checks, and audits.py:715-756 builds each documented name's DocumentationPhysicsContext from its own cocos_transformation_type and unit, calls score_documentation, and emits one LintFinding per FAIL while a NOT_EVALUABLE gate raises none, so the sign-convention, defining-equation and symbol-definition decisions reach the report.",
+    "manifest": "read; it records status complete, commits 363a1ea56 and 03d2b6f5b, the gate command with 90 passed EXIT=0 at head against 85 passed EXIT=0 at base, negative_control_log, measurement_module and measurement_cwd for the scratch arm, and no blockers.",
+    "write_paths": "the manifest declares imas_codex/standard_names/review/audits.py, imas_codex/standard_names/docs_gates.py, tests/standard_names/test_house_style_checks.py, the evidence fragment and an unused figures dir; git diff --stat against eeed04f25 lists exactly those four files, all inside the declared scope, with no plan or index edit."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_house_style_checks.py:287 asserts 'sign_convention' in the report's finding types and reddens when the call is removed (negative_control.log, EXIT=1), and :229/:242 redden when _template_opening_findings reverts (negative_template_multi.log, EXIT=1); the companion :292 asserts only the absence of that finding, so it would also pass if the gates were never called and guards nothing on its own.",
+    "evidence": "the gate names tests/standard_names/test_house_style_checks.py and the manifest records baseline_suite 85 passed EXIT=0 and after_suite 90 passed EXIT=0, both completed:true with 0 failures, so added_failure_count is 0; but after_suite's recorded revision is eeed04f25 (the base), not the head the arm ran at (after_suite_house_style.log header line 1), a record slip that does not change the delta.",
+    "fit": "run_documentation_gate_checks follows the module's function-local import and LintFinding idiom set by run_house_style_checks at imas_codex/standard_names/review/audits.py:685, and neither the added function name nor the new test names carry a plan, sprint or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/review/audits.py:775 wires run_documentation_gate_checks into run_all_audits and audits.py:746 emits one finding per FAIL gate while a NOT_EVALUABLE gate (no COCOS type or unit) raises none, matching the goal's not-a-finding clause.",
+    "reuse": "run_documentation_gate_checks calls the existing owner docs_gates.score_documentation rather than reimplementing gate evaluation; a search of the repository for other converters of gate outcomes to findings and for PhysicsContext construction found only docs_holdout_eval._physics_context_for (imas_codex/standard_names/docs_holdout_eval.py:164), which takes a DocsHoldoutRow with declared_unit/dd_path keys rather than an audit name row with unit/cocos_transformation_type, so it is not the same capability and no owner for this conversion exists.",
+    "scope_discipline": "the diff against eeed04f25 touches exactly imas_codex/standard_names/review/audits.py, imas_codex/standard_names/docs_gates.py, tests/standard_names/test_house_style_checks.py and the fragment, all inside the declared write paths."
+  },
+  "node": "review-of-shs-documentation-gates-in-audit",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal routes the documentation gates docs_gates.py already owned into the AuditReport a reviewer reads; imas_codex/standard_names/review/audits.py:775 appends run_documentation_gate_checks(names) beside run_house_style_checks, and audits.py:715-756 builds each documented name's DocumentationPhysicsContext from its own cocos_transformation_type and unit, calls score_documentation, and emits one LintFinding per FAIL while a NOT_EVALUABLE gate raises none, so the sign-convention, defining-equation and symbol-definition decisions now reach the report, which is the goal.\nVERDICT done_when: the done_when asks for an AuditReport test whose sign-convention class appears for a COCOS-sensitive fixture missing its sign paragraph, reddening when run_all_audits stops calling the gates; tests/standard_names/test_house_style_checks.py:287 does exactly that, and the run's negative_control.log shows removing the call reddens it (1 failed, EXIT=1); the two-template no-finding case is tests/standard_names/test_house_style_checks.py:229 (negative_template_multi.log, 2 failed EXIT=1 on revert) and the unasserted census is now asserted at :321 against a fixture; the manifest records baseline_suite and after_suite with revision, exit_status and completed:true.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/review/audits.py, imas_codex/standard_names/docs_gates.py, tests/standard_names/test_house_style_checks.py, the evidence fragment and an unused figures dir; git diff --stat against eeed04f25 lists exactly those four files, all inside the declared scope, with no plan or index edit.\nVERDICT manifest: read; it records status complete, commits 363a1ea56 and 03d2b6f5b, the gate command with 90 passed EXIT=0 at head against 85 passed EXIT=0 at base, negative_control_log, measurement_module and measurement_cwd for the scratch arm, and no blockers.\nVERDICT diff: read commit by commit against base eeed04f25a535a33169e5115a89e49f296ce8bbf; 363a1ea56 adds run_documentation_gate_checks and calls it from run_all_audits (imas_codex/standard_names/review/audits.py), rewrites _template_opening_findings to report only when no selected template matches (imas_codex/standard_names/docs_gates.py:628), and extends the test file (+133/-28 across the three); 03d2b6f5b adds the 58-line evidence fragment; nothing else moves.\nCALL_SITES: imas_codex/cli/sn.py:6316:run_all_audits, imas_codex/standard_names/review/pipeline.py:1752:_extract_audit_findings, imas_codex/standard_names/review/audits.py:696:run_house_style_checks\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/audits.py:775 wires run_documentation_gate_checks into run_all_audits and audits.py:746 emits one finding per FAIL gate while a NOT_EVALUABLE gate (no COCOS type or unit) raises none, matching the goal's not-a-finding clause.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate names tests/standard_names/test_house_style_checks.py and the manifest records baseline_suite 85 passed EXIT=0 and after_suite 90 passed EXIT=0, both completed:true with 0 failures, so added_failure_count is 0; but after_suite's recorded revision is eeed04f25 (the base), not the head the arm ran at (after_suite_house_style.log header line 1), a record slip that does not change the delta.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff against eeed04f25 touches exactly imas_codex/standard_names/review/audits.py, imas_codex/standard_names/docs_gates.py, tests/standard_names/test_house_style_checks.py and the fragment, all inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_house_style_checks.py:287 asserts 'sign_convention' in the report's finding types and reddens when the call is removed (negative_control.log, EXIT=1), and :229/:242 redden when _template_opening_findings reverts (negative_template_multi.log, EXIT=1); the companion :292 asserts only the absence of that finding, so it would also pass if the gates were never called and guards nothing on its own.\nSCORE fit: 19\nJUSTIFICATION fit: run_documentation_gate_checks follows the module's function-local import and LintFinding idiom set by run_house_style_checks at imas_codex/standard_names/review/audits.py:685, and neither the added function name nor the new test names carry a plan, sprint or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: run_documentation_gate_checks calls the existing owner docs_gates.score_documentation rather than reimplementing gate evaluation; a search of the repository for other converters of gate outcomes to findings and for PhysicsContext construction found only docs_holdout_eval._physics_context_for (imas_codex/standard_names/docs_holdout_eval.py:164), which takes a DocsHoldoutRow with declared_unit/dd_path keys rather than an audit name row with unit/cocos_transformation_type, so it is not the same capability and no owner for this conversion exists.\nFINDING tests/standard_names/test_house_style_checks.py:292 follow-on: test_sign_convention_gate_is_silent_when_the_paragraph_is_present asserts only the absence of the sign_convention finding, so it passes unchanged if run_documentation_gate_checks is deleted from run_all_audits; it is a companion to :287, not an independent guard on the silence path.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T172844325767-shs-documentation-gates-in-audit/manifest.md:17 follow-on: after_suite records revision eeed04f25a535a33169e5115a89e49f296ce8bbf (the base) although the arm ran in the worktree carrying 363a1ea56, and after_suite_house_style.log header line 1 repeats it, so the head arm's recorded revision does not name the tree it measured.",
+  "review_run_id": "r-20261012T174557281509-review-of-shs-documentation-gates-in-audit",
+  "reviewed_base_sha": "eeed04f25a535a33169e5115a89e49f296ce8bbf",
+  "reviewed_head_sha": "03d2b6f5bba05d101d5ba4cd170ab0bd5553c704",
+  "reviewed_run_id": "r-20261012T172844325767-shs-documentation-gates-in-audit",
+  "reviewer_run_id": "r-20261012T174557281509-review-of-shs-documentation-gates-in-audit",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T172844325767-shs-documentation-gates-in-audit/baseline_suite_house_style.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T172844325767-shs-documentation-gates-in-audit/after_suite_house_style.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T172844325767-shs-documentation-gates-in-audit/negative_control.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T172844325767-shs-documentation-gates-in-audit/negative_template_multi.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T17:56:00.000000+00:00",
+  "total": 114
+}
