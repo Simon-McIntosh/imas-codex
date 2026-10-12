@@ -40,6 +40,11 @@
     <p>A fixture source bound to two live identities (the predecessor and the just-written successor) makes the compare-and-set in <code>retarget_standard_name_sources</code> (<code>imas_codex/standard_names/provenance_lifecycle.py</code>) raise an anonymous <code>RuntimeError</code> (<code>bindings=['example_new_name', 'example_old_name']</code>) rather than <code>SourceBindingConflictError</code>, so a failure that needs adjudication is classified as a transient fault and spends a retry. <code>tests/standard_names/test_compose_supersede_dual_bound.py</code> holds it as a strict xfail that turns red when the conflict is raised properly. Gate: 82 passed and 1 xfailed, no added failures. Merge <code>bb1357ff5</code>. Independent review 111/120. Two notes on the record: its "sees a fix" control is asserted in prose rather than shown by a run, and its quoted failure line carries the test's later name; the reproduction itself rests on a recorded run. §23 carries the repair.</p><p>Evidence: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/compose-supersede-dual-bound">compose supersede over a dual-bound source</a>.</p>
   </section>
 
+  <section id="s18">
+    <h2>§18 — an empty export cut refuses, pinned</h2>
+    <p><code>tests/standard_names/test_export_empty_refusal.py</code> exports an empty candidate set and sees the non-zero exit of the empty-population refusal in <code>imas_codex/standard_names/export.py</code>; removing the refusal turns it red. The defect the census recorded was already fixed; this pins it. Merge <code>e7c26a149</code>. Independent review 112/120, no added failures. Follow-on: the test carries a third copy of a read-only graph double that two other export tests also define.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-empty-export-refusal">sib-empty-export-refusal</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;implementable&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;}">
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -165,7 +165,7 @@
 <p>Surviving rows the census places off the release path, each with its proposed repair in the census: the parked-disposition net has no caller; the parked census cohort is wider than its writer's; the parked refusal raises the wrong exception; four bypasses of the defaulted-attribute guard; 412 names labelled scaffolding while carrying reviewed documentation; recovering origin and status from generation evidence; a schema digest node; released manifests recording worktree paths; reviewer swings wider than the exhaustion margin; the declared-attribute check judging 5 of 18 sites; an unreachable embedder becoming a finding. They wait until the WEST release is cut, then each becomes a section of its own.</p>
 
     <h2 id="s18">§18 — An empty export cut refuses, by test</h2>
-<section data-reckon="section" data-id="s18" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s18" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>An export that filters every candidate used to exit 0; the 2026-09-21 export refusals likely closed it (census, §4). Confirm by test; if it is not in fact fixed, report it rather than fixing it here.</p><p><strong>Done when:</strong> a test exports an empty candidate set and sees a non-zero exit, and fails with the refusal removed.</p>
 
     <h2 id="s19">§19 — How many chain-cap identities have no sourced ancestor now?</h2>
@@ -241,6 +241,9 @@
 </div>
 <div class="r-comment" data-section="s15" data-id="c-run-r-20261012T192024313049-review-of-sib-compose-supersede-dual-bound" data-who="reckon-build" data-when="2026-10-12T19:27:53.004Z">
     <div class="r-comment-body"><p>Review of r-20261012T185852762530-sib-compose-supersede-dual-bound at base 345868c92 / head aa436d5d4: a good reproduction node — test_compose_supersede_dual_bound.py drives the real supersede_prior_source_names -&gt; retarget chain over a dual-bound source, committed strict xfail so it reddens on the fix; scores goal_fidelity 19, evidence 15, scope_discipline 20, durability 19, fit 18, reuse 20 (total 111); two follow-on findings, no blockers.</p></div>
+</div>
+<div class="r-comment" data-section="s18" data-id="c-close-s18" data-who="reckon-build" data-when="2026-10-12T19:33:00Z">
+    <div class="r-comment-body"><p>§18 landed: an empty-candidate export exits non-zero, pinned by a test that fails with the refusal removed (merge <code>e7c26a149</code>); review 112/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s18">evidence</a></p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
