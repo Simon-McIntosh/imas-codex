@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="catalog-review-surface">
   <meta name="plan-title" content="Catalog Review Surface Integrity">
   <meta name="plan-summary" content="Make the reviewer&#x27;s surface honest: what a reviewer may change, enforced by checks, with edits traceable back into the graph">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="superseded">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -20,13 +20,14 @@
   <title>Catalog Review Surface Integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-18">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
+<meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="f39508320a56db9599efc04b32c05d64a0598569,8862a65f37bd49011cbec319ccb95638acefd98e">
 <meta name="plan-artifacts" content="tests/graph/test_backup_currency_contents.py,tests/graph/test_backup_currency.py,tests/core/test_backup_currency.py">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-depends-on" content="graph-destructive-command-safety">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s4a&quot;:&quot;done&quot;,&quot;s4b&quot;:&quot;done&quot;,&quot;s4c&quot;:&quot;done&quot;}">
+<meta name="plan-archived" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -339,6 +340,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260918-the-ownership-caveat-is-settled-by-precedent" data-who="ship-s14-20260917" data-when="2026-09-18">
     <div class="r-comment-body"><p><strong>The ownership caveat on <code>f-crs-the-refusal-reaches-the-request-itself</code> was over-cautious and is settled by precedent, so the work is dispatchable.</strong> That followup said whether the refusal write belongs here or to the repository owning the fork was a decision rather than an implementation detail, and that a node should state which repository it writes to before writing anything.</p><p>Checked rather than assumed: <strong>imas-codex already performs exactly this class of write against the catalog fork, routinely.</strong> <code>catalog_release.py:86</code> issues a <code>POST</code> to create a pull request and <code>:106</code> a <code>PATCH</code> to <code>/repos/{repo}/pulls/{number}</code> updating its body. Posting a refusal onto a request is the same boundary crossing this repository already owns and already exercises on every cut. There is no new authority involved, only a missing call site.</p><p><strong>It is also cheap to fence, which the earlier framing obscured.</strong> The call sites the followup names — <code>_record_promotion_refusal</code> at <code>promote.py:129</code> and <code>_pull_request_call</code> at <code>:1454</code> — sit in a 78 KB module (~19.5k tokens), not in the 1.14 MB module that priced two other followups out of the lane entirely. A node fenced on <code>promote.py</code>, one test and one evidence file fits the context window with room to spare.</p><p>Dispatched on that basis, with a contract that requires the test to prove both directions — a refusing promotion puts its reason on the request, and a succeeding one posts nothing — with the transport mocked so it needs neither a live graph nor network.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261012-superseded" data-who="reckon-review" data-when="2026-10-12T05:45:00Z">
+    <div class="r-comment-body"><p><strong>Superseded at 0.86 implemented, with every followup resolved.</strong> What a reviewer may change and its enforcement are landed. The one open deliverable, §4's fold-back rehearsal with one accepted and one refused edit, is carried verbatim to <a href="/imas-codex/sn-west-prototype-release">sn-west-prototype-release</a> §7, where it runs before the physicist's edits come back.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260908T053735165564-n-crs-the-repl-bounds-its-own-output" data-who="cx-betatangle" data-when="2026-09-08T06:24:00Z">
     <div class="r-comment-body"><p>repl output is bounded at one million characters, below the client's 16 MB transport guard even if every non-BMP character expands to a 12-byte JSON surrogate pair, with truncation appending the exact produced and dropped counts and the exception return bounded through the same helper. This is the MCP failure of 2026-09-08: capture was always correct, the return of stdout_capture.getvalue() was not. The node needed four attempts — three sol sessions died from harness faults that spliced stray words and a truncated worktree path into command text, then failed write_stdin with an unknown process id. Its work and gate were complete after the first; only the commit was missing, and terra landed it in two minutes.</p></div>

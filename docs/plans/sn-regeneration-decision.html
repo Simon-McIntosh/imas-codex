@@ -4,23 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-regeneration-decision">
-  <meta name="plan-title"     content="Regenerate Or Keep Repairing, Decided On A Number">
-  <meta name="plan-summary"   content="Settle whether to delete and regenerate names and docs from sources, on a stated threshold rather than a feeling, once origin is declared.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-regeneration-decision">
+  <meta name="plan-title" content="Regenerate Or Keep Repairing, Decided On A Number">
+  <meta name="plan-summary" content="Settle whether to delete and regenerate names and docs from sources, on a stated threshold rather than a feeling, once origin is declared.">
+  <meta name="plan-status" content="superseded">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="2.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-risk" content="critical">
-  <meta name="plan-sprint"    content="S12">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="sn-origin-provenance-backfill">
   <title>Regeneration Decision | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-archived" content="2026-10-12">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -104,32 +107,38 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">&sect;</span> Decisions</h2>
-      <div class="r-dec" data-key="regenerate-scope" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">If regeneration proceeds, what is its scope?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="pipeline-only">Only origin=pipeline identities, protecting every catalog edit</button>
-          <button class="r-opt" data-value="docs-only">Documentation only, retaining all existing names</button>
-          <button class="r-opt" data-value="full">Everything not carrying catalog release provenance</button>
-          <button class="r-opt" data-value="none">No regeneration; continue targeted repair</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="semantic-residue-expectation" data-choice="regeneration-does-not-clear-identity-questions" data-by="reckon-ship" data-when="2026-08-25">
-        <p class="r-dec-q">Should regeneration be expected to clear the remaining identity rows?</p>
-        <p class="r-dec-rat">No, and this is recorded now so it is not assumed later. The dual-bound spelling choice, the field-map-grid locus and the reflector surface-versus-local-centre split are questions about physics and vocabulary, not artifacts of a particular generation. A regenerate re-derives each from the same source and poses the identical question. Regeneration is priced on freshness of documentation and naming under current criteria, never on clearing these three.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="regenerate-scope" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">If regeneration proceeds, what is its scope?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="pipeline-only">Only origin=pipeline identities, protecting every catalog edit</button>
+      <button class="r-opt" data-value="docs-only">Documentation only, retaining all existing names</button>
+      <button class="r-opt" data-value="full">Everything not carrying catalog release provenance</button>
+      <button class="r-opt" data-value="none">No regeneration; continue targeted repair</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="semantic-residue-expectation" data-choice="regeneration-does-not-clear-identity-questions" data-by="reckon-ship" data-when="2026-08-25">
+    <p class="r-dec-q">Should regeneration be expected to clear the remaining identity rows?</p>
+    <p class="r-dec-rat">No, and this is recorded now so it is not assumed later. The dual-bound spelling choice, the field-map-grid locus and the reflector surface-versus-local-centre split are questions about physics and vocabulary, not artifacts of a particular generation. A regenerate re-derives each from the same source and poses the identical question. Regeneration is priced on freshness of documentation and naming under current criteria, never on clearing these three.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">&sect;</span> Followups</h2>
-      <article class="r-fu" data-id="f-srd-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-build sn-regeneration-decision">
-        <h4 class="r-fu-title">Measure the five quantities and put the scope choice to the lead with a recommendation</h4>
-        <div class="r-fu-body"><p>Blocked until origin is declared. Then take a fresh post-recovery census rather than reusing the embedded baseline counts; measure the regenerable and protected populations, the measured cost per identity, what a regenerate clears, and what it would reintroduce — and present the scope decision with a recommendation and arguments rather than a menu.</p></div>
-        <pre class="r-fu-prompt">/reckon-build sn-regeneration-decision</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-srd-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-build sn-regeneration-decision" data-resolved-at="2026-10-12T05:13:55+00:00" data-resolved-by="reckon-review">
+    <h4 class="r-fu-title">Measure the five quantities and put the scope choice to the lead with a recommendation</h4>
+    <div class="r-fu-body"><p>Blocked until origin is declared. Then take a fresh post-recovery census rather than reusing the embedded baseline counts; measure the regenerable and protected populations, the measured cost per identity, what a regenerate clears, and what it would reintroduce — and present the scope decision with a recommendation and arguments rather than a menu.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-regeneration-decision</pre>
+    <p class="r-fu-outcome">Carried to sn-integrity-backlog §3. Done — no followup; this plan is superseded.</p>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-20261012-superseded" data-who="reckon-review" data-when="2026-10-12T05:50:00Z">
+    <div class="r-comment-body"><p><strong>Parked in <a href="/imas-codex/sn-integrity-backlog">sn-integrity-backlog</a> §3.</strong> The regenerate-or-repair decision is still owed, and the WEST prototype comes first. Decided in the 2026-10-12 portfolio review.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

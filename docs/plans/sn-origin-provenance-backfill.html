@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-origin-provenance-backfill">
   <meta name="plan-title" content="An Import Wiped Provenance, And The Evidence To Rebuild It Survived">
   <meta name="plan-summary" content="A catalog import cleared origin on 1,091 identities and relabelled others. Recover it from surviving generation evidence, then close the path that allowed it.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="superseded">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="4.0">
   <meta name="plan-capability-version" content="1.0">
@@ -20,8 +20,9 @@
   <title>Origin Provenance Recovery | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
+<meta name="plan-modified" content="2026-10-12">
+<meta name="plan-archived" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -164,10 +165,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sopb-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-build sn-origin-provenance-backfill" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sopb-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-build sn-origin-provenance-backfill" data-resolved-at="2026-10-12T05:13:42+00:00" data-resolved-by="reckon-review">
     <h4 class="r-fu-title">Recover origin and status from generation evidence, then close the import write path</h4>
     <div class="r-fu-body"><p>Derive from generation evidence, prove zero misclassifications on the 1,798 accepted controls before touching anything undeclared, and measure how many <code>catalog_edit</code> identities carry a generative fingerprint so the human-curated figure stops being quoted unmeasured. Then remove the import path's ability to clear or overwrite <code>origin</code> and <code>status</code>, with a test that fails if it can.</p></div>
     <pre class="r-fu-prompt">/reckon-build sn-origin-provenance-backfill</pre>
+    <p class="r-fu-outcome">Carried to sn-integrity-backlog §2. Done — no followup; this plan is superseded.</p>
     </article>
 </section>
 
@@ -192,6 +194,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260825T173907453065-n-protectionexposure" data-who="test-residue" data-when="2026-08-25T17:56:17Z">
     <div class="r-comment-body"><p>Read-only protection-exposure census: shielded=2096 (27 with current editorial evidence), 315 unprotected identities carry accepted evidence (named exactly), null-origin exposure=12; graph writes 0; digest unchanged</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261012-superseded" data-who="reckon-review" data-when="2026-10-12T05:50:00Z">
+    <div class="r-comment-body"><p><strong>Parked in <a href="/imas-codex/sn-integrity-backlog">sn-integrity-backlog</a> §2.</strong> Deferred until the WEST prototype ships. Decided in the 2026-10-12 portfolio review.</p></div>
 </div>
 </section>
 </main>

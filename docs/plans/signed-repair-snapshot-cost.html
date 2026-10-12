@@ -4,21 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="signed-repair-snapshot-cost">
-  <meta name="plan-title"     content="Signed Repair Collateral Snapshot Cost">
-  <meta name="plan-summary"   content="The collateral snapshot every signed repair takes is graph-wide, so it costs more than the repairs it protects and arguably measures the wrong thing">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="medium">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="signed-repair-snapshot-cost">
+  <meta name="plan-title" content="Signed Repair Collateral Snapshot Cost">
+  <meta name="plan-summary" content="The collateral snapshot every signed repair takes is graph-wide, so it costs more than the repairs it protects and arguably measures the wrong thing">
+  <meta name="plan-status" content="superseded">
+  <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="3.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="general">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S12">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>Signed Repair Collateral Snapshot Cost | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-archived" content="2026-10-12">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -103,26 +106,32 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="snapshot-approach" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Does the collateral snapshot get cheaper by digesting server-side, or by covering only the dimensions the operation owns?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="server-side-digest">Digest in Cypher so property maps never cross the wire</button>
-          <button class="r-opt" data-value="narrow-to-owned">Cover only the dimensions the operation owns</button>
-          <button class="r-opt" data-value="both">Both, if the measurement shows each carries a distinct share of the cost</button>
-          </p>
-        <p class="r-dec-rat">Open. The measurement in §3 decides it; the concurrency argument in §2 is a reason to prefer narrowing if the two are close on cost, because narrowing also stops a peer's unrelated write from failing a clean repair.</p>
-        </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="snapshot-approach" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the collateral snapshot get cheaper by digesting server-side, or by covering only the dimensions the operation owns?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="server-side-digest">Digest in Cypher so property maps never cross the wire</button>
+      <button class="r-opt" data-value="narrow-to-owned">Cover only the dimensions the operation owns</button>
+      <button class="r-opt" data-value="both">Both, if the measurement shows each carries a distinct share of the cost</button>
+      </p>
+    <p class="r-dec-rat">Open. The measurement in §3 decides it; the concurrency argument in §2 is a reason to prefer narrowing if the two are close on cost, because narrowing also stops a peer&#x27;s unrelated write from failing a clean repair.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-srsc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-build signed-repair-snapshot-cost" data-resolved-at="" data-resolved-by="">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-srsc-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-build signed-repair-snapshot-cost" data-resolved-at="2026-10-12T05:14:17+00:00" data-resolved-by="reckon-review">
     <h4 class="r-fu-title">Measure the snapshot cost, then choose between digesting server-side and narrowing to owned dimensions</h4>
     <div class="r-fu-body"><p>Time a representative signed repair as it stands, so the baseline is a number. Then implement whichever approach the measurement favours and time it again on the same repair. Keep the existing collateral guard tests passing and add one proving the changed snapshot still catches a genuine out-of-scope write. Answer the concurrency question explicitly: can a peer session writing an unrelated axis still fail a clean repair?</p></div>
     <pre class="r-fu-prompt">/reckon-build signed-repair-snapshot-cost</pre>
+    <p class="r-fu-outcome">Carried to sn-integrity-backlog §4. Done — no followup; this plan is superseded.</p>
     </article>
-    </section>
-  </main>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-20261012-superseded" data-who="reckon-review" data-when="2026-10-12T05:50:00Z">
+    <div class="r-comment-body"><p><strong>Parked in <a href="/imas-codex/sn-integrity-backlog">sn-integrity-backlog</a> §4.</strong> Deferred until the WEST prototype ships. Decided in the 2026-10-12 portfolio review.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

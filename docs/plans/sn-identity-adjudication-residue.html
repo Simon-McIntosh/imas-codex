@@ -4,23 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-identity-adjudication-residue">
-  <meta name="plan-title"     content="Two Questions No Pipeline Can Answer For Us">
-  <meta name="plan-summary"   content="The last two semantic rows are physics questions, not defects: which momentum-flux spelling survives, and whether a reflector centre is surface or origin.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="mid">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-identity-adjudication-residue">
+  <meta name="plan-title" content="Two Questions No Pipeline Can Answer For Us">
+  <meta name="plan-summary" content="The last two semantic rows are physics questions, not defects: which momentum-flux spelling survives, and whether a reflector centre is surface or origin.">
+  <meta name="plan-status" content="superseded">
+  <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="3.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S12">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="isn-locus-vocabulary-rotation">
   <title>Identity Adjudication Residue | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-archived" content="2026-10-12">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -103,36 +106,42 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">&sect;</span> Decisions</h2>
-      <div class="r-dec" data-key="momentum-flux-identity" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which identity does the neutral-state radial momentum flux source realize?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="internal-state">radial_neutral_internal_state_momentum_flux — internal_state carries meaning</button>
-          <button class="r-opt" data-value="plain-state">radial_neutral_state_momentum_flux — internal_state is a redundant peel</button>
-          <button class="r-opt" data-value="both-legitimate">Both are legitimate and the fan-out invariant needs revisiting</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="reflector-split" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How should the reflector centre be distinguished from the centre of curvature?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="new-local-origin-identity">A new reviewed identity for the local-frame origin</button>
-          <button class="r-opt" data-value="qualify-existing">Qualify the existing reflector coordinate identity</button>
-          <button class="r-opt" data-value="permanent-refusal">Neither — the row stays a settled refusal</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="momentum-flux-identity" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which identity does the neutral-state radial momentum flux source realize?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="internal-state">radial_neutral_internal_state_momentum_flux — internal_state carries meaning</button>
+      <button class="r-opt" data-value="plain-state">radial_neutral_state_momentum_flux — internal_state is a redundant peel</button>
+      <button class="r-opt" data-value="both-legitimate">Both are legitimate and the fan-out invariant needs revisiting</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="reflector-split" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How should the reflector centre be distinguished from the centre of curvature?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="new-local-origin-identity">A new reviewed identity for the local-frame origin</button>
+      <button class="r-opt" data-value="qualify-existing">Qualify the existing reflector coordinate identity</button>
+      <button class="r-opt" data-value="permanent-refusal">Neither — the row stays a settled refusal</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">&sect;</span> Followups</h2>
-      <article class="r-fu" data-id="f-siar-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-build sn-identity-adjudication-residue">
-        <h4 class="r-fu-title">Adjudicate both identities on physics, then propose them through sn edit</h4>
-        <div class="r-fu-body"><p>Adjudicate on DD semantics and catalog convention rather than on which spelling is shorter or which refusal is easier to clear. Then propose through <code>sn edit</code> with a mandatory reason and let review score independently. Resolve <code>radial_coordinate_of_reflector</code>'s missing description and embedding in the same pass.</p></div>
-        <pre class="r-fu-prompt">/reckon-build sn-identity-adjudication-residue</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-siar-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-build sn-identity-adjudication-residue" data-resolved-at="2026-10-12T05:13:52+00:00" data-resolved-by="reckon-review">
+    <h4 class="r-fu-title">Adjudicate both identities on physics, then propose them through sn edit</h4>
+    <div class="r-fu-body"><p>Adjudicate on DD semantics and catalog convention rather than on which spelling is shorter or which refusal is easier to clear. Then propose through <code>sn edit</code> with a mandatory reason and let review score independently. Resolve <code>radial_coordinate_of_reflector</code>'s missing description and embedding in the same pass.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-identity-adjudication-residue</pre>
+    <p class="r-fu-outcome">Carried to sn-integrity-backlog §4. Done — no followup; this plan is superseded.</p>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-20261012-superseded" data-who="reckon-review" data-when="2026-10-12T05:50:00Z">
+    <div class="r-comment-body"><p><strong>Parked in <a href="/imas-codex/sn-integrity-backlog">sn-integrity-backlog</a> §4.</strong> Two physics adjudications through <code>sn edit</code>, deferred until the WEST prototype ships. Decided in the 2026-10-12 portfolio review.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
