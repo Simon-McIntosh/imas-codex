@@ -328,3 +328,48 @@ def test_rerank_pool_is_larger_than_the_returned_search_window():
     from imas_codex.llm.search_tools import RERANK_POOL
 
     assert RERANK_POOL > 30
+
+
+async def test_both_entry_points_share_one_fault_classification(monkeypatch):
+    """One per-call unit classifies the fault; each entry point maps the result.
+
+    A malformed answer and a transport fault are driven through both entry
+    points. The batch maps both faults to ``None``; the single-state caller
+    raises the malformed answer and maps the transport fault to ``None`` — the
+    four outcomes of the shared classification. Because the classification
+    lives in one place, teaching the shared unit to read a malformed answer as
+    a transport fault turns this test red.
+    """
+    from imas_codex.discovery.base.llm import DecisionsValidationError
+
+    raised: list[Exception] = []
+
+    def sync_call(model, state, questions, *, service, **_kwargs):
+        raise raised[0]
+
+    async def async_call(model, state, questions, *, service, **_kwargs):
+        raise raised[0]
+
+    monkeypatch.setattr(judgment, "call_decisions", sync_call)
+    monkeypatch.setattr(judgment, "acall_decisions", async_call)
+
+    state = _states(1)[0]
+
+    raised[:] = [DecisionsValidationError("answer violated its question contract")]
+
+    results, cost = await judgment.decide_batch(
+        [state], QUESTIONS, model=MODEL, service=SERVICE
+    )
+    assert results == [None]
+    assert cost == 0.0
+    with pytest.raises(DecisionsValidationError):
+        judgment.decide_one(MODEL, state, QUESTIONS, service=SERVICE)
+
+    raised[:] = [RuntimeError("the endpoint refused every attempt")]
+
+    results, cost = await judgment.decide_batch(
+        [state], QUESTIONS, model=MODEL, service=SERVICE
+    )
+    assert results == [None]
+    assert cost == 0.0
+    assert judgment.decide_one(MODEL, state, QUESTIONS, service=SERVICE) is None
