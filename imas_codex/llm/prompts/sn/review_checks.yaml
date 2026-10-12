@@ -1,0 +1,1341 @@
+checks:
+- id: malformed_physical_base
+  axis: name
+  dimension: grammar
+  evidence_fields:
+  - physical_base
+  retrieval: false
+  question:
+    kind: noul
+    text: Is the physical base a registered, well-formed single token?
+- id: unregistered_token_in_closed_segment
+  axis: name
+  dimension: grammar
+  evidence_fields:
+  - physical_base
+  - subject
+  - component
+  - coordinate
+  - position
+  - process
+  retrieval: true
+  question:
+    kind: noul
+    text: Does every segment use a token registered in that closed segment?
+- id: decomposition_group_absorbed_into_base
+  axis: name
+  dimension: grammar
+  evidence_fields:
+  - physical_base
+  - component
+  - coordinate
+  - subject
+  retrieval: false
+  question:
+    kind: noul
+    text: Is a token that belongs to another segment absorbed into physical_base?
+- id: field_region_preposition_wrong
+  axis: name
+  dimension: grammar
+  evidence_fields:
+  - physical_base
+  - position
+  retrieval: false
+  question:
+    kind: noul
+    text: For an evaluated field at a position/region locus, is the join _at_ rather than _of_?
+- id: ordered_sample_positional_token
+  axis: name
+  dimension: grammar
+  evidence_fields:
+  - physical_base
+  - description
+  - source_paths
+  retrieval: true
+  question:
+    kind: noul
+    text: Does the name encode a sample or endpoint position that indexes a point rather than naming a
+      quantity?
+- id: retired_operator_spelling
+  axis: name
+  dimension: grammar
+  evidence_fields:
+  - physical_base
+  - process
+  retrieval: false
+  question:
+    kind: noul
+    text: Does the name use an operator spelling the installed grammar has retired?
+- id: grammar_round_trip_failure
+  axis: name
+  dimension: grammar
+  evidence_fields:
+  - id
+  - physical_base
+  - subject
+  - component
+  - coordinate
+  - position
+  - process
+  retrieval: false
+  audit_finding_class: round_trip_failure
+- id: dropped_distinguishing_axis
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - physical_base
+  - subject
+  - component
+  - coordinate
+  - position
+  - process
+  - source_paths
+  - dd_source_docs
+  retrieval: true
+  question:
+    kind: noul
+    text: Does the name preserve every source-stated distinguishing axis of the observable?
+- id: ambiguity_in_isolation
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - physical_base
+  - subject
+  - component
+  - position
+  - description
+  - sibling_fields
+  retrieval: true
+  question:
+    kind: noul
+    text: Is the quantity unambiguous to a reader who sees only the name?
+- id: device_attributed_observable
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - physical_base
+  - subject
+  - source_paths
+  - dd_source_docs
+  retrieval: true
+  question:
+    kind: noul
+    text: Does the name describe the physical observable rather than the measuring instrument's own state?
+- id: over_qualified_modifier
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - physical_base
+  - subject
+  - component
+  - source_paths
+  - dd_source_docs
+  retrieval: true
+  question:
+    kind: noul
+    text: Does the name add a modifier the source does not state, on a form that makes it a claim?
+- id: source_fidelity_unsupported_qualifier
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - physical_base
+  - component
+  - coordinate
+  - position
+  - process
+  - dd_source_docs
+  - source_paths
+  retrieval: true
+  question:
+    kind: noul
+    text: Does the name assert a direction, mechanism, weighting or locus the authoritative DD doc does
+      not support?
+- id: bound_to_wrong_object
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - source_paths
+  - dd_source_docs
+  - description
+  - parent_path
+  - sibling_fields
+  retrieval: true
+  question:
+    kind: choice
+    text: Which object does the name denote, read against its bound source path?
+    options:
+    - the bound source object
+    - a different object
+    - one of several bound objects
+- id: collapsed_two_quantities
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - source_paths
+  - dd_source_docs
+  - unit
+  - description
+  retrieval: true
+  question:
+    kind: choice
+    text: Do all bound source paths denote the same quantity?
+    options:
+    - one quantity
+    - two or more distinct quantities
+- id: over_specialised_parent
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - physical_base
+  - derived_children
+  - derived_parent_note
+  retrieval: true
+  question:
+    kind: noul
+    text: Is a derived family parent judged as an over-specialised standalone name rather than the abstraction
+      of its children?
+- id: owner_erased_outline
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - physical_base
+  - position
+  - source_paths
+  retrieval: true
+  question:
+    kind: noul
+    text: Does a bare outline form erase an owner the source identifies?
+- id: coupled_vs_launched_confusion
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - source_paths
+  - dd_source_docs
+  - description
+  retrieval: true
+  question:
+    kind: noul
+    text: Does the name conflate a coupled quantity with a launched/incident quantity?
+- id: value_provenance_in_name
+  axis: name
+  dimension: semantic
+  evidence_fields:
+  - physical_base
+  - subject
+  retrieval: false
+  question:
+    kind: noul
+    text: Does the name encode value provenance (measured/reconstructed/reference) as a segment?
+- id: non_canonical_operator_join
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - physical_base
+  - process
+  - coordinate
+  retrieval: false
+  question:
+    kind: noul
+    text: Does every operator use the installed grammar's canonical join form?
+- id: non_canonical_segment_order
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - physical_base
+  - subject
+  - component
+  - coordinate
+  - position
+  retrieval: false
+  question:
+    kind: noul
+    text: Are the name's segments in the grammar's canonical order?
+- id: non_canonical_render
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - id
+  - physical_base
+  - subject
+  - component
+  - coordinate
+  - position
+  - process
+  retrieval: false
+  question:
+    kind: noul
+    text: Is the spelling the canonical render of its parsed intermediate representation?
+- id: non_canonical_locus_token
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - physical_base
+  - position
+  - source_paths
+  retrieval: true
+  question:
+    kind: noul
+    text: Does the name use the registered locus/position token for its source object rather than a generic
+      or collapsed one?
+- id: advisory_alias_collapsed
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - physical_base
+  - coordinate
+  - position
+  - cocos_label
+  retrieval: false
+  question:
+    kind: noul
+    text: Does the name collapse one registered advisory alias into another?
+- id: bare_shape_parameter_missing_surface
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - physical_base
+  - position
+  retrieval: false
+  question:
+    kind: noul
+    text: Does a plasma-shape parameter carry the surface locus that makes it meaningful?
+- id: model_surname_suffix
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - id
+  - physical_base
+  retrieval: false
+  question:
+    kind: noul
+    text: Does the name carry a model author surname or model-specific identifier?
+- id: minority_spelling_not_in_roster
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - id
+  - existing_names
+  retrieval: true
+  question:
+    kind: noul
+    text: Does the name adopt a minority spelling against the catalog's established base?
+- id: redundant_repeated_segment
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - physical_base
+  - subject
+  - component
+  retrieval: false
+  question:
+    kind: noul
+    text: Does the name repeat a redundant segment (e.g. electron_electron)?
+- id: missing_required_segment
+  axis: name
+  dimension: completeness
+  evidence_fields:
+  - physical_base
+  - subject
+  - component
+  - position
+  retrieval: false
+  question:
+    kind: noul
+    text: Is a physically required segment (subject, component) missing?
+- id: unit_kind_inconsistent
+  axis: name
+  dimension: completeness
+  evidence_fields:
+  - unit
+  - kind
+  - physical_base
+  retrieval: false
+  question:
+    kind: noul
+    text: Is the physical base consistent with the quantity's authoritative unit and kind?
+- id: source_binding_drift
+  axis: name
+  dimension: completeness
+  evidence_fields:
+  - source_paths
+  - version_notes
+  - documentation
+  retrieval: true
+  question:
+    kind: noul
+    text: Has the anchored source path changed so the name/documentation no longer matches it?
+- id: duplicate_catalog_identity
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - id
+  - existing_names
+  - nearby_existing_names
+  retrieval: false
+  audit_finding_class: duplicate_component
+- id: lexical_convention_violation
+  axis: name
+  dimension: convention
+  evidence_fields:
+  - id
+  - position
+  - physics_domain
+  retrieval: false
+  audit_finding_class: convention_violation
+- id: description_not_single_definition
+  axis: docs
+  dimension: description_quality
+  evidence_fields:
+  - description
+  - documentation
+  retrieval: false
+  question:
+    kind: noul
+    text: Is the description a precise single-line physical definition free of editorial filler?
+- id: description_template_opening_mismatch
+  axis: docs
+  dimension: description_quality
+  evidence_fields:
+  - description
+  retrieval: false
+  audit_finding_class: template_opening
+- id: description_false_of_some_binding
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - description
+  - source_paths
+  - dd_source_docs
+  retrieval: true
+  question:
+    kind: choice
+    text: Is the description true of every bound source path?
+    options:
+    - true of all
+    - narrower than the bindings
+    - false of at least one binding
+- id: units_in_prose
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  - unit
+  retrieval: false
+  question:
+    kind: noul
+    text: Does the documentation carry a unit anywhere in prose?
+- id: cocos_number_in_prose
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  - cocos_label
+  retrieval: false
+  question:
+    kind: noul
+    text: Does the documentation cite a COCOS number in prose rather than stating the direction?
+- id: latex_escaping_broken
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  question:
+    kind: noul
+    text: Is the LaTeX escaped cleanly, with no corrupted backslashes?
+- id: non_normative_documentation
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  question:
+    kind: noul
+    text: Is the documentation a strict normative definition, free of diagnostic lists, recipes and padding?
+- id: symbols_undefined
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: symbol_definitions
+- id: defining_equation_missing
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: defining_equation
+- id: link_hygiene
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  - links
+  retrieval: false
+  audit_finding_class: link_hygiene
+- id: forbidden_equation_variant
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: forbidden_equation_variant
+- id: forbidden_symbol_spelling
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: forbidden_symbol_spelling
+- id: forbidden_locus_gloss
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: forbidden_locus_gloss
+- id: minimum_word_count
+  axis: docs
+  dimension: completeness
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: minimum_word_count
+- id: relationship_link_missing
+  axis: docs
+  dimension: completeness
+  evidence_fields:
+  - documentation
+  - related_neighbours
+  retrieval: false
+  audit_finding_class: relationship_link
+- id: raw_dd_reference_in_prose
+  axis: docs
+  dimension: completeness
+  evidence_fields:
+  - documentation
+  - source_paths
+  retrieval: false
+  question:
+    kind: noul
+    text: Does the documentation cite a raw DD path or IDS name as storage context?
+- id: sign_convention_missing
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  - cocos_label
+  retrieval: false
+  audit_finding_class: sign_convention
+- id: link_unresolved
+  axis: docs
+  dimension: completeness
+  evidence_fields:
+  - links
+  - documentation
+  retrieval: false
+  audit_finding_class: unresolved
+- id: link_dead
+  axis: docs
+  dimension: completeness
+  evidence_fields:
+  - links
+  - documentation
+  retrieval: false
+  audit_finding_class: dead_link
+- id: link_missing_reverse
+  axis: docs
+  dimension: completeness
+  evidence_fields:
+  - links
+  retrieval: false
+  audit_finding_class: missing_reverse
+- id: claim_contradicts_source
+  axis: docs
+  dimension: physics_accuracy
+  evidence_fields:
+  - documentation
+  - dd_source_docs
+  - description
+  retrieval: true
+  question:
+    kind: choice
+    text: Does this claim agree with its DD source definition?
+    options:
+    - supports
+    - contradicts
+    - says nothing
+- id: false_equivalence_with_related
+  axis: docs
+  dimension: physics_accuracy
+  evidence_fields:
+  - documentation
+  - related_neighbours
+  - cross_ids_paths
+  retrieval: true
+  question:
+    kind: noul
+    text: Does the documentation equate the quantity with a related one it is not equal to?
+- id: incompatible_physics_qualifier
+  axis: docs
+  dimension: physics_accuracy
+  evidence_fields:
+  - documentation
+  - physical_base
+  - unit
+  retrieval: false
+  question:
+    kind: noul
+    text: Does the documentation apply a qualifier the physics of the quantity does not admit?
+- id: equation_physically_incorrect
+  axis: docs
+  dimension: physics_accuracy
+  evidence_fields:
+  - documentation
+  - unit
+  retrieval: true
+  question:
+    kind: noul
+    text: Are the stated equations physically correct and dimensionally consistent with the quantity?
+human_reason_map:
+- reason: canonical renderer migration; semantic IR unchanged
+  count: 136
+  check_id: non_canonical_render
+- reason: Canonical re-rendering under the current grammar; parse and compose preserve the exact intermediate
+    representation.
+  count: 13
+  check_id: non_canonical_render
+- reason: 'DD-shaped x2 axis label removed from the grammar: the second local tangential direction completes
+    the right-handed object-local triad (e2 = e3 x e1; e3 = plasma-facing normal, e1 = more-horizontal
+    tangent toward positive toroidal angle). Descriptive carrier replaces the DD label per the locked
+    local-frame design.'
+  count: 12
+  check_id: non_canonical_render
+- reason: canonical renderer migration for a non-canonical drafted successor
+  count: 12
+  check_id: non_canonical_render
+- reason: 'DD-shaped x1 axis label removed from the grammar: the first local tangential direction is the
+    more-horizontal in-plane tangent oriented toward positive toroidal angle (e1 of the object-local frame;
+    e3 = plasma-facing normal, e2 = e3 x e1). Descriptive carrier replaces the DD label per the locked
+    local-frame design.'
+  count: 10
+  check_id: non_canonical_render
+- reason: Use the DD-authoritative toroidal flux coordinate term.
+  count: 6
+  check_id: non_canonical_segment_order
+- reason: Use canonical component and normalization order.
+  count: 4
+  check_id: non_canonical_segment_order
+- reason: 'State-outside-subject canonical ordering (lead decision 2026-07-17, ISN 3cd15f5): state qualifiers
+    bind outside the subject; the saturation state applies to the ion current, so ''saturated'' renders
+    before ''ion''. Grammar now rejects the state-after-subject form.'
+  count: 3
+  check_id: non_canonical_segment_order
+- reason: Use canonical grammar segment order.
+  count: 3
+  check_id: non_canonical_segment_order
+- reason: The Data Dictionary defines this profile in terms of the toroidal flux coordinate; radius is
+    not an approved catalog term.
+  count: 3
+  check_id: non_canonical_segment_order
+- reason: The live plan authorizes the canonical locus spelling or owner-specific composition for this
+    exact owner-geometry identity; a generic angular identity does not retain the named owner or position
+    semantics.
+  count: 3
+  check_id: ambiguity_in_isolation
+- reason: The description defines the locus as the surface minimizing the safety-factor magnitude; minimum_absolute_safety_factor
+    is the registered position token for that same locus.
+  count: 3
+  check_id: non_canonical_locus_token
+- reason: DD summary/global_quantities/power_loss is 'Total power loss through the plasma separatrix (P_sep)',
+    units W — a scalar power, not a flux-surface-normal surface-integrated energy flux. The current name
+    encodes a derivation rather than the quantity.
+  count: 2
+  check_id: unit_kind_inconsistent
+- reason: gm2 (DD unit m^-2), gm3 and gm7 (both dimensionless) are flux-surface averages of grad_rho^2/R^2,
+    grad_rho^2 and grad_rho respectively, per the DD text for those exact paths. All three sit on one
+    name that carries BOTH a dimensionless and an m^-2 unit edge — the only standard name in the graph
+    with two units, a direct symptom of the collapse. The average of a gradient and the average of its
+    square are different quantities.
+  count: 2
+  check_id: collapsed_two_quantities
+- reason: A camera image up-vector component is a dimensionless direction cosine, but this name has collected
+    five DD paths whose declared unit is metre and whose DD text reads 'Height' or is a strike-point coordinate.
+    A vertical position and an orientation-vector component are different quantities and cannot share
+    a name; the unit contradiction is the symptom.
+  count: 2
+  check_id: collapsed_two_quantities
+- reason: The pinned grammar now requires an explicit section plane on cross-sectional identities, so
+    the prior spelling no longer parses; poloidal_plane names the sectioning plane and keeps the swept
+    toroidal surface area a distinct quantity.
+  count: 2
+  check_id: missing_required_segment
+- reason: unit s^-1, no m^-2 area factor; global particle removal rate at the wall due to pumping, not
+    a spatial flux through a surface. 'rate' is the correct registered ISN base.
+  count: 2
+  check_id: unit_kind_inconsistent
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''thomson_scattering/channel/line_of_sight/first_point/z''
+    → ''ic_antennas/antenna/module/pressure/position/z''). Refresh this name''s documentation to reflect
+    the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh,
+    not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: DD waves/coherent_wave/global_quantities/electrons/power_thermal is RF wave power absorbed by
+    thermal electrons; bare name overclaims all-channel scope; align with sibling absorbed_wave_power
+    names.
+  count: 1
+  check_id: over_qualified_modifier
+- reason: DD waves/coherent_wave/global_quantities/electrons/power_fast is RF wave power absorbed by fast
+    (non-thermal) electrons; bare name overclaims all-channel scope; align with sibling absorbed_wave_power
+    names.
+  count: 1
+  check_id: over_qualified_modifier
+- reason: DD waves/coherent_wave/global_quantities/ion/power_thermal is RF wave power absorbed by thermal
+    ions; bare name overclaims all-channel scope; align with sibling absorbed_wave_power names.
+  count: 1
+  check_id: over_qualified_modifier
+- reason: DD waves/coherent_wave/global_quantities/ion/power_fast is RF wave power absorbed by fast ions;
+    bare name overclaims all-channel scope; align with sibling absorbed_wave_power names.
+  count: 1
+  check_id: over_qualified_modifier
+- reason: Per-toroidal-mode decomposition of thermal-electron coherent-wave absorbed power (DD power_thermal_n_phi);
+    align with parent thermal_electron_absorbed_wave_power.
+  count: 1
+  check_id: minority_spelling_not_in_roster
+- reason: Per-toroidal-mode decomposition of fast-electron coherent-wave absorbed power (DD power_fast_n_phi);
+    align with parent fast_electron_absorbed_wave_power.
+  count: 1
+  check_id: minority_spelling_not_in_roster
+- reason: Per-toroidal-mode decomposition of thermal-ion coherent-wave absorbed power (DD power_thermal_n_phi);
+    align with parent thermal_ion_absorbed_wave_power.
+  count: 1
+  check_id: minority_spelling_not_in_roster
+- reason: Per-toroidal-mode decomposition of fast-ion coherent-wave absorbed power (DD power_fast_n_phi);
+    align with parent fast_ion_absorbed_wave_power.
+  count: 1
+  check_id: minority_spelling_not_in_roster
+- reason: 'Row-10 (lead-approved): drop ''stored'' to match the family-wide energy convention (thermal_plasma_energy,
+    thermal_ion_energy all use base ''energy''; DD energy_electrons_thermal = ''thermal electron energy
+    content''). Predecessor tombstone compacted with recorded internal change; id is free.'
+  count: 1
+  check_id: over_qualified_modifier
+- reason: Grammar round-trip canonicalizes this spelling to ion_upper_bound_charge_number (subject token
+    precedes the bound qualifier in the canonical order); the current non-canonical order fails the full-name
+    parse gate and the name sits quarantined.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: 'Grammar round-trip canonicalizes this spelling: the transformation token linear precedes the
+    subject+state segment in the canonical order, matching the accepted parent linear_neutral_internal_state_momentum_flux.
+    The current non-canonical order fails the full-name parse gate and the name sits quarantined.'
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: The coordinated grammar rotation aliases the dimensional toroidal-flux carrier to toroidal_flux_radius;
+    the accepted catalog spelling must match the canonical parse at the pinned release.
+  count: 1
+  check_id: non_canonical_render
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''pf_passive/loop/element/geometry/annulus/z''
+    → ''pf_active/coil/geometry/rectangle/z''; documentation: ''Centre height'' → ''Geometric centre Z'').
+    Refresh this name''s documentation to reflect the corrected source; preserve the established intent
+    and family phrasing. This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''summary/global_quantities/beta_tor_thermal_norm/value''
+    → ''equilibrium/time_slice/global_quantities/beta_tor_norm''; documentation: ''Value'' → ''Normalized
+    toroidal beta, defined as 100 * beta_tor * a[m] * B0 [T] / ip [MA]''). Refresh this name''s documentation
+    to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted
+    source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''pf_plasma/element/geometry/annulus/r''
+    → ''pf_active/coil/element/geometry/annulus/r''). Refresh this name''s documentation to reflect the
+    corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh,
+    not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''equilibrium/time_slice/global_quantities/beta_tor_norm''
+    → ''summary/global_quantities/beta_tor_norm_mhd/value''; documentation: ''Normalized toroidal beta,
+    defined as 100 * beta_tor * a[m] * B0 [T] / ip [MA]'' → ''Value''). Refresh this name''s documentation
+    to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted
+    source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''equilibrium/time_slice/boundary/closest_wall_point/r''
+    → ''iron_core/segment/geometry/outline/r''). Refresh this name''s documentation to reflect the corrected
+    source; preserve the established intent and family phrasing. This is a targeted source-refresh, not
+    a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: IMAS DD paths edge_transport/model/ggd/momentum/v/parallel and plasma_transport/model/ggd/{ion,neutral}/momentum/v/parallel
+    are the parallel components of momentum convection velocity (m.s^-1); rc61 parses the replacement
+    as the canonical token ordering.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: IMAS DD disruption/global_quantities/power_parallel_halo is parallel heat-flux power in the
+    halo-current region during disruption (W); rc61 parses the replacement as the canonical token ordering.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''edge_profiles/ggd/j_perpendicular_viscosity/r''
+    → ''plasma_profiles/ggd/j_parallel_viscosity/r''). Refresh this name''s documentation to reflect the
+    corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh,
+    not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''magnetics/b_field_pol_probe/poloidal_angle''
+    → ''gyrokinetics_local/linear/wavevector/eigenmode/angle_pol''; units: ''rad'' → ''1''; documentation:
+    ''Poloidal angle of the coil orientation'' → ''Poloidal angle grid. The angle is defined with respect
+    to (R0,Z0) with R0=(Rmax-Rmin)/2 and Z0=(Zmax-Zmin)/2. It is increasing clockwise. So (r,theta,phi)
+    is ri…''). Refresh this name''s documentation to reflect the corrected source; preserve the established
+    intent and family phrasing. This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''interferometer/channel/line_of_sight/first_point/phi''
+    → ''ec_launchers/mirror/geometry/sphere_centre/phi''). Refresh this name''s documentation to reflect
+    the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh,
+    not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''summary/fusion/neutron_rates/total/value''
+    → ''neutron_diagnostic/fusion_power''; units: ''Hz'' → ''W''; documentation: ''Value'' → ''Fusion
+    power reconstructed from the detectors signals''). Refresh this name''s documentation to reflect the
+    corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh,
+    not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''plasma_sources/source/profiles_1d/ion/element/multiplicity''
+    → ''edge_transport/model/ggd/ion/element/atoms_n''; units: ''Elementary Charge Unit'' → ''—''; documentation:
+    ''Multiplicity of the atom'' → ''Number of atoms of this element in the molecule''). Refresh this
+    name''s documentation to reflect the corrected source; preserve the established intent and family
+    phrasing. This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''edge_transport/model/ggd/neutral/state/momentum/v/phi''
+    → ''plasma_profiles/ggd/neutral/state/velocity/phi''). Refresh this name''s documentation to reflect
+    the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh,
+    not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''edge_profiles/profiles_1d/ion/state/ionization_potential''
+    → ''core_profiles/profiles_1d/ion/state/ionization_potential''; documentation: "Cumulative and average
+    ionization potential to reach a given bundle. Defined as sum (x_z* (sum of Epot from z''=0 to z-1)),
+    where Epot is the ionization potentia…" → "Cumulative and average ionization potential to reach a
+    given bundle. Defined as sum (x_z* (sum of Epot from z''=0 to z-1)), where Epot is the ionization
+    potentia…"). Refresh this name''s documentation to reflect the corrected source; preserve the established
+    intent and family phrasing. This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (units: ''m^-2.s^-1.sr^-1.m^-1''
+    → ''m^-3.s^-1.sr^-1''). Refresh this name''s documentation to reflect the corrected source; preserve
+    the established intent and family phrasing. This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: The DD text for .../electrons/particles is 'Source term for electron density equation' with
+    unit m^-3.s^-1, while particles_inside is the volume-integrated rate at s^-1. Five volumetric-density
+    sources are attached to a name declaring s^-1, a unit that cannot be theirs; a density and its integral
+    are different quantities.
+  count: 1
+  check_id: collapsed_two_quantities
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''equilibrium/time_slice/profiles_1d/magnetic_shear''
+    → ''gyrokinetics/flux_surface/magnetic_shear_r_minor''; units: ''1'' → ''-''; documentation: ''Magnetic
+    shear, defined as rho_tor/q . dq/drho_tor'' → ''Magnetic shear, defined as r_minor_norm/q . dq/dr_minor_norm
+    (different definition from the equilibrium IDS)''). Refresh this name''s documentation to reflect
+    the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh,
+    not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''edge_sources/source/ggd/momentum/phi''
+    → ''core_sources/source/profiles_1d/ion/momentum/toroidal''; documentation: ''Toroidal component,
+    one scalar value is provided per element in the grid subset.'' → ''Toroidal component''). Refresh
+    this name''s documentation to reflect the corrected source; preserve the established intent and family
+    phrasing. This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'All 37 sources are state-resolved (…/ion/state/z_max across core_profiles, edge_profiles, distributions,
+    waves, wall). The DD documents z_max as ''Maximum Z of the charge state bundle'', and the bundle has
+    no existence outside the state entry that defines it — a species with several state entries carries
+    a different z_max in each, so a name with no state qualifier cannot say which it means. The state-resolved
+    form is the established convention: the sibling z_min is ion_state_minimum_charge_number and the live
+    catalog carries ion_state_charge_number.'
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''focs/beat_length''
+    → ''focs/fibre_properties/beat_length''). Refresh this name''s documentation to reflect the corrected
+    source; preserve the established intent and family phrasing. This is a targeted source-refresh, not
+    a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD: ''Energy extracted from the component on the whole plasma discharge'' — total calorimetric
+    energy with no population discrimination; ''thermal'' parses as the thermal-population token, asserting
+    a species-population claim the DD text does not make, and the stored spelling fails canonical order
+    at the pinned grammar.'
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: 'DD (summary/time_breakdown): ''Time of the plasma breakdown''. The stored spelling fails canonical
+    order at the pinned grammar, and every spelling joining ''plasma'' with ''breakdown'' canonicalizes
+    wrongly (''plasma'' binds as a channel qualifier, splitting the lexical concept). ISN registers ''breakdown''
+    as the breakdown-phase scoping qualifier; with the temporal qualifier this composes canonically as
+    the start time of the breakdown phase. The plain ''breakdown_time'' id is a refine tombstone in this
+    name''s own chain and cannot be adopted without closing a REFINED_FROM cycle.'
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: 'DD (summary/global_quantities/greenwald_fraction): ''Greenwald fraction = line_average/n_e/value
+    divided by (ip*1e6*pi*minor_radius^2)'' — the numerator is the LINE-AVERAGED electron density; the
+    reviewer quorum already flagged the bare ''average'' qualifier as under-specified against the DD text.
+    line_averaged is the registered transformation and the form parses canonically.'
+  count: 1
+  check_id: ambiguity_in_isolation
+- reason: 'DD (equilibrium profiles_1d b_field_average): ''Flux surface averaged modulus of B'' — the
+    averaged quantity is the field MAGNITUDE; the name without the magnitude decomposition claims a vector
+    average. The competing spelling misspells the reduction participle (''average''); this form parses
+    canonically.'
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: 'DD (equilibrium profiles_1d gm9): ''Flux surface averaged 1/R'' with unit m^-1 — the quantity
+    is the averaged inverse major radius; ''toroidal metric'' names a tensor component the path does not
+    store, and the metric spelling collapsed distinct coefficients elsewhere in this family. Parser-validated
+    at the pinned grammar with the path''s own DD unit.'
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: 'DD (equilibrium profiles_1d gm2): ''Flux surface averaged |grad rho|^2/R^2'' with unit m^-2
+    — the average of a quotient, expressible as the flux_surface_averaged reduction wrapping the binary
+    ratio of the squared gradient magnitude to the squared major radius. The generic ''metric'' base collapses
+    distinct coefficients and cannot carry the m^-2 unit.'
+  count: 1
+  check_id: ambiguity_in_isolation
+- reason: 'DD (equilibrium profiles_1d gm4): ''Flux surface averaged 1/B^2'' with unit T^-2 — the drafted
+    name misses the flux-surface averaging, the square, and the magnitude decomposition; the parser-validated
+    form carries all three with the path''s own DD unit.'
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: 'DD (equilibrium profiles_1d gm3): ''Flux surface averaged |grad rho|^2'' — dimensionless average
+    of the SQUARED gradient magnitude of the toroidal flux radius; the tensor spelling names a tensor
+    component the path does not store. Parser-validated at the pinned grammar; single source after the
+    collapse split.'
+  count: 1
+  check_id: bound_to_wrong_object
+- reason: 'DD (equilibrium profiles_1d gm7): ''Flux surface averaged |grad rho|'' — dimensionless average
+    of the gradient magnitude itself (not its square); the metric spelling collapses this family. Parser-validated
+    at the pinned grammar; single source.'
+  count: 1
+  check_id: bound_to_wrong_object
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_rotating_frame/density_real''
+    → ''gyrokinetics_local/species/density_norm''; units: ''-'' → ''1''; documentation: ''Normalised density
+    (real part)'' → ''Normalised density''). Refresh this name''s documentation to reflect the corrected
+    source; preserve the established intent and family phrasing. This is a targeted source-refresh, not
+    a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''gyrokinetics_local/species_all/velocity_tor_norm''
+    → ''gyrokinetics_local/species_all/velocity_phi_norm''; units: ''-'' → ''1''; documentation: ''Normalised
+    toroidal velocity of species (all species are assumed to have a purely toroidal velocity with a common
+    toroidal angular frequency)'' → ''normalized toroidal velocity of species (all species are assumed
+    to have a purely toroidal velocity with a common toroidal angular frequency)''). Refresh this name''s
+    documentation to reflect the corrected source; preserve the established intent and family phrasing.
+    This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: IMAS DD gyrocenter moment paths represent normalized 0.5*m*v_parallel*v_perp^2 moments for gyrokinetic
+    eigenmodes; rc61 parses the replacement as the canonical token ordering.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: The DD unit T.m for edge_profiles/ggd/a_field/<component> is correct for a magnetic vector potential;
+    the name it is attached to declares kg.m^-1.s^-2, a momentum flux. A vector potential and a momentum
+    flux are unrelated quantities, so this is a mis-attachment on the standard-name side, not a DD defect.
+  count: 1
+  check_id: bound_to_wrong_object
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''gyrokinetics/wavevector/radial_component_norm''
+    → ''gyrokinetics_local/linear/wavevector/radial_wavevector_norm''; units: ''-'' → ''1''). Refresh
+    this name''s documentation to reflect the corrected source; preserve the established intent and family
+    phrasing. This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (units: ''(m.s^-1)^-3.m^-3.s^-1''
+    → ''m^-6.s^2''). Refresh this name''s documentation to reflect the corrected source; preserve the
+    established intent and family phrasing. This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: The DD path plasma_sources/source/global_quantities/total_ion_particles sits under global_quantities
+    and declares s^-1, while the profiles_1d copies declare m^-3.s^-1. The global integrated rate is attached
+    to a name declaring the volumetric density unit, which cannot be its unit.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: All three producing DD paths declare m^-2.s^-1.sr^-1, so this is photon-count line radiance;
+    W.m^-2.sr^-1 denotes energy radiance. The successor unit will be repaired from DD authority before
+    review.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: The rc63 closed grammar requires explicit square_of algebraic operator ordering for the toroidal
+    flux coordinate gradient magnitude.
+  count: 1
+  check_id: non_canonical_operator_join
+- reason: The rc63 closed grammar requires explicit inverse_of and square_of algebraic operator ordering
+    for magnetic field magnitude.
+  count: 1
+  check_id: non_canonical_operator_join
+- reason: The rc63 closed grammar requires explicit inverse_of algebraic operator ordering for major radius.
+  count: 1
+  check_id: non_canonical_operator_join
+- reason: The rc63 closed grammar requires canonical plasma_stored_energy subject/base ordering inside
+    the time derivative operand.
+  count: 1
+  check_id: non_canonical_operator_join
+- reason: DD 4.1.1 defines delta_position as an increment added to the static measurement position and
+    this leaf as its toroidal angle; a toroidal offset at the measurement position preserves the angular
+    increment without applying a difference operator to a geometry carrier.
+  count: 1
+  check_id: field_region_preposition_wrong
+- reason: DD 4.1.1 defines the dimensionless ratio of electron temperature at the magnetic axis to volume-averaged
+    electron temperature; the replacement states both operands and the numerator locus explicitly.
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: DD 4.1.1 defines the parallel ion-velocity component divided by the modulus of the local magnetic
+    field; the replacement preserves the parallel projection, magnitude denominator, and DD-authoritative
+    unit.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: The strict parser supplies this canonical flat order for the same lossless neutral internal-state
+    atomic collision power-density expression.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: The strict parser supplies this canonical first-operand order while preserving the exact binary
+    gas-species fraction expression.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: The strict parser supplies this canonical denominator order while preserving the exact Monte
+    Carlo marker-weight count ratio.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: The strict parser supplies this canonical denominator order while preserving the accepted dimensionless
+    normalization ratio.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: The strict parser supplies canonical subject/state order for both operands while preserving
+    the accepted disruption threshold ratio.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: The strict parser requires volume averaging outside time differentiation by operator precedence;
+    this canonical form preserves the DD volume-average density derivative and unit.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: IMAS DD summary disruption decay-time paths define the characteristic decay time of runaway
+    electron current, in seconds, for both fixed 20-80 percent and custom linear estimators.
+  count: 1
+  check_id: ambiguity_in_isolation
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''summary/pedestal_fits/linear/rhostar_pedestal_top_electron_hfs/value''
+    → ''summary/pedestal_fits/mtanh/rhostar_pedestal_top_electron_hfs/value''). Refresh this name''s documentation
+    to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted
+    source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''core_sources/source/profiles_1d/electrons/particles''
+    → ''plasma_sources/source/profiles_1d/electrons/particles_inside''; units: ''m^-3.s^-1'' → ''s^-1'';
+    documentation: ''Source term for electron density equation'' → ''Electron source inside the flux surface.
+    Cumulative volume integral of the source term for the electron density equation.''). Refresh this
+    name''s documentation to reflect the corrected source; preserve the established intent and family
+    phrasing. This is a targeted source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'State-resolution mismatch: not one source is state-resolved. distribution_sources/source/profiles_1d/particles
+    and distribution_sources/source/ggd/particles/values are species-generic particle source terms whose
+    species is carried by a sibling species/ structure, and plasma_sources/source/ggd/electrons/particles/values
+    is an electron source. Nothing carries the ion state the ion_state qualifier claims; state resolution
+    in the DD is expressed by a /state/ substructure, which the live ion_state_source_rate correctly sources.
+    Replace the false ion_state qualifier with the particle channel qualifier, which preserves the distinction
+    the DD does make at this level, namely particles versus energy and momentum source terms under the
+    same source.'
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''core_transport/model/profiles_1d/ion/state/energy/d''
+    → ''plasma_transport/model/profiles_1d/ion/state/energy/d''). Refresh this name''s documentation to
+    reflect the corrected source; preserve the established intent and family phrasing. This is a targeted
+    source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: The grammar retired the tendency operator; time_derivative is the single surviving unary prefix
+    for a temporal change, and the two were identical in kind, precedence and semantic effects, so this
+    is a respelling with no change of physics. The quantity is the time rate of change of the neoclassical
+    tearing mode rotation frequency in rad.s^-2, which is exactly what time_derivative denotes; keeping
+    the retired spelling would leave the identity carrying no temporal_change effect that the grammar
+    can read.
+  count: 1
+  check_id: retired_operator_spelling
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''plasma_transport/model/ggd/ion/state/energy/v_pol/values''
+    → ''edge_transport/model/ggd/ion/state/energy/v_pol/values''). Refresh this name''s documentation
+    to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted
+    source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: The grammar retired the tendency operator; time_derivative is the single surviving unary prefix
+    for a temporal change, and the two were identical in kind, precedence and semantic effects, so this
+    is a respelling with no change of physics. The bound DD path transport_solver_numerics/solver_1d/d_dvolume_drho_tor_dt
+    is the time rate of change of dV/drho_tor in m^2.s^-1, exactly what time_derivative denotes; keeping
+    the retired spelling also makes the attachment fail the tense-consistency rule because the operator
+    no longer registers a temporal_change effect.
+  count: 1
+  check_id: retired_operator_spelling
+- reason: Both attached DD paths are local electron-density source terms and independently declare m^-3.s^-1
+    through matching scalar metadata and HAS_UNIT edges; the predecessor instead denotes a volume-integrated
+    total at s^-1, so the corrected identity must retain volumetric source-rate semantics and DD-authoritative
+    units.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: IMAS DD spectrometer_x_ray_crystal/channel/profiles_line_integrated/velocity_tor is toroidal
+    plasma velocity in m.s^-1 estimated directly from line-integrated spectral measurements without tomographic
+    inversion.
+  count: 1
+  check_id: bound_to_wrong_object
+- reason: The DD path plasma_transport/model/profiles_1d/neutral/state/momentum/v_pol denotes the effective
+    poloidal convection velocity in the neutral internal-state momentum equation; replace the non-canonical
+    convected qualifier while preserving direction, neutral internal-state resolution, momentum transport,
+    and velocity.
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: The WEST ECE frequency path measures the oscillation frequency of the probing wave assigned
+    to a diagnostic channel; diagnostic_antenna overstates the hardware owner, while wave_diagnostic_channel
+    retains the wave and channel identity.
+  count: 1
+  check_id: device_attributed_observable
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''b_field_non_axisymmetric/time_slice/control_surface/outline/z''
+    → ''b_field_non_axisymmetric/time_slice/control_surface/normal_vector/z''). Refresh this name''s documentation
+    to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted
+    source-refresh, not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: The recorded validator identifies the phase_of construction as invalid; moving phase to the
+    governed quantity suffix is a clear grammar correction with unchanged physics.
+  count: 1
+  check_id: field_region_preposition_wrong
+- reason: The recorded validator rejects coordinate_of; the detector pixel is the measurement locus, so
+    at is the grammar-defined relation.
+  count: 1
+  check_id: field_region_preposition_wrong
+- reason: The integrated_ prefix is forbidden; cumulative_inside_flux_surface is the grammar-valid integral
+    form and preserves the total electron density quantity.
+  count: 1
+  check_id: non_canonical_operator_join
+- reason: 'DD source drift — the anchoring Data Dictionary path changed (path renamed: ''summary/local/separatrix_average/n_i/tungsten/value''
+    → ''summary/local/separatrix/n_i/tungsten/value''). Refresh this name''s documentation to reflect
+    the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh,
+    not a rewrite.'
+  count: 1
+  check_id: source_binding_drift
+- reason: 'The three bound DD paths (balance_of_plant/power_plant/system/component/port/mass_flow, calorimetry/cooling_loop/mass_flow,
+    calorimetry/group/component/mass_flow) are a mass flow rate in kg.s^-1, and this name''s own documentation
+    defines it as the net rate at which coolant crosses a flow boundary, m_dot = dM/dt. Dividing a mass
+    by the time base is a temporal derivative expressed as a ratio: the identity carries no temporal_change
+    semantics even though the unit does, and it reads as an arithmetic construction rather than a physical
+    quantity. The grammar now registers mass_flow_rate as a physical base, so the quantity has a base
+    of its own and the ratio construction is no longer needed.'
+  count: 1
+  check_id: collapsed_two_quantities
+- reason: The grammar retired the tendency operator; time_derivative is the single surviving unary prefix
+    for a temporal change, and the two were identical in kind, precedence and semantic effects, so this
+    is a respelling with no change of physics. The quantity is the time rate of change of the total thermal
+    plasma internal energy in W, which is exactly what time_derivative denotes; keeping the retired spelling
+    would leave the identity carrying no temporal_change effect that the grammar can read.
+  count: 1
+  check_id: retired_operator_spelling
+- reason: DD unit is Hz (s^-1), no m^-2 factor; description confirms this is a volume-integrated total
+    production rate, not a spatial flux through a surface. physical_base='flux' contradicts the stored
+    dimension; 'rate' is the correct registered ISN base for a bare production/count rate.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit m^-3.s^-1.sr^-1 is a local photon count-production rate per plasma volume and emission
+    solid angle; physical_base='emissivity' requires a power density (W.m^-3, cf. electron_emissivity),
+    which this is not. 'rate' is the correct registered ISN base for a bare production rate.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit s^-1, no m^-2 area factor; description confirms this is an uncalibrated detected-photoelectron
+    count rate, not a spatial flux through a surface. 'rate' is the registered ISN base for a bare count
+    rate.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit m^-3.s^-1.sr^-1 is a photon-number production rate per plasma volume, solid angle and wavelength
+    interval, not power per area (radiance requires W.m^-2.sr^-1, and even photon_radiance requires per-area
+    m^-2). 'rate' is the correct registered ISN base for this bare photon-count density.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit m^-3.s^-1.sr^-1 is a photon-number production rate per plasma volume, solid angle and wavelength
+    interval, not power per area (radiance requires W.m^-2.sr^-1); even the correct photon-count base
+    photon_radiance requires per-area m^-2, not m^-3. 'rate' is the correct registered ISN base for this
+    bare photon-count density.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit m^-3.s^-1, no W-based power factor; this is a volumetric fusion-reaction production rate,
+    not a power density (physical_base='emissivity' requires W.m^-3, cf. electron_emissivity). 'rate'
+    is the correct registered ISN base; cascades to the deuterium_deuterium/tritium fusion children.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit Hz (s^-1), no m^-2 area factor; volume-integrated fusion neutron production rate, not a
+    spatial flux through a surface. 'rate' is the correct registered ISN base.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit Hz (s^-1), no m^-2 area factor; volume-integrated fusion neutron production rate, not a
+    spatial flux through a surface. 'rate' is the correct registered ISN base; cascades through the neutron/deuterium-deuterium/deuterium-tritium
+    children.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit Hz (s^-1), no m^-2 area factor; volume-integrated fusion neutron production rate, not a
+    spatial flux through a surface. 'rate' is the correct registered ISN base; distinguished from the
+    reaction-rate-density family (rate_due_to_fusion, ex-emissivity) by the 'total' qualifier since this
+    one is a bare global count rate.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit Hz/s^-1, no m^-2 area factor; this is a global particle removal rate due to pumping, not
+    a spatial flux through a surface. 'rate' is the correct registered ISN base.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit s^-1, no m^-2 area factor, unlike its parent neutral_particle_flux_at_wall_due_to_surface_emission
+    which keeps a genuine per-area flux unit; this 'total' variant is the volume/surface-integrated bare
+    count rate. 'rate' is the correct registered ISN base.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: unit m^-2.s^-1.sr^-1 is a photon count per projected area per solid angle, exactly the registered
+    photon_radiance base's dimension (already used correctly elsewhere, e.g. photon_radiance_at_spectral_line),
+    not power-based radiance (W.m^-2.sr^-1).
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: DD charge_exchange/channel/spectrum/radiance_spectral, spectrometer_uv/channel/radiance_spectral
+    and spectrometer_visible/channel/grating_spectrometer/radiance_spectral all document themselves as
+    'Calibrated spectral radiance (radiance per unit wavelength)'. The unit m^-3.s^-1.sr^-1 is m^-2.s^-1.sr^-1
+    per unit wavelength - a line-of-sight radiance, not a per-unit-volume production rate; the third metre
+    exponent is the wavelength interval, not a volume. photon_radiance is the corpus base for photon-number
+    radiance, carried by 3 accepted names at m^-2.s^-1.sr^-1 (photon_radiance_at_spectral_line, motional_stark_photon_radiance_at_spectral_line,
+    impurity_ion_photon_radiance_of_spectral_line_due_to_charge_exchange), while m^-3.s^-1.sr^-1 has zero
+    accepted names on any base. Bare 'rate' asserts a volumetric production rate the DD path does not
+    measure.
+  count: 1
+  check_id: ambiguity_in_isolation
+- reason: DD bremsstrahlung_visible/channel/radiance_spectral and charge_exchange/channel/spectrum/radiance_continuum
+    both document themselves as 'Calibrated spectral radiance (radiance per unit wavelength)'. The unit
+    m^-3.s^-1.sr^-1 is m^-2.s^-1.sr^-1 per unit wavelength - a line-of-sight radiance of free-free emission,
+    not a per-unit-volume production rate; the third metre exponent is the wavelength interval, not a
+    volume. photon_radiance is the corpus base for photon-number radiance, carried by 3 accepted names
+    at m^-2.s^-1.sr^-1, while m^-3.s^-1.sr^-1 has zero accepted names on any base. Bare 'rate' asserts
+    a volumetric production rate the DD path does not measure.
+  count: 1
+  check_id: ambiguity_in_isolation
+- reason: The parent emissivity_due_to_fusion is a volumetric neutron production rate with unit m^-3.s^-1
+    and no solid-angle dependence at all. source_rate is the corpus base for that dimension - 13 accepted
+    names use it against 1 on bare rate - and bare 'rate' does not distinguish this volumetric quantity
+    from the accepted integrated sibling rate_due_to_beam_beam_fusion, whose unit is Hz; review flagged
+    exactly that ambiguity.
+  count: 1
+  check_id: unit_kind_inconsistent
+- reason: DD description names a per-volume neutron production rate (m^-3.s^-1), identical in physics
+    content to the accepted deuterium_deuterium_emissivity_due_to_fusion and deuterium_tritium_emissivity_due_to_fusion
+    siblings, which already use physical_base=emissivity for this exact unit. The prior bare rate_due_to_fusion
+    and this source_rate_due_to_fusion spelling both omitted the produced subject (neutron), which is
+    why source_rate_due_to_fusion failed the name-vs-description similarity gate at 0.513. Naming the
+    subject explicitly (neutron) alongside the established emissivity base for this unit makes the name
+    self-describing and consistent with its accepted siblings.
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: 'Canonical rendering under the locus-tail rule: the grammar now renders the operator segment
+    after the base quantity, so the stored spelling is a rendering defect rather than a meaning change.
+    The re-rendered spelling strict-reparses to a byte-identical canonical IR, so the asserted quantity
+    is unchanged.'
+  count: 1
+  check_id: non_canonical_render
+- reason: All bound DD paths are reflectometer channel positions; reflectometer_cutoff_position is the
+    registered position token that makes the existing locus diagnostic-specific.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: The sole bound DD path is a Doppler reflectometer channel position; reflectometer_cutoff_position
+    is the registered position token that makes the existing locus diagnostic-specific.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: The sole bound DD path is charge_exchange/channel/ion/velocity_pol; charge_exchange_channel
+    is the registered position token naming that same channel locus.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: The sole bound DD path is charge_exchange/channel/momentum_phi; charge_exchange_channel is the
+    registered position token naming that same channel locus.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: The sole bound DD path is thomson_scattering/channel/delta_position/phi; thomson_scattering_channel_position
+    is the registered position token naming that same channel locus.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: The sole bound DD path is thomson_scattering/channel/delta_position/z; thomson_scattering_channel_position
+    is the registered position token naming that same channel locus.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: Both bound DD paths are Langmuir-probe plasma-potential measurements; langmuir_probe_position
+    is the registered position token naming that same probe locus.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: The sole bound DD path is ece/channel/delta_position_suprathermal/theta; ece_channel_emission_position
+    is the registered position token naming that same emission locus.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: The sole bound DD path is ece/channel/delta_position_suprathermal/phi; ece_channel_emission_position
+    is the registered position token naming that same emission locus.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: The sole bound DD path is ece/channel/delta_position_suprathermal/psi; ece_channel_emission_position
+    is the registered position token naming that same emission locus while the wave-particle-interaction
+    mechanism remains unchanged.
+  count: 1
+  check_id: non_canonical_locus_token
+- reason: The canonical renderer places flux_surface_averaged immediately before the toroidal_current_density
+    operand; this is a spelling-only re-rendering with unchanged semantics.
+  count: 1
+  check_id: non_canonical_render
+- reason: Canonical grammar renders the flux-surface averaging operator before the toroidal component
+    while preserving the same parsed meaning and DD source.
+  count: 1
+  check_id: non_canonical_segment_order
+- reason: The quantity is net boundary power, equal to forward power minus reflected power at the antenna
+    boundary; the unqualified name does not distinguish it from the forward, reflected, and total variants
+    beside it.
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: The source description locates the hot neutral translational temperature in the plasma edge
+    or scrape-off layer; this equivalent name makes the measured location explicit without changing the
+    quantity.
+  count: 1
+  check_id: bound_to_wrong_object
+- reason: The source description locates the hot neutral translational temperature at the plasma edge
+    or scrape-off layer; this grammar-valid replacement uses the established plasma-boundary location
+    qualifier without changing the measured species-level temperature.
+  count: 1
+  check_id: bound_to_wrong_object
+- reason: The source is one scalar half-width of the hard X-ray emissivity peak on the inner side; this
+    grammar-valid replacement follows the established hard-X-ray peak width construction and does not
+    combine two independent quantities.
+  count: 1
+  check_id: collapsed_two_quantities
+- reason: The DD path hard_xrays/emissivity_profile_1d/half_width_internal is one scalar inward half-width
+    of the hard X-ray emissivity peak in normalized toroidal flux coordinate. The current name says generic
+    width and omits both the half-width distinction, which changes the implied magnitude by a factor of
+    two, and the emissivity profile locus. This successor restores half_width and binds the quantity to
+    the emissivity peak; unit 1 and the description carry the normalized-coordinate context, so it remains
+    documentation rather than another identity segment.
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: The DD path hard_x_rays/emissivity_profile_1d/half_width_internal is one scalar inward half-width
+    of the hard X-ray emissivity peak in normalized toroidal flux coordinate. The prior generic width
+    spelling omitted the half-width distinction, changing the implied magnitude by a factor of two, and
+    omitted the emissivity-profile locus. This successor restores half_width and binds the quantity to
+    the emissivity peak; unit 1 and the description carry the normalized-coordinate context. The quantity
+    is a field evaluated at the emissivity peak rather than an intrinsic geometric property of the peak,
+    so the position locus takes the ISN-authoritative relation at.
+  count: 1
+  check_id: dropped_distinguishing_axis
+- reason: 'The DD path barometry/gauge/pressure is the Pressure leaf of a barometry gauge: an instrument
+    reading of neutral gas pressure in the vacuum vessel and surrounding vacuum system, not a kinetic
+    neutral-particle pressure moment. The successor makes the measured gas and gauge owner explicit, separating
+    this diagnostic reading from total_neutral_pressure, thermal_neutral_pressure, neutral_internal_state_pressure,
+    and total_neutral_internal_state_pressure. Its description must likewise identify neutral gas pressure
+    measured by the barometry gauge.'
+  count: 1
+  check_id: device_attributed_observable
+- reason: DD leaf ic_antennas/antenna/module/strap/distance_to_conductor defines the distance from an
+    ICRH antenna strap to the conducting wall or conductor located behind it; this strap-to-backwall separation
+    governs the antenna loading resistance and RF coupling efficiency. The bare base distance was capped
+    by reviewers for not stating which distance of the strap is meant; the back_surface zone names the
+    strap rear face whose perpendicular clearance to the conducting wall behind it is this quantity, matching
+    the specificity of the accepted sibling family inner_radius_of_antenna_strap and outer_radius_of_antenna_strap.
+  count: 1
+  check_id: ambiguity_in_isolation
