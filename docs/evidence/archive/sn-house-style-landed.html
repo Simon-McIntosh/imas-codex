@@ -45,6 +45,11 @@
     <p><code>tests/standard_names/test_conventions_wiring.py</code> drives each documentation render site (<code>process_generate_docs_batch</code>, <code>prepare_docs_review_request</code> and <code>process_refine_docs_batch</code> in <code>workers.py</code>, and <code>_review_single_batch</code> in <code>review/pipeline.py</code>) with <code>render_prompt</code> stubbed. Each test asserts that the context carries the conventions selected for the item, and each fails with <code>KeyError: 'conventions'</code> when its site's key is removed (4 of 4 controls red). Merge <code>c2d5c8417</code>. Independent review 111/120, no findings. Its broad gate of 113 files showed 2,003 passed against 1,999, with the same seven failures at base and head; §10 takes up six of them.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-house-style/shs-conventions-wiring">shs-conventions-wiring</a>.</p>
   </section>
 
+  <section id="s10">
+    <h2>§10 — the documentation prompt changes broke six tests</h2>
+    <p>Measured at <code>776b372e6</code>, <code>7d9fd765b</code> and <code>7977270a4</code> from archived copies: all six tests passed before the merges, and <code>7977270a4</code>, the conventions block, broke them. Two causes. A real regression: selecting registry conventions raised on a name the grammar cannot parse and failed the whole generate, refine or review documentation batch it was in. The three render sites in <code>workers.py</code> now render no block for such a name (<code>_conventions_for_prompt</code>). The golden captures of the generate, refine and review documentation prompts held the old text, and were re-captured by rendering for the intended change. The six pass; reverting turns all six red. The broad gate went from 33 failures and 29 errors at base to 21 failures and 29 errors, with no added ids; what remains is §24-§25 export red and the approval-tag errors in <code>sn-integrity-backlog</code> §27. Merge <code>4fcaa2533</code>. Independent review 108/120. Open: <code>_review_single_batch</code> in <code>review/pipeline.py</code> selects conventions unguarded and still aborts its batch on an unparseable name (§11).</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-house-style/shs-prompt-regressions">shs-prompt-regressions</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>
