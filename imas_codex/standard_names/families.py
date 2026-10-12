@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
+from typing import Any
 
 from imas_standard_names.grammar.model_types import Component, GeometricBase
 
@@ -392,3 +393,208 @@ def sort_by_axis_convention(
             str(item.get(axis_key, "")).lower(), _FALLBACK_ORDER
         ),
     )
+
+
+# ---------------------------------------------------------------------------
+# Pattern families — grammar-identical cohorts
+# ---------------------------------------------------------------------------
+
+# The name lifecycle stage excluded from every family read.
+_LIVE_STAGE_EXCLUSION = "superseded"
+
+#: Segments that fix a name's identity. Two live names share a pattern family
+#: only when every one of these is equal. ``transformation`` carries the
+#: operator token (``flux_surface_averaged``, ``time_derivative`` …), which is
+#: deliberately NOT a pattern axis: a reduction operator and its unreduced
+#: parent therefore land in different pattern families and are joined only by
+#: the explicit ``HAS_PARENT`` route.
+#:
+#: ``object`` carries the entity locus — the ISN locus registry's ``entity``
+#: type (``antenna_strap``, ``bolometer`` …). An entity names a distinct
+#: object, so ``radial_coordinate_of_<owner>`` over many owners is grammar
+#: ancestry, not prose parallelism: two entity owners never share a family.
+#: See :data:`PATTERN_VARIATION_AXES` for the locus types that do vary.
+PATTERN_INVARIANT_SEGMENTS: tuple[str, ...] = (
+    "physical_base",
+    "geometric_base",
+    "transformation",
+    "process",
+    "object",
+)
+
+#: Segments along which two names may differ and stay family-mates. An empty
+#: segment is a value of its axis, so a name with no locus shares a signature
+#: with its locus-qualified variants. ``component`` and ``coordinate`` name the
+#: same ISN axis (they are parser aliases) and are stored in either column, so
+#: both vary together. ``position``, ``geometry`` and ``region`` carry the
+#: locus variation axis: the ISN locus registry's ``position``, ``geometry``
+#: and ``region`` types place one quantity somewhere and are prose-parallel,
+#: so ``electron_temperature`` and ``electron_temperature_at_magnetic_axis``
+#: are family-mates. Only the ``entity`` type is invariant (see
+#: :data:`PATTERN_INVARIANT_SEGMENTS`).
+PATTERN_VARIATION_AXES: tuple[str, ...] = (
+    "subject",
+    "component",
+    "coordinate",
+    "position",
+    "geometry",
+    "region",
+    "device",
+)
+
+#: Every grammar segment that participates in a pattern family.
+PATTERN_SEGMENTS: tuple[str, ...] = PATTERN_INVARIANT_SEGMENTS + PATTERN_VARIATION_AXES
+
+
+def _invariant_projection(alias: str) -> str:
+    """Cypher projecting *alias*'s invariant segments as comparable strings."""
+    return ",\n".join(
+        f"     coalesce({alias}.{seg}, '') AS {seg}"
+        for seg in PATTERN_INVARIANT_SEGMENTS
+    )
+
+
+def _invariant_equality(alias: str) -> str:
+    """Cypher equality predicates binding *alias* to a projected seed."""
+    return "\n  AND ".join(
+        f"coalesce({alias}.{seg}, '') = {seg}" for seg in PATTERN_INVARIANT_SEGMENTS
+    )
+
+
+# Rows for the seed's live pattern family: the seed fixes the invariant segment
+# tuple, and every live name with the same tuple is a member. The invariant
+# columns are derived from :data:`PATTERN_INVARIANT_SEGMENTS` so that constant
+# is the single definition; a bounded ``:StandardName`` scan with equality
+# predicates.
+_PATTERN_FAMILY_MEMBERS_QUERY = f"""
+MATCH (seed:StandardName {{id: $sn_id}})
+WHERE coalesce(seed.name_stage, '') <> $superseded
+WITH
+{_invariant_projection("seed")}
+MATCH (m:StandardName)
+WHERE {_invariant_equality("m")}
+  AND coalesce(m.name_stage, '') <> $superseded
+RETURN m.id AS id,
+       m.description AS description,
+       m.documentation AS documentation,
+       coalesce(m.docs_stage, '') AS docs_stage,
+       m.reviewer_score_docs AS reviewer_score_docs,
+       coalesce(m.physical_base, '') AS physical_base,
+       coalesce(m.subject, '') AS subject,
+       coalesce(m.component, '') AS component,
+       coalesce(m.coordinate, '') AS coordinate,
+       coalesce(m.object, '') AS object,
+       coalesce(m.position, '') AS position,
+       coalesce(m.geometry, '') AS geometry,
+       coalesce(m.region, '') AS region,
+       coalesce(m.device, '') AS device,
+       coalesce(m.name_stage, '') AS name_stage
+ORDER BY m.id
+"""
+
+# Families (live names grouped by invariant signature) with at least
+# ``$min_members`` members. The grouping keys are the same single constant.
+_PATTERN_FAMILY_CENSUS_QUERY = f"""
+MATCH (m:StandardName)
+WHERE coalesce(m.name_stage, '') <> $superseded
+WITH
+{_invariant_projection("m")},
+     count(m) AS n
+WHERE n >= $min_members
+RETURN count(*) AS families, sum(n) AS members
+"""
+
+
+def _segment_value(segments: dict[str, Any], name: str) -> str:
+    """One segment as a comparable string; an absent/empty segment is ``""``."""
+    value = segments.get(name)
+    return "" if value is None else str(value)
+
+
+def pattern_signature(segments: dict[str, Any]) -> tuple[str, ...]:
+    """Return the invariant pattern signature of a name's grammar segments.
+
+    Two live names are family-mates iff their signatures are equal; their
+    parses then differ only along :data:`PATTERN_VARIATION_AXES`. An absent
+    or empty segment contributes ``""`` — it is a value of its axis, so a
+    parent with no locus shares a signature with its locus-qualified children.
+    An ``entity`` locus (the ``object`` segment) is invariant, so two entity
+    owners never share a signature.
+    """
+    return tuple(_segment_value(segments, seg) for seg in PATTERN_INVARIANT_SEGMENTS)
+
+
+def fetch_pattern_family(sn_id: str, gc: Any) -> list[dict[str, Any]]:
+    """Return the live pattern-family rows of *sn_id* (the seed included).
+
+    The family is every live (non-superseded) StandardName sharing the seed's
+    invariant segment tuple, ordered by id. Returns ``[]`` when the seed is
+    absent or superseded. The seed's own row is always present, so a name with
+    no axis sibling yields a family of one. Never raises on a graph fault —
+    the caller decides.
+    """
+    return [
+        dict(row)
+        for row in (
+            gc.query(
+                _PATTERN_FAMILY_MEMBERS_QUERY,
+                sn_id=sn_id,
+                superseded=_LIVE_STAGE_EXCLUSION,
+            )
+            or []
+        )
+    ]
+
+
+def count_pattern_families(gc: Any, *, min_members: int = 3) -> dict[str, int]:
+    """Count live pattern families with at least *min_members* members.
+
+    Returns ``{"families": n, "members": m}`` where ``members`` is the total
+    membership of those families.
+    """
+    rows = list(
+        gc.query(
+            _PATTERN_FAMILY_CENSUS_QUERY,
+            min_members=min_members,
+            superseded=_LIVE_STAGE_EXCLUSION,
+        )
+        or []
+    )
+    if not rows:
+        return {"families": 0, "members": 0}
+    row = rows[0]
+    return {"families": row.get("families") or 0, "members": row.get("members") or 0}
+
+
+# The base physical quantity a family is expressed over — the row whose id is
+# the family's ``physical_base``. It is a member of the family only when the
+# family's ``transformation`` is empty; an operator-reduced family
+# (``flux_surface_averaged`` …) therefore looks its base up separately.
+_FAMILY_BASE_QUERY = """
+MATCH (b:StandardName {id: $base_id})
+WHERE coalesce(b.name_stage, '') <> $superseded
+RETURN b.id AS id,
+       b.description AS description,
+       b.documentation AS documentation,
+       coalesce(b.docs_stage, '') AS docs_stage,
+       b.reviewer_score_docs AS reviewer_score_docs
+"""
+
+
+def fetch_family_base(base_id: str, gc: Any) -> dict[str, Any]:
+    """Return the base-quantity row for *base_id*, or ``{}`` when absent.
+
+    The returned dict carries the documentation columns the sibling-family
+    context reads (``description``, ``documentation``, ``docs_stage``,
+    ``reviewer_score_docs``); every variation segment is absent, which the
+    caller reads as the unqualified base.
+    """
+    rows = list(
+        gc.query(
+            _FAMILY_BASE_QUERY,
+            base_id=base_id,
+            superseded=_LIVE_STAGE_EXCLUSION,
+        )
+        or []
+    )
+    return dict(rows[0]) if rows else {}

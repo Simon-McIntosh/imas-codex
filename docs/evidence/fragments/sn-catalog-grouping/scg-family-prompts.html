@@ -1,0 +1,46 @@
+<section id="scg-family-prompts">
+  <h2>Sibling-family prompts render without a parent</h2>
+
+  <p id="scg-family-prompts-summary">
+    The three sibling-family prompt templates now guard the family parent.
+    When <code>fetch_sibling_family</code> returns <code>parent=None</code> (a
+    base token no <code>StandardName</code> node backs), the render names the
+    family by its shared pattern instead of dereferencing <code>None.name</code>
+    under the loader's <code>StrictUndefined</code>. When a parent exists, the
+    wording and the <code>name:</code> link are unchanged.
+  </p>
+
+  <table id="scg-family-prompts-guards">
+    <thead>
+      <tr><th>template</th><th>guarded read</th><th>parentless render</th></tr>
+    </thead>
+    <tbody>
+      <tr id="scg-family-prompts-guard-generate">
+        <td><code>sn/generate_docs_user.md</code></td>
+        <td>family-intro sentence and the rule-4 parent cross-link</td>
+        <td>says &ldquo;share a common pattern&rdquo;, no <code>name:</code> link</td>
+      </tr>
+      <tr id="scg-family-prompts-guard-review">
+        <td><code>sn/review_docs_user.md</code></td>
+        <td>section header &ldquo;shared parent &hellip;&rdquo;</td>
+        <td>header reads &ldquo;(shared pattern)&rdquo;</td>
+      </tr>
+      <tr id="scg-family-prompts-guard-refine">
+        <td><code>sn/refine_docs_user.md</code></td>
+        <td>section header &ldquo;shared parent &hellip;&rdquo;</td>
+        <td>header reads &ldquo;(shared pattern)&rdquo;</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="scg-family-prompts-measure">
+    <code>tests/standard_names/test_family_prompt_parent.py</code> renders each
+    template through <code>render_prompt</code> with a parent and with
+    <code>parent=None</code>: 6 passing. The gate over the render tests that
+    cover the three templates ran 177 passed / 1 skipped at the base templates
+    and 183 passed / 1 skipped with the guards, zero added failures. Removing
+    the parent guard from <code>generate_docs_user.md</code> fails
+    <code>test_parentless_family_renders_without_parent_link[generate_docs]</code>
+    (exit 1).
+  </p>
+</section>

@@ -23,6 +23,14 @@ from imas_codex.standard_names.context import (
 from imas_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
+from tests.standard_names.test_pattern_families import (
+    _FLUX_SPECIES,
+    _flux_fixture,
+    _flux_node,
+    _name,
+    _PatternGraph,
+    _seed_id,
+)
 
 
 def test_path_ids_prefix_extracts_leading_segment():
@@ -176,90 +184,64 @@ def test_fetch_review_neighbours_grammar_segments_fallback():
 
 
 class _FamilyGC:
-    """Fake GraphClient returning canned sibling-family rows."""
+    """Fake GraphClient exposing one fixture pattern family."""
 
-    def __init__(self, rows):
-        self._rows = rows
+    def __init__(self, graph):
+        self._graph = graph
 
     def query(self, cypher, **params):
-        if "HAS_PARENT" in cypher:
-            return self._rows
-        return []
+        return self._graph.query(cypher, **params)
 
 
 def _family_row(**overrides):
-    row = {
-        "parent_id": "mode_number",
-        "parent_description": "Dimensionless integer tuple of mode numbers.",
-        "parent_documentation": "The mode number vector collects the harmonics.",
-        "parent_docs_stage": "accepted",
-        "member_operator_kind": "projection",
-        "sibs": [
-            {
-                "id": "toroidal_mode_number",
-                "description": "Toroidal mode number n is the harmonic.",
-                "documentation": "Toroidal mode number n labels periodicity.",
-                "docs_stage": "accepted",
-                "reviewer_score_docs": 0.9,
-                "operator_kind": "projection",
-                "axis": "toroidal",
-            },
-            {
-                "id": "radial_mode_number",
-                "description": "Dimensionless non-negative integer branch label.",
-                "documentation": "Counts radial nodes.",
-                "docs_stage": "accepted",
-                "reviewer_score_docs": 0.85,
-                "operator_kind": "projection",
-                "axis": "radial",
-            },
-        ],
-    }
-    row.update(overrides)
-    return row
+    return _flux_node(_FLUX_SPECIES[1], **overrides)
 
 
 def test_sibling_family_parent_anchor():
-    fam = fetch_sibling_family("poloidal_mode_number", gc=_FamilyGC([_family_row()]))
+    fam = fetch_sibling_family(_seed_id(), gc=_flux_fixture(), max_siblings=20)
     assert fam is not None
-    assert fam["parent"]["name"] == "mode_number"
+    assert fam["parent"]["name"] == "density"
     assert fam["parent"]["docs_accepted"] is True
-    assert fam["anchor"]["name"] == "mode_number"
+    assert fam["anchor"]["name"] == "density"
     assert fam["anchor"]["is_parent"] is True
-    names = [s["name"] for s in fam["siblings"]]
-    assert names == ["radial_mode_number", "toroidal_mode_number"]
+    assert _seed_id() not in [s["name"] for s in fam["siblings"]]
 
 
 def test_sibling_family_best_sibling_anchor_when_parent_pending():
-    row = _family_row(parent_docs_stage="pending")
-    fam = fetch_sibling_family("poloidal_mode_number", gc=_FamilyGC([row]))
-    assert fam["anchor"]["name"] == "toroidal_mode_number"  # highest score
+    gc = _flux_fixture()
+    gc.nodes["density"]["docs_stage"] = "pending"
+    gc.nodes[_family_row()["id"]]["docs_stage"] = "accepted"
+    gc.nodes[_family_row()["id"]]["reviewer_score_docs"] = 0.9
+    fam = fetch_sibling_family(_seed_id(), gc=gc, max_siblings=20)
+    assert fam["parent"]["docs_accepted"] is False
+    assert fam["anchor"]["name"] == _family_row()["id"]
     assert fam["anchor"]["is_parent"] is False
 
 
 def test_sibling_family_defers_without_accepted_member():
-    row = _family_row(parent_docs_stage="pending")
-    for s in row["sibs"]:
-        s["docs_stage"] = "pending"
-    fam = fetch_sibling_family("poloidal_mode_number", gc=_FamilyGC([row]))
+    gc = _flux_fixture()
+    gc.nodes["density"]["docs_stage"] = "pending"
+    fam = fetch_sibling_family(_seed_id(), gc=gc, max_siblings=20)
     assert fam["anchor"] is None
-    assert len(fam["siblings"]) == 2  # siblings still provided for comparison
+    assert len(fam["siblings"]) == 16  # siblings still provided for comparison
 
 
 def test_sibling_family_placeholder_description_nulled():
-    row = _family_row(
-        parent_description=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-        parent_docs_stage="accepted",
-    )
-    fam = fetch_sibling_family("poloidal_mode_number", gc=_FamilyGC([row]))
-    # placeholder parent description disqualifies the parent anchor
+    gc = _flux_fixture()
+    gc.nodes["density"]["description"] = DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
+    gc.nodes[_family_row()["id"]]["docs_stage"] = "accepted"
+    gc.nodes[_family_row()["id"]]["reviewer_score_docs"] = 0.9
+    fam = fetch_sibling_family(_seed_id(), gc=gc, max_siblings=20)
+    # the deterministic placeholder marks the base quantity unready as anchor
     assert fam["parent"]["docs_accepted"] is False
     assert fam["parent"]["description"] == ""
-    assert fam["anchor"]["name"] == "toroidal_mode_number"
+    assert fam["anchor"]["name"] == _family_row()["id"]
+    assert fam["anchor"]["is_parent"] is False
 
 
 def test_sibling_family_none_when_no_family():
-    assert fetch_sibling_family("lonely_name", gc=_FamilyGC([])) is None
+    lone = _PatternGraph([_name("lonely_name", physical_base="lonely_name")])
+    assert fetch_sibling_family("lonely_name", gc=_FamilyGC(lone)) is None
 
 
 def test_doc_opening_word_boundary_truncation():

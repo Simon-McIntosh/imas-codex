@@ -183,20 +183,15 @@ def test_restamp_keeps_safe_family_and_carries_no_source_migration_manifest():
 
 
 class _LocusSeedGC:
-    """Expose a locus parent and reject any physical-base fallback query."""
+    """Expose a locus parent and reject any pattern-family fallback query."""
 
     def __init__(self):
         self.calls = []
 
     def query(self, cypher, **params):
         self.calls.append(cypher)
-        if "RETURN c.id AS id, c.physical_base AS physical_base" in cypher:
-            return [
-                {
-                    "id": "radial_coordinate_of_control_surface",
-                    "physical_base": "coordinate",
-                }
-            ]
+        if "MATCH (c:StandardName {id: $seed})" in cypher:
+            return [{"id": "radial_coordinate_of_control_surface"}]
         if "RETURN p.id AS parent_id" in cypher:
             return [
                 {
@@ -205,10 +200,10 @@ class _LocusSeedGC:
                     "operator": "control_surface",
                 }
             ]
-        raise AssertionError("locus seed must not fall back to a base-wide cohort")
+        raise AssertionError("locus seed must not fall back to a pattern family")
 
 
-def test_locus_seed_is_not_regrouped_by_physical_base():
+def test_locus_seed_is_not_regrouped_by_pattern_family():
     gc = _LocusSeedGC()
 
     assert assemble_family("radial_coordinate_of_control_surface", gc=gc) is None
