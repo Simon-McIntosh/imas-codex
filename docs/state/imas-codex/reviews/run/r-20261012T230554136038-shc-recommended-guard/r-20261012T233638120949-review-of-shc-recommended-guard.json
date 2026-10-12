@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "c4788daab674a5d886655ee93695fada383c00bd",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6118 (sn_harmonize --apply)"
+  ],
+  "completed_at": "2026-10-12T23:43:23.513Z",
+  "dispatched_at": "2026-10-12T23:36:49Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/protection.py",
+      "line": "213",
+      "severity": "follow-on",
+      "text": "follow-on: recommended_name_protections re-queries `sn.name_stage = 'approved'`, the same clause automatic_deletion_protections (protection.py:86) already derives as its `name_stage=approved` reason, so the new sibling duplicates part of the owned capability rather than extending it; the plan asked protection.py to 'gain the roster and contested reasons' and have the command 'reuse its evidence rather than a second query'. The brief instead directed a sibling returning the three classes, which the node followed, so this is a reuse note, not a defect in behaviour."
+    },
+    {
+      "file": "imas_codex/standard_names/protection.py",
+      "line": "173",
+      "severity": "follow-on",
+      "text": "follow-on: class 1 ('a roster whose candidate request is open') is approximated by _frozen_roster_requests as 'any roster that recorded pr_number/pr_url'; the node found no open/merged state (all 14 rosters under manifests/reviews/ carry pr_number, and promote.py reads PR state only through a live GitHub call), and the brief said to stop and report rather than invent a notion. The proxy is a conservative superset \u2014 rostered members whose request merged are promoted to name_stage=approved (class 2) \u2014 and the limitation is recorded in the manifest's evidence_inputs, so it refuses more, never fewer."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_guard.py",
+      "line": "209",
+      "severity": "follow-on",
+      "text": "follow-on: the env-var seam `SHC_NO_RECOMMENDED_GUARD` encodes the node/plan label 'SHC' (shc-recommended-guard) in a symbol; the repo naming rules forbid plan/section/gate labels in code, test names and symbols. Rename it to describe the mechanism (e.g. the recommended-guard call removed) so it stands alone without the plan."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_guard.py",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "follow-on: the module docstring carries authority attribution ('exactly as the lead ruled'), which the naming rules ban in source comments and docstrings; state the three classes as the rule itself, without a person or a ruling date."
+    }
+  ],
+  "head_log_revision": "da531257a0e405a0c884e2a0926ba617a5d610c8",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "one production call site, imas_codex/cli/sn.py:6118 apply_families inside sn_harmonize for `sn harmonize --apply`; refuse_recommended_members and recommended_name_protections are called only from harmonize.py apply_families, and the node's own test file does not count.",
+    "diff": "Read commit da531257a against base c4788daab; one commit, five files, +711/-65, all inside the declared write paths.",
+    "done_when": "The done_when requires the refusal of a family holding a roster member and an approved name, with the reason recorded on the run and the refusal test failing when the guard is removed; tests/standard_names/test_harmonize_guard.py:235 and :288 assert the refusal and the forced-override record, negative_control.txt records the guard removed with EXIT=1 red on test_roster_and_approved_members_refused_without_force, and after.txt records the family suite at 582 passed.",
+    "goal": "The node's goal is to refuse a harmonize apply over names already recommended into a catalog pull request; harmonize.py:942 calls refuse_recommended_members before any family is marked, and recommended_name_protections (protection.py:213) covers the three ruled classes.",
+    "manifest": "Read; it states the five guard tests, baseline 577 / after 582, negative_control_log as a bare path, and the class-1 'recorded candidate request' proxy in evidence_inputs.",
+    "write_paths": "The manifest declares protection.py, harmonize.py, sn.py, tests/standard_names/test_harmonize_guard.py and the fragment; git diff c4788daab..da531257a touches exactly those five paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize_guard.py:235 asserts the refusal names both protected ids with their evidence and that nothing is marked (harness.marked_batches == [], pipeline.revisions == {}), and :288 asserts the forced override writes one StandardNameChange per protected name under one run id; negative_control.txt shows test_roster_and_approved_members_refused_without_force red with EXIT=1 once refuse_recommended_members is stubbed, so the refusal test tracks the guard rather than a value the test passed in.",
+    "evidence": "baseline.txt records 577 passed / 0 failed at c4788daab and after.txt 582 passed / 0 failed at da531257a, both EXIT=0, and negative_control.txt records the red arm at head; the done_when's refusal-measure is asserted by the guard tests and the help mode by test_harmonize_help_describes_report_and_apply.",
+    "fit": "protection.py:169 RecommendedNameError and the raise-based refusal follow the module's PipelineAuthorityError / ProtectedDeletionError idiom, but tests/standard_names/test_harmonize_guard.py:209 puts the node label 'SHC' in `SHC_NO_RECOMMENDED_GUARD` and :5 attributes the rule to 'the lead'.",
+    "goal_fidelity": "harmonize.py:942 runs refuse_recommended_members over every apply-family member before the first mark, recommended_name_protections (protection.py:213) covers roster / approved / contested, and sn.py:6118 raises click.ClickException naming each protected identity, delivering the plan's guard; class 1 is approximated by 'recorded candidate request' rather than a true open state, which the node documents.",
+    "reuse": "the guard adds a sibling in the owner module protection.py rather than forking in harmonize.py, but recommended_name_protections (protection.py:213) re-derives the `name_stage=approved` clause automatic_deletion_protections (protection.py:86) already owns, and sn.py:812 _docs_drain_factory correctly unifies the duplicated _campaign_drain/_harmonize_drain.",
+    "scope_discipline": "git diff c4788daab..da531257a touches only imas_codex/standard_names/protection.py, imas_codex/standard_names/harmonize.py, imas_codex/cli/sn.py, tests/standard_names/test_harmonize_guard.py and docs/evidence/fragments/sn-harmonize-command/shc-recommended-guard.html, all within the declared write paths, and the sn.py drain-merge and --help text were explicitly requested in the brief."
+  },
+  "node": "review-of-shc-recommended-guard",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to refuse a harmonize apply over names already recommended into a catalog pull request; harmonize.py:942 calls refuse_recommended_members before any family is marked, and recommended_name_protections (protection.py:213) covers the three ruled classes.\nVERDICT done_when: the done_when requires the refusal of a family holding a roster member and an approved name, with the reason recorded on the run and the refusal test failing when the guard is removed; tests/standard_names/test_harmonize_guard.py:235 and :288 assert the refusal and the forced-override record, negative_control.txt records the guard removed with EXIT=1 red on test_roster_and_approved_members_refused_without_force, and after.txt records the family suite at 582 passed.\nVERDICT write_paths: the manifest declares protection.py, harmonize.py, sn.py, tests/standard_names/test_harmonize_guard.py and the fragment; git diff c4788daab..da531257a touches exactly those five paths and nothing else.\nVERDICT manifest: read; it states the five guard tests, baseline 577 / after 582, negative_control_log as a bare path, and the class-1 'recorded candidate request' proxy in evidence_inputs.\nVERDICT diff: read commit da531257a against base c4788daab; one commit, five files, +711/-65, all inside the declared write paths.\nCALL_SITES: imas_codex/cli/sn.py:6118 (sn_harmonize --apply)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: harmonize.py:942 runs refuse_recommended_members over every apply-family member before the first mark, recommended_name_protections (protection.py:213) covers roster / approved / contested, and sn.py:6118 raises click.ClickException naming each protected identity, delivering the plan's guard; class 1 is approximated by 'recorded candidate request' rather than a true open state, which the node documents.\nSCORE evidence: 18\nJUSTIFICATION evidence: baseline.txt records 577 passed / 0 failed at c4788daab and after.txt 582 passed / 0 failed at da531257a, both EXIT=0, and negative_control.txt records the red arm at head; the done_when's refusal-measure is asserted by the guard tests and the help mode by test_harmonize_help_describes_report_and_apply.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff c4788daab..da531257a touches only imas_codex/standard_names/protection.py, imas_codex/standard_names/harmonize.py, imas_codex/cli/sn.py, tests/standard_names/test_harmonize_guard.py and docs/evidence/fragments/sn-harmonize-command/shc-recommended-guard.html, all within the declared write paths, and the sn.py drain-merge and --help text were explicitly requested in the brief.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_harmonize_guard.py:235 asserts the refusal names both protected ids with their evidence and that nothing is marked (harness.marked_batches == [], pipeline.revisions == {}), and :288 asserts the forced override writes one StandardNameChange per protected name under one run id; negative_control.txt shows test_roster_and_approved_members_refused_without_force red with EXIT=1 once refuse_recommended_members is stubbed, so the refusal test tracks the guard rather than a value the test passed in.\nSCORE fit: 14\nJUSTIFICATION fit: protection.py:169 RecommendedNameError and the raise-based refusal follow the module's PipelineAuthorityError / ProtectedDeletionError idiom, but tests/standard_names/test_harmonize_guard.py:209 puts the node label 'SHC' in `SHC_NO_RECOMMENDED_GUARD` and :5 attributes the rule to 'the lead'.\nSCORE reuse: 15\nJUSTIFICATION reuse: the guard adds a sibling in the owner module protection.py rather than forking in harmonize.py, but recommended_name_protections (protection.py:213) re-derives the `name_stage=approved` clause automatic_deletion_protections (protection.py:86) already owns, and sn.py:812 _docs_drain_factory correctly unifies the duplicated _campaign_drain/_harmonize_drain.\nFINDING imas_codex/standard_names/protection.py:213 follow-on: recommended_name_protections re-queries `sn.name_stage = 'approved'`, the same clause automatic_deletion_protections (protection.py:86) already derives as its `name_stage=approved` reason, so the new sibling duplicates part of the owned capability rather than extending it; the plan asked protection.py to 'gain the roster and contested reasons' and have the command 'reuse its evidence rather than a second query'. The brief instead directed a sibling returning the three classes, which the node followed, so this is a reuse note, not a defect in behaviour.\nFINDING imas_codex/standard_names/protection.py:173 follow-on: class 1 ('a roster whose candidate request is open') is approximated by _frozen_roster_requests as 'any roster that recorded pr_number/pr_url'; the node found no open/merged state (all 14 rosters under manifests/reviews/ carry pr_number, and promote.py reads PR state only through a live GitHub call), and the brief said to stop and report rather than invent a notion. The proxy is a conservative superset \u2014 rostered members whose request merged are promoted to name_stage=approved (class 2) \u2014 and the limitation is recorded in the manifest's evidence_inputs, so it refuses more, never fewer.\nFINDING tests/standard_names/test_harmonize_guard.py:209 follow-on: the env-var seam `SHC_NO_RECOMMENDED_GUARD` encodes the node/plan label 'SHC' (shc-recommended-guard) in a symbol; the repo naming rules forbid plan/section/gate labels in code, test names and symbols. Rename it to describe the mechanism (e.g. the recommended-guard call removed) so it stands alone without the plan.\nFINDING tests/standard_names/test_harmonize_guard.py:5 follow-on: the module docstring carries authority attribution ('exactly as the lead ruled'), which the naming rules ban in source comments and docstrings; state the three classes as the rule itself, without a person or a ruling date.",
+  "review_run_id": "r-20261012T233638120949-review-of-shc-recommended-guard",
+  "reviewed_base_sha": "c4788daab674a5d886655ee93695fada383c00bd",
+  "reviewed_head_sha": "da531257a0e405a0c884e2a0926ba617a5d610c8",
+  "reviewed_run_id": "r-20261012T230554136038-shc-recommended-guard",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-recommended-guard",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 14,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T23:47:00+00:00",
+  "total": 100
+}
