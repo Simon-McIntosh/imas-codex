@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:34:20.732Z",
+  "dispatched_at": "2026-10-12T18:29:33Z",
+  "findings": [
+    {
+      "anchor": "plan.html:216",
+      "id": "reasoning-1",
+      "reason": "a node implementing the cap at line 1826 finds no access to the lint findings there and must add a parameter or forwarding path the plan does not name, which is exactly the wrong-path cost the cap's placement is meant to avoid.",
+      "text": "\u00a75 places the score cap \"where the review pipeline writes a reviewer's score onto the entry (the scored-entry loop \u2026 that sets reviewer_score, near line 1826)\", but that loop is `_match_reviews_to_entries(reviews, names, wlog, name_only, target)` \u2014 its signature and its sole caller (pipeline.py:2077) carry no `AuditReport`, so \"a name carrying an error-severity lint finding in the same AuditReport\" cannot be identified at that site as written",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e9a54eb7acbb26282fc3148fa5134524d3bc08d88e7aad9b41727d4e1ec7f4be",
+  "plan_slug": "sn-house-style",
+  "plan_version": 16,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T18:36:04.045998+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:36:04.045998+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-house-style.v16.json",
+  "review_run_id": "r-20261012T182921748505-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "c7f72225c22f6cfa2962d7b2a242cbebf6961033",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `reviewer_score` at pipeline.py:1826 and the `audit_findings` render-context assignment at pipeline.py:1989 (inside `_review_single_batch`) both resolve exactly; `decide_one` (judgment.py:117), `select_conventions` (`imas_standard_names.grammar.terms`), the flux-surface-average smoke read, `sn-judgment-evaluation` \u00a72/\u00a73, `sn-catalog-grouping` \u00a72/\u00a74 and the consistency census all resolve.",
+    "done_when": "pass \u2014 \u00a75 and \u00a77 each name a declared negative control (\"the same test fails with the template line removed\"; \"the cap removed as the counterfactual\"; \"the test fails when the stage is unwired\"; \"A report-only result leaves the score uncapped\").",
+    "evidence_paths": "pass \u2014 \u00a77's live-run cost and fixtures land in `docs/evidence/fragments/sn-house-style/`, a durable repository path that exists, not a scratchpad.",
+    "naming": "pass \u2014 the changed units introduce no plan labels, ticket numbers or version tags (the `16` is plan-version metadata, not source), and describe mechanism rather than changelog.",
+    "reasoning": "a finding \u2014 \u00a75's mechanism does not run on the code path it names.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable (generation and review read the registry) and \u00a77 carries one (the report-only judge stage).",
+    "wiring": "pass \u2014 the plan's only declared dependency (\u00a72 \u2192 `imas-standard-names:concept-and-notation-registry#s2`, which resolves) is correct, and \u00a75's earlier \u00a73 dependency was removed by scoping \u00a75 to entries the registry already carries."
+  },
+  "section_digests": {
+    "_document": "90a84415f5ca4de8601a8e435fcfd5398064b07ec4096a89a29515b092057f9d",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s2": "a68b18b0a4122caff66d27ab77f0d6f94f3c046d2a034c6ef489ffc38f438ddb",
+    "s3": "50e289cff8fb10f82f4114f3e51de9e7d184bd4777b80c4f5ee7e617bbdd3c56",
+    "s4": "dca02964189096d0d6a3fb9f0ee3c9931308addf7be8f667cad98d98ca36d3a7",
+    "s5": "bc48985c6ab239db8959d962d1691b61564f5c63b5a7096c9d62f76cfb69952f",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78",
+    "s7": "5be478ef6ae9f348a0e617cfdb5bc8b20b3a18fd8c8e652a1d97e2393f5681c3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:36:02.065744+00:00"
+}
