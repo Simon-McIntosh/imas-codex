@@ -1,0 +1,77 @@
+<section>
+  <h2 id="shc-apply-mechanism">Applying a pattern family anchor-first, then its members</h2>
+  <p id="shc-apply-mechanism-scope">
+    Builds the apply mechanism of <code>sn harmonize</code> (§3 of this plan):
+    the anchor-gated two-batch campaign for one pattern family, proven on
+    fixtures with the pool drain stubbed. Write paths:
+    <code>imas_codex/cli/sn.py</code>,
+    <code>imas_codex/standard_names/harmonize.py</code>,
+    <code>imas_codex/standard_names/campaign.py</code>,
+    <code>imas_codex/standard_names/families.py</code>,
+    <code>tests/standard_names/test_harmonize_apply.py</code>,
+    <code>tests/standard_names/test_harmonize_command.py</code>.
+  </p>
+
+  <h3 id="shc-apply-mechanism-two-batch">One family, two batches, the anchor first</h3>
+  <p id="shc-apply-mechanism-two-batch-text">
+    A pattern family has no parent node, so its members are drained through one
+    <code>CampaignRunner</code> with an explicit batch plan: the anchor alone,
+    then the remaining members. The anchor batch has one member, so its measured
+    acceptance rate is 1.0 when the anchor reaches documentation acceptance and
+    0.0 otherwise — the runner's ordinary convergence gate halts the family
+    before the member batch is ever marked or drained when the anchor did not
+    converge. The members are then never reset and no <code>DocsRevision</code>
+    snapshot is taken. A family that converges is stamped with its fresh
+    <code>harmonized_group_signature</code>, so a repeated apply over the
+    unchanged scope plans nothing.
+  </p>
+  <table id="shc-apply-mechanism-decisions">
+    <caption>What an apply decides, per family</caption>
+    <thead>
+      <tr><th>Decision</th><th>Condition</th><th>Planned batches</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>harmonized</code></td>
+        <td>Every member already carries the current
+          <code>harmonized_group_signature</code>.</td>
+        <td>none</td>
+      </tr>
+      <tr>
+        <td><code>deferred</code></td>
+        <td>No member qualifies as an anchor (<code>select_anchor</code> is
+          <code>None</code>).</td>
+        <td>none</td>
+      </tr>
+      <tr>
+        <td><code>apply</code></td>
+        <td>An anchor exists and the family is not yet harmonized.</td>
+        <td>the anchor, then the other members</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-apply-mechanism-runner">The one change to the campaign runner</h3>
+  <p id="shc-apply-mechanism-runner-text">
+    The fixed-size split (<code>plan_batches</code>) cannot express a batch
+    sequence that must judge the anchor before marking the members, so
+    <code>CampaignRunner.run</code> gained an optional <code>batch_plan</code>
+    override and the module gained
+    <code>anchor_gated_batches(anchor, members)</code>. No second runner was
+    written. A one-member family yields a family with no member batch. The
+    campaign spec's <code>describe()</code> now falls back to its raw string, so
+    a hand-built spec names the change event it records.
+  </p>
+
+  <h3 id="shc-apply-mechanism-gates">Gates and the negative control</h3>
+  <p id="shc-apply-mechanism-gates-text">
+    The gate suite is the harmonize, family-harmonization, campaign,
+    pattern-family and Cypher-property tests. Baseline at the orientation base
+    revision: 161 passed. After the change: 166 passed (+5, the new apply tests).
+    The negative control removes the anchor acceptance gate
+    (<code>SHC_NO_ANCHOR_GATE</code> sets the acceptance floor to zero), and
+    <code>test_failed_anchor_leaves_members_untouched</code> then fails: the
+    member batch runs when the anchor has not converged. The log is
+    <code>negcontrol-apply.log</code> beside the run.
+  </p>
+</section>
