@@ -69,6 +69,13 @@
       "finding": "reasoning-3",
       "reason": "",
       "when": "2026-10-12T07:14:54.764581+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "the done-when is conjunctive: the wrapper deletion, its cost-booking control and the seat must all hold for one verdict, so the node cannot close on the seat alone; the seat is three lines of configuration with no behaviour of its own, and a separate node for it would cost more than it isolates",
+      "when": "2026-10-12T07:14:56.978366+00:00"
     }
   ],
   "responses": {
@@ -89,6 +96,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-12T07:14:54.764581+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the done-when is conjunctive: the wrapper deletion, its cost-booking control and the seat must all hold for one verdict, so the node cannot close on the seat alone; the seat is three lines of configuration with no behaviour of its own, and a separate node for it would cost more than it isolates",
+      "when": "2026-10-12T07:14:56.978366+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-judgment-evaluation/r-20261012T063159097638-plan-review-of-sn-judgment-evaluation.json",
