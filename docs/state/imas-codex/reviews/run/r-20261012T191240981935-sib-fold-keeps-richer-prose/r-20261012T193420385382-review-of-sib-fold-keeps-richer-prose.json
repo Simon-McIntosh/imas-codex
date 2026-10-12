@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/test_fold_keeps_richer_prose.py tests/standard_names/test_tombstone_supersede.py tests/standard_names/test_fold_dry_run_predicts_live.py tests/standard_names/test_fold_guard_current_successor.py tests/standard_names/test_tombstone_fold_lineage.py tests/standard_names/test_supersede_into_tombstone.py tests/standard_names/test_supersede_into_ancestor.py tests/standard_names/test_edit_engine.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T191240981935-sib-fold-keeps-richer-prose/after_gate.log",
+    "revision": "d01b5463cf9230808692c00589148b87a7c4f576"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261012T191240981935-sib-fold-keeps-richer-prose/base uv run pytest -p no:cacheprovider tests/standard_names/test_tombstone_supersede.py tests/standard_names/test_fold_dry_run_predicts_live.py tests/standard_names/test_fold_guard_current_successor.py tests/standard_names/test_tombstone_fold_lineage.py tests/standard_names/test_supersede_into_tombstone.py tests/standard_names/test_supersede_into_ancestor.py tests/standard_names/test_edit_engine.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T191240981935-sib-fold-keeps-richer-prose/base_gate.log",
+    "revision": "343bb1ab6c61e8d996c4c1f2ce5508f83b894eb1"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:7166"
+  ],
+  "completed_at": "2026-10-12T19:44:56.936Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-12T19:34:30Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_fold_keeps_richer_prose.py",
+      "line": 54,
+      "severity": "follow-on",
+      "text": "the integration tests substitute a hand-written mirror (_DocsTransaction.run) for the fold's real mutation query, so deleting or misspelling the query's target.documentation / target.docs_stage SET lines at imas_codex/standard_names/edit.py:1537-1538 would redden no test"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T191240981935-sib-fold-keeps-richer-prose/negative_control.log",
+      "line": 2,
+      "severity": "follow-on",
+      "text": "the header names rev 343bb1ab6 (the base) for a tree that also carried the change and the revert, so a reader tying the red log to a revision is misled about what produced it"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/cli/sn.py:7166 sn_supersede imports and calls supersede_into, the sole production entry to the changed fold; the node's own test files import a fake graph harness and are not production call sites.",
+    "diff": "read commit by commit against 343bb1ab6; the single commit d01b5463c adds 309 lines across three files -- +91 in imas_codex/standard_names/edit.py (the three helpers, the two query SET lines, the expected-state write and the two call sites), +155 for the new test file and +63 for the evidence fragment -- and changes no other path.",
+    "done_when": "the three measures hold on the code -- a sparse source onto a rich target keeps the target's documentation (tests/standard_names/test_fold_keeps_richer_prose.py:109, 5 passed EXIT=0 in after_newtest.log), a rich source onto a sparse target carries the source's (test_fold_keeps_richer_prose.py:124), and the first test fails with the choice reverted (negative_control.log: 2 failed EXIT=1); the seven existing fold/edit files plus the new file run 135 passed at head (after_gate.log) against 130 passed at base (base_gate.log), adding no failures.",
+    "goal": "the node goal is to make a fold onto an occupied identity keep the richer documentation; the diff adds imas_codex/standard_names/edit.py:2164 _fold_holds_documentation, edit.py:2173 _fold_carries_source_documentation and edit.py:2198 _fold_target_documentatitation and wires them into the fold's mutation query (edit.py:1537) and its receipt's expected post-state (edit.py:2611), so the surviving identity holds whichever side's prose is richer.",
+    "manifest": "read; status complete, commit d01b5463c, one landing line, baseline_suite and after_suite named with openable log paths and revisions, added-failure delta recorded as zero; the supplementary logs carry mislabeled headers, noted as findings.",
+    "write_paths": "the source declared imas_codex/standard_names/edit.py, tests/standard_names/test_fold_keeps_richer_prose.py and docs/evidence/fragments/sn-integrity-backlog/sib-fold-keeps-richer-prose.html; the diff at d01b5463c touches exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_fold_keeps_richer_prose.py:109 and :124 fail when edit.py:2173 is reverted to return True (negative_control.log), but those integration tests hand-mirror the mutation at test_fold_keeps_richer_prose.py:54 rather than executing _FOLD_NAME_MUTATION_QUERY, so the query's new SET lines at edit.py:1537-1538 are guarded by no test.",
+    "evidence": "the three done_when measures are each captured to a retained log (after_newtest.log 5 passed EXIT=0, after_gate.log 135 passed EXIT=0, negative_control.log 2 failed EXIT=1) against base_gate.log 130 passed, but the negative-control and new-test log headers name the base revision and a placeholder module rather than the tree actually measured.",
+    "fit": "the new helpers follow the module's underscore-private idiom and docstring style at imas_codex/standard_names/edit.py:2164, and no name carries a plan, sprint or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/edit.py:2173 _fold_carries_source_documentation chooses the documented or higher-docs-stage side and edit.py:1537 writes that pair to the surviving target, so a sparse fold onto a rich target keeps the target's prose exactly as the goal states.",
+    "reuse": "no existing owner of a documentation-richness or docs-stage-rank comparison exists in imas_codex (search over imas_codex/standard_names and the whole tree found none), so edit.py:2173 is the first and extends no capability.",
+    "scope_discipline": "the only paths in d01b5463c are imas_codex/standard_names/edit.py, tests/standard_names/test_fold_keeps_richer_prose.py and docs/evidence/fragments/sn-integrity-backlog/sib-fold-keeps-richer-prose.html, all inside the declared write paths."
+  },
+  "node": "review-of-sib-fold-keeps-richer-prose",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make a fold onto an occupied identity keep the richer documentation; the diff adds imas_codex/standard_names/edit.py:2164 _fold_holds_documentation, edit.py:2173 _fold_carries_source_documentation and edit.py:2198 _fold_target_documentatitation and wires them into the fold's mutation query (edit.py:1537) and its receipt's expected post-state (edit.py:2611), so the surviving identity holds whichever side's prose is richer.\nVERDICT done_when: the three measures hold on the code -- a sparse source onto a rich target keeps the target's documentation (tests/standard_names/test_fold_keeps_richer_prose.py:109, 5 passed EXIT=0 in after_newtest.log), a rich source onto a sparse target carries the source's (test_fold_keeps_richer_prose.py:124), and the first test fails with the choice reverted (negative_control.log: 2 failed EXIT=1); the seven existing fold/edit files plus the new file run 135 passed at head (after_gate.log) against 130 passed at base (base_gate.log), adding no failures.\nVERDICT write_paths: the source declared imas_codex/standard_names/edit.py, tests/standard_names/test_fold_keeps_richer_prose.py and docs/evidence/fragments/sn-integrity-backlog/sib-fold-keeps-richer-prose.html; the diff at d01b5463c touches exactly those three paths and nothing else.\nVERDICT manifest: read; status complete, commit d01b5463c, one landing line, baseline_suite and after_suite named with openable log paths and revisions, added-failure delta recorded as zero; the supplementary logs carry mislabeled headers, noted as findings.\nVERDICT diff: read commit by commit against 343bb1ab6; the single commit d01b5463c adds 309 lines across three files -- +91 in imas_codex/standard_names/edit.py (the three helpers, the two query SET lines, the expected-state write and the two call sites), +155 for the new test file and +63 for the evidence fragment -- and changes no other path.\nCALL_SITES: imas_codex/cli/sn.py:7166\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/edit.py:2173 _fold_carries_source_documentation chooses the documented or higher-docs-stage side and edit.py:1537 writes that pair to the surviving target, so a sparse fold onto a rich target keeps the target's prose exactly as the goal states.\nSCORE evidence: 16\nJUSTIFICATION evidence: the three done_when measures are each captured to a retained log (after_newtest.log 5 passed EXIT=0, after_gate.log 135 passed EXIT=0, negative_control.log 2 failed EXIT=1) against base_gate.log 130 passed, but the negative-control and new-test log headers name the base revision and a placeholder module rather than the tree actually measured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the only paths in d01b5463c are imas_codex/standard_names/edit.py, tests/standard_names/test_fold_keeps_richer_prose.py and docs/evidence/fragments/sn-integrity-backlog/sib-fold-keeps-richer-prose.html, all inside the declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_fold_keeps_richer_prose.py:109 and :124 fail when edit.py:2173 is reverted to return True (negative_control.log), but those integration tests hand-mirror the mutation at test_fold_keeps_richer_prose.py:54 rather than executing _FOLD_NAME_MUTATION_QUERY, so the query's new SET lines at edit.py:1537-1538 are guarded by no test.\nSCORE fit: 19\nJUSTIFICATION fit: the new helpers follow the module's underscore-private idiom and docstring style at imas_codex/standard_names/edit.py:2164, and no name carries a plan, sprint or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: no existing owner of a documentation-richness or docs-stage-rank comparison exists in imas_codex (search over imas_codex/standard_names and the whole tree found none), so edit.py:2173 is the first and extends no capability.\nFINDING tests/standard_names/test_fold_keeps_richer_prose.py:54 follow-on: the integration tests substitute a hand-written mirror (_DocsTransaction.run) for the fold's real mutation query, so deleting or misspelling the query's target.documentation / target.docs_stage SET lines at imas_codex/standard_names/edit.py:1537-1538 would redden no test\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T191240981935-sib-fold-keeps-richer-prose/negative_control.log:2 follow-on: the header names rev 343bb1ab6 (the base) for a tree that also carried the change and the revert, so a reader tying the red log to a revision is misled about what produced it",
+  "review_run_id": "r-20261012T193420385382-review-of-sib-fold-keeps-richer-prose",
+  "reviewed_base_sha": "343bb1ab6c61e8d996c4c1f2ce5508f83b894eb1",
+  "reviewed_head_sha": "d01b5463cf9230808692c00589148b87a7c4f576",
+  "reviewed_run_id": "r-20261012T191240981935-sib-fold-keeps-richer-prose",
+  "reviewer_run_id": "r-20261012T193420385382-review-of-sib-fold-keeps-richer-prose",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T191240981935-sib-fold-keeps-richer-prose/after_newtest.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T191240981935-sib-fold-keeps-richer-prose/after_gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T191240981935-sib-fold-keeps-richer-prose/base_gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T191240981935-sib-fold-keeps-richer-prose/negative_control.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:47:06.709670+00:00",
+  "total": 110
+}
