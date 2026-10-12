@@ -290,6 +290,64 @@ def _family_row(
 
 
 class TestBuildWorklist:
+    def test_parentless_bucket_uses_the_shared_family_enumeration(self):
+        """The parentless bucket is the one family-enumeration mechanism.
+
+        build_worklist must resolve parentless families through the shared
+        pattern-family query, not a second inline grouping: the issued
+        parentless query is asserted to equal the shared enumeration's own
+        text, so restoring a duplicate implementation fails here.
+        """
+        from imas_codex.standard_names.harmonize import (
+            _PARENTLESS_MEMBER_FILTER,
+            _pattern_family_rows_query,
+        )
+
+        def _query(cypher, **_params):
+            if "AS parent_id" in cypher:
+                return []
+            return [
+                {
+                    "physical_base": "alpha_base",
+                    "geometric_base": "",
+                    "transformation": "",
+                    "process": "",
+                    "object": "",
+                    "members": [
+                        {
+                            "id": f"alpha_base_{i}",
+                            "description": desc,
+                            "documentation": "",
+                            "docs_stage": "accepted",
+                            "reviewer_score_docs": 0.9,
+                        }
+                        for i, desc in enumerate(
+                            (
+                                "alpha opening one",
+                                "beta closing two",
+                                "gamma middle three",
+                            )
+                        )
+                    ],
+                }
+            ]
+
+        gc = MagicMock()
+        gc.query.side_effect = _query
+        worklist = build_worklist(
+            gc=gc, min_size=3, min_drift=0.5, include_parentless=True
+        )
+        pattern_rows = [row for row in worklist if row["grouping"] == "pattern"]
+        assert len(pattern_rows) == 1
+        assert pattern_rows[0]["physical_base"] == "alpha_base"
+        assert pattern_rows[0]["n"] == 3
+
+        shared = _pattern_family_rows_query(
+            seeded=False, node_filter=_PARENTLESS_MEMBER_FILTER
+        )
+        issued = [call.args[0] for call in gc.query.call_args_list]
+        assert shared in issued
+
     def test_filters_by_min_size(self):
         gc = MagicMock()
         # Family with only 2 members — below default min_size=3
@@ -517,34 +575,3 @@ class TestBuildWorklist:
         # via the deterministic id fallback in select_anchor.
         assert worklist[0]["anchor"] is not None
         assert worklist[0]["deferred"] is False
-
-
-# ---------------------------------------------------------------------------
-# lint_links / mark / stamp
-# ---------------------------------------------------------------------------
-
-
-class _LintGC:
-    def __init__(self, docs, all_ids):
-        self._docs = docs
-        self._ids = all_ids
-
-    def query(self, cypher, **params):
-        if "docs_stage = 'accepted'" in cypher:
-            return [{"id": k, "documentation": v} for k, v in self._docs.items()]
-        if "RETURN sn.id AS id" in cypher:
-            return [{"id": i} for i in self._ids]
-        return []
-
-
-def test_lint_links_flags_label_target_mismatch():
-    from imas_codex.standard_names.harmonize import lint_links
-
-    docs = {
-        "a_name": "See [b_name](name:c_name) for detail.",  # label is a real id != target
-        "d_name": "See [B name](name:b_name).",  # human label normalizes to target — ok
-        "e_name": "See [not a name](name:b_name).",  # label not an id — ok
-    }
-    gc = _LintGC(docs, {"a_name", "b_name", "c_name", "d_name", "e_name"})
-    findings = lint_links(gc=gc)
-    assert findings == [{"member": "a_name", "label": "b_name", "target": "c_name"}]
