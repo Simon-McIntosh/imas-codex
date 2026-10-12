@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T05:25:34.078Z",
+  "dispatched_at": "2026-10-12T05:17:13Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html#s2:69",
+      "id": "wiring-1",
+      "reason": "the one node dispatched now would either stall on a grouping that does not exist yet or ship a report over the very grouping the plan exists to replace, and its followup warns about the lint only, not the grouping.",
+      "text": "\u00a72's report is specified per pattern family with lint findings by class, but \u00a72 declares no depends-on; pattern families come from sn-catalog-grouping \u00a72 and the lint from sn-house-style \u00a74, both still `implementable`, and \u00a73 declares the same two dependencies. As dispatched, \u00a72 would run its report over the existing HAS_PARENT grouping that \u00a71 names as the wrong family.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html#s4:133",
+      "id": "done_when-1",
+      "reason": "\u00a74 exists to decide whether making entries agree made any of them worse and to set the WEST cost limit, so a threshold that can pass while measuring nothing calibrates the WEST run on an unproven instrument.",
+      "text": "\u00a74's done-when asserts \"No member's documentation score falls below the acceptance threshold\" with no negative control; nothing shows a fall below that threshold is detectable, so a uniform after-column of unchanged scores passes whether the instrument works or not.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html#s3:113",
+      "id": "reasoning-1",
+      "reason": "a function whose only caller \u00a72 removes, reused by \u00a73 without a named caller, can leave the snapshot-before-reset unreached so `sn harmonize --apply` resets documentation with no way back, the exact loss \u00a73 claims the snapshot prevents.",
+      "text": "\u00a72 deletes `sn run --families`, whose handler at imas_codex/cli/sn.py:2745 is the only production caller of mark_families_for_regen (harmonize.py:728); \u00a73 relies on that function for the pre-reset snapshot (\"as mark_families_for_regen already does\") but names no caller in the new command.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "cef1a998a9b6ecde6314132d3e292f5762d0ce28af1b92d09c08ef9dd3dadafc",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T051704202443-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "40c1eb9b8a2fc3d69417fb8a97f16956df084587",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the harmonize.py docstring pointer, select_anchor (harmonize.py:103), mark_families_for_regen (harmonize.py:728), the two flags named for deletion (sn.py:1775, sn.py:6102), the census href (resolved as `.html`) and all three depends-on targets (sn-house-style#s4, sn-house-style#s5, sn-catalog-grouping#s2) resolve.",
+    "done_when": "a finding \u2014 \u00a74's done-when rests on a threshold assertion (\"No member's documentation score falls below the acceptance threshold\") with no declared negative control, so it cannot show a sub-threshold score is detectable.",
+    "evidence_paths": "pass \u2014 \u00a74 records its figures \"in the plan's evidence\", the repository's own convention for plan evidence (cf. docs/plans/sn-west-review-rehearsal.html), which is git-tracked and served by the docs surface rather than a session scratchpad.",
+    "naming": "pass \u2014 the command name `harmonize` matches the existing module and reuses the word the prompts already use, and no plan label, ticket or version tag reaches a symbol or file.",
+    "reasoning": "a finding \u2014 \u00a72 deletes the only production caller of mark_families_for_regen, and \u00a73 relies on that function for snapshot-before-reset without naming the caller that will reach it.",
+    "single_goal": "pass \u2014 \u00a72 is one deliverable (one surface replacing three routes, flags deleted in the same change) and \u00a73 and \u00a74 each name one.",
+    "wiring": "a finding \u2014 \u00a72 declares no depends-on at all (the plan-section-depends-on meta names only s3 and s4), though its report is specified \"for each pattern family in scope\" with \"lint findings by class\", which sn-catalog-grouping \u00a72 and sn-house-style \u00a74 provide and which \u00a73 does declare."
+  },
+  "section_digests": {
+    "_document": "cfdda693f2ac5e70a694efdcac5289d53d95a7596568112e941447e483828a5a",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s2": "3564b3f21b78772d527df10cdd82b0ad53d6852e977e548bc572c9f888612f59",
+    "s3": "189e0f0bbbd64e638c93e66e86cc4872e9cbb3f493d489a399a1ea5e363c2134",
+    "s4": "ec312430c0540a82251c5152c9007afb2ec32f3307b346bca3c1d4bbf133d879"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T05:34:18.494272+00:00"
+}
