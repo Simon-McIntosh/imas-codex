@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/review/pipeline.py:2164",
+    "imas_codex/standard_names/review/pipeline.py:576",
+    "imas_codex/standard_names/review/pipeline.py:578",
+    "imas_codex/standard_names/promote.py:710"
+  ],
+  "completed_at": "2026-10-12T22:32:04.248Z",
+  "dispatched_at": "2026-10-12T22:25:15Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "1747",
+      "severity": "follow-on",
+      "text": "follow-on: the two call sites at :1775 and :1811 both render through _lint_finding_line, but no test compares their output, so re-inlining the format at one site would redden no assertion and the single-format property rests on reading alone."
+    },
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "1976",
+      "severity": "follow-on",
+      "text": "follow-on: the else-branch log reports an entry as \"already below acceptance\" when reviewer_score is None (absent) as well as when it is genuinely low, misstating the condition for the missing-score path the original code guarded explicitly."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit (one commit f76dcc376 against base 1078886d7) \u2014 _lint_finding_line added and both format sites routed through it; the cap reordered so the finding is recorded before the score branch; the absence test's marker replaced by the guard-enclosed heading and a below-acceptance recording test added; a 13-line evidence fragment.",
+    "done_when": "each of the four clauses is measured by a log on disk \u2014 nc_below_threshold.log removes the recording and reddens the below-acceptance test (2 failed, EXIT=1); the shared formatter is confirmed by the two call sites at pipeline.py:1775 and :1811; nc_guard_removed.log drops the {% if audit_findings %} guard and reddens test_audit_findings_block_is_absent_when_no_findings (EXIT=1); gate_after.log adds no failure over gate_base.log (1 failed/310 passed vs 1 failed/309 passed, same id, EXIT=1).",
+    "goal": "the node's goal is to record every error lint finding on its review entry through one finding-line formatter; pipeline.py:1964 records entry[\"audit_cap_finding\"] on every entry holding an error finding before the score test branches, and pipeline.py:1747 _lint_finding_line is the single renderer called at pipeline.py:1775 (reviewer prompt) and pipeline.py:1811 (the record path).",
+    "manifest": "read; status complete; it names commit f76dcc376 as the head, records baseline_suite and after_suite carrying the identical single failure id, names both negative-control logs, and its tests/test_logs fields reconcile with the gate logs on disk.",
+    "write_paths": "git diff --stat 1078886d7..f76dcc376 changes exactly three paths \u2014 imas_codex/standard_names/review/pipeline.py, tests/standard_names/test_review_findings_cap.py and docs/evidence/fragments/sn-house-style/shs-cap-record.html \u2014 every one inside the declared write paths."
+  },
+  "justifications": {
+    "durability": "nc_below_threshold.log reddens the new test when pipeline.py:1964 is removed (EXIT=1) and nc_guard_removed.log reddens the absence test when the template guard is dropped (EXIT=1), but no assertion ties the two pipeline.py:1775/:1811 call sites together, so the shared-format clause is guarded only by reading.",
+    "evidence": "gate_base.log (1 failed/309 passed) and gate_after.log (1 failed/310 passed) share the one pre-existing failure id and the rg the done_when names returns the same 28 paths the gate command ran, so added_failure_count is 0.",
+    "fit": "the helper and callers follow the module idiom and the new test comment at test_review_findings_cap.py:29 states the mechanism (the guard-enclosed heading) rather than any plan or ticket reference.",
+    "goal_fidelity": "pipeline.py:1964 sets entry[\"audit_cap_finding\"] for every error-holding entry before the score branch at pipeline.py:1966, and pipeline.py:1747 _lint_finding_line is the one formatter used at pipeline.py:1775 and :1811.",
+    "reuse": "_lint_finding_line at pipeline.py:1747 is the sole owner of the lint line format \u2014 a search of imas_codex/ for other \"severity}:lint:\" renderers found none \u2014 and it reuses the existing LintFinding type from review/audits.",
+    "scope_discipline": "git diff --stat 1078886d7..f76dcc376 lists exactly the three declared paths and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to record every error lint finding on its review entry through one finding-line formatter; pipeline.py:1964 records entry[\"audit_cap_finding\"] on every entry holding an error finding before the score test branches, and pipeline.py:1747 _lint_finding_line is the single renderer called at pipeline.py:1775 (reviewer prompt) and pipeline.py:1811 (the record path).\nVERDICT done_when: each of the four clauses is measured by a log on disk \u2014 nc_below_threshold.log removes the recording and reddens the below-acceptance test (2 failed, EXIT=1); the shared formatter is confirmed by the two call sites at pipeline.py:1775 and :1811; nc_guard_removed.log drops the {% if audit_findings %} guard and reddens test_audit_findings_block_is_absent_when_no_findings (EXIT=1); gate_after.log adds no failure over gate_base.log (1 failed/310 passed vs 1 failed/309 passed, same id, EXIT=1).\nVERDICT write_paths: git diff --stat 1078886d7..f76dcc376 changes exactly three paths \u2014 imas_codex/standard_names/review/pipeline.py, tests/standard_names/test_review_findings_cap.py and docs/evidence/fragments/sn-house-style/shs-cap-record.html \u2014 every one inside the declared write paths.\nVERDICT manifest: read; status complete; it names commit f76dcc376 as the head, records baseline_suite and after_suite carrying the identical single failure id, names both negative-control logs, and its tests/test_logs fields reconcile with the gate logs on disk.\nVERDICT diff: read commit by commit (one commit f76dcc376 against base 1078886d7) \u2014 _lint_finding_line added and both format sites routed through it; the cap reordered so the finding is recorded before the score branch; the absence test's marker replaced by the guard-enclosed heading and a below-acceptance recording test added; a 13-line evidence fragment.\nCALL_SITES: imas_codex/standard_names/review/pipeline.py:2164, imas_codex/standard_names/review/pipeline.py:576, imas_codex/standard_names/review/pipeline.py:578, imas_codex/standard_names/promote.py:710\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: pipeline.py:1964 sets entry[\"audit_cap_finding\"] for every error-holding entry before the score branch at pipeline.py:1966, and pipeline.py:1747 _lint_finding_line is the one formatter used at pipeline.py:1775 and :1811.\nSCORE evidence: 20\nJUSTIFICATION evidence: gate_base.log (1 failed/309 passed) and gate_after.log (1 failed/310 passed) share the one pre-existing failure id and the rg the done_when names returns the same 28 paths the gate command ran, so added_failure_count is 0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 1078886d7..f76dcc376 lists exactly the three declared paths and nothing else.\nSCORE durability: 18\nJUSTIFICATION durability: nc_below_threshold.log reddens the new test when pipeline.py:1964 is removed (EXIT=1) and nc_guard_removed.log reddens the absence test when the template guard is dropped (EXIT=1), but no assertion ties the two pipeline.py:1775/:1811 call sites together, so the shared-format clause is guarded only by reading.\nSCORE fit: 20\nJUSTIFICATION fit: the helper and callers follow the module idiom and the new test comment at test_review_findings_cap.py:29 states the mechanism (the guard-enclosed heading) rather than any plan or ticket reference.\nSCORE reuse: 20\nJUSTIFICATION reuse: _lint_finding_line at pipeline.py:1747 is the sole owner of the lint line format \u2014 a search of imas_codex/ for other \"severity}:lint:\" renderers found none \u2014 and it reuses the existing LintFinding type from review/audits.\nFINDING imas_codex/standard_names/review/pipeline.py:1747 follow-on: the two call sites at :1775 and :1811 both render through _lint_finding_line, but no test compares their output, so re-inlining the format at one site would redden no assertion and the single-format property rests on reading alone.\nFINDING imas_codex/standard_names/review/pipeline.py:1976 follow-on: the else-branch log reports an entry as \"already below acceptance\" when reviewer_score is None (absent) as well as when it is genuinely low, misstating the condition for the missing-score path the original code guarded explicitly.",
+  "review_run_id": "r-20261012T222503614474-review-of-shs-cap-record",
+  "reviewed_base_sha": "1078886d7290d73220b55253bbb34f67f12f34ed",
+  "reviewed_head_sha": "f76dcc3768a7a8bc1d67ddaf8508c1b842eff07f",
+  "reviewed_run_id": "r-20261012T202323972721-shs-cap-record",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:29:56.947135+00:00",
+  "total": 118
+}
