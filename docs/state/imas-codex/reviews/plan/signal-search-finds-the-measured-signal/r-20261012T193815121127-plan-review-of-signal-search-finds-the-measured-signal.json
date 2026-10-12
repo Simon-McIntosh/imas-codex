@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T19:47:52.989Z",
+  "dispatched_at": "2026-10-12T19:38:30Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html \u00a73",
+      "id": "anchors_resolve-1",
+      "reason": "`git log -1 --format=%cI 93bfb7e9d` prints `2026-10-11T23:08:21+02:00` (= 21:08:21Z), and no commit on 2026-10-11 sits at 19:08:21Z, so the predicate that defines the eligible golden population is either wrong by two hours or the instant came from a different event than the commit it is attached to; the author should correct it or record where 19:08:21Z comes from, which changes the eligible set and the fixture's census count of 14,991.",
+      "text": "the eligibility cutover the plan states is two hours earlier than the commit it cites, and the same instant is already written into the committed fixture (`tests/llm/fixtures/signal_search_questions.json`: `eligibility.enriched_at_cutover = 2026-10-11T19:08:21Z`) and into gate `g-ssfms-1`",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "cc8363f43cdc623ca0eab51560b902cc5d55170dde2de10b39e829048b214461",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 9,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T193815121127-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "889d0ebbababe8cbcccd2f136dd42120c5e59a2e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a73 pairs commit `93bfb7e9d` with the instant `2026-10-11T19:08:21Z`, but that commit's timestamp is `2026-10-11T21:08:21Z` (23:08:21+02:00), so the instant the plan and its fixture carry as the eligibility cutover is two hours earlier than the commit it cites.",
+    "done_when": "pass \u2014 \u00a73 carries the random-order control (\"the random control scores below every arm on mean nDCG@10; a control that does not means the labels are wrong\") and has node 2 show the labelling refusal firing on the fixture; \u00a74's third bullet carries the negative control (\"The old rule must fail the same test\"), which the current rule does.",
+    "evidence_paths": "pass \u2014 \u00a73's table and labelling log land in `docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html`, a durable in-repo path; \u00a74's measurement is the same harness.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach the new symbols (`rrf_fuse`, `RRF_K`, `imas_codex/search/fusion.py`, `signal_search_questions.json`); the \u00a7-references are the plan's own sections.",
+    "reasoning": "pass \u2014 \u00a73's mechanism (pooled labels over a fixed arm set plus a seeded random control) can produce its done-when, and \u00a74's mechanism runs on the named production callers `_search_signals`, `_search_docs`, `_search_code` (all in `imas_codex/llm/search_tools.py`) and `_hybrid_ids` (`imas_codex/ids/slot_context.py`), each of which still carries the additive rule at lines 287, 915, 1667 and 70 respectively. The one evidence mismatch found in these units is filed under anchors_resolve.",
+    "single_goal": "pass \u2014 \u00a73's three nodes each carry one deliverable (held-out questions, harness, pooled evidence), and \u00a74 carries one (the shared rank fusion and its measurement).",
+    "wiring": "pass \u2014 \u00a74's dependence on \u00a73 is declared in the followup (\"\u00a74 and \u00a75 touch different files and can run in parallel once \u00a73 lands\") and \u00a74's done-when measures on \u00a73's pooled labels, so the ordering the gate needs is stated and no declared relationship points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "3a0b5c1d43e7a684bd9c55c4e26c78a780e14030ed8b107eb1ad6efe77ad55c2",
+    "s4": "bbfa57f0f787e5833fdbccdbece0e75658e4bfe6f10d389c40ec5c8c4ef64720",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:48:48.526706+00:00"
+}
