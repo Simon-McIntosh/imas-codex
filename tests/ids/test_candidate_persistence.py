@@ -19,8 +19,15 @@ from imas_codex.ids.graph_ops import (
     clear_candidates,
     read_candidates,
     select_candidates,
-    write_candidates,
+    write_candidates as _write_candidates,
 )
+
+
+def write_candidates(source_id, judgments, route, gc, **judged):
+    """Write with fixed judged descriptions; their storage is tested elsewhere."""
+    judged.setdefault("judged_description", "source text")
+    judged.setdefault("judged_rep_description", "representative text")
+    return _write_candidates(source_id, judgments, route, gc, **judged)
 
 
 def _gc_returning(*responses):
@@ -124,7 +131,10 @@ class TestWriteCandidates:
             write_candidates("jet:PF:r", judgments, "selected", gc)
 
         statement = _normalised(gc)
-        assert "CASE WHEN written = $expected THEN $route ELSE null END" in statement
+        assert "written = $expected AND $route IS NOT NULL AS routed" in statement
+        assert "sg.candidate_route = CASE WHEN routed THEN $route ELSE null END" in (
+            statement
+        )
         assert gc.query.call_args.kwargs["expected"] == 2
         assert "sg.mapping_claimed_at = null" in statement
         assert "sg.mapping_claim_token = null" in statement
@@ -139,8 +149,10 @@ class TestWriteCandidates:
         assert written == 0
         assert gc.query.call_args.kwargs["route"] == "no_candidate"
         assert gc.query.call_args.kwargs["expected"] == 0
-        assert "CASE WHEN written = $expected THEN $route ELSE null END" in (
-            _normalised(gc)
+        statement = _normalised(gc)
+        assert "written = $expected AND $route IS NOT NULL AS routed" in statement
+        assert "sg.candidate_route = CASE WHEN routed THEN $route ELSE null END" in (
+            statement
         )
 
     def test_boolean_route_marks_the_edge(self):

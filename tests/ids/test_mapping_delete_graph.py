@@ -85,6 +85,12 @@ def _purge(gc: GraphClient) -> None:
         "MATCH (ev:MappingEvidence {id: $ev}) DETACH DELETE ev",
         ev=EVIDENCE_ID,
     )
+    # The seeded IMASNode belongs to no IDS; left behind it carries a null
+    # ``ids`` into every query that reads IMASNode ids.
+    gc.query(
+        "MATCH (ip:IMASNode {id: $imas}) WHERE ip.ids IS NULL DETACH DELETE ip",
+        imas=IMAS_NODE_ID,
+    )
 
 
 @pytest.mark.graph

@@ -3,9 +3,11 @@
 Claims enriched sources whose Data Dictionary candidates have not been judged,
 routes each to the IDSs most likely to hold its values, retrieves candidates
 within those IDSs, judges them with the decisions model, and records the route
-and candidate edges on the graph. A source that already carries a
-``candidate_route`` is skipped; re-judging it is a two-step operation — clear
-its candidates first with ``imas-codex discover clear FACILITY -d map``.
+and candidate edges on the graph with the descriptions the judgment read. A
+source whose route is current is skipped. One whose source or representative
+description has been rewritten since is judged again on the next pass, so a
+re-enrichment needs no clear; ``imas-codex discover clear FACILITY -d map``
+discards every route of the facility.
 
 The stage drains the sources the signals stage seeded, so it has no seeding
 half of its own. :func:`run_candidates_stage` is the stage the sequence runner

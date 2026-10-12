@@ -374,6 +374,17 @@ class TestDecidedSourceNotReclaimed:
         assert "n.candidate_route = 'escalated'" in predicate
         assert "n.mapping_disposition IS NULL" in predicate
 
+    def test_claim_predicate_skips_shortlists_judged_from_old_text(self):
+        from imas_codex.ids.workers import (
+            _ROUTE_IS_CURRENT,
+            claim_sources_for_escalated,
+        )
+
+        with patch("imas_codex.ids.workers.claim_batch", return_value=[]) as mock_claim:
+            claim_sources_for_escalated("jet", ["magnetics"])
+        predicate = mock_claim.call_args.kwargs["status_predicate"]
+        assert _ROUTE_IS_CURRENT in predicate
+
 
 class TestResetClearsVerdict:
     def test_reset_nulls_disposition_and_evidence(self):

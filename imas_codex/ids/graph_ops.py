@@ -483,6 +483,9 @@ def write_candidates(
     judgments: Iterable[dict[str, Any]],
     route: str | None,
     gc: GraphClient,
+    *,
+    judged_description: str | None,
+    judged_rep_description: str | None,
 ) -> int:
     """Replace a source's MAPPING_CANDIDATE edges in one transaction.
 
@@ -494,6 +497,9 @@ def write_candidates(
     it rather than treating it as done. The claim is released either way, and
     a shortfall raises ``CandidateWriteError``. An empty judgment list is a
     valid write: a ``no_candidate`` route with no edges still sets the route.
+    The descriptions the judgment read are stored beside the route, which
+    stands only while they still match the graph; they are null whenever the
+    route is.
 
     Args:
         source_id: SignalSource ID.
@@ -509,6 +515,9 @@ def write_candidates(
             (e.g. 'selected', 'escalated', 'no_candidate'), or None to clear it.
             Written only when every judgment persisted.
         gc: Graph client instance.
+        judged_description: The source description the judgment read.
+        judged_rep_description: The representative signal's description the
+            judgment read, empty when the source has no representative.
 
     Returns:
         The number of edges written.
@@ -542,7 +551,12 @@ def write_candidates(
                 r.arms = rec.arms
             RETURN count(r) AS written
         }
-        SET sg.candidate_route = CASE WHEN written = $expected THEN $route ELSE null END,
+        WITH sg, written, written = $expected AND $route IS NOT NULL AS routed
+        SET sg.candidate_route = CASE WHEN routed THEN $route ELSE null END,
+            sg.candidate_judged_description =
+                CASE WHEN routed THEN $judged_description ELSE null END,
+            sg.candidate_judged_rep_description =
+                CASE WHEN routed THEN $judged_rep_description ELSE null END,
             sg.mapping_claimed_at = null,
             sg.mapping_claim_token = null
         RETURN written AS written
@@ -551,6 +565,8 @@ def write_candidates(
         route=route,
         records=records,
         expected=expected,
+        judged_description=judged_description,
+        judged_rep_description=judged_rep_description,
     )
 
     written = rows[0]["written"] if rows else 0
@@ -894,7 +910,9 @@ def clear_candidates(facility: str, gc: GraphClient) -> dict[str, int]:
              CASE WHEN sg.candidate_route IS NULL THEN 0 ELSE 1 END AS had_route
         WITH sg, rels, size(rels) AS edge_count, had_route
         FOREACH (rel IN rels | DELETE rel)
-        SET sg.candidate_route = null
+        SET sg.candidate_route = null,
+            sg.candidate_judged_description = null,
+            sg.candidate_judged_rep_description = null
         RETURN sum(edge_count) AS edges_removed,
                sum(had_route) AS routes_reset
         """,

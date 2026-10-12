@@ -151,8 +151,9 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0, expand=
             return expand(source, candidates, judgments, cost=cost)
         return [], []
 
-    def fake_write(source_id, records, route, gc):
+    def fake_write(source_id, records, route, gc, **judged):
         captured.setdefault("routes", {})[source_id] = route
+        captured.setdefault("judged", {})[source_id] = judged
         captured.setdefault("records", {})[source_id] = list(records)
         return len(records)
 
@@ -195,6 +196,29 @@ def test_candidate_worker_writes_one_route_per_source(monkeypatch):
     # The selected source marks exactly its top candidate.
     selected = captured["records"]["src-sel"]
     assert [r["route"] for r in selected] == [True, False]
+
+
+def test_candidate_worker_records_the_text_each_route_was_judged_from(monkeypatch):
+    """Each route is written with the source and representative text it read.
+
+    Negative control: drop the judged-description arguments from the worker's
+    write call; ``captured["judged"]`` then holds empty dicts and this fails.
+    """
+    captured: dict = {}
+    _patch_worker(monkeypatch, captured)
+    state = _new_state(batch_size=10)
+
+    asyncio.run(candidate_worker(state))
+
+    assert captured["judged"]["src-sel"] == {
+        "judged_description": "sel",
+        "judged_rep_description": "",
+    }
+    assert {judged["judged_description"] for judged in captured["judged"].values()} == {
+        "sel",
+        "esc",
+        "none",
+    }
 
 
 def test_candidate_worker_scopes_retrieval_to_routed_ids(monkeypatch):

@@ -270,6 +270,21 @@ _MAPPING_CLAIM_FIELDS = {
     "token_field": "mapping_claim_token",
 }
 
+# A route stands only while the text its judgment read is still on the graph:
+# the source's own description and its representative signal's. Re-enrichment
+# and member individualization both rewrite those descriptions without touching
+# the route, so a source whose text has changed is unjudged again. The judged
+# text itself is compared, not a timestamp, because individualization rewrites
+# a description without stamping it. Never null, so ``NOT`` of it is safe.
+_ROUTE_IS_CURRENT = (
+    "(n.candidate_route IS NOT NULL "
+    "AND n.candidate_judged_description IS NOT NULL "
+    "AND n.candidate_judged_description = coalesce(n.description, '') "
+    "AND NOT EXISTS { MATCH (judged_rep:FacilitySignal {id: n.representative_id}) "
+    "WHERE coalesce(judged_rep.description, '') "
+    "<> coalesce(n.candidate_judged_rep_description, '') })"
+)
+
 
 def claim_sources_for_mapping(
     facility: str,
@@ -306,12 +321,14 @@ def claim_sources_for_candidates(
     batch_size: int = 10,
     focus_ids: list[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Claim enriched sources whose candidates have not been judged yet.
+    """Claim enriched sources whose candidates are unjudged or judged from old text.
 
-    A source is claimable while its ``candidate_route`` is null; a route lands
-    once its candidates are judged and written, so a judged source drops out of
-    this set. The claim window bounds a source whose judgment failed: once the
-    claim is stale it is reclaimed and retried.
+    A source is claimable while it has no route, or while its route was judged
+    from a source or representative description that has since been rewritten.
+    A route lands with the text it was judged from once its candidates are
+    written, so a judged source drops out of this set until its text changes.
+    The claim window bounds a source whose judgment failed: once the claim is
+    stale it is reclaimed and retried.
     """
     domain_filter, domain_params = _domain_filter(domains)
     focus_filter = "AND n.id IN $focus_ids" if focus_ids else ""
@@ -319,7 +336,7 @@ def claim_sources_for_candidates(
         "SignalSource",
         facility=facility,
         status_predicate=(
-            f"n.status = 'enriched' AND n.candidate_route IS NULL "
+            f"n.status = 'enriched' AND NOT {_ROUTE_IS_CURRENT} "
             f"{domain_filter} {focus_filter}"
         ),
         status_params={
@@ -431,7 +448,11 @@ def _escalated_source_predicate(
     ids_names: list[str] | None,
     domains: list[str] | None = None,
 ) -> tuple[str, dict[str, Any]]:
-    """Select unresolved escalated sources with a candidate in a target IDS."""
+    """Select unresolved escalated sources with a candidate in a target IDS.
+
+    A shortlist judged from text that has since been rewritten is not chosen
+    from; the candidate stage judges that source again first.
+    """
     domain_filter, params = _domain_filter(domains)
     ids_clause = ""
     if ids_names:
@@ -441,7 +462,7 @@ def _escalated_source_predicate(
         )
         params["ids_names"] = list(ids_names)
     return (
-        "n.candidate_route = 'escalated' "
+        f"n.candidate_route = 'escalated' AND {_ROUTE_IS_CURRENT} "
         "AND n.mapping_disposition IS NULL " + ids_clause + domain_filter,
         params,
     )
@@ -561,14 +582,14 @@ def has_pending_candidate_work(
     domains: list[str] | None = None,
     focus_ids: list[str] | None = None,
 ) -> bool:
-    """Check if enriched sources remain whose candidates are unjudged."""
+    """Check if enriched sources remain unjudged or judged from old text."""
     domain_filter, domain_params = _domain_filter(domains)
     focus_filter = "AND n.id IN $focus_ids" if focus_ids else ""
     return has_pending(
         "SignalSource",
         facility=facility,
         status_predicate=(
-            f"n.status = 'enriched' AND n.candidate_route IS NULL "
+            f"n.status = 'enriched' AND NOT {_ROUTE_IS_CURRENT} "
             f"{domain_filter} {focus_filter}"
         ),
         status_params={
@@ -1317,10 +1338,12 @@ async def candidate_worker(
 ) -> None:
     """Claim unjudged sources and route their DD candidates.
 
-    Claim loop: claims batches of enriched sources whose ``candidate_route`` is
-    unset, routes each source to its most probable IDSs, retrieves candidates
-    within those IDSs, judges them and writes the route and edges. A decisions
-    transport failure releases the source's claim so a later pass retries it.
+    Claim loop: claims batches of enriched sources with no route, or with a
+    route judged from text since rewritten, routes each source to its most
+    probable IDSs, retrieves candidates within those IDSs, judges them and
+    writes the route and edges together with the descriptions the judgment
+    read. A decisions transport failure releases the source's claim so a later
+    pass retries it.
     """
     wlog = WorkerLogAdapter(logger, worker_name="candidate_worker")
 
@@ -1470,6 +1493,8 @@ async def candidate_worker(
                     records,
                     decision.decision,
                     gc,
+                    judged_description=source.get("description") or "",
+                    judged_rep_description=source.get("rep_description") or "",
                 )
                 state.sources_judged += 1
                 state.candidates_written += written

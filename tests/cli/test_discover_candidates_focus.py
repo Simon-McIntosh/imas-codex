@@ -11,6 +11,7 @@ from click.testing import CliRunner
 from imas_codex.cli.discover import discover
 from imas_codex.cli.discover.map import CandidatesStageOptions, run_candidates_stage
 from imas_codex.ids.workers import (
+    _ROUTE_IS_CURRENT,
     CandidateDiscoveryState,
     has_pending_candidate_work,
     run_candidate_engine,
@@ -160,7 +161,7 @@ def test_pending_work_ignores_unfocused_sources(monkeypatch):
         assert label == "SignalSource"
         assert kwargs["facility"] == FACILITY
         predicate = kwargs["status_predicate"]
-        assert "candidate_route IS NULL" in predicate
+        assert f"NOT {_ROUTE_IS_CURRENT}" in predicate
         if "n.id IN $focus_ids" in predicate:
             ids = kwargs["status_params"]["focus_ids"]
         else:

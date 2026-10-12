@@ -2279,6 +2279,20 @@ classes:
           escalated or no_candidate. Null until the source is judged, and reset
           to null by clear_candidates.
         range: string
+      candidate_judged_description:
+        description: >-
+          The source description the candidate stage judged from. The route
+          stands only while the source's description still equals this text;
+          once it differs the candidate stage judges the source again. Null
+          when no route is set.
+        range: string
+      candidate_judged_rep_description:
+        description: >-
+          The representative signal's description the candidate stage judged
+          from, empty when the source had no representative. Once the
+          representative's description differs from this text the candidate
+          stage judges the source again. Null when no route is set.
+        range: string
       mapping_claimed_at:
         description: >-
           Timestamp when a worker claimed this source for mapping.
