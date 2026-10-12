@@ -76,6 +76,13 @@
       "finding": "anchors_resolve-1",
       "reason": "",
       "when": "2026-10-12T18:01:07.535374+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-2",
+      "reason": "",
+      "when": "2026-10-12T18:01:17.785669+00:00"
     }
   ],
   "responses": {
@@ -84,6 +91,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-12T18:01:07.535374+00:00"
+    },
+    "anchors_resolve-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:01:17.785669+00:00"
     },
     "done_when-1": {
       "action": "acted",
