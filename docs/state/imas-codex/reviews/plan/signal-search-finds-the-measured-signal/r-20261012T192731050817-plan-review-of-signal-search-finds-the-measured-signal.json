@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T19:34:43.012Z",
+  "dispatched_at": "2026-10-12T19:27:46Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:152",
+      "id": "single_goal-1",
+      "reason": "a coordinator sizing the section from \"two nodes\" folds the pooling/labelling node back into the harness node and undoes the split the changed sentence was written to make, so the node carrying two deliverables cannot be closed on one verdict.",
+      "text": "\u00a73 opens \"The section is two nodes\" and then enumerates three (\"The first writes the held-out questions\", \"The second node builds the harness and adds the eleven draft questions\", \"The third pools and labels every arm's top 10\"), so the declared node count contradicts the body it introduces; the section is also budgeted 3.0 effort-hours against the code-and-labelling halves which the same paragraph says \"do not fit one hour together\"",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:155",
+      "id": "reasoning-1",
+      "reason": "a node dispatched from \u00a73 as written re-runs the questions phase and writes a second held-out batch into the same fixture the first node already populated, so the section's own phase list must be reconciled with the tree before it is built.",
+      "text": "\u00a73 presents the held-out-questions node as future work (\"It writes at least eight questions \u2026 commits them to the fixture marked held_out\"), but that output is already committed at `tests/llm/fixtures/signal_search_questions.json` (commit `045d63386`, 2026-10-12T19:17Z, ten minutes before this plan version) carrying eleven `held_out` questions across ten EDDB categories and the `enrichment_at` cutover `2026-10-11T19:08:21Z` as fixture data exactly as \u00a73 specifies; only the harness module `tests/llm/test_signal_search_goldens.py` is still absent",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f20f6de6509f25f3f16c832dcf611dc92a9877ac372db67ad239c7cd0e0563f4",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T192731050817-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "1569553bcf37959f35adeb36364901a0df6704c3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 s10's glossary anchor resolves (`signal_glossary`, `imas_codex/config/facilities/jt-60sa.yaml:219`, read at `imas_codex/discovery/signals/parallel.py:4385`), its re-enrichment command resolves (`discover signals <facility> --reset-to discovered --focus`, with `discovered` a real `SIGNAL_RESET_SPECS` key and the `5.0` cost default at `imas_codex/cli/discover/signals.py:43`), and s3's three commit anchors (`43290a049`, `b4c89a8fc`, `93bfb7e9d`) all resolve to the quoted commits.",
+    "done_when": "pass \u2014 s10's amended measure is now falsifiable (\"The boundary test passes, and the substring matcher fails it\" is a declared negative control on the changed matcher, and \"the substring matcher fails it\" is the very control the earlier review asked for), and each other section still names a control (s3's random-order control, \u00a74's old rule, \u00a76's old index, \u00a75's current writer, \u00a79's unchanged harness).",
+    "evidence_paths": "pass \u2014 the changed sections write to `docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html` and to the crew reports directory, both durable repository/state paths, not a scratchpad or node-local temporary.",
+    "naming": "pass \u2014 the changed text in s10 and s3 introduces no plan labels, stage names, ticket numbers or version tags, and names the matcher by mechanism (\"respect word and camel-case boundaries\").",
+    "reasoning": "a finding \u2014 \u00a73 describes its held-out-questions node as pending work, but that node's output is already committed, so the section's account of its own phases no longer matches the tree.",
+    "single_goal": "a finding \u2014 \u00a73 opens \"The section is two nodes\" and then names three.",
+    "wiring": "pass \u2014 \u00a73's four-part build order, the followup's sequencing (\u00a74 and \u00a75 parallel once \u00a73 lands, \u00a76 after \u00a75, \u00a77 after \u00a74, \u00a78 on decision `signal-role`, \u00a711 on a JET re-extraction) and the single gate `g-ssfms-1` (gating s11) each point at a section that exists, and no dependency a section relies on is missing."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "aff47943dfec93c23c43fcdc5fa9fd6054a7c76b17c797d5b8ef67aa4298068d",
+    "s4": "09295645f508bcafcd63e82c1e34f448704b4f48b8642b376753d5b3c99e2d6e",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:35:10.109879+00:00"
+}
