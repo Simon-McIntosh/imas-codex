@@ -822,6 +822,62 @@ def _stamp_applied_family(gc: Any, anchor_id: str) -> bool:
     )
 
 
+def refuse_recommended_members(
+    gc: Any,
+    member_ids: list[str],
+    *,
+    force: str | None = None,
+    reviews_dir: Any | None = None,
+) -> dict[str, str]:
+    """Refuse an apply over names already recommended into a catalog request.
+
+    Returns the per-request evidence when *force* is given (the caller records
+    the reason), and raises :class:`RecommendedNameError` naming every
+    committed member when it is not. An empty result means nothing is in one
+    of the covered classes. Reads the graph and the frozen rosters through
+    :func:`~imas_codex.standard_names.protection.recommended_name_protections`.
+    """
+    from imas_codex.standard_names.protection import (
+        RecommendedNameError,
+        recommended_name_protections,
+    )
+
+    protections = recommended_name_protections(gc, member_ids, reviews_dir=reviews_dir)
+    if protections and force is None:
+        details = "; ".join(
+            f"{name_id} ({reason})" for name_id, reason in sorted(protections.items())
+        )
+        raise RecommendedNameError(
+            "Refused harmonize apply for names recommended into a catalog "
+            "pull request: " + details
+        )
+    return protections
+
+
+def _record_forced_recommended(
+    gc: Any, protections: dict[str, str], reason: str, run_id: str
+) -> None:
+    """Stamp the override reason on each forced name's internal change log.
+
+    The reason and the evidence it overrode are recorded under the apply's own
+    scope run id, so the override is auditable against the run that made it.
+    """
+    from imas_codex.standard_names.provenance_lifecycle import (
+        record_standard_name_change,
+    )
+
+    for name_id, evidence in sorted(protections.items()):
+        record_standard_name_change(
+            gc,
+            name_id,
+            name_id,
+            operation="harmonize_forced_recommended",
+            reason=f"{reason} (overrode {evidence})",
+            origin="harmonize",
+            run_id=run_id,
+        )
+
+
 def apply_families(
     gc: Any | None = None,
     *,
@@ -833,6 +889,8 @@ def apply_families(
     thresholds: Any | None = None,
     runner_factory: Any | None = None,
     runner_kwargs: dict[str, Any] | None = None,
+    force: str | None = None,
+    reviews_dir: Any | None = None,
 ) -> dict[str, Any]:
     """Run the anchor-gated apply over each family in scope.
 
@@ -867,6 +925,32 @@ def apply_families(
     spec = CampaignSpec(raw="harmonize-pattern-family")
     kwargs = dict(runner_kwargs or {})
 
+    # The recommended-name guard runs BEFORE any family is marked: a reset
+    # rewrites text a reviewer was asked to read, so the whole apply is refused
+    # (or the override reason recorded) before the first batch touches the graph.
+    targets = sorted(
+        {
+            mid
+            for fam_plan in plans
+            if fam_plan["decision"] == "apply"
+            for mid in fam_plan["members"]
+        }
+    )
+    guards: dict[str, str] = {}
+    override_run_id: str | None = None
+    try:
+        guards = refuse_recommended_members(
+            resolved_gc, targets, force=force, reviews_dir=reviews_dir
+        )
+        if guards and force is not None:
+            import uuid
+
+            override_run_id = str(uuid.uuid4())
+            _record_forced_recommended(resolved_gc, guards, force, override_run_id)
+    except Exception:
+        _close_if_owned(resolved_gc, own_gc)
+        raise
+
     applied: list[dict[str, Any]] = []
     try:
         for fam_plan in plans:
@@ -893,7 +977,13 @@ def apply_families(
             )
     finally:
         _close_if_owned(resolved_gc, own_gc)
-    return {"plans": plans, "applied": applied}
+    return {
+        "plans": plans,
+        "applied": applied,
+        "recommended_guards": guards,
+        "force_reason": force if guards else None,
+        "force_run_id": override_run_id,
+    }
 
 
 __all__ = [
@@ -911,6 +1001,7 @@ __all__ = [
     "ESTIMATED_DOC_CALL_COST_USD",
     "plan_family_applies",
     "apply_families",
+    "refuse_recommended_members",
 ]
 
 

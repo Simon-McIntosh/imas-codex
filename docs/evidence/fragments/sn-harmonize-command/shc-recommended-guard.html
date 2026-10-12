@@ -1,0 +1,73 @@
+<section>
+  <h2 id="shc-recommended-guard">Refusing an apply over names already recommended</h2>
+  <p id="shc-recommended-guard-scope">
+    Builds the recommended-name guard of <code>sn harmonize --apply</code> (§3 of
+    this plan). A reset rewrites text a physicist has been asked to review, or
+    has already reviewed, so the apply refuses the family before the first member
+    is marked. The guard reuses
+    <code>imas_codex/standard_names/protection.py</code> — the module that already
+    owns "this name is committed, do not move it" — rather than a second query.
+    Write paths: <code>imas_codex/standard_names/protection.py</code>,
+    <code>imas_codex/standard_names/harmonize.py</code>,
+    <code>imas_codex/cli/sn.py</code>,
+    <code>tests/standard_names/test_harmonize_guard.py</code>.
+  </p>
+
+  <h3 id="shc-recommended-guard-classes">The three classes, exactly</h3>
+  <p id="shc-recommended-guard-classes-text">
+    <code>recommended_name_protections</code> returns per-identity evidence for
+    the three classes the lead ruled on 2026-10-12, so a refusal can name each
+    identity and the evidence that protected it:
+  </p>
+  <table id="shc-recommended-guard-evidence">
+    <caption>What protects a name, and the evidence string it carries</caption>
+    <thead>
+      <tr><th>Class</th><th>Source</th><th>Evidence</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>member of an open frozen review roster</td>
+        <td>a <code>manifests/reviews/*.sn_names.yaml</code> that recorded a
+          candidate request (<code>pr_number</code>/<code>pr_url</code>)</td>
+        <td><code>candidate_request=&lt;url&gt;</code></td>
+      </tr>
+      <tr>
+        <td>name at <code>name_stage=approved</code></td>
+        <td><code>StandardName.name_stage</code></td>
+        <td><code>name_stage=approved</code></td>
+      </tr>
+      <tr>
+        <td>name at <code>name_stage=contested</code></td>
+        <td><code>StandardName.name_stage</code></td>
+        <td><code>name_stage=contested</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-recommended-guard-mechanism">Refusal before the first reset</h3>
+  <p id="shc-recommended-guard-mechanism-text">
+    <code>apply_families</code> collects the members of every family whose
+    decision is <code>apply</code> and calls <code>refuse_recommended_members</code>
+    <em>before</em> the first <code>mark_members_for_regen</code>. Without
+    <code>--force</code> a protected member raises
+    <code>RecommendedNameError</code> naming every protected identity with its
+    evidence; nothing is marked, snapshotted or reset. With
+    <code>--force REASON</code> the apply proceeds and the reason — together with
+    the evidence it overrode — is recorded once per protected name as a
+    <code>StandardNameChange</code> under the apply's own scope run id, so the
+    override is auditable against the run that made it.
+  </p>
+
+  <h3 id="shc-recommended-guard-gates">Gates and the negative control</h3>
+  <p id="shc-recommended-guard-gates-text">
+    The gate suite is the harmonize, family-harmonization, campaign,
+    pattern-family, protection and Cypher-property tests. Baseline at the
+    orientation base revision: 577 passed. After the change: 582 passed (+5, the
+    new guard tests). The negative control removes the guard call before the
+    reset (<code>SHC_NO_RECOMMENDED_GUARD</code> replaces
+    <code>refuse_recommended_members</code> with a no-op), and
+    <code>test_roster_and_approved_members_refused_without_force</code> then
+    fails — the apply proceeds instead of refusing. The log is
+    <code>negative_control.txt</code> beside the run.
+  </p>
+</section>
