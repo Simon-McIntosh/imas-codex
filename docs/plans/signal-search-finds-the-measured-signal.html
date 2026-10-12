@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69">
 </head>
@@ -307,7 +307,9 @@
       measurement run outside pytest. The rerank may lift any of its 60 candidates into its top 10, and its order varies
       between runs, so this section first labels RRF's top 60 on every question, under §3's rule and into §3's fixture,
       extending the top-10 labels §3 leaves. That labelling is the section's first node, sized as §3's labelling was;
-      the second scores the arms and decides the switch. The generic arm uses
+      the second scores the arms and decides the switch. Both arms build each candidate's state with the signal state
+      builder this section adds to the product, not the generic one the harness used for the prototype, so the switch
+      is decided on the state that ships. The generic arm uses
       <code>_RERANK_QUESTION</code>; the role-aware arm uses the question the harness keeps.
     </p>
     <p>
@@ -315,7 +317,9 @@
       rerank against fusion alone on the pooled labels, with
       per-question wins and losses, the generic question measured beside the role-aware one, and p95 wall time at pool
       60. The switch ships on only if the role-aware rerank beats fusion alone on both mean nDCG@10 and grade-3
-      precision@5, with p95 within 5 s. Otherwise it ships off, and this section records why.
+      precision@5, with p95 within 5 s. Otherwise it ships off, and this section records why. The table, the per-question wins and losses, both questions'
+      figures and the p95 are in
+      <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/rerank.html</code>.
     </p>
 
     <h2 id="s8">§8 — Signal role as a stored judgment</h2>
