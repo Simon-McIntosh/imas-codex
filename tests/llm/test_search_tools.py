@@ -33,6 +33,7 @@ from imas_codex.llm.search_tools import (
     _enrich_wiki_chunks,
     _fetch,
     _fetch_wiki_page,
+    _rank_signals,
     _search_code,
     _search_docs,
     _search_signals,
@@ -180,6 +181,60 @@ _IMAS_ENRICHMENT_IP = {
 # ---------------------------------------------------------------------------
 # search_signals
 # ---------------------------------------------------------------------------
+
+
+class TestRankSignals:
+    """The signal ranking extracted from _search_signals returns ordered ids."""
+
+    def _gc(self, routes: dict[str, list[dict[str, Any]]]):
+        gc = MagicMock()
+        gc.query = MagicMock(side_effect=_route_query(routes))
+        return gc
+
+    def test_returns_ordered_ids_and_scores(self):
+        """A full-text hit lifts a signal above a stronger vector-only one."""
+        gc = self._gc(
+            {
+                "facility_signal_desc_embedding": [
+                    {"id": "tcv:magnetics/ip", "score": 0.92},
+                    {"id": "tcv:magnetics/bpol", "score": 0.85},
+                ],
+                "facility_signal_text": [{"id": "tcv:magnetics/bpol", "score": 14.0}],
+            }
+        )
+        ids, scores = _rank_signals(gc, [0.1] * 1024, "plasma current", "tcv", 10)
+        assert ids == ["tcv:magnetics/bpol", "tcv:magnetics/ip"]
+        # 0.7 * 0.85 + 0.3 * 14 + 0.1
+        assert scores["tcv:magnetics/bpol"] == pytest.approx(4.895, abs=1e-3)
+        assert scores["tcv:magnetics/ip"] == pytest.approx(0.92)
+
+    def test_text_only_hit_enters_the_order(self):
+        """A signal found only by text keeps its text score and is ranked."""
+        gc = self._gc(
+            {
+                "facility_signal_desc_embedding": [
+                    {"id": "tcv:magnetics/ip", "score": 0.92},
+                ],
+                "facility_signal_text": [{"id": "tcv:magnetics/cc", "score": 13.0}],
+            }
+        )
+        ids, scores = _rank_signals(gc, [0.1] * 1024, "current", "tcv", 10)
+        assert ids == ["tcv:magnetics/cc", "tcv:magnetics/ip"]
+        assert scores["tcv:magnetics/cc"] == pytest.approx(13.0)
+
+    def test_cut_at_k(self):
+        """The order is cut to the requested k after fusion."""
+        gc = self._gc(
+            {
+                "facility_signal_desc_embedding": [
+                    {"id": "tcv:magnetics/ip", "score": 0.92},
+                    {"id": "tcv:magnetics/bpol", "score": 0.85},
+                ],
+                "facility_signal_text": [],
+            }
+        )
+        ids, _ = _rank_signals(gc, [0.1] * 1024, "current", "tcv", 1)
+        assert ids == ["tcv:magnetics/ip"]
 
 
 class TestSearchSignals:

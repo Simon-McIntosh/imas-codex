@@ -232,6 +232,43 @@ def rerank_candidates(
 # ---------------------------------------------------------------------------
 
 
+def _rank_signals(
+    gc: GraphClient,
+    embedding: list[float],
+    query: str,
+    facility: str,
+    k: int,
+    diagnostic: str | None = None,
+    physics_domain: str | None = None,
+) -> tuple[list[str], dict[str, float]]:
+    """Rank facility signals by the tool's own rule; return (ordered ids, scores).
+
+    Vector search on signal descriptions, boosted by a full-text keyword match.
+    A signal found by both keeps 0.7 of its cosine score and adds 0.3 of its
+    BM25 score plus 0.1; a signal found only by text keeps its BM25 score. The
+    ordered ids are the fused order cut at ``k``.
+    """
+    signal_ids, scores = _vector_search_signals(
+        gc, embedding, facility, k, diagnostic, physics_domain
+    )
+
+    # Text search for keyword matches (hybrid boost)
+    text_signals = _text_search_signals(gc, query, facility, k)
+    for r in text_signals:
+        sid = r["id"]
+        text_score = round(r["score"], 3)
+        if sid in scores:
+            scores[sid] = round(scores[sid] * 0.7 + text_score * 0.3 + 0.1, 3)
+        else:
+            scores[sid] = text_score
+            signal_ids.append(sid)
+
+    signal_ids = sorted(
+        set(signal_ids), key=lambda sid: scores.get(sid, 0), reverse=True
+    )[:k]
+    return signal_ids, scores
+
+
 def _search_signals(
     query: str,
     facility: str,
@@ -273,26 +310,10 @@ def _search_signals(
         return f"Error initializing search: {e}"
 
     try:
-        # Step 1: Vector search on signal descriptions
-        signal_ids, scores = _vector_search_signals(
-            gc, embedding, facility, k, diagnostic, physics_domain
+        # Step 1: Rank signals by the tool's own hybrid rule
+        signal_ids, scores = _rank_signals(
+            gc, embedding, query, facility, k, diagnostic, physics_domain
         )
-
-        # Step 1b: Text search for keyword matches (hybrid boost)
-        text_signals = _text_search_signals(gc, query, facility, k)
-        for r in text_signals:
-            sid = r["id"]
-            text_score = round(r["score"], 3)
-            if sid in scores:
-                scores[sid] = round(scores[sid] * 0.7 + text_score * 0.3 + 0.1, 3)
-            else:
-                scores[sid] = text_score
-                signal_ids.append(sid)
-
-        # Re-sort by score and limit to k
-        signal_ids = sorted(
-            set(signal_ids), key=lambda sid: scores.get(sid, 0), reverse=True
-        )[:k]
 
         # Step 1c: Filter by check outcome if requested
         if check_status or error_type:

@@ -1,0 +1,58 @@
+<section id="ssfms-golden-harness" data-reckon="fragment">
+  <h2 id="ssfms-golden-harness-title">Signal search golden harness</h2>
+
+  <p id="ssfms-golden-harness-what">
+    The harness <code>tests/llm/test_signal_search_goldens.py</code> scores five ranking arms and a
+    seeded random control over the questions in <code>tests/llm/fixtures/signal_search_questions.json</code>,
+    reporting mean nDCG@10, grade-3 precision@5, grade-3 recall@30 and the count of questions with no
+    grade-3 hit in the top 30 per arm. The arms are the product ranking (<code>_rank_signals</code>, lifted
+    out of <code>_search_signals</code> with no change in behaviour), vector-only (pool 100), RRF of the
+    100-vector and 50-full-text pools, and that fusion's top 60 reranked by a generic and by a role-aware
+    Jev question. The Jev arms are not built unless <code>SSFMS_JEV_ARMS=1</code>, so a default run spends
+    nothing. The fixture holds the eleven draft questions beside the eleven held-out ones, 22 questions
+    in total, 11 held out.
+  </p>
+
+  <table id="ssfms-golden-harness-refusal">
+    <caption>Refusal of every arm on the fixture as it stands (pooled labelling is a later node)</caption>
+    <thead><tr><th>Arm</th><th>Questions refused (of 22)</th><th>First unlabelled candidates named</th></tr></thead>
+    <tbody>
+      <tr><td>current_tool</td><td>20</td><td>glw_curglw3, glw_curglw2, glw_curglwp06</td></tr>
+      <tr><td>vector_only</td><td>20</td><td>psrc_ip, psc_obsip, psc_iptermtime</td></tr>
+      <tr><td>rrf</td><td>18</td><td>psrc_ip, dcsv_ppip, psrc_comip</td></tr>
+      <tr><td>rrf_rerank</td><td>18</td><td>psrc_ip, dcsv_ppip, psrc_comip</td></tr>
+      <tr><td>rrf_rerank_role</td><td>18</td><td>psrc_ip, dcsv_ppip, psrc_comip</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-golden-harness-refusal-note">
+    Each arm refuses to score while its top 10 holds a candidate the fixture does not label, and names
+    the candidate, so an incomplete label set can never be scored as a miss. A candidate read and judged
+    irrelevant carries grade 0 and is scored; only an absent label refuses. On the first question,
+    <em>plasma current total</em>, the product arm surfaces the Greifenberg coil currents
+    (<code>glw_curglw3</code> and neighbours) at the top and the fixture labels only
+    <code>dhc_obsip</code> and <code>psrc_calip</code>, so the arm refuses and names them. The harness's
+    five-arm table runs once pooled labelling reads these candidates.
+  </p>
+
+  <table id="ssfms-golden-harness-gates">
+    <thead><tr><th>Gate</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Pure harness tests (metrics, fixture shape, refusal gate)</td><td>6 passed</td></tr>
+    <tr><td>Graph refusal test</td><td>1 passed; all five arms refuse and name candidates</td></tr>
+      <tr><td><code>tests/llm/test_search_tools.py</code> after the ranking extraction</td><td>106 passed, 8 skipped (was 103 passed, 8 skipped; the three added tests pin <code>_rank_signals</code>)</td></tr>
+      <tr><td>Negative control: refusal disabled in <code>require_labelled</code></td><td>1 failed, EXIT=1, naming <code>test_an_unlabelled_candidate_refuses_the_arm_and_names_it</code></td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-golden-harness-embedding-note">
+    <strong>Evidence a later node needs.</strong> <code>tests/conftest.py</code> forces a local
+    <code>all-MiniLM-L6-v2</code> embedding model for the whole session. It is dimensionally
+    incompatible with the graph's <code>facility_signal_desc_embedding</code> index (384 against 256),
+    so every vector arm fails before it ranks anything until the harness deletes
+    <code>IMAS_CODEX_EMBEDDING_LOCATION</code> and <code>IMAS_CODEX_EMBEDDING_MODEL</code> and resolves the
+    production backend. The harness does this in an autouse fixture; a future graph harness on this
+    repository needs the same opt-out. The error reads as a Neo4j type error, not as an embedding
+    configuration fault.
+  </p>
+</section>
