@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-12T14:55:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-row-census.html",
+      "line": "22",
+      "severity": "blocking",
+      "text": "blocking: the landing record states the census reads 2 fixed, five changed, ten still true, and eleven needing a ruling or a bounding write to confirm, but the census rows tally 2 fixed, 7 changed, 15 still true, and 14 needing a ruling or a bounding write (8 needs-a-ruling rows plus 6 needs-a-write rows); the headline a coordinator reads to judge the census is wrong in three of four counts and its figures do not sum to the 38 rows the delivered file holds."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145528571333-sib-row-census/manifest.md",
+      "line": "15",
+      "severity": "blocking",
+      "text": "blocking: the artifacts line claims 41 verdict rows (14 \u00a72, 12 \u00a73, 15 \u00a74), while row-census.html holds 38 rows (13 \u00a72, 11 \u00a73, 14 \u00a74), so the manifest overstates the delivered row count by three and mis-splits it across the sections."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/row-census.html",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the header records the invocation revision and the row-set predicates but omits the quantitative anchor-resolution count that plan \u00a76 requires the census to follow from docs/evidence/reuse-map-residual-closure.md:30 (the six-rows, six-paths, six-anchors-resolved, zero-unresolved line), so a reader cannot tell how many of the census's cited anchors were resolved."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/row-census.html",
+      "line": "52",
+      "severity": "follow-on",
+      "text": "follow-on: the \u00a72 lifecycle source is rendered as six rows where the \u00a76 done-when states the lifecycle row's seven footguns must be seven rows; the plan's \u00a72 cell itself enumerates six named items, so the shortfall is either an under-split of the four-holes row (four separately named holes kept as one row at row-census.html:52) or a one-off in the plan's count, recorded because the done-when judges completeness by that number."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read one change at a time; 2a5bacad9 adds row-census.html (the census) and a7a70db00 adds sib-row-census.html (the landing record) while completing the census, both inside the declared scope.",
+    "done_when": "the done_when is the census file plus its two controls; I reproduced both controls independently (control 1: the *_density_at_pedestal_top family MATCH returns 20 rows all name_stage=accepted in 0.007 s; control 2: rg -l schema_digest imas_codex/ exits 1 with no output), recorded at logs/review-controls.log, and every cited query is bounded under ten seconds, so the measure holds except for the lifecycle row count the done_when states as seven.",
+    "goal": "The node goal (plan sn-integrity-backlog \u00a76) is a read-only census of every item named in \u00a72-\u00a74, one row per separately stateable item, with two built-in controls; the landed docs/evidence/fragments/sn-integrity-backlog/row-census.html holds 38 verdict rows (13 \u00a72 / 11 \u00a73 / 14 \u00a74) covering every \u00a72-\u00a74 source with a live figure and a proposed repair, so the goal is met in substance, except that the \u00a76 requirement that the lifecycle row's seven footguns be seven rows yields six rows (row-census.html:52 onward) and the header (row-census.html:21) omits the quantitative anchor-resolution count the plan names.",
+    "manifest": "read at .../r-20261012T145528571333-sib-row-census/manifest.md; its changed_paths and control figures check out, but its artifacts line claims 41 verdict rows (14 \u00a72, 12 \u00a73, 15 \u00a74) while the file holds 38 rows (13/11/14), and the landing record's verdict tallies likewise disagree with the rows.",
+    "write_paths": "the node's declared write scope is docs/evidence/fragments/sn-integrity-backlog/ plus an unused docs/figures dir; git diff --stat from c7b4c626e21cc93a2fc9cfefe200ef066b800829 to a7a70db00cd6aeda7e93ab42af3d541acca79ce9 lists exactly two files, row-census.html and sib-row-census.html, 459 insertions, nothing else and no plan or graph write."
+  },
+  "justifications": {
+    "durability": "no test guards the census and none is added; the node's only regression discipline is the two built-in controls at row-census.html:22-38, which show the method can see a fix and a defect but would not fail if a regression moved a cited figure.",
+    "evidence": "both controls reproduce under my own run (logs/review-controls.log: pedestal-top 20 rows, schema_digest rg exit 1) and the code-read claims I spot-checked hold (imas_codex/standard_names/edit.py:2183, imas_codex/cli/sn.py:1762, imas_codex/standard_names/catalog_import.py:73), but the manifest and landing headline counts are wrong.",
+    "fit": "the fragment keeps the evidence-fragment header and the brief's per-row column shape, but drops the anchor-resolution count that plan \u00a76 names from docs/evidence/reuse-map-residual-closure.md:30.",
+    "goal_fidelity": "row-census.html:47-390 gives every \u00a72-\u00a74 source a verdict and a live figure, but the \u00a76 requirement that the lifecycle row's seven footguns be seven rows yields the six rows beginning at row-census.html:52, and the anchor-resolution count the plan's convention carries is absent from the header at row-census.html:21.",
+    "reuse": "the census adds no source definition and calls the existing owners it cites - find_provenance_orphans (imas_codex/standard_names/ledger.py:96), find_edge_scalar_desyncs (ledger.py:123), find_semantic_source_invariant_violations (imas_codex/standard_names/provenance_lifecycle.py:1229), census_parked_dispositions (imas_codex/standard_names/graph_ops.py:11655), all confirmed present - and writes a fresh query only for cohorts it marks no owning reader.",
+    "scope_discipline": "the diff from c7b4c626e to a7a70db00 touches only row-census.html and sib-row-census.html under docs/evidence/fragments/sn-integrity-backlog/, both declared, with no plan edit, no index change and no graph write."
+  },
+  "node": "review-of-sib-row-census",
+  "project": "imas-codex",
+  "raw_text": "\nVERDICT goal: The node goal (plan sn-integrity-backlog \u00a76) is a read-only census of every item named in \u00a72-\u00a74, one row per separately stateable item, with two built-in controls; the landed docs/evidence/fragments/sn-integrity-backlog/row-census.html holds 38 verdict rows (13 \u00a72 / 11 \u00a73 / 14 \u00a74) covering every \u00a72-\u00a74 source with a live figure and a proposed repair, so the goal is met in substance, except that the \u00a76 requirement that the lifecycle row's seven footguns be seven rows yields six rows (row-census.html:52 onward) and the header (row-census.html:21) omits the quantitative anchor-resolution count the plan names.\nVERDICT done_when: the done_when is the census file plus its two controls; I reproduced both controls independently (control 1: the *_density_at_pedestal_top family MATCH returns 20 rows all name_stage=accepted in 0.007 s; control 2: rg -l schema_digest imas_codex/ exits 1 with no output), recorded at logs/review-controls.log, and every cited query is bounded under ten seconds, so the measure holds except for the lifecycle row count the done_when states as seven.\nVERDICT write_paths: the node's declared write scope is docs/evidence/fragments/sn-integrity-backlog/ plus an unused docs/figures dir; git diff --stat from c7b4c626e21cc93a2fc9cfefe200ef066b800829 to a7a70db00cd6aeda7e93ab42af3d541acca79ce9 lists exactly two files, row-census.html and sib-row-census.html, 459 insertions, nothing else and no plan or graph write.\nVERDICT manifest: read at .../r-20261012T145528571333-sib-row-census/manifest.md; its changed_paths and control figures check out, but its artifacts line claims 41 verdict rows (14 \u00a72, 12 \u00a73, 15 \u00a74) while the file holds 38 rows (13/11/14), and the landing record's verdict tallies likewise disagree with the rows.\nVERDICT diff: read one change at a time; 2a5bacad9 adds row-census.html (the census) and a7a70db00 adds sib-row-census.html (the landing record) while completing the census, both inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: row-census.html:47-390 gives every \u00a72-\u00a74 source a verdict and a live figure, but the \u00a76 requirement that the lifecycle row's seven footguns be seven rows yields the six rows beginning at row-census.html:52, and the anchor-resolution count the plan's convention carries is absent from the header at row-census.html:21.\nSCORE evidence: 13\nJUSTIFICATION evidence: both controls reproduce under my own run (logs/review-controls.log: pedestal-top 20 rows, schema_digest rg exit 1) and the code-read claims I spot-checked hold (imas_codex/standard_names/edit.py:2183, imas_codex/cli/sn.py:1762, imas_codex/standard_names/catalog_import.py:73), but the manifest and landing headline counts are wrong.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff from c7b4c626e to a7a70db00 touches only row-census.html and sib-row-census.html under docs/evidence/fragments/sn-integrity-backlog/, both declared, with no plan edit, no index change and no graph write.\nSCORE durability: 11\nJUSTIFICATION durability: no test guards the census and none is added; the node's only regression discipline is the two built-in controls at row-census.html:22-38, which show the method can see a fix and a defect but would not fail if a regression moved a cited figure.\nSCORE fit: 15\nJUSTIFICATION fit: the fragment keeps the evidence-fragment header and the brief's per-row column shape, but drops the anchor-resolution count that plan \u00a76 names from docs/evidence/reuse-map-residual-closure.md:30.\nSCORE reuse: 20\nJUSTIFICATION reuse: the census adds no source definition and calls the existing owners it cites - find_provenance_orphans (imas_codex/standard_names/ledger.py:96), find_edge_scalar_desyncs (ledger.py:123), find_semantic_source_invariant_violations (imas_codex/standard_names/provenance_lifecycle.py:1229), census_parked_dispositions (imas_codex/standard_names/graph_ops.py:11655), all confirmed present - and writes a fresh query only for cohorts it marks no owning reader.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-row-census.html:22 blocking: the landing record states the census reads 2 fixed, five changed, ten still true, and eleven needing a ruling or a bounding write to confirm, but the census rows tally 2 fixed, 7 changed, 15 still true, and 14 needing a ruling or a bounding write (8 needs-a-ruling rows plus 6 needs-a-write rows); the headline a coordinator reads to judge the census is wrong in three of four counts and its figures do not sum to the 38 rows the delivered file holds.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145528571333-sib-row-census/manifest.md:15 blocking: the artifacts line claims 41 verdict rows (14 \u00a72, 12 \u00a73, 15 \u00a74), while row-census.html holds 38 rows (13 \u00a72, 11 \u00a73, 14 \u00a74), so the manifest overstates the delivered row count by three and mis-splits it across the sections.\nFINDING docs/evidence/fragments/sn-integrity-backlog/row-census.html:21 follow-on: the header records the invocation revision and the row-set predicates but omits the quantitative anchor-resolution count that plan \u00a76 requires the census to follow from docs/evidence/reuse-map-residual-closure.md:30 (the six-rows, six-paths, six-anchors-resolved, zero-unresolved line), so a reader cannot tell how many of the census's cited anchors were resolved.\nFINDING docs/evidence/fragments/sn-integrity-backlog/row-census.html:52 follow-on: the \u00a72 lifecycle source is rendered as six rows where the \u00a76 done-when states the lifecycle row's seven footguns must be seven rows; the plan's \u00a72 cell itself enumerates six named items, so the shortfall is either an under-split of the four-holes row (four separately named holes kept as one row at row-census.html:52) or a one-off in the plan's count, recorded because the done-when judges completeness by that number.\nreviewed_base_sha: c7b4c626e21cc93a2fc9cfefe200ef066b800829\nreviewed_head_sha: a7a70db00cd6aeda7e93ab42af3d541acca79ce9\n",
+  "review_run_id": "legacy-24fc8a006398",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "c7b4c626e21cc93a2fc9cfefe200ef066b800829",
+  "reviewed_head_sha": "a7a70db00cd6aeda7e93ab42af3d541acca79ce9",
+  "reviewed_run_id": "r-20261012T145528571333-sib-row-census",
+  "reviewer_run_id": "r-20261012T162346807302-review-of-sib-row-census",
+  "scores": {
+    "durability": 11,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T16:39:16.261379+00:00",
+  "total": 93
+}
