@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b">
 </head>
@@ -293,6 +293,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261012T154109340468-shs-registry-consumer" data-who="reckon-build" data-when="2026-10-12T15:50:49.823Z">
     <div class="r-comment-body"><p>LANDED tests/standard_names/test_conventions_registry.py — select_conventions for flux_surface_averaged_argon_density_at_plasma_boundary returns exactly concepts (flux_surface_averaged, plasma_boundary), notation (density), template (density over subject); the same positive assertion fails against a tmp_path scratch registry with the flux_surface_averaged concept removed (log EXIT=1).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261012T165650462245-shs-conformance-checks" data-who="reckon-build" data-when="2026-10-12T17:18:19.495Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-house-style/shs-conformance-checks.html — adds registry conformance findings to docs_gates.py (four classes: forbidden equation variant, forbidden locus gloss, forbidden symbol spelling, template opening) and routes them through run_house_style_checks into run_all_audits&#x27; AuditReport; live WEST roster census records forbidden_equation_variant 1, forbidden_locus_gloss 1, template_opening 1, forbidden_symbol_spelling 0, no_entry 188, parse_failures 1 over 220 names.</p></div>
 </div>
 </section>
 </main>
