@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="signal-search-finds-the-measured-signal">
+  <meta name="plan-title" content="Signal Search Finds the Measured Signal">
+  <meta name="plan-summary" content="Signal search ranks the measurement first at any facility: one rank fusion for all search tools, current embeddings, a role-aware rerank, pooled goldens">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="24.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S16">
+  <meta name="plan-tags" content="signals,discovery">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
+  <title>Signal Search Finds the Measured Signal | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-12">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — What the ripple search exposed</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      On 2026-10-12 the lead asked for the JT-60SA signals needed to assess voltage ripple on the superconducting coil
+      power supplies. The question was a test of the system. <code>search_signals</code> answered it poorly. It ranked
+      voltage references and commands first, surfaced one of the four booster-supply output voltages, and never surfaced
+      the HTS current-lead temperatures or the coil quench-detection voltages. The answer was eventually assembled by
+      listing whole EDDB categories with Cypher, which only works for someone who already knows the category names.
+    </p>
+    <p>
+      To measure the failure, eleven physics questions were written from that session. Each received draft graded labels
+      enumerated from the live graph by EDDB category and data name, under the rule in §3. The same questions were then run
+      through five orderings at <code>k=30</code>, all against the live graph. The data, rankings and script are in
+      <code>~/.config/reckon/crew/reports/imas-codex/signal-search-prototype/</code>
+      (<code>goldens_draft.json</code>, <code>arms.json</code>, <code>embedding_drift.json</code>,
+      <code>fig_signal_search_arms.py</code>).
+    </p>
+    <table>
+      <thead><tr><th>Ordering</th><th>Mean nDCG@10</th><th>Grade-3 precision@5</th><th>Grade-3 recall@30</th><th>Questions with no grade-3 hit in the top 30</th></tr></thead>
+      <tbody>
+        <tr><td>Current tool (<code>_search_signals</code>)</td><td>0.465</td><td>0.418</td><td>0.343</td><td>2</td></tr>
+        <tr><td>Vector search alone, pool 100</td><td>0.531</td><td>0.473</td><td>0.507</td><td>0</td></tr>
+        <tr><td>Reciprocal rank fusion of vector (100) and full-text (50)</td><td>0.686</td><td>0.691</td><td>0.680</td><td>0</td></tr>
+        <tr><td>RRF, then Jev rerank of the top 60 with the existing generic question</td><td>0.697</td><td>0.582</td><td>0.709</td><td>0</td></tr>
+        <tr><td>RRF, then Jev rerank of the top 60 with a role-aware question</td><td>0.695</td><td>0.636</td><td>0.768</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/per-question-ndcg.svg" alt="Per-question nDCG@10 for the current signal search, RRF fusion and RRF followed by the role-aware Jev rerank">
+      <figcaption>
+        Per-question nDCG@10 against the draft labels, for eleven JT-60SA questions. Grey is the tool as it stands today,
+        blue is reciprocal rank fusion of a 100-candidate vector pool and a 50-candidate full-text pool, and orange is that
+        fusion followed by a role-aware Jev rerank of its top 60. Fusion lifts nine of the eleven questions. The rerank swings
+        both ways: TF coil current rises from 0.25 to 0.71, while PF coil helium outlet temperature falls from 1.00 to 0.27.
+        Most of the falls are candidates the draft labels never graded, such as the HTS warm-end inlet temperatures, which
+        are genuine lead temperatures.
+      </figcaption>
+    </figure>
+    <p>Five causes account for the failure, in order of measured effect:</p>
+    <table>
+      <thead><tr><th>Cause</th><th>Where</th><th>Evidence</th><th>Closed by</th></tr></thead>
+      <tbody>
+        <tr><td>Hybrid scoring adds a raw BM25 score (5 to 14 here) to a cosine score that never exceeds 1, so any keyword match outranks every semantic match, and a text-only hit keeps its raw BM25 score</td><td><code>imas_codex/llm/search_tools.py</code> line 287; the same rule at lines 915 (docs) and 1667 (code) and in <code>imas_codex/ids/slot_context.py</code> <code>_hybrid_ids</code></td><td>HTS lead question: vector search alone puts 26 of 52 grade-3 signals in its top 30, the fused report none; its top BM25 score is 13.86</td><td>§4</td></tr>
+        <tr><td>The vector cut is taken at <code>k</code>, so there is no candidate pool for fusion or rerank to work on</td><td><code>_vector_search_signals</code></td><td>Pool 100 alone lifts recall@30 from 0.343 to 0.507</td><td>§4</td></tr>
+        <tr><td>Stored embeddings lag the descriptions they claim to embed</td><td><code>GraphClient.create_nodes</code> embeds only on a node write that carries no embedding; descriptions rewritten by Cypher keep their old vector</td><td>235 of 612 labelled signals have cosine below 0.995 between the stored vector and a fresh embedding of the current description, the lowest 0.866</td><td>§5</td></tr>
+        <tr><td>Nothing records whether a signal measures a quantity or commands it</td><td>FacilitySignal schema</td><td>For the booster question the generic rerank and the current tool both prefer references and commands</td><td>§7, §8</td></tr>
+        <tr><td>A report repeats one family row by row and prints a seven-line access template per signal</td><td><code>format_signals_report</code></td><td>Booster question at <code>k=20</code>: 341 lines, 17.1 lines per signal, 10 distinct name templates in 20 rows</td><td>§9</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The labels were written by the same session that designed the orderings, after seeing results, so these figures are
+      a prototype reading, not a verdict. §3 replaces them with pooled labels and adds held-out questions written blind.
+      The prototype spent USD 0.030 of Jev on the two rerank arms, under the lead's JT-60SA authorisation.
+    </p>
+
+    <h2 id="s2">§2 — Do we need a signal search, and does the graph support it?</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      <strong>Yes, the tool is needed, and the graph supports it.</strong> The question "which signals measure X" is
+      how an agent enters a facility's data. Without it, an agent must already know the facility's naming: 70 EDDB
+      categories at JT-60SA, 46,872 signals at JET. Cypher and <code>repl()</code> answer only once the names are known,
+      which is exactly what the ripple session lacked. A dedicated tool is right because signals carry facets the other
+      search tools do not: unit, data class, measurement role, access template and check status. It should share its
+      retrieval core with them, so §4 fixes fusion once for all four search paths rather than for signals alone.
+    </p>
+    <p>
+      The graph already holds the pieces the tool needs. Each limit below can be fixed in place, and none needs a
+      new store:
+    </p>
+    <table>
+      <thead><tr><th>Capability</th><th>State in the live graph on 2026-10-12</th><th>Section</th></tr></thead>
+      <tbody>
+        <tr><td>Vector index <code>facility_signal_desc_embedding</code></td><td>Present, with <code>facility_id</code> as an in-index pre-filter, so a small facility's signals survive the cut. It embeds <code>description</code> only, and 38% of the labelled signals carry a stale vector.</td><td>§5</td></tr>
+        <tr><td>Full-text index <code>facility_signal_text</code></td><td>Covers <code>name</code>, <code>description</code> and <code>node_path</code>. JT-60SA signals have no <code>node_path</code>. Not indexed: <code>keywords</code> (14,991 JT-60SA signals), <code>aliases</code> (6,469), <code>unit</code>, and the catalogue's own wording in <code>source_description</code> (15,089).</td><td>§6</td></tr>
+        <tr><td>Vector index <code>signal_source_desc_embedding</code></td><td>Exists. None of the 8,681 SignalSource nodes carries an embedding.</td><td>Decision <code>search-unit</code></td></tr>
+        <tr><td>Signal families</td><td>JT-60SA: all 15,111 signals in 5,172 SignalSource families, mostly singletons, because per-coil channels are separate sources. JET: 30,284 of 46,872 signals in 2,335 families of up to 2,366 members.</td><td>§9</td></tr>
+        <tr><td>Measurement role</td><td>No property.</td><td>§8</td></tr>
+        <tr><td>Facets usable as filters</td><td><code>data_class</code> on 6,501 JT-60SA signals and no JET signal. <code>diagnostic</code> and <code>physics_domain</code> are unreliable on plant signals: power-supply references are tagged bolometry, neutron and heating.</td><td>§10</td></tr>
+        <tr><td>Population</td><td>Only JET (46,872) and JT-60SA (15,111) have FacilitySignal nodes; TCV and ITER have none in this graph.</td><td>§3, §11</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s3">§3 — A golden set any facility can join</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      This section builds the instrument every later section is judged by. It has four parts. The first is
+      eligibility. A signal enters the golden set only after the Jev-era signal pipeline has enriched it. That pipeline
+      reranks enrichment context through Jev (<code>43290a049</code>, 2026-10-07). It keeps the catalogue wording
+      (<code>b4c89a8fc</code>, 2026-10-09). Its context rerank completes within its budget (<code>93bfb7e9d</code>,
+      2026-10-11T19:08:21Z). The predicate is <code>enriched_at</code> at or after that instant. It holds today for
+      14,991 JT-60SA signals and for no JET signal. JET was enriched earlier by another model and joins only when it is
+      re-extracted (§11). The predicate and its cutover live in the fixture as data, not code. A labelled signal that is
+      no longer eligible fails the fixture by name rather than being skipped.
+    </p>
+    <p>
+      Second, the questions. The eleven draft questions in <code>goldens_draft.json</code> are kept. At least six held-out
+      questions are added, written by someone who has not seen the orderings: the lead, or a worker briefed only with
+      the eligible population. Every question is phrased in physics terms, with no facility name and no data-source
+      vocabulary such as <code>MMSYS</code> or <code>BPS</code>, so a ranking tuned to it is not tuned to one facility.
+    </p>
+    <p>
+      Third, the grading rule, which follows the DD-path rerank labels in
+      <code>tests/tools/fixtures/dd_mapping_questions.json</code>:
+    </p>
+    <ul>
+      <li><strong>3</strong>: a measurement of the queried quantity, on any circuit the question names.</li>
+      <li><strong>2</strong>: a commanded, reference or setpoint value of it, or the same quantity measured at an adjacent point such as a lead's inlet gas rather than its body.</li>
+      <li><strong>1</strong>: related hardware, such as a status flag, a configuration value or a neighbouring measurement on the same circuit.</li>
+    </ul>
+    <p>
+      Fourth, pooled labelling. Every candidate that any arm places in its top 10 is labelled under that rule before
+      arms are compared. The arms are the current tool, vector only, RRF, and both reranks, plus any arm a later section
+      adds. Each label is enumerated by Cypher and confirmed by reading the name and description. This removes the
+      prototype's bias, where an arm that lifted an unlabelled but relevant signal was scored as wrong.
+    </p>
+    <p>
+      The harness is one <code>@pytest.mark.graph</code> module, <code>tests/llm/test_signal_search_goldens.py</code>,
+      with its fixture at <code>tests/llm/fixtures/signal_search_questions.json</code>. It reports mean nDCG@10,
+      grade-3 precision@5, grade-3 recall@30 and the zero-hit count for each arm, plus a random-order control. It runs on
+      the fleet allocation, not the login node.
+    </p>
+    <p>
+      <strong>Done when</strong> the fixture holds at least seventeen questions, six of them held out. Every arm's top 10
+      on every question carries a label. The harness prints the five-arm table on the pooled labels, and the random
+      control scores below every arm on mean nDCG@10; a control that does not means the labels are wrong. The table and
+      the labelling log are in
+      <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html</code>.
+    </p>
+
+    <h2 id="s4">§4 — One rank fusion for every search tool</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Replace the additive rule <code>score * 0.7 + text_score * 0.3 + 0.1</code> at its four sites with reciprocal
+      rank fusion. The sites are <code>_search_signals</code>, <code>_search_docs</code> and <code>_search_code</code> in
+      <code>imas_codex/llm/search_tools.py</code>, and <code>_hybrid_ids</code> in
+      <code>imas_codex/ids/slot_context.py</code>. The fusion already exists as <code>rrf_fuse</code> and
+      <code>RRF_K = 60</code> in <code>imas_codex/standard_names/search.py</code>. Lift it to one shared owner that the
+      standard-name search and these four callers import; the plan's design review settles the module. Do not write a
+      second fusion. Signal search over-fetches 100 vector and 50 full-text candidates before fusing, the prototype's
+      values, then cuts to <code>k</code>.
+    </p>
+    <p>
+      The docs and code tools rerank after fusing, so their gain will be smaller. Their 18-question JT-60SA labels from
+      <a href="/imas-codex/plans/discovery-judgments-through-jev">discovery-judgments-through-jev</a> §9 guard against
+      regression. That plan's §13 places four code and docs answers at embedding ranks 159 to 181; the additive rule may
+      be part of why, so re-place them after this lands. <code>_hybrid_ids</code> feeds the map candidate stage, so land
+      this between <code>imas map run</code> invocations, never during one.
+    </p>
+    <p>
+      <strong>Done when</strong> all of the following hold:
+    </p>
+    <ul>
+      <li>On §3's pooled labels, held-out questions included, fused signal search beats the current tool on mean nDCG@10 and grade-3 precision@5, and no question has zero grade-3 hits in its top 30.</li>
+      <li>Labelled-only nDCG@10 on the docs and code question set stays within 0.02 of its recorded 0.4821 at pool 60.</li>
+      <li>A unit test shows a candidate ranked first by vector alone (cosine 0.9) outranking one ranked fifth by full text alone (BM25 14). The old rule must fail the same test.</li>
+      <li>A test asserts that no facility identifier appears in the fusion or ranking code.</li>
+    </ul>
+
+    <h2 id="s5">§5 — Embeddings follow the text they embed</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <code>GraphClient.create_nodes</code> embeds a description only when it writes a node that carries no embedding.
+      The signal pipeline rewrites descriptions through Cypher, both when individualising group members and when
+      propagating a representative's text, so the vector keeps describing the old text. By timestamp, 3,537 JT-60SA and
+      39,471 JET signals were embedded before their last enrichment. Individualisation writes no timestamp at all, so
+      timestamps undercount; the cosine probe in §1 is the true measure.
+    </p>
+    <p>
+      Give signal descriptions one writer. It sets <code>description</code>, <code>embedding</code>,
+      <code>embedded_at</code> and a new <code>embedded_text_hash</code> slot together, and every description write in
+      <code>imas_codex/discovery/signals/</code> goes through it. Then re-embed every FacilitySignal, at every facility,
+      whose stored hash differs from the hash of its current text. JET is included: a stale vector harms any search,
+      whatever the age of the description.
+    </p>
+    <p>
+      Decision <code>embed-text</code> is settled here by measurement. Embed the description alone, or a composed
+      <em>name — description (unit)</em> text, and keep whichever scores higher on §3's harness.
+    </p>
+    <p>
+      <strong>Done when</strong> a census over all FacilitySignal nodes finds none whose <code>embedded_text_hash</code>
+      differs from the hash of its current embed text. A test shows that an individualisation write re-embeds, and the
+      same test fails against the current writer. The harness on the head of this section is no lower than on §4's head.
+    </p>
+
+    <h2 id="s6">§6 — Index the words a searcher types</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Widen <code>facility_signal_text</code> to cover <code>keywords</code>, <code>aliases</code>, <code>unit</code>
+      and <code>source_description</code> beside <code>name</code>, <code>description</code> and <code>node_path</code>,
+      through the schema's index definition, not an ad-hoc statement. The catalogue wording and its alias codes are what
+      a physicist copies from a logbook or a wiki table. The handbook writes <code>4451 A231</code> for the EF5 supply's
+      DC voltage, which the current index cannot match.
+    </p>
+    <p>
+      <strong>Done when</strong> the index definition carries the seven fields and the harness is no lower than on §5's
+      head. A positive control passes: a query that matches only through a newly indexed field, such as an alias code or
+      a catalogue phrase, places its target in the top 10. The same query against the old index must not; that is the
+      negative control.
+    </p>
+
+    <h2 id="s7">§7 — Rerank signal search with a role-aware Jev score</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Route <code>_search_signals</code> through <code>rerank_candidates</code>, the owner the docs, code and DD-path
+      searches already share. It gets a signal state builder: name, description up to 1,200 characters, unit, data class
+      and accessor. It also gets the role-aware question from the prototype. The question's five levels run from "a
+      different quantity" through "a commanded, reference or setpoint value" to "a measurement of exactly the quantity
+      asked for". The pool is 60 and the budget 5 s. The seat is the existing discovery-relevance model on the
+      facility-discovery service. The switch follows the DD-path rerank: on for a full or facility server, off for a
+      read-only or DD-only server.
+    </p>
+    <p>
+      The prototype could not settle whether the rerank earns its place. On the draft labels it raised recall@30 and
+      lowered precision@5, and most of its losses were unlabelled relevant signals. Pooled labels settle it.
+    </p>
+    <p>
+      <strong>Done when</strong> the harness reports the rerank against fusion alone on the pooled labels, with
+      per-question wins and losses, the generic question measured beside the role-aware one, and p95 wall time at pool
+      60. The switch ships on only if the role-aware rerank beats fusion alone on both mean nDCG@10 and grade-3
+      precision@5, with p95 within 5 s. Otherwise it ships off, and this section records why.
+    </p>
+
+    <h2 id="s8">§8 — Signal role as a stored judgment</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Judge each signal's role once, at enrichment, with a Jev Choice: <em>measured</em>, <em>commanded</em>,
+      <em>reference or setpoint</em>, <em>status or flag</em>, <em>configuration parameter</em>, or <em>derived or
+      computed</em>. Store it as <code>signal_role</code>. It serves three readers:
+    </p>
+    <ul>
+      <li>a <code>role=</code> filter on <code>search_signals</code>;</li>
+      <li>the rerank state in §7;</li>
+      <li>the mapping stage, where a reference belongs in <code>pulse_schedule</code> and a measurement belongs in the measured IDS. This is the same distinction the DD-path labels grade as 2 against 3.</li>
+    </ul>
+    <p>
+      A prototype on a stratified sample of 300 eligible signals, hand-labelled, measures agreement and cost before any
+      backfill. This section is held by decision <code>signal-role</code>.
+    </p>
+    <p>
+      <strong>Done when</strong> the prototype's agreement with the hand labels and its cost per signal are recorded. If
+      the lead accepts them, every eligible signal carries <code>signal_role</code>, and <code>search_signals</code>
+      accepts a <code>role=</code> filter. A <code>role=measured</code> query on §3's questions returns no grade-2
+      reference in its top 5. The same query without the filter is the control.
+    </p>
+
+    <h2 id="s9">§9 — Results an agent can read</h2>
+<section data-reckon="section" data-id="s9" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Collapse rows that share a name template within one data-source category into one row. The template is the name
+      with its digits removed, and the row shows the member list, such as <em>EF{1,2,5,6} Booster BPS Voltage</em>, and
+      the member count. Print each distinct access template once, not per signal. Each row shows unit, data class, check
+      status and, once §8 lands, role. This applies to any facility: at JET the same rule folds a 2,366-member family
+      into one row.
+    </p>
+    <p>
+      <strong>Done when</strong> no golden question's <code>k=20</code> report holds two rows with the same template in
+      the same category. The booster question's report falls from 341 lines to at most 120 while still naming all four
+      booster voltages. The harness, which scores members, is no lower than on the previous head.
+    </p>
+
+    <h2 id="s10">§10 — Correct the descriptions search exposed</h2>
+<section data-reckon="section" data-id="s10" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The search reads the descriptions, so their errors are search errors. A physicist who searches "switching network
+      unit" cannot find signals described as snubbers. Five defects were seen in the ripple session:
+    </p>
+    <table>
+      <thead><tr><th>Defect</th><th>Signals</th></tr></thead>
+      <tbody>
+        <tr><td>SNU expanded as "snubber" and as "superconducting unit"; the wiki page MECSfeat defines it as the switching network unit</td><td>SNU resistor temperatures and terminal voltages on CS1–4, EF3 and EF4, including <code>CS3/voSNUlAT</code></td></tr>
+        <tr><td>EFCC expanded three ways: equilibrium field coil converter, error field correction coil, equilibrium field control coil</td><td><code>PSSCfst/refvcEFC*</code>, <code>PSC/oEFCC*</code></td></tr>
+        <tr><td>The lower fast position-control coil references carry swapped names and units</td><td><code>PSSCfst/refcurLFPPCC</code>, <code>PSSCfst/refvolLFPPCC</code></td></tr>
+        <tr><td>Description says kilovolts where the unit is V</td><td><code>EF2/volPSDC</code></td></tr>
+        <tr><td>Power-supply signals tagged with unrelated diagnostics: bolometry, neutron, heating</td><td><code>PSSCfst/refvolEF2Bse</code>, <code>PSSCfst/refvcEFC*</code>, <code>DCSV/ppEF6Vol</code>, <code>TFC/volConvDC</code></td></tr>
+      </tbody>
+    </table>
+    <p>
+      Add glossary entries to the facility configuration's EDAS enrichment glossary: <code>SNU</code>, <code>EFCC</code>,
+      <code>BPS</code>, <code>QPC</code>, <code>DR</code>, <code>HTS</code> and <code>FPPCC</code>. Re-enrich the
+      affected families through the pipeline, never by patching rows in place. Check the swapped references against the
+      EDDB catalogue first: a swap that exists in the catalogue is recorded, not "corrected". The diagnostic tags come
+      from the enrichment judgment that
+      <a href="/imas-codex/plans/discovery-judgments-through-jev">discovery-judgments-through-jev</a> §6 moves to Jev.
+      That part is that plan's, so this section only records the census that shows it.
+    </p>
+    <p>
+      <strong>Done when</strong> a census over eligible JT-60SA signals finds no description that expands SNU as anything
+      but switching network unit. EFCC carries one expansion. The LFPPCC references agree with the catalogue's names and
+      units. The census, before and after, is in the section's evidence fragment.
+    </p>
+
+    <h2 id="s11">§11 — JET joins the golden set when it is re-extracted</h2>
+<section data-reckon="section" data-id="s11" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="deferred" data-links=""></section>
+    <p>
+      JET's 46,872 signals were enriched before the Jev-era pipeline existed, so none is golden-eligible. Until they are
+      re-extracted, the harness prints a JET reading on a small question set as a non-regression check, and never gates
+      on it. Once JET signals are re-enriched after the cutover, write JET questions under §3's rule, pool their labels,
+      and add them to the fixture. The same path admits any other facility, such as TCV, WEST or ITER, when its signals
+      enter the graph through the pipeline.
+    </p>
+    <p>
+      <strong>Done when</strong> the fixture carries at least six JET questions on re-extracted signals with pooled
+      labels, and §4's fusion and, if shipped, §7's rerank hold their JT-60SA margins on them.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="search-unit" data-choice="" data-by="" data-when="" data-recommended="signal-row-template-collapse" data-recommended-by="coordinator">
+    <p class="r-dec-q">What is one row of a signal search result?</p>
+    <p class="r-dec-ctx">JT-60SA&#x27;s 15,111 signals sit in 5,172 SignalSource families, mostly singletons, because each coil&#x27;s channel is its own source. So searching families would not merge the six EF coil voltages a physicist thinks of as one row. The SignalSource vector index exists but holds no embeddings. JET&#x27;s families reach 2,366 members, where per-signal rows would flood any report.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="signal-row-template-collapse">A signal row, with rows sharing a name template collapsed for display</button>
+      <button class="r-opt" data-value="signal-source-family">A SignalSource family, searched through its own embedded index</button>
+      <button class="r-opt" data-value="signal-row-uncollapsed">A signal row, as today</button>
+      </p>
+    <p class="r-dec-rat">Recommended: collapse by name template for display while scoring individual signals. It merges per-coil channels that SignalSource keeps apart, folds JET&#x27;s large families, needs no new index, and leaves the harness scoring the signals a physicist would read.</p>
+    </div>
+<div class="r-dec" data-key="signal-role" data-choice="" data-by="" data-when="" data-recommended="stored-at-enrichment" data-recommended-by="coordinator">
+    <p class="r-dec-q">Where is a signal&#x27;s measurement role judged?</p>
+    <p class="r-dec-ctx">The ripple search&#x27;s central failure was ranking references and commands above measurements. A stored role can filter a search, feed the rerank, and tell the mapping stage a pulse_schedule reference from a measured home. A query-time judgment costs nothing until a search runs, but it is re-paid on every query and helps no other reader.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="stored-at-enrichment">Store a Jev role judgment on each signal at enrichment</button>
+      <button class="r-opt" data-value="query-time-only">Judge role only inside the search rerank</button>
+      </p>
+    <p class="r-dec-rat">Recommended: store it at enrichment, after §8&#x27;s 300-signal prototype records agreement and cost. One judgment per signal serves search, rerank and mapping, and the role becomes a facet anyone can query.</p>
+    </div>
+<div class="r-dec" data-key="embed-text" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What text does a signal&#x27;s embedding encode?</p>
+    <p class="r-dec-ctx">Today it encodes the description alone. A composed text, name followed by description and unit, gives the vector the identifier and unit a searcher often types. §5 measures both on the harness before choosing; no recommendation precedes that measurement.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="description-only">The description alone</button>
+      <button class="r-opt" data-value="name-description-unit">Name, description and unit composed</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ssfms-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-12" data-recommends-skill="/reckon-build signal-search-finds-the-measured-signal" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the golden harness, then land fusion and current embeddings against it</h4>
+    <div class="r-fu-body"><p>§3 comes first: every later section is judged by its harness. §4 and §5 touch different files and can run in parallel once §3 lands. §6 follows §5, §7 follows §4, §8 waits on its decision, §9 and §10 are independent, and §11 waits on a JET re-extraction.</p></div>
+    <pre class="r-fu-prompt">/reckon-build signal-search-finds-the-measured-signal</pre>
+    </article>
+</section>
+  <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-ssfms-1" data-section="s11" data-gated-sections="s11" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">JET FacilitySignals re-enriched by the Jev-era signal pipeline, with enriched_at at or after 2026-10-11T19:08:21Z</h4>
+    <p class="r-gate-required-evidence">a census receipt counting JET FacilitySignals enriched after the cutover, recorded in this plan's evidence fragment for §11</p>
+    </div>
+</section>
+</main>
+</body>
+</html>
