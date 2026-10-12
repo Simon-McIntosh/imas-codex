@@ -6912,6 +6912,44 @@
   "plan_link": "sn-judgment-evaluation",
   "promoted_by": null,
   "promoted_revision": "3a84819ada38652db878bdf1def766dc0688f7a5",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 193727,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261012T150602792761-benchmark-spearman-owner",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 193727,
+        "path": "/tmp/reckon-crew-scratch/r-20261012T150602792761-benchmark-spearman-owner"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/benchmark-spearman-owner",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "tree is no longer available"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
