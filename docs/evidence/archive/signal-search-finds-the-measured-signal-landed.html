@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="signal-search-finds-the-measured-signal-landed">
+  <meta name="plan-title" content="Signal Search Finds the Measured Signal — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Signal Search Finds the Measured Signal: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="signal-search-finds-the-measured-signal">
+  <meta name="plan-verdict" content="qualified">
+  <title>Signal Search Finds the Measured Signal — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Signal Search Finds the Measured Signal — landed record</h1>
+  <p>Closure synthesis for Signal Search Finds the Measured Signal: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s10">
+    <h2>§10 — the descriptions search exposed, corrected</h2>
+    <p>Merged in <code>5fadc0147</code> (run <code>r-20261012T193722028601-ssfms-description-corrections</code>, twelve commits ending <code>6d0847a69</code>).</p><ul><li><strong>Matcher.</strong> <code>glossary_term_reaches</code> in <code>imas_codex/discovery/signals/parallel.py</code> admits a term only across word, camel-case and digit boundaries, so <code>EFC</code> reaches <code>refvcEFC1</code> and not <code>refcurEF1</code>, and <code>HiTe</code> reaches <code>curCS1HiTe</code>. A case-folded substring matcher fails three of its tests. The boundary rule withdrew 494 false reaches: <code>DR</code> 437 (cryogenic channel codes), <code>LFP</code> 24, <code>EFC</code> 20, <code>FPPCC</code> 13. The <code>LFP</code> withdrawals were checked against their stored paths: they are flux-loop and power-supply algorithm signals.</li><li><strong>Glossary.</strong> The JT-60SA <code>signal_glossary</code> gains EFC, SNU, BPS, QPC, DR, HTS and FPPCC; EFCC no longer carries a converter reading.</li><li><strong>Descriptions.</strong> After a scoped re-enrichment, EFC/EFCC wrong expansions fell from 16 to 0 and unexpanded ones from 11 to 0 (182 of 182 read error field correction coil). SNU snubber readings fell from 38 to 0 and superconducting-unit readings from 3 to 0 (49 of 56 read switching network unit; 7 EF3 signals keep the bare abbreviation).</li><li><strong>Propagation.</strong> <code>propagate_source_enrichment</code> and <code>sweep_source_enrichment</code> find a <code>SignalSource</code> by <code>representative_id</code> rather than through the representative's own <code>MEMBER_OF</code> edge, so a representative heading a shot-templated and a shot-pinned source refreshes both. This is what reached the seven CS1 members the first pass missed. Shape tests fail when either site is reverted.</li><li><strong>Catalogue swap.</strong> <code>psscfst_refcurlfppcc</code> is named a voltage reference in the catalogue itself, so the swap is recorded, not corrected.</li><li><strong>Verification.</strong> An independent run of the six discovery modules that reach the change gave 63 passed at base <code>78397b48f</code> and 68 at the delivered head, zero added; its claims review reproduced all three claims. The run's own reviews scored 109, 96 and, at the final head, 111 of 120.</li></ul><p>Census before and after, the reach table and the figure: <a href="/imas-codex/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html">descriptions.html</a>.</p>
+  </section>
+
+</main>
+</body>
+</html>
