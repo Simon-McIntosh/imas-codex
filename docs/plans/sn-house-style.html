@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -213,11 +213,13 @@
       section when <code>sn-catalog-audit-instrument</code> was superseded.
       Render the findings, the lint's among them, in the review templates. An unresolved
       lint error caps the documentation score below the acceptance threshold. The cap lives
-      where the review pipeline writes a reviewer's score onto the entry (the scored-entry
-      loop in <code>imas_codex/standard_names/review/pipeline.py</code> that sets
-      <code>reviewer_score</code>, near line 1826): a name carrying an error-severity lint
-      finding in the <code>AuditReport</code> has its score capped there, and the entry
-      records that the cap applied. A prompt cannot enforce it.
+      in <code>_review_single_batch</code> (<code>imas_codex/standard_names/review/pipeline.py</code>),
+      right after <code>_match_reviews_to_entries</code> returns the scored entries (near line
+      2077). That matching loop carries no <code>AuditReport</code>, but the batch does: the
+      pipeline already attaches each batch's findings from <code>state.audit_report</code>
+      (near line 575). The batch also carries the ids of its names that hold an error-severity
+      lint finding, and each scored entry among them has its score capped and records that the
+      cap applied. A prompt cannot enforce it.
     </p>
     <p>
       This section's mechanism is built and gated on entries the registry already carries
