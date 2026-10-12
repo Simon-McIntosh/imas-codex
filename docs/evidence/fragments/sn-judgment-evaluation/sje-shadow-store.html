@@ -1,0 +1,105 @@
+<!-- A challenge judge's per-question answers are declared on StandardNameReview,
+     discriminated by judge_kind, and built by _build_review_record. Every test
+     here is offline: GraphClient is mocked, no graph write, no Jev call.
+     Logs: ~/.config/reckon/crew/runs/r-20261012T150536920692-sje-shadow-store/{baseline,gate,after,shadow_tests,negative_control}.log -->
+<section id="sje-shadow-store" data-reckon="evidence">
+  <h2 id="sje-shadow-store-heading">A shadow store, read by no gate</h2>
+
+  <p id="sje-shadow-store-intro">
+    A challenge judge answers per-question probes about a name. Those answers are
+    stored on the same <code>StandardNameReview</code> node kind the incumbent chat
+    reviewer uses, discriminated by a new <code>judge_kind</code>, so they accumulate
+    for audit and iterate without changing any outcome. <em>Which</em> questions are
+    asked is unsettled, so no per-question column is declared: the answers, their
+    option distributions and their confidences are three JSON objects keyed by
+    question name, beside one scalar <code>judgment_model</code>. The spelling and
+    types of <code>judgment_model</code>, <code>…_probs</code> and
+    <code>…_confidence</code> follow the convention the discovery scorer already
+    uses for judged values.
+  </p>
+
+  <table id="sje-shadow-store-schema-table">
+    <caption>Fields added to <code>StandardNameReview</code>; all five are null on an incumbent record</caption>
+    <thead>
+      <tr><th>Field</th><th>Range</th><th>Meaning</th></tr>
+    </thead>
+    <tbody>
+      <tr id="sje-shadow-store-f-kind"><td><code>judge_kind</code></td><td><code>StandardNameReviewJudgeKind</code></td><td><code>incumbent</code> (the deciding chat reviewer) or <code>jev</code> (a challenge judge). A record of any other kind is never canonical.</td></tr>
+      <tr id="sje-shadow-store-f-model"><td><code>judgment_model</code></td><td>string</td><td>The model that produced the answers.</td></tr>
+      <tr id="sje-shadow-store-f-answers"><td><code>judge_answers_json</code></td><td>JSON object</td><td>Question name → the answered value.</td></tr>
+      <tr id="sje-shadow-store-f-probs"><td><code>judge_probs_json</code></td><td>JSON object</td><td>Question name → ordered option probabilities.</td></tr>
+      <tr id="sje-shadow-store-f-conf"><td><code>judge_confidence_json</code></td><td>JSON object</td><td>Question name → the judge's confidence in its answer.</td></tr>
+    </tbody>
+  </table>
+
+  <p id="sje-shadow-store-builder">
+    <code>_build_review_record</code> gains a <code>judgment</code> argument carrying
+    <code>{question: {"answer", "probs", "confidence"}}</code>. A record built with it
+    is marked <code>jev</code>, is forced to <code>is_canonical: false</code> even when
+    the caller asks for canonical, and carries <code>score: null</code>, so no scalar
+    verdict exists for an accepting path to pick up.
+  </p>
+
+  <figure id="sje-shadow-store-figure">
+    <svg viewBox="0 0 700 200" width="700" height="200" role="img" aria-labelledby="sje-shadow-store-figure-title">
+      <title id="sje-shadow-store-figure-title">Which readers reach a shadow review record</title>
+      <rect x="8" y="70" width="150" height="60" fill="none" stroke="#333" stroke-width="1.2"/>
+      <text x="83" y="95" text-anchor="middle" font-size="12">StandardName</text>
+      <text x="83" y="113" text-anchor="middle" font-size="12">reviewer_score_name</text>
+      <rect x="300" y="20" width="170" height="60" fill="none" stroke="#333" stroke-width="1.2"/>
+      <text x="385" y="45" text-anchor="middle" font-size="12">accept mirror</text>
+      <text x="385" y="63" text-anchor="middle" font-size="11" fill="#555">in-memory entries</text>
+      <rect x="300" y="120" width="170" height="60" fill="none" stroke="#333" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <text x="385" y="145" text-anchor="middle" font-size="12">refine trigger</text>
+      <text x="385" y="163" text-anchor="middle" font-size="11" fill="#555">name-level state</text>
+      <rect x="540" y="120" width="150" height="60" fill="none" stroke="#b00" stroke-width="1.2"/>
+      <text x="615" y="145" text-anchor="middle" font-size="12">scan HAS_REVIEW</text>
+      <text x="615" y="163" text-anchor="middle" font-size="11" fill="#b00">needs a filter</text>
+      <line x1="158" y1="95" x2="300" y2="50" stroke="#333" stroke-width="1.2"/>
+      <line x1="158" y1="105" x2="300" y2="145" stroke="#333" stroke-width="1.2"/>
+      <line x1="158" y1="112" x2="540" y2="140" stroke="#b00" stroke-width="1.2"/>
+      <text x="230" y="42" font-size="11" fill="#555">no review node read</text>
+      <text x="230" y="178" font-size="11" fill="#b00">reads review nodes</text>
+    </svg>
+    <figcaption>
+      The accepting and refining decisions reach a shadow record by neither route:
+      the accept mirror takes its score from the in-memory entry the pipeline
+      matched, and the refine trigger is a pure predicate over name-level state.
+      The two node-scanning readers in the fragment below attach through
+      <code>HAS_REVIEW</code> and have no judge-kind filter.
+    </figcaption>
+  </figure>
+
+  <p id="sje-shadow-store-evidence">
+    The gate is <code>tests/standard_names/test_review_shadow_store.py</code> (11
+    tests) with the review, quorum, pool and schema suites beside it: 96 passing at
+    the base revision, 168 at the head, no added failures
+    (<code>after.log</code>, <code>EXIT=0</code>). A negative control points the
+    accept gate's score selection at a shadow confidence instead of the reviewer's
+    score; the identical-decisions test fails on exactly that change
+    (<code>negative_control.log</code>, 1 failed / 10 passed), so the equality it
+    asserts is load-bearing rather than a property of the fixture.
+  </p>
+
+  <p id="sje-shadow-store-gaps">
+    Two gaps found and <strong>not</strong> closed here, because both live outside
+    this node's write scope:
+  </p>
+  <ul id="sje-shadow-store-gap-list">
+    <li id="sje-shadow-store-gap-write">
+      <code>imas_codex/standard_names/graph_ops.py</code> — <code>write_reviews</code>
+      builds its batch (line 6150) and its <code>SET</code> clause (ending line 6145)
+      from an explicit property list, so a shadow payload is dropped at write time.
+      A test asserts the omission and trips as soon as the list is extended.
+    </li>
+    <li id="sje-shadow-store-gap-readers">
+      <code>imas_codex/standard_names/review/projection.py:151</code> takes
+      <code>rows[0]["review_group_id"]</code> as the latest group from an unfiltered
+      <code>HAS_REVIEW</code> scan, and
+      <code>imas_codex/standard_names/graph_ops.py:6281</code>
+      (<code>update_review_aggregates</code>) counts, means and spreads every
+      <code>StandardNameReview</code> regardless of kind. Both would follow a shadow
+      record once one is attached.
+    </li>
+  </ul>
+</section>

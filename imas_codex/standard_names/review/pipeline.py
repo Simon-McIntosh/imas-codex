@@ -184,11 +184,22 @@ def _build_review_record(
     tokens_in: int | None = None,
     tokens_out: int | None = None,
     comments_per_dim: dict | None = None,
+    judgment: dict | None = None,
+    judgment_model: str | None = None,
 ) -> dict:
-    """Build a Review graph record for a scored item."""
+    """Build a Review graph record for a scored item.
+
+    ``judgment`` carries a challenge judge's per-question answers as a mapping
+    of question name to ``{"answer", "probs", "confidence"}``. Such a record is
+    a challenge judge's record: it is never canonical and carries no scalar
+    ``score``, so the accepting path — which reads the score mirror — cannot
+    follow it. Because which questions are asked is unsettled, the answers are
+    keyed by question name rather than by a slot per dimension.
+    """
     sn_id = item.get("_original_id") or item.get("id") or ""
     if not sn_id or not model or not reviewed_at:
         return {}
+    is_challenge_judge = judgment is not None or judgment_model is not None
     rid = f"{sn_id}:{_model_slug(model)}:{reviewed_at}"
     raw_scores = scores if scores is not None else item.get("reviewer_scores")
     if isinstance(raw_scores, dict | list):
@@ -197,6 +208,13 @@ def _build_review_record(
         scores_json = raw_scores
     else:
         scores_json = "{}"
+    if is_challenge_judge:
+        judgment = judgment or {}
+        answers = {q: a.get("answer") for q, a in judgment.items()}
+        probs = {q: a.get("probs") for q, a in judgment.items()}
+        confidences = {q: a.get("confidence") for q, a in judgment.items()}
+    else:
+        answers = probs = confidences = None
     return {
         "id": rid,
         "standard_name_id": sn_id,
@@ -205,9 +223,16 @@ def _build_review_record(
         # so that queries on rv.reviewer_model return the expected value.
         "reviewer_model": model,
         "model_family": _derive_model_family(model),
-        "is_canonical": bool(is_canonical),
-        "score": float(
-            score if score is not None else (item.get("reviewer_score") or 0.0)
+        "is_canonical": bool(is_canonical) and not is_challenge_judge,
+        "score": None
+        if is_challenge_judge
+        else float(score if score is not None else (item.get("reviewer_score") or 0.0)),
+        "judge_kind": "jev" if is_challenge_judge else "incumbent",
+        "judgment_model": judgment_model,
+        "judge_answers_json": json.dumps(answers) if answers is not None else None,
+        "judge_probs_json": json.dumps(probs) if probs is not None else None,
+        "judge_confidence_json": (
+            json.dumps(confidences) if confidences is not None else None
         ),
         "scores_json": scores_json,
         "tier": (tier if tier is not None else item.get("review_tier")) or "unknown",

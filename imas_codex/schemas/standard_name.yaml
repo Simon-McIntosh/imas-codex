@@ -449,6 +449,24 @@ enums:
           Link resolution attempted multiple times and permanently failed.
           Terminal state — requires manual intervention or vocabulary update.
 
+  StandardNameReviewJudgeKind:
+    description: >-
+      Which judge produced a ``StandardNameReview`` record's verdicts.
+      ``incumbent`` is the pipeline chat reviewer whose score mirrors onto
+      the StandardName. ``jev`` is a challenge judge whose per-question
+      answers are stored on the same record kind but read by no accepting,
+      refining or exporting path: its answers accumulate for comparison
+      without changing an outcome. A record of any other kind is never
+      canonical.
+    permissible_values:
+      incumbent:
+        description: The pipeline chat reviewer whose verdicts decide the name.
+      jev:
+        description: >-
+          A challenge judge answering per-question probes. Its answers are
+          stored beside the incumbent's and read by no accepting, refining or
+          exporting path.
+
   StandardNameReviewMode:
     description: >-
       Which LLM review rubric produced the most recent axis-specific
@@ -3785,6 +3803,40 @@ classes:
           (e.g. "0.7.0rc56"). Records which grammar and validation
           rules were used during review.
         range: string
+      judge_kind:
+        description: >-
+          Which judge produced this record's verdicts — ``incumbent``
+          (the pipeline chat reviewer) or ``jev`` (a challenge judge).
+          Incumbent records mirror onto the StandardName; a challenge
+          judge's record is stored beside them and read by no accepting,
+          refining or exporting path.
+        range: StandardNameReviewJudgeKind
+      judgment_model:
+        description: >-
+          Decisions model that produced the per-question judgments,
+          following the property discovery's path scorer writes. Because
+          the model is recorded, deciding whether a change of judge
+          invalidates a stored answer is a string comparison.
+      judge_answers_json:
+        description: >-
+          JSON object mapping each judged question's name to the judge's
+          answered value. Keyed by question name rather than by dimension
+          because which questions are asked is unsettled; a fixed slot per
+          dimension would force a schema change whenever a question is
+          added, removed or renamed, and would carry the same information
+          less truthfully for records that answered a different set.
+          Null on incumbent records, which store their verdict in
+          ``score``, ``tier`` and ``scores_json``.
+      judge_probs_json:
+        description: >-
+          JSON object mapping each judged question's name to its ordered
+          option probabilities, the distribution behind that question's
+          answer in ``judge_answers_json``. Keys match
+          ``judge_answers_json``.
+      judge_confidence_json:
+        description: >-
+          JSON object mapping each judged question's name to the judge's
+          confidence in its answer. Keys match ``judge_answers_json``.
 
   PromotionCandidate:
     description: >-
