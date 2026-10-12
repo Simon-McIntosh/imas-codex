@@ -133,6 +133,39 @@ async def test_edas_prompt_scopes_category_and_term_context_to_signals():
     assert "coil currents" not in unrelated
 
 
+def test_the_boundary_matcher_holds_a_term_to_whole_words():
+    assert parallel.glossary_term_reaches("EFC", "PSSCfst/refvcEFC1")
+    assert not parallel.glossary_term_reaches("EFC", "PSSCfst/refcurEF1")
+    # The matcher it replaces accepted a case-folded substring, which EFC is
+    # inside refcurEF1 ("refcuref1"); keep that difference visible.
+    assert "efc" in "PSSCfst/refcurEF1".casefold()
+
+
+@pytest.mark.asyncio
+async def test_a_coil_abbreviation_reaches_its_own_signal_not_a_lookalike():
+    prompt = await _enrichment_prompt(
+        [
+            {
+                "id": "efc",
+                "accessor": "read efc",
+                "discovery_source": "edas",
+                "data_source_path": "PSSCfst/refvcEFC1",
+                "name": None,
+            },
+            {
+                "id": "lookalike",
+                "accessor": "read lookalike",
+                "discovery_source": "edas",
+                "data_source_path": "PSSCfst/refcurEF1",
+                "name": None,
+            },
+        ]
+    )
+    efc, lookalike = prompt.split("### Signal")[1:]
+    assert "glossary: EFC — " in efc
+    assert "glossary: EFC — " not in lookalike
+
+
 def test_facility_glossary_is_declared_and_loaded():
     with open("imas_codex/schemas/facility_config.yaml") as stream:
         schema = yaml.safe_load(stream)

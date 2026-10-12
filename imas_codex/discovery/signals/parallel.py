@@ -3754,6 +3754,31 @@ async def mdsplus_promote_worker(
     state.promote_phase.mark_done()
 
 
+def glossary_term_reaches(term: str, text: str) -> bool:
+    """Whether ``term`` names a whole word of ``text``, case-insensitively.
+
+    A term reaches a signal only across word and camel-case boundaries: it
+    begins a word (start of text, after a non-alphanumeric, or at a
+    lower-case-to-upper-case turn) and does not run into a following lower-case
+    run. So ``EFC`` reaches ``refvcEFC1`` — after the camel turn — but not
+    ``refcurEF1``, where ``efc`` lies inside ``refcur``, and ``UFP`` reaches the
+    concatenated acronyms of ``curUFPLKAT``.
+    """
+    if not term:
+        return False
+    for match in re.finditer(re.escape(term), text, re.IGNORECASE):
+        start, end = match.start(), match.end()
+        begins_word = (
+            start == 0
+            or not text[start - 1].isalnum()
+            or (text[start - 1].islower() and text[start].isupper())
+        )
+        ends_word = end == len(text) or not text[end].islower()
+        if begins_word and ends_word:
+            return True
+    return False
+
+
 async def enrich_worker(
     state: DataDiscoveryState,
     on_progress: Callable | None = None,
@@ -4381,10 +4406,10 @@ async def enrich_worker(
                     catalogue_text = " ".join(
                         str(signal.get(field) or "")
                         for field in ("data_source_path", "name", "source_description")
-                    ).casefold()
+                    )
                     for entry in signal_glossary:
                         term = entry["term"]
-                        if term and term.casefold() in catalogue_text:
+                        if term and glossary_term_reaches(term, catalogue_text):
                             user_lines.append(f"glossary: {term} — {entry['meaning']}")
                 if signal.get("is_static"):
                     user_lines.append("is_static: true")
