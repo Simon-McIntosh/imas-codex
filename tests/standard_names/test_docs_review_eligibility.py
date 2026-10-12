@@ -87,6 +87,15 @@ def test_export_reason_distinguishes_absence_from_unrecorded_resolution() -> Non
         "review_quorum_shortfall": None,
         "docs_stage": "accepted",
         "docs_review_quorum_shortfall": None,
+        # The topology the population query projects onto every candidate: a
+        # Data Dictionary extraction reached this name directly. Without
+        # producer evidence the eligibility classifier withholds the candidate
+        # before it reaches the docs-review branches under test.
+        "_has_dd_source_binding": True,
+        "_has_derived_producer": False,
+        "_has_non_derived_producer": True,
+        "_has_live_child": False,
+        "_is_parent": False,
     }
     population = [
         {
