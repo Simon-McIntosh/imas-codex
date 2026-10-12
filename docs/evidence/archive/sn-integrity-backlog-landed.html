@@ -90,6 +90,11 @@
     <p>On the live graph, the signed supersede path wrote receipt-stamped <code>HAS_SUCCESSOR</code> edges for <code>flux_due_to_thermal_fusion</code> and <code>lower_energy</code>; <code>HAS_SUCCESSOR</code> went from 48 to 50. The preview admitted 2 of 3 rows, the apply changed 2 with 4 persistent writes, and the manifest's sha256 is <code>38c5ce50e4fb2ce797eca34b11c00696cfd1aa4be4e6f966c7a5c30361489279</code>. The structural-legitimacy guard refused the third, <code>area_of_flux_surface</code>, with "target has a live structural child": although superseded, it still parents three accepted names through <code>HAS_PARENT</code>. The second dry run lists that one name. Manifest, receipt and both dry runs are in the worker record. Merge <code>8511a72f0</code>; the run is held open and resumable for the decision below.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill">sib-scalar-only-backfill</a>.</p>
   </section>
 
+  <section id="s25">
+    <h2>§25 — the rest of the export set was red on stale fixtures</h2>
+    <p>All fifteen export and catalog tests failed for one cause: their synthetic population rows carried none of the five producing-source topology flags (<code>_has_dd_source_binding</code>, <code>_has_derived_producer</code>, <code>_has_non_derived_producer</code>, <code>_has_live_child</code>, <code>_is_parent</code>). Since <code>b161235bb</code> (2026-09-18), the eligibility classifier treats an absent flag as an absent observation and withholds such a row as <code>no_producing_source</code> before the branch under test runs. That change was an intended hardening, not a regression. Each fixture row now carries the topology a real row has: a Data Dictionary source binding with a non-derived producer. The fix is in fixtures only, 83 lines, with no product change. The eight files went from 12 failed and 3 errors (45 passed) at base to 60 passed at head, and removing the topology turns them red again. Merge <code>f15f55e47</code>. Independent review 108/120, no added failures. Follow-on: one fixture comment describes a non-derived producer where its flags set a derived one.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-export-set-red">sib-export-set-red</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>
