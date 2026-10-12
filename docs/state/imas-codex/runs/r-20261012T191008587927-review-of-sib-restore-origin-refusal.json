@@ -574,6 +574,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "a76020e640e64b108f7d04864841bf5c794cb1d3",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5042,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261012T191008587927-review-of-sib-restore-origin-refusal",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5042,
+        "path": "/tmp/reckon-crew-scratch/r-20261012T191008587927-review-of-sib-restore-origin-refusal"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-sib-restore-origin-refusal",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
