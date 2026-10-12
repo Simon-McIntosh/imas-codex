@@ -1,0 +1,120 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:38:35.221Z",
+  "dispatched_at": "2026-10-12T18:34:30Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/docs_gates.py:660",
+      "id": "reuse_search-1",
+      "reason": "the report section must name `review/audits.py` as its lint source, or the builder will add a third lint beside the one the dependency plan builds (and `harmonize.lint_links`, `harmonize.py:499`, is already a duplicate of `run_link_integrity`).",
+      "text": "\u00a72's report lists \"the lint findings by class\" but never names the producer; the conformance checks `sn-house-style` \u00a74 builds land in `imas_codex/standard_names/docs_gates.py:660` (`house_style_findings`) and reach the pipeline through `imas_codex/standard_names/review/audits.py:99` (`AuditReport`), with `run_lexical_lint` (`review/audits.py:296`) and `run_link_integrity` (`review/audits.py:405`) as the other two classes. `sn-house-style` \u00a74 states in its own text that \"the harmonize command reads the same report\", so the source is already decided and the plan should cite it rather than leave it unnamed.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/protection.py:86",
+      "id": "duplicate_owner-1",
+      "reason": "extend `protection.py` with the roster/`contested` reasons and reuse its evidence string, or the command's guard and the owner's guard will disagree on what \"recommended\" means.",
+      "text": "\u00a73's guard refuses three classes (\"recommended into a catalog pull request\": roster members of an open candidate request, `name_stage` `approved`, and `contested`) unless `--force` is given. `protection.py` already owns this concept: `automatic_deletion_protections` returns per-identity durable-authority evidence that bars a write, and its query already names `name_stage = 'approved'` (`protection.py:109`) and `catalog_pr_number IS NOT NULL` (`protection.py:111`). The plan forks a second query for the same \"this name is committed, do not move it\" question.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/harmonize.py:643",
+      "id": "thin_wrapper-1",
+      "reason": "the apply section should call `mark_members_for_regen` directly on the pattern family's members, or state why re-keying the parent-level wrapper is needed; as written it is a thin layer that hides nothing.",
+      "text": "\u00a73 says `sn harmonize --apply` \"is the caller of `mark_families_for_regen` ... adapted to take a pattern family\". `mark_families_for_regen` resolves members through `HAS_PARENT` (`harmonize.py:660-682`) \u2014 the very grouping \u00a71 says is wrong \u2014 and delegates to `mark_members_for_regen(member_ids)` (`harmonize.py:542`), which already takes an explicit member set, snapshots each member's docs, resets the pipeline and stamps a scope `run_id`. A pattern family yields exactly that member set from `families.fetch_pattern_family` (`families.py:605`). No behaviour in the parent-level wrapper survives the re-key beyond a `HAS_PARENT` lookup the plan does not want.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-harmonize-command.html#s2",
+      "id": "interface_budget-1",
+      "reason": "with every budget figure at 0 the section must enumerate the dead helpers it orphans and account for the new refusal family in its own text, or name why neither can be retired.",
+      "text": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. \u00a72 adds a new top-level command with a scope group (`--batch`/`--family`/`--concept`/`--all`) and a mode group (`--report`/`--apply`/`--dry-run`/`--cost-limit`), and names only two retirements (`--families`, `--target groups`). Deleting `--target groups` (`sn.py:6193`) orphans its helpers, which the section does not name: `_refuse_grouped_review_scoping` (`sn.py:5952`), `_report_drifting_families` (`sn.py:5993`) and `harmonize.build_worklist` (`harmonize.py:298`), whose only production caller is `sn.py:6211`. \u00a73 adds a refusal family and a `--force` with a recorded reason, and names no existing refusal it retires or merges.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "af7e12f32d1d4e8f6676811bc49dde86c381cb05b1016ce022bec5d40ba4b2f3",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-12T18:41:37.509103+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-12T18:41:45.503585+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-12T18:41:53.559064+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-12T18:42:02.788826+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:41:45.503585+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:42:02.788826+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:41:37.509103+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:41:53.559064+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-harmonize-command.v4.json",
+  "review_run_id": "r-20261012T183409204318-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "16527e372cae64a394d7f11ba40f443579732c2e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the command hides scope resolution, pattern-family assembly (`families.py`), the drift metric, the lint read and the apply/snapshot behind one surface, delegating work to the existing deep modules rather than spreading a fan of wrappers over one mechanism.",
+    "duplicate_owner": "a finding \u2014 \u00a73's refusal guard for \"recommended into a catalog pull request\" re-implements the durable-authority evidence query that `protection.py` already owns.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a new command and \u00a73 a new refusal family and `--force`, naming only two flag retirements and not the now-orphaned helpers, and stating no reason the added surface cannot be retired or merged.",
+    "reuse_search": "a finding \u2014 \u00a71 does cite the three scattered surfaces (`harmonize.py`, `sn run --families`, `sn review --target groups`) and \u00a73 cites `mark_families_for_regen` and `select_anchor`, but \u00a72's report measures \"the lint findings by class\" without naming the module that already produces them (`house_style_findings`, `docs_gates.py:660`; the `AuditReport` in `review/audits.py`).",
+    "thin_wrapper": "a finding \u2014 \u00a73 proposes adapting `mark_families_for_regen` to take a pattern family without saying why `mark_members_for_regen`, which already snapshots, resets and stamps a scope run-id over an explicit member set, cannot be called directly."
+  },
+  "section_digests": {
+    "_document": "2b2341966256ecbb7712a1f4b7cd7aee827ae18b22b02b9e28b53fd1e773b1c0",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s2": "3564b3f21b78772d527df10cdd82b0ad53d6852e977e548bc572c9f888612f59",
+    "s3": "5001e15e743f23da1a2f04b9543cfbb472fddf1b84537e6ebf054da589bd58d9",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:41:25.739493+00:00"
+}
