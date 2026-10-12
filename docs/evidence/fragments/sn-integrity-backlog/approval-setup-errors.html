@@ -10,6 +10,7 @@
 <body>
 <main>
 <h1 id="sib-approval-setup-errors-title">The catalog approval tests timed out on a PATH git wrapper, not on their fixtures</h1>
+<p><strong>Integration note (2026-10-13):</strong> the diagnosis below is kept; the test change it describes was not merged. That change pinned the real <code>git</code> ahead of the worker wrapper inside the test modules, which bypasses a sandbox component for every worker that runs them. On <code>main</code> the approval tests are unchanged: they pass outside a worker sandbox and time out inside one until the wrapper's per-call startup cost is fixed in reckon. Where this record says the files now pass, it refers to the unmerged change.</p>
 
 <p id="sib-approval-setup-errors-summary">
 A gate on 2026-10-12 reported <code>tests/standard_names/test_sn_approve_tag.py</code>
