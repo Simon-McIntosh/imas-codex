@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T06:39:26.472Z",
+  "dispatched_at": "2026-10-12T06:33:27Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-west-prototype-release.html:204",
+      "id": "reasoning-1",
+      "reason": "as written the node re-runs a first-exercise rehearsal that is already done and evidenced, spending its budget on completed work and, because the census null-finding it cites is a post-unwind artefact rather than evidence the writer never ran, mis-stating the current position; \u00a77 should be removed or reframed to consume the existing receipt.",
+      "text": "\u00a77 says \"The writer exists and has never run in production\" and tells the reader to \"exercise the approval fold-back with one accepted and one refused reviewer edit on a rehearsal branch\", but its cited source `catalog-review-surface` \u00a74 records that rehearsal as already run and unwound: followup `f-crs-003` (resolved 2026-09-17) records fork request 20 carrying one promoted and one refused catalog edit, the traceability receipt read back with `catalog_pr_number` 20 and `catalog_reviewer_actor` non-null, and an unwind with `properties_differing_count 0`; followup `f-crs-the-refusal-reaches-the-request-itself` (resolved 2026-09-18) records the last gap (surfacing the refusal on the pull request) landed at 2390f87f9. \u00a77's done-when \u2014 accepted edit traceable, refused edit changed nothing, unwind leaves no lasting change \u2014 is exactly the completed rehearsal, and evidence lives at `docs/evidence/catalog-review-surface/fold-back-rehearsal.md`",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-west-prototype-release.html:169",
+      "id": "done_when-1",
+      "reason": "the assertion is falsifiable against the real staged catalog once `sn-catalog-grouping` \u00a72's 17-member family exists, so this adds a mutation control without changing what the node delivers.",
+      "text": "\u00a75's done-when asserts \"every pattern family appears contiguously within its domain (asserted by a test over the staged files)\" but names no control showing the test can fail, so a test that reads a staged catalog with no multi-member family present would pass vacuously",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "ea0c6e4d94d7851981eff5ebdcd3df4b70423a7117c51e1615fcc1a630c5bd84",
+  "plan_slug": "sn-west-prototype-release",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T063317507583-plan-review-of-sn-west-prototype-release",
+  "reviewed_blob_sha": "d9983e6a072ad6b7c414e1ac99b984480fbfa725",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a72's `sn-judgment-evaluation#s4` and",
+    "done_when": "a finding \u2014 \u00a75's done-when names a test but no control showing",
+    "evidence_paths": "pass \u2014 \u00a74's ledger sits at",
+    "naming": "pass \u2014 the changed units introduce no plan labels, stage names,",
+    "reasoning": "a finding \u2014 \u00a77 commands a rehearsal its own cited source",
+    "single_goal": "pass \u2014 \u00a72 (rule on and apply the name repairs), \u00a74 (read",
+    "wiring": "pass \u2014 s3's two depends-on, s4's single depends-on"
+  },
+  "section_digests": {
+    "_document": "da5d8fa38db30700897884f02b5caa1e6c5dc6c23b65ee97b8c5e61e5d7c92b6",
+    "s1": "b96cab0977b50530a79aa9b407b6b6a5e6a527b2550f3d432bddf84e0040210d",
+    "s2": "d091350364c03d177a9ff6fa2d34b87fc53b664f765c4300dee0bdd207462d29",
+    "s3": "70d73723b0f229053fa8edc6333cf010650957cb42e850b6d0016a0deb45420c",
+    "s4": "5f11d3e3a313dea656e3a78ec867d541c8960393231ac02709cde3bfe4ca05a0",
+    "s5": "92d3c326c11c7ac068a80465e7a7442effe47f33acb6066dea94c6210085467e",
+    "s6": "0cad5e70f0eebd431aed6c6f2b9a13922360e142a4ba0797064b0232394c68e4",
+    "s7": "7ec33b21f68fcba783fe060ddfebc324a30fdafa818a907023dc18bf225b7a3e",
+    "s8": "771210eabc5d8e24b17f7a23dcc03e3d5abf74f78b34e2dbb0f5b259aacd7104"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T07:13:09.031832+00:00"
+}
