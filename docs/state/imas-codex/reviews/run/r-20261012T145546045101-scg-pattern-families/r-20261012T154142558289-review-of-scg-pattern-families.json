@@ -1,0 +1,114 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate-arm logs: logs/gate-base.log records 81 passed EXIT=0 at c7b4c626e and logs/gate-after.log records 97 passed EXIT=0 at the change, so head adds no failing test (the +16 are the reviewed node's own new passing cases in tests/standard_names/test_pattern_families.py).",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/scg-pattern-families uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_families.py tests/standard_names/test_review_neighbours.py tests/standard_names/test_docs_context_injection.py tests/standard_names/test_family_harmonization_auto.py tests/standard_names/test_harmonize.py tests/standard_names/test_pattern_families.py tests/graph/test_cypher_property_check.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145546045101-scg-pattern-families/logs/gate-after.log",
+    "revision": "c7b4c626e21cc93a2fc9cfefe200ef066b800829"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145546045101-scg-pattern-families/scratch/base-arm uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_families.py tests/standard_names/test_review_neighbours.py tests/standard_names/test_docs_context_injection.py tests/standard_names/test_family_harmonization_auto.py tests/standard_names/test_harmonize.py tests/graph/test_cypher_property_check.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145546045101-scg-pattern-families/logs/gate-base.log",
+    "revision": "c7b4c626e21cc93a2fc9cfefe200ef066b800829"
+  },
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:_enrich_for_docs_gen",
+    "imas_codex/standard_names/workers.py:_bounded_docs_escalation_factory",
+    "imas_codex/cli/sn.py:sn_status",
+    "imas_codex/cli/sn.py:sn_review"
+  ],
+  "completed_at": "2026-10-12T16:00:29.126Z",
+  "dispatched_at": "2026-10-12T15:41:52Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/families.py",
+      "line": 438,
+      "severity": "follow-on",
+      "text": "the invariant segment set is encoded twice in the file and nothing binds the two: PATTERN_INVARIANT_SEGMENTS (families.py:411) is what pattern_signature consumes, while _PATTERN_FAMILY_MEMBERS_QUERY (families.py:438) and _PATTERN_FAMILY_CENSUS_QUERY (families.py:469) hard-code the same four columns (coalesce on physical_base, geometric_base, transformation, process). Adding or renaming an invariant segment to the tuple leaves both live queries grouping on the old tuple and no test reddens, because the fixture re-implements the grouping in Python (see the durability justification)."
+    },
+    {
+      "file": "tests/standard_names/test_pattern_families.py",
+      "line": 60,
+      "severity": "follow-on",
+      "text": "the fixture _PatternGraph.query dispatches on the query text (a HAS_PARENT substring returns []) and re-computes membership with the module's own pattern_signature, so the landed change's Cypher WHERE clauses are never executed by any test. The negative control catches only a whole-route swap; a mutation of an equality clause inside _PATTERN_FAMILY_MEMBERS_QUERY (for example dropping coalesce(m.geometric_base,'') = geometric_base) leaves all 16 tests green while the live graph would return a different family."
+    },
+    {
+      "file": "imas_codex/standard_names/context.py",
+      "line": 828,
+      "severity": "follow-on",
+      "text": "parent_name is the seed's physical_base value and is returned verbatim as parent.name (context.py:913) even when no StandardName carries that id; fetch_family_base then returns {} and the family is handed to the docs prompt (workers.py:_enrich_for_docs_gen) with a base-quantity name that may not exist and an empty description. The old HAS_PARENT route always named a real parent node; docs_accepted is False in this case so it defers rather than asserts, but the name is still rendered."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": 472,
+      "severity": "follow-on",
+      "text": "assemble_family now returns grouping pattern (harmonize.py:343), but build_worklist(include_parentless=True) still groups parentless names by physical_base and emits grouping physical_base with a physical_base key (harmonize.py:472-524), so the module carries two parentless-family definitions and the plan's one-definition-of-a-family statement is only partly satisfied. The brief scoped the retirement to assemble_family, so this is recorded rather than repaired here."
+    },
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": 4170,
+      "severity": "follow-on",
+      "text": "the Sibling Families headline count and the gate that decides whether to call build_worklist run an inline HAS_PARENT query (operator_kind IN projection/qualifier/coordinate/locus), so the harmonize command's family count still reports the pre-change definition and disagrees with the pattern family the docs prompt and assemble_family now use. cli/sn.py is outside this node's write scope (the brief forbids editing the caller), so the divergence is recorded for the coordinator."
+    },
+    {
+      "file": "imas_codex/standard_names/families.py",
+      "line": 499,
+      "severity": "follow-on",
+      "text": "row_pattern_signature is defined (families.py:499) and referenced nowhere in the repository, dead code added with the change."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s): workers.py:_enrich_for_docs_gen and workers.py:_bounded_docs_escalation_factory read fetch_sibling_family, and cli/sn.py:sn_status (assemble_family and build_worklist) and cli/sn.py:sn_review (build_worklist) read the harmonize family; none of the node's own test files counts as a production call site.",
+    "diff": "read commit by commit against base c7b4c626e21cc93a2fc9cfefe200ef066b800829: 58ad9b1a4 adds the pattern-family API to families.py (+183) and rewrites fetch_sibling_family (context.py, -163/+?) and assemble_family (harmonize.py, +77/-?) to read it, and 38f0a7336 adds the evidence fragment (166 lines) and the census figure (svg); the diff also rewrites three existing test files and adds tests/standard_names/test_pattern_families.py (+343). Nothing outside the declared files moves.",
+    "done_when": "the done_when names a fixture-graph test resolving the 17 flux_surface_averaged_<species>_density_at_plasma_boundary names to one family of 17, a lone name to a family of one, the family-of-17 test failing when the lookup reverts to the HAS_PARENT route, and a bounded live census recorded beside the HAS_PARENT count; tests/standard_names/test_pattern_families.py:206 asserts the 17 cohort and :229 the family of one, the negative control logs/negative-control.log shows 10 failed / 6 passed EXIT=1 with test_species_cohort_resolves_to_one_family_of_seventeen among the ids, and the census table (171 pattern families >=3, 2643 members, 220 HAS_PARENT families, 7 HAS_PARENT-only) with queries, row-set predicates and elapsed times is in the fragment.",
+    "goal": "the goal is a grammar-based pattern-family definition owned by families.py and read by fetch_sibling_family and assemble_family, retiring assemble_family's physical_base fallback while keeping the family-eligible HAS_PARENT route for operator-derived children; families.py:411/504 now define it, context.py:813 and harmonize.py:343 read it, and the physical_base fallback is gone (harmonize.py:343). Achievement is partial on the plan's one-definition-of-a-family statement, since cli/sn.py:4170 and harmonize.py:472 still group the old way.",
+    "manifest": "read; it records status complete, the two commits 58ad9b1a4 and 38f0a7336, gate base 81 passed and after 97 passed EXIT=0 with log paths logs/gate-base.log and logs/gate-after.log, the negative-control log path and its 10 failed / 6 passed result, and the live census numbers (171/2643/220/7).",
+    "write_paths": "the manifest declares imas_codex/standard_names/families.py, context.py, harmonize.py, four of the six named test files (test_pattern_families.py new; test_docs_context_injection.py, test_family_harmonization_auto.py, test_review_neighbours.py modified), the evidence fragment and docs/figures/... in its own orientation_write_paths; git show --name-only lists exactly those files and nothing else, so every changed path is inside the node-declared scope (the figure path is declared by the node but not named in the brief's prose write scope)."
+  },
+  "justifications": {
+    "durability": "the family-of-17 test fails when the family lookup reverts to the HAS_PARENT route (logs/negative-control.log, 10 failed EXIT=1), but the fixture re-implements the grouping in Python via pattern_signature (tests/standard_names/test_pattern_families.py:45) and dispatches on the query text, so the Cypher WHERE predicates inside _PATTERN_FAMILY_MEMBERS_QUERY are never executed: a mutation of one equality clause reddens no test (finding at families.py:438).",
+    "evidence": "the gate files record 81 passed at base (logs/gate-base.log) and 97 passed at the change (logs/gate-after.log), both EXIT=0, the negative control reddens the family-of-17 case (logs/negative-control.log, 10 failed EXIT=1), and the live census with queries, row-set predicates and elapsed times is recorded in docs/evidence/fragments/sn-catalog-grouping/scg-pattern-families.html; the residual gap is that the real Cypher predicate is property-checked (tests/graph/test_cypher_property_check.py) but not executed.",
+    "fit": "the additions sit in families.py beside the module's existing family-detection code (families.py:210 detect_families) and follow its dataclass and module-constant style, the new test file is named for what it tests, and no plan, sprint or ticket identifier appears in the changed source; the slack is the unused row_pattern_signature (families.py:499), and the operator_kind string fetch_sibling_family now composes (context.py:870, e.g. subject+position) replaces the closed taxonomy the docs prompt previously displayed.",
+    "goal_fidelity": "the landed definition is read by both named consumers (context.py:813 fetch_pattern_family, harmonize.py:343) and assemble_family's physical_base fallback is removed, so the primary goal lands; it stops short of the plan's one-definition-of-a-family because cli/sn.py:4170 and harmonize.py:472 still group parentless names by the pre-change rule.",
+    "reuse": "the added functions extend imas_codex/standard_names/families.py, the module that already owns family detection (families.py:210 detect_families), and context.py deletes its own _SIBLING_FAMILY_QUERY rather than adding a second resolver; a search by capability over imas_codex found no other owner of a grammar-segment-signature family lookup (the nearest, audits._ir_physical_quantity_signature, is a different projection), so the only duplication is the invariant tuple repeated inside the file's own two Cypher strings (finding at families.py:438).",
+    "scope_discipline": "every changed code and test path is inside the manifest's declared write paths; the family-census figure (docs/figures/sn-catalog-grouping/scg-pattern-families/family-census.svg) is declared only in the manifest's orientation_write_paths and not in the brief's prose write scope, and no plan meta line is edited."
+  },
+  "node": "review-of-scg-pattern-families",
+  "project": "imas-codex",
+  "raw_text": "VERDICT-note: the emission below is the review record.\nVERDICT goal: the goal is a grammar-based pattern-family definition owned by families.py and read by fetch_sibling_family and assemble_family, retiring assemble_family's physical_base fallback while keeping the family-eligible HAS_PARENT route for operator-derived children; families.py:411/504 now define it, context.py:813 and harmonize.py:343 read it, and the physical_base fallback is gone (harmonize.py:343). Achievement is partial on the plan's one-definition-of-a-family statement, since cli/sn.py:4170 and harmonize.py:472 still group the old way.\nVERDICT done_when: the done_when names a fixture-graph test resolving the 17 flux_surface_averaged_<species>_density_at_plasma_boundary names to one family of 17, a lone name to a family of one, the family-of-17 test failing when the lookup reverts to the HAS_PARENT route, and a bounded live census recorded beside the HAS_PARENT count; tests/standard_names/test_pattern_families.py:206 asserts the 17 cohort and :229 the family of one, the negative control logs/negative-control.log shows 10 failed / 6 passed EXIT=1 with test_species_cohort_resolves_to_one_family_of_seventeen among the ids, and the census table (171 pattern families >=3, 2643 members, 220 HAS_PARENT families, 7 HAS_PARENT-only) with queries, row-set predicates and elapsed times is in the fragment.\nVERDICT write_paths: the manifest declares families.py, context.py, harmonize.py, four of the six named test files, the evidence fragment and docs/figures/... in its own orientation_write_paths; git show --name-only lists exactly those files and nothing else, all inside the node-declared scope.\nVERDICT manifest: read; it records status complete, commits 58ad9b1a4 and 38f0a7336, gate base 81 passed and after 97 passed EXIT=0 with log paths, the negative-control log and its 10 failed / 6 passed result, and the live census numbers (171/2643/220/7).\nVERDICT diff: read commit by commit against base c7b4c626e21cc93a2fc9cfefe200ef066b800829; 58ad9b1a4 adds the pattern-family API to families.py and rewrites the two consumers, and 38f0a7336 adds the evidence fragment and figure; three existing test files are rewritten and test_pattern_families.py is added, and nothing outside the declared files moves.\nCALL_SITES: imas_codex/standard_names/workers.py:_enrich_for_docs_gen, imas_codex/standard_names/workers.py:_bounded_docs_escalation_factory, imas_codex/cli/sn.py:sn_status, imas_codex/cli/sn.py:sn_review\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the landed definition is read by both named consumers (context.py:813 fetch_pattern_family, harmonize.py:343) and assemble_family's physical_base fallback is removed, so the primary goal lands; it stops short of the plan's one-definition-of-a-family because cli/sn.py:4170 and harmonize.py:472 still group parentless names by the pre-change rule.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate files record 81 passed at base (logs/gate-base.log) and 97 passed at the change (logs/gate-after.log), both EXIT=0, the negative control reddens the family-of-17 case (logs/negative-control.log, 10 failed EXIT=1), and the live census with queries, row-set predicates and elapsed times is recorded in docs/evidence/fragments/sn-catalog-grouping/scg-pattern-families.html; the residual gap is that the real Cypher predicate is property-checked (tests/graph/test_cypher_property_check.py) but not executed.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed code and test path is inside the manifest's declared write paths; the family-census figure (docs/figures/sn-catalog-grouping/scg-pattern-families/family-census.svg) is declared only in the manifest's orientation_write_paths and not in the brief's prose write scope, and no plan meta line is edited.\nSCORE durability: 14\nJUSTIFICATION durability: the family-of-17 test fails when the family lookup reverts to the HAS_PARENT route (logs/negative-control.log, 10 failed EXIT=1), but the fixture re-implements the grouping in Python via pattern_signature (tests/standard_names/test_pattern_families.py:45) and dispatches on the query text, so the Cypher WHERE predicates inside _PATTERN_FAMILY_MEMBERS_QUERY are never executed: a mutation of one equality clause reddens no test (finding at families.py:438).\nSCORE fit: 17\nJUSTIFICATION fit: the additions sit in families.py beside the module's existing family-detection code (families.py:210 detect_families) and follow its dataclass and module-constant style, the new test file is named for what it tests, and no plan, sprint or ticket identifier appears in the changed source; the slack is the unused row_pattern_signature (families.py:499), and the operator_kind string fetch_sibling_family now composes (context.py:870, e.g. subject+position) replaces the closed taxonomy the docs prompt previously displayed.\nSCORE reuse: 17\nJUSTIFICATION reuse: the added functions extend imas_codex/standard_names/families.py, the module that already owns family detection (families.py:210 detect_families), and context.py deletes its own _SIBLING_FAMILY_QUERY rather than adding a second resolver; a search by capability over imas_codex found no other owner of a grammar-segment-signature family lookup, so the only duplication is the invariant tuple repeated inside the file's own two Cypher strings (finding at families.py:438).\nFINDING imas_codex/standard_names/families.py:438 follow-on: the invariant segment set is encoded twice in the file and nothing binds the two: PATTERN_INVARIANT_SEGMENTS (families.py:411) is what pattern_signature consumes, while _PATTERN_FAMILY_MEMBERS_QUERY (families.py:438) and _PATTERN_FAMILY_CENSUS_QUERY (families.py:469) hard-code the same four columns, so adding or renaming an invariant segment leaves both live queries grouping on the old tuple and no test reddens.\nFINDING tests/standard_names/test_pattern_families.py:60 follow-on: the fixture _PatternGraph.query dispatches on the query text and re-computes membership with the module's own pattern_signature, so the landed change's Cypher WHERE clauses are never executed by any test; the negative control catches only a whole-route swap, and a mutation of one equality clause leaves all 16 tests green.\nFINDING imas_codex/standard_names/context.py:828 follow-on: parent_name is the seed's physical_base value and is returned verbatim as parent.name (context.py:913) even when no StandardName carries that id, so the docs prompt is handed a base-quantity name that may not exist with an empty description; the old HAS_PARENT route always named a real parent node.\nFINDING imas_codex/standard_names/harmonize.py:472 follow-on: assemble_family now returns grouping pattern (harmonize.py:343), but build_worklist(include_parentless=True) still groups parentless names by physical_base and emits grouping physical_base (harmonize.py:472-524), so the module carries two parentless-family definitions and the plan's one-definition-of-a-family statement is only partly satisfied.\nFINDING imas_codex/cli/sn.py:4170 follow-on: the Sibling Families count and the gate that decides whether to call build_worklist run an inline HAS_PARENT query, so the harmonize command still reports the pre-change family definition and disagrees with the pattern family the docs prompt and assemble_family now use.\nFINDING imas_codex/standard_names/families.py:499 follow-on: row_pattern_signature is defined and referenced nowhere in the repository, dead code added with the change.",
+  "review_run_id": "r-20261012T154142558289-review-of-scg-pattern-families",
+  "reviewed_base_sha": "c7b4c626e21cc93a2fc9cfefe200ef066b800829",
+  "reviewed_head_sha": "38f0a7336ce3b86ab37ebf5cb353a00363c32274",
+  "reviewed_run_id": "r-20261012T145546045101-scg-pattern-families",
+  "reviewer_run_id": "r-20261012T154142558289-review-of-scg-pattern-families",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145546045101-scg-pattern-families/logs/gate-base.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145546045101-scg-pattern-families/logs/gate-after.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145546045101-scg-pattern-families/logs/negative-control.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:56:00.000000+00:00",
+  "total": 102
+}
