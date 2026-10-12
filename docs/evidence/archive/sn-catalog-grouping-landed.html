@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-catalog-grouping-landed">
+  <meta name="plan-title" content="Group Names By What They Share, Not By Where They Came From — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Group Names By What They Share, Not By Where They Came From: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="sn-catalog-grouping">
+  <meta name="plan-verdict" content="qualified">
+  <title>Group Names By What They Share, Not By Where They Came From — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Group Names By What They Share, Not By Where They Came From — landed record</h1>
+  <p>Closure synthesis for Group Names By What They Share, Not By Where They Came From: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2">
+    <h2>§2 — pattern families from the grammar</h2>
+    <p>Three nodes, merged together at <code>26fc2e150</code>. Pattern families (<code>58ad9b1a4</code>, <code>38f0a7336</code>) built the family from the grammar's segment columns in <code>imas_codex/standard_names/families.py</code> and pointed <code>fetch_sibling_family</code> and <code>assemble_family</code> at it; its brief made every locus, and the empty locus, a variation axis, which regrouped <code>radial_coordinate_of_&lt;owner&gt;</code> across 34 distinct objects into one documentation cohort, the grouping <code>f2d15655b</code> had removed in August (review 102/120, recorded as a malformed node). The family-definition node (<code>5c666533b</code>, <code>17f084e2d</code>) holds the object segment invariant while position, geometry and region vary, derives the query's invariant columns from one constant, retires the phantom parent and the <code>physical_base</code> worklist grouping, and deletes dead code (review 94/120, no added failures; the entity-owner tests fail under the mutation). Retiring the phantom parent left three docs prompts reading <code>sibling_family.parent.name</code> unguarded; the family-prompts node (<code>aea797386</code>) guards them, and removing a guard makes the parentless render raise (review 114/120). Live census: 180 pattern families of three or more members over 2,198 names (171 over 2,643 before the entity rule), against 220 <code>HAS_PARENT</code> families; 7 families only the retained <code>HAS_PARENT</code> route produces, all differing in a transformation. The 17 boundary-averaged species densities resolve to one family of 17. Follow-ons for a cleanup node: the members-query test compares the query with the constant it is generated from; the <code>fetch_sibling_family</code> docstring states the old rule; <code>build_worklist</code> restates the invariant projection; <code>fetch_sibling_family</code> still breaks anchor ties by description length where <code>harmonize.select_anchor</code> breaks them by id. The inline <code>HAS_PARENT</code> count in <code>cli/sn.py</code> belongs to the harmonize command.</p>
+  </section>
+
+</main>
+</body>
+</html>
