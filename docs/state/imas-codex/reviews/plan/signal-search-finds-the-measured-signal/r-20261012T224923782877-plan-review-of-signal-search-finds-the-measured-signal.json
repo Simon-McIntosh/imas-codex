@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T22:59:00.592Z",
+  "dispatched_at": "2026-10-12T22:49:38Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-search-finds-the-measured-signal.html:316",
+      "id": "done_when-1",
+      "reason": "the ship-on/off decision is the node's whole deliverable; without a repeat or a stated margin it can be taken on a coin flip, sending the rerank into the product or leaving it out for a reason that is not the one the section asserts.",
+      "text": "\u00a77's done-when decides \"the switch ships on only if the role-aware rerank beats fusion alone on both mean nDCG@10 and grade-3 precision@5\" from one scoring pass, while \u00a77 says at line 307 that \"its order varies between runs\" and the harness scores each arm once (tests/llm/test_signal_search_goldens.py:340 `score_arm` loops the questions once, no repeat), so a margin of the size \u00a71 reports (rerank nDCG 0.695\u20130.697 vs fusion 0.686) can fall either way on run noise \u2014 the gate can pass or fail on variance rather than on the rerank earning its place.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-search-finds-the-measured-signal.html:311",
+      "id": "single_goal-1",
+      "reason": "the two deliverables close on different verdicts \u2014 the product change on whether it is correct and installed, the measurement on whether it is trusted \u2014 so a node that carries both cannot be closed on one, and a worker must decide which half a blocked verdict applies to.",
+      "text": "\u00a77 says \"the second scores the arms and decides the switch\", but that same node also lands shipped product code that \u00a77's first paragraph adds (the signal state builder at line 293, the role-aware question \"moved into the product beside `_RERANK_QUESTION`\" at line 313, and the `_search_signals` rerank routing at line 292), so one node carries both a product change reviewable in its own right and a measurement whose outcome may be \"ships off\" with no product change at all.",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "2024f1441f638ede5698c892fa2a1dee983508601b42da1822b84b200ae89f37",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 27,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T224923782877-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "724bdbb327385a779f995a5264cdbe023b459f62",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `rerank_candidates` (imas_codex/llm/search_tools.py:171), `_RERANK_QUESTION` (:84), `_search_signals` (:272), the `facility-discovery` service and `discovery-relevance` seat (search_tools.py:82, pyproject.toml:432), the server-mode switch (`imas_codex/llm/server.py:1882`, `_rerank_dd_paths = not (self.read_only or self.dd_only)`) and the harness's role question (tests/llm/test_signal_search_goldens.py:61) all resolve; \u00a77 carries no href.",
+    "done_when": "a finding \u2014 \u00a77 decides the switch on a single pass of a comparison \u00a77 itself calls run-variable, with no repeat, margin or control that could fail.",
+    "evidence_paths": "pass \u2014 \u00a77 names a durable fragment path, `docs/evidence/fragments/signal-search-finds-the-measured-signal/rerank.html`, under the existing fragments tree, not a scratchpad.",
+    "naming": "pass \u2014 \u00a77 introduces no symbol, and the names it points at carry no plan label, stage name, ticket or version.",
+    "reasoning": "pass \u2014 the root cause (the prototype's rerank losses were unlabelled relevant signals, so pooled labels settle it) matches \u00a71's evidence; the mechanism (route `_search_signals` through the shared `rerank_candidates`, on the `discovery-relevance` seat, gated exactly as the DD-path rerank) can produce the done-when; and the caller is named (`_search_signals`, imas_codex/llm/search_tools.py:272), with the switch anchored to the real gate at server.py:1882.",
+    "single_goal": "a finding \u2014 \u00a77's second node carries the shipped product change (signal state builder, role question into the product, `_search_signals` routing) together with the measurement and the switch decision, so one verdict cannot close it.",
+    "wiring": "pass \u2014 \u00a77's declared order \"\u00a77 follows \u00a74\", its reliance on \u00a73's fixture and harness, and its hand-off of the rerank arms from \u00a73 line 156 all match the followup `f-ssfms-001` and \u00a73's own text; no missing or mispointed edge."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "21cb67ae2f717525df04e4e4da39715e179eedb4bf5d77aee908cf4919b8264d",
+    "s4": "ff798997815d5f566c82571e887c792ba4db14c9b54cd6306c43a26e35044551",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "e56de48730e8605cf8ccde51dacd2fdcb9db5f40a64b44d52c15044083b7ab87",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T23:00:41.019255+00:00"
+}
