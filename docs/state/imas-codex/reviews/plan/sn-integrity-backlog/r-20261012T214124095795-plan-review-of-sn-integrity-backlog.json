@@ -1,0 +1,145 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T21:47:18.358Z",
+  "dispatched_at": "2026-10-12T21:41:37Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:49",
+      "id": "reasoning-1",
+      "reason": "\u00a71 is the argument for work ordering, and a reader or coordinator taking it at face value would expect four sanctioned-surface repairs and a live restore defect that \u00a77/\u00a79 have already disposed of.",
+      "text": "\u00a71 asserts as present fact that \"four sanctioned paths refuse an orphaned identity's state\" and \"the restore command can re-arm the origin value that caused a deletion\", but \u00a77 (line 125) records only three holes remaining with the fourth closed by --skip-global-maintenance, and \u00a79 is status done (landed, test-pinned, merge 02e45ea33) for the restore re-arm \u2014 the rationale paragraph overstates by one hole and names one already-fixed defect",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:201",
+      "id": "reasoning-2",
+      "reason": "a worker that raises a slow test's timeout satisfies the paragraph and fails the done-when, spending the node's budget on a path the gate rejects.",
+      "text": "\u00a726's mechanism says \"Raise the per-file timeout only for what remains, and state the remaining cost\", while its done-when requires every test under 10 seconds, a third of the 30-second bound \u2014 the escape the mechanism offers for a test that stays slow is exactly what the measure forbids, so following the mechanism cannot satisfy the gate",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:205",
+      "id": "evidence_paths-1",
+      "reason": "a later reader cannot open \"the fragment\", and the plan's own convention (\u00a715, \u00a719, \u00a721) names each fragment's file under docs/evidence/fragments/sn-integrity-backlog/.",
+      "text": "\u00a727's done-when requires \"the fragment\" to record each test's setup error from a tracebacks run, but names no path.",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:201",
+      "id": "done_when-1",
+      "reason": "the duration measure is self-falsifying \u2014 the unfixed file's 17\u201325 s per test already exceeds the 10 s gate \u2014 so no separate control is needed to make the node able to fail.",
+      "text": "\u00a726 declares no negative control that the per-test bound fires (unlike the \"fails with the fix reverted\" controls of \u00a77\u2013\u00a718).",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "567b037ba23ad6e884e5bafe63cea7ded518c056cb68d83f3a60d18b597707a2",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 61,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T21:48:25.157064+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-12T21:48:27.851462+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "evidence_paths-1",
+      "reason": "",
+      "when": "2026-10-12T21:48:30.293541+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "the duration bound is self-falsifying: the unfixed file's 17 to 25 second tests already exceed the 10 second gate, so the node can fail without a separate control",
+      "when": "2026-10-12T21:48:32.837178+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the duration bound is self-falsifying: the unfixed file's 17 to 25 second tests already exceed the 10 second gate, so the node can fail without a separate control",
+      "when": "2026-10-12T21:48:32.837178+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T21:48:30.293541+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T21:48:25.157064+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T21:48:27.851462+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v61.json",
+  "review_run_id": "r-20261012T214124095795-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "bc21017da116113a9657823537c3dbd137700172",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 tests/standard_names/test_review_release.py and test_sn_approve_tag.py resolve, TestResolveTagRemote holds exactly the 2 tests \u00a727 counts, the repository's 30-second bound is real (pyproject timeout=30), \u00a724's landed evidence states \"12 in test_review_release.py\", and \u00a75's `sn review --target groups` and `sn harmonize` anchors both resolve.",
+    "done_when": "a finding \u2014 \u00a726 names no declared negative control, though its per-test duration bound is itself falsified by the unfixed code (17\u201325 s > 10 s).",
+    "evidence_paths": "a finding \u2014 \u00a727's done-when says \"the fragment records each test's setup error\" and \u00a726's done-when requires a `pytest --durations=0` record, yet neither names a durable path, unlike \u00a715's compose-supersede-dual-bound.html and \u00a719's unsourced-ancestry-census.html.",
+    "naming": "pass \u2014 no plan label, ticket number or version tag reaches a symbol, filename or comment in the reviewed units.",
+    "reasoning": "findings \u2014 \u00a71 states two defects as current that the plan's own \u00a77 and \u00a79 record as fixed; and \u00a726's stated mechanism cannot produce its own done-when.",
+    "single_goal": "pass \u2014 \u00a726 carries one deliverable (fit test_review_release.py to its per-test bound) and \u00a727 one (settle and repair the approval tests' setup errors), each closable on a single verdict.",
+    "wiring": "pass \u2014 \u00a726's premise derives from \u00a724's landed head run and \u00a727 stands alone; no dependency among the reviewed units is missing, and neither declares a relationship pointing at the wrong node."
+  },
+  "section_digests": {
+    "_document": "14c783ce529018cd0e3b6953270d2fb19a5047d79fe9e75ede9beef31a3dd27b",
+    "s1": "571d1542955f1382d7e0f47b5f8def69e8d4201f948c3933a15fd1cc2c98e7f8",
+    "s10": "84c8bdeb15133e22cd2f08ee96d429ac3f92f85d28d6720d5e2fd0a87a97cbf2",
+    "s11": "499a319e38a73614c326b3607a7d1cae481dac12714fad0562ffe74a78694c89",
+    "s12": "62e459e2a7b4232b44e54b32969fb970620d613ef8797e09b993d36d4b44d757",
+    "s13": "80e90ea7c45053ae6c5de9d69ac1ef80a87289bb80c7afb2f796f3c31b3235d7",
+    "s14": "4981171151a50aafb83f844e0ad63c7df82749d58b56d7fb8590f5ee8cccfb9b",
+    "s15": "0e2bcb71a7aac4d1ddeae8e3a5959c43e1f3e90ae3ea89c3ca3b16303b3f87b2",
+    "s16": "0ea017c6ac78ad295a75878f5d17514576fb4cc4c0b96f3acbde1adf6dbce703",
+    "s17": "32359142ba3b6f1263abefa9f37711fbc5fdefe9548620b20287985e5858d673",
+    "s18": "c6a5bf0492c322e4f1c9ebe6e0e4b880f6312ab30ec62992d8c786d321fa2d82",
+    "s19": "f735f604bc9a9d5ff1664a38976a03f6a4ede1a90baa42b16f38af66702d3c4b",
+    "s2": "af2703cbe346dcd322398505bfee69c50a6bcd1238937227f17cdb6c5fc75c58",
+    "s20": "805e801ca7a749b7317a6427d250b1a67bead66a292735383165c6e4e1877825",
+    "s21": "47e390d3695f9b02e65881501ddd52ecd87022d600dc4e915c6d282fa6da35bd",
+    "s22": "ba8506427fb29722b2940dcd76473585cc4f09fe8f4baa48ecff9fa7a723597a",
+    "s23": "44670189f5cafaaefa0ad448ffffd16b3b33a1cc017a2be6b72d08a2a911b48a",
+    "s24": "9c7844d14a2768bfd77971a05dac1d799cff7466e3e9f6802dd0336fadc6fee1",
+    "s25": "40eced7f771252fb9ab48c78df7b98f91a7c1d3300462bc4ecae8c5d4ccc9908",
+    "s26": "6769536c3defe11c3e6dbe920a1e7f8338f6bdfdcf97fe9788ebc29001da610d",
+    "s27": "fbd1b436a4bea9158bdd2959668cdcf0d13ad8cd1e2249469a0e3ec9dc346fd4",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s6": "e6bf01013b7bd341cf2f86ebf24dc60084ea8cabeb4cf4cd2664c1109ac5ca62",
+    "s7": "1930b98dfc66a2e1f9a1ce5149fbb73fe208b66c3e0c35664330a12e7e945933",
+    "s8": "6b362f87f941f8c95d562c95cdf93e578892ff32c85156fd5565c76548c58eab",
+    "s9": "20748220a6f94f6c422b1b677587d4456ccf3be5fbe204daac414373443327bd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:48:20.398853+00:00"
+}
