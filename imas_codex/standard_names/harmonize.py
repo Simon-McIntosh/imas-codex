@@ -21,11 +21,13 @@ from typing import Any
 
 from imas_codex.graph.models import NameStage
 from imas_codex.standard_names.context import DOCUMENTATION_FAMILY_OPERATOR_KINDS
+
+# The family-enumeration query is owned by families.py; re-exported so the
+# worklist test can compare the query build_worklist issues against it.
 from imas_codex.standard_names.families import (
     DOCS_STAGE_ACCEPTED,
-    PATTERN_INVARIANT_SEGMENTS,
-    _invariant_equality,
-    _invariant_projection,
+    _pattern_family_rows_query as _pattern_family_rows_query,
+    fetch_pattern_families,
     fetch_pattern_family,
     select_anchor,
 )
@@ -464,125 +466,6 @@ def build_worklist(
         _close_if_owned(resolved_gc, own_gc)
 
 
-def _family_member_collect() -> str:
-    """Cypher collecting one family's member rows with the report columns.
-
-    The documentation columns drive anchor selection and drift; the lint
-    columns (unit, COCOS type, physics domain, position, links, link status)
-    are what the review lint reads, so the report hands it rows it can score
-    without a second read.
-    """
-    return """collect({
-        id: m.id,
-        description: m.description,
-        documentation: m.documentation,
-        docs_stage: m.docs_stage,
-        reviewer_score_docs: m.reviewer_score_docs,
-        harmonized_group_signature: m.harmonized_group_signature,
-        unit: m.unit,
-        cocos_transformation_type: m.cocos_transformation_type,
-        physics_domain: m.physics_domain,
-        position: m.position,
-        links: m.links,
-        link_status: m.link_status
-    }) AS members"""
-
-
-def _pattern_family_rows_query(*, seeded: bool, node_filter: str) -> str:
-    """Cypher enumerating pattern families, keyed on the invariant segments.
-
-    *seeded* groups only the families that contain one of ``$seeds`` (two
-    hops: the seeds' signatures, then every live name sharing one). Otherwise
-    every live family is grouped. *node_filter* is an extra predicate on the
-    member alias ``m``, so a caller narrows the population without restating
-    the grouping — the fragment that used to be a second definition of a
-    family in this module.
-    """
-    segments = ", ".join(PATTERN_INVARIANT_SEGMENTS)
-    projection = _invariant_projection("m")
-    collect = _family_member_collect()
-    extra = f"\n  AND {node_filter}" if node_filter else ""
-    if seeded:
-        seed_projection = _invariant_projection("seed")
-        equality = _invariant_equality("m")
-        return f"""
-MATCH (seed:StandardName)
-WHERE seed.id IN $seeds AND coalesce(seed.name_stage, '') <> $superseded
-WITH DISTINCT
-{seed_projection}
-MATCH (m:StandardName)
-WHERE coalesce(m.name_stage, '') <> $superseded
-  AND {equality}{extra}
-WITH
-{projection},
-     {collect}
-RETURN {segments}, members
-"""
-    return f"""
-MATCH (m:StandardName)
-WHERE coalesce(m.name_stage, '') <> $superseded{extra}
-WITH
-{projection},
-     {collect}
-RETURN {segments}, members
-"""
-
-
-def fetch_pattern_families(
-    gc: Any | None = None,
-    *,
-    seeds: list[str] | None = None,
-    node_filter: str = "",
-    min_size: int = 1,
-) -> list[dict[str, Any]]:
-    """Enumerate live pattern families grouped by invariant grammar signature.
-
-    The one family-enumeration mechanism in this module. Pass *seeds* to keep
-    only the families containing at least one seed id; ``None`` enumerates
-    every live family with at least *min_size* members. *node_filter* is an
-    extra predicate on the member alias, so a caller selects a population
-    without restating the grouping.
-
-    Returns one dict per family: ``invariant`` (the tuple of invariant
-    segment values), ``physical_base``, ``members`` (member rows carrying the
-    documentation and lint columns) and ``n``. Read-only: it never writes.
-    """
-    if seeds is not None and not seeds:
-        return []
-    resolved_gc, own_gc = _resolve_gc(gc)
-    try:
-        rows = (
-            resolved_gc.query(
-                _pattern_family_rows_query(
-                    seeded=seeds is not None, node_filter=node_filter
-                ),
-                seeds=sorted(set(seeds or [])),
-                superseded=NameStage.superseded.value,
-            )
-            or []
-        )
-    finally:
-        _close_if_owned(resolved_gc, own_gc)
-
-    families: list[dict[str, Any]] = []
-    for row in rows:
-        members = [dict(m) for m in (row.get("members") or [])]
-        if len(members) < min_size:
-            continue
-        families.append(
-            {
-                "invariant": tuple(
-                    row.get(seg) or "" for seg in PATTERN_INVARIANT_SEGMENTS
-                ),
-                "physical_base": row.get("physical_base") or "",
-                "members": members,
-                "n": len(members),
-            }
-        )
-    families.sort(key=lambda f: (f["physical_base"], f["invariant"]))
-    return families
-
-
 def concept_member_ids(concept: str, gc: Any | None = None) -> list[str]:
     """Live standard-name ids whose grammar selects registry concept *concept*."""
     from imas_standard_names.grammar.terms import load_conventions, select_conventions
@@ -618,6 +501,24 @@ def concept_member_ids(concept: str, gc: Any | None = None) -> list[str]:
     return sorted(selected)
 
 
+#: Prefix of the lexical lint's cross-name finding ids. A position-form
+#: conflict is a property of a physics domain's names as a set, not of any one
+#: name, so ``run_lexical_lint`` keys it on ``[domain:<d>]`` — an id that
+#: matches no member and must be attributed to the families in that domain.
+_DOMAIN_FINDING_PREFIX = "[domain:"
+
+
+def _domain_scoped_finding(name_id: str) -> str | None:
+    """The physics domain of a domain-scoped finding id, or ``None``.
+
+    Returns ``None`` for an ordinary per-name finding id, which the report
+    attributes by member id as before.
+    """
+    if name_id.startswith(_DOMAIN_FINDING_PREFIX) and name_id.endswith("]"):
+        return name_id[len(_DOMAIN_FINDING_PREFIX) : -1]
+    return None
+
+
 def report_family_rows(
     gc: Any | None = None,
     *,
@@ -633,7 +534,17 @@ def report_family_rows(
     :func:`~imas_codex.standard_names.review.audits.run_link_integrity` — the
     report never calls ``run_all_audits``, whose embedding preflight writes.
     Nothing here writes to the graph.
+
+    A lint finding scoped to a physics domain rather than to one name — the
+    lexical lint's cross-name position-form findings carry the synthetic id
+    ``[domain:<d>]`` — matches no member id, so it is attributed here to the
+    families in scope whose members belong to that domain (row key
+    ``domain_lint``). The scope total counts each distinct finding exactly
+    once: a domain finding belongs to every qualifying family row but is
+    counted in the scope total at the first family in report order, so summing
+    the rows' ``lint_total`` is the number of distinct findings.
     """
+    from imas_codex.standard_names.domain_priority import domain_key
     from imas_codex.standard_names.review.audits import (
         run_link_integrity,
         run_lint_checks,
@@ -643,7 +554,14 @@ def report_family_rows(
     in_scope = [member for family in families for member in family["members"]]
 
     by_name: dict[str, dict[str, int]] = {}
+    # (domain, class) → count, one entry per domain-scoped finding.
+    by_domain: dict[tuple[str, str], int] = {}
     for finding in run_lint_checks(in_scope):
+        domain = _domain_scoped_finding(finding.name_id)
+        if domain is not None:
+            key = (domain, f"domain_{finding.finding_type}")
+            by_domain[key] = by_domain.get(key, 0) + 1
+            continue
         counts = by_name.setdefault(finding.name_id, {})
         counts[finding.finding_type] = counts.get(finding.finding_type, 0) + 1
     for link_finding in run_link_integrity(in_scope):
@@ -652,12 +570,22 @@ def report_family_rows(
         counts[key] = counts.get(key, 0) + 1
 
     rows: list[dict[str, Any]] = []
+    family_domains: list[set[str]] = []
     for family in families:
         members = family["members"]
+        domains = {
+            domain_key(m.get("physics_domain"), fallback="") for m in members
+        } - {""}
         lint: dict[str, int] = {}
         for member in members:
             for finding_class, count in by_name.get(member.get("id"), {}).items():
                 lint[finding_class] = lint.get(finding_class, 0) + count
+        domain_lint = {
+            finding_class: count
+            for (domain, finding_class), count in by_domain.items()
+            if domain in domains
+        }
+        family_domains.append(domains)
         rows.append(
             {
                 "physical_base": family["physical_base"],
@@ -667,10 +595,39 @@ def report_family_rows(
                 "anchor": select_anchor(None, None, None, members),
                 "drift": drift(members),
                 "lint": dict(sorted(lint.items())),
+                "domain_lint": dict(sorted(domain_lint.items())),
                 "lint_total": sum(lint.values()),
             }
         )
-    rows.sort(key=lambda r: (-r["drift"], -r["n"], r["physical_base"]))
+
+    order = sorted(
+        range(len(rows)),
+        key=lambda i: (
+            -rows[i]["drift"],
+            -rows[i]["n"],
+            rows[i]["physical_base"],
+        ),
+    )
+    rows = [rows[i] for i in order]
+    order_domains = [family_domains[i] for i in order]
+
+    # Count each domain finding once: at the first family in report order that
+    # belongs to its domain. Every finding of one domain lands at that family,
+    # so the summed total stays the number of distinct findings.
+    owner_of: dict[str, int] = {}
+    for idx, domains in enumerate(order_domains):
+        for domain in domains:
+            owner_of.setdefault(domain, idx)
+    for (domain, finding_class), count in sorted(by_domain.items()):
+        owner = owner_of.get(domain)
+        if owner is None:
+            continue
+        rows[owner]["lint"][finding_class] = (
+            rows[owner]["lint"].get(finding_class, 0) + count
+        )
+        rows[owner]["lint_total"] += count
+    for row in rows:
+        row["lint"] = dict(sorted(row["lint"].items()))
     return rows
 
 
@@ -782,7 +739,6 @@ __all__ = [
     "select_anchor",
     "assemble_family",
     "build_worklist",
-    "fetch_pattern_families",
     "concept_member_ids",
     "report_family_rows",
 ]

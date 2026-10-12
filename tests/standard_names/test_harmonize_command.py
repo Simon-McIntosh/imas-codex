@@ -127,9 +127,16 @@ def test_family_scope_reports_members_drift_anchor_and_total(
     assert len(rows) == 1
     family = rows[0]
     assert family["physical_base"] == "alpha_base"
-    assert family["n"] == len(_MEMBERS)
-    assert set(family["members"]) == {m["id"] for m in _MEMBERS}
-    assert family["drift"] == pytest.approx(1.0 - 1.0 / len(_MEMBERS))
+    # Written out independently of _MEMBERS: the report's enumeration over the
+    # fixture changes the answer, so a stubbed or dropped grouping fails here
+    # rather than moving both sides of the comparison together.
+    assert family["n"] == 3
+    assert set(family["members"]) == {
+        "alpha_base_at_boundary",
+        "alpha_base_at_axis",
+        "alpha_base_of_probe",
+    }
+    assert family["drift"] == pytest.approx(1.0 - 1.0 / 3)
     assert family["anchor"] is not None
 
 
@@ -164,7 +171,7 @@ def test_batch_scope_reports_the_roster_families(
     result = CliRunner().invoke(sn, ["harmonize", "--batch", str(roster), "--json"])
 
     assert result.exit_code == 0, result.output
-    assert _rows(result.output)[0]["n"] == len(_MEMBERS)
+    assert _rows(result.output)[0]["n"] == 3
 
 
 def test_all_scope_enumerates_every_family(monkeypatch: Any) -> None:
@@ -181,6 +188,72 @@ def test_all_scope_enumerates_every_family(monkeypatch: Any) -> None:
     assert result.exit_code == 0, result.output
     rows = _rows(result.output)
     assert {row["physical_base"] for row in rows} == {"alpha_base", "gamma_base"}
+
+
+def _domain_node(
+    node_id: str, base: str, *, domain: str, position: str
+) -> dict[str, Any]:
+    """A minimal member whose domain carries one axis-ambiguous position form."""
+    node = dict(_MEMBERS[0])
+    node.update(
+        {
+            "id": node_id,
+            "physical_base": base,
+            "description": f"Docs for {node_id}.",
+            "documentation": f"Documentation for {node_id}.",
+            "physics_domain": domain,
+            "position": position,
+        }
+    )
+    return node
+
+
+def test_domain_scoped_finding_is_attributed_and_counted_once(
+    monkeypatch: Any,
+) -> None:
+    """A cross-name domain finding reaches the family rows, counted once.
+
+    The lexical lint keys a mixed-position-form finding on ``[domain:<d>]``
+    (no member), observed across two families that share physics domain
+    ``equilibrium``. Each family row carries it in ``domain_lint``; the scope
+    total counts the one distinct finding once, so summing the rows agrees.
+    """
+    from imas_codex.cli.sn import sn
+
+    _install(
+        monkeypatch,
+        [
+            _domain_node(
+                "alpha_base_at_magnetic_axis",
+                "alpha_base",
+                domain="equilibrium",
+                position="at_magnetic_axis",
+            ),
+            _domain_node(
+                "beta_base_on_axis",
+                "beta_base",
+                domain="equilibrium",
+                position="on_axis",
+            ),
+        ],
+    )
+
+    result = CliRunner().invoke(sn, ["harmonize", "--all", "--json"])
+
+    assert result.exit_code == 0, result.output
+    rows = _rows(result.output)
+    assert {row["physical_base"] for row in rows} == {"alpha_base", "beta_base"}
+    # The synthetic-id finding matches no member, so it is attributed to every
+    # family whose members belong to the domain.
+    assert [row["domain_lint"].get("domain_convention_violation") for row in rows] == [
+        1,
+        1,
+    ]
+    # ...and counted in the scope total exactly once.
+    assert sum(row["lint"].get("domain_convention_violation", 0) for row in rows) == 1
+    assert [row["lint_total"] for row in rows] == [
+        sum(row["lint"].values()) for row in rows
+    ]
 
 
 def test_concept_scope_reports_its_families(monkeypatch: Any) -> None:
