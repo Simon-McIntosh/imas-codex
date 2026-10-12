@@ -33,6 +33,7 @@ Key design principle:
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import re
@@ -40,6 +41,7 @@ import subprocess
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -54,6 +56,7 @@ from imas_codex.discovery.base.supervision import (
     PipelinePhase,
     is_infrastructure_error,
 )
+from imas_codex.embeddings.description import embed_descriptions_batch
 from imas_codex.graph import GraphClient
 from imas_codex.graph.models import DataAccess, FacilitySignalStatus
 from imas_codex.graph.query_builder import render_chunk_source
@@ -1516,6 +1519,141 @@ def claim_signals_for_check(
         return []
 
 
+# Item keys the description writer consumes itself; every other key on an
+# item is a node property written in the same statement.
+_DESCRIPTION_WRITER_KEYS = frozenset(
+    {
+        "id",
+        "description",
+        "embed_text",
+        "embedding",
+        "embedded_at",
+        "embedded_text_hash",
+    }
+)
+
+
+def _default_embed_text(item: dict[str, Any]) -> str:
+    """Derive the text to embed for one item from its description."""
+    return item.get("description") or ""
+
+
+def write_signal_descriptions(
+    items: list[dict[str, Any]],
+    *,
+    embed_text: Callable[[dict[str, Any]], str] | None = None,
+    gc: GraphClient | None = None,
+    followers_of: str | None = None,
+    followers_status: str | None = None,
+    extra_params: dict[str, Any] | None = None,
+) -> int:
+    """The single writer for FacilitySignal descriptions.
+
+    Sets ``description`` together with its ``embedding``, ``embedded_at`` and
+    ``embedded_text_hash``, so a node's stored vector always describes the text
+    stored beside it. Every signal description rewrite in this package goes
+    through here: the enrichment and under-specification marks, the propagation
+    of a representative's text to its group, and the individualization pass.
+    Because the vector is written with the text, a description rewrite can no
+    longer leave a stale embedding behind.
+
+    ``embed_text`` derives the text to embed for one item. It defaults to the
+    item's ``description`` and is a parameter so the composition decision — the
+    description alone, or a composed ``name — description (unit)`` — is made in
+    one place and can change without editing a call site.
+
+    Any key on an item other than those the writer owns is written to the node
+    as well, so a caller that also updates ``name`` or ``enrichment_source``
+    writes them in the same statement instead of splitting one logical update
+    across two.
+
+    When ``followers_of`` names a source's representative, every item is written
+    to that source's members through ``MEMBER_OF`` rather than to a node named by
+    ``item.id`` — the shape propagation needs to reach a whole group in one
+    statement. ``followers_status``, when given, restricts that write to members
+    still in that status (propagation writes only still-``discovered`` members
+    and never the representative).
+
+    Args:
+        items: Dicts with ``id`` and ``description`` plus any extra properties.
+        embed_text: Callable deriving the embed text from an item.
+        gc: Optional shared GraphClient; one is opened when omitted.
+        followers_of: Representative id whose members receive the items.
+        followers_status: Status filter applied in followers mode.
+        extra_params: Additional named parameters bound into the statement, for
+            a caller whose statement contract carries the group's shared
+            enrichment values by name.
+
+    Returns:
+        Number of nodes written.
+    """
+    if not items:
+        return 0
+
+    derive = embed_text or _default_embed_text
+    payload: list[dict[str, Any]] = []
+    for item in items:
+        props = dict(item)
+        text = derive(props)
+        props["embed_text"] = text
+        props["embedded_text_hash"] = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        props.pop("embedding", None)
+        payload.append(props)
+
+    embed_descriptions_batch(payload, text_field="embed_text")
+
+    extra = sorted(set().union(*(set(p) for p in payload)) - _DESCRIPTION_WRITER_KEYS)
+    extra_clause = "".join(f",\n            s.{key} = item.{key}" for key in extra)
+
+    params: dict[str, Any] = {"items": payload}
+    if followers_of is None:
+        match = "MATCH (s:FacilitySignal {id: item.id})"
+        where = ""
+    else:
+        # A group is reached through its source's ``representative_id``, never
+        # through the representative's own member edge: a representative may
+        # belong to another source, and the member edge then misses the group it
+        # represents.
+        match = (
+            "MATCH (sg:SignalSource {representative_id: $rep_id})\n"
+            "        MATCH (s:FacilitySignal)-[:MEMBER_OF]->(sg)"
+        )
+        where = "\n        WHERE s.id <> $rep_id"
+        params["rep_id"] = followers_of
+        if followers_status is not None:
+            where += " AND s.status = $followers_status"
+            params["followers_status"] = followers_status
+    if extra_params:
+        params.update(extra_params)
+
+    statement = f"""
+        UNWIND $items AS item
+        {match}{where}
+        SET s.description = item.description,
+            s.embedding = item.embedding,
+            s.embedded_at = datetime(),
+            s.embedded_text_hash = item.embedded_text_hash{extra_clause}
+        RETURN count(s) AS updated
+    """
+
+    if gc is None:
+        with GraphClient() as client:
+            return _run_description_write(client, statement, params)
+    return _run_description_write(gc, statement, params)
+
+
+def _run_description_write(
+    gc: GraphClient,
+    statement: str,
+    params: dict[str, Any],
+) -> int:
+    """Execute one rendered description write and return the rows written."""
+    rows = gc.query(statement, **params)
+    if rows and isinstance(rows[0], dict) and "updated" in rows[0]:
+        return rows[0]["updated"]
+    return len(params["items"])
+
+
 def mark_signals_enriched(
     signals: list[dict],
     batch_cost: float = 0.0,
@@ -1551,13 +1689,19 @@ def mark_signals_enriched(
 
     try:
         with GraphClient() as gc:
+            write_signal_descriptions(
+                [
+                    {"id": sig["id"], "description": sig.get("description", "")}
+                    for sig in signals
+                ],
+                gc=gc,
+            )
             gc.query(
                 """
                 UNWIND $signals AS sig
                 MATCH (s:FacilitySignal {id: sig.id})
                 SET s.status = $enriched,
                     s.physics_domain = sig.physics_domain,
-                    s.description = sig.description,
                     s.name = sig.name,
                     s.diagnostic = coalesce(nullIf(sig.diagnostic, ''), s.diagnostic),
                     s.analysis_code = coalesce(nullIf(sig.analysis_code, ''), s.analysis_code),
@@ -1633,13 +1777,19 @@ def mark_signals_underspecified(
 
     try:
         with GraphClient() as gc:
+            write_signal_descriptions(
+                [
+                    {"id": sig["id"], "description": sig.get("description", "")}
+                    for sig in signals
+                ],
+                gc=gc,
+            )
             gc.query(
                 """
                 UNWIND $signals AS sig
                 MATCH (s:FacilitySignal {id: sig.id})
                 SET s.status = $status,
                     s.physics_domain = sig.physics_domain,
-                    s.description = sig.description,
                     s.name = sig.name,
                     s.diagnostic = coalesce(nullIf(sig.diagnostic, ''), s.diagnostic),
                     s.analysis_code = coalesce(nullIf(sig.analysis_code, ''), s.analysis_code),
@@ -2074,43 +2224,42 @@ def propagate_source_enrichment(
         # Cost per signal (representative + followers)
         per_signal_cost = batch_cost / (follower_count + 1) if batch_cost > 0 else 0.0
 
-        # Propagate enrichment: discovered → enriched
-        result = gc.query(
-            """
-            MATCH (sg:SignalSource {representative_id: $rep_id})
-            MATCH (s:FacilitySignal)-[:MEMBER_OF]->(sg)
-            WHERE s.id <> $rep_id
-              AND s.status = $discovered
-            SET s.status = $enriched,
-                s.physics_domain = $physics_domain,
-                s.description = $description,
-                s.name = $name,
-                s.diagnostic = coalesce(nullIf($diagnostic, ''), s.diagnostic),
-                s.analysis_code = coalesce(nullIf($analysis_code, ''), s.analysis_code),
-                s.keywords = $keywords,
-                s.sign_convention = coalesce(nullIf($sign_convention, ''), s.sign_convention),
-                s.context_quality = $context_quality,
-                s.llm_cost = $per_signal_cost,
-                s.enriched_at = datetime(),
-                s.claimed_at = null,
-                s.enrichment_source = 'signal_source_propagation'
-            RETURN count(s) AS updated
-            """,
-            rep_id=representative_id,
-            discovered=FacilitySignalStatus.discovered.value,
-            enriched=FacilitySignalStatus.enriched.value,
-            physics_domain=enrichment.get("physics_domain", ""),
-            description=enrichment.get("description", ""),
-            name=enrichment.get("name", ""),
-            diagnostic=enrichment.get("diagnostic", ""),
-            analysis_code=enrichment.get("analysis_code", ""),
-            keywords=enrichment.get("keywords", []),
-            sign_convention=enrichment.get("sign_convention", ""),
-            context_quality=enrichment.get("context_quality", ""),
-            per_signal_cost=per_signal_cost,
-        )
+        # Propagate enrichment: discovered → enriched. The description is
+        # written by the shared description writer so the followers receive the
+        # representative's text together with its embedding and text hash.
+        follower_props: dict[str, Any] = {
+            "id": representative_id,
+            "description": enrichment.get("description", ""),
+            "status": FacilitySignalStatus.enriched.value,
+            "physics_domain": enrichment.get("physics_domain", ""),
+            "name": enrichment.get("name", ""),
+            "keywords": enrichment.get("keywords", []),
+            "context_quality": enrichment.get("context_quality", ""),
+            "llm_cost": per_signal_cost,
+            "enriched_at": datetime.now(UTC),
+            "claimed_at": None,
+            "enrichment_source": "signal_source_propagation",
+        }
+        # A blank enrichment leaves the follower's existing value standing,
+        # matching the coalesce the statement used before the writer took over.
+        for key in ("diagnostic", "analysis_code", "sign_convention"):
+            value = enrichment.get(key, "")
+            if value:
+                follower_props[key] = value
 
-        updated = result[0]["updated"] if result else 0
+        updated = write_signal_descriptions(
+            [follower_props],
+            gc=gc,
+            followers_of=representative_id,
+            followers_status=FacilitySignalStatus.discovered.value,
+            extra_params={
+                "enriched": FacilitySignalStatus.enriched.value,
+                "description": enrichment.get("description", ""),
+                "name": enrichment.get("name", ""),
+                "physics_domain": enrichment.get("physics_domain", ""),
+                "keywords": enrichment.get("keywords", []),
+            },
+        )
 
         # Also create Diagnostic nodes for members
         if enrichment.get("diagnostic"):
@@ -5004,18 +5153,23 @@ async def individualize_source_descriptions(
                 enriched_members,
             )
 
-            # Update graph with individualized name + description
+            # Update graph with individualized name + description. The
+            # description goes through the shared writer so each member is
+            # re-embedded against its own text rather than keeping the vector
+            # of the representative's copy.
             if individualized:
                 with GraphClient() as gc:
-                    gc.query(
-                        """
-                        UNWIND $items AS item
-                        MATCH (s:FacilitySignal {id: item.id})
-                        SET s.name = item.name,
-                            s.description = item.description,
-                            s.enrichment_source = 'individualized'
-                        """,
-                        items=individualized,
+                    write_signal_descriptions(
+                        [
+                            {
+                                "id": item["id"],
+                                "name": item["name"],
+                                "description": item["description"],
+                                "enrichment_source": "individualized",
+                            }
+                            for item in individualized
+                        ],
+                        gc=gc,
                     )
                     # Mark source as individualized
                     gc.query(
