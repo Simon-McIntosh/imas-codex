@@ -141,6 +141,28 @@ def test_the_boundary_matcher_holds_a_term_to_whole_words():
     assert "efc" in "PSSCfst/refcurEF1".casefold()
 
 
+def test_a_term_reaches_across_a_digit_to_letter_turn():
+    """A digit-to-letter turn, and a capital run's hand-off, start a word."""
+    assert parallel.glossary_term_reaches("HiTe", "MMSYS/curCS1HiTe")
+    assert parallel.glossary_term_reaches("HiTe", "MMSYS/curEF2HiTe")
+    assert parallel.glossary_term_reaches("HiTe", "MMSYS/curLFPHiTe")
+    assert parallel.glossary_term_reaches("HiTe", "MMSYS/curUFPHiTe")
+    # An acronym written as capitals may open onto a following word.
+    assert parallel.glossary_term_reaches("UFP", "MMSYS/curUFPdisr")
+    assert parallel.glossary_term_reaches("LFP", "MMSYS/curLFPdisr")
+    # ... but a term inside a longer token is still refused, and so is a
+    # capitalised ordinary word that merely begins with the letters.
+    assert not parallel.glossary_term_reaches("LFP", "PSC/calFP1")
+    assert not parallel.glossary_term_reaches("EFC", "PSSCfst/refcurEF1")
+    assert not parallel.glossary_term_reaches("DR", "CRYOHRS/CDPT171")
+    assert not parallel.glossary_term_reaches(
+        "DR", "CryoHRS/cFT195 Cryo LP By-pass Pressure Drop Flow FE195"
+    )
+    # A digit inside a token's capital run does not start a word, so the DR of
+    # "radial displacement" keeps out of the dump-resistor glossary line.
+    assert not parallel.glossary_term_reaches("DR", "CryoMag/mC01DR")
+
+
 def test_a_source_is_swept_for_its_representative_not_its_member_edge():
     """A representative may itself be a member of a different source.
 
@@ -159,15 +181,11 @@ def test_a_source_is_swept_for_its_representative_not_its_member_edge():
 
         def query(self, cypher, **params):
             recorded.append(cypher)
-            return [
-                {"representative_id": "jt-60sa:general/cs1_temsnur11", "enrichment": {}}
-            ]
+            return [{"representative_id": "jt-60sa:general/cs1_temsnur11", "enrichment": {}}]
 
     with (
         patch.object(parallel, "GraphClient", StubGraph),
-        patch.object(
-            parallel, "propagate_source_enrichment", return_value=7
-        ) as propagate,
+        patch.object(parallel, "propagate_source_enrichment", return_value=7) as propagate,
     ):
         assert parallel.sweep_source_enrichment("jt-60sa") == 7
 

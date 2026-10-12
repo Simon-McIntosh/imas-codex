@@ -3754,14 +3754,20 @@ async def mdsplus_promote_worker(
 
 
 def glossary_term_reaches(term: str, text: str) -> bool:
-    """Whether ``term`` names a whole word of ``text``, case-insensitively.
+    """Whether ``term`` names a word of ``text``, case-insensitively.
 
-    A term reaches a signal only across word and camel-case boundaries: it
-    begins a word (start of text, after a non-alphanumeric, or at a
-    lower-case-to-upper-case turn) and does not run into a following lower-case
-    run. So ``EFC`` reaches ``refvcEFC1`` — after the camel turn — but not
-    ``refcurEF1``, where ``efc`` lies inside ``refcur``, and ``UFP`` reaches the
-    concatenated acronyms of ``curUFPLKAT``.
+    A term reaches a signal only across word and camel-case boundaries. It
+    begins a word at the start of the text, after a non-alphanumeric, at a
+    lower-case-to-upper-case turn, or where a capitalised word follows a
+    capital or a digit without a lower-case letter between them. So ``HiTe``
+    reaches ``curCS1HiTe`` across the digit, and ``curLFPHiTe`` where the
+    capital run hands off; a digit inside a token's capital run does not start a
+    word, so ``DR`` does not reach ``mC01DR``. A term written as capitals may
+    open onto a following word, so ``UFP`` reaches ``curUFPdisr``; a term not
+    written as capitals may not run into a following lower-case run, so ``EFC``
+    reaches ``refvcEFC1`` — across the camel turn — but not ``refcurEF1``, where
+    ``efc`` lies inside ``refcur``, and ``DR`` does not reach the ``Drop`` of a
+    pressure-drop description.
     """
     if not term:
         return False
@@ -3771,8 +3777,17 @@ def glossary_term_reaches(term: str, text: str) -> bool:
             start == 0
             or not text[start - 1].isalnum()
             or (text[start - 1].islower() and text[start].isupper())
+            or (
+                (text[start - 1].isupper() or text[start - 1].isdigit())
+                and text[start].isupper()
+                and text[start + 1 : start + 2].islower()
+            )
         )
-        ends_word = end == len(text) or not text[end].islower()
+        ends_word = (
+            end == len(text)
+            or not text[end].islower()
+            or (text[start:end].isupper() and text[end].islower() and term.isupper())
+        )
         if begins_word and ends_word:
             return True
     return False
