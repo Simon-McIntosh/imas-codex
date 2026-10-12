@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-judgment-evaluation-landed">
+  <meta name="plan-title" content="Measure Every Standard-Name Judgment Before It Moves To Jev — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Measure Every Standard-Name Judgment Before It Moves To Jev: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="sn-judgment-evaluation">
+  <meta name="plan-verdict" content="qualified">
+  <title>Measure Every Standard-Name Judgment Before It Moves To Jev — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Measure Every Standard-Name Judgment Before It Moves To Jev — landed record</h1>
+  <p>Closure synthesis for Measure Every Standard-Name Judgment Before It Moves To Jev: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2">
+    <h2>§2 — one decisions owner and the sn-judge seat landed</h2>
+    <p>Commits <code>428878833</code> (code) with <code>b4c509140</code>, <code>7b336be5e</code>, <code>b6038aa02</code> (evidence). <code>_call_judgment</code> is gone from <code>imas_codex/ids/candidates.py</code>; candidate answers come from <code>decide_one</code> in <code>imas_codex/discovery/base/judgment.py</code>, which raises <code>DecisionsValidationError</code> to its caller and returns <code>None</code> for any other transport fault, while <code>decide_batch</code> keeps its batch behaviour. Cost booking lives in one helper, <code>_book_cost</code>; neutering it turns both candidate spend assertions red (2 failed, exit 1). <code>[tool.imas-codex.sn-judge]</code> resolves through <code>get_model</code>; the seat names only the model. The source-text assertions in <code>tests/ids/test_candidates.py</code> and <code>tests/discovery/test_judgment.py</code> became behavioural, and the duplicated <code>_decisions_key</code> helper is one fixture. Independent review 96/120, no added failures. Recorded scope excess, required by the done-when: the seat registry in <code>imas_codex/settings.py</code> and the monkeypatch target in <code>tests/discovery/test_decisions_key_skip.py</code>. Follow-on: <code>decide_one</code> repeats <code>decide_batch</code>'s per-call fault classification rather than sharing one unit. Found on main, not caused here: <code>tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping</code> passes <code>no_activate</code> to a mapping CLI that does not take it.</p>
+  </section>
+
+</main>
+</body>
+</html>

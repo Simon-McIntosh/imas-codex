@@ -20,12 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
   <meta name="plan-blocks" content="sn-review-through-jev,sn-selection-over-generation,sn-catalog-grouping">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;done&quot;}">
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-10-12">
+<meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2">
 </head>
 <body>
   <main class="plan-doc">
@@ -98,7 +99,7 @@
     </p>
 
     <h2 id="s2">§2 — One decisions owner, and a seat for standard names</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       The 2026-10-12 code review of the discovery judgment neighbourhood (run
       <code>review-code-f64de2151701</code>) found the decisions-call contract owned twice.
@@ -339,6 +340,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T154012151828-review-of-sje-shadow-store" data-who="reckon-build" data-when="2026-10-12T15:50:19.761Z">
     <div class="r-comment-body"><p>review of sje-shadow-store: 96/120, one blocking finding (write_reviews drops the shadow fields) and four follow-ons, all carried into the sje-shadow-write companion node</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-12T15:55:00Z">
+    <div class="r-comment-body"><p>§2 landed: candidates route through <code>decide_one</code> in the shared owner with one cost-booking helper (commit <code>428878833</code>); the booking control reddens both spend assertions; <code>sn-judge</code> resolves; review 96/120, no added failures. Follow-on: share one per-call unit between <code>decide_one</code> and <code>decide_batch</code>. <a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s2">evidence</a></p></div>
 </div>
 </section>
 </main>
