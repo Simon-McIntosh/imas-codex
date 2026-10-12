@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T21:40:24.933Z",
+  "dispatched_at": "2026-10-12T21:29:57Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:181",
+      "id": "reasoning-1",
+      "reason": "without a frozen additive-rule arm (or a restated comparator) the node that lands \u00a74 cannot evaluate the section's own gate, and its gain goes unmeasured.",
+      "text": "\u00a73 says \"The tool arm calls the product ranking\" (line 179, so a later section \"measures its own head\") and, two lines later, that \"the current additive rule [is] among [the harness arms], so the baseline survives \u00a74\", yet the arm enumeration (lines 154-155, and line 173's \"the five arms\") names exactly five arms \u2014 current tool, vector only, RRF, and both reranks \u2014 with no frozen additive-rule arm, and the landed harness (`tests/llm/test_signal_search_goldens.py:244-247`) implements the `current_tool` arm by calling `_rank_signals` live; once \u00a74 rewrites `_rank_signals` to use fusion, the \"current tool\" arm *is* fusion, so \u00a74's done-when (\"fused signal search beats the current tool on mean nDCG@10\", \u00a74 line 239) compares fusion against itself and cannot hold",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "96c083a3636c4f9862c3e8a3c7bf1a6e3976b2e296cf8de649b56f39bc07c98d",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 18,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T212944331198-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "09a929bc0fe38b5f2cd73e8b65c68390d620fad6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 commits `43290a049`, `b4c89a8fc`, `93bfb7e9d` resolve; `tests/llm/fixtures/signal_search_questions.json`, `tests/llm/test_signal_search_goldens.py`, `tests/tools/fixtures/dd_mapping_questions.json`, the prototype directory, `signal_glossary` and the extensionless href `/imas-codex/plans/discovery-judgments-through-jev` (resolved as `.html`) all exist. `goldens.html` in the done-when is the third node's planned output, not a dangling pointer.",
+    "done_when": "pass \u2014 \u00a73's done-when (lines 187-189) names measurable conditions and a real control: the random-order control must score below every arm, and the refusal is exercised by a negative-control test that unlabels a candidate and requires the arm to refuse.",
+    "evidence_paths": "pass \u2014 the done-when writes to `docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html`, a durable repository path, not a scratchpad.",
+    "naming": "pass \u2014 \u00a73 carries no plan-stage label or ticket number into a symbol; the plan text names no plan-labelled harness variable.",
+    "reasoning": "a finding \u2014 \u00a73 asserts the additive baseline survives \u00a74, but its own arm enumeration and the tool arm it landed do not produce that baseline.",
+    "single_goal": "pass \u2014 the three \u00a73 nodes each carry one deliverable (held-out questions; harness + draft questions; pooled labelling and the five-arm run).",
+    "wiring": "pass \u2014 \u00a73's ordering (first) and its dependents in the followup (f-ssfms-001) and the s11 gate g-ssfms-1 resolve; no relationship points at a wrong node."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "0fe859b54a828d8c5476bb42ca9606c58fe1dac12cac050ea18f1ee30e764efe",
+    "s4": "bbfa57f0f787e5833fdbccdbece0e75658e4bfe6f10d389c40ec5c8c4ef64720",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:41:41.331897+00:00"
+}
