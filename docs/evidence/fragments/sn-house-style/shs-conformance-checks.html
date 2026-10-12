@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="fragment">
+  <title>Conformance checks in the Layer 1 audits</title>
+</head>
+<body>
+  <section id="shs-conformance-checks-summary">
+    <h2>Registry conformance checks in the review audits</h2>
+    <p>
+      The deterministic checks read the ISN conventions registry through
+      <code>select_conventions</code> and raise findings in four classes:
+      a forbidden variant of a selected concept's written equation, a forbidden
+      locus gloss, a forbidden spelling of a selected quantity's symbol, and a
+      documentation opening that does not follow the selected pattern template.
+      The forbidden locus gloss arrives through the same concept-variant
+      mechanism as the equation variant, distinguished by whether the match lies
+      inside a display equation. Findings join the
+      <code>convention_violation</code> family and are appended to the
+      <code>AuditReport</code> by <code>run_all_audits</code>; each names the
+      registry entry it came from.
+    </p>
+  </section>
+
+  <section id="shs-conformance-checks-fixtures">
+    <h2>Fixtures</h2>
+    <table>
+      <thead><tr><th>Fixture</th><th>Expected</th></tr></thead>
+      <tbody>
+        <tr><td>carbon <code>dl/B</code> line form</td><td>flagged (<code>forbidden_equation_variant</code>)</td></tr>
+        <tr><td>argon line form</td><td>flagged (<code>forbidden_equation_variant</code>)</td></tr>
+        <tr><td>beryllium surface form</td><td>not flagged</td></tr>
+        <tr><td>boundary described as "the separatrix"</td><td>flagged (<code>forbidden_locus_gloss</code>)</td></tr>
+        <tr><td>density written <code>\rho</code></td><td>flagged (<code>forbidden_symbol_spelling</code>)</td></tr>
+        <tr><td>off-template opening</td><td>flagged (<code>template_opening</code>)</td></tr>
+        <tr><td>canonical entry</td><td>zero findings</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Each check has a test that fails when the check is removed; the three
+      mutation logs are <code>negative_forbidden_variant.log</code>,
+      <code>negative_symbol_spelling.log</code> and
+      <code>negative_template_opening.log</code>, each ending in a non-zero
+      <code>EXIT=</code> line with the guarding test id failing.
+    </p>
+  </section>
+
+  <section id="shs-conformance-checks-census">
+    <h2>Live WEST roster census</h2>
+    <p>
+      Roster <code>v0.4.0rc7+west-task-2e.sn_names.yaml</code> (220 names),
+      descriptions and documentation read from the live graph. Baseline for
+      <code>sn-west-prototype-release</code>.
+    </p>
+    <table>
+      <thead><tr><th>Class</th><th>Count</th></tr></thead>
+      <tbody>
+        <tr><td><code>forbidden_equation_variant</code></td><td>1</td></tr>
+        <tr><td><code>forbidden_locus_gloss</code></td><td>1</td></tr>
+        <tr><td><code>forbidden_symbol_spelling</code></td><td>0</td></tr>
+        <tr><td><code>template_opening</code></td><td>1</td></tr>
+        <tr><td>no registry entry selected</td><td>188</td></tr>
+        <tr><td>name the grammar cannot parse</td><td>1</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The census asserts it resolved all 220 roster rows before reporting any
+      count, so an absence is a measured absence. The 188 names with no selected
+      entry are the authoring worklist; the single parse failure is
+      <code>inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width</code>.
+    </p>
+  </section>
+</body>
+</html>

@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+from imas_standard_names.grammar.terms import AppliedConventions, select_conventions
+
 from imas_codex.graph.models import COCOSLabelTransformation
 from imas_codex.standard_names.audits import (
     _dimension_container,
@@ -506,6 +508,185 @@ def _predicate_result(
     return DocumentationGateResult(
         outcome=DocumentationGateOutcome.FAIL,
         reason=fail_reason,
+    )
+
+
+class HouseStyleFindingClass(StrEnum):
+    """The conformance finding classes a written name can raise."""
+
+    FORBIDDEN_EQUATION_VARIANT = "forbidden_equation_variant"
+    FORBIDDEN_SYMBOL_SPELLING = "forbidden_symbol_spelling"
+    FORBIDDEN_LOCUS_GLOSS = "forbidden_locus_gloss"
+    TEMPLATE_OPENING = "template_opening"
+
+
+@dataclass(frozen=True)
+class HouseStyleFinding:
+    """One conformance finding against a selected registry entry."""
+
+    finding_class: HouseStyleFindingClass
+    registry_entry: str
+    detail: str
+
+
+_TEMPLATE_PLACEHOLDER_RE = re.compile(r"\{[^{}]+\}")
+
+
+def _template_opening_pattern(template: str) -> re.Pattern[str] | None:
+    """Compile a documented template into an opening pattern.
+
+    Each ``{placeholder}`` is replaced by a wildcard, so the pattern checks the
+    fixed wording an opening must carry without binding a substitution the
+    registry does not source.
+    """
+    literal = _TEMPLATE_PLACEHOLDER_RE.sub(".+", template.strip())
+    if not literal:
+        return None
+    try:
+        return re.compile(literal, re.DOTALL)
+    except re.error:
+        return None
+
+
+def _opening_line(text: str) -> str:
+    """Return the first non-empty line, the opening the template governs."""
+
+    for line in text.splitlines():
+        if line.strip():
+            return line.strip()
+    return ""
+
+
+def _display_math_spans(text: str) -> list[tuple[int, int]]:
+    return [match.span() for match in _DISPLAY_MATH_RE.finditer(text)]
+
+
+def _forbidden_variant_findings(
+    concepts: tuple[Any, ...],
+    text: str,
+) -> list[HouseStyleFinding]:
+    """Flag a forbidden variant of a selected concept, named by its locus.
+
+    A variant matching inside a display equation is a written equation the
+    registry forbids; one matching in prose is a forbidden gloss of a concept.
+    """
+
+    findings: list[HouseStyleFinding] = []
+    spans = _display_math_spans(text)
+    for concept in concepts:
+        for pattern in concept.forbidden_variants:
+            try:
+                match = re.search(pattern, text, re.IGNORECASE)
+            except re.error:
+                continue
+            if match is None:
+                continue
+            inside_equation = any(start <= match.start() < end for start, end in spans)
+            finding_class = (
+                HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT
+                if inside_equation
+                else HouseStyleFindingClass.FORBIDDEN_LOCUS_GLOSS
+            )
+            findings.append(
+                HouseStyleFinding(
+                    finding_class=finding_class,
+                    registry_entry=f"concept:{concept.token}",
+                    detail=(
+                        f"'{match.group(0).strip()}' is a forbidden variant of "
+                        f"'{concept.phrase}'"
+                    ),
+                )
+            )
+            break
+    return findings
+
+
+def _forbidden_symbol_findings(
+    notation: tuple[Any, ...],
+    text: str,
+) -> list[HouseStyleFinding]:
+    """Flag a forbidden spelling of a selected quantity's canonical symbol."""
+
+    findings: list[HouseStyleFinding] = []
+    for entry in notation:
+        for spelling in entry.forbidden_spellings:
+            if spelling and spelling in text:
+                findings.append(
+                    HouseStyleFinding(
+                        finding_class=HouseStyleFindingClass.FORBIDDEN_SYMBOL_SPELLING,
+                        registry_entry=f"notation:{entry.token}",
+                        detail=(
+                            f"'{spelling}' is a forbidden spelling of the "
+                            f"canonical symbol '{entry.symbol}'"
+                        ),
+                    )
+                )
+                break
+    return findings
+
+
+def _template_opening_findings(
+    templates: tuple[Any, ...],
+    documentation: str,
+) -> list[HouseStyleFinding]:
+    """Flag a documentation opening that does not follow the selected template."""
+
+    opening = _opening_line(documentation)
+    findings: list[HouseStyleFinding] = []
+    for template in templates:
+        pattern = _template_opening_pattern(template.documentation)
+        if pattern is None:
+            continue
+        if not pattern.match(opening):
+            findings.append(
+                HouseStyleFinding(
+                    finding_class=HouseStyleFindingClass.TEMPLATE_OPENING,
+                    registry_entry=f"template:{template.base}",
+                    detail=(
+                        f"documentation opens as '{opening[:60]}', which does "
+                        f"not follow the '{template.documentation}' template"
+                    ),
+                )
+            )
+    return findings
+
+
+def house_style_findings(
+    conventions: AppliedConventions,
+    *,
+    description: str = "",
+    documentation: str = "",
+) -> list[HouseStyleFinding]:
+    """Return the registry conformance findings for one written name.
+
+    The registry supplies what a name's own gate cannot decide: the canonical
+    equation form and its forbidden variants, the canonical symbol per quantity,
+    and the opening each pattern template requires. The forbidden locus gloss
+    arrives through the same concept variants, so a gloss equating two loci is
+    reported without a separate lookup.
+    """
+
+    prose = f"{description}\n\n{documentation}"
+    return [
+        *_forbidden_variant_findings(conventions.concepts, prose),
+        *_forbidden_symbol_findings(conventions.notation, prose),
+        *_template_opening_findings(conventions.templates, documentation),
+    ]
+
+
+def conformance_findings(
+    name: str,
+    *,
+    description: str = "",
+    documentation: str = "",
+) -> list[HouseStyleFinding]:
+    """Select a name's registry entries and return its conformance findings."""
+
+    conventions = select_conventions(name)
+    return house_style_findings(
+        conventions,
+        description=description,
+        documentation=documentation,
     )
 
 
