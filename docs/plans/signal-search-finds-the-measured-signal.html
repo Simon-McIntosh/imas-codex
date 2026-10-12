@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69">
 </head>
@@ -523,6 +523,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261012T225135927601-review-of-ssfms-pooled-labels" data-who="reckon-build" data-when="2026-10-12T23:10:05.330Z">
     <div class="r-comment-body"><p>review record stored at both fenced paths; reviewed_run_id r-20261012T201857058094-ssfms-pooled-labels, reviewed_base_sha 75a6127f4f5b8a2979ec4b84b2e907371aac6916, reviewed_head_sha 44792accfae6f7423618619b696559e2312a0736; all six items verdicted, all six dimensions scored 0..20 and summed 95, four follow-on findings, CALL_SITES none.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261012T201857058094-ssfms-pooled-labels" data-who="reckon-build" data-when="2026-10-12T22:36:45.125Z">
+    <div class="r-comment-body"><p>signal-search-finds-the-measured-signal §3 closed on four arms and the control — current_tool, additive_rule (the product&#x27;s additive rule frozen in the harness and pinned equal to current_tool on every question), vector_only and rrf, each scored on the eligible population of 14312 signals with every arm above the seeded control on mean nDCG@10, and the two Jev rerank arms moved to a measurement outside pytest so no test reaches the paid decisions endpoint.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261012T1958-s11-cutover" data-who="reckon-build" data-when="2026-10-12T19:58:00Z">
     <div class="r-comment-body"><p>Gate <code>g-ssfms-1</code> states its cutover as 2026-10-11T19:08:21Z, which is two hours early. The cutover is 2026-10-11T21:08:54Z, the start of the first run with <code>93bfb7e9d</code> loaded (§3 gives the derivation). Count JET re-enrichment against 21:08:54Z when closing the gate; reckon offers no op to rewrite a declared gate's measure.</p></div>
