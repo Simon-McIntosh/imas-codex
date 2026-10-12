@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:228",
+    "imas_codex/cli/sn.py:326",
+    "imas_codex/discovery/base/services.py:354"
+  ],
+  "completed_at": "2026-10-12T20:06:54.514Z",
+  "dispatched_at": "2026-10-12T19:59:36Z",
+  "findings": [
+    {
+      "file": "tests/test_settings_sn.py",
+      "line": "67",
+      "severity": "follow-on",
+      "text": "follow-on: the compose dict's \"model\" value is compared against mod.get_model(\"sn-compose\"), and get_model_config itself computes model = get_model(section) at imas_codex/settings.py:328, so both sides move together and the assertion holds whatever the model value is; it survives the model rename the brief requires but no longer guards the model field, and reinstating a wrong-model regression in get_model_config's model key would still redden it only because the two accessors would then diverge, not because the model is wrong."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-judgment-evaluation/settings-local-route-test.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment is in the node's declared write scope but was never written and is absent from the worktree at d2c80e955 and from main; the landing record went to the run directory (r-20261012T194739272952-settings-local-route-test/settings-local-route-test.landing.html) instead, so the node's declared documentary deliverable does not exist in the tree."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the changed module is a test file, so its subjects are the settings accessors; get_model_config has three production callers (imas_codex/cli/sn.py:228, imas_codex/cli/sn.py:326, imas_codex/discovery/base/services.py:354) and resolve_model_source/get_model_source_models have none outside tests.",
+    "diff": "read commit by commit from d2422ecd to d2c80e955; one commit changes only tests/test_settings_sn.py (12 insertions, 4 deletions), reading the model through get_model and get_model_source_models instead of the retired literal.",
+    "done_when": "the done_when requires the three tests green at head, a rename-only pass and a broken-route fail each kept with EXIT=, and baseline_suite/after_suite; the manifest records base_suite.log (4 failed / 68 passed) and after_suite.log (1 failed / 71 passed, delta -3) plus rename_only.log EXIT=0 and negative_control.log 3 failed EXIT=1.",
+    "goal": "the reviewed brief's goal is that three stale seat tests stop hard-coding the retired local/deepseek-v4-flash and read the model the configuration declares; the landed change does exactly that at tests/test_settings_sn.py:67, :78-83 and :96-105.",
+    "manifest": "read; it records status complete, one commit d2c80e955, the gate at 71 passed / 1 failed, and negative_control_log as a bare path whose header names module.__file__ and cwd.",
+    "write_paths": "the node's declared paths are tests/test_settings_sn.py and docs/evidence/fragments/sn-judgment-evaluation/settings-local-route-test.html; the diff touches only tests/test_settings_sn.py, inside scope, and the declared fragment was not produced."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows the three tests red (EXIT=1) under a _resolve_model_route mutation that returns a wrong api-base, while rename_only.log shows them green (EXIT=0) under a model rename, so the route guards at tests/test_settings_sn.py:84 and :107-110 genuinely fire; the model comparison added at tests/test_settings_sn.py:67 is not independent of it because get_model_config's model is get_model(section) at imas_codex/settings.py:328.",
+    "evidence": "base_suite.log and after_suite.log each carry a first-line header naming rev, tree and cmd, and read 4 failed / 68 passed and 1 failed / 71 passed, so the gate the done_when names is recorded rather than claimed; the one remaining failure is pre-existing in both arms.",
+    "fit": "the change keeps the module's pytest idiom and docstring style and introduces no filename, symbol or comment the naming rules forbid.",
+    "goal_fidelity": "tests/test_settings_sn.py:67, :80 and :98 resolve the seat model from configuration (get_model and get_model_source_models) instead of the literal local/deepseek-v4-flash, which is the deliverable the goal states.",
+    "reuse": "no new definition is added; the change reuses the pre-existing get_model_source_models owner at imas_codex/settings.py:477. the `next(... startswith(\"local/\"))` selection idiom is inlined twice (tests/test_settings_sn.py:78 and :96) though no owner of that selection exists in the repository.",
+    "scope_discipline": "every path in the diff is inside the declared write paths: git diff d2422ecd..d2c80e955 touches only tests/test_settings_sn.py, and no product code or configuration is changed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed brief's goal is that three stale seat tests stop hard-coding the retired local/deepseek-v4-flash and read the model the configuration declares; the landed change does exactly that at tests/test_settings_sn.py:67, :78-83 and :96-105.\nVERDICT done_when: the done_when requires the three tests green at head, a rename-only pass and a broken-route fail each kept with EXIT=, and baseline_suite/after_suite; the manifest records base_suite.log (4 failed / 68 passed) and after_suite.log (1 failed / 71 passed, delta -3) plus rename_only.log EXIT=0 and negative_control.log 3 failed EXIT=1.\nVERDICT write_paths: the node's declared paths are tests/test_settings_sn.py and docs/evidence/fragments/sn-judgment-evaluation/settings-local-route-test.html; the diff touches only tests/test_settings_sn.py, inside scope, and the declared fragment was not produced.\nVERDICT manifest: read; it records status complete, one commit d2c80e955, the gate at 71 passed / 1 failed, and negative_control_log as a bare path whose header names module.__file__ and cwd.\nVERDICT diff: read commit by commit from d2c80e955's base d2422ecd to d2c80e955; one commit changes only tests/test_settings_sn.py (12 insertions, 4 deletions).\nCALL_SITES: imas_codex/cli/sn.py:228, imas_codex/cli/sn.py:326, imas_codex/discovery/base/services.py:354\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/test_settings_sn.py:67, :80 and :98 resolve the seat model from configuration (get_model and get_model_source_models) instead of the literal local/deepseek-v4-flash, which is the deliverable the goal states.\nSCORE evidence: 19\nJUSTIFICATION evidence: base_suite.log and after_suite.log each carry a first-line header naming rev, tree and cmd, and read 4 failed / 68 passed and 1 failed / 71 passed, so the gate the done_when names is recorded rather than claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff is inside the declared write paths: git diff d2422ecd..d2c80e955 touches only tests/test_settings_sn.py, and no product code or configuration is changed.\nSCORE durability: 15\nJUSTIFICATION durability: negative_control.log shows the three tests red (EXIT=1) under a _resolve_model_route mutation, while rename_only.log shows them green (EXIT=0) under a model rename, so the route guards at tests/test_settings_sn.py:84 and :107-110 fire; the model comparison at tests/test_settings_sn.py:67 is not independent because get_model_config's model is get_model(section) at imas_codex/settings.py:328.\nSCORE fit: 19\nJUSTIFICATION fit: the change keeps the module's pytest idiom and docstring style and introduces no filename, symbol or comment the naming rules forbid.\nSCORE reuse: 19\nJUSTIFICATION reuse: no new definition is added; the change reuses the pre-existing get_model_source_models owner at imas_codex/settings.py:477, with the `next(... startswith(\"local/\"))` selection inlined twice at tests/test_settings_sn.py:78 and :96 where no owner of that selection exists.\nFINDING tests/test_settings_sn.py:67 follow-on: the compose dict's \"model\" value is compared against mod.get_model(\"sn-compose\"), and get_model_config itself computes model = get_model(section) at imas_codex/settings.py:328, so both sides move together and the assertion holds whatever the model value is; it survives the model rename the brief requires but no longer guards the model field.\nFINDING docs/evidence/fragments/sn-judgment-evaluation/settings-local-route-test.html:1 follow-on: the fragment is in the node's declared write scope but was never written and is absent from the worktree at d2c80e955 and from main; the landing record went to the run directory instead, so the node's declared documentary deliverable does not exist in the tree.",
+  "review_run_id": "r-20261012T195923904758-review-of-settings-local-route-test",
+  "reviewed_base_sha": "d2422ecdc9d0ce8000e92c8548029c02be2dfb48",
+  "reviewed_head_sha": "d2c80e955e90baf67b15d121f284540a52505294",
+  "reviewed_run_id": "r-20261012T194739272952-settings-local-route-test",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:07:18.620436+00:00",
+  "total": 112
+}
