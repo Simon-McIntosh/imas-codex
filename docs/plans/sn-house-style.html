@@ -21,12 +21,12 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;imas-standard-names:concept-and-notation-registry#s2&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
-<meta name="plan-modified" content="2026-10-12">
+<meta name="plan-version" content="31">
+<meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
 <body>
@@ -256,7 +256,7 @@
 <p>The §5 tests hand the template its conventions directly, so removing the conventions key from any render site (<code>process_generate_docs_batch</code>, <code>process_refine_docs_batch</code> and <code>prepare_docs_review_request</code> in <code>imas_codex/standard_names/workers.py</code>, and the review render in <code>review/pipeline.py</code>) leaves every test green while the block silently leaves the live prompt. Assert the wiring at each site: drive the site with a stubbed <code>render_prompt</code> and check that the context it passes carries the conventions selected for the item.</p><p><strong>Done when:</strong> one test per render site asserts the conventions reach <code>render_prompt</code>, and each fails when its site's context key is removed in a scratch copy; the prompt and context tests add no failure against their base.</p>
 
     <h2 id="s9">§9 — The score cap records every error finding, from one format</h2>
-<section data-reckon="section" data-id="s9" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s9" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>The §5 review found three gaps in the cap in <code>_review_single_batch</code> (<code>imas_codex/standard_names/review/pipeline.py</code>). An entry already scored below acceptance carries an error-severity lint finding that the record drops, although §5 asks every such entry to record it. The one-line finding format is written twice, in <code>_extract_audit_findings</code> and in the cap's extraction, so the prompt and the record can drift. One absence test in <code>tests/standard_names/test_review_findings_cap.py</code> cannot fail. Record the finding on every entry that holds one whether or not the cap changed its score, give the format one owner, and make the absence test bite. The second documentation path (<code>_review_batch_core</code>) passes no findings, but it has no audit report of its own and is reached only by tests today, so it is out of scope here; it gains findings when it gains a production caller.</p><p><strong>Done when:</strong> an entry below acceptance with an error finding records it, and the test fails with the recording removed; one function formats a finding line, used by both the prompt and the record; the absence test fails when the template's guard is removed; the review-pipeline tests add no failure against their base.</p>
 
     <h2 id="s10">§10 — The documentation prompt changes broke six tests</h2>
@@ -377,6 +377,9 @@
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261012T205912558787-shs-prompt-regressions" data-who="reckon-build" data-when="2026-10-12T21:26:23.727Z">
     <div class="r-comment-body"><p>LANDED imas_codex/standard_names/workers.py — _conventions_for_prompt guards the registry selection at the generate, refine and review render sites so a name the grammar cannot parse costs the conventions block and not the batch; the three documentation golden captures recaptured by rendering; the six former failures pass at head (6 passed, EXIT=0) and the prompt/review/pool gate adds no failure against base (21 failed at head vs 33 at base, zero added ids).</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-close-s9" data-who="reckon-build" data-when="2026-10-12T22:33:00Z">
+    <div class="r-comment-body"><p>§9 landed: the score cap records every error finding on its entry through one formatter (merge <code>81d03e570</code>); review 118/120. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s9">evidence</a></p></div>
 </div>
 </section>
 </main>
