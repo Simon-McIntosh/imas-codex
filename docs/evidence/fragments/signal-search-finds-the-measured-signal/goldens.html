@@ -9,10 +9,22 @@
     <code>eligible_signal_ids</code>; <code>filter_eligible</code> removes every excluded candidate from an
     arm's order <em>before</em> the cut at <code>K</code>, so a signal enriched before the cutover is
     dropped rather than scored, and the slot it held is taken by the next eligible candidate.
-    <code>current_tool</code> (the product ranking), <code>vector_only</code> (pool 100) and
-    <code>rrf</code> (100-vector fused with a 50-full-text pool) are scored on this population, beside the
-    seeded random control (<code>CONTROL_SEED</code> 20261012). The predicate admits 14312 of the facility's
-    signals; the fixture labels 1551 of them across 22 questions, 11 held out.
+    <code>current_tool</code> (the product ranking), <code>additive_rule</code> (the product's additive
+    rule frozen in the harness), <code>vector_only</code> (pool 100) and <code>rrf</code> (100-vector
+    fused with a 50-full-text pool) are scored on this population, beside the seeded random control
+    (<code>CONTROL_SEED</code> 20261012). The predicate admits 14312 of the facility's signals; the
+    fixture labels 1551 of them across 22 questions, 11 held out.
+  </p>
+
+  <p id="ssfms-pooled-labels-frozen">
+    <code>additive_rule</code> reproduces the product's ranking arithmetic itself — vector search and
+    full-text search, <code>0.7</code> of the cosine plus <code>0.3</code> of the text score plus
+    <code>0.1</code> for a signal found by both, the text score alone for a text-only signal, cut at
+    <code>K</code> — rather than calling <code>_rank_signals</code>, so the arm keeps measuring the rule
+    the product ships today after the product ranking is rewritten.
+    <code>test_the_frozen_additive_rule_reproduces_the_product_ranking</code> pins the copy to the head it
+    was taken from: the two arms return the same order on every question, which is what makes the frozen
+    arm a faithful stand-in rather than a rewrite.
   </p>
 
   <figure id="ssfms-pooled-labels-figure">
@@ -21,19 +33,21 @@
     <figcaption>
       Mean nDCG@10 over the 22 questions for each arm scored on the eligible population, with the seeded
       control drawn as a dotted grey line. Every arm sits above the control; <code>rrf</code> is the
-      highest. Held-out-only means are 0.519 for <code>current_tool</code>, 0.743 for
-      <code>vector_only</code> and 0.830 for <code>rrf</code>. Measured 2026-10-12 on the fleet
+      highest, and <code>additive_rule</code> is drawn one lightness step from <code>current_tool</code>
+      because it is the same rule. Held-out-only means are 0.519 for <code>current_tool</code>,
+      0.743 for <code>vector_only</code> and 0.830 for <code>rrf</code>. Measured 2026-10-12 on the fleet
       allocation, fixture at 1551 pooled labels.
     </figcaption>
   </figure>
 
   <table id="ssfms-pooled-labels-table">
-    <caption>Three deterministic arms and the control on the eligible population, 22 questions</caption>
+    <caption>Four arms and the control on the eligible population, 22 questions</caption>
     <thead>
       <tr><th>Arm</th><th>mean nDCG@10</th><th>grade-3 precision@5</th><th>grade-3 recall@30</th><th>grade-3 hit@30</th><th>held-out mean nDCG@10</th></tr>
     </thead>
     <tbody>
-      <tr><td>current_tool</td><td>0.5629</td><td>0.5182</td><td>0.3878</td><td>0.9091</td><td>0.5189</td></tr>
+      <tr><td>current_tool</td><td>0.5656</td><td>0.5182</td><td>0.3901</td><td>0.9091</td><td>0.5189</td></tr>
+      <tr><td>additive_rule</td><td>0.5656</td><td>0.5182</td><td>0.3901</td><td>0.9091</td><td>0.5189</td></tr>
       <tr><td>vector_only</td><td>0.6846</td><td>0.5545</td><td>0.5828</td><td>1.0000</td><td>0.7434</td></tr>
       <tr><td>rrf</td><td>0.7963</td><td>0.7182</td><td>0.7429</td><td>1.0000</td><td>0.8297</td></tr>
       <tr><td>random_control</td><td>0.5218</td><td>0.3545</td><td>0.6631</td><td>1.0000</td><td>0.5142</td></tr>
@@ -68,7 +82,7 @@
       </tr>
       <tr>
         <td>Label the eligible union</td><td>the top-10 union under the filter, candidate by candidate</td>
-        <td>The top-10 union of the five arms under the filter was collected and each candidate read and
+        <td>The top-10 union of the arms under the filter was collected and each candidate read and
         graded.</td>
       </tr>
       <tr>
@@ -105,9 +119,15 @@
         neighbouring structure takes grade 1, which is the rubric the question states.</td>
       </tr>
       <tr>
-        <td>Label the Jev-surfaced candidates</td><td>+9 across seven questions</td>
-        <td>Nine candidates the reranking arms lifted were read and graded from their names and
-        descriptions, including one grade-0 (an elongation command surfaced for the soft-x-ray question).</td>
+        <td>Label the candidates the arms lifted</td><td>+9 across seven questions</td>
+        <td>Nine candidates the arms lifted were read and graded from their names and descriptions,
+        including one grade-0 (an elongation command surfaced for the soft-x-ray question).</td>
+      </tr>
+      <tr>
+        <td>Label the additive-rule arm</td><td>no new labels</td>
+        <td>The frozen additive rule returns the same order as the product ranking on every question, so
+        it lifts no candidate the product arm had not already surfaced; the suite's labelling gate
+        confirms this by passing with <code>additive_rule</code> scored.</td>
       </tr>
     </tbody>
   </table>
@@ -136,38 +156,34 @@ EXIT=1</code></pre>
   <table id="ssfms-pooled-labels-gates">
     <thead><tr><th>Gate</th><th>Result</th></tr></thead>
     <tbody>
-      <tr><td><code>tests/llm/test_signal_search_goldens.py</code> (default markers plus <code>graph</code>)</td><td>10 passed — the eligibility gate, the pre-cutover filter tests, the refusal test, the metrics and the three-arm table</td></tr>
+      <tr><td><code>tests/llm/test_signal_search_goldens.py</code> (default markers plus <code>graph</code>)</td><td>11 passed — the eligibility gate, the pre-cutover filter tests, the refusal test, the metrics, the frozen-rule equivalence pin and the four-arm table</td></tr>
       <tr><td><code>tests/llm/test_search_tools.py</code></td><td>106 passed, 8 skipped — unchanged from the harness commit, so the ranking extraction is untouched</td></tr>
       <tr><td>Negative control: one pooled label removed</td><td>1 failed, <code>EXIT=1</code>, naming the removed signal</td></tr>
     </tbody>
   </table>
 
-  <h3 id="ssfms-pooled-labels-blocker-title">The two Jev arms cannot be scored inside the test suite</h3>
+  <h3 id="ssfms-pooled-labels-scope-title">The two rerank arms move out of the test suite</h3>
 
-  <p id="ssfms-pooled-labels-blocker">
-    Two findings, both structural rather than labelling gaps.
+  <p id="ssfms-pooled-labels-scope">
+    The section closes on the four arms above and the control. The two rerank arms
+    (<code>rrf_rerank</code>, <code>rrf_rerank_role</code>) are scored by a measurement that runs outside
+    pytest, over labels pooled against its own candidate pool, and no test here reaches the paid endpoint.
   </p>
 
-  <p id="ssfms-pooled-labels-blocker-guard">
-    <strong>The suite refuses the paid endpoint by design.</strong> <code>tests/conftest.py</code> installs
-    an autouse fixture, <code>no_live_decisions_requests</code>, that raises on any HTTP request to
-    <code>openrouter.ai/api/alpha/decisions</code>. Both Jev arms spend on that endpoint, so with
-    <code>SIGNAL_SEARCH_JEV_ARMS=1</code> the pytest table test reaches the rerank and fails with
-    <code>RuntimeError: no running event loop</code> after the guarded call raises per item. A run of the
-    same harness functions outside pytest spends normally, which is how the deterministic table above was
-    produced; a five-arm table under pytest therefore needs either a stub rerank or an explicit exemption
-    from that guard, and neither exists today.
+  <p id="ssfms-pooled-labels-scope-why">
+    Two structural reasons, neither a labelling gap. First, <code>tests/conftest.py</code> installs an
+    autouse fixture, <code>no_live_decisions_requests</code>, that raises on any HTTP request to
+    <code>openrouter.ai/api/alpha/decisions</code>, which is the endpoint both rerank arms spend on, so a
+    pytest run cannot score them by design. Second, the rerank reorders a 60-candidate pool
+    nondeterministically, so any of those 60 can reach the top ten on a given run; the fixture's labels
+    are the top-10 union over the arms, so a rerank run can surface a family the union has not reached —
+    four consecutive live runs each did, and each was labelled before the next moved the boundary again.
   </p>
 
-  <p id="ssfms-pooled-labels-blocker-pool">
-    <strong>A top-10 union cannot exhaust a nondeterministic rerank.</strong> The labelling pool was the
-    union of each arm's top ten, which is sufficient for the three deterministic arms. The rerank arms
-    reorder a 60-candidate pool nondeterministically, so any of those 60 can reach the top ten on a given
-    run. Four consecutive live runs each surfaced a different family the previous runs had not lifted
-    (<code>cryoctb_mt08nfv</code>, <code>psscfst_refcuref1bst</code>, <code>ef4_volsnuat</code>,
-    <code>cryoctb_mb2ct5</code>, then <code>gau_p0pngdi</code>); each was labelled and the boundary moved
-    again. The remedy is to label the rerank pool itself rather than its top ten, which is a labelling
-    pass of its own, or to make the rerank deterministic, and the arms should not carry a rerank pool
-    deeper than the labelling pass reaches.
+  <p id="ssfms-pooled-labels-scope-kept">
+    The module keeps what that measurement needs — <code>_rerank_arm</code>, the <code>JEV_ARMS</code>
+    tuple, <code>JEV_ARMS_ENV</code> and the role-aware question constants — and <code>arm_ranking</code>
+    still builds a rerank arm when <code>ctx.spend_jev</code> is set. No test sets it, so the committed
+    suite never reaches the guarded endpoint and spends nothing.
   </p>
 </section>
