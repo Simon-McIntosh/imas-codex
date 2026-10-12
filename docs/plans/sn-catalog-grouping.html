@@ -25,7 +25,7 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -112,10 +112,14 @@
       compose path in <code>imas_codex/standard_names/workers.py</code> injects the DD source
       item's <code>physics_domain</code> as authoritative ("Inject physics_domain from DD"), and
       <code>_resolve_physics_domains</code> in <code>imas_codex/standard_names/consolidation.py</code>
-      merges the candidates' values into the primary. The adopted mechanism sets the primary at
-      one owner, <code>_resolve_physics_domains</code>, through which every composed candidate
-      passes. The compose injection keeps the DD value only as the <code>source_domains</code>
-      provenance and the tie-breaker. If a compose path reaches persistence without passing
+      merges the values of a duplicate group into the primary. That resolver is reached only for
+      groups of two or more: a name composed once is appended to the approved list directly. The
+      one point every approved candidate passes is the loop in <code>consolidate_candidates</code>
+      that builds the approved list, singletons and merged groups alike. The adopted mechanism
+      sets the primary there, once per approved candidate, and
+      <code>_resolve_physics_domains</code> keeps only the merge of a group's
+      <code>source_domains</code>. The compose injection keeps the DD value only as the
+      <code>source_domains</code> provenance and the tie-breaker. If a compose path reaches persistence without passing
       consolidation, it is routed through it rather than given a second consult site. The rule
       table's loader lives in <code>imas_codex/standard_names/domain_priority.py</code>, which
       already owns domain ranking and coercion, not in a new module.
@@ -144,8 +148,9 @@
       with the unit filter and the threshold as parameters. Do not add a fourth near-duplicate
       pass beside it, <code>fetch_review_neighbours</code> in <code>context.py</code> and
       <code>nearest_registered_token</code> in <code>vocab_semantic_dedup.py</code>. The worklist
-      holds live pairs with the same unit, embedding cosine at or above 0.95, and more than a
-      one-token difference, excluding the §5 vectors. Scope it to pairs with at least one WEST
+      holds live pairs with the same unit, embedding cosine at or above 0.95, and different
+      spellings (one differing token is enough, so <code>neutral</code> against
+      <code>neutral_state</code> is in), excluding the §5 vectors. Scope it to pairs with at least one WEST
       member first.
     </p>
     <p>
