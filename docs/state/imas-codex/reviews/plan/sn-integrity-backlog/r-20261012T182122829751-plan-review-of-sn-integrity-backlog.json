@@ -1,0 +1,117 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:29:14.177Z",
+  "dispatched_at": "2026-10-12T18:21:39Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261012T182122829751-plan-review-of-sn-integrity-backlog/plan.html:161",
+      "id": "anchors_resolve-1",
+      "reason": "\u00a716's decision to run only after \u00a720, and its removal set (\"every reader the record lists\"), are read straight off a document the reader cannot reach, so the fix is to link the `.md` (as sibling plans do) or commit an `.html` twin.",
+      "text": "\u00a716 links \"The successor-scalar reader record\" to `/imas-codex/evidence/sn-lifecycle-integrity/successor-scalar-readers`, but that evidence exists only as `\u2026/successor-scalar-readers.md`; the extensionless href resolves as `<path>.html`, which does not exist, and reckon's `resolve_route` returns a typed-route collision for the three-segment non-archive evidence path, so the record the section's whole sequencing rests on cannot be opened from the plan",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261012T182122829751-plan-review-of-sn-integrity-backlog/plan.html:177",
+      "id": "single_goal-1",
+      "reason": "the earlier review split \u00a714 and \u00a715 for exactly this shape (two deliverables, two independent guards) and both were acted on, so the same rule sends \u00a720 into a code node and a live-graph backfill node.",
+      "text": "\u00a720 carries two deliverables under one gate: a repository code change (move the `HAS_SUCCESSOR` derivation onto the supersede operation and stop reading the scalar) and a live-graph backfill (\"give the 3 names whose only successor pointer is the scalar their edge\", measured by a different clause, \"the 3 sole-pointer identities resolve their successor through the edge on the live graph\"); the code change can pass and the node still fail on live data state it did not create",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261012T182122829751-plan-review-of-sn-integrity-backlog/plan.html:177",
+      "id": "reasoning-1",
+      "reason": "a worker dispatched on \u00a720 is pointed at `graph_ops.py` for \"the supersede operation\" that does not exist there, and is not told the write lands in a signed, program-validated mutation, so it can spend its turns in the wrong module or break the signed-program shape.",
+      "text": "\u00a720's mechanism says to \"write the edge \u2026 in the operation that marks a name superseded and knows its successor\" but names no caller: the only file it cites (`imas_codex/standard_names/graph_ops.py`, ~line 3193) is the derivation being *removed*, whereas the operation that marks a name superseded is the signed `supersede` mutation in `imas_codex/standard_names/signed_manifest.py`, which the cited reader record states (\"signed_manifest.py:4712 \u2026 mints no edge at all\") and flags as the highest-risk decision-needing site in its enumeration",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "5a5ecdf39b721d8f050eca74a61c5ceb78b7d7d5a36959b46f6c627c6a84ee20",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 16,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "",
+      "when": "2026-10-12T18:31:13.484724+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-12T18:31:16.554000+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T18:31:19.020909+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:31:16.554000+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:31:19.020909+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:31:13.484724+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v16.json",
+  "review_run_id": "r-20261012T182122829751-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "45078acc471987f1de28e91172fc1ab8cafed8b8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a716's \"successor-scalar reader record\" link resolves to nothing on the surface.",
+    "done_when": "pass \u2014 \u00a716's scoped removal grep plus its migration counts, \u00a719's split that must sum to an independently counted total, and \u00a720's test that fails when the edge write is removed each give a gate that can fail.",
+    "evidence_paths": "pass \u2014 the measurement units name durable paths (`docs/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census.html` in \u00a719; `\u2026/compose-supersede-dual-bound.html` in \u00a715), never a scratchpad.",
+    "naming": "pass \u2014 the changed units introduce no plan labels, stage names, ticket numbers or version tags into symbols or prose.",
+    "reasoning": "a finding \u2014 \u00a720's mechanism names no caller for the \"supersede operation\" it writes into, and names only the file that holds the derivation it is removing.",
+    "single_goal": "a finding \u2014 \u00a720 carries a repository code change and a live-graph backfill as one node.",
+    "wiring": "pass \u2014 the only ordering the changed units rely on (\u00a716 \"runs only after \u00a720 lands\") is stated in prose and points at the correct node; no depends-on/informs/gates declaration is wrong or points at a missing node."
+  },
+  "section_digests": {
+    "_document": "dbaf8e70dc575ff20815f99759261bcd2117c3cb591a476bea9c276b58009831",
+    "s1": "571d1542955f1382d7e0f47b5f8def69e8d4201f948c3933a15fd1cc2c98e7f8",
+    "s10": "84c8bdeb15133e22cd2f08ee96d429ac3f92f85d28d6720d5e2fd0a87a97cbf2",
+    "s11": "499a319e38a73614c326b3607a7d1cae481dac12714fad0562ffe74a78694c89",
+    "s12": "62e459e2a7b4232b44e54b32969fb970620d613ef8797e09b993d36d4b44d757",
+    "s13": "80e90ea7c45053ae6c5de9d69ac1ef80a87289bb80c7afb2f796f3c31b3235d7",
+    "s14": "4981171151a50aafb83f844e0ad63c7df82749d58b56d7fb8590f5ee8cccfb9b",
+    "s15": "0e2bcb71a7aac4d1ddeae8e3a5959c43e1f3e90ae3ea89c3ca3b16303b3f87b2",
+    "s16": "fbb6a54c6fad9e696b404c35cb7e8b5b5b1f38362f3a0b5a312145906e902876",
+    "s17": "32359142ba3b6f1263abefa9f37711fbc5fdefe9548620b20287985e5858d673",
+    "s18": "c6a5bf0492c322e4f1c9ebe6e0e4b880f6312ab30ec62992d8c786d321fa2d82",
+    "s19": "f735f604bc9a9d5ff1664a38976a03f6a4ede1a90baa42b16f38af66702d3c4b",
+    "s2": "af2703cbe346dcd322398505bfee69c50a6bcd1238937227f17cdb6c5fc75c58",
+    "s20": "c03ae190d322d7a39ab9e941e8742ecb6f3242087902434610b1d0422e568f3f",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s6": "e6bf01013b7bd341cf2f86ebf24dc60084ea8cabeb4cf4cd2664c1109ac5ca62",
+    "s7": "1930b98dfc66a2e1f9a1ce5149fbb73fe208b66c3e0c35664330a12e7e945933",
+    "s8": "6b362f87f941f8c95d562c95cdf93e578892ff32c85156fd5565c76548c58eab",
+    "s9": "20748220a6f94f6c422b1b677587d4456ccf3be5fbe204daac414373443327bd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:31:10.892180+00:00"
+}
