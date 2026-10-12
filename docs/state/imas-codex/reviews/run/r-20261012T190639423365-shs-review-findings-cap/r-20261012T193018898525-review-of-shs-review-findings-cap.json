@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (revision a76020e6, logs/gate_base.log, 4 failed / 1155 passed / 1 skipped, EXIT=1) and after_suite (revision 92e156243, logs/gate_after.log, 4 failed / 1160 passed / 1 skipped, EXIT=1) carry identical failure_ids sets (the four pre-existing settings/docs-eligibility failures), so added = 0; the after arm adds the new test file as +5 passed (1155 -> 1160) with no new failure id.",
+  "backend": "clive",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/review/pipeline.py:review_review_worker",
+    "imas_codex/standard_names/review/pipeline.py:enrich_review_worker",
+    "imas_codex/standard_names/promote.py:_score_proposal"
+  ],
+  "completed_at": "2026-10-12T19:40:26.890Z",
+  "dispatched_at": "2026-10-12T19:30:29Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "1801",
+      "severity": "follow-on",
+      "text": "_extract_error_lint_ids re-states the one-line lint-summary format f\"[{severity}:lint:{finding_type}] {name_id}: {detail[:200]}\" verbatim from _extract_audit_findings (pipeline.py:1752-1756), so the string the reviewer is shown and the string the cap records are maintained in two places; a change to one leaves the prompt and the recorded audit_cap_finding to drift, where a shared one-line-summary helper would give that format a single owner."
+    },
+    {
+      "file": "tests/standard_names/test_review_findings_cap.py",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "test_audit_findings_block_is_absent_when_no_findings (line 52) renders with audit_findings=[] and asserts FINDING_MARKER (line 65) is absent, but FINDING_MARKER is a literal only ever supplied by the sibling render test, so no renderer could emit it regardless of the template's if-guard; the assertion names no code change under which it reddens and does not guard the {% if audit_findings %} condition it claims to test."
+    },
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "1957",
+      "severity": "follow-on",
+      "text": "the cap skips any entry whose score is already below DEFAULT_MIN_SCORE and records nothing (line 1957), so an entry that holds an error-severity lint finding but was independently scored below acceptance carries neither audit_cap_applied nor audit_cap_finding; the plan asks each scored entry among the error-holding names to record that the cap applied and which finding caused it, and here the finding is dropped from the record even though it stands."
+    },
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "2621",
+      "severity": "follow-on",
+      "text": "the second documentation call site, _review_batch_core, calls _review_single_batch with audit_findings=[] and no error_lint_findings, so the cap cannot fire and the findings block cannot render on that path; it is reached only by tests today (loop.py imports process_review_docs_batch from workers.py, not pipeline.py), so it is recorded rather than blocking, but extending the render/cap into _review_single_batch leaves this sibling docs path uncapped."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "three production call sites reach the change: imas_codex/standard_names/review/pipeline.py:review_review_worker (the pipeline review worker, which renders sn/review_docs and sn/review_names through _review_single_batch and threads error_lint_findings), pipeline.py:enrich_review_worker (attaches error_lint_findings to each batch at line 578), and imas_codex/standard_names/promote.py:_score_proposal (calls _review_single_batch at line 710 with audit_findings=[] and no error_lint_findings, so the single-name approval scorer reaches the changed function but supplies no findings).",
+    "diff": "git diff a76020e6..92e156243 is one commit 92e156243 over five files: imas_codex/standard_names/review/pipeline.py (+67, _extract_error_lint_ids, _cap_docs_scores_for_lint_errors, and an error_lint_findings parameter threaded through _review_single_batch and its three review_review_worker call sites plus its retry), imas_codex/llm/prompts/sn/review_docs.md (+14) and review_names.md (+14) adding an {% if audit_findings %} block, tests/standard_names/test_review_findings_cap.py (new, 165 lines, 5 tests) and docs/evidence/fragments/sn-house-style/shs-review-findings-cap.html (new, 13 lines).",
+    "done_when": "The brief's two measures hold on the artefacts: logs/negative_control_template.log:1 stamps revision 92e156243 and records 'review_docs.md audit-findings loop line removed' at 1 failed / 1 passed EXIT=1 for test_audit_finding_text_reaches_rendered_prompt, and logs/negative_control_cap.log:1 stamps the same revision with the cap call replaced by a no-op at 1 failed / 4 passed EXIT=1 for test_error_lint_finding_caps_docs_score_below_acceptance; logs/new_test_head.log records 5 passed EXIT=0, and logs/gate_base.log vs logs/gate_after.log add no failure id over base.",
+    "goal": "The node goal (brief.md:38-46) is to render the batch's audit findings for the reviewer and to cap a documentation score that holds an error-severity lint finding below acceptance, recording the finding; imas_codex/standard_names/review/pipeline.py:1801-1805 derives the error lint findings per batch, pipeline.py:1936-1967 clamps a docs score at DEFAULT_MIN_SCORE - 0.001 and records audit_cap_applied/audit_cap_finding, and the render context at pipeline.py:2054 carries audit_findings into both templates, so the goal is met.",
+    "manifest": "Read the reviewed run's manifest (status complete): one commit 92e156243, changed_paths the five landed files, baseline_suite and after_suite both completed:true with exit_status 1 and the same four failure_ids, negative_control_log named as the cap log with its note, follow_ons none, blockers none.",
+    "write_paths": "The manifest declares imas_codex/standard_names/review/pipeline.py, imas_codex/llm/prompts/sn/review_docs.md, tests/standard_names/test_review_findings_cap.py, the fragment and docs/figures/sn-house-style/shs-review-findings-cap; git diff --stat a76020e6..92e156243 touches exactly those five paths (review_names.md among the prompts) and no path outside the fence."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_findings_cap.py:49 fails when the audit-findings loop in review_docs.md is removed (negative_control_template.log, 1 failed EXIT=1) and :146-155 fails when the _cap_docs_scores_for_lint_errors call is replaced by a no-op (negative_control_cap.log, 1 failed EXIT=1), so both guards redden on the regressions they claim; docked one point because :52-65 (the absence test) names no condition under which it fails.",
+    "evidence": "logs/gate_base.log:1 and logs/gate_after.log:1 name their revision, tree and command, the after arm ran to its summary line with completed:true, and the manifest's baseline_suite/after_suite match their logs; docked because the manifest's tests field shows the command with the new test appended by hand while baseline_suite.command omits it, so the two arms' commands are not literally the same string.",
+    "fit": "pipeline.py:1801-1805 and :1936-1967 follow the module's existing idiom (module-level helpers taking (report, batch_ids, wlog) and mutating entry dicts in place, mirroring _extract_audit_findings and _match_reviews_to_entries), and no added name carries a plan, sprint, codex or ticket label, though the helper's name _extract_error_lint_ids says ids while it returns an id-to-summary mapping.",
+    "goal_fidelity": "pipeline.py:1936-1967 clamps a documentation score above DEFAULT_MIN_SCORE (0.85) to 0.849 and records audit_cap_applied and audit_cap_finding, and pipeline.py:2054 passes audit_findings into both review_docs and review_names, so the documented behaviour is present on the path the brief names; docked for the already-below entries that record no finding.",
+    "reuse": "the error-lint-per-batch map is a capability the repository did not carry (searched imas_codex/standard_names/review/ and AudReport accessors: no severity-filtered accessor exists), so the function is new rather than a fork; docked because it re-states the exact one-line summary format owned by _extract_audit_findings (pipeline.py:1752-1756) instead of sharing it.",
+    "scope_discipline": "git diff --stat a76020e6..92e156243 shows exactly the five manifest and brief-declared paths and no product, generated or unrelated file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal (brief.md:38-46) is to render the batch's audit findings for the reviewer and to cap a documentation score that holds an error-severity lint finding below acceptance, recording the finding; imas_codex/standard_names/review/pipeline.py:1801-1805 derives the error lint findings per batch, pipeline.py:1936-1967 clamps a docs score at DEFAULT_MIN_SCORE - 0.001 and records audit_cap_applied/audit_cap_finding, and the render context at pipeline.py:2054 carries audit_findings into both templates, so the goal is met.\nVERDICT done_when: The brief's two measures hold on the artefacts: logs/negative_control_template.log:1 stamps revision 92e156243 and records 'review_docs.md audit-findings loop line removed' at 1 failed / 1 passed EXIT=1 for test_audit_finding_text_reaches_rendered_prompt, and logs/negative_control_cap.log:1 stamps the same revision with the cap call replaced by a no-op at 1 failed / 4 passed EXIT=1 for test_error_lint_finding_caps_docs_score_below_acceptance; logs/new_test_head.log records 5 passed EXIT=0, and logs/gate_base.log vs logs/gate_after.log add no failure id over base.\nVERDICT write_paths: The manifest declares imas_codex/standard_names/review/pipeline.py, imas_codex/llm/prompts/sn/review_docs.md, tests/standard_names/test_review_findings_cap.py, the fragment and docs/figures/sn-house-style/shs-review-findings-cap; git diff --stat a76020e6..92e156243 touches exactly those five paths (review_names.md among the prompts) and no path outside the fence.\nVERDICT manifest: Read the reviewed run's manifest (status complete): one commit 92e156243, changed_paths the five landed files, baseline_suite and after_suite both completed:true with exit_status 1 and the same four failure_ids, negative_control_log named as the cap log with its errors, follow_ons none, blockers none.\nVERDICT diff: git diff a76020e6..92e156243 is one commit 92e156243 over five files: pipeline.py (+67, _extract_error_lint_ids, _cap_docs_scores_for_lint_errors, error_lint_findings threaded through _review_single_batch and its review_review_worker call sites), review_docs.md (+14) and review_names.md (+14), test_review_findings_cap.py (new, 165 lines, 5 tests) and the evidence fragment (new, 13 lines).\nCALL_SITES: imas_codex/standard_names/review/pipeline.py:review_review_worker, imas_codex/standard_names/review/pipeline.py:enrich_review_worker, imas_codex/standard_names/promote.py:_score_proposal\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: pipeline.py:1936-1967 clamps a documentation score above DEFAULT_MIN_SCORE (0.85) to 0.849 and records audit_cap_applied and audit_cap_finding, and pipeline.py:2054 passes audit_findings into both review_docs and review_names, so the documented behaviour is present on the path the brief names; docked for the already-below entries that record no finding.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/gate_base.log:1 and logs/gate_after.log:1 name their revision, tree and command, the after arm ran to its summary line with completed:true, and the manifest's baseline_suite/after_suite match their logs; docked because baseline_suite.command omits the new test file while the after arm appends it.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat a76020e6..92e156243 shows exactly the five manifest and brief-declared paths and no product, generated or unrelated file.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_review_findings_cap.py:49 fails when the audit-findings loop in review_docs.md is removed (negative_control_template.log, 1 failed EXIT=1) and :146-155 fails when the cap call is replaced by a no-op (negative_control_cap.log, 1 failed EXIT=1), so both guards redden on the regressions they claim; docked because :52-65 names no condition under which it fails.\nSCORE fit: 17\nJUSTIFICATION fit: pipeline.py:1801-1805 and :1936-1967 follow the module's existing helper idiom, and no added name carries a plan or ticket label, though _extract_error_lint_ids says ids while it returns an id-to-summary mapping.\nSCORE reuse: 15\nJUSTIFICATION reuse: the error-lint-per-batch map is a capability the repository did not carry, but _extract_error_lint_ids re-states the exact one-line summary format owned by _extract_audit_findings (pipeline.py:1752-1756) instead of sharing it.\nFINDING imas_codex/standard_names/review/pipeline.py:1801 follow-on: _extract_error_lint_ids re-states the one-line lint-summary format verbatim from _extract_audit_findings (pipeline.py:1752-1756), so the reviewer text and the cap's recorded finding are maintained in two places.\nFINDING tests/standard_names/test_review_findings_cap.py:65 follow-on: test_audit_findings_block_is_absent_when_no_findings asserts a test-local literal FINDING_MARKER absent from a render with audit_findings=[], so no template could emit it and the assertion names no code change under which it reddens; it does not guard the {% if audit_findings %} condition it claims to test.\nFINDING imas_codex/standard_names/review/pipeline.py:1957 follow-on: the cap skips entries already below DEFAULT_MIN_SCORE and records nothing, so an error-holding entry scored below acceptance carries no audit_cap_finding although the plan asks each such entry to record it.\nFINDING imas_codex/standard_names/review/pipeline.py:2621 follow-on: _review_batch_core calls _review_single_batch with audit_findings=[] and no error_lint_findings, so the cap cannot fire on that docs path; it is test-only today but is left uncapped.\n",
+  "review_run_id": "r-20261012T193018898525-review-of-shs-review-findings-cap",
+  "reviewed_base_sha": "a76020e640e64b108f7d04864841bf5c794cb1d3",
+  "reviewed_head_sha": "92e156243490eab4f9b2f09a0aa60c1b38f9af6b",
+  "reviewed_run_id": "r-20261012T190639423365-shs-review-findings-cap",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:44:00.000000+00:00",
+  "total": 105
+}
