@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -328,6 +328,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-shs-review-findings-cap" data-who="reckon-build" data-when="2026-10-12T19:42:00Z">
     <div class="r-comment-body"><p>Review half of §5 landed: audit findings render in the review prompts, and an error-severity lint finding caps the documentation score below acceptance (merge <code>7d9fd765b</code>); review 105/120. The registry block in the documentation prompts is still open. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s5-review">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261012T190639423365-shs-review-findings-cap" data-who="reckon-build" data-when="2026-10-12T19:30:15.169Z">
+    <div class="r-comment-body"><p>Render the batch&#x27;s Layer 1 audit findings in review_docs.md and review_names.md, and cap a documentation score above the 0.85 acceptance threshold (DEFAULT_MIN_SCORE) just below it when the name holds an error-severity lint finding, recording the finding that forced the cap — gate 1160 passed / 4 pre-existing failures, 0 added; new-test arm 5 passed.</p></div>
 </div>
 </section>
 </main>
