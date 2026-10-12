@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping"
+  ],
+  "added_failures_note": "added failures retired by name in the reviewed node's done-when or manifest; total not capped",
+  "base_log_revision": "427d872afc96eab56f250d54437bd66d6abde0a0",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/ids/workers.py:1392",
+    "imas_codex/ids/workers.py:1427",
+    "imas_codex/ids/candidates.py:618",
+    "imas_codex/discovery/base/judgment.py:227",
+    "imas_codex/discovery/base/judgment.py:312",
+    "imas_codex/llm/search_tools.py:151"
+  ],
+  "completed_at": "2026-10-12T15:54:17.215Z",
+  "dispatched_at": "2026-10-12T15:42:11Z",
+  "findings": [
+    {
+      "file": "imas_codex/settings.py",
+      "line": "150",
+      "severity": "follow-on",
+      "text": "follow-on: the sn-judge seat's registry entries (MODEL_SECTIONS and _MODEL_DEFAULTS) sit outside the declared write paths, which name pyproject.toml only, so the seat the goal requires cannot resolve without editing a path the fence excluded; the coordinator must widen the scope or accept the two paths at promotion."
+    },
+    {
+      "file": "tests/discovery/test_decisions_key_skip.py",
+      "line": "108",
+      "severity": "follow-on",
+      "text": "follow-on: the monkeypatch target was retargeted from candidates.call_decisions to judgment.call_decisions, a second path outside the declared write scope, required because the deleted module-level name would otherwise leave tests/discovery with a failing reference."
+    },
+    {
+      "file": "imas_codex/discovery/base/judgment.py",
+      "line": "93",
+      "severity": "follow-on",
+      "text": "follow-on: decide_one duplicates decide_batch's fail-soft transport handling (call, classify the exception, book the cost) instead of sharing the per-call unit the brief directs, so the two entry points can drift in how they classify a fault; the manifest records the deliberate decision that decide_batch's blanket swallow cannot be reused by a caller that must raise."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T150509998089-sje-decisions-owner/manifest.md",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite carries completed:false and its base-arm.log is not a pytest run, so the \"no added failures against base\" claim rests on structural attribution (map.py byte-identical base..head) rather than a measured base arm; a later reader should treat the base half of the delta as unverified."
+    }
+  ],
+  "head_log_revision": "428878833dd1df6259686167e6e823241120cff4",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against 427d872afc96eab56f250d54437bd66d6abde0a0; the code commit deletes _call_judgment and adds decide_one and _book_cost to judgment.py, the seat lands in pyproject.toml and settings.py, and the three later commits are the evidence fragment and its figure.",
+    "done_when": "the done-when names tests/ids and tests/discovery with no added failures, a red candidate spend assertion when the shared booking line is removed, and get_model(\"sn-judge\") resolving; the manifest records all three and I read each log it cites.",
+    "goal": "the goal is one decisions owner plus a standard-names seat; imas_codex/ids/candidates.py:373 and imas_codex/ids/candidates.py:458 obtain answers through decide_one and no _call_judgment remains (grep over imas_codex/ returns line 289's prose only), and get_model(\"sn-judge\") is registered in imas_codex/settings.py:150 and :190.",
+    "manifest": "read; it records status complete, the four commits, the gate command and its \"1 failed, 800 passed, 13 skipped\" result, the negative-control log and the base-arm limitation, and I confirmed the failing id is pre-existing.",
+    "write_paths": "the declared paths are the two source files, pyproject.toml, five test files, the conftest fixture and the two evidence paths; the diff touches twelve files, ten inside that set and two outside it (imas_codex/settings.py, tests/discovery/test_decisions_key_skip.py), both disclosed in the manifest."
+  },
+  "justifications": {
+    "durability": "tests/ids/test_candidate_judgment.py's spend assertions fail with KeyError under the negative control recorded in negative-control.log, and tests/discovery/test_judgment.py:291-295 imports the guard's target under a blocking hook with a positive control that reddens.",
+    "evidence": "the head gate log head-gate2.log records \"1 failed, 800 passed, 13 skipped\" and the record's failure_ids name one pre-existing test, but the reviewed manifest's baseline_suite carries completed:false and base-arm.log holds a prose attribution rather than a pytest run, so the base half of the delta is reasoned, not measured.",
+    "fit": "the new names decide_one, _book_cost and DEFAULT_COST_STEP at imas_codex/discovery/base/judgment.py:45-60 carry no plan or ticket label and match the \"cost: Any | None\" idiom already used across the module.",
+    "goal_fidelity": "imas_codex/ids/candidates.py:373 and :458 route through decide_one in imas_codex/discovery/base/judgment.py:60, so the private wrapper the goal retires is gone and the seat resolves at imas_codex/settings.py:190.",
+    "reuse": "decide_one lives in the owner module imas_codex/discovery/base/judgment.py and _book_cost consolidates the booking both entry points share, but decide_one re-implements the call/classify/book shape of the per-call unit at judgment.py:176 rather than sharing it.",
+    "scope_discipline": "ten of the twelve changed paths sit inside the declared write paths listed in the manifest, and imas_codex/settings.py and tests/discovery/test_decisions_key_skip.py fall outside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is one decisions owner plus a standard-names seat; imas_codex/ids/candidates.py:373 and imas_codex/ids/candidates.py:458 obtain answers through decide_one and no _call_judgment remains (grep over imas_codex/ returns line 289's prose only), and get_model(\"sn-judge\") is registered in imas_codex/settings.py:150 and :190.\nVERDICT done_when: the done-when names tests/ids and tests/discovery with no added failures, a red candidate spend assertion when the shared booking line is removed, and get_model(\"sn-judge\") resolving; the manifest records all three and I read each log it cites.\nVERDICT write_paths: the declared paths are the two source files, pyproject.toml, five test files, the conftest fixture and the two evidence paths; the diff touches twelve files, ten inside that set and two outside it (imas_codex/settings.py, tests/discovery/test_decisions_key_skip.py), both disclosed in the manifest.\nVERDICT manifest: read; it records status complete, the four commits, the gate command and its \"1 failed, 800 passed, 13 skipped\" result, the negative-control log and the base-arm limitation, and I confirmed the failing id is pre-existing.\nVERDICT diff: read commit by commit against 427d872afc96eab56f250d54437bd66d6abde0a0; the code commit deletes _call_judgment and adds decide_one and _book_cost to judgment.py, the seat lands in pyproject.toml and settings.py, and the three later commits are the evidence fragment and its figure.\nCALL_SITES: imas_codex/ids/workers.py:1392, imas_codex/ids/workers.py:1427, imas_codex/ids/candidates.py:618, imas_codex/discovery/base/judgment.py:227, imas_codex/discovery/base/judgment.py:312, imas_codex/llm/search_tools.py:151\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/ids/candidates.py:373 and :458 route through decide_one in imas_codex/discovery/base/judgment.py:60, so the private wrapper the goal retires is gone and the seat resolves at imas_codex/settings.py:190.\nSCORE evidence: 14\nJUSTIFICATION evidence: the head gate log head-gate2.log records \"1 failed, 800 passed, 13 skipped\" and the record's failure_ids name one pre-existing test, but the reviewed manifest's baseline_suite carries completed:false and base-arm.log holds a prose attribution rather than a pytest run, so the base half of the delta is reasoned, not measured.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: ten of the twelve changed paths sit inside the declared write paths listed in the manifest, and imas_codex/settings.py and tests/discovery/test_decisions_key_skip.py fall outside them.\nSCORE durability: 18\nJUSTIFICATION durability: tests/ids/test_candidate_judgment.py's spend assertions fail with KeyError under the negative control recorded in negative-control.log, and tests/discovery/test_judgment.py:291-295 imports the guard's target under a blocking hook with a positive control that reddens.\nSCORE fit: 16\nJUSTIFICATION fit: the new names decide_one, _book_cost and DEFAULT_COST_STEP at imas_codex/discovery/base/judgment.py:45-60 carry no plan or ticket label and match the \"cost: Any | None\" idiom already used across the module.\nSCORE reuse: 16\nJUSTIFICATION reuse: decide_one lives in the owner module imas_codex/discovery/base/judgment.py and _book_cost consolidates the booking both entry points share, but decide_one re-implements the call/classify/book shape of the per-call unit at judgment.py:176 rather than sharing it.\nFINDING imas_codex/settings.py:150 follow-on: the sn-judge seat's registry entries (MODEL_SECTIONS and _MODEL_DEFAULTS) sit outside the declared write paths, which name pyproject.toml only, so the seat the goal requires cannot resolve without editing a path the fence excluded; the coordinator must widen the scope or accept the two paths at promotion.\nFINDING tests/discovery/test_decisions_key_skip.py:108 follow-on: the monkeypatch target was retargeted from candidates.call_decisions to judgment.call_decisions, a second path outside the declared write scope, required because the deleted module-level name would otherwise leave tests/discovery with a failing reference.\nFINDING imas_codex/discovery/base/judgment.py:93 follow-on: decide_one duplicates decide_batch's fail-soft transport handling (call, classify the exception, book the cost) instead of sharing the per-call unit the brief directs, so the two entry points can drift in how they classify a fault; the manifest records the deliberate decision that decide_batch's blanket swallow cannot be reused by a caller that must raise.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T150509998089-sje-decisions-owner/manifest.md:20 follow-on: baseline_suite carries completed:false and its base-arm.log is not a pytest run, so the \"no added failures against base\" claim rests on structural attribution (map.py byte-identical base..head) rather than a measured base arm; a later reader should treat the base half of the delta as unverified.",
+  "review_run_id": "r-20261012T154200176895-review-of-sje-decisions-owner",
+  "reviewed_base_sha": "427d872afc96eab56f250d54437bd66d6abde0a0",
+  "reviewed_head_sha": "b6038aa0235780593dc353f3a1511fbc6f8625c2",
+  "reviewed_run_id": "r-20261012T150509998089-sje-decisions-owner",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:54:52.547487+00:00",
+  "total": 96
+}
