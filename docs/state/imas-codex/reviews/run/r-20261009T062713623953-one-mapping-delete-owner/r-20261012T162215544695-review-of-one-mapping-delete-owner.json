@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run carries no baseline_suite/after_suite arm pair in its manifest (the node was not suite-armed); it recorded a single gate (head-gate.log, 17 passed EXIT=0; gate.log graph test 1 passed EXIT=0) and a separate negative-control arm (negative-control.log EXIT=1). With no base/head pair there is no suite delta, so added_failure_count is 0 and added_failure_ids is empty.",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/ids/workers.py:622 (delete_mapping",
+    "reached from run_mapping_engine's --clear branch at workers.py:1567)",
+    "imas_codex/cli/map.py:710 (delete_mapping",
+    "reached from `imas map clear` at imas_codex/cli/map.py:1035)"
+  ],
+  "completed_at": "2026-10-12T16:35:14.285Z",
+  "dispatched_at": "2026-10-12T16:22:28Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/graph_ops.py",
+      "line": "829",
+      "severity": "follow-on",
+      "text": "follow-on: the evidence delete removes the MappingEvidence of any SignalSource the mapping USES_SIGNAL_SOURCE points at, so clearing mapping A deletes the evidence of a source shared with IDS mapping B; the S19 review named this pre-existing for `map clear`, but the engine --clear path now reaches it, widening the effect to `map run --clear`."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read commit by commit against base 24d536235b6; the single commit 8546ff622 adds graph_ops.delete_mapping (graph_ops.py:808), reroutes workers.clear_mappings_for_ids (workers.py:602) and map._clear_mapping (map.py:697) onto it, and adds tests/ids/test_mapping_delete_graph.py plus the rewritten tests/ids/test_map_run_clear.py; six files, all inside the declared scope.",
+    "done_when": "The done_when asks for unit tests showing both callers reach the one owner, a graph-marked test that seeds a throwaway mapping with one binding and one evidence node, clears it through the engine path and finds none of the three left, and a negative control in which the engine skips the evidence delete so the graph test fails; the manifest records tests/ids/test_map_run_clear.py + tests/ids/test_mapping_edge_ownership.py (17 passed) and tests/ids/test_mapping_delete_graph.py -m graph (1 passed), with negative-control.log red at EXIT=1.",
+    "goal": "The S19 goal is that one owner deletes a mapping's bindings, its MappingEvidence and its IMASMapping node whichever command asks; graph_ops.delete_mapping (imas_codex/ids/graph_ops.py:808) is that owner, and both _clear_mapping (imas_codex/cli/map.py:710) and the engine --clear branch through clear_mappings_for_ids (imas_codex/ids/workers.py:602, called at workers.py:1567) call it.",
+    "manifest": "Read; it names commit 8546ff6229cfc1c33867f4447f67191b70269156, the two gate commands and their results, negative_control_log, and the {\"mappings\",\"bindings\",\"evidence\"} counts delete_mapping returns.",
+    "write_paths": "The manifest declares seven paths; every path changed by the diff (imas_codex/ids/graph_ops.py, imas_codex/ids/workers.py, imas_codex/cli/map.py, tests/ids/test_map_run_clear.py, tests/ids/test_mapping_delete_graph.py, docs/evidence/fragments/jt60sa-mapping-study-expansion/one-mapping-delete-owner.html) is inside them."
+  },
+  "justifications": {
+    "durability": "the graph test independently re-counts the three artefacts after the engine clear (tests/ids/test_mapping_delete_graph.py:105) and reddens under the recorded mutation, but the only end-to-end guard of the evidence Cypher is graph-marked and excluded from the default run, so the mock unit tests (tests/ids/test_map_run_clear.py:104) do not reach that statement.",
+    "evidence": "every test the done_when names is recorded in the manifest and the gate logs, and the graph test carries a positive control asserting the seeded mapping is visible before the clear (tests/ids/test_mapping_delete_graph.py:99).",
+    "fit": "delete_mapping sits beside clear_mapping_bindings (imas_codex/ids/graph_ops.py:776), carries no plan or ticket label, and clear_mappings_for_ids (imas_codex/ids/workers.py:602) is renamed to describe what it now does.",
+    "goal_fidelity": "both callers now route the whole delete through graph_ops.delete_mapping (imas_codex/ids/graph_ops.py:808), and the engine branch logs its three counts unconditionally (imas_codex/ids/workers.py:1572).",
+    "reuse": "delete_mapping extends clear_mapping_bindings (imas_codex/ids/graph_ops.py:827) and replaces the inline evidence-and-mapping delete map.py carried, and a search over imas_codex/ found no other MappingEvidence or IMASMapping delete site.",
+    "scope_discipline": "every path in git diff 24d536235b6..8546ff622 is inside the manifest's declared write paths (imas_codex/ids/graph_ops.py, imas_codex/ids/workers.py, imas_codex/cli/map.py, tests/ids/test_map_run_clear.py, tests/ids/test_mapping_delete_graph.py, docs/evidence/fragments/.../one-mapping-delete-owner.html)."
+  },
+  "limitations": [
+    "The reviewed run's gates were not re-run; the added-failure count is read from the reviewed run's own manifest and gate logs, which carry no base/head arm pair.",
+    "The graph-marked test needs a live Neo4j and is excluded from the default run, so its end-to-end evidence-delete assertion was read from the reviewed run's gate.log, not re-executed here.",
+    "The evidence-delete blast radius on a source shared by two IDS mappings was read from the Cypher and cross-checked against the S19 closing comment, not reproduced against the live graph."
+  ],
+  "node": "review-of-one-mapping-delete-owner",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The S19 goal is that one owner deletes a mapping's bindings, its MappingEvidence and its IMASMapping node whichever command asks; graph_ops.delete_mapping (imas_codex/ids/graph_ops.py:808) is that owner, and both _clear_mapping (imas_codex/cli/map.py:710) and the engine --clear branch through clear_mappings_for_ids (imas_codex/ids/workers.py:602, called at workers.py:1567) call it.\nVERDICT done_when: The done_when asks for unit tests showing both callers reach the one owner, a graph-marked test that seeds a throwaway mapping with one binding and one evidence node, clears it through the engine path and finds none of the three left, and a negative control in which the engine skips the evidence delete so the graph test fails; the manifest records tests/ids/test_map_run_clear.py + tests/ids/test_mapping_edge_ownership.py (17 passed) and tests/ids/test_mapping_delete_graph.py -m graph (1 passed), with negative-control.log red at EXIT=1.\nVERDICT write_paths: The manifest declares seven paths; every path changed by the diff (imas_codex/ids/graph_ops.py, imas_codex/ids/workers.py, imas_codex/cli/map.py, tests/ids/test_map_run_clear.py, tests/ids/test_mapping_delete_graph.py, docs/evidence/fragments/jt60sa-mapping-study-expansion/one-mapping-delete-owner.html) is inside them.\nVERDICT manifest: Read; it names commit 8546ff6229cfc1c33867f4447f67191b70269156, the two gate commands and their results, negative_control_log, and the {\"mappings\",\"bindings\",\"evidence\"} counts delete_mapping returns.\nVERDICT diff: Read commit by commit against base 24d536235b6; the single commit 8546ff622 adds graph_ops.delete_mapping (graph_ops.py:808), reroutes workers.clear_mappings_for_ids (workers.py:602) and map._clear_mapping (map.py:697) onto it, and adds tests/ids/test_mapping_delete_graph.py plus the rewritten tests/ids/test_map_run_clear.py; six files, all inside the declared scope.\nCALL_SITES: imas_codex/ids/workers.py:622 (delete_mapping, reached from run_mapping_engine's --clear branch at workers.py:1567), imas_codex/cli/map.py:710 (delete_mapping, reached from `imas map clear` at imas_codex/cli/map.py:1035)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: both callers now route the whole delete through graph_ops.delete_mapping (imas_codex/ids/graph_ops.py:808), and the engine branch logs its three counts unconditionally (imas_codex/ids/workers.py:1572).\nSCORE evidence: 20\nJUSTIFICATION evidence: every test the done_when names is recorded in the manifest and the gate logs, and the graph test carries a positive control asserting the seeded mapping is visible before the clear (tests/ids/test_mapping_delete_graph.py:99).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 24d536235b6..8546ff622 is inside the manifest's declared write paths (imas_codex/ids/graph_ops.py, imas_codex/ids/workers.py, imas_codex/cli/map.py, tests/ids/test_map_run_clear.py, tests/ids/test_mapping_delete_graph.py, docs/evidence/fragments/.../one-mapping-delete-owner.html).\nSCORE durability: 18\nJUSTIFICATION durability: the graph test independently re-counts the three artefacts after the engine clear (tests/ids/test_mapping_delete_graph.py:105) and reddens under the recorded mutation, but the only end-to-end guard of the evidence Cypher is graph-marked and excluded from the default run, so the mock unit tests (tests/ids/test_map_run_clear.py:104) do not reach that statement.\nSCORE fit: 20\nJUSTIFICATION fit: delete_mapping sits beside clear_mapping_bindings (imas_codex/ids/graph_ops.py:776), carries no plan or ticket label, and clear_mappings_for_ids (imas_codex/ids/workers.py:602) is renamed to describe what it now does.\nSCORE reuse: 20\nJUSTIFICATION reuse: delete_mapping extends clear_mapping_bindings (imas_codex/ids/graph_ops.py:827) and replaces the inline evidence-and-mapping delete map.py carried, and a search over imas_codex/ found no other MappingEvidence or IMASMapping delete site.\nFINDING imas_codex/ids/graph_ops.py:829 follow-on: the evidence delete removes the MappingEvidence of any SignalSource the mapping USES_SIGNAL_SOURCE points at, so clearing mapping A deletes the evidence of a source shared with IDS mapping B; the S19 review named this pre-existing for `map clear`, but the engine --clear path now reaches it, widening the effect to `map run --clear`.\nreviewed_base_sha: 24d536235b6297c39f5f39153fd4d0b90850a186\nreviewed_head_sha: 8546ff6229cfc1c33867f4447f67191b70269156\n",
+  "review_run_id": "r-20261012T162215544695-review-of-one-mapping-delete-owner",
+  "review_scope": "Independent review of the S19 landed change (commit 8546ff622 against base 24d536235b6): the single whole-mapping delete owner graph_ops.delete_mapping, its routing from map clear and the engine --clear path, the two test files and the landing fragment. Read-only.",
+  "reviewed_base_sha": "24d536235b6297c39f5f39153fd4d0b90850a186",
+  "reviewed_commits": [
+    "8546ff6229cfc1c33867f4447f67191b70269156"
+  ],
+  "reviewed_head_sha": "8546ff6229cfc1c33867f4447f67191b70269156",
+  "reviewed_run_id": "r-20261009T062713623953-one-mapping-delete-owner",
+  "reviewer": "review-of-one-mapping-delete-owner",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T16:32:27.446362+00:00",
+  "total": 118,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T062713623953-one-mapping-delete-owner/head-gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T062713623953-one-mapping-delete-owner/gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T062713623953-one-mapping-delete-owner/negative-control.log"
+  ]
+}
