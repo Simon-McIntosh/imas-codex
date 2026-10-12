@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's manifest records no baseline_suite or after_suite gate log, so added_failure_count was not taken",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T19:17:09.774Z",
+  "dispatched_at": "2026-10-12T19:02:46Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_review_checks.py",
+      "line": "123",
+      "severity": "follow-on",
+      "text": "follow-on: test_audit_finding_classes_are_emitted asserts the class is a member of AUDIT_FINDING_CLASSES, which ReviewCheck's model_validator already enforces at load, so the assertion cannot fail for any check that loaded and validates nothing about the classes audits.py actually emits; \"duplicate_component\" is not a finding_type any audit emits (it is AuditReport.duplicate_components) and no test would notice."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T183814394133-srtj-check-taxonomy/manifest.md",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "follow-on: the checkpoint reports the name axis as 28 checks (grammar 7, semantic 10, convention 8, completeness 3) and docs as 26 (documentation_quality 13, completeness 7); the taxonomy actually holds 32 name-axis checks and 24 docs-axis checks, so the reporting understates the name axis by four."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/imas-codex-srtj-check-taxonomy/gate-green.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log's first line is the pytest banner rather than a header naming the revision, tree and command it ran at, so a later reader cannot confirm from the log alone which revision produced the nine passes."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read against base 4c9113742; the single commit 2e50fb776 adds checks.py (256 lines), review_checks.yaml (1341 lines), test_review_checks.py (143 lines) and the fragment, all inside the declared scope.",
+    "done_when": "section 2's done-when names a both-or-neither test, an uncarried-evidence-field test with a shown failure, and the mapping share; tests/standard_names/test_review_checks.py carries all three and the fragment records the 136-reason table at 100 percent.",
+    "goal": "the brief's goal is a data taxonomy of named review checks plus a small typed loader; imas_codex/llm/prompts/sn/review_checks.yaml holds 56 such checks and imas_codex/standard_names/review/checks.py:246 loads and validates them.",
+    "manifest": "read; it records the gate as \"9 passed\" at 2e50fb7768adaa1e3d16026d6272260ea5893853 and names the negative-control log.",
+    "write_paths": "the manifest declares review_checks.yaml, checks.py, test_review_checks.py and the evidence fragment; git diff --name-only 4c9113742..2e50fb776 lists exactly those four files."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_checks.py:87 plants an absent field and asserts the helper reports it, but :123's audit-class assertion only restates the loader guard.",
+    "evidence": "/home/ITER/mcintos/.cache/imas-codex-srtj-check-taxonomy/gate-negative-control.log shows test_evidence_fields_are_carried_by_the_review_state failing on the planted field with EXIT=1, though the gate logs' first lines name no revision or command.",
+    "fit": "checks.py:106 follows the repo's pydantic-model idiom and derives carried fields by AST from pipeline.py, and no check id or module name carries a plan label.",
+    "goal_fidelity": "imas_codex/standard_names/review/checks.py:246 loads the taxonomy and yaml holds 56 checks (36 Noul, 4 Choice, 16 audit-decided), matching the brief's deliverable.",
+    "reuse": "the loader imports DOCUMENTATION_GATE_NAMES and HouseStyleFindingClass from imas_codex/standard_names/docs_gates.py and a search of imas_codex/standard_names/review and imas_codex/llm/prompts found no existing review-check taxonomy owner.",
+    "scope_discipline": "git diff --name-only between base 4c9113742 and head 2e50fb776 touches only the four declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the brief's goal is a data taxonomy of named review checks plus a small typed loader; imas_codex/llm/prompts/sn/review_checks.yaml holds 56 such checks and imas_codex/standard_names/review/checks.py:246 loads and validates them.\nVERDICT done_when: section 2's done-when names a both-or-neither test, an uncarried-evidence-field test with a shown failure, and the mapping share; tests/standard_names/test_review_checks.py carries all three and the fragment records the 136-reason table at 100 percent.\nVERDICT write_paths: the manifest declares review_checks.yaml, checks.py, test_review_checks.py and the evidence fragment; git diff --name-only 4c9113742..2e50fb776 lists exactly those four files.\nVERDICT manifest: read; it records the gate as \"9 passed\" at 2e50fb7768adaa1e3d16026d6272260ea5893853 and names the negative-control log.\nVERDICT diff: read against base 4c9113742; the single commit 2e50fb776 adds checks.py (256 lines), review_checks.yaml (1341 lines), test_review_checks.py (143 lines) and the fragment, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/checks.py:246 loads the taxonomy and yaml holds 56 checks (36 Noul, 4 Choice, 16 audit-decided), matching the brief's deliverable.\nSCORE evidence: 16\nJUSTIFICATION evidence: /home/ITER/mcintos/.cache/imas-codex-srtj-check-taxonomy/gate-negative-control.log shows test_evidence_fields_are_carried_by_the_review_state failing on the planted field with EXIT=1, though the gate logs' first lines name no revision or command.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only between base 4c9113742 and head 2e50fb776 touches only the four declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_review_checks.py:87 plants an absent field and asserts the helper reports it, but :123's audit-class assertion only restates the loader guard.\nSCORE fit: 19\nJUSTIFICATION fit: checks.py:106 follows the repo's pydantic-model idiom and derives carried fields by AST from pipeline.py, and no check id or module name carries a plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the loader imports DOCUMENTATION_GATE_NAMES and HouseStyleFindingClass from imas_codex/standard_names/docs_gates.py and a search of imas_codex/standard_names/review and imas_codex/llm/prompts found no existing review-check taxonomy owner.\nFINDING tests/standard_names/test_review_checks.py:123 follow-on: test_audit_finding_classes_are_emitted asserts the class is a member of AUDIT_FINDING_CLASSES, which ReviewCheck's model_validator already enforces at load, so the assertion cannot fail for any check that loaded and validates nothing about the classes audits.py actually emits; \"duplicate_component\" is not a finding_type any audit emits (it is AuditReport.duplicate_components) and no test would notice.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T183814394133-srtj-check-taxonomy/manifest.md:17 follow-on: the checkpoint reports the name axis as 28 checks (grammar 7, semantic 10, convention 8, completeness 3) and docs as 26 (documentation_quality 13, completeness 7); the taxonomy actually holds 32 name-axis checks and 24 docs-axis checks, so the reporting understates the name axis by four.\nFINDING /home/ITER/mcintos/.cache/imas-codex-srtj-check-taxonomy/gate-green.log:1 follow-on: the gate log's first line is the pytest banner rather than a header naming the revision, tree and command it ran at, so a later reader cannot confirm from the log alone which revision produced the nine passes.\n",
+  "review_run_id": "r-20261012T190220398790-review-of-srtj-check-taxonomy",
+  "reviewed_base_sha": "4c9113742ded755fcc4e8576fbfe73f602bd5038",
+  "reviewed_head_sha": "2e50fb7768adaa1e3d16026d6272260ea5893853",
+  "reviewed_run_id": "r-20261012T183814394133-srtj-check-taxonomy",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:18:17.129200+00:00",
+  "total": 109
+}
