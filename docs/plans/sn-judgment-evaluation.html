@@ -24,7 +24,7 @@
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2">
 </head>
@@ -340,6 +340,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T154012151828-review-of-sje-shadow-store" data-who="reckon-build" data-when="2026-10-12T15:50:19.761Z">
     <div class="r-comment-body"><p>review of sje-shadow-store: 96/120, one blocking finding (write_reviews drops the shadow fields) and four follow-ons, all carried into the sje-shadow-write companion node</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261012T155037257528-sje-shadow-write" data-who="reckon-build" data-when="2026-10-12T16:05:13Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-judgment-evaluation/sje-shadow-write.html — shadow fields persist with null score; 362 passed, 1 deselected, zero added failures; writer and accept mutations each fail their target test.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-12T15:55:00Z">
     <div class="r-comment-body"><p>§2 landed: candidates route through <code>decide_one</code> in the shared owner with one cost-booking helper (commit <code>428878833</code>); the booking control reddens both spend assertions; <code>sn-judge</code> resolves; review 96/120, no added failures. Follow-on: share one per-call unit between <code>decide_one</code> and <code>decide_batch</code>. <a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s2">evidence</a></p></div>
