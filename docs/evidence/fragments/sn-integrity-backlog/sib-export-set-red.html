@@ -45,14 +45,13 @@
 <table id="sib-export-set-red-measure-table">
 <thead><tr><th>Arm</th><th>Scope</th><th>Result</th></tr></thead>
 <tbody>
-<tr><td>baseline (base <code>1d5af84bd</code>, worktree)</td><td>the eight export/catalog files, 60 selected</td><td>12 failed, 45 passed, 3 errors, EXIT=1 (63 s)</td></tr>
-<tr><td>before the change (scratch copy of <code>b468bfb5c</code> = <code>b161235bb^</code>, HEAD test files)</td><td>same eight files, 60 selected</td><td>60 passed, EXIT=0 (107 s)</td></tr>
-<tr><td>after (head, worktree, fixtures repaired)</td><td>same eight files, 60 selected</td><td>60 passed, EXIT=0 (116 s)</td></tr>
-<tr><td>negative control (repairs reverted = baseline tree)</td><td>same eight files</td><td>the fifteen named ids fail, EXIT=1</td></tr>
+<tr><td>negative control (repairs reverted to <code>1d5af84bd</code>)</td><td>the eight export/catalog files, 60 selected</td><td>12 failed, 45 passed, 3 errors, EXIT=1 — the fifteen named ids against identical product code</td></tr>
+<tr><td>before the change (scratch copy of <code>b468bfb5c</code> = <code>b161235bb^</code>, HEAD test files)</td><td>same eight files, 60 selected</td><td>60 passed, EXIT=0</td></tr>
+<tr><td>after (head <code>0562db25b</code>, fixtures repaired)</td><td>same eight files, 60 selected</td><td>60 passed, 0 failed, 0 errors, EXIT=0</td></tr>
 </tbody>
 </table>
-<p>The before-the-change arm is the identifying measurement: at <code>b161235bb^</code> all sixty pass over the same eight files, so the fifteen regressed at <code>b161235bb</code> and nowhere else. The scratch tree carries no <code>.git</code>, so the arm sets <code>SOURCE_DATE_EPOCH</code> to reach the manifest write; without it the cut raises the provenance-timestamp error and the arm measures nothing about the classifier.</p>
-<p>Logs in the run directory: <code>base_export_set.log</code>, <code>prechange_scratch.log</code> (contaminated by the absent <code>.git</code>), <code>prechange_scratch2.log</code>, <code>head_export_set.log</code>.</p>
+<p>The negative control holds the product code fixed and reverts only the fixtures: between the base and head revisions the two trees differ in nothing under <code>imas_codex/</code>, so the fifteen failures are the repairs' own absence and nothing else. The before-the-change arm identifies the cause: at <code>b161235bb^</code> all sixty pass over the same eight files, so the fifteen regressed at <code>b161235bb</code> and nowhere else. That scratch tree carries no <code>.git</code>, so the arm sets <code>SOURCE_DATE_EPOCH</code> to reach the manifest write; without it the cut raises the provenance-timestamp error and the arm measures nothing about the classifier.</p>
+<p>Logs in the run directory: <code>negative_control.log</code>, <code>head_gate.log</code>.</p>
 </main>
 </body>
 </html>
