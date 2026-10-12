@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="8b42e71ca,e48572d1b,d8a9227fc,97bff9908,3787f8357,bedcba7b8,04e46d27c,88885fa53,170a48d35,ab402cc72,205b68c99,08a6ae16f,26f7197b1,3ec338788,a758dc050,b8c4cf3ce,c792d5d1a,563463bbc,0e1f1d382,43ee5a2e0,10d79f25b,615da419b">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="96">
+<meta name="plan-version" content="97">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -529,6 +529,9 @@
 </div>
 <div class="r-comment" data-section="s17" data-id="c-run-r-20261012T162145271084-review-of-focus-validation-agrees-with-claims" data-who="reckon-build" data-when="2026-10-12T16:36:47.007Z">
     <div class="r-comment-body"><p>Stored a parsed six-dimension review of r-20261009T061528146758-focus-validation-agrees-with-claims (base 9f4bf1d3, head 997941042) at reviews/imas-codex/r-20261009T061528146758-focus-validation-agrees-with-claims.json and its .at-997941042 sibling; total 114/120 (goal_fidelity 20, evidence 20, scope_discipline 20, durability 19, fit 20, reuse 15), one follow-on finding that _validate_focus re-implements the segment-through-MEMBER_OF rule build_focus_predicate owns.</p></div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-s17-review" data-who="reckon-build" data-when="2026-10-12T16:42:00Z">
+    <div class="r-comment-body"><p>The independent review of §17 (2026-10-12) scored 15 to 20, with reuse the lowest. Follow-on: <code>_validate_focus</code> in <code>imas_codex/cli/discover/signals.py</code> (around lines 77 to 84) resolves an array segment through <code>MEMBER_OF</code> with its own Cypher. That mirrors the rule <code>build_focus_predicate</code> owns in <code>imas_codex/discovery/signals/parallel.py</code> (around lines 534 to 537). The two agree today but are maintained by hand. Validation could instead count the claim predicate's own selection.</p></div>
 </div>
 <div class="r-comment" data-section="s19" data-id="c-close-s19" data-who="reckon-build" data-when="2026-10-09T06:47:00Z">
     <div class="r-comment-body"><p>§19 landed: <code>map clear</code> and <code>map run --clear</code> now delete bindings, evidence and the mapping node through one owner (merge <code>08a6ae16f</code>; 575 tests and the live graph test pass). Evidence of a source shared by two IDS mappings is still removed by clearing either; that is pre-existing. <a href="/imas-codex/evidence/archive/jt60sa-mapping-study-expansion-landed.html#s19">evidence</a></p></div>
