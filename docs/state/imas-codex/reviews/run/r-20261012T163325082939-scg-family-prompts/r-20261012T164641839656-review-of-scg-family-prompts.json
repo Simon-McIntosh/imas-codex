@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own suite logs: log-baseline.txt records 177 passed, 1 skipped EXIT=0 at base 17f084e2d and log-after.txt records 183 passed, 1 skipped EXIT=0 at head aea797386, both to their summary lines; the +6 are the reviewed node's own new passing cases in tests/standard_names/test_family_prompt_parent.py, so the head adds no failing test and the added-failure count is zero.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/scg-family-prompts uv run pytest -p no:cacheprovider <11 existing render tests> tests/standard_names/test_family_prompt_parent.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T163325082939-scg-family-prompts/log-after.txt",
+    "revision": "aea797386d61d8b3703afbad957f4ff707ea9fab"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/scg-family-prompts uv run pytest -p no:cacheprovider <11 existing render tests>",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T163325082939-scg-family-prompts/log-baseline.txt",
+    "revision": "17f084e2d28d7145d9288c8a5a542d03a7519f4a"
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:9566 render_prompt('sn/generate_docs_user')",
+    "imas_codex/standard_names/workers.py:10239 render_prompt('sn/review_docs_user')",
+    "imas_codex/standard_names/workers.py:10695 render_prompt('sn/refine_docs_user')",
+    "imas_codex/standard_names/benchmark.py:889 render_prompt('sn/generate_docs_user')",
+    "imas_codex/standard_names/docs_holdout_eval.py:261 render_prompt('sn/generate_docs_user')"
+  ],
+  "completed_at": "2026-10-12T16:53:10.094Z",
+  "dispatched_at": "2026-10-12T16:46:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-family-prompts.html",
+      "line": 9,
+      "severity": "follow-on",
+      "text": "the fragment states the parentless defect is that the render dereferences None.name 'under the loader's StrictUndefined' and so 'fails', but the three production call sites (workers.py:9566/10239/10695) render through render_prompt, whose environment is the default-jinja2 one (prompt_loader.py:1101, no undefined=), so None.name renders as an empty string and does not raise; only render_prompt_strict (prompt_loader.py:1201) raises. The landed symptom was therefore a wrong prompt ('sharing the parent ``' plus a dangling '(name:)' cross-link), not a crash. The guard is correct either way; only the stated mechanism is inaccurate. Verified directly: default Environment prints 'parent ' with no raise, StrictUndefined raises UndefinedError."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call sites: workers.py:9566 renders sn/generate_docs_user, workers.py:10239 renders sn/review_docs_user, workers.py:10695 renders sn/refine_docs_user, benchmark.py:889 and docs_holdout_eval.py:261 render sn/generate_docs_user; all pass sibling_family sourced from context.fetch_sibling_family (context.py:734 for review, workers.py:9367/10680 for generate/refine), so each reaches the guarded templates.",
+    "diff": "read commit by commit against base 17f084e2d28d7145d9288c8a5a542d03a7519f4a; the single commit aea797386 guards the parent read in generate_docs_user.md (family-intro sentence at lines 45-47 and the rule-4 cross-link at lines 91-92), review_docs_user.md:80 and refine_docs_user.md:64 with {% if ...parent %} branches, and adds tests/standard_names/test_family_prompt_parent.py (6 render tests) plus the fragment html; git diff --stat lists exactly those five files and nothing outside the declared scope moves.",
+    "done_when": "the done_when asks for a test rendering each of the three templates through render_prompt with a parentless family and one with a parent, both rendering, the parentless render carrying no name: link, and the parentless case failing when a guard is removed; tests/standard_names/test_family_prompt_parent.py:112/130 do exactly that (6 passing), log-negative-control.txt shows EXIT=1 with test_parentless_family_renders_without_parent_link[generate_docs] failing on the guard-removed render, and the gate logs record after 183 passed / 1 skipped against baseline 177 passed / 1 (zero added failures).",
+    "goal": "the goal is to guard the three sibling-family prompt templates that read the family parent unguarded so a parentless family no longer breaks the render; generate_docs_user.md:45/91, review_docs_user.md:80 and refine_docs_user.md:64 now branch on item.sibling_family.parent, and a grep of imas_codex/llm/prompts/sn/ for sibling_family.parent finds only guarded reads, so the goal lands for all three templates and no further unguarded read remains.",
+    "manifest": "read; it records status complete, commit aea797386, gate after 183 passed / 1 skipped vs baseline 177 / 1 both EXIT=0, gate and negative-control log paths, and follow_ons none; the negative_control_log path is bare and its last line is EXIT=1 with a failing id the head arm does not fail, so the record is readable.",
+    "write_paths": "the manifest declares imas_codex/llm/prompts/sn/generate_docs_user.md, review_docs_user.md, refine_docs_user.md, tests/standard_names/test_family_prompt_parent.py, docs/evidence/fragments/sn-catalog-grouping/scg-family-prompts.html and docs/figures/sn-catalog-grouping/scg-family-prompts; git diff --stat for 17f084e2d..aea797386 lists those five code/test/docs paths and nothing else, so every changed path is inside the declared scope (the figures dir was declared and unused)."
+  },
+  "justifications": {
+    "durability": "the parentless assertions at tests/standard_names/test_family_prompt_parent.py:116/119/122 compare the rendered output against fixed literal constants and are shown red when the generate guard is removed (log-negative-control.txt), so a real regression guard exists for all three templates; the with-parent assertion at line 138 derives its expected token from the same module constant it feeds as input, but the constant is defined in the test (line 21) rather than read from the code under test, and reverting the input is the separate parentless case, so it still discriminates a dropped link.",
+    "evidence": "the gate the worker ran covers exactly the render tests that reach the three templates and adds the new render test, and both arms are recorded to their summary lines in log-baseline.txt (177 passed) and log-after.txt (183 passed) with the negative-control log at log-negative-control.txt showing EXIT=1; the residual is that the gate exercises render_prompt (the non-strict environment), so it proves the wrong-text symptom is gone rather than the StrictUndefined raise the brief names.",
+    "fit": "the templating edits sit inside the existing {% if %} style of the surrounding templates and the test file names its cases by what they render (test_parentless_family_renders_without_parent_link, test_family_with_parent_names_the_parent) with no plan, section or ticket identifier anywhere in the changed source.",
+    "goal_fidelity": "the landed templates at generate_docs_user.md:45/91, review_docs_user.md:80 and refine_docs_user.md:64 now guard item.sibling_family.parent, and a grep over imas_codex/llm/prompts/sn/ finds no remaining unguarded sibling_family.parent read, so the parentless render no longer reads None.parent; the residual is that the real production symptom was wrong text rather than the render 'failing' as the brief and fragment state (finding at scg-family-prompts.html:9).",
+    "reuse": "the change extends the three prompt templates that already own the sibling-family block and reuses the existing render_prompt loader rather than adding a rendering path, so no capability is re-implemented; a search of imas_codex/standard_names/ for a second sibling-family template renderer found none.",
+    "scope_discipline": "every path in git diff --stat 17f084e2d..aea797386 (the three templates, the new test, the fragment html) is inside the manifest's declared write paths and no plan or index file is edited, so nothing outside the goal moves."
+  },
+  "node": "review-of-scg-family-prompts",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to guard the three sibling-family prompt templates that read the family parent unguarded so a parentless family no longer breaks the render; generate_docs_user.md:45/91, review_docs_user.md:80 and refine_docs_user.md:64 now branch on item.sibling_family.parent, and a grep of imas_codex/llm/prompts/sn/ for sibling_family.parent finds only guarded reads, so the goal lands for all three templates and no further unguarded read remains.\nVERDICT done_when: the done_when asks for a test rendering each of the three templates through render_prompt with a parentless family and one with a parent, both rendering, the parentless render carrying no name: link, and the parentless case failing when a guard is removed; tests/standard_names/test_family_prompt_parent.py:112/130 do exactly that (6 passing), log-negative-control.txt shows EXIT=1 with test_parentless_family_renders_without_parent_link[generate_docs] failing on the guard-removed render, and the gate logs record after 183 passed / 1 skipped against baseline 177 passed / 1 (zero added failures).\nVERDICT write_paths: the manifest declares imas_codex/llm/prompts/sn/generate_docs_user.md, review_docs_user.md, refine_docs_user.md, tests/standard_names/test_family_prompt_parent.py, docs/evidence/fragments/sn-catalog-grouping/scg-family-prompts.html and docs/figures/sn-catalog-grouping/scg-family-prompts; git diff --stat for 17f084e2d..aea797386 lists those five code/test/docs paths and nothing else, so every changed path is inside the declared scope (the figures dir was declared and unused).\nVERDICT manifest: read; it records status complete, commit aea797386, gate after 183 passed / 1 skipped vs baseline 177 / 1 both EXIT=0, gate and negative-control log paths, and follow_ons none; the negative_control_log path is bare and its last line is EXIT=1 with a failing id the head arm does not fail, so the record is readable.\nVERDICT diff: read commit by commit against base 17f084e2d28d7145d9288c8a5a542d03a7519f4a; the single commit aea797386 guards the parent read in generate_docs_user.md (family-intro sentence at lines 45-47 and the rule-4 cross-link at lines 91-92), review_docs_user.md:80 and refine_docs_user.md:64 with {% if ...parent %} branches, and adds tests/standard_names/test_family_prompt_parent.py (6 render tests) plus the fragment html; git diff --stat lists exactly those five files and nothing outside the declared scope moves.\nCALL_SITES: imas_codex/standard_names/workers.py:9566 render_prompt('sn/generate_docs_user'), imas_codex/standard_names/workers.py:10239 render_prompt('sn/review_docs_user'), imas_codex/standard_names/workers.py:10695 render_prompt('sn/refine_docs_user'), imas_codex/standard_names/benchmark.py:889 render_prompt('sn/generate_docs_user'), imas_codex/standard_names/docs_holdout_eval.py:261 render_prompt('sn/generate_docs_user')\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the landed templates at generate_docs_user.md:45/91, review_docs_user.md:80 and refine_docs_user.md:64 now guard item.sibling_family.parent, and a grep over imas_codex/llm/prompts/sn/ finds no remaining unguarded sibling_family.parent read, so the parentless render no longer reads None.parent; the residual is that the real production symptom was wrong text rather than the render 'failing' as the brief and fragment state (finding at scg-family-prompts.html:9).\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate the worker ran covers exactly the render tests that reach the three templates and adds the new render test, and both arms are recorded to their summary lines in log-baseline.txt (177 passed) and log-after.txt (183 passed) with the negative-control log at log-negative-control.txt showing EXIT=1; the residual is that the gate exercises render_prompt (the non-strict environment), so it proves the wrong-text symptom is gone rather than the StrictUndefined raise the brief names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --stat 17f084e2d..aea797386 (the three templates, the new test, the fragment html) is inside the manifest's declared write paths and no plan or index file is edited, so nothing outside the goal moves.\nSCORE durability: 18\nJUSTIFICATION durability: the parentless assertions at tests/standard_names/test_family_prompt_parent.py:116/119/122 compare the rendered output against fixed literal constants and are shown red when the generate guard is removed (log-negative-control.txt), so a real regression guard exists for all three templates; the with-parent assertion at line 138 derives its expected token from the same module constant it feeds as input, but the constant is defined in the test (line 21) rather than read from the code under test, and reverting the input is the separate parentless case, so it still discriminates a dropped link.\nSCORE fit: 19\nJUSTIFICATION fit: the templating edits sit inside the existing {% if %} style of the surrounding templates and the test file names its cases by what they render (test_parentless_family_renders_without_parent_link, test_family_with_parent_names_the_parent) with no plan, section or ticket identifier anywhere in the changed source.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the three prompt templates that already own the sibling-family block and reuses the existing render_prompt loader rather than adding a rendering path, so no capability is re-implemented; a search of imas_codex/standard_names/ for a second sibling-family template renderer found none.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-family-prompts.html:9 follow-on: the fragment states the parentless defect is that the render dereferences None.name 'under the loader's StrictUndefined' and so 'fails', but the three production call sites (workers.py:9566/10239/10695) render through render_prompt, whose environment is the default-jinja2 one (prompt_loader.py:1101, no undefined=), so None.name renders as an empty string and does not raise; only render_prompt_strict (prompt_loader.py:1201) raises. The landed symptom was a wrong prompt ('sharing the parent ``' plus a dangling '(name:)' cross-link), not a crash; the guard is correct either way and only the stated mechanism is inaccurate.",
+  "review_run_id": "r-20261012T164641839656-review-of-scg-family-prompts",
+  "reviewed_base_sha": "17f084e2d28d7145d9288c8a5a542d03a7519f4a",
+  "reviewed_head_sha": "aea797386d61d8b3703afbad957f4ff707ea9fab",
+  "reviewed_run_id": "r-20261012T163325082939-scg-family-prompts",
+  "reviewer_run_id": "r-20261012T164641839656-review-of-scg-family-prompts",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T163325082939-scg-family-prompts/log-baseline.txt",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T163325082939-scg-family-prompts/log-after.txt",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T163325082939-scg-family-prompts/log-head.txt",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T163325082939-scg-family-prompts/log-negative-control.txt"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T16:55:00+00:00",
+  "total": 114
+}
