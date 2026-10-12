@@ -1,0 +1,27 @@
+<section id="sje-goldens-repair" data-reckon="evidence">
+  <p id="sje-goldens-repair-summary">
+    The name golden now carries an item-level canonical unit and only
+    plan-sanctioned positives. <code>_row</code> takes a
+    <code>canonical</code> key that identifies the item (a name in the name
+    golden, a binding in the object golden, an unordered pair of bindings in
+    the distinct-quantity golden) and must not fall back to the row unit.
+    The 140 WEST-correct bindings are gone from the name golden, so no row
+    there is a binding verdict labelled positive. 737 rows, 446 negative and
+    291 positive, 720 canonical units and 654 carrying incumbent review; every
+    source holds at or below 200.
+  </p>
+  <ul id="sje-goldens-repair-changes">
+    <li id="sje-goldens-repair-canonical">Rows naming one item share a
+      <code>canonical_unit</code>: the name golden collapses 737 rows onto 720
+      units, so the paired AUC of the plan's decision rule is per-item rather
+      than per-row.</li>
+    <li id="sje-goldens-repair-positives">WEST audit rows remain only as
+      rejected identities (54 negative rows); the object golden stays the one
+      that judges bindings.</li>
+    <li id="sje-goldens-repair-ambiguous">A canonical unit whose independent
+      sources disagree on its label is dropped with its orphaned edit partner,
+      so every surviving unit has one label and one split.</li>
+    <li id="sje-goldens-repair-regenerated">All three fixtures are rebuilt
+      through <code>judgment_goldens.main</code>; none is hand-edited.</li>
+  </ul>
+</section>

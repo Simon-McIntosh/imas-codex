@@ -102,11 +102,12 @@ def _row(
     name: str = "",
     group: str | None = None,
     domain: str | None = None,
+    canonical: str | None = None,
 ) -> dict[str, Any]:
     return {
         "unit": unit,
         "label": label,
-        "canonical_unit": unit,
+        "canonical_unit": canonical or unit,
         "copy_group": group or unit,
         "label_source": source,
         "source_evidence": evidence,
@@ -197,6 +198,24 @@ def _finish(
         if key not in seen:
             seen.add(key)
             unique.append(row)
+    canonical_labels: dict[str, set[int]] = defaultdict(set)
+    for row in unique:
+        canonical_labels[row["canonical_unit"]].add(row["label"])
+    ambiguous = {unit for unit, labels in canonical_labels.items() if len(labels) > 1}
+    if ambiguous:
+        unique = [row for row in unique if row["canonical_unit"] not in ambiguous]
+    group_labels: dict[str, set[int]] = defaultdict(set)
+    for row in unique:
+        group_labels[row["copy_group"]].add(row["label"])
+    incomplete = {group for group, labels in group_labels.items() if len(labels) < 2}
+    unique = [
+        row
+        for row in unique
+        if not (
+            row["label_source"].startswith("human_edit_")
+            and row["copy_group"] in incomplete
+        )
+    ]
     covered = _review_coverage(
         graph, [row.get(name_key, row["unit"]) for row in unique]
     )
@@ -261,6 +280,7 @@ def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
                 group=f"name:{_rank(item['name'])[:16]}",
                 domain=item.get("domain")
                 or _domain((item.get("paths") or [""])[0], item["name"]),
+                canonical=item["name"],
             )
             for item in quarantines
         ],
@@ -282,6 +302,7 @@ def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
                     evidence,
                     name=item["old"],
                     group=group,
+                    canonical=item["old"],
                 ),
                 _row(
                     item["new"],
@@ -290,6 +311,7 @@ def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
                     evidence,
                     name=item["new"],
                     group=group,
+                    canonical=item["new"],
                 ),
             )
         )
@@ -312,7 +334,7 @@ def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
             continue
         rows.extend((old, new))
         used_names.update((old["unit"], new["unit"]))
-        if sum(row["label_source"] == "human_edit_target" for row in rows) == 100:
+        if sum(row["label_source"] == "human_edit_target" for row in rows) == 200:
             break
     west_bad = [
         _row(
@@ -323,27 +345,13 @@ def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
             name=item["name"],
             group=f"name:{_rank(item['name'])[:16]}",
             domain=_domain(item["path"]),
+            canonical=item["name"],
         )
         | {"name": item["name"]}
         for item in west
         if item["verdict"] == "incorrect"
     ]
-    west_good = [
-        _row(
-            f"{item['path']}::{item['name']}",
-            1,
-            "west_audit",
-            item["evidence"],
-            name=item["name"],
-            group=f"name:{_rank(item['name'])[:16]}",
-            domain=_domain(item["path"]),
-        )
-        | {"name": item["name"]}
-        for item in west
-        if item["verdict"] == "correct"
-    ]
     rows.extend(_sample(west_bad, 60))
-    rows.extend(_sample(west_good, 140))
     for path, reference in REFERENCE_NAMES.items():
         rows.append(
             _row(
@@ -353,6 +361,7 @@ def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
                 "benchmark_reference.py:REFERENCE_NAMES",
                 name=reference["name"],
                 domain=_domain(path),
+                canonical=reference["name"],
             )
             | {"name": reference["name"]}
         )
@@ -366,6 +375,7 @@ def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
                     item["evidence"],
                     name=item["kept"],
                     domain=_domain(item["path"]),
+                    canonical=item["kept"],
                 )
                 | {"name": item["kept"]}
             )
@@ -378,6 +388,7 @@ def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
                 f"expert-review-reply.html:comment={comment}",
                 name=name,
                 group=f"name:{_rank(name)[:16]}",
+                canonical=name,
             )
             | {"name": name}
         )
@@ -415,6 +426,7 @@ def build_description_object(graph: GraphClient) -> list[dict[str, Any]]:
             name=item["name"],
             group=item["path"],
             domain=item["physics_domain"],
+            canonical=item["unit"],
         )
         row["name"] = item["name"]
         rows.append(row)
@@ -438,6 +450,7 @@ def build_description_object(graph: GraphClient) -> list[dict[str, Any]]:
             name=item["name"],
             group=item["path"],
             domain=item["physics_domain"],
+            canonical=item["unit"],
         )
         row["name"] = item["name"]
         rows.append(row)
@@ -450,6 +463,7 @@ def build_description_object(graph: GraphClient) -> list[dict[str, Any]]:
             name=reference["name"],
             group=path,
             domain=_domain(path),
+            canonical=f"{path}::{reference['name']}",
         )
         row["name"] = reference["name"]
         rows.append(row)
@@ -462,6 +476,7 @@ def build_description_object(graph: GraphClient) -> list[dict[str, Any]]:
                 item["evidence"],
                 name=item["kept"],
                 domain=_domain(item["path"]),
+                canonical=f"{item['path']}::{item['kept']}",
             )
             row["name"] = item["kept"]
             rows.append(row)
@@ -473,6 +488,7 @@ def build_description_object(graph: GraphClient) -> list[dict[str, Any]]:
             f"expert-review-reply.html:comment={comment}",
             name=name,
             group=f"name:{_rank(name)[:16]}",
+            canonical=name,
         )
         row["name"] = name
         rows.append(row)
@@ -511,6 +527,9 @@ def build_near_duplicate(graph: GraphClient) -> list[dict[str, Any]]:
                     name=name,
                     group=name,
                     domain=_domain(path),
+                    canonical="::".join(
+                        sorted((f"{name}::{bindings[0]}", f"{name}::{path}"))
+                    ),
                 )
                 | {"name": name}
             )
@@ -544,6 +563,14 @@ def build_near_duplicate(graph: GraphClient) -> list[dict[str, Any]]:
                 name=names[0],
                 group="::".join(names),
                 domain=_domain(verdict["path"]),
+                canonical="::".join(
+                    sorted(
+                        (
+                            f"{names[0]}::{verdict['path']}",
+                            f"{names[1]}::{verdict['path']}",
+                        )
+                    )
+                ),
             )
             | {"name": names[0]}
         )
@@ -561,6 +588,7 @@ def write_fixture(path: Path, rows: list[dict[str, Any]]) -> dict[str, Any]:
         "rows": len(rows),
         "sources": dict(Counter(row["label_source"] for row in rows)),
         "labels": dict(Counter(str(row["label"]) for row in rows)),
+        "canonical_units": len({row["canonical_unit"] for row in rows}),
         "incumbent_overlap": sum(row["incumbent_review"] for row in rows),
         "splits": dict(Counter(row["split"] for row in rows)),
     }
