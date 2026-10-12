@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T06:41:08.539Z",
+  "dispatched_at": "2026-10-12T06:33:11Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:144",
+      "id": "reasoning-1",
+      "reason": "",
+      "text": "\u2014 \u00a74 says \"The verdicts",
+      "type": "reasoning",
+      "would_change": null
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:100",
+      "id": "wiring-1",
+      "reason": "",
+      "text": "\u2014 \u00a73 makes the Jev Choice",
+      "type": "wiring",
+      "would_change": null
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:136",
+      "id": "anchors_resolve-1",
+      "reason": "",
+      "text": "\u2014 \"the",
+      "type": "anchors_resolve",
+      "would_change": null
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:163",
+      "id": "done_when-1",
+      "reason": "",
+      "text": "\u2014 \u00a74's done-when is an",
+      "type": "done_when",
+      "would_change": null
+    }
+  ],
+  "plan_fingerprint": "a11b91abc2876e3b6610f3f27e24b2634964025b5a88e51239e42cd0a9b0ee0a",
+  "plan_slug": "sn-catalog-grouping",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T063302019605-plan-review-of-sn-catalog-grouping",
+  "reviewed_blob_sha": "1d856d47b5920b769f1cfc3e1cc4a0a505df1074",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 every file, symbol and cross-plan section",
+    "done_when": "pass \u2014 \u00a73 now names a declared negative control (\"it fails with",
+    "evidence_paths": "pass \u2014 neither unit names a scratchpad or node-local",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags",
+    "reasoning": "a finding \u2014 \u00a74 asserts its verdicts \"are measured against",
+    "single_goal": "pass \u2014 \u00a73 delivers one thing (the adopted domain-assignment",
+    "wiring": "a finding \u2014 \u00a73 and \u00a74 each name an artifact of the sibling plan"
+  },
+  "section_digests": {
+    "_document": "502a2bfa69c4863a9cd34bcc0968e350e314683f2c0e58fd0858bdf994c91f0e",
+    "s1": "6bc3b44a7fd794158b4e454dd07668ea7d805f53ea1a5e11fac0c4b9a32edd70",
+    "s2": "34ac2d2767f629f7e4dd1a6c0e0fb59ed8cd20adb3ca821f03b454a57dfbaf81",
+    "s3": "78292c4318c2c3556d1029ed3403ea10c4c645184c43ae20acebff221f30d3bc",
+    "s4": "7e0a7cca58c028f781edc953dc867be47675bf39c7f9eb6023c6ee5e65c2bc06",
+    "s5": "ea0ea78d8eb9c536eb9b5abd7755fba1d6c03de82525f8979ca15c017d7cd642"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T07:12:49.563841+00:00"
+}
