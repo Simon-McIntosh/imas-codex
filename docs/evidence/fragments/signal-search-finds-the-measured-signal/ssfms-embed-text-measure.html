@@ -1,0 +1,23 @@
+<section id="ssfms-embed-text-measure-node" data-reckon="fragment">
+  <h2 id="ssfms-embed-text-measure-node-title">Embed text measured on the golden set</h2>
+
+  <p id="ssfms-embed-text-measure-node-what">
+    This node measured the <code>embed-text</code> decision §5 settles: description-only against a composed
+    <em>name — description (unit)</em> text, for a signal's embedding. The measurement is the section's
+    evidence — the four-row arm table under
+    <a href="/imas-codex/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html">§5 —
+    which text a signal's embedding encodes</a>. In one line: over the 22 questions, description-only scores
+    <strong>0.7761</strong> RRF / <strong>0.6890</strong> vector-only mean nDCG@10 and
+    <strong>0.6818</strong> / <strong>0.5636</strong> grade-3 precision@5, against name-description-unit's
+    <strong>0.7620</strong> / <strong>0.6641</strong> and <strong>0.6636</strong> / <strong>0.5000</strong> —
+    description-only higher on both arms and all metrics.
+  </p>
+
+  <p id="ssfms-embed-text-measure-node-labels">
+    124 candidates the two texts lift into a top 10 that §3's pooled labelling had not reached are read and
+    graded into <code>tests/llm/fixtures/signal_search_questions.json</code>, across 18 of the 22 questions,
+    so both arms score every question under both texts with no refusal. All 14,312 eligible
+    <code>jt-60sa</code> signals are embedded in memory; a census digest over every
+    <code>FacilitySignal</code> is unchanged before and after, so no stored vector was written.
+  </p>
+</section>
