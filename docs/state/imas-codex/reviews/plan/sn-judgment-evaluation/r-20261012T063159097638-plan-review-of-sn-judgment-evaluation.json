@@ -76,9 +76,22 @@
       "finding": "single_goal-1",
       "reason": "the done-when is conjunctive: the wrapper deletion, its cost-booking control and the seat must all hold for one verdict, so the node cannot close on the seat alone; the seat is three lines of configuration with no behaviour of its own, and a separate node for it would cost more than it isolates",
       "when": "2026-10-12T07:14:56.978366+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "section 5 is human labelling with no code to guard; its falsifiable check is the recorded coordinator-lead kappa on the 50-item overlap with the disagreements and rulings, and a planted-defect control has nothing to act on",
+      "when": "2026-10-12T07:14:59.313426+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 5 is human labelling with no code to guard; its falsifiable check is the recorded coordinator-lead kappa on the 50-item overlap with the disagreements and rulings, and a planted-defect control has nothing to act on",
+      "when": "2026-10-12T07:14:59.313426+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
