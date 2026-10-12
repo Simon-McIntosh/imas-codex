@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T22:28:35.946Z",
+  "dispatched_at": "2026-10-12T22:22:25Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:308",
+      "id": "reasoning-1",
+      "reason": "with no node producing labels for RRF ranks 11\u201360, every rerank arm run raises UnlabelledCandidates and names its candidates, so \u00a77's done-when (the rerank measured against fusion alone on the pooled labels) cannot be satisfied and a builder would have to invent the labelling step the plan omits.",
+      "text": "\u00a77's added paragraph and its done-when require \"their labels cover RRF's top 60 on every question rather than a top-10 union\", yet \u00a73's only labelling node (line 174, \"The third pools and labels every arm's top 10\") produces top-10 depth, runs before \u00a77 (the followup orders \u00a77 after \u00a74, which follows \u00a73), and \u00a77's own text assigns the arms \"to score, not to label\"; the committed harness enforces exactly this through require_labelled on the rerank's top 10 (tests/llm/test_signal_search_goldens.py:193), which pulls anywhere from RRF rank 1 to rank 60",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "8b5b64f5b44ac239057c431384bc075a0ec36a176779e48cbaba08304081835a",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 24,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T222211039938-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "31340aa3bee6c52b63e70b22ad299f5ef0fc323c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `_search_signals` (imas_codex/llm/search_tools.py:272), `rerank_candidates` (imas_codex/llm/search_tools.py:171), `_RERANK_QUESTION` (imas_codex/llm/search_tools.py:84), and the cited fixture and harness (tests/llm/fixtures/signal_search_questions.json, tests/llm/test_signal_search_goldens.py) all resolve at the review base.",
+    "done_when": "pass \u2014 \u00a73's done-when names its negative control (the seeded random-order permutation that must score below every arm), and \u00a77's done-when carries a falsifiable ship condition (\"ships on only if \u2026 otherwise it ships off\") measured beside the generic-question and fusion-alone arms.",
+    "evidence_paths": "pass \u2014 \u00a73's table and labelling log land on the repository path docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html, and \u00a77's rerank report is the same harness's output, not a session scratchpad.",
+    "naming": "pass \u2014 the changed prose of \u00a73 and \u00a77 introduces no plan labels, ticket numbers or version tags into code and states the mechanism (pooled labelling, the arm functions run outside pytest) rather than a tracker reference.",
+    "reasoning": "a finding \u2014 \u00a77's new paragraph requires the arms' labels to cover RRF's top 60, but the only labelling node is \u00a73's, which labels each arm's top 10 and runs before \u00a77, and \u00a77 assigns only scoring.",
+    "single_goal": "pass \u2014 \u00a73 closes on the golden harness plus pooled labels; \u00a77 closes on the role-aware rerank's ship decision; the change moved scoring of the two Jev arms wholly to \u00a77 rather than leaving \u00a73 carrying two deliverables.",
+    "wiring": "pass \u2014 \u00a73's arm list now names \u00a77 as the owner of the two rerank arms (\"plus any arm a later section adds; \u00a77 adds the two reranks\"), and the followup's ordering (\u00a73 \u2192 \u00a74 \u2192 \u00a77) resolves every input each of the two changed units declares."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "21cb67ae2f717525df04e4e4da39715e179eedb4bf5d77aee908cf4919b8264d",
+    "s4": "ff798997815d5f566c82571e887c792ba4db14c9b54cd6306c43a26e35044551",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "13fe822ef758401dbcf6084e8439603b763caf45e1baef61efaea03a85464f8b",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:29:58.080939+00:00"
+}
