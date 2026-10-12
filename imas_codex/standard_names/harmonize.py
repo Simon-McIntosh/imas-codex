@@ -24,6 +24,7 @@ from imas_codex.standard_names.context import DOCUMENTATION_FAMILY_OPERATOR_KIND
 from imas_codex.standard_names.families import (
     DOCS_STAGE_ACCEPTED,
     PATTERN_INVARIANT_SEGMENTS,
+    _invariant_equality,
     _invariant_projection,
     fetch_pattern_family,
     select_anchor,
@@ -45,6 +46,13 @@ _FAMILY_REDUCTION_OPERATORS: tuple[str, ...] = (
 )
 
 _TOKEN_RE = re.compile(r"[a-zA-Z]+|\d+")
+
+#: Member predicate for the parentless bucket: a name with a base quantity
+#: and a description and no operator parent is grouped by its pattern family.
+_PARENTLESS_MEMBER_FILTER = (
+    "m.physical_base IS NOT NULL AND m.description IS NOT NULL "
+    "AND NOT EXISTS { MATCH (m)-[:HAS_PARENT]->(:StandardName) }"
+)
 
 
 def doc_sig(desc: str, n: int = 6) -> str:
@@ -400,46 +408,20 @@ def build_worklist(
             )
 
         if include_parentless:
-            invariants = _invariant_projection("c")
-            parentless_rows = (
-                resolved_gc.query(
-                    f"""
-                    MATCH (c:StandardName)
-                    WHERE c.physical_base IS NOT NULL
-                      AND coalesce(c.name_stage, '') <> $superseded
-                      AND c.description IS NOT NULL
-                      AND NOT EXISTS {{
-                        MATCH (c)-[:HAS_PARENT]->(:StandardName)
-                      }}
-                    WITH
-{invariants},
-                         collect({{
-                             id: c.id,
-                             description: c.description,
-                             documentation: c.documentation,
-                             docs_stage: c.docs_stage,
-                             reviewer_score_docs: c.reviewer_score_docs,
-                             harmonized_group_signature: c.harmonized_group_signature
-                         }}) AS members
-                    RETURN {", ".join(PATTERN_INVARIANT_SEGMENTS)}, members
-                    """,
-                    superseded=NameStage.superseded.value,
-                )
-                or []
-            )
-            for row in parentless_rows:
-                members = list(row.get("members") or [])
-                n = len(members)
-                if n < min_size:
-                    continue
+            for family in fetch_pattern_families(
+                resolved_gc,
+                node_filter=_PARENTLESS_MEMBER_FILTER,
+                min_size=min_size,
+            ):
+                members = family["members"]
                 d = drift(members, n=6)
                 if d < min_drift:
                     continue
                 d_secondary = drift(members, n=8)
                 sig = group_signature(members)
                 # Parentless families have no single parent node to stamp;
-                # use the first member's signature property as a proxy —
-                # coalesce (missing) means "never harmonized".
+                # use the members' signature property as a proxy —
+                # absent (coalesced missing) means "never harmonized".
                 existing_sigs = {
                     m.get("harmonized_group_signature")
                     for m in members
@@ -456,9 +438,9 @@ def build_worklist(
                     {
                         "parent": None,
                         "grouping": "pattern",
-                        "physical_base": row.get("physical_base"),
+                        "physical_base": family["physical_base"],
                         "operator_kinds": [],
-                        "n": n,
+                        "n": len(members),
                         "drift": d,
                         "drift_secondary": d_secondary,
                         "docs_accepted": docs_accepted,
@@ -482,6 +464,216 @@ def build_worklist(
         _close_if_owned(resolved_gc, own_gc)
 
 
+def _family_member_collect() -> str:
+    """Cypher collecting one family's member rows with the report columns.
+
+    The documentation columns drive anchor selection and drift; the lint
+    columns (unit, COCOS type, physics domain, position, links, link status)
+    are what the review lint reads, so the report hands it rows it can score
+    without a second read.
+    """
+    return """collect({
+        id: m.id,
+        description: m.description,
+        documentation: m.documentation,
+        docs_stage: m.docs_stage,
+        reviewer_score_docs: m.reviewer_score_docs,
+        harmonized_group_signature: m.harmonized_group_signature,
+        unit: m.unit,
+        cocos_transformation_type: m.cocos_transformation_type,
+        physics_domain: m.physics_domain,
+        position: m.position,
+        links: m.links,
+        link_status: m.link_status
+    }) AS members"""
+
+
+def _pattern_family_rows_query(*, seeded: bool, node_filter: str) -> str:
+    """Cypher enumerating pattern families, keyed on the invariant segments.
+
+    *seeded* groups only the families that contain one of ``$seeds`` (two
+    hops: the seeds' signatures, then every live name sharing one). Otherwise
+    every live family is grouped. *node_filter* is an extra predicate on the
+    member alias ``m``, so a caller narrows the population without restating
+    the grouping — the fragment that used to be a second definition of a
+    family in this module.
+    """
+    segments = ", ".join(PATTERN_INVARIANT_SEGMENTS)
+    projection = _invariant_projection("m")
+    collect = _family_member_collect()
+    extra = f"\n  AND {node_filter}" if node_filter else ""
+    if seeded:
+        seed_projection = _invariant_projection("seed")
+        equality = _invariant_equality("m")
+        return f"""
+MATCH (seed:StandardName)
+WHERE seed.id IN $seeds AND coalesce(seed.name_stage, '') <> $superseded
+WITH DISTINCT
+{seed_projection}
+MATCH (m:StandardName)
+WHERE coalesce(m.name_stage, '') <> $superseded
+  AND {equality}{extra}
+WITH
+{projection},
+     {collect}
+RETURN {segments}, members
+"""
+    return f"""
+MATCH (m:StandardName)
+WHERE coalesce(m.name_stage, '') <> $superseded{extra}
+WITH
+{projection},
+     {collect}
+RETURN {segments}, members
+"""
+
+
+def fetch_pattern_families(
+    gc: Any | None = None,
+    *,
+    seeds: list[str] | None = None,
+    node_filter: str = "",
+    min_size: int = 1,
+) -> list[dict[str, Any]]:
+    """Enumerate live pattern families grouped by invariant grammar signature.
+
+    The one family-enumeration mechanism in this module. Pass *seeds* to keep
+    only the families containing at least one seed id; ``None`` enumerates
+    every live family with at least *min_size* members. *node_filter* is an
+    extra predicate on the member alias, so a caller selects a population
+    without restating the grouping.
+
+    Returns one dict per family: ``invariant`` (the tuple of invariant
+    segment values), ``physical_base``, ``members`` (member rows carrying the
+    documentation and lint columns) and ``n``. Read-only: it never writes.
+    """
+    if seeds is not None and not seeds:
+        return []
+    resolved_gc, own_gc = _resolve_gc(gc)
+    try:
+        rows = (
+            resolved_gc.query(
+                _pattern_family_rows_query(
+                    seeded=seeds is not None, node_filter=node_filter
+                ),
+                seeds=sorted(set(seeds or [])),
+                superseded=NameStage.superseded.value,
+            )
+            or []
+        )
+    finally:
+        _close_if_owned(resolved_gc, own_gc)
+
+    families: list[dict[str, Any]] = []
+    for row in rows:
+        members = [dict(m) for m in (row.get("members") or [])]
+        if len(members) < min_size:
+            continue
+        families.append(
+            {
+                "invariant": tuple(
+                    row.get(seg) or "" for seg in PATTERN_INVARIANT_SEGMENTS
+                ),
+                "physical_base": row.get("physical_base") or "",
+                "members": members,
+                "n": len(members),
+            }
+        )
+    families.sort(key=lambda f: (f["physical_base"], f["invariant"]))
+    return families
+
+
+def concept_member_ids(concept: str, gc: Any | None = None) -> list[str]:
+    """Live standard-name ids whose grammar selects registry concept *concept*."""
+    from imas_standard_names.grammar.terms import load_conventions, select_conventions
+
+    resolved_gc, own_gc = _resolve_gc(gc)
+    try:
+        rows = (
+            resolved_gc.query(
+                """
+                MATCH (m:StandardName)
+                WHERE coalesce(m.name_stage, '') <> $superseded
+                RETURN m.id AS id
+                """,
+                superseded=NameStage.superseded.value,
+            )
+            or []
+        )
+    finally:
+        _close_if_owned(resolved_gc, own_gc)
+
+    registry = load_conventions()
+    selected: list[str] = []
+    for row in rows:
+        name_id = row.get("id")
+        if not name_id:
+            continue
+        try:
+            conventions = select_conventions(name_id, registry=registry)
+        except Exception:
+            continue
+        if any(concept_obj.token == concept for concept_obj in conventions.concepts):
+            selected.append(name_id)
+    return sorted(selected)
+
+
+def report_family_rows(
+    gc: Any | None = None,
+    *,
+    seeds: list[str] | None = None,
+    min_size: int = 1,
+) -> list[dict[str, Any]]:
+    """Assemble the read-only harmonization report rows for families in scope.
+
+    One row per pattern family: the member ids, the anchor, the drift metric
+    and the lint findings by class, sorted by (drift desc, size desc, base).
+    The lint is the composition of
+    :func:`~imas_codex.standard_names.review.audits.run_lint_checks` plus
+    :func:`~imas_codex.standard_names.review.audits.run_link_integrity` — the
+    report never calls ``run_all_audits``, whose embedding preflight writes.
+    Nothing here writes to the graph.
+    """
+    from imas_codex.standard_names.review.audits import (
+        run_link_integrity,
+        run_lint_checks,
+    )
+
+    families = fetch_pattern_families(gc, seeds=seeds, min_size=min_size)
+    in_scope = [member for family in families for member in family["members"]]
+
+    by_name: dict[str, dict[str, int]] = {}
+    for finding in run_lint_checks(in_scope):
+        counts = by_name.setdefault(finding.name_id, {})
+        counts[finding.finding_type] = counts.get(finding.finding_type, 0) + 1
+    for link_finding in run_link_integrity(in_scope):
+        counts = by_name.setdefault(link_finding.name_id, {})
+        key = f"link_{link_finding.finding_type}"
+        counts[key] = counts.get(key, 0) + 1
+
+    rows: list[dict[str, Any]] = []
+    for family in families:
+        members = family["members"]
+        lint: dict[str, int] = {}
+        for member in members:
+            for finding_class, count in by_name.get(member.get("id"), {}).items():
+                lint[finding_class] = lint.get(finding_class, 0) + count
+        rows.append(
+            {
+                "physical_base": family["physical_base"],
+                "invariant": list(family["invariant"]),
+                "members": sorted(m.get("id") for m in members if m.get("id")),
+                "n": len(members),
+                "anchor": select_anchor(None, None, None, members),
+                "drift": drift(members),
+                "lint": dict(sorted(lint.items())),
+                "lint_total": sum(lint.values()),
+            }
+        )
+    rows.sort(key=lambda r: (-r["drift"], -r["n"], r["physical_base"]))
+    return rows
+
+
 def _anchor_desc(members: list[dict[str, Any]], anchor_id: str) -> str:
     for m in members:
         if m.get("id") == anchor_id:
@@ -492,51 +684,6 @@ def _anchor_desc(members: list[dict[str, Any]], anchor_id: str) -> str:
 # ---------------------------------------------------------------------------
 # Harmonization apply: mark + stamp orchestration
 # ---------------------------------------------------------------------------
-
-_LINK_RE = re.compile(r"\[([^\]]+)\]\(name:([a-z0-9_]+)\)")
-
-
-def lint_links(gc: Any | None = None) -> list[dict[str, Any]]:
-    """Scan accepted docs for markdown links whose text names a DIFFERENT
-    standard name than their target resolves to.
-
-    A link ``[label](name:target)`` is flagged when the snake_cased label is
-    itself an existing StandardName id AND differs from ``target`` — the
-    text promises one quantity while the href resolves to another (a real
-    physics error class found across sibling families). Human-readable
-    labels that aren't themselves ids are fine and skipped.
-
-    Returns ``[{member, label, target}]`` sorted by member id.
-    """
-    resolved_gc, own_gc = _resolve_gc(gc)
-    try:
-        rows = (
-            resolved_gc.query(
-                """
-                MATCH (sn:StandardName)
-                WHERE sn.docs_stage = 'accepted'
-                  AND sn.documentation IS NOT NULL
-                RETURN sn.id AS id, sn.documentation AS documentation
-                """
-            )
-            or []
-        )
-        all_ids = {
-            r["id"]
-            for r in (
-                resolved_gc.query("MATCH (sn:StandardName) RETURN sn.id AS id") or []
-            )
-        }
-    finally:
-        _close_if_owned(resolved_gc, own_gc)
-
-    findings: list[dict[str, Any]] = []
-    for row in rows:
-        for label, target in _LINK_RE.findall(row.get("documentation") or ""):
-            label_id = label.strip().lower().replace(" ", "_").replace("-", "_")
-            if label_id in all_ids and label_id != target:
-                findings.append({"member": row["id"], "label": label, "target": target})
-    return sorted(findings, key=lambda f: f["member"])
 
 
 def mark_members_for_regen(
@@ -627,9 +774,7 @@ def stamp_harmonized(
 
 __all__ = [
     "doc_sig",
-    "lint_links",
     "mark_members_for_regen",
-    "mark_families_for_regen",
     "restamp_harmonized_families",
     "stamp_harmonized",
     "drift",
@@ -637,55 +782,10 @@ __all__ = [
     "select_anchor",
     "assemble_family",
     "build_worklist",
+    "fetch_pattern_families",
+    "concept_member_ids",
+    "report_family_rows",
 ]
-
-
-def mark_families_for_regen(
-    family_parents: list[str],
-    *,
-    gc: Any | None = None,
-    dry_run: bool = False,
-) -> dict[str, Any]:
-    """Mark whole families for docs regeneration by parent id.
-
-    Resolves each parent's live family (members via the family operator
-    kinds, plus the parent itself), then resets the docs pipeline for the
-    full set via :func:`mark_members_for_regen`. Returns that function's
-    result plus ``member_ids`` and ``unknown_parents``.
-    """
-    resolved_gc, own_gc = _resolve_gc(gc)
-    member_ids: list[str] = []
-    unknown: list[str] = []
-    try:
-        for parent_id in family_parents:
-            rows = (
-                resolved_gc.query(
-                    """
-                    MATCH (p:StandardName {id: $pid})
-                    OPTIONAL MATCH (c:StandardName)-[r:HAS_PARENT]->(p)
-                    WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
-                      AND coalesce(c.name_stage, '') <> $superseded
-                    RETURN p.id AS parent_id,
-                           [x IN collect(c.id) WHERE x IS NOT NULL] AS kids
-                    """,
-                    pid=parent_id,
-                    kinds=list(_FAMILY_OPERATOR_KINDS),
-                    reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
-                    superseded=NameStage.superseded.value,
-                )
-                or []
-            )
-            if not rows:
-                unknown.append(parent_id)
-                continue
-            member_ids.append(rows[0]["parent_id"])
-            member_ids.extend(rows[0]["kids"] or [])
-    finally:
-        _close_if_owned(resolved_gc, own_gc)
-
-    member_ids = sorted(set(member_ids))
-    out = mark_members_for_regen(member_ids, dry_run=dry_run)
-    return {**out, "member_ids": member_ids, "unknown_parents": unknown}
 
 
 def restamp_harmonized_families(gc: Any | None = None) -> dict[str, int]:

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="520" viewBox="0 0 1400 520" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1400" height="520" fill="white"/>
+
+  <!-- Scope selectors -->
+  <text x="40" y="46" font-size="22" fill="#333">scope (exactly one)</text>
+  <rect x="40" y="66" width="270" height="52" fill="none" stroke="#333" stroke-width="1.2"/>
+  <text x="60" y="98" font-size="20" fill="#333">--batch &lt;roster&gt;</text>
+  <rect x="40" y="132" width="270" height="52" fill="none" stroke="#333" stroke-width="1.2"/>
+  <text x="60" y="164" font-size="20" fill="#333">--family &lt;seed&gt;</text>
+  <rect x="40" y="198" width="270" height="52" fill="none" stroke="#333" stroke-width="1.2"/>
+  <text x="60" y="230" font-size="20" fill="#333">--concept &lt;id&gt;</text>
+  <rect x="40" y="264" width="270" height="52" fill="none" stroke="#333" stroke-width="1.2"/>
+  <text x="60" y="296" font-size="20" fill="#333">--all</text>
+
+  <!-- Arrows to the one enumerator -->
+  <line x1="310" y1="92" x2="470" y2="196" stroke="#9a7b4f" stroke-width="2.6"/>
+  <line x1="310" y1="158" x2="470" y2="200" stroke="#9a7b4f" stroke-width="2.6"/>
+  <line x1="310" y1="224" x2="470" y2="204" stroke="#9a7b4f" stroke-width="2.6"/>
+  <line x1="310" y1="290" x2="470" y2="208" stroke="#9a7b4f" stroke-width="2.6"/>
+
+  <!-- Shared enumeration -->
+  <rect x="470" y="150" width="330" height="104" fill="none" stroke="#9a7b4f" stroke-width="2.6"/>
+  <text x="492" y="188" font-size="20" fill="#9a7b4f">fetch_pattern_families</text>
+  <text x="492" y="216" font-size="20" fill="#9a7b4f">one grouping query, one</text>
+  <text x="492" y="240" font-size="20" fill="#9a7b4f">place (invariant segments)</text>
+
+  <line x1="800" y1="202" x2="960" y2="202" stroke="#333" stroke-width="2.6"/>
+
+  <!-- Read-only lint composition -->
+  <rect x="960" y="120" width="400" height="164" fill="none" stroke="#2f6f6f" stroke-width="2.6"/>
+  <text x="982" y="154" font-size="20" fill="#2f6f6f">run_lint_checks</text>
+  <text x="982" y="180" font-size="18" fill="#2f6f6f">lexical + house style + doc gates</text>
+  <text x="982" y="212" font-size="20" fill="#2f6f6f">run_link_integrity</text>
+  <text x="982" y="240" font-size="18" fill="#2f6f6f">read-only; never run_all_audits,</text>
+  <text x="982" y="262" font-size="18" fill="#2f6f6f">whose embedding preflight writes</text>
+
+  <line x1="960" y1="330" x2="800" y2="330" stroke="#333" stroke-width="2.6"/>
+  <rect x="470" y="300" width="330" height="120" fill="none" stroke="#333" stroke-width="1.2"/>
+  <text x="492" y="338" font-size="20" fill="#333">report_family_rows</text>
+  <text x="492" y="364" font-size="18" fill="#333">members · anchor · drift</text>
+  <text x="492" y="388" font-size="18" fill="#333">lint counts by class · total</text>
+  <text x="492" y="410" font-size="18" fill="#333">nothing written to the graph</text>
+
+  <line x1="470" y1="400" x2="310" y2="440" stroke="#333" stroke-width="2.6"/>
+  <rect x="40" y="424" width="270" height="64" fill="none" stroke="#333" stroke-width="1.2"/>
+  <text x="60" y="452" font-size="20" fill="#333">per-family rows +</text>
+  <text x="60" y="476" font-size="20" fill="#333">scope total</text>
+</svg>

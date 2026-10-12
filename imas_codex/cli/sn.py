@@ -1772,18 +1772,6 @@ def _reject_unscoped_accepted_reset(
     ),
 )
 @click.option(
-    "--families",
-    "families",
-    default=None,
-    help=(
-        "Curative family-docs wave: space-separated family parent ids. "
-        "Snapshots every live member's docs to a DocsRevision, resets the "
-        "family's docs pipeline, and drains ONLY those names through the "
-        "docs pools (implies --docs-only --flush; scoped internally). "
-        "Requires --include-accepted; pair with --dry-run to preview."
-    ),
-)
-@click.option(
     "--only",
     "only_phase",
     type=click.Choice(TURN_PHASES, case_sensitive=False),
@@ -1983,7 +1971,6 @@ def sn_run(
     edits_only: bool,
     scope_run_id: str | None,
     skip_global_maintenance: bool,
-    families: str | None,
     only_phase: str | None,
     override_edits: tuple[str, ...],
     skip_clear_gate: bool,
@@ -2051,7 +2038,6 @@ def sn_run(
             "--batch": batch_name is not None,
             "--drain-batch": drain_batch is not None,
             "--scope-run-id": scope_run_id is not None,
-            "--families": families is not None,
             "--source/--facility": source != "dd" or facility is not None,
             "--reset/--reseed/--revalidate": (
                 reset_to is not None or reset_only or reseed or revalidate
@@ -2100,7 +2086,6 @@ def sn_run(
                 (skip_review, names_only, docs_only, flush, edits_only)
             ),
             "--maintenance mode": only_phase is not None,
-            "--families": families is not None,
             "--rename": rename_spec is not None,
             "--campaign": campaign is not None or campaign_manifest is not None,
             "--accepted/edit overrides": include_accepted or bool(override_edits),
@@ -2350,10 +2335,6 @@ def sn_run(
         if only_phase in {"reconcile", "attach", "validate", "link"}:
             raise click.UsageError(
                 f"--skip-global-maintenance cannot be combined with --only {only_phase}"
-            )
-        if families:
-            raise click.UsageError(
-                "--skip-global-maintenance cannot be combined with --families"
             )
         if campaign or campaign_manifest:
             raise click.UsageError(
@@ -2727,44 +2708,6 @@ def sn_run(
                 **_reset_filter_kwargs,
             )
             console.print(f"[yellow]--reset-to drafted:[/yellow] reset {n} SN nodes")
-
-    # --families: curative family-docs wave. Resolve parents → members,
-    # snapshot + reset their docs pipeline, then run a docs-only flush
-    # scoped to exactly that set. Post-drain reconcile restamps the
-    # families once every member re-passes review.
-    if families:
-        from imas_codex.standard_names.harmonize import mark_families_for_regen
-
-        parents = families.split()
-        if not include_accepted and not dry_run:
-            raise click.UsageError(
-                "--families resets docs on accepted (catalog-authoritative) "
-                "names — pass --include-accepted to authorize, or --dry-run "
-                "to preview."
-            )
-        out = mark_families_for_regen(parents, dry_run=dry_run)
-        if out.get("unknown_parents"):
-            console.print(
-                "[yellow]Unknown family parents (skipped):[/yellow] "
-                + " ".join(out["unknown_parents"])
-            )
-        if dry_run:
-            console.print(
-                f"[green]Would reset {out['eligible']} docs[/green] across "
-                f"{len(parents) - len(out.get('unknown_parents') or [])} "
-                f"family(ies): {' '.join(out['member_ids'])}"
-            )
-            return
-        if not out.get("reset"):
-            console.print("[yellow]No eligible docs to reset — nothing to do.[/yellow]")
-            return
-        console.print(
-            f"[green]Reset {out['reset']} docs[/green] across the family set; "
-            "draining through the docs pools…"
-        )
-        scope_run_id = out["run_id"]
-        docs_only = True
-        flush = True
 
     # --campaign: budgeted, gated documentation-refinement campaign scoped by a
     # defect predicate. Dry-run writes a reviewable manifest and exits; a live
@@ -4211,8 +4154,7 @@ def sn_status(family_seed: str | None, show_contested: bool) -> None:
                             )
                         )
                         console.print(
-                            "  [dim]curative wave: sn run --families "
-                            '"<parent …>" --include-accepted[/dim]'
+                            "  [dim]family report: sn harmonize --family <seed>[/dim]"
                         )
             except Exception:
                 logger.debug("sn status: family block failed", exc_info=True)
@@ -5949,84 +5891,158 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
         console.print(f"Compacted {len(safe)} unapproved candidates.")
 
 
-def _refuse_grouped_review_scoping(
-    *,
-    ids: str | None,
-    domain: str | None,
-    unreviewed: bool,
-    force: bool,
+@sn.command("harmonize")
+@click.option(
+    "--batch",
+    "batch_token",
+    default=None,
+    help="Roster batch token or path (an sn_names manifest), e.g. v0.4.0rc7+west-task-2e.",
+)
+@click.option(
+    "--family",
+    "family_seed",
+    default=None,
+    help="One pattern family, by any member's standard-name id.",
+)
+@click.option(
+    "--concept",
+    "concept_token",
+    default=None,
+    help="Every family containing a name whose grammar selects this registry concept.",
+)
+@click.option(
+    "--all",
+    "all_families",
+    is_flag=True,
+    default=False,
+    help="Every live pattern family in the catalog.",
+)
+@click.option(
+    "--min-size",
+    type=int,
+    default=1,
+    show_default=True,
+    help="Skip families smaller than this many members.",
+)
+@click.option(
+    "--report",
+    "report_mode",
+    is_flag=True,
+    default=False,
+    help="Report mode (the default and, for now, the only mode).",
+)
+@click.option(
+    "--json",
+    "as_json",
+    is_flag=True,
+    default=False,
+    help="Emit machine-readable JSON instead of the human report.",
+)
+def sn_harmonize(
+    batch_token: str | None,
+    family_seed: str | None,
+    concept_token: str | None,
+    all_families: bool,
+    min_size: int,
+    report_mode: bool,
+    as_json: bool,
 ) -> None:
-    """Reject scoping options that ``--target groups`` cannot honour.
+    """Read-only pattern-family harmonization report.
 
-    Grouped review reports every drifting sibling family, so ``--ids``,
-    ``--physics-domain``, ``--stage``, ``--unreviewed`` and ``--force``
-    have no per-family meaning. Accepting one would produce a run whose
-    output looks scoped and is not, so each supplied option is named and
-    the invocation is refused.
+    Reports every pattern family in scope: its members, its documentation
+    anchor, its description drift, and its lint finding counts by class, then
+    a scope total. Writes nothing to the graph — the report runs the
+    deterministic lint composition directly and never the embedding-writing
+    audit preflight.
 
-    ``--stage`` carries a default, so a value comparison cannot tell a
-    supplied ``--stage drafted`` from the default: the parameter source
-    is what distinguishes them.
+    Exactly one scope is required: ``--batch``, ``--family``, ``--concept``
+    or ``--all``.
+
+    \b
+    Examples:
+      imas-codex sn harmonize --batch v0.4.0rc7+west-task-2e
+      imas-codex sn harmonize --family ion_temperature
+      imas-codex sn harmonize --concept temperature
+      imas-codex sn harmonize --all --json
     """
-    supplied = []
-    if ids is not None:
-        supplied.append("--ids")
-    if domain is not None:
-        supplied.append("--physics-domain")
-
-    ctx = click.get_current_context(silent=True)
-    stage_source = ctx.get_parameter_source("stage_filter") if ctx is not None else None
-    if stage_source is not None and stage_source != click.core.ParameterSource.DEFAULT:
-        supplied.append("--stage")
-    if unreviewed:
-        supplied.append("--unreviewed")
-    if force:
-        supplied.append("--force")
-
-    if supplied:
-        raise click.UsageError(
-            "--target groups reports every sibling family and does not "
-            f"support scoping options: {', '.join(supplied)}"
-        )
-
-
-def _report_drifting_families(families: list[dict[str, Any]]) -> None:
-    """Render the grouped-review worklist, one line per drifting family.
-
-    The defects per-identity review cannot see are the cohort ones — a base
-    split across two spellings, a family whose members disagree, an identity
-    bound to loci of different kinds. Each line carries the family's parent,
-    member count, deterministic drift and anchor, which are the fields
-    :func:`harmonize.build_worklist` already computes. The worklist follows on
-    one line as JSON so a caller can consume it as data rather than parse the
-    table. Read-only: this never writes to the graph.
-    """
-    console.print(
-        f"\n[bold]Grouped review:[/bold] {len(families)} drifting "
-        f"{'family' if len(families) == 1 else 'families'}"
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.harmonize import (
+        concept_member_ids,
+        report_family_rows,
     )
-    if not families:
-        console.print(
-            "  No family met the drift and size thresholds (min_drift=0.5, min_size=3)."
+
+    scopes = [
+        ("--batch", batch_token),
+        ("--family", family_seed),
+        ("--concept", concept_token),
+    ]
+    supplied = [name for name, value in scopes if value] + (
+        ["--all"] if all_families else []
+    )
+    if len(supplied) != 1:
+        raise click.UsageError(
+            "exactly one scope is required: --batch, --family, --concept or --all "
+            f"(got {len(supplied)}: {', '.join(supplied)})"
         )
+
+    seeds: list[str] | None = None
+    family_ids: list[str] | None = None
+
+    if batch_token:
+        from imas_codex.standard_names.sources_manifest import (
+            SourcesManifestError,
+            load_focus_file,
+            resolve_batch_token,
+        )
+
+        resolved = resolve_batch_token(batch_token)
+        if resolved is None:
+            raise click.UsageError(f"--batch: no manifest matches {batch_token!r}")
+        try:
+            kind, items = load_focus_file(resolved)
+        except SourcesManifestError as exc:
+            raise click.UsageError(f"--batch: {exc}") from exc
+        if kind != "sn_names":
+            raise click.UsageError(
+                f"--batch {batch_token!r} is an {kind} manifest; "
+                "a harmonization roster must list standard-name ids (kind: sn_names)"
+            )
+        seeds = items
+    elif family_seed:
+        seeds = [family_seed]
+    elif concept_token:
+        with GraphClient() as gc:
+            family_ids = concept_member_ids(concept_token, gc)
+        if not family_ids:
+            raise click.UsageError(
+                f"--concept {concept_token!r} selects no live standard name"
+            )
+        seeds = family_ids
+    else:
+        seeds = None  # --all
+
+    with GraphClient() as gc:
+        rows = report_family_rows(gc, seeds=seeds, min_size=min_size)
+
+    if as_json:
+        console.print(json.dumps(rows, sort_keys=True), soft_wrap=True, markup=False)
         return
 
-    for family in families:
-        parent = family.get("parent") or family.get("physical_base")
-        members = family.get("members") or []
-        anchor = family.get("anchor")
+    total_members = 0
+    total_lint = 0
+    for row in rows:
+        total_members += row["n"]
+        total_lint += row["lint_total"]
+        lint_text = ", ".join(f"{k}={v}" for k, v in row["lint"].items()) or "clean"
         console.print(
-            f"  parent={parent or '(parentless)'}"
-            f"  members={family.get('n', len(members))}"
-            f"  drift={family.get('drift', 0.0):.3f}"
-            f"  anchor={anchor or '(deferred)'}"
+            f"family {row['physical_base']}  members={row['n']}  "
+            f"drift={row['drift']:.2f}  anchor={row['anchor'] or '—'}  "
+            f"lint={row['lint_total']}"
         )
-
-        for member in members:
-            console.print(f"      - {member}")
-
-    console.print("  [bold]Worklist[/bold]")
-    console.print(json.dumps(families, sort_keys=True), soft_wrap=True, markup=False)
+        console.print(f"    lint: {lint_text}")
+    console.print(
+        f"scope total: families={len(rows)}  members={total_members}  lint={total_lint}"
+    )
 
 
 @sn.command("review")
@@ -6100,18 +6116,17 @@ def _report_drifting_families(families: list[dict[str, Any]]) -> None:
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging")
 @click.option(
     "--target",
-    type=click.Choice(["names", "docs", "groups"], case_sensitive=False),
+    type=click.Choice(["names", "docs"], case_sensitive=False),
     default="names",
     show_default=True,
     help=(
         "Which review rubric to apply. 'names' → 4-dim name rubric "
         "(grammar/semantic/convention/completeness, /80). 'docs' → 4-dim "
         "docs rubric (description_quality/documentation_quality/"
-        "completeness/physics_accuracy, /80). Those two are per-identity. "
-        "'groups' → grouped review: reports each drifting sibling family "
-        "detected by harmonize.build_worklist (parent, member count, drift, "
-        "anchor) and writes nothing to the graph. A lower-fidelity target "
-        "will not overwrite a higher-fidelity prior review unless --force."
+        "completeness/physics_accuracy, /80). Both are per-identity. Use "
+        "`sn harmonize` to report family-level findings. A lower-fidelity "
+        "target will not overwrite a higher-fidelity prior review unless "
+        "--force."
     ),
 )
 @click.option(
@@ -6164,7 +6179,6 @@ def sn_review(
       imas-codex sn review --force --physics-domain magnetics
       imas-codex sn review --target names --unreviewed
       imas-codex sn review --target docs --physics-domain equilibrium
-      imas-codex sn review --target groups
       imas-codex sn review --reviewer-profile quality-cost-balanced --unreviewed -c 2.0
     """
     import asyncio
@@ -6189,27 +6203,6 @@ def sn_review(
 
     # Enforce batch-size cap
     batch_size = min(batch_size, 25)
-
-    if target_normalized == "groups":
-        # Grouped review reads sibling families through harmonize's
-        # read-only surface and emits them as a worklist. Nothing here
-        # writes: the four harmonization apply helpers are never imported.
-        #
-        # The scoping options select individual identities, and grouped
-        # review has no per-family equivalent for any of them, so a
-        # supplied one would be accepted and silently discarded while the
-        # run reported every family. Refuse the whole invocation instead.
-        _refuse_grouped_review_scoping(
-            ids=ids,
-            domain=domain,
-            unreviewed=unreviewed,
-            force=force,
-        )
-
-        from imas_codex.standard_names.harmonize import build_worklist
-
-        _report_drifting_families(build_worklist())
-        return
 
     # Load reviewer list (N>=1). Priority: --models > --reviewer-profile > config.
     from imas_codex.settings import (

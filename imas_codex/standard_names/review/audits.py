@@ -755,6 +755,22 @@ def run_documentation_gate_checks(
     return findings
 
 
+def run_lint_checks(names: list[dict[str, Any]]) -> list[LintFinding]:
+    """Run the deterministic lint composition over *names*.
+
+    One composition, in one place: the lexical lint, the registry conformance
+    checks and the deterministic documentation gates. :func:`run_all_audits`
+    calls this after its embedding preflight, and the read-only
+    ``sn harmonize --report`` surface calls it directly — that surface cannot
+    run :func:`run_all_audits`, whose preflight re-embeds and writes.
+    """
+    return [
+        *run_lexical_lint(names),
+        *run_house_style_checks(names),
+        *run_documentation_gate_checks(names),
+    ]
+
+
 def run_all_audits(names: list[dict[str, Any]]) -> AuditReport:
     """Run all Layer 1 deterministic audits and return a combined report.
 
@@ -768,12 +784,7 @@ def run_all_audits(names: list[dict[str, Any]]) -> AuditReport:
     logger.info("Starting Layer 1 audits on %d standard names", len(names))
 
     embedding = run_embedding_preflight(names)
-    lint_findings = run_lexical_lint(names)
-    lint_findings = [
-        *lint_findings,
-        *run_house_style_checks(names),
-        *run_documentation_gate_checks(names),
-    ]
+    lint_findings = run_lint_checks(names)
     link_findings = run_link_integrity(names)
     duplicate_components = run_duplicate_detection(names)
 

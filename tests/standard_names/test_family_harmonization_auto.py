@@ -1,11 +1,10 @@
 """Unit tests for automatic family-harmonization bookkeeping.
 
-Covers the three always-on pieces that replaced the standalone harmonize
-command:
+Covers the always-on bookkeeping the family-harmonization apply path runs:
 
 * ``_doc_link_mismatches`` — the accept-path link label/target gate helper.
 * ``restamp_harmonized_families`` — the post-drain signature reconcile.
-* ``mark_families_for_regen`` — parent-id resolution for ``sn run --families``.
+* ``assemble_family`` — the family a seed resolves to, for the docs prompt.
 
 All graph access is mocked (conftest blocks live GraphClient by default).
 """
@@ -18,7 +17,6 @@ from imas_codex.standard_names.graph_ops import _doc_link_mismatches
 from imas_codex.standard_names.harmonize import (
     assemble_family,
     group_signature,
-    mark_families_for_regen,
     restamp_harmonized_families,
 )
 
@@ -208,46 +206,3 @@ def test_locus_seed_is_not_regrouped_by_pattern_family():
 
     assert assemble_family("radial_coordinate_of_control_surface", gc=gc) is None
     assert len(gc.calls) == 2
-
-
-# ---------------------------------------------------------------------------
-# mark_families_for_regen
-# ---------------------------------------------------------------------------
-
-
-class _ParentGC:
-    def __init__(self, families):
-        self._families = families  # parent -> kids
-
-    def query(self, cypher, **params):
-        pid = params.get("pid")
-        if pid not in self._families:
-            return []
-        return [{"parent_id": pid, "kids": self._families[pid]}]
-
-
-def test_mark_families_resolves_members_and_flags_unknown():
-    gc = _ParentGC({"mode_number": ["poloidal_mode_number", "toroidal_mode_number"]})
-    captured = {}
-
-    def _fake_mark(member_ids, *, dry_run=False):
-        captured["ids"] = member_ids
-        captured["dry_run"] = dry_run
-        return {"run_id": "rid", "eligible": len(member_ids), "reset": 0}
-
-    with patch(
-        "imas_codex.standard_names.harmonize.mark_members_for_regen",
-        side_effect=_fake_mark,
-    ):
-        out = mark_families_for_regen(
-            ["mode_number", "no_such_parent"], gc=gc, dry_run=True
-        )
-
-    assert captured["ids"] == [
-        "mode_number",
-        "poloidal_mode_number",
-        "toroidal_mode_number",
-    ]
-    assert captured["dry_run"] is True
-    assert out["unknown_parents"] == ["no_such_parent"]
-    assert out["eligible"] == 3

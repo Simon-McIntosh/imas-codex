@@ -55,9 +55,9 @@ dedicated command:
   family automatically on the next run.
 - `sn status` reports family/drift state; `sn status --family <seed>` shows
   one family.
-- Curative re-open of ACCEPTED docs is the only manual act:
-  `sn run --families "<parent …>" --include-accepted` (one-shot: snapshot →
-  reset → scoped docs drain → restamp). Never edit docs by hand.
+- `sn harmonize` reports pattern families read-only (members, anchor, drift,
+  lint counts by class, scope total) over one of `--batch`, `--family`,
+  `--concept`, `--all`; it writes nothing. Never edit docs by hand.
 
 
 ### Correcting a Standard Name fault

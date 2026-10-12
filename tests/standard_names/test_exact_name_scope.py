@@ -296,7 +296,6 @@ def test_exact_name_dry_run_splits_values_and_uses_zero_write_helper() -> None:
         ["--focus", "equilibrium/time_slice/psi"],
         ["--batch", "west_production_dd_paths"],
         ["--scope-run-id", "other-run"],
-        ["--families", "flux"],
     ],
 )
 def test_exact_name_rejects_other_scope_selectors(
