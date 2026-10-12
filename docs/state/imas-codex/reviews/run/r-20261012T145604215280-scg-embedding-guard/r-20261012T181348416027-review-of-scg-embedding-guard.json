@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/embeddings/test_embed_distinct_guard.py tests/embeddings/test_encoder.py tests/embeddings/test_embeddings.py tests/embeddings/test_embedding_encoder.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145604215280-scg-embedding-guard/gate_head.log",
+    "note": "head arm ran in the worktree with the guard change uncommitted; the committed head content is 08024a3549cd684755243ebe6eb84f34343c5dbe. Summary line: 65 passed, 5 deselected, 1 warning.",
+    "revision": "c7b4c626e21cc93a2fc9cfefe200ef066b800829"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261012T145604215280-scg-embedding-guard/scg-base-arm uv run --directory /tmp/reckon-crew-scratch/r-20261012T145604215280-scg-embedding-guard/scg-base-arm pytest -p no:cacheprovider tests/embeddings/test_encoder.py tests/embeddings/test_embeddings.py tests/embeddings/test_embedding_encoder.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145604215280-scg-embedding-guard/gate_base.log",
+    "revision": "c7b4c626e21cc93a2fc9cfefe200ef066b800829"
+  },
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/embeddings/description.py:86",
+    "imas_codex/graph/client.py:663",
+    "imas_codex/graph/dd_search.py:461",
+    "imas_codex/standard_names/search.py:57",
+    "imas_codex/llm/server.py:716",
+    "imas_codex/clusters/extractor.py:695",
+    "imas_codex/discovery/wiki/pipeline.py:1269"
+  ],
+  "completed_at": "2026-10-12T18:20:12.371Z",
+  "dispatched_at": "2026-10-12T18:14:10Z",
+  "findings": [
+    {
+      "file": "tests/embeddings/test_encoder.py",
+      "line": 87,
+      "severity": "follow-on",
+      "summary": "two fixtures whose stub returns three identical zero vectors are edited outside the declared write paths (encoder.py, test_embed_distinct_guard.py, the fragment); the edit is necessary and correct (the guard rejects that shape, so both tests would redden unchanged) and is disclosed in the manifest, but it needs a coordinator scope grant or the node lands a file it was not fenced to write."
+    },
+    {
+      "file": "imas_codex/embeddings/encoder.py",
+      "line": 432,
+      "severity": "follow-on",
+      "summary": "embed_texts_with_result returns the same backend output through the sibling path without calling _reject_identical_vectors, so the guard does not cover every public producer of embeddings; it currently has no production caller, so the gap is latent rather than reachable."
+    },
+    {
+      "file": "imas_codex/embeddings/encoder.py",
+      "line": 44,
+      "severity": "follow-on",
+      "summary": "DegenerateEmbeddingError subclasses Exception rather than EmbeddingBackendError, so callers that catch the backend error for a graceful fallback (imas_codex/llm/search_tools.py:268, imas_codex/tools/graph_search.py:1821) now propagate it uncaught; visible failure is the stated intent, but the class sits outside the hierarchy those sites key on."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the guard sits on Encoder.embed_texts, which 39 production call sites invoke across imas_codex/; verified against seven that include a try/except wrapper (imas_codex/embeddings/description.py:86) and direct callers (imas_codex/graph/client.py:663, imas_codex/standard_names/search.py:57, imas_codex/llm/server.py:716).",
+    "diff": "read commit by commit against c7b4c626e; the single commit 08024a354 changes exactly four paths inside/listing the declared scope: encoder.py adds DegenerateEmbeddingError and _reject_identical_vectors called on both return paths of embed_texts (+52/-2), test_embed_distinct_guard.py is new (87 lines, six tests), test_encoder.py adjusts two degenerate stub fixtures (out of declared scope), and the fragment is new (43 lines).",
+    "done_when": "the done_when asks for a zero identical-vector cluster count with the bounded query, predicate and elapsed time; a stub-backend test that is refused and fails when the guard is removed; and four gate files. The fragment records the predicate, 2528 rows and 0.67 s and the 4-clusters-to-0 result; negative_control.log shows three tests reddening with the refusal removed; gate_head.log runs all four files at 65 passed.",
+    "goal": "the node goal is to make Encoder.embed_texts refuse a silent constant vector and then repair the 38 names built from one; encoder.py:413 and encoder.py:428 call _reject_identical_vectors on both return paths, and the manifest records the four clusters (sizes 18/14/4/2, 38 names) re-embedded to zero.",
+    "manifest": "read; status complete, commit 08024a354, landing line present, gate and negative-control logs named, and the out-of-scope test_encoder.py edit disclosed as a blocker in fields 8 and 10 rather than hidden.",
+    "write_paths": "the source declared encoder.py, tests/embeddings/test_embed_distinct_guard.py, the fragment docs/evidence/fragments/sn-catalog-grouping/scg-embedding-guard.html and an unused docs/figures dir; the diff touches the first three plus tests/embeddings/test_encoder.py, which is outside the declared set."
+  },
+  "justifications": {
+    "durability": "tests/embeddings/test_embed_distinct_guard.py:40,47,84 assert the refusal against a stub returning one vector for distinct texts, and negative_control.log shows all three redden (DID NOT RAISE, EXIT=1) with _reject_identical_vectors removed while they pass at head.",
+    "evidence": "gate_head.log and gate_base.log are retained with their summary lines (65 and 59 passed, EXIT=0) and negative_control.log keeps the reverted-guard red, but the census query itself is reported only as predicate and elapsed in the fragment (docs/evidence/fragments/sn-catalog-grouping/scg-embedding-guard.html:17) with no raw query log to re-run.",
+    "fit": "DegenerateEmbeddingError at imas_codex/embeddings/encoder.py:44 mirrors the sibling EmbeddingBackendError idiom and _reject_identical_vectors is a staticmethod on the owning class, with no plan, sprint or ticket label in any added name or comment.",
+    "goal_fidelity": "imas_codex/embeddings/encoder.py:413 and :428 both return through _reject_identical_vectors, so the local and remote paths and every description.py wrapper reach the guard, and the manifest records the 38 names repaired to zero clusters.",
+    "reuse": "no owner for degenerate-vector detection exists in imas_codex/embeddings/ (a capability search found only unrelated cache content hashing), so _reject_identical_vectors is the first and it is placed on the canonical Encoder rather than a new module.",
+    "scope_discipline": "the diff reaches tests/embeddings/test_encoder.py:87 and :597, which are outside the declared write paths, even though the change is necessary and disclosed; the other three paths are inside scope."
+  },
+  "node": "review-of-scg-embedding-guard",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make Encoder.embed_texts refuse a silent constant vector and then repair the 38 names built from one; encoder.py:413 and encoder.py:428 call _reject_identical_vectors on both return paths, and the manifest records the four clusters (sizes 18/14/4/2, 38 names) re-embedded to zero.\nVERDICT done_when: the done_when asks for a zero identical-vector cluster count with the bounded query, predicate and elapsed time; a stub-backend test that is refused and fails when the guard is removed; and four gate files. The fragment records the predicate, 2528 rows and 0.67 s and the 4-clusters-to-0 result; negative_control.log shows three tests reddening with the refusal removed; gate_head.log runs all four gate files at 65 passed.\nVERDICT write_paths: the source declared encoder.py, tests/embeddings/test_embed_distinct_guard.py, the fragment and an unused docs/figures dir; the diff touches the first three plus tests/embeddings/test_encoder.py, which is outside the declared set.\nVERDICT manifest: read; status complete, commit 08024a354, landing line present, gate and negative-control logs named, and the out-of-scope test_encoder.py edit disclosed in fields 8 and 10 rather than hidden.\nVERDICT diff: read commit by commit against c7b4c626e; the single commit 08024a354 changes exactly four paths: encoder.py (+52/-2), test_embed_distinct_guard.py (new, 87 lines), test_encoder.py (two stub fixtures, out of scope), and the fragment (new, 43 lines).\nCALL_SITES: imas_codex/embeddings/description.py:86, imas_codex/graph/client.py:663, imas_codex/graph/dd_search.py:461, imas_codex/standard_names/search.py:57, imas_codex/llm/server.py:716, imas_codex/clusters/extractor.py:695, imas_codex/discovery/wiki/pipeline.py:1269\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/embeddings/encoder.py:413 and :428 both return through _reject_identical_vectors, so the local and remote paths and every description.py wrapper reach the guard, and the manifest records the 38 names repaired to zero clusters.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate_head.log and gate_base.log are retained with their summary lines (65 and 59 passed, EXIT=0) and negative_control.log keeps the reverted-guard red, but the census query is reported only as predicate and elapsed in the fragment (docs/evidence/fragments/sn-catalog-grouping/scg-embedding-guard.html:17) with no raw query log to re-run.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: the diff reaches tests/embeddings/test_encoder.py:87 and :597, which are outside the declared write paths, even though the change is necessary and disclosed.\nSCORE durability: 18\nJUSTIFICATION durability: tests/embeddings/test_embed_distinct_guard.py:40,47,84 assert the refusal against a stub returning one vector for distinct texts, and negative_control.log shows all three redden (DID NOT RAISE, EXIT=1) with _reject_identical_vectors removed while they pass at head.\nSCORE fit: 18\nJUSTIFICATION fit: DegenerateEmbeddingError at imas_codex/embeddings/encoder.py:44 mirrors the sibling EmbeddingBackendError idiom and _reject_identical_vectors is a staticmethod on the owning class, with no plan, sprint or ticket label in any added name or comment.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner for degenerate-vector detection exists in imas_codex/embeddings/ (a capability search found only unrelated cache content hashing), so _reject_identical_vectors is the first and it is placed on the canonical Encoder rather than a new module.\nFINDING tests/embeddings/test_encoder.py:87 follow-on: two fixtures whose stub returns three identical zero vectors are edited outside the declared write paths (encoder.py, test_embed_distinct_guard.py, the fragment); the edit is necessary and correct (the guard rejects that shape, so both tests would redden unchanged) and is disclosed in the manifest, but it needs a coordinator scope grant or the node lands a file it was not fenced to write.\nFINDING imas_codex/embeddings/encoder.py:432 follow-on: embed_texts_with_result returns the same backend output through the sibling path without calling _reject_identical_vectors, so the guard does not cover every public producer of embeddings; it currently has no production caller, so the gap is latent rather than reachable.\nFINDING imas_codex/embeddings/encoder.py:44 follow-on: DegenerateEmbeddingError subclasses Exception rather than EmbeddingBackendError, so callers that catch the backend error for a graceful fallback (imas_codex/llm/search_tools.py:268, imas_codex/tools/graph_search.py:1821) now propagate it uncaught; visible failure is the stated intent, but the class sits outside the hierarchy those sites key on.",
+  "review_run_id": "r-20261012T181348416027-review-of-scg-embedding-guard",
+  "reviewed_base_sha": "c7b4c626e21cc93a2fc9cfefe200ef066b800829",
+  "reviewed_head_sha": "08024a3549cd684755243ebe6eb84f34343c5dbe",
+  "reviewed_run_id": "r-20261012T145604215280-scg-embedding-guard",
+  "reviewer_run_id": "r-20261012T181348416027-review-of-scg-embedding-guard",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145604215280-scg-embedding-guard/gate_head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145604215280-scg-embedding-guard/gate_base.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145604215280-scg-embedding-guard/negative_control.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:25:00.000000+00:00",
+  "total": 103
+}
