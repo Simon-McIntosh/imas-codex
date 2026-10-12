@@ -24,7 +24,7 @@
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2,e000241de910e5a4d0d21825593e12ecd6934ec5,d7e3860a7c6e85a5fbfde1103dc0bded5af7203e,77815e0ea71be4c94a0dd52d386dc0987045dc9b,f2b9d9ee2e77922cd107952e8f51a2602519218d,9caea975fe223505bddf301dd8747709159232f2,03559dfe552d88192815516b3a12e3e9916f74ff,439ced57fd4422969f004797d2402211851de29a,2f9e46540ec7f67fe92969c4dd76e41aa9ad7ecb">
 </head>
@@ -358,6 +358,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261012T150509998089-sje-decisions-owner" data-who="reckon-build" data-when="2026-10-12T15:41:05.069Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-judgment-evaluation/sje-decisions-owner.html</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261012T161448035827-judgment-per-call-unit" data-who="reckon-build" data-when="2026-10-12T16:31:16.994Z">
+    <div class="r-comment-body"><p>judgment-per-call-unit — decide_one and decide_batch now share one per-call unit (_settle_call: call, classify OK/MALFORMED/TRANSPORT, book cost); four-outcome test drives a malformed answer and a transport fault through both entry points and asserts the four outcomes (193 passed, 8 skipped; baseline 192 passed, 8 skipped; no added failures); negative control red.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261012T154803039063-review-of-sje-existing-goldens" data-who="reckon-build" data-when="2026-10-12T15:58:42.849Z">
     <div class="r-comment-body"><p>review-of-sje-existing-goldens scores goal_fidelity 15, evidence 15, scope_discipline 20, durability 17, fit 18, reuse 18 (total 103) for r-20261012T151727063207-sje-existing-goldens at f2b9d9ee2..439ced57f, with three follow-on findings and zero added failures.</p></div>
