@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T21:25:50.974Z",
+  "dispatched_at": "2026-10-12T21:17:30Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:134",
+      "id": "reasoning-1",
+      "reason": "\"the golden set does not describe\" reads as \"unlabelled\", and a worker resolving it the paragraph's way disarms the refusal guard the done-when's whole measure rests on (a paragraph that means only ineligible signals should say \"outside the eligible population\").",
+      "text": "the new rule and the done-when disagree on the harness's behaviour toward a candidate the labels do not carry: the paragraph says such a candidate neither credits nor refuses an arm, while the done-when makes an unlabelled candidate in an arm's top 10 the sole trigger for refusing to score it",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e3eb0104633b043934953927b369d755557759a04671e11c962f8cf20e1006a0",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 16,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T211717848723-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "3bf618f418323c9f4a4df03141f790548a451424",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 43290a049 (2026-10-07), b4c89a8fc (2026-10-09) and 93bfb7e9d (2026-10-11T23:08:21+02:00 = 21:08:21Z) all resolve to the subjects stated; tests/llm/test_signal_search_goldens.py, tests/llm/fixtures/signal_search_questions.json and tests/tools/fixtures/dd_mapping_questions.json exist, and the fixture's enriched_at_cutover reads 2026-10-11T19:08:21Z exactly as \u00a73 says it first was.",
+    "done_when": "pass \u2014 \u00a73's done-when is measurable (question/held-out counts, the five-arm table, mean nDCG@10) and declares a negative control with its own falsifier: \"the random control scores below every arm on mean nDCG@10; a control that does not means the labels are wrong\".",
+    "evidence_paths": "pass \u2014 \u00a73's table and labelling log land on the durable repo path docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html, not a scratchpad or node-local directory.",
+    "naming": "pass \u2014 \u00a73 names no plan label, stage or ticket in a symbol, file or comment; the new evidence fragment and fixture paths name the mechanism (goldens, signal_search_questions), and the only plan-referencing variable (SSFMS_JEV_ARMS) lives in a landed comment already recorded as a defect, not in \u00a73's text.",
+    "reasoning": "a finding \u2014 \u00a73's new population paragraph says an arm is \"neither credited nor refused for a signal the golden set does not describe\", which contradicts \u00a73's own done-when refusing any arm whose top 10 holds an unlabelled candidate.",
+    "single_goal": "pass \u2014 \u00a73 declares three nodes and enumerates exactly three: question-writing, harness-building, pooled labelling; each carries one deliverable, and the section's single goal is the golden instrument.",
+    "wiring": "pass \u2014 \u00a73's ordering holds (it precedes \u00a74\u2013\u00a710 per followup f-ssfms-001); no depends-on/informs/gates edge is missing or mis-pointed, and the sole gate g-ssfms-1 names s11 where the JET eligibility measure belongs."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "55d50691690b7735d44b84cbb536748fc9fcf7dae252804f125fea55ae3b98bf",
+    "s4": "bbfa57f0f787e5833fdbccdbece0e75658e4bfe6f10d389c40ec5c8c4ef64720",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:28:36.871160+00:00"
+}
