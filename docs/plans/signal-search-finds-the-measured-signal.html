@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69">
 </head>
@@ -234,6 +234,13 @@
       measure a change.
     </p>
     <p>
+      The section is two nodes. The first writes the fusion: the shared module, the four call sites, one owner for the
+      signal vector query, and the two unit tests. The second measures it: the signal harness at the first node's head
+      against the frozen additive-rule arm, labelling any eligible candidate the fused tool lifts into a top 10 under
+      §3's rule, and the docs and code question set at pool 60, which spends Jev on their rerank. Its table goes in
+      <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/fusion.html</code>.
+    </p>
+    <p>
       <strong>Done when</strong> all of the following hold:
     </p>
     <ul>
@@ -262,6 +269,16 @@
     <p>
       Decision <code>embed-text</code> is settled here by measurement. Embed the description alone, or a composed
       <em>name — description (unit)</em> text, and keep whichever scores higher on §3's harness.
+    </p>
+    <p>
+      The section is three nodes. The first measures the decision without touching stored vectors. It embeds the
+      eligible JT-60SA signals both ways, ranks each harness question by cosine over those vectors in memory, scores a
+      vector-only arm and an RRF arm with the full-text stream for each text on §3's labels, and labels any eligible
+      candidate either text lifts into a top 10 under §3's rule. The coordinator locks <code>embed-text</code> from its
+      table. The second, in parallel with the first, writes the single description writer, taking the embed text as a
+      parameter so the decision can set it, with its test. The third, after both, re-embeds every FacilitySignal whose
+      hash differs, at every facility, and runs the census. The measurement and the census go in
+      <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html</code>.
     </p>
     <p>
       <strong>Done when</strong> a census over all FacilitySignal nodes finds none whose <code>embedded_text_hash</code>
