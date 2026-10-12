@@ -1,0 +1,70 @@
+{
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T213205046032-review-of-ssfms-verify-description-corrections/verify-rerun-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T213205046032-review-of-ssfms-verify-description-corrections/verify-rerun-base.log"
+  ],
+  "claim_lines": [
+    "CLAIM 1: reproduced: re-ran the report's head-arm command (six discovery modules under the delivered tree at b8a47a132) and it prints 68 passed, 2 deselected, 1 warning, EXIT=0, matching the manifest's stated \"68 passed / 0 failed / 0 skipped (2 deselected, EXIT=0)\"; module.__file__ resolved to the head worktree's imas_codex/discovery/signals/parallel.py.",
+    "CLAIM 2: reproduced: the report's cited base tree (/tmp/reckon-crew-scratch/.../base-78397b48f) is gone from this node, so I rebuilt it from the report's own recipe (git archive 78397b48fa5fecd168b37c01f1a13ddaab55329d + the five generated files) and it prints 63 passed, 2 deselected, 1 warning, EXIT=0, matching the manifest's stated \"63 passed / 0 failed / 0 skipped (2 deselected, EXIT=0)\"; the reconstructed base tree contains none of the five new test ids.",
+    "CLAIM 3: reproduced: added failures are zero \u2014 head 68 passed / base 63 passed with 0 failures in each arm, so no test fails at head that passes at base; the 63-to-68 delta is exactly the five test ids the head revision adds in tests/discovery/test_signal_glossary.py."
+  ],
+  "claim_summary": {
+    "detail": "The report's summary line is the manifest tests: line quoting head 68 passed / 0 failed / 0 skipped (2 deselected, EXIT=0), base 63 passed / 0 failed / 0 skipped (2 deselected, EXIT=0) and added failures = 0. The table beneath it \u2014 the baseline_suite and after_suite records and the artifacts line \u2014 carries the same figures (failure_count 0 at both arms, exit_status 0, head summary '68 passed, 2 deselected, 1 warning in 50.83s', base '63 passed, 2 deselected, 1 warning in 48.88s'). My independent re-run reproduced 68 (head) and 63 (base), so the summary agrees with its table and with the re-run.",
+    "verdict": "agrees"
+  },
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "manifest tests: line; after_suite.command (uv run --directory <head worktree> pytest -p no:cacheprovider the six modules); head-b8a47a132-six-modules.log",
+      "finding": "head b8a47a132: six discovery modules = 68 passed / 0 failed / 2 deselected, EXIT=0",
+      "verdict": "reproduced"
+    },
+    "CLAIM 2": {
+      "cites": "manifest tests: line; baseline_suite.command; base-78397b48f-six-modules.log; the reviewed run's brief.md base-extraction recipe",
+      "finding": "base 78397b48f: six discovery modules = 63 passed / 0 failed / 2 deselected, EXIT=0 after reconstructing the cited base tree",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "manifest 'Added failures: None' and 'Reconciliation of the 63-to-68 pass delta'; head-ids.txt (68) / base-ids.txt (63) / ids-diff.txt",
+      "finding": "zero added failures across the six modules; the 63-to-68 pass delta is the five tests the head revision adds",
+      "verdict": "reproduced"
+    }
+  },
+  "claims": [
+    {
+      "cites": "after_suite.command (head worktree b8a47a132)",
+      "rank": 1,
+      "report_figure": "head = 68 passed / 0 failed / 0 skipped (2 deselected, EXIT=0)",
+      "rerun_figure": "68 passed, 2 deselected, 1 warning, EXIT=0",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "baseline_suite.command (base 78397b48f; tree reconstructed from the run's brief recipe)",
+      "rank": 2,
+      "report_figure": "base = 63 passed / 0 failed / 0 skipped (2 deselected, EXIT=0)",
+      "rerun_figure": "63 passed, 2 deselected, 1 warning, EXIT=0",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "the two arms above; ids-diff.txt",
+      "rank": 3,
+      "report_figure": "added failures = 0; 63-to-68 delta = five tests the head revision adds",
+      "rerun_figure": "0 added failures; 68 - 63 = 5, matching the five new test ids",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-12T21:43:16.043Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-12T21:32:23Z",
+  "method": "The reviewed run is read-only (committed nothing past its base 78397b48f; verified head b8a47a132), so it left no diff of its own and ran its six-module gate as a measurement rather than a delivery. Its report is its manifest.md. I re-ran the three claims it ranks highest from the reviewed run's own directory: the head six-module gate against the delivered worktree (b8a47a132), the base six-module gate against a base tree reconstructed per the run's own brief (git archive 78397b48f into $TMPDIR plus the five generated files, because the cited /tmp/reckon-crew-scratch base tree no longer exists on this node), and the zero-added-failure delta those two arms compose. Commands and logs: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T213205046032-review-of-ssfms-verify-description-corrections/verify-rerun-head.log and verify-rerun-base.log.",
+  "project": "imas-codex",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T211433813154-ssfms-verify-description-corrections/manifest.md",
+  "review_run_id": "r-20261012T213205046032-review-of-ssfms-verify-description-corrections",
+  "reviewed_base_sha": "78397b48fa5fecd168b37c01f1a13ddaab55329d",
+  "reviewed_head_sha": "b8a47a1324c52dc22c51838c2c8861e3fb437d5d",
+  "reviewed_run_id": "r-20261012T211433813154-ssfms-verify-description-corrections",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run is a read-only measurement, and this record is composed under the claims rubric, which carries claim verdicts and no suite-delta fields.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:41:01.319509+00:00"
+}
