@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="fragment">
+  <title>The conventions block is guarded where it is wired</title>
+</head>
+<body>
+  <section id="shs-conventions-wiring-landing">
+    <h2>The conventions block is guarded where it is wired</h2>
+    <p>The prompt-level tests hand a template its conventions directly, so a
+    render site that stops supplying the context key leaves them green while the
+    block silently drops out of the live prompt. Four tests now drive each
+    render site itself with <code>render_prompt</code> stubbed and assert the
+    context the site passes carries the conventions the registry selects for the
+    item — the generate, refine and single-item-review workers in
+    <code>imas_codex/standard_names/workers.py</code> and the batch reviewer in
+    <code>imas_codex/standard_names/review/pipeline.py</code>.</p>
+
+    <h3 id="shs-conventions-wiring-sites-heading">One test per site, and the control that reddens it</h3>
+    <table id="shs-conventions-wiring-sites">
+      <caption>Gate: <code>uv run pytest -p no:cacheprovider tests/standard_names/test_conventions_wiring.py</code> (4 passed). Each control removes that site's conventions key in a scratch copy.</caption>
+      <thead><tr><th>Site</th><th>Render call asserted</th><th>Control mutation</th><th>Control result</th></tr></thead>
+      <tbody>
+        <tr id="shs-conventions-wiring-generate"><td><code>process_generate_docs_batch</code></td><td><code>sn/generate_docs_user</code></td><td>drop <code>"conventions": conventions_context_for(sn_id)</code> from the prompt-context dict</td><td>KeyError: 'conventions', EXIT=1</td></tr>
+        <tr id="shs-conventions-wiring-prepare"><td><code>prepare_docs_review_request</code></td><td><code>sn/review_docs_user</code></td><td>drop <code>prompt_context["conventions"] = conventions_context_for(...)</code></td><td>KeyError: 'conventions', EXIT=1</td></tr>
+        <tr id="shs-conventions-wiring-refine"><td><code>process_refine_docs_batch</code></td><td><code>sn/refine_docs_user</code></td><td>drop <code>prompt_context["conventions"] = conventions_context_for(sn_id)</code></td><td>KeyError: 'conventions', EXIT=1</td></tr>
+        <tr id="shs-conventions-wiring-review"><td><code>_review_single_batch</code></td><td><code>sn/review_docs</code> (populated items)</td><td>drop the <code>item_data["conventions"] = conventions_context_for(...)</code> block</td><td>KeyError: 'conventions', EXIT=1</td></tr>
+      </tbody>
+    </table>
+
+    <p>The comparable gate over the prompt and context tests
+    (<code>rg -l "generate_docs|refine_docs|review_docs|standard_names.context" tests/</code>,
+    113 files) is unchanged: 7 failed, 1999 passed at the base and 7 failed,
+    2003 passed after — the same seven failure ids on both arms, so the four new
+    tests add no failure. The seven pre-existing failures are outside this node's
+    scope and are reported as follow-ons.</p>
+  </section>
+</body>
+</html>
