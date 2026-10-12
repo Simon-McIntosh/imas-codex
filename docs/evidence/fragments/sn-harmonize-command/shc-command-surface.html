@@ -1,0 +1,77 @@
+<section>
+  <h2 id="shc-command-surface">One read-only family surface: <code>sn harmonize</code></h2>
+  <p id="shc-command-surface-scope">
+    Replaces the family routes of <code>sn run</code> and <code>sn review</code>
+    with one read-only report over pattern families. Write paths:
+    <code>imas_codex/cli/sn.py</code>,
+    <code>imas_codex/standard_names/harmonize.py</code>,
+    <code>imas_codex/standard_names/review/audits.py</code>.
+  </p>
+
+  <figure id="shc-command-surface-figure">
+    <img src="/imas-codex/figures/sn-harmonize-command/shc-command-surface/report-surface.svg"
+         alt="Scope selectors resolve through one family-enumeration mechanism and the read-only lint composition into per-family rows and a scope total."/>
+    <figcaption>
+      The command routes every scope through one grouping mechanism
+      (<code>fetch_pattern_families</code>) and one read-only lint composition
+      (<code>run_lint_checks</code> plus <code>run_link_integrity</code>), then
+      prints per-family rows and a scope total. It never reaches the full audit,
+      whose embedding preflight writes.
+    </figcaption>
+  </figure>
+
+  <h3 id="shc-command-surface-report">The report</h3>
+  <ul id="shc-command-surface-report-surface">
+    <li><code>sn harmonize</code> takes exactly one scope of
+      <code>--batch &lt;roster&gt;</code>, <code>--family &lt;seed&gt;</code>,
+      <code>--concept &lt;id&gt;</code> or <code>sn harmonize --all</code>.
+      Zero or more than one scope is a usage error (exit 2).</li>
+    <li>Per pattern family in scope it prints the members, the documentation
+      anchor, the drift metric and the lint finding counts by class, then a
+      scope total. <code>--json</code> emits the same rows as JSON.</li>
+    <li>Row assembly lives in <code>harmonize.report_family_rows</code>; the CLI
+      only prints. The lint is the composition of
+      <code>audits.run_lint_checks</code> (lexical, house style, documentation
+      gates) plus <code>audits.run_link_integrity</code> — the report never calls
+      <code>run_all_audits</code>, whose embedding preflight re-embeds and
+      writes.</li>
+  </ul>
+
+  <h3 id="shc-command-surface-enumeration">One family-enumeration mechanism</h3>
+  <p id="shc-command-surface-delegation">
+    <code>harmonize.fetch_pattern_families</code> is the single family
+    enumeration: it groups live names by the invariant grammar signature, with
+    an optional seed filter and an optional member predicate.
+    <code>build_worklist</code>'s parentless bucket now delegates to it through
+    <code>_PARENTLESS_MEMBER_FILTER</code> instead of carrying a second inline
+    grouping, so the parentless bucket and the report list the same families.
+    <code>build_worklist</code> is still the <code>sn status</code> drift
+    surface; only its duplicate block is gone.
+  </p>
+
+  <h3 id="shc-command-surface-deletions">Deleted family routes</h3>
+  <ul id="shc-command-surface-deletions-list">
+    <li><code>sn run --families</code> — option and handler removed; the flag is
+      now an unknown option (exit 2).</li>
+    <li><code>sn review --target groups</code> — removed from the
+      <code>--target</code> choice and its branch; <code>--target</code> now
+      accepts <code>names</code> and <code>docs</code> only.</li>
+    <li>Helpers reached only by those routes:
+      <code>_refuse_grouped_review_scoping</code> and
+      <code>_report_drifting_families</code> in <code>sn.py</code>;
+      <code>mark_families_for_regen</code> and <code>lint_links</code> in
+      <code>harmonize.py</code>. Kept: <code>mark_members_for_regen</code>,
+      <code>assemble_family</code>, <code>restamp_harmonized_families</code>.</li>
+  </ul>
+
+  <h3 id="shc-command-surface-negative-control">Negative control</h3>
+  <p id="shc-command-surface-negative-control-text">
+    Declared mutation: point the report at <code>run_all_audits</code> and the
+    no-write test fails. The command is exercised against a stub graph with the
+    embedding preflight replaced by a raise; with the report on its own lint
+    composition the invocation succeeds and no query writes. The negative
+    control test swaps the report's lint for
+    <code>audits.run_all_audits</code> and shows the same invocation now fails
+    on the writing preflight — the guard is not vacuous.
+  </p>
+</section>
