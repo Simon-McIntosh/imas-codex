@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "c833c0a16588d38be4877e9af5b8670b313b74af",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6316 (_load_catalog -> run_all_audits)"
+  ],
+  "completed_at": "2026-10-12T17:27:54.550Z",
+  "dispatched_at": "2026-10-12T17:19:20Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/audits.py",
+      "line": "727",
+      "severity": "follow-on",
+      "text": "follow-on: run_all_audits appends only run_house_style_checks, so the sign-convention class the brief and plan \u00a74 require to reach the AuditReport (via docs_gates.py:512 score_documentation) still does not, leaving one of the five lint classes unread by the reviewer."
+    },
+    {
+      "file": "tests/standard_names/test_house_style_checks.py",
+      "line": "191",
+      "severity": "follow-on",
+      "text": "follow-on: the census test asserts only that the finding-class set is a subset of the enum and that fewer than 220 names lack an entry; the per-class counts the fragment publishes are printed and not asserted, so a drift in the counts would not redden."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "640",
+      "severity": "follow-on",
+      "text": "follow-on: _template_opening_findings flags a finding for every template the opening fails to match rather than only when it matches none, so a name selecting more than one template would over-fire; the registry currently holds a single template entry, so this is latent and not reachable today."
+    },
+    {
+      "file": "tests/standard_names/test_house_style_checks.py",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "follow-on: the _classes helper is defined and never called."
+    }
+  ],
+  "head_log_revision": "489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "Read commit 489a1a81 against base c833c0a16; one commit, four files, +513/-1, all inside the declared scope.",
+    "done_when": "The done_when names the carbon dl/B and argon line-form equations flagged, the beryllium surface form not flagged, a separatrix gloss flagged, a canonical entry at zero findings, and a recorded WEST census; tests/standard_names/test_house_style_checks.py:57 asserts the fixtures and census.log records the per-class census.",
+    "goal": "The node's goal is to add registry-driven conformance findings to the docs_gates checks and route them into the review AuditReport; imas_codex/standard_names/docs_gates.py:654 house_style_findings and imas_codex/standard_names/review/audits.py:728 implement that.",
+    "manifest": "Read; it states units 10 passed, census 1 passed, the docs_gates/audits gate 77 passed against an identical baseline, with baseline_suite and after_suite completed:true and three negative-control logs.",
+    "write_paths": "The manifest declares docs_gates.py, review/audits.py, the new test file and the fragment; the diff touches exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "each of the four checks has a revert-sensitive test shown red by negative_forbidden_variant/symbol_spelling/template_opening logs, though the census test tests/standard_names/test_house_style_checks.py:191 asserts only class membership and not the per-class counts it records.",
+    "evidence": "tests/standard_names/test_house_style_checks.py:57 asserts each done_when fixture and census.log prints census {'forbidden_equation_variant': 1, 'template_opening': 1, 'forbidden_locus_gloss': 1} no_entry 188 parse_failures 1, reconciling with the fragment's per-class counts.",
+    "fit": "the additions follow the module's StrEnum/frozen-dataclass/private-helper idiom at docs_gates.py:514 and carry no plan label, though tests/standard_names/test_house_style_checks.py:47 defines an unused _classes helper.",
+    "goal_fidelity": "docs_gates.py:654 house_style_findings and review/audits.py:728 deliver four of the five plan \u00a74 classes to the AuditReport, but the sign-convention class (docs_gates.py:429 _sign_convention_result, aggregated by docs_gates.py:512 score_documentation) still never reaches it though the brief names run_all_audits calling the documentation gates.",
+    "reuse": "select_conventions/forbidden_variants/forbidden_spellings are consumed nowhere else in imas_codex (git grep), so docs_gates.py:654 extends the ISN registry owner rather than forking it, and ISN owns no template-opening matcher.",
+    "scope_discipline": "git diff c833c0a16..489a1a81 touches only docs_gates.py, review/audits.py, tests/standard_names/test_house_style_checks.py and the fragment, the fragment inside the declared write paths."
+  },
+  "node": "review-of-shs-conformance-checks",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node's goal is to add registry-driven conformance findings to the docs_gates checks and route them into the review AuditReport; imas_codex/standard_names/docs_gates.py:654 house_style_findings and imas_codex/standard_names/review/audits.py:728 implement that.\nVERDICT done_when: The done_when names the carbon dl/B and argon line-form equations flagged, the beryllium surface form not flagged, a separatrix gloss flagged, a canonical entry at zero findings, and a recorded WEST census; tests/standard_names/test_house_style_checks.py:57 asserts the fixtures and census.log records the per-class census.\nVERDICT write_paths: The manifest declares docs_gates.py, review/audits.py, the new test file and the fragment; the diff touches exactly those four paths and nothing else.\nVERDICT manifest: Read; it states units 10 passed, census 1 passed, the docs_gates/audits gate 77 passed against an identical baseline, with baseline_suite and after_suite completed:true and three negative-control logs.\nVERDICT diff: Read commit 489a1a81 against base c833c0a16; one commit, four files, +513/-1, all inside the declared scope.\nCALL_SITES: imas_codex/cli/sn.py:6316 (_load_catalog -> run_all_audits)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs_gates.py:654 house_style_findings and review/audits.py:728 deliver four of the five plan \u00a74 classes to the AuditReport, but the sign-convention class (docs_gates.py:429 _sign_convention_result, aggregated by docs_gates.py:512 score_documentation) still never reaches it though the brief names run_all_audits calling the documentation gates.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/standard_names/test_house_style_checks.py:57 asserts each done_when fixture and census.log prints census {'forbidden_equation_variant': 1, 'template_opening': 1, 'forbidden_locus_gloss': 1} no_entry 188 parse_failures 1, reconciling with the fragment's per-class counts.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff c833c0a16..489a1a81 touches only docs_gates.py, review/audits.py, tests/standard_names/test_house_style_checks.py and the fragment, the fragment inside the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: each of the four checks has a revert-sensitive test shown red by negative_forbidden_variant/symbol_spelling/template_opening logs, though the census test tests/standard_names/test_house_style_checks.py:191 asserts only class membership and not the per-class counts it records.\nSCORE fit: 17\nJUSTIFICATION fit: the additions follow the module's StrEnum/frozen-dataclass/private-helper idiom at docs_gates.py:514 and carry no plan label, though tests/standard_names/test_house_style_checks.py:47 defines an unused _classes helper.\nSCORE reuse: 18\nJUSTIFICATION reuse: select_conventions/forbidden_variants/forbidden_spellings are consumed nowhere else in imas_codex (git grep), so docs_gates.py:654 extends the ISN registry owner rather than forking it, and ISN owns no template-opening matcher.\nFINDING imas_codex/standard_names/review/audits.py:727 follow-on: run_all_audits appends only run_house_style_checks, so the sign-convention class the brief and plan \u00a74 require to reach the AuditReport (via docs_gates.py:512 score_documentation) still does not, leaving one of the five lint classes unread by the reviewer.\nFINDING tests/standard_names/test_house_style_checks.py:191 follow-on: the census test asserts only that the finding-class set is a subset of the enum and that fewer than 220 names lack an entry; the per-class counts the fragment publishes are printed and not asserted, so a drift in the counts would not redden.\nFINDING imas_codex/standard_names/docs_gates.py:640 follow-on: _template_opening_findings flags a finding for every template the opening fails to match rather than only when it matches none, so a name selecting more than one template would over-fire; the registry currently holds a single template entry, so this is latent and not reachable today.\nFINDING tests/standard_names/test_house_style_checks.py:47 follow-on: the _classes helper is defined and never called.",
+  "review_run_id": "r-20261012T171900516419-review-of-shs-conformance-checks",
+  "reviewed_base_sha": "c833c0a16588d38be4877e9af5b8670b313b74af",
+  "reviewed_head_sha": "489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a",
+  "reviewed_run_id": "r-20261012T165650462245-shs-conformance-checks",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shs-conformance-checks",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T17:26:58.637750+00:00",
+  "total": 105
+}
