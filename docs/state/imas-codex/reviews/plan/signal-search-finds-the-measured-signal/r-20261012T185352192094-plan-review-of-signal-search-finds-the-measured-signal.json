@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T19:08:52.925Z",
+  "dispatched_at": "2026-10-12T18:54:36Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html#s8",
+      "id": "wiring-1",
+      "reason": "the plan either needs role added to \u00a77's state (making \u00a77 depend on \u00a78) or \u00a78's reader list corrected, otherwise the stated justification for a stored role is half unmet when \u00a77 lands.",
+      "text": "\u00a78 declares the stored `signal_role` serves three readers, one of them \"the rerank state in \u00a77\", yet \u00a77's state builder is fixed at \"name, description up to 1,200 characters, unit, data class and accessor\" with no role, and the followup orders \"\u00a77 follows \u00a74, \u00a78 waits on its decision\", so \u00a77 ships before the property exists and never reads it",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html#s8",
+      "id": "done_when-1",
+      "reason": "the pair only shows the filter does something once the control's expected result is stated (the unfiltered top 5 must contain a grade-2 reference), which is one clause.",
+      "text": "the done-when's control is only \"The same query without the filter is the control\", with no expected outcome, so \"a `role=measured` query ... returns no grade-2 reference in its top 5\" can hold vacuously if the unfiltered query also surfaces no grade-2 reference",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html#s4",
+      "id": "reasoning-1",
+      "reason": "a node grepping the quoted expression finds six sites and cannot tell whether \"four\" is the defect census (convert four) or the rule's census (convert six), so it will either convert a path the plan never measured or leave the shared package half-converted.",
+      "text": "\u00a74 says to replace the additive rule `score * 0.7 + text_score * 0.3 + 0.1` \"at its four sites\", but that identical expression also occurs at `imas_codex/search/search_strategy.py:447` and `imas_codex/search/engines/hybrid_engine.py:80`, inside the very package \u00a74 lands `imas_codex/search/fusion.py` into, and \u00a74 records no disposition for them while giving an explicit carve-out to `hybrid_dd_search`",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "417a7f265a91a535471a4c072b9a5f281d070378d467b1c7f89f0df8f2f0b996",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T185352192094-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "59900d90e61c7fcb67ebb4a0456206e7bca89fb8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the three cited commits resolve (`43290a049`, `b4c89a8fc`, `93bfb7e9d`), `tests/tools/fixtures/dd_mapping_questions.json` carries the 3/2/1 grades \u00a73 follows, `0.4821` is present in `docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html`, and \u00a78's `node_classifier.py` / `enrichment.py` anchors and the prototype fixtures resolve.",
+    "done_when": "a finding \u2014 \u00a78's control names the unfiltered query but states no expected result, so its measure can be satisfied without the filter doing anything.",
+    "evidence_paths": "pass \u2014 \u00a73's five-arm table and labelling log land in the repository fragment `docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html`, and \u00a74's measures route through that harness, not a scratchpad.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach the new symbols (`signal_role`, `rrf_fuse`, `RRF_K`), and the changed prose states mechanisms rather than changelog.",
+    "reasoning": "a finding \u2014 \u00a74 asserts the additive rule has four sites, but its own quoted expression occurs at six.",
+    "single_goal": "pass \u2014 \u00a73's two nodes each carry one deliverable (the held-out questions; the pooled harness), and \u00a74 and \u00a78 each carry one.",
+    "wiring": "a finding \u2014 \u00a78 declares the stored `signal_role` serves \"the rerank state in \u00a77\", but \u00a77's state builder carries no role and the followup lands \u00a77 before \u00a78, so the declared consumer never reads it."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "481c7d9952ca4af18afa8855d91bb1dde23fc4ec0743ed482ecc2e6c103f1de6",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "730ccbc7bb1a6c4bc820bee042eb100eb8766d0a20a1c0cec284566cb0301563",
+    "s4": "684c6f335388165c388591f171992515c075d6bb3716fc865937e5cc779e8c39",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "fc9895bdfe11142b59bb21521123b0977261e715f7e7698561aedd10137337e3",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:10:26.955517+00:00"
+}
