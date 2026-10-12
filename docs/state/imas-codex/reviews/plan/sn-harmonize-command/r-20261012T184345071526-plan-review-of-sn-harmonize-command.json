@@ -1,0 +1,80 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:50:18.690Z",
+  "dispatched_at": "2026-10-12T18:44:01Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html#s2:100",
+      "id": "reasoning-1",
+      "reason": "without naming sn_status, the deletion node removes a function in active use and the guard that is meant to catch exactly this counts it as clear.",
+      "text": "s2 says the helpers \"only those routes reach go with them ... and `build_worklist` unless the report is its caller\", but `build_worklist` has a live production caller outside the two retired routes: `sn_status` at imas_codex/cli/sn.py:3967 calls `build_worklist(gc=gc)` at imas_codex/cli/sn.py:4189 to render the \"Sibling Families\" drift count. A node following s2 will delete it when the new report does not call it, silently breaking `sn status`; s2's done-when (\"None of the retired helpers is left without a production caller\") cannot see that break, because the caller it would strand is in neither retired route",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html#s2:86",
+      "id": "reasoning-2",
+      "reason": "a node reading \"share one function\" as \"call run_all_audits\" writes to the graph inside a mode whose whole point is that it writes nothing, and the plan names no opt-out for the shared function.",
+      "text": "s2 says \"the report calls that composition without the embedding preflight, which writes, so `run_all_audits` and the report share one function\", but `run_all_audits` at imas_codex/standard_names/review/audits.py:758 unconditionally calls `run_embedding_preflight` (audits.py:770), which re-embeds and persists (`SET sn.embedding = ...`, audits.py:242) \u2014 it cannot serve the non-writing caller \u00a72's done-when requires (\"writes nothing\") without a change to its signature that s2 does not declare",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "21cb622eb3924d701094e422d44ef6609465502a327ab6a357ed9a634335cac2",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 5,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T19:01:37.026060+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-12T19:01:42.477189+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T19:01:37.026060+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T19:01:42.477189+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-harmonize-command.v5.json",
+  "review_run_id": "r-20261012T184345071526-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "4dc5950064d55f8cc7177778e82f482cb27d9531",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited module and symbol resolves (`run_all_audits`/`run_link_integrity`/`AuditReport` in `imas_codex/standard_names/review/audits.py`, `select_anchor`/`fetch_pattern_family` in `families.py`, `mark_members_for_regen`/`build_worklist` in `harmonize.py`, `automatic_deletion_protections` in `protection.py`, `resolve_batch_token` in `sources_manifest.py`); the extensionless href `/imas-codex/research/sn-catalog-consistency-census` resolves as `docs/research/sn-catalog-consistency-census.html`, and sn-house-style \u00a74/\u00a75 and sn-catalog-grouping \u00a72 exist.",
+    "done_when": "pass \u2014 s2 and s3 each carry a declared negative control (s2: a test that each deleted flag is rejected, plus \"none left without a production caller\"; s3: an anchor deliberately failed leaves its members untouched, and the refusal test fails when the guard is removed).",
+    "evidence_paths": "pass \u2014 s4 records figures in the plan's evidence, and no gate log is directed to a session scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 the changed units add no plan labels, stage names or ticket numbers to symbols; the roster token `v0.4.0rc7+west-task-2e` is example data in plan prose, not a code identifier.",
+    "reasoning": "a finding \u2014 s2 lists `build_worklist` among \"the helpers only those routes reach\", but `build_worklist` is called in production by `sn status`, a third route \u00a72 does not retire.",
+    "single_goal": "pass \u2014 s2 is one change (build the surface and delete the two routes it replaces, which cannot be split without leaving two live routes); s3 is the apply path.",
+    "wiring": "pass \u2014 the section table declares s2\u2192{sn-catalog-grouping#s2, sn-house-style#s4} and s3\u2192{sn-house-style#s4, sn-catalog-grouping#s2}; both target sections exist and the earlier wiring-1 gap (\u00a72 declared no depends-on) is closed."
+  },
+  "section_digests": {
+    "_document": "2b2341966256ecbb7712a1f4b7cd7aee827ae18b22b02b9e28b53fd1e773b1c0",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s2": "3493599f9d002195607774b205d8973ab03248ed8058261f44f9c037257d8581",
+    "s3": "a8aba485c2254e87a30a52e3b7c2e04f3cdb943efe827151187b4beb8fb0afb0",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:01:28.874869+00:00"
+}
