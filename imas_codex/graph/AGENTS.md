@@ -407,6 +407,80 @@ query('''
 
 **SLURM-only rule.** Both services MUST run as SLURM jobs — never bypass with `nohup`, `ssh … &`, `screen`, `tmux`, or anything else. SLURM provides cgroup isolation, clean lifecycle (`scancel`), accounting, and drain cleanup. Rogue processes cause "Duplicate jobid" errors that drain nodes for all users. If SLURM won't schedule, get the node resumed (`scontrol update NodeName=<node> State=RESUME`) — don't work around it.
 
+### When the graph goes away
+
+**Read the scheduler before the error.** A failed graph call says nothing about
+why; `squeue` does:
+
+```bash
+squeue -u "$USER" -n codex-neo4j -o '%i %T %M %N'
+```
+
+- **A job a few minutes old is a restart.** Usually it's the offsite push check:
+  `imas-codex-graph-push.timer`, a systemd user timer on `98dci4-srv-1006` that
+  fires daily at 00:00 Europe/Paris and runs `imas-codex graph push --cycle`. It
+  stops the graph for about three minutes, but only when the newest offsite copy
+  is a week old and no other client has run a transaction in the last ten
+  minutes. Otherwise it writes a `not_due` or `deferred` receipt and leaves the
+  graph alone. Wait for `Started.` in
+  `~/.local/share/imas-codex/services/codex-neo4j.log`, then carry on. Each
+  cycle's outcome is in `~/.local/share/imas-codex/offsite-push/receipts/`. The
+  installed schedule is whatever `systemctl --user cat imas-codex-graph-push.timer`
+  shows on that host; `imas-codex graph push --schedule` reinstalls it from the
+  code.
+- **No job at all means it is down.** Start it from a login node:
+  `ssh 98dci4-srv-1006 'cd ~/Code/imas-codex && uv run --no-sync imas-codex graph start'`.
+  From a compute node, `graph start`, `stop` and `export` reach the scheduler
+  through `ssh iter`, which is refused on port 22 there.
+- **A pipeline that reported "completed, 0 remaining" during the gap measured
+  the outage, not its queue.** Rerun it once the graph answers.
+
+**Never write through store errors.** An `ERROR` line in the service log after a
+restart, or `NOT PART OF CHAIN` from a query, means the store files are damaged.
+Stop every writer, take a checkpoint (`graph export`, which now waits for the job
+to exit), and check that archive offline on a compute node. The check needs no
+downtime, uses node-local `/tmp`, and takes about five minutes:
+
+```bash
+A=~/.local/share/imas-codex/exports/<archive>.tar.gz; W=/tmp/codex-graph-check
+mkdir -p $W/{dumps,temp,logs,report}
+tar -xzf $A -O "$(tar -tzf $A | grep 'graph.dump$')" > $W/dumps/neo4j.dump
+HEAP_SIZE=16g apptainer exec --bind $W/dumps:/dumps --bind $W/temp:/checktemp \
+  --bind $W/logs:/var/lib/neo4j/logs --bind $W/report:/report \
+  ~/apptainer/neo4j_2026.01.4-community.sif neo4j-admin database check neo4j \
+  --from-path=/dumps --temp-path=/checktemp --report-path=/report --threads=8
+```
+
+Exit 0 means the store was consistent when it was dumped. Exit 1 prints the
+error count by record type and writes the full report.
+
+**A store torn during shutdown is recoverable from its own transaction log.**
+Measured 2026-10-12, when the torn store and its archive both failed the check:
+1. Take the newest archive dumped before any write landed on the torn store.
+   The dump carries its transaction log.
+2. Load it into node-local scratch with `neo4j-admin database load`.
+3. Cut `transactions/neo4j/checkpoint.1` back to the last scheduled checkpoint
+   that completed before the stop. The file is a 128-byte header plus 232-byte
+   little-endian entries.
+4. Delete the `.id` files.
+5. Start a throwaway instance with the image's default `server.jvm.additional`
+   options.
+
+Recovery replays the lost transactions and rebuilds the id, counts and degrees
+stores, and the result checked with zero errors. Writes made after a torn
+restart are already in the record files, so replaying over the live store
+cannot remove them; start from the archive. The full procedure and the three
+trials are in §3 of the `graph-maintenance-leaves-the-store-whole` plan.
+
+**Never touch the store files while the job is listed.** `scancel` returns at
+once, but Neo4j goes on flushing its shutdown checkpoint, 26 s on 2026-10-12, and
+anything that copies or replaces `neostore*` files inside that window tears
+them. That is exactly what happened: the export's lock cleanup did it at 00:00
+on 2026-10-12, leaving 492 inconsistent node records. Stop the graph only
+through `imas-codex graph stop` or `graph export`. Both wait until the job id
+has left `squeue`, and the lock cleanup refuses while any Neo4j JVM is alive on
+the node.
+
 ### Neo4j connection
 
 On an ITER login node, `GraphClient()` (no args) discovers the SLURM node running the

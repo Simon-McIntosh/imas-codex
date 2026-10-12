@@ -100,6 +100,17 @@ it lands, a worker reporting "the tunnel is down" is checked from the
 coordinator's own shell first, because a genuine hop outage looks identical
 from inside the worker (both happened on 2026-10-05).
 
+**When the graph goes away, read `squeue -u $USER -n codex-neo4j` before the
+error.** A job a few minutes old is a restart, usually the daily offsite-push
+check (`imas-codex-graph-push.timer` on `98dci4-srv-1006`, 00:00 Europe/Paris),
+which stops the graph for about three minutes when a weekly push is due and the
+graph is idle. No job means it is down; start it from a login node. After any
+restart, an `ERROR` in `~/.local/share/imas-codex/services/codex-neo4j.log` means
+stop every writer and run the offline consistency check before anyone writes
+again. Never stop the graph with a bare `scancel` or touch its store files while
+the job is listed. The steps for each case are in "When the graph goes away" in
+[`imas_codex/graph/AGENTS.md`](imas_codex/graph/AGENTS.md).
+
 **Checkpointing:** one verified checkpoint protects a body of work, taken from the
 main checkout; there is no recurring backup discipline. It stops the database, so
 every graph-touching worker must be at rest. A bare export lands in `EXPORTS_DIR`;

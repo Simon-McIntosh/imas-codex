@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="mapping-generation-accounts-for-every-source">
+  <meta name="plan-title" content="Mapping Generation Accounts for Every Source">
+  <meta name="plan-summary" content="Every selected home is answered or retried, an error bound attaches to one determined parent or none, and a filtered candidate run stays inside its filter">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="5.25">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S16">
+  <meta name="plan-tags" content="signals,jt-60sa,mapping">
+  <meta name="plan-depends-on" content="jt60sa-mapping-study-expansion">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <title>Mapping Generation Accounts for Every Source | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — What the generation-side review found</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      On 2026-10-11 an investigate run read the generation half of the signal-to-IMAS mapping pipeline at
+      <code>93bfb7e9d</code>. That half covers source selection, candidate retrieval, prompting, binding parse and the
+      state later stages read. Its report is <code>~/.config/reckon/crew/reports/map-review-generation.md</code>. An
+      independent claims review reproduced its top-ranked findings. Four of the seven findings were fixed directly in
+      <code>ac0710097</code>. The other three each need a design choice, so this plan owns them. The table carries
+      everything a worker needs; the report is background.
+    </p>
+    <table>
+      <thead><tr><th>Finding</th><th>Where</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>A second selected home in one IDS that gets an empty answer is never retried, and the source reads <code>validated</code></td><td><code>imas_codex/ids/workers.py</code>: <code>claim_sources_for_mapping</code>, <code>refresh_mapping_status</code></td><td>open, §2</td></tr>
+        <tr><td>“low” inside “flow” classified an error signal as a lower bound</td><td><code>imas_codex/ids/mapping.py</code>: <code>classify_error_signals</code></td><td>fixed, <code>ac0710097</code></td></tr>
+        <tr><td>The error-derivation fallback binds the first partial key match in dict order</td><td><code>imas_codex/ids/mapping.py</code>: <code>match_error_signals_to_imas</code></td><td>open, §3</td></tr>
+        <tr><td>A candidate run whose <code>--ids</code> filter removes every routed IDS searches the whole Data Dictionary</td><td><code>imas_codex/ids/workers.py</code> candidate worker; <code>imas_codex/ids/candidates.py</code>: <code>_merge_arms</code></td><td>open, §4</td></tr>
+        <tr><td>The cluster-candidates prompt slot was always empty</td><td><code>imas_codex/ids/mapping.py</code></td><td>fixed, <code>ac0710097</code></td></tr>
+        <tr><td>The existing-mappings read asked for <code>POPULATES.config</code>, which nothing writes</td><td><code>imas_codex/ids/tools.py</code></td><td>fixed, <code>ac0710097</code></td></tr>
+        <tr><td>The sources-mapped counter counted assignment batches</td><td><code>imas_codex/ids/workers.py</code></td><td>fixed (renamed <code>sections_mapped</code>), <code>ac0710097</code></td></tr>
+      </tbody>
+    </table>
+    <p>
+      The validation, assembly and lifecycle findings from the second review are planned separately, in
+      <a href="/imas-codex/plans/mapping-validation-and-assembly-report-what-they-drop">mapping-validation-and-assembly-report-what-they-drop</a>.
+      Every map run this plan triggers stays at status <code>generated</code>, with nothing activated, under the
+      project rule that signal maps are drafts until a validation step promotes them.
+    </p>
+
+    <h2 id="s2">§2 — Every selected home is answered or retried</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The candidate stage can select several homes for one source, and two of them can sit in different sections of
+      one IDS, for example <code>magnetics/ip</code> and <code>magnetics/flux_loop</code>.
+      <code>build_target_assignments</code> (<code>imas_codex/ids/mapping.py</code>) builds one assignment per section,
+      so the map stage asks once for each. Mapping state, though, is tracked per IDS:
+    </p>
+    <ul>
+      <li><code>claim_sources_for_mapping</code> (<code>imas_codex/ids/workers.py</code>) refuses a source once any <code>MAPS_TO_IMAS</code> binding into the IDS exists;</li>
+      <li><code>refresh_mapping_status</code> collects the selected edges' IDS names, so one binding marks the whole IDS bound.</li>
+    </ul>
+    <p>
+      Suppose the second section's answer comes back empty, or omits the source. A <code>SignalMappingBatch</code> need not
+      account for every source it was asked about. Then the source reads <code>validated</code>, the empty home is never
+      claimed again, and the run's partial report does not name it, because it counts only sources with no binding at all.
+    </p>
+    <p>
+      The repair records an outcome on each selected home: the selected <code>MAPPING_CANDIDATE</code> edge itself.
+      <code>home_outcome</code> takes one of three values:
+    </p>
+    <ul>
+      <li><code>bound</code>, once a binding into that edge's section persists;</li>
+      <li><code>declined</code>, when the answer lists the source in <code>unmapped</code> for that section, with the reason stored as <code>home_evidence</code>;</li>
+      <li><code>unanswered</code>, after a second answer that still does not account for the assignment; <code>home_attempts</code> counts the answers so far.</li>
+    </ul>
+    <p>The rules that follow from it:</p>
+    <ul>
+      <li><strong>Claim:</strong> a source is claimable for an IDS while it has a selected edge into a section that is neither bound nor carries an outcome.</li>
+      <li><strong>Status:</strong> <code>refresh_mapping_status</code> writes <code>validated</code> only when every selected section is <code>bound</code> or <code>declined</code>. An <code>unanswered</code> home leaves the source short of validated, and the validate stage's partial report names each one.</li>
+      <li><strong>Coverage:</strong> the map stage judges whether an answer covers an assignment. A mapping whose target lies in the section counts, and so does an <code>unmapped</code> entry naming the source. The model's output schema does not change.</li>
+    </ul>
+    <p>
+      The new edge properties go wherever the <code>MAPPING_CANDIDATE</code> edge's properties are declared: the
+      relationship description in <code>imas_codex/schemas/facility.yaml</code>, and
+      <code>imas_codex/graph/cypher_property_check.py</code> if it adjudicates edge properties. That way the property
+      checker passes the new Cypher.
+    </p>
+    <p>
+      Node <code>every-selected-home</code>, role implement, 2.5 h. Write paths: <code>imas_codex/ids/workers.py</code>,
+      <code>imas_codex/ids/mapping.py</code>, <code>imas_codex/schemas/facility.yaml</code>,
+      <code>imas_codex/graph/cypher_property_check.py</code>, <code>tests/ids/test_every_selected_home.py</code> and
+      <code>docs/evidence/fragments/mapping-generation-accounts-for-every-source/every-selected-home.html</code>.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> adds no failure
+      against its base, and <code>tests/ids/test_every_selected_home.py</code> fails on the base revision and passes on
+      the change. That file shows four things:
+    </p>
+    <ul>
+      <li>A source with two selected sections in one IDS, whose first answer binds one section and returns nothing for the other, is claimed again by the next pass.</li>
+      <li>After a second empty answer that home reads <code>unanswered</code>, and the source does not read <code>validated</code>.</li>
+      <li>A second section answered with an <code>unmapped</code> entry reads <code>declined</code>, its reason is stored, and the source reads <code>validated</code>.</li>
+      <li>A source whose every selected section is bound behaves as it does today.</li>
+    </ul>
+    <p>
+      Every Cypher statement the node edits runs under <code>EXPLAIN</code> against the live graph, and the property
+      checker reports no undeclared property. <strong>Negative control:</strong> restoring the per-IDS claim predicate
+      makes the re-claim test fail, and the node records that run.
+    </p>
+
+    <h2 id="s3">§3 — An error bound attaches to one determined parent or none</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      <code>match_error_signals_to_imas</code> (<code>imas_codex/ids/mapping.py</code>) derives an error field from the
+      binding of the signal the error belongs to. When the error signal's group key, with its error suffix stripped,
+      misses an exact match, a fallback loop takes the first known key that contains it or is contained in it, then
+      breaks. Take parents <code>gasc_valve1</code> and <code>gasc_main</code> and an error key that strips to
+      <code>gasc</code>: whichever parent the data mappings list first wins. The binding then carries
+      <code>mapping_type="error_derived"</code> and evidence naming that parent, so the guess reads as a direct match,
+      and changing the read order can silently move it.
+    </p>
+    <p>
+      The repair makes the fallback determined:
+    </p>
+    <ul>
+      <li>An exact key match keeps today's behaviour.</li>
+      <li>Otherwise the fallback collects every known key that shares a whole <code>_</code>- or <code>:</code>-delimited token sequence with the stripped key.</li>
+      <li>Exactly one such key gives that parent.</li>
+      <li>None gives no derivation.</li>
+      <li>Several give no derivation. The stage reports the error signal as ambiguous, naming the candidate parent keys, in its log and in the count it returns.</li>
+    </ul>
+    <p>
+      Node <code>error-parent-is-determined</code>, role implement, 0.75 h. Write paths:
+      <code>imas_codex/ids/mapping.py</code>, <code>tests/ids/test_error_parent_is_determined.py</code> and
+      <code>docs/evidence/fragments/mapping-generation-accounts-for-every-source/error-parent-is-determined.html</code>.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> adds no failure
+      against its base, and the new test file fails on the base revision and passes on the change. It shows three
+      things:
+    </p>
+    <ul>
+      <li>The <code>gasc</code> example derives no binding in either list order, and reports the ambiguity naming both parent keys.</li>
+      <li>A unique partial match still derives its binding.</li>
+      <li>An exact match is unchanged.</li>
+    </ul>
+    <p>
+      <strong>Negative control:</strong> restoring the first-hit break makes the order test fail.
+    </p>
+
+    <h2 id="s4">§4 — A filtered candidate run stays inside its filter</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      With <code>--ids</code> set, the candidate worker narrows each source's routed IDS list to the filter and stores the
+      result unconditionally. A source routed only outside the filter therefore carries an empty list.
+      <code>retrieve_candidates</code> and <code>_merge_arms</code> (<code>imas_codex/ids/candidates.py</code>) read an
+      empty sequence exactly like "no routing information": <code>list(routed_ids) or [UNSCOPED_ARM]</code> searches the
+      whole Data Dictionary. The consequences:
+    </p>
+    <ul>
+      <li>A run told to look only at <code>magnetics</code> judges a gas source against every IDS.</li>
+      <li>It can write a selected route for an IDS the operator excluded.</li>
+      <li>It drops that source from its own coverage without naming it.</li>
+      <li>It spends model calls on the exclusion.</li>
+    </ul>
+    <p>
+      The repair separates the two meanings. <code>None</code> means no routing information and searches unscoped, as it
+      does now. An empty list means nothing is in scope, so the source is skipped for this run:
+    </p>
+    <ul>
+      <li>its claim is released untouched;</li>
+      <li>no candidate edge and no <code>candidate_route</code> are written;</li>
+      <li>the run summary counts it as filtered out.</li>
+    </ul>
+    <p>
+      <code>_merge_arms</code> refuses an empty list with a <code>ValueError</code>, so no caller can turn "nothing in
+      scope" back into "everything". §2 also edits <code>imas_codex/ids/workers.py</code>, so this node dispatches after
+      §2's node has released that path.
+    </p>
+    <p>
+      Node <code>filtered-candidate-run</code>, role implement, 0.75 h. Write paths: <code>imas_codex/ids/workers.py</code>,
+      <code>imas_codex/ids/candidates.py</code>, <code>tests/ids/test_filtered_candidate_run.py</code> and
+      <code>docs/evidence/fragments/mapping-generation-accounts-for-every-source/filtered-candidate-run.html</code>.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code> adds no failure
+      against its base, and the new test file fails on the base revision and passes on the change. It shows four
+      things:
+    </p>
+    <ul>
+      <li><code>_merge_arms</code> with <code>routed_ids=[]</code> raises.</li>
+      <li>A candidate pass with the filter <code>["magnetics"]</code> and a source routed only to <code>gas</code> makes no retrieval call.</li>
+      <li>That pass writes no route and counts one filtered source.</li>
+      <li><code>routed_ids=None</code> still searches unscoped.</li>
+    </ul>
+    <p>
+      <strong>Negative control:</strong> restoring the <code>or [UNSCOPED_ARM]</code> coalesce for an empty list makes the
+      retrieval-call test fail.
+    </p>
+
+    <h2 id="s5">§5 — Proof on JT-60SA</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Once §2 to §4 are on main, one live run shows the repair on real sources. The run reads only the graph and the local
+      model lane and opens no connection to the JT-60SA host. It needs a graph store that passes the offline consistency
+      check, so it runs after the store recovered from the 2026-10-12 restart is back in service.
+    </p>
+    <p>
+      Node <code>generation-proof-jt60sa</code>, role test, 1.0 h. Write path:
+      <code>docs/evidence/fragments/mapping-generation-accounts-for-every-source/generation-proof-jt60sa.html</code>.
+      <strong>Done when</strong> two runs are recorded.
+    </p>
+    <ul>
+      <li><code>uv run --no-sync imas-codex imas map run jt-60sa -i magnetics -i pf_active --no-activate</code> completes. Its fragment lists every claimed source with each selected home's section, <code>home_outcome</code> and evidence, beside the source's <code>mapping_status</code>. No home is left without an outcome, and a Cypher count shows no mapping above status <code>generated</code> and none active.</li>
+      <li>A candidate pass filtered to <code>magnetics</code> logs a nonzero filtered-out count. The fragment shows, by a before-and-after Cypher count, that it wrote no route outside <code>magnetics</code>.</li>
+    </ul>
+    <p>
+      The fragment quotes both commands and the log paths under <code>~/.local/share/imas-codex/logs/</code>.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="silent-home-answer" data-choice="" data-by="" data-when="" data-recommended="retry-once-then-unanswered" data-recommended-by="coordinator">
+        <p class="r-dec-q">What happens to a selected home whose answer does not account for it?</p>
+        <p class="r-dec-ctx">An explicit unmapped entry with a reason is an answer: it records the home as declined and is never asked again. Silence is different. It may be a dropped batch, a truncated answer or a model that skipped the item. Retrying for ever spends calls on a home the model will not answer; never retrying turns one bad batch into a permanent gap.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="retry-once-then-unanswered">Retry once, then record unanswered</button>
+          <button class="r-opt" data-value="retry-until-cleared">Retry on every pass until an answer arrives</button>
+          <button class="r-opt" data-value="unanswered-at-once">Record unanswered on the first silence</button>
+        </p>
+        <p class="r-dec-rat">Recommended: retry once, then record unanswered. One retry absorbs a dropped or truncated batch. The recorded outcome keeps the home visible in the partial report and out of the claim set until <code>imas map clear</code> resets it.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-mgaes-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-12" data-recommends-skill="/reckon-build mapping-generation-accounts-for-every-source">
+        <h4 class="r-fu-title">Repair the three open generation-side findings, then prove them on JT-60SA</h4>
+        <div class="r-fu-body"><p>§2 to §4 are independent repairs; §2 and §4 share <code>imas_codex/ids/workers.py</code> and run one after the other. §5 follows all three.</p></div>
+        <pre class="r-fu-prompt">/reckon-build mapping-generation-accounts-for-every-source</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

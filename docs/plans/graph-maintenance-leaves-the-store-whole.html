@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="graph-maintenance-leaves-the-store-whole">
+  <meta name="plan-title" content="Graph Maintenance Leaves the Store Whole">
+  <meta name="plan-summary" content="Stopping, exporting and pushing the shared graph never tears its store, waits for idle, works from a compute node, and never reads an outage as an empty queue">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="6.5">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S16">
+  <meta name="plan-tags" content="graph-service,discovery">
+  <meta name="plan-depends-on" content="offsite-recovery-cadence">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <title>Graph Maintenance Leaves the Store Whole | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — What happened on 2026-10-12</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>
+      The weekly offsite push (<code>imas-codex-graph-push.timer</code>, a systemd user timer on
+      <code>98dci4-srv-1006</code>) stopped the shared graph at 00:00 Europe/Paris to dump it. The JT-60SA signals
+      regeneration was writing at the time. Times below are UTC, from the Neo4j debug log, the SLURM accounting record and
+      the push receipt.
+    </p>
+    <table>
+      <thead><tr><th>Time</th><th>Event</th></tr></thead>
+      <tbody>
+        <tr><td>21:59:26–28</td><td>Last scheduled checkpoint completes, transaction 2341700</td></tr>
+        <tr><td>22:00:12</td><td>The cycle takes the live census, then cancels the <code>codex-neo4j</code> job</td></tr>
+        <tr><td>22:00:15</td><td>Neo4j starts its shutdown checkpoint (transaction 2341903)</td></tr>
+        <tr><td>22:00:16–39</td><td>The export's lock cleanup deletes <code>database_lock</code>, then copies every <code>neostore*</code> file with <code>dd</code> and moves the copy over the original</td></tr>
+        <tr><td>22:00:41</td><td>The shutdown checkpoint completes, into the inodes the cleanup had just replaced</td></tr>
+        <tr><td>22:00–22:02</td><td>The dump reads the torn copies; the archive census shows 12 more relationships than the live census, so the push is refused</td></tr>
+        <tr><td>22:02:50</td><td>The cycle resubmits the job; the regeneration resumes and fails with <code>NOT PART OF CHAIN</code> on damaged records</td></tr>
+        <tr><td>22:02–22:25</td><td>25 transactions commit on the torn store, some into property ids its torn id files wrongly listed as free</td></tr>
+      </tbody>
+    </table>
+    <p>
+      An offline consistency check of the archive the cycle took reports 1,225 errors, on 492 node records and 731
+      relationship-type index entries. A later checkpoint of the live store reports 1,048. All the damaged records are
+      JT-60SA <code>FacilitySignal</code> and <code>SignalSource</code> nodes written in the minutes before the stop,
+      plus three DD <code>IMASNode</code>s. The archive of 2026-09-27 checks clean.
+    </p>
+
+    <h2 id="s2">§2 — Landed: the stop waits for the job, and the push waits for an idle graph</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
+    <p>
+      <code>410162d5b</code> makes <code>stop_neo4j_job</code> (<code>imas_codex/cli/services.py</code>) the one owner of
+      stopping the graph job:
+    </p>
+    <ul>
+      <li>It sends SIGTERM to the server JVM, cancels the job, and returns only after the job id has left <code>squeue</code>. A failed <code>squeue</code> counts as still listed.</li>
+      <li><code>_clean_neo4j_locks</code> refuses while any Neo4j JVM is alive on the node.</li>
+      <li>The export and load stop no longer swallow a failed stop, and their job detection raises when <code>squeue</code> cannot answer.</li>
+    </ul>
+    <p>
+      Eight tests in <code>tests/cli/test_neo4j_stop_waits_for_exit.py</code> pass on the change. On the committed code,
+      5 fail and 3 error (exit 1).
+    </p>
+    <p>
+      <code>184996eb8</code> turns the push into a daily check (<code>imas_codex/graph/offsite.py</code>). A push falls due
+      a week after the newest offsite copy. A due push defers to the next day while other clients are working on the
+      graph, which it measures with <code>SHOW TRANSACTIONS</code>:
+    </p>
+    <ul>
+      <li>Transaction ids are one sequence across every session, so the gap between eleven probes over ten minutes, less the probes themselves, counts other clients' transactions.</li>
+      <li>On the idle graph it advanced by exactly one in 60 s, the probe itself.</li>
+    </ul>
+    <p>
+      The deferred-push test fails when the busy check is removed. The runbook "When the graph goes away" is in
+      <code>imas_codex/graph/AGENTS.md</code>, with a pointer in the root <code>AGENTS.md</code>.
+    </p>
+
+    <h2 id="s3">§3 — The live store runs on the recovered copy</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-status="implementable" data-links=""></section>
+    <p>
+      Recovery replays the transaction log over the torn store, from the last checkpoint that completed before the stop.
+      The dd copies only replaced <code>neostore*</code> record files; the transaction log and index files were left
+      whole. Three trials ran on node-local copies:
+    </p>
+    <table>
+      <thead><tr><th>Trial</th><th>Store</th><th>Replay</th><th>Consistency check</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>live store at 06:14</td><td>21:59 checkpoint to the end of the log, post-restart transactions included</td><td>598 errors; 389 relationship records</td></tr>
+        <tr><td>B</td><td>live store at 06:14</td><td>21:59 checkpoint to transaction 2341903, id files rebuilt</td><td>243 errors: the post-restart writes were already in the record files</td></tr>
+        <tr><td>C</td><td>the 00:00 archive, which carries its own transaction log</td><td>21:59 checkpoint to transaction 2341903, id files rebuilt</td><td><strong>0 errors</strong>; 1,768,490 nodes, 4,556,357 relationships, 15,111 JT-60SA signals</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The cut works like this. <code>transactions/neo4j/checkpoint.1</code> is a 128-byte header followed by 232-byte
+      little-endian entries; each entry holds the log version at byte 2, the byte offset at 10 and the time in
+      milliseconds at 34. Keeping entries up to the 21:59:28 one makes Neo4j recover from log 175, offset 60,425,926.
+      The throwaway instance needs the image's default <code>server.jvm.additional</code> options, because the id-file
+      rebuild fails without <code>--add-opens=java.base/java.nio=ALL-UNNAMED</code>.
+    </p>
+    <p>
+      State at 07:09: the graph was stopped through the fixed stop and the torn store moved to
+      <code>~/.local/share/imas-codex/recovery/torn-20261012/</code>. Trial C's store is now in the live data directory.
+      The restart is waiting on the lead, because the auto-mode classifier refused <code>graph start</code>.
+    </p>
+    <p>
+      Node <code>recovered-store-in-service</code>, role test, 1.0 h. Write path:
+      <code>docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/recovered-store-in-service.html</code>.
+      <strong>Done when</strong> all of these hold:
+    </p>
+    <ul>
+      <li>The <code>codex-neo4j</code> job runs on the recovered store, and a <code>GraphClient</code> census returns 1,768,490 nodes, 15,111 JT-60SA <code>FacilitySignal</code>s and zero <code>FacilitySignal</code>s without a facility.</li>
+      <li>A checkpoint taken with <code>imas-codex graph export</code> passes the offline <code>neo4j-admin database check</code> with exit 0.</li>
+      <li>The service log shows no <code>ERROR</code> line after the start.</li>
+    </ul>
+    <p>
+      The fragment records the archive path and both logs. The torn copy stays in the recovery directory until the lead
+      releases it.
+    </p>
+
+    <h2 id="s4">§4 — The daily push timer is installed and observed</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The installed timer still reads <code>OnCalendar=weekly</code> until it is reinstalled. Reinstalling waits for §3:
+      once the timer is daily, the first night would find the offsite copy (2026-09-27) overdue and push whatever store
+      is live. Installing it changes a systemd unit on the shared login node, so the lead runs it, or authorises it in
+      the session that does.
+    </p>
+    <p>
+      Node <code>daily-push-timer</code>, role test, 0.5 h. Write path:
+      <code>docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/daily-push-timer.html</code>.
+      <strong>Done when</strong> all of these hold:
+    </p>
+    <ul>
+      <li><code>imas-codex graph push --schedule</code> has run on <code>98dci4-srv-1006</code>.</li>
+      <li><code>systemctl --user cat imas-codex-graph-push.timer</code> shows <code>OnCalendar=daily</code>.</li>
+      <li><code>imas-codex graph push --cycle --dry-run</code> prints its decision.</li>
+      <li>The next scheduled run leaves a receipt in <code>~/.local/share/imas-codex/offsite-push/receipts/</code> whose outcome is <code>pushed</code>, <code>not_due</code> or <code>deferred</code>, with its activity observation recorded.</li>
+    </ul>
+
+    <h2 id="s5">§5 — Graph lifecycle commands work from a compute node</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      From a SLURM step, <code>graph start</code>, <code>stop</code> and <code>export</code> fail before doing anything.
+      They reach the scheduler through <code>_run_remote</code> (<code>imas_codex/cli/services.py</code>), which runs
+      <code>ssh iter</code> whenever the host matches none of the facility's <code>login_nodes</code> patterns, and port 22
+      is refused there. <code>squeue</code>, <code>sbatch</code> and <code>scancel</code> all work locally on a compute node.
+      Node-side commands (<code>_run_on_node</code>) also need a route. On 2026-10-12 ssh to the graph node was refused
+      from both the compute node and the login node, and <code>_term_neo4j_on_node</code> fell through to
+      <code>scancel</code>.
+    </p>
+    <p>
+      The repair runs scheduler commands locally whenever the scheduler answers locally, and routes node commands through
+      the scheduler instead of ssh (<code>srun --overlap --jobid</code>, on the graph job's own allocation). The node
+      route is confirmed by the decision below.
+    </p>
+    <p>
+      Node <code>lifecycle-from-compute</code>, role implement, 1.0 h. Write paths: <code>imas_codex/cli/services.py</code>,
+      <code>tests/cli/test_services_scheduler_route.py</code> and
+      <code>docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/lifecycle-from-compute.html</code>.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/cli -p no:cacheprovider</code> adds no failure
+      against its base. Its new tests fail on the base revision and pass on the change, and show:
+    </p>
+    <ul>
+      <li>On a host where <code>squeue</code> answers locally, the scheduler commands run without ssh.</li>
+      <li>Node commands use the chosen route.</li>
+    </ul>
+    <p>
+      From a compute node, <code>imas-codex graph status</code> reports the job without an ssh error, and its log is
+      quoted.
+    </p>
+
+    <h2 id="s6">§6 — No pattern kill on the login node</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <code>Neo4jOperation._stop_neo4j</code> (<code>imas_codex/graph/neo4j_ops.py</code>) still runs three
+      <code>pkill -15 -f</code> patterns on whichever host runs the export: <code>neo4j_.*community.sif</code>,
+      <code>Neo4jCommunity</code> and <code>neo4j.*console</code>. On the shared login node they match any session's
+      temporary Neo4j, test instance or admin run. <code>_stop_login_services</code> runs
+      <code>pgrep -f 'neo4j_.*community.*\.sif'</code> inside a <code>bash -c</code> whose argv carries the same pattern,
+      and kills the first match. On 2026-10-12 it reported <em>Killed login Neo4j process (PID 501330)</em>, and nothing
+      recorded what that process was.
+    </p>
+    <p>
+      The repair resolves each kill to pids it can attribute: the instance's own pid file, or processes whose working
+      directory or bind path is the graph data directory. It prints them with their command lines, then signals only
+      that list. No step selects by pattern alone.
+    </p>
+    <p>
+      Node <code>no-login-pattern-kill</code>, role implement, 0.75 h. Write paths:
+      <code>imas_codex/graph/neo4j_ops.py</code>, <code>imas_codex/cli/services.py</code>,
+      <code>tests/graph/test_login_kill_is_attributed.py</code> and
+      <code>docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/no-login-pattern-kill.html</code>.
+      §5 also edits <code>imas_codex/cli/services.py</code>, so the two run one after the other.
+      <strong>Done when</strong> <code>rg -n "pkill" imas_codex/graph imas_codex/cli/services.py</code> prints nothing.
+      A test shows that a process whose command line merely contains <code>Neo4jCommunity</code>, with another data
+      directory, is not signalled, and fails if the pattern kill returns. <code>uv run --no-sync pytest tests/graph
+      tests/cli -p no:cacheprovider</code> adds no failure against its base.
+    </p>
+
+    <h2 id="s7">§7 — Every discovery queue fails closed on an unreachable graph</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      During the outage the signals regeneration reported "completed, 0 remaining" with 407 signals left. Its
+      pending-work predicates and claim caught every exception and returned false or an empty list.
+      <code>2061f2990</code> fixed that for signals: they now re-raise errors <code>is_infrastructure_error</code>
+      classifies. The paths, wiki, code and document pipelines carry predicates of the same shape under
+      <code>imas_codex/discovery/</code>, and none has been checked.
+    </p>
+    <p>
+      Node <code>queues-fail-closed</code>, role implement, 1.0 h. Write paths: the pending-work and claim functions under
+      <code>imas_codex/discovery/paths/</code>, <code>imas_codex/discovery/wiki/</code>,
+      <code>imas_codex/discovery/code/</code> and <code>imas_codex/discovery/documents/</code>, plus
+      <code>tests/discovery/test_queues_fail_closed.py</code> and
+      <code>docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/queues-fail-closed.html</code>.
+    </p>
+    <p>
+      Its first step measures the exposure against the whole of <code>tests/discovery</code>: flip each guard closed in a
+      scratch copy and count the failures. That count goes in the fragment before any change.
+      <strong>Done when</strong> <code>uv run --no-sync pytest tests/discovery -p no:cacheprovider</code> adds no
+      failure against its base. A test per pipeline shows that an infrastructure error raised inside the pending
+      predicate or claim propagates, rather than reading as no work. The fragment lists every predicate examined, with
+      its verdict.
+    </p>
+
+    <h2 id="s8">§8 — The currency check sees a changed graph</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      The cycle of 2026-10-04 wrote a <code>no_op</code> receipt: the live graph had not changed since the offsite copy of
+      2026-09-27. Its currency read <code>live_path</code> as <code>data/databases/neo4j/id-buffer.tmp.0</code>, last
+      modified 2026-09-27T22:03. The graph was written that week; the next cycle found the transaction log modified at
+      2026-10-11T22:00. A false <code>current</code> still skips a due push under §2's guard, because the no-op is
+      decided first.
+    </p>
+    <p>
+      Node <code>currency-sees-change</code>, role implement, 0.75 h. Write paths: the currency function in
+      <code>imas_codex/graph/neo4j_ops.py</code>, <code>tests/graph/test_offsite_currency_live_tree.py</code> and
+      <code>docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/currency-sees-change.html</code>.
+      <strong>Done when</strong> a test reproduces the 2026-10-04 reading: a store whose only recent file is the
+      transaction log, beside an older <code>id-buffer.tmp.0</code>. The test reports <code>stale</code> on the change
+      and <code>current</code> on the base. The fragment quotes both receipts. <code>uv run --no-sync pytest tests/graph
+      tests/core/test_offsite_push.py -p no:cacheprovider</code> adds no failure against its base.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="node-command-route" data-choice="" data-by="" data-when="" data-recommended="srun-overlap" data-recommended-by="coordinator">
+        <p class="r-dec-q">How do lifecycle commands reach the graph node?</p>
+        <p class="r-dec-ctx">The SIGTERM and lock cleanup run on the node that hosts the job. On 2026-10-12, ssh to that node was refused from both a compute node and the login node.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="srun-overlap">srun --overlap --jobid into the graph job</button>
+          <button class="r-opt" data-value="ssh-via-login">ssh through the login node, as today</button>
+        </p>
+        <p class="r-dec-rat">Recommended: <code>srun --overlap --jobid</code>. It needs no ssh route, runs inside the job's own cgroup, and works from wherever the scheduler answers.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-gmlsw-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-12" data-recommends-skill="/reckon-build graph-maintenance-leaves-the-store-whole">
+        <h4 class="r-fu-title">Put the recovered store in service, install the daily timer, then harden the remaining lifecycle paths</h4>
+        <div class="r-fu-body"><p>§3 is first and needs the lead to start the graph; §4 follows it. §5 to §8 are independent repairs, with §5 and §6 sharing <code>imas_codex/cli/services.py</code>.</p></div>
+        <pre class="r-fu-prompt">/reckon-build graph-maintenance-leaves-the-store-whole</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
