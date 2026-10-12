@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 
 import pytest
-from sklearn.metrics import roc_auc_score
 
+from imas_codex.discovery.base.evaluation import bootstrap_interval, roc_auc
 from imas_codex.discovery.paths.scorer import (
     CODE_BEARING_PURPOSES,
     build_path_judgment_questions,
@@ -139,8 +139,11 @@ def test_category_gate_reproduces_source_label_auc():
         )
         labels.append(row["category"] in CODE_BEARING_PURPOSES | {"container"})
         scores.append(max(scan, expand))
-    auc = roc_auc_score(labels, scores)
+    auc = roc_auc(labels, scores)
+    interval = bootstrap_interval(labels, scores, n_resamples=1000, seed=123)
     assert len(units) == 222
     assert sum(labels) == 134
-    assert 0.8858 <= auc <= 0.9608
     assert auc == pytest.approx(0.9244, abs=0.0001)
+    assert interval["point"] == pytest.approx(0.9244, abs=0.0001)
+    assert abs(interval["lower"] - 0.8858) < 0.01
+    assert abs(interval["upper"] - 0.9608) < 0.01

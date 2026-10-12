@@ -1,0 +1,44 @@
+<!-- Landing record for the shared evaluation module.
+     Module: imas_codex/discovery/base/evaluation.py (new).
+     AUC folded in: imas_codex/standard_names/benchmark_roles.py::discrimination_metrics.
+     Positive control: tests/discovery/test_path_category_gate.py. Negative control log:
+     /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T144956062346-sje-evaluation-module/negative_control_stub.log -->
+<section id="sje-evaluation-module" data-reckon="evidence">
+  <h2 id="sje-evaluation-module-heading">Shared evaluation module, and one AUC owner</h2>
+
+  <p id="sje-evaluation-module-intro">
+    <code>imas_codex/discovery/base/evaluation.py</code> now owns the metric
+    primitives (scikit-learn <code>roc_auc_score</code>, <code>accuracy_score</code>,
+    <code>f1_score</code>, <code>confusion_matrix</code>, <code>cohen_kappa_score</code>)
+    and what the library lacks: copy-group-aware resampling, the paired difference
+    over canonical units, an operating point chosen on the calibration split and
+    refused on that split, the stability figures, and the fixed fixture-row loader.
+    The hand-rolled pairwise AUC loop in
+    <code>discrimination_metrics</code> is folded onto the module's
+    <code>roc_auc</code>, so one AUC owner remains.
+  </p>
+
+  <table id="sje-evaluation-module-table">
+    <caption>Gate at the changed revision: 74 passed (base 61), 13 added known-answer tests.</caption>
+    <thead>
+      <tr><th>Measure</th><th>Figure</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Perfectly separating scores</td><td>AUC 1.0</td></tr>
+      <tr><td>Reversed scores</td><td>AUC 0.0</td></tr>
+      <tr><td>Fully tied scores</td><td>AUC 0.5</td></tr>
+      <tr><td>Category-gate positive control (222 units, 134 positive)</td><td>AUC 0.9244; interval [0.8869, 0.9603], seed 123, 1000 resamples</td></tr>
+      <tr><td>Fold value-equivalence</td><td>0 mismatches in 2000 tie-heavy random cases</td></tr>
+    </tbody>
+  </table>
+
+  <p id="sje-evaluation-module-reading">
+    The positive control reproduces 0.9244 through the module, and both bootstrap
+    bounds sit inside 0.01 of the figures the discovery study reported (0.924 [0.886,
+    0.961]) &mdash; the module computes the method discovery used, not a near relative.
+    The declared negative control replaces each metric function with a constant stub;
+    ten known-answer test ids that pass at the head turn red, and the run exits non-zero.
+    The interval is a copy-group-aware percentile bootstrap; for the control each
+    canonical unit is its own group, since the fixture's dedup key is the canonical unit.
+  </p>
+</section>

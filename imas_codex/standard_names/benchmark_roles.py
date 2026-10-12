@@ -43,6 +43,7 @@ from typing import Any
 # Re-exported for back-compat: the banned-prose vocabulary now lives in the
 # neutral ``prose_policy`` module so production selection logic need not import
 # a benchmark module.  The docs-seat benchmark below still audits against it.
+from imas_codex.discovery.base.evaluation import roc_auc
 from imas_codex.standard_names.prose_policy import (
     BANNED_PROSE_PATTERNS as BANNED_PROSE_PATTERNS,  # noqa: F401
     banned_prose_findings,
@@ -1224,11 +1225,8 @@ def discrimination_metrics(
         )
     if good_scores and bad_scores:
         metrics["separation"] = round(metrics["good_mean"] - metrics["bad_mean"], 4)
-        wins = 0.0
-        for g in good_scores:
-            for b in bad_scores:
-                wins += 1.0 if g > b else 0.5 if g == b else 0.0
-        metrics["auc"] = round(wins / (len(good_scores) * len(bad_scores)), 4)
+        labels = [1.0] * len(good_scores) + [0.0] * len(bad_scores)
+        metrics["auc"] = round(roc_auc(labels, list(good_scores) + list(bad_scores)), 4)
     return metrics
 
 
