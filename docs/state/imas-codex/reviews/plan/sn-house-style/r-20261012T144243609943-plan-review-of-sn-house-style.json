@@ -1,0 +1,164 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:49:20.253Z",
+  "dispatched_at": "2026-10-12T14:42:56Z",
+  "findings": [
+    {
+      "anchor": "docs_gates.py:512",
+      "id": "reuse_search-1",
+      "reason": "the plan's own \u00a74 sign-convention/equation/symbol checks should cite the existing owner and either extend it or say in one line why its rules cannot be reused, per the reuse-item contract.",
+      "text": "\u00a74's five conformance check classes are proposed as new, but imas_codex/standard_names/docs_gates.py already implements three of them deterministically and is nowhere named in the plan's prior-art account",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/docs_gates.py:429",
+      "id": "duplicate_owner-1",
+      "reason": "the honest change is to extend docs_gates.py and route `score_documentation` into the Layer 1 audit report the reviewer reads, not to write a second sign-convention check.",
+      "text": "\u00a74's fifth check class, \"a sign-convention paragraph present or absent against the COCOS rule\", duplicates `_sign_convention_result`, which already decides sign prose exactly from authoritative COCOS transformation type (fail on a COCOS-invariant quantity that states a sign, fail on a COCOS-sensitive quantity that omits or misplaces it); the plan forks this into review/audits.py rather than extending the owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/docs_gates.py:354",
+      "id": "duplicate_owner-2",
+      "reason": "the same module the plan routes \u00a74's checks past (because score_documentation is unwired) already holds the equation gate; the plan should name it and decide extend-vs-wire rather than add a third equation check.",
+      "text": "\u00a74's first check class, a forbidden variant of a registered concept's equation, duplicates `_defining_equation_result` in the same owner module, which already gates documentation on its defining equation and dimensional consistency",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/docs_gates.py:416",
+      "id": "duplicate_owner-3",
+      "reason": "\u00a74 should extend the existing symbol gate with the registry's per-quantity canonical symbol rather than add a parallel symbol check; the registry supplies the canonical symbol the owner currently lacks, which is the extension argument.",
+      "text": "\u00a74's second check class, a non-canonical symbol for a registered quantity, duplicates `_symbols_are_defined` in the same owner module, which already gates documentation on symbol definition",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/review/audits.py:359",
+      "id": "duplicate_owner-4",
+      "reason": "naming that the locus-gloss check extends the existing `convention_violation` family (rather than forming a fifth class) lets the author reuse the report shape and the reviewer's existing rendering path instead of introducing a parallel finding class.",
+      "text": "\u00a74's third check class, a forbidden locus gloss, is a second convention check beside `run_lexical_lint`, which already emits `convention_violation` findings for mixed locus/position forms (review/audits.py:359 `_PROCESSING_SUFFIXES`, :388 mixed-position-domain detection) in the same module the plan extends; the plan does not name the existing convention_violation family it would join",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/anti_patterns.yaml:1",
+      "id": "reuse_search-2",
+      "reason": "the anti-pattern gallery is keyed on name decomposition while concepts.yml is keyed on description/documentation content, so the mechanisms do not in fact overlap; a one-line \"distinct from the decomposition gallery in anti_patterns.yaml\" would remove the doubt but the design does not change.",
+      "text": "the plan's concepts.yml \"forbidden variants as patterns\" and templates.yml openings are curated wrong-form\u2192canonical maps, the same shape as the shipped anti-pattern gallery (anti_patterns.yaml, loaded by context.py:372 `_load_decomposition_anti_patterns`), which the plan neither names nor distinguishes",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "4772acbbf6d7432f29090aa23f5b5033df942a691a701f4ee36d803f1a618477",
+  "plan_slug": "sn-house-style",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-12T15:00:31.970391+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-12T15:00:33.878778+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-2",
+      "reason": "",
+      "when": "2026-10-12T15:00:35.144465+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-3",
+      "reason": "",
+      "when": "2026-10-12T15:00:36.433584+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-4",
+      "reason": "",
+      "when": "2026-10-12T15:00:38.164118+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-2",
+      "reason": "",
+      "when": "2026-10-12T15:00:39.879666+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:33.878778+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:35.144465+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:36.433584+00:00"
+    },
+    "duplicate_owner-4": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:38.164118+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:31.970391+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:39.879666+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-house-style.v3.json",
+  "review_run_id": "r-20261012T144243609943-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "56bbe762052acfe2448c8e7d3202545de3d7d1bd",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the ISN registry hides three files, a model and a loader behind one accessor, and the imas-codex \u00a72 is a consumer test, not a new layer.",
+    "duplicate_owner": "a finding \u2014 \u00a74 re-implements deterministic checks that imas_codex/standard_names/docs_gates.py already owns, adding them to review/audits.py instead of extending the owner and wiring it into the Layer 1 audit.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section of this plan adds to any of the four families, and \u00a74 states \"A second lint module is not built\" while \u00a75 states its new prompt block replaces, and does not sit beside, the free-text consistency advice.",
+    "reuse_search": "a finding \u2014 the plan searched review/audits.py, review/pipeline.py, audits.py and the prompts, but never cites imas_codex/standard_names/docs_gates.py, which already owns deterministic documentation conformance gates (sign convention, defining equation, symbol definition).",
+    "thin_wrapper": "pass \u2014 \u00a72 adds a test rather than a wrapper, and \u00a75 wires an existing-but-unread `audit_findings` render-context variable into the review templates instead of building a parallel path."
+  },
+  "section_digests": {
+    "_document": "77a40e495a1bf407034434c1f885a25f404d4eda585a946eabb49fe01da0fe60",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s2": "23f227226f8b84dda9a1437a157a9860d371e5cec0c478e9cecb9d26c26f706e",
+    "s3": "50e289cff8fb10f82f4114f3e51de9e7d184bd4777b80c4f5ee7e617bbdd3c56",
+    "s4": "8d625353f981df4d4abe5f25d9c84d7171ac60af3ec7f863526d46164e590937",
+    "s5": "3208be29326928c4ea9f1693a1493465ae47938e6f2188f57252dd9cadbcaa0b",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:00:16.631210+00:00"
+}
