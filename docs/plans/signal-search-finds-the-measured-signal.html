@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -149,6 +149,25 @@
       the fleet allocation, not the login node.
     </p>
     <p>
+      The section is two nodes. The first writes the held-out questions. Its worker gets a brief, not this plan, because
+      §1 and its figure show the orderings. It may enumerate the eligible population by Cypher over categories, data names
+      and descriptions. It must not run any search tool or open the prototype directory. It writes at least eight
+      questions, so that six survive if pooled labelling finds one ill-posed, spread over at least four EDDB categories,
+      and records for each the grade-3 signals it found by enumeration. It commits them to the fixture marked
+      <code>held_out</code>. The second node adds the eleven draft questions, pools and labels every arm's top 10, and
+      builds the harness.
+    </p>
+    <p>
+      A label of 0 records a candidate that was read and judged irrelevant, so an unlabelled candidate stays distinct
+      from an irrelevant one. The tool arm calls the product ranking, so each later section measures its own head:
+      extract the ranking inside <code>_search_signals</code> into a function that returns ordered signal ids, with no
+      change in behaviour. The other arms live in the harness, the current additive rule among them, so the baseline
+      survives §4. The two rerank arms spend Jev, so they run only when the harness is asked for them, and a default
+      graph run spends nothing. The prototype did not keep its role-aware question text, so write it from §7's five
+      levels and keep it in the harness; §7 moves it into the product beside <code>_RERANK_QUESTION</code>. The random
+      control is a seeded permutation of each question's labelled pool.
+    </p>
+    <p>
       <strong>Done when</strong> the fixture holds at least seventeen questions, six of them held out. The harness refuses to
       score an arm whose top 10 on any question holds an unlabelled candidate, and names the candidate. It prints the five-arm table on the pooled labels, and the random
       control scores below every arm on mean nDCG@10; a control that does not means the labels are wrong. The table and
@@ -163,9 +182,11 @@
       rank fusion. The sites are <code>_search_signals</code>, <code>_search_docs</code> and <code>_search_code</code> in
       <code>imas_codex/llm/search_tools.py</code>, and <code>_hybrid_ids</code> in
       <code>imas_codex/ids/slot_context.py</code>. The fusion already exists as <code>rrf_fuse</code> and
-      <code>RRF_K = 60</code> in <code>imas_codex/standard_names/search.py</code>. Lift it to one shared owner that the
-      standard-name search and these four callers import; the plan's design review settles the module. Do not write a
-      second fusion. Signal search over-fetches 100 vector and 50 full-text candidates before fusing, the prototype's
+      <code>RRF_K = 60</code> in <code>imas_codex/standard_names/search.py</code>. Move it to
+      <code>imas_codex/search/fusion.py</code>, which exports <code>rrf_fuse</code> and <code>RRF_K</code> and nothing
+      else, and have the standard-name search and these four callers import it from there. This moves a definition
+      rather than adding one. Do not write a second fusion. The code path fuses three streams: chunk vector, chunk text
+      with its reference hits, and code-example vector, which today adds 0.05 to the larger score at line 1678. Signal search over-fetches 100 vector and 50 full-text candidates before fusing, the prototype's
       values, then cuts to <code>k</code>.
     </p>
     <p>
@@ -176,6 +197,13 @@
       the pool sweep in <code>docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html</code>. That plan's §13 places four code and docs answers at embedding ranks 159 to 181; the additive rule may
       be part of why, so re-place them after this lands. <code>_hybrid_ids</code> feeds the map candidate stage, so land
       this between <code>imas map run</code> invocations, never during one.
+    </p>
+    <p>
+      <code>hybrid_dd_search</code> in <code>imas_codex/graph/dd_search.py</code> keeps its own blend. It scales BM25 to
+      the range 0 to 1 before weighting, in <code>_text_search_dd_paths</code> in
+      <code>imas_codex/tools/graph_search.py</code>, so it does not have the mixed-scale defect, and its tie-breakers are
+      tuned against <code>tests/tools/fixtures/dd_mapping_questions.json</code>. Moving it to RRF is a change to measure
+      on that fixture, not part of this section.
     </p>
     <p>
       <strong>Done when</strong> all of the following hold:
@@ -267,6 +295,16 @@
     <p>
       A prototype on a stratified sample of 300 eligible signals, hand-labelled, measures agreement and cost before any
       backfill. This section is held by decision <code>signal-role</code>.
+    </p>
+    <p>
+      Two precedents draw the same line elsewhere, and neither applies to a facility signal.
+      <code>_PULSE_SCHEDULE_REFERENCE_RE</code> in <code>imas_codex/core/node_classifier.py</code> marks a DD path under
+      a <code>pulse_schedule</code> reference as a commanded waveform; it is the mapping-side counterpart a stored role
+      pairs with. <code>OPERATIONS_PATTERNS</code> in <code>imas_codex/discovery/paths/enrichment.py</code> scores code
+      files by keyword. A pattern over signal names would serve one facility's naming, so the role is judged from name,
+      description and glossary. This section adds one stored property and one <code>search_signals</code> option. When
+      the decision is taken it names what the option retires; the candidate is the <code>physics_domain</code> filter,
+      which §2 found unreliable on plant signals.
     </p>
     <p>
       <strong>Done when</strong> the prototype's agreement with the hand labels and its cost per signal are recorded. If
