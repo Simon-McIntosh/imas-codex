@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_review_release.py::test_pr_target_fork_uses_origin_slug"
+  ],
+  "after_suite": {
+    "command": "UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=<worktree> uv run pytest -p no:cacheprovider -p no:randomly <47 export test files>",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 27,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T195617718658-sib-export-tests-red/logs/head_export_set.log",
+    "note": "summary line: 24 failed, 428 passed, 3 deselected, 3 errors (20m01s); none of the seven named ids remain; the one added id is test_review_release.py::test_pr_target_fork_uses_origin_slug (load-fragile, outside fence); full id list in logs/head_failed.txt",
+    "revision": "5f1817acfd23928ac7966f781bc33cf968c3166d"
+  },
+  "baseline_suite": {
+    "command": "UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=<worktree> uv run pytest -p no:cacheprovider -p no:randomly <47 export test files>",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 35,
+    "failure_ids": [
+      "tests/standard_names/test_docs_review_eligibility.py::test_export_reason_distinguishes_absence_from_unrecorded_resolution",
+      "tests/standard_names/test_export_exclusion_ledger.py::test_export_emits_generic_source_bindings_and_preserves_accounting",
+      "tests/standard_names/test_export_exclusion_ledger.py::test_export_ledger_closes_over_fixture_population",
+      "tests/standard_names/test_export_exclusion_ledger.py::test_export_validates_cross_links_against_full_catalog",
+      "tests/standard_names/test_export_exclusion_ledger.py::test_manifest_sources_reconcile_emitted_excluded_and_non_nameable",
+      "tests/standard_names/test_export_release_holds.py::test_explicitly_included_identities_remain_eligible",
+      "tests/standard_names/test_export_release_holds.py::test_release_holds_close_the_identity_ledger",
+      "tests/standard_names/test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T195617718658-sib-export-tests-red/logs/base_export_set.log",
+    "note": "summary line: 32 failed, 419 passed, 1 skipped, 3 deselected, 3 errors (18m57s); failure_ids lists the seven named plus the scratch-only determinism red; full id list in logs/base_failed.txt",
+    "revision": "828d166cebb8d4e8b552c5c92957851482de31c7"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T21:19:44.471Z",
+  "dispatched_at": "2026-10-12T21:08:37Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_export_exclusion_ledger.py",
+      "line": 786,
+      "severity": "follow-on",
+      "summary": "the expected reconciliation dict compares \"rows\": reconciliation[\"rows\"] (test_export_exclusion_ledger.py:786) -- the rows value is read from the same dict under test, so that key is a self-comparison that holds whatever the code produces and a change that only corrupted row contents would pass it; the other keys are independent literals so the assertion is not wholly vacuous, and the line predates this change but sits inside the assertion block it rewrote, so a later reader should not count it as coverage"
+    },
+    {
+      "file": "logs/head_failed.txt",
+      "line": 1,
+      "severity": "follow-on",
+      "summary": "the after arm adds one failure id absent from the base arm -- tests/standard_names/test_review_release.py::test_pr_target_fork_uses_origin_slug -- so the brief's done_when \"the export tests add no failure against base\" is not literally met; the manifest discloses it and shows the file's red set is load-dependent (logs/head_review_release_isolated.log passes that id and a different test times out), and test_review_release.py is outside the node's fence, so this is a follow-on rather than a defect in the landing"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none -- the landed change is three test fixtures, one assertion block and an evidence fragment; no production module is modified or reached",
+    "diff": "read both commits against base 828d166ce; 5f1817acf adds the five topology keys to the _candidate helpers at test_export_exclusion_ledger.py:49-53 and test_export_release_holds.py:64-68 and to the population row at test_docs_review_eligibility.py:90-95, and rewrites test_manifest_sources_reconcile's gate assertion (:788-792) to the intended manifest_generability refusal plus a \"waived\": 0 reconciliation key; 808a2f88 adds only the evidence fragment",
+    "done_when": "the brief's done_when asks for the cause named with its commit and confirmed by a scratch-copy restoration, the seven tests passing at head, and the export set adding no failure against base with baseline_suite and after_suite recorded; the run records base (32 failed/419 passed) and after (24 failed/428 passed) arms over the same 47 files, the seven present in logs/base_failed.txt and absent from logs/head_failed.txt, and a scratch counterfactual at logs/cause_scratch_keypresence.log where restoring the key-presence form makes 6 of the 7 pass",
+    "goal": "the node goal is to find why seven export tests went red and repair them, stating product-vs-fixture per test; the landing names the cause as b161235bb (the producer-evidence predicate dropping its key-presence early return) plus e0c2d5ef3 (the manifest-generability gate) and repairs all seven as fixture updates -- the _candidate helpers in tests/standard_names/test_export_exclusion_ledger.py and tests/standard_names/test_export_release_holds.py and the population row in tests/standard_names/test_docs_review_eligibility.py now carry the five topology keys the population query projects at imas_codex/standard_names/export.py:710-714",
+    "manifest": "read; status complete, commits 5f1817acf and 808a2f88, landing line present, baseline_suite and after_suite recorded with log paths, negative_control_log named; it discloses that the after arm adds one failure id (test_review_release.py::test_pr_target_fork_uses_origin_slug) and attributes it to load fragility in a file outside the node's fence",
+    "write_paths": "the source declared imas_codex/standard_names/export.py, the three test files, the fragment docs/evidence/fragments/sn-integrity-backlog/sib-export-tests-red.html and a figures dir; git diff 828d166ce..808a2f88 touches the three test files (+72/-1) and the fragment, every path inside the declared set, and imas_codex/standard_names/export.py is read but unchanged"
+  },
+  "justifications": {
+    "durability": "the added assertions at tests/standard_names/test_export_exclusion_ledger.py:788-791 are independent literals that redden if the manifest_generability gate is removed, but :786 compares reconciliation[\"rows\"] against itself and the gate assertion was inverted to assert refusal rather than passing",
+    "evidence": "baseline_suite and after_suite reconcile with logs/base_export_set.log and logs/head_export_set.log and the seven ids are present in logs/base_failed.txt and absent from logs/head_failed.txt, but the after arm adds one failure id, so the done_when's \"no failure against base\" holds only by the manifest's attribution",
+    "fit": "the fixture keys match the population projection at imas_codex/standard_names/export.py:710-714 and the added comments state the mechanism with no plan, sprint or ticket label in any added name or comment",
+    "goal_fidelity": "tests/standard_names/test_export_exclusion_ledger.py:49-53 now carries the same topology imas_codex/standard_names/export.py:710-714 projects, so the classifier reaches the branches under test instead of withholding at export.py:877",
+    "reuse": "the change adds no production definition -- three test fixtures and one assertion set -- so it forks no capability; a search over imas_codex/standard_names/ found only the export module that already owns the population-row shape",
+    "scope_discipline": "every path in git diff 828d166ce..808a2f88 is inside the node's declared write paths and imas_codex/standard_names/export.py is unchanged, so the diff carries nothing the goal does not imply"
+  },
+  "node": "review-of-sib-export-tests-red",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to find why seven export tests went red and repair them, stating product-vs-fixture per test; the landing names the cause as b161235bb (the producer-evidence predicate dropping its key-presence early return) plus e0c2d5ef3 (the manifest-generability gate) and repairs all seven as fixture updates -- the _candidate helpers in tests/standard_names/test_export_exclusion_ledger.py and tests/standard_names/test_export_release_holds.py and the population row in tests/standard_names/test_docs_review_eligibility.py now carry the five topology keys the population query projects at imas_codex/standard_names/export.py:710-714\nVERDICT done_when: the brief's done_when asks for the cause named with its commit and confirmed by a scratch-copy restoration, the seven tests passing at head, and the export set adding no failure against base with baseline_suite and after_suite recorded; the run records base (32 failed/419 passed) and after (24 failed/428 passed) arms over the same 47 files, the seven present in logs/base_failed.txt and absent from logs/head_failed.txt, and a scratch counterfactual at logs/cause_scratch_keypresence.log where restoring the key-presence form makes 6 of the 7 pass\nVERDICT write_paths: the source declared imas_codex/standard_names/export.py, the three test files, the fragment docs/evidence/fragments/sn-integrity-backlog/sib-export-tests-red.html and a figures dir; git diff 828d166ce..808a2f88 touches the three test files (+72/-1) and the fragment, every path inside the declared set, and imas_codex/standard_names/export.py is read but unchanged\nVERDICT manifest: read; status complete, commits 5f1817acf and 808a2f88, landing line present, baseline_suite and after_suite recorded with log paths, negative_control_log named; it discloses that the after arm adds one failure id (test_review_release.py::test_pr_target_fork_uses_origin_slug) and attributes it to load fragility in a file outside the node's fence\nVERDICT diff: read both commits against base 828d166ce; 5f1817acf adds the five topology keys to the _candidate helpers at test_export_exclusion_ledger.py:49-53 and test_export_release_holds.py:64-68 and to the population row at test_docs_review_eligibility.py:90-95, and rewrites test_manifest_sources_reconcile's gate assertion (:788-792) to the intended manifest_generability refusal plus a \"waived\": 0 reconciliation key; 808a2f88 adds only the evidence fragment\nCALL_SITES: none -- the landed change is three test fixtures, one assertion block and an evidence fragment; no production module is modified or reached\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/test_export_exclusion_ledger.py:49-53 now carries the same topology imas_codex/standard_names/export.py:710-714 projects, so the classifier reaches the branches under test instead of withholding at export.py:877\nSCORE evidence: 17\nJUSTIFICATION evidence: baseline_suite and after_suite reconcile with logs/base_export_set.log and logs/head_export_set.log and the seven ids are present in logs/base_failed.txt and absent from logs/head_failed.txt, but the after arm adds one failure id, so the done_when's \"no failure against base\" holds only by the manifest's attribution\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 828d166ce..808a2f88 is inside the node's declared write paths and imas_codex/standard_names/export.py is unchanged, so the diff carries nothing the goal does not imply\nSCORE durability: 15\nJUSTIFICATION durability: the added assertions at tests/standard_names/test_export_exclusion_ledger.py:788-791 are independent literals that redden if the manifest_generability gate is removed, but :786 compares reconciliation[\"rows\"] against itself and the gate assertion was inverted to assert refusal rather than passing\nSCORE fit: 19\nJUSTIFICATION fit: the fixture keys match the population projection at imas_codex/standard_names/export.py:710-714 and the added comments state the mechanism with no plan, sprint or ticket label in any added name or comment\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no production definition -- three test fixtures and one assertion set -- so it forks no capability; a search over imas_codex/standard_names/ found only the export module that already owns the population-row shape\nFINDING tests/standard_names/test_export_exclusion_ledger.py:786 follow-on: the expected reconciliation dict compares \"rows\": reconciliation[\"rows\"] (test_export_exclusion_ledger.py:786) -- the rows value is read from the same dict under test, so that key is a self-comparison that holds whatever the code produces and a change that only corrupted row contents would pass it; the other keys are independent literals so the assertion is not wholly vacuous, and the line predates this change but sits inside the assertion block it rewrote, so a later reader should not count it as coverage\nFINDING logs/head_failed.txt:1 follow-on: the after arm adds one failure id absent from the base arm -- tests/standard_names/test_review_release.py::test_pr_target_fork_uses_origin_slug -- so the brief's done_when \"the export tests add no failure against base\" is not literally met; the manifest discloses it and shows the file's red set is load-dependent (logs/head_review_release_isolated.log passes that id and a different test times out), and test_review_release.py is outside the node's fence, so this is a follow-on rather than a defect in the landing",
+  "review_run_id": "r-20261012T210825835612-review-of-sib-export-tests-red",
+  "reviewed_base_sha": "828d166cebb8d4e8b552c5c92957851482de31c7",
+  "reviewed_head_sha": "808a2f8806c72b53fe80b51fe03604e76bf1e206",
+  "reviewed_run_id": "r-20261012T195617718658-sib-export-tests-red",
+  "reviewer_run_id": "r-20261012T210825835612-review-of-sib-export-tests-red",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T195617718658-sib-export-tests-red/logs/base_export_set.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T195617718658-sib-export-tests-red/logs/head_export_set.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T195617718658-sib-export-tests-red/logs/negative_export_set.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T195617718658-sib-export-tests-red/logs/cause_scratch_keypresence.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:20:00.000000+00:00",
+  "total": 109
+}

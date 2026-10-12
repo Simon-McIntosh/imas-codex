@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -337,6 +337,9 @@
 </div>
 <div class="r-comment" data-section="s24" data-id="c-run-r-20261012T195617718658-sib-export-tests-red" data-who="reckon-build" data-when="2026-10-12T21:08:10.108Z">
     <div class="r-comment-body"><p>Repaired three export fixtures that predated the producing-source predicate (b161235bb) and the manifest-generability refusal (e.g. e0c2d5ef3); the seven named export tests pass at head, and the 47-file export set adds no failure against base (head 24 failed / 428 passed against base 32 failed / 419 passed).</p></div>
+</div>
+<div class="r-comment" data-section="s24" data-id="c-run-r-20261012T210825835612-review-of-sib-export-tests-red" data-who="reckon-build" data-when="2026-10-12T21:19:44.471Z">
+    <div class="r-comment-body"><p>Independent review of r-20261012T195617718658-sib-export-tests-red complete: goal_fidelity 18, evidence 17, scope_discipline 20, durability 15, fit 19, reuse 20 (total 109); the seven export tests are stale fixtures repaired without a product change, all inside the declared write paths; two follow-on findings recorded (a self-comparing rows key, and one load-fragile added failure id).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
