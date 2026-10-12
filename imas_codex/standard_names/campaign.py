@@ -495,6 +495,19 @@ def plan_batches(ids: Sequence[str], batch_size: int) -> list[list[str]]:
     return [list(ids[i : i + batch_size]) for i in range(0, len(ids), batch_size)]
 
 
+def anchor_gated_batches(anchor_id: str, member_ids: Sequence[str]) -> list[list[str]]:
+    """The two-batch plan for one family: the anchor alone, then the members.
+
+    The anchor is drained as its own batch so the convergence gate judges it
+    before the members are ever touched: a single-member batch accepts at rate
+    1.0 when the anchor reaches documentation acceptance and 0.0 otherwise, so
+    the ordinary gate halts the run before the member batch when the anchor was
+    not accepted. The members are one batch, scoped to exactly the non-anchor
+    ids.
+    """
+    return [[anchor_id], list(member_ids)]
+
+
 # ── Convergence gate ──────────────────────────────────────────────────────────
 
 
@@ -935,6 +948,7 @@ class CampaignRunner:
             [Sequence[tuple[str, str, dict[str, int]]]], list[bool]
         ]
         | None = None,
+        batch_plan: Sequence[Sequence[str]] | None = None,
     ) -> CampaignResult:
         """Run the campaign from *start_batch*, halting on the first failure.
 
@@ -945,13 +959,21 @@ class CampaignRunner:
         convergence gate.  A failed gate, an exceeded cost ceiling, or an abort
         request halts between batches and records ``resume_from`` so a later run
         resumes cleanly.
+
+        *batch_plan* overrides the fixed-size split when the caller needs a
+        batch sequence that *target_ids* alone cannot express (an anchor batch
+        ahead of its members, see :func:`anchor_gated_batches`).
         """
         if mark_fn is None:
             from imas_codex.standard_names.harmonize import mark_members_for_regen
 
             mark_fn = mark_members_for_regen
 
-        batches = plan_batches(target_ids, self.budget.batch_size)
+        batches = (
+            [list(b) for b in batch_plan]
+            if batch_plan is not None
+            else plan_batches(target_ids, self.budget.batch_size)
+        )
         result = CampaignResult(
             spec=self.spec,
             total_selected=len(target_ids),
@@ -1076,6 +1098,7 @@ __all__ = [
     "default_campaign_manifest_path",
     "CampaignBudget",
     "plan_batches",
+    "anchor_gated_batches",
     "ConvergenceThresholds",
     "BatchOutcome",
     "evaluate_convergence",
