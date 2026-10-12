@@ -212,7 +212,7 @@ def test_every_propagated_statement_binds_the_parameters_it_names():
             return False
 
         def query(self, cypher, **params):
-            missing = {name for name in re.findall(r"\$(\w+)", cypher)} - set(params)
+            missing = set(re.findall(r"\$(\w+)", cypher)) - set(params)
             assert not missing, f"statement binds {sorted(missing)} but is not given it"
             calls.append(cypher)
             return [{"cnt": 1, "updated": 1}]
