@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-export-tests-red">
+<title>Seven export tests restored by carrying producer evidence in their fixtures</title>
+</head>
+<body>
+<main>
+<h1 id="sib-export-tests-red-title">The seven red export tests were stale fixtures, not a regression</h1>
+
+<table id="sib-export-tests-red-paths">
+<tbody>
+<tr><th>Cause</th><td><code>b161235bb</code> and <code>e0c2d5ef3</code> (2026-09-18): the eligibility classifier began withholding a candidate carrying none of the producing-source topology flags, and the cut gained a <code>manifest_generability</code> refusal. Three fixture files were never updated.</td></tr>
+<tr><th>Repair</th><td>Fixtures only, no product change: <code>tests/standard_names/test_export_exclusion_ledger.py</code>, <code>test_export_release_holds.py</code>, <code>test_docs_review_eligibility.py</code> (+39/-1, <code>5f1817acf</code>).</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-export-tests-red-measure">Measure</h2>
+<table id="sib-export-tests-red-measure-table">
+<thead><tr><th>Arm</th><th>Scope</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>baseline (base <code>828d166ce</code>, scratch copy)</td><td>47 export test files, 455 selected</td><td>32 failed, 419 passed, 1 skipped, 3 errors, EXIT=1 (18 m 57 s)</td></tr>
+<tr><td>after (head, worktree)</td><td>same 47 files</td><td>24 failed, 428 passed, 3 errors, EXIT=1 (20 m 01 s)</td></tr>
+<tr><td>negative control (key-presence form restored in a scratch copy)</td><td>the seven named tests</td><td>the seven named ids fail, EXIT=1</td></tr>
+</tbody>
+</table>
+<p>Logs: <code>base_export_set.log</code>, <code>head_export_set.log</code>, <code>negative_control_seven.log</code>, <code>cause_scratch_keypresence.log</code>, <code>head_review_release_isolated.log</code> in the run directory.</p>
+</main>
+</body>
+</html>
