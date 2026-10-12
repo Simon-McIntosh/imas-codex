@@ -642,6 +642,35 @@ def retarget_standard_name_sources(
                 )
                 for holder_id, holder_stage in holders
             )
+        elif (
+            row.get("source_exists")
+            and row.get("source_status") != "stale"
+            and not row.get("actively_claimed")
+            and len(bindings) > 1
+            and set(bindings) <= comparison_expected_names
+        ):
+            live_stages = {
+                entry["id"]: entry.get("name_stage")
+                for entry in (binding_state or ())
+                if entry.get("id") is not None
+            }
+            binding_conflicts.append(
+                SourceBindingConflict(
+                    source_id=source_id,
+                    holding_identity=old_name,
+                    holding_stage=live_stages.get(old_name),
+                    source_status=row.get("source_status"),
+                    detail=(
+                        f"{source_id} is bound to {len(bindings)} live identities "
+                        f"{bindings!r} at stages "
+                        f"{[live_stages.get(name) for name in bindings]!r} "
+                        f"(source status={row.get('source_status')!r}, "
+                        f"scalar={scalar!r}); a source may claim at most one live "
+                        "identity, so the operator must decide which binding is "
+                        "correct"
+                    ),
+                )
+            )
         else:
             conflicts.append(
                 f"{source_id}(exists={bool(row.get('source_exists'))}, "
