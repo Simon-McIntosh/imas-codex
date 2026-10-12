@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (345868c92) failure_count 0; after_suite (aa436d5d4) failure_count 0; added = 0",
+  "backend": "clive",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T19:27:53.004Z",
+  "dispatched_at": "2026-10-12T19:20:38Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_compose_supersede_dual_bound.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's controls table claims a second control (\"Sees a fix\") proved by negative_control.log, but that file holds one line of prose ('CONTROL: fixed-behaviour -> test PASSES (strict xfail flips to XPASS=red)') rather than a run, so the claim that the body passes under a simulated adjudicable fix is asserted and not shown; there is no pytest log in the run directory recording a fixed arm (probe_new_test.log, probe_new_test2.log and probe_runxfail.log all run the unfixed tree). The reproduction itself stands on probe_new_test2.log, so this does not hold the node, but the durable artifact presents an unbacked control beside a real one."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/compose-supersede-dual-bound.html",
+      "line": "34",
+      "severity": "follow-on",
+      "text": "follow-on: the block introduced as \"Verbatim, forced past the xfail with --runxfail\" ends with 'FAILED ...::test_compose_supersede_over_dual_bound_source_is_not_an_anonymous_fault', but the only run log carrying that trace (probe_runxfail.log:33) records the same failure under the earlier id '...test_compose_supersede_over_dual_bound_source_is_adjudicable'; the quoted block is therefore lightly edited from its source, so a reader cannot reproduce the quoted line against a recorded run. The RuntimeError line matches verbatim, so the substance is faithful."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none \u2014 the landed change is a test module and two evidence fragments; no production runtime code reaches a test, so there is no production call site to name",
+    "diff": "git diff --stat 345868c92..aa436d5d4 is exactly three files: tests/standard_names/test_compose_supersede_dual_bound.py (171 added lines), docs/evidence/fragments/sn-integrity-backlog/compose-supersede-dual-bound.html (111) and .../sib-compose-supersede-dual-bound.html (26), read commit by commit: a module-level reproduction driving supersede_prior_source_names over a fixture source with two live PRODUCED_NAME bindings, committed @pytest.mark.xfail(strict=True).",
+    "done_when": "The node done_when (prompt.txt:185) asks that tests/standard_names/test_compose_supersede_dual_bound.py drive compose supersede over a dual-bound source, be committed passing or strict-xfail per observed behaviour, and be recorded with its log in compose-supersede-dual-bound.html; the committed test drives the real chain (probe_runxfail.log:13-20 shows supersede_prior_source_names -> _apply -> retarget_standard_name_sources -> RuntimeException), is committed strict xfail, and the fragment cites probe_new_test2.log.",
+    "goal": "The reviewed node goal is to reproduce, not repair, compose supersede over a dual-bound source; the landed test drives supersede_prior_source_names over one DD source bound to example_new_name and example_old_name and records the anonymous RuntimeError, and no product source was changed in the diff.",
+    "manifest": "Read the reviewed run's manifest: status complete, one commit aa436d5d4, changed_paths the three frag/test paths, baseline_suite failure_count 0 and after_suite failure_count 0 both completed:true, negative_control_log named, follow_ons naming a repair and an unsettled live-graph guard question, blockers none.",
+    "write_paths": "The manifest declares tests/standard_names/test_compose_supersede_dual_bound.py plus the two docs/evidence/fragments/sn-integrity-backlog/ HTML files (and an unused docs/figures/ dir); git diff --stat 345868c92..aa436d5d4 touches exactly those three files and no other path, all inside the fence."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_compose_supersede_dual_bound.py:130-146 is a strict xfail whose body pytest.fail()s only on an anonymous RuntimeError, so it turns XPASS (red) the day the dual binding routes to SourceBindingConflictError (line 132 returns) or the supersession completes, making it a guard that reddens on the fix.",
+    "evidence": "after_suite.log:38 records '82 passed, 3 deselected, 1 xfailed' at revision aa436d5d4 and probe_new_test2.log:19 records the XFAIL, so the gate result is logged; docked because the cited fix-side control negative_control.log carries a one-line claim with no run, so the fragment's second control is asserted rather than shown.",
+    "fit": "the module defines its own _Tx/_Session/_Client fake transaction handles, the per-file idiom of its neighbour tests/standard_names/test_supersession.py:34, and introduces no plan, revision or ticket label in any name or docstring.",
+    "goal_fidelity": "tests/standard_names/test_compose_supersede_dual_bound.py:74-141 drives the real compose-supersede helper supersede_prior_source_names over a single source whose binding_state is predecessor+successor, matching the goal's dual-bound reproduction and repairing nothing.",
+    "reuse": "the two added helpers and the fake graph handles add no capability the repository owns; the closest sibling tests/standard_names/test_source_migration_conflict.py:129-149 covers only foreign-holder and transient ids and not both-holders-inside-the-pair, so the dual-bound case is a distinct coverage rather than a duplicate.",
+    "scope_discipline": "git diff --stat 345868c92..aa436d5d4 shows exactly the three declared write paths (the test module and the two sn-integrity-backlog evidence fragments) and no product source file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The reviewed node goal is to reproduce, not repair, compose supersede over a dual-bound source; the landed test drives supersede_prior_source_names over one DD source bound to example_new_name and example_old_name and records the anonymous RuntimeError, and no product source was changed in the diff.\nVERDICT done_when: The node done_when (prompt.txt:185) asks that tests/standard_names/test_compose_supersede_dual_bound.py drive compose supersede over a dual-bound source, be committed passing or strict-xfail per observed behaviour, and be recorded with its log in compose-supersede-dual-bound.html; the committed test drives the real chain (probe_runxfail.log:13-20 shows supersede_prior_source_names -> _apply -> retarget_standard_name_sources -> RuntimeException), is committed strict xfail, and the fragment cites probe_new_test2.log.\nVERDICT write_paths: The manifest declares tests/standard_names/test_compose_supersede_dual_bound.py plus the two docs/evidence/fragments/sn-integrity-backlog/ HTML files (and an unused docs/figures/ dir); git diff --stat 345868c92..aa436d5d4 touches exactly those three files and no other path, all inside the fence.\nVERDICT manifest: Read the reviewed run's manifest: status complete, one commit aa436d5d4, changed_paths the three frag/test paths, baseline_suite failure_count 0 and after_suite failure_count 0 both completed:true, negative_control_log named, follow_ons naming a repair and an unsettled live-graph guard question, blockers none.\nVERDICT diff: git diff --stat 345868c92..aa436d5d4 is exactly three files: tests/standard_names/test_compose_supersede_dual_bound.py (171 added lines), docs/evidence/fragments/sn-integrity-backlog/compose-supersede-dual-bound.html (111) and .../sib-compose-supersede-dual-bound.html (26), read commit by commit: a module-level reproduction driving supersede_prior_source_names over a fixture source with two live PRODUCED_NAME bindings, committed @pytest.mark.xfail(strict=True).\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_compose_supersede_dual_bound.py:74-141 drives the real compose-supersede helper supersede_prior_source_names over a single source whose binding_state is predecessor+successor, matching the goal's dual-bound reproduction and repairing nothing.\nSCORE evidence: 15\nJUSTIFICATION evidence: after_suite.log:38 records '82 passed, 3 deselected, 1 xfailed' at revision aa436d5d4 and probe_new_test2.log:19 records the XFAIL, so the gate result is logged; docked because the cited fix-side control negative_control.log carries a one-line claim with no run, so the fragment's second control is asserted rather than shown.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 345868c92..aa436d5d4 shows exactly the three declared write paths (the test module and the two sn-integrity-backlog evidence fragments) and no product source file.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_compose_supersede_dual_bound.py:130-146 is a strict xfail whose body pytest.fail()s only on an anonymous RuntimeError, so it turns XPASS (red) the day the dual binding routes to SourceBindingConflictError (line 132 returns) or the supersession completes, making it a guard that reddens on the fix.\nSCORE fit: 18\nJUSTIFICATION fit: the module defines its own _Tx/_Session/_Client fake transaction handles, the per-file idiom of its neighbour tests/standard_names/test_supersession.py:34, and introduces no plan, revision or ticket label in any name or docstring.\nSCORE reuse: 20\nJUSTIFICATION reuse: the two added helpers and the fake graph handles add no capability the repository owns; the closest sibling tests/standard_names/test_source_migration_conflict.py:129-149 covers only foreign-holder and transient ids and not both-holders-inside-the-pair, so the dual-bound case is a distinct coverage rather than a duplicate.\nFINDING tests/standard_names/test_compose_supersede_dual_bound.py:1 follow-on: the fragment's controls table claims a second control (\"Sees a fix\") proved by negative_control.log, but that file holds a single line of prose rather than a run, so the claim that the body passes under a simulated adjudicable fix is asserted and not shown; no pytest log in the run directory records a fixed arm, so the durable artifact presents an unbacked control beside a real one.\nFINDING docs/evidence/fragments/sn-integrity-backlog/compose-supersede-dual-bound.html:34 follow-on: the block introduced as \"Verbatim, forced past the xfail with --runxfail\" ends with 'FAILED ...::test_compose_supersede_over_dual_bound_source_is_not_an_anonymous_fault', but the only run log carrying that trace (probe_runxfail.log:33) records it under the earlier id '..._is_adjudicable'; the quoted block is lightly edited from its source, so a reader cannot reproduce the quoted line against a recorded run.\n",
+  "review_run_id": "r-20261012T192024313049-review-of-sib-compose-supersede-dual-bound",
+  "reviewed_base_sha": "345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd",
+  "reviewed_head_sha": "aa436d5d4e86faf096b0a0361a21d3b091cfe884",
+  "reviewed_run_id": "r-20261012T185852762530-sib-compose-supersede-dual-bound",
+  "scores": {
+    "durability": 19,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:24:07.000000+00:00",
+  "total": 111
+}
