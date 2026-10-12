@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T06:39:24.328Z",
+  "dispatched_at": "2026-10-12T06:32:40Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-selection-over-generation.html:104",
+      "id": "wiring-1",
+      "reason": "with no declared dependency a scheduler can dispatch \u00a73/\u00a74 before the module lands, and the node either blocks or reimplements the metrics, defeating the shared-owner design.",
+      "text": "\u00a73's done-when reports \"link-label AUC ... with its interval\" and \u00a74's reports nDCG@10 and review acceptance, both of which need the `sn-judgment-evaluation` evaluation module (`paired_auc`, `bootstrap_interval`, `load_labelled_fixture`), yet neither section declares the depends-on that \u00a72/\u00a75/\u00a76 do; followup f-ssog-001 states the same dependency in prose (\"can run as soon as the evaluation module exists\").",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-selection-over-generation.html:131",
+      "id": "wiring-2",
+      "reason": "a node dispatched on \u00a75 without the check source cannot compute the composite it is measured on, the same omission \u00a76's dependency exists to prevent.",
+      "text": "\u00a75 orders reading by \"a Jev risk composite of the named checks most likely to have failed\", whose taxonomy and Jev answers are built in `sn-review-through-jev` \u00a72\u2013\u00a73, but \u00a75 declares only `sn-judgment-evaluation#s4` (the goldens), while \u00a76 declares `sn-review-through-jev#s3` for that same feature source.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-selection-over-generation.html:90",
+      "id": "single_goal-1",
+      "reason": "one node carrying two deliverables cannot be closed on a single verdict, and the prototype's whole purpose (an ear- or-earn-a-node number) is split across two measures.",
+      "text": "\u00a73 bundles two different judgments \u2014 a Noul scoring `name:` link labels (measured by link-label AUC) and a Score ranking family-template anchors (measured by harmonization lint findings) \u2014 into one node with two unrelated done-when halves and two evidence outputs.",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-selection-over-generation.html:83",
+      "id": "done_when-1",
+      "reason": "an unconstrained verdict cannot fail, so the node cannot be shown to have decided anything, unlike \u00a76 which names the rule (beat the hand-set composite by more than its interval).",
+      "text": "\u00a72's done-when requires the fragment to report exact-name match, per-slot accuracy, family agreement and cost, then \"ends with a stated recommendation: cross-check, generator, or neither\", but states no threshold or decision rule tying the numbers to the recommendation, so any measured outcome satisfies it.",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b95d7b335619bed8de5614febff9be0239641a388a8fee7c93cabfa890bbadad",
+  "plan_slug": "sn-selection-over-generation",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T063230972710-plan-review-of-sn-selection-over-generation",
+  "reviewed_blob_sha": "424a2ea972f3614b55eaa117329a5004bc0ac58e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `select_anchor` (`imas_codex/standard_names/harmonize.py:103`), `rerank_pool` (`imas_codex/discovery/base/judgment.py:179`), the `sn-classifier` gpt-5.5 seat (`pyproject.toml:362`), and every cited section (`sn-judgment-evaluation#s3`/`#s4`, `sn-review-through-jev#s3`, `sn-catalog-grouping#s3`/`#s4`, `discovery-judgments-through-jev#s6`) resolve and match their descriptions.",
+    "done_when": "a finding \u2014 \u00a72's done-when ends in an unconstrained recommendation (\"cross-check, generator, or neither\") with no decision rule, so no measurement outcome can falsify it.",
+    "evidence_paths": "pass \u2014 the sections name evidence fragments and the house convention places them under `docs/evidence/fragments/<plan-slug>/`; no section claims a scratchpad or node-local path.",
+    "naming": "pass \u2014 the prose names no code symbol, filename or comment after a plan, ticket or version tag; `S19` appears only as plan metadata.",
+    "reasoning": "pass \u2014 each mechanism is capable of its done-when, the unwired-prototype design is stated as such, and the cited anchors support the claims they are attached to.",
+    "single_goal": "a finding \u2014 \u00a73 carries two independent judgments (link-label classification and family-anchor scoring) under one node with two separate done-when measures.",
+    "wiring": "a finding \u2014 \u00a72, \u00a75 and \u00a76 declare depends-on, but \u00a73 and \u00a74 declare none although both consume the `sn-judgment-evaluation` module, and \u00a75 omits the `sn-review-through-jev` check source that \u00a76 declares for the same feature."
+  },
+  "section_digests": {
+    "_document": "4d8134ffad1b49ef508117870161043e36908ab706c02de2bebce03c11bb1da1",
+    "s1": "5b0f0bda5a0305717d18f0c91fc939366d9371e6d9ead898aeca9a8d22db6fb0",
+    "s2": "dcf94f3b755ceefa5a83f774e8faede075867f3877258bf98b1fc76853b73302",
+    "s3": "b369c240760e5be3be6efffa7f3a36c1d0743a2b84e70bc46d640681af2dd520",
+    "s4": "24e3d317dc460c0c7a08ad57a3d23e2c29be0cb6ec178d884d5261b51f6396f9",
+    "s5": "a85f15537b765d486ba7279ea2262f869f03cfeccef8236c966091051ad7627d",
+    "s6": "63f9cc3fcb84e3261c6f8b56b0bb53e43944a11b370667adc5e19f2aeb60dea4"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T07:12:10.192079+00:00"
+}
