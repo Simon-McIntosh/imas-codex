@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;imas-standard-names:concept-and-notation-registry#s2&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -264,7 +264,7 @@
 <p>The §8 gate ran 113 files at revision <code>1078886d7</code>, after the §5 merges (<code>7d9fd765b</code>, <code>7977270a4</code>), and found failures in tests the §5 gates did not run. <code>test_edit_prompt_injection.py::test_no_edit_render_matches_golden</code> reports that the <code>sn/refine_docs_user</code> no-edit render no longer matches its golden capture, and §5 changed that template. Five more sit on the documentation review path: <code>test_pool_batch_processors.py::TestOnEventPayloadsNotTruncated::test_review_docs_comment_not_clipped</code>, <code>test_review_docs_stages.py::TestWorkerStreamsPerItemDocs::test_worker_streams_per_item</code>, and three in <code>test_review_quorum_pool.py</code> (<code>test_docs_two_models_agreement_writes_two_cycles</code>, <code>test_docs_three_models_disagreement_runs_escalator</code>, <code>test_derived_parent_docs_use_the_complete_reviewer_chain</code>). The seventh failure, <code>test_docs_review_eligibility.py</code>, belongs to <code>sn-integrity-backlog</code> §24.</p><p><strong>Done when:</strong> for each of the six tests, the fragment states whether it fails at the revision before <code>7d9fd765b</code> and which §5 change made it fail; each passes at head, through a product fix where behaviour regressed or a golden or fixture update where the change was intended, stated per test; and the prompt, review-pipeline and pool tests add no failure against base.</p>
 
     <h2 id="s11">§11 — One guard for an unparseable name, in the conventions owner</h2>
-<section data-reckon="section" data-id="s11" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s11" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>§10 guarded the three render sites in <code>workers.py</code> against a name the grammar cannot parse, but the fourth site, <code>_review_single_batch</code> in <code>imas_codex/standard_names/review/pipeline.py</code>, still calls <code>conventions_context_for</code> unguarded, so an unparseable name aborts an <code>sn review</code> documentation batch. Put the guard once in <code>conventions_context_for</code> (<code>imas_codex/standard_names/context.py</code>), which returns no conventions for a name that does not parse, and have the <code>workers.py</code> sites call it directly instead of their local guard.</p><p><strong>Done when:</strong> a review batch through <code>_review_single_batch</code> containing an unparseable name completes with no conventions block for that name, and the test fails with the guard removed; <code>workers.py</code> carries no separate parse guard of its own; and the prompt, context and review-pipeline tests add no failure against base.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
@@ -386,6 +386,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261012T222503614474-review-of-shs-cap-record" data-who="reckon-build" data-when="2026-10-12T22:32:04.248Z">
     <div class="r-comment-body"><p>independent review of r-20261012T202323972721-shs-cap-record at head f76dcc376 (base 1078886d7) — six dimensions scored goal_fidelity 20, evidence 20, scope_discipline 20, durability 18, fit 20, reuse 20 (total 118), two follow-on findings, added_failure_count 0</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-close-s11" data-who="reckon-build" data-when="2026-10-12T22:58:00Z">
+    <div class="r-comment-body"><p>§11 landed: the parse guard lives in <code>conventions_context_for</code>, so no documentation batch, worker or review pipeline, aborts on an unparseable name (merge <code>ad9e1f69f</code>); review 116/120. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s11">evidence</a></p></div>
 </div>
 </section>
 </main>

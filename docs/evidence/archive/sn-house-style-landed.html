@@ -55,6 +55,11 @@
     <p>In <code>_review_single_batch</code> (<code>imas_codex/standard_names/review/pipeline.py</code>), an entry already scored below acceptance now records the error-severity finding against it (<code>audit_cap_finding</code>) without a score change. One formatter, <code>_lint_finding_line</code>, renders a finding line for both the reviewer's prompt input and the recorded entry. The absence test now names the heading the template guard encloses, so removing the guard turns it red. Removing the below-threshold recording turns 2 tests red. Gate: 310 passed against 309, with the same one failure at base and head. Merge <code>81d03e570</code>. Independent review 118/120. Follow-ons: no test compares the two call sites' output, so the shared format is enforced by reading rather than by test, and the log line for an absent score says "already below acceptance".</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-house-style/shs-cap-record">shs-cap-record</a>.</p>
   </section>
 
+  <section id="s11">
+    <h2>§11 — one guard for an unparseable name, in the conventions owner</h2>
+    <p><code>conventions_context_for</code> (<code>imas_codex/standard_names/context.py</code>) now catches only the grammar's parse error and returns no conventions, with a debug line naming the name. The local guard <code>_conventions_for_prompt</code> is gone from <code>workers.py</code>, whose three render sites call the owner directly. A documentation review batch through <code>_review_single_batch</code> containing an unparseable name now completes, with no conventions for that name; removing the guard turns two tests red. Gate: 966 passed against 962, no failures. Merge <code>ad9e1f69f</code>. Independent review 116/120, no findings.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-house-style/shs-conventions-parse-guard">shs-conventions-parse-guard</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>
