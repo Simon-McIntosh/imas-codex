@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/embeddings/",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T190439531594-encoder-single-dispatch/gate_head.log",
+    "note": "head arm ran in the worktree at 2b2b1f2; summary line: 171 passed, 1 skipped, 6 deselected, 1 warning.",
+    "revision": "2b2b1f2dab2c96aa1222e42063550b5cf74c18dc"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261012T190439531594-encoder-single-dispatch/enc-base-729504 uv run pytest -p no:cacheprovider tests/embeddings/",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T190439531594-encoder-single-dispatch/gate_base.log",
+    "note": "base arm ran in the scratch tree at a76020e; summary line: 171 passed, 1 skipped, 6 deselected, 1 warning.",
+    "revision": "a76020e640e64b108f7d04864841bf5c794cb1d3"
+  },
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/embeddings/description.py:86",
+    "imas_codex/graph/client.py:663",
+    "imas_codex/graph/dd_search.py:461",
+    "imas_codex/standard_names/search.py:57",
+    "imas_codex/llm/server.py:716",
+    "imas_codex/clusters/extractor.py:695",
+    "imas_codex/discovery/wiki/pipeline.py:1269"
+  ],
+  "completed_at": "2026-10-12T19:27:03.878Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "the node deletes uncalled code and declared no negative control at dispatch; nothing can call the deleted method, and a second embed path reappearing is a review-time concern, not a test the deletion can carry",
+      "recorded_at": "2026-10-12T19:26:39.841452+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-12T19:19:04Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the deleted method had no production call site (git grep over imas_codex/**, tests/** and scripts/** returns 0); the change was verified against the surviving encoder.embed_texts callers that import the module, including a wrapped caller at imas_codex/embeddings/description.py:86 and direct callers at imas_codex/graph/client.py:663, imas_codex/standard_names/search.py:57 and imas_codex/llm/server.py:716, none of which referenced the removed method.",
+    "diff": "read commit by commit against a76020e; the single commit 2b2b1f2 removes exactly 83 lines from imas_codex/embeddings/encoder.py (embed_texts_with_result and the now-unused EmbeddingResult import) and changes no other path.",
+    "done_when": "the node's three measures hold on the code: git grep embed_texts_with_result over imas_codex/**, tests/** and scripts/** returns 0; grep -c \"_reconnect_remote()\" imas_codex/embeddings/encoder.py is 3 at base and 2 at head; tests/embeddings/ runs 171 passed/1 skipped/EXIT=0 at base and head with no added failures. Residual references exist only in append-only records under docs/state/ and docs/evidence/archive/, disclosed in the manifest, not as callers.",
+    "goal": "the node goal is to delete the uncalled unguarded duplicate embed path; the diff removes Encoder.embed_texts_with_result from imas_codex/embeddings/encoder.py (83 lines) and its sole-use EmbeddingResult import, and the method is absent at head (present in one place at base a76020e).",
+    "manifest": "read; status complete, commit 2b2b1f2, landing line present, base and head gate logs named and openable with revision/tree/module.__file__ headers, and the doc-record residue disclosed in evidence_inputs.",
+    "write_paths": "the source declared imas_codex/embeddings/encoder.py, tests/embeddings/test_encoder.py, and docs/evidence/fragments/sn-catalog-grouping/encoder-single-dispatch.html; the diff touches only encoder.py, all inside the declared set."
+  },
+  "justifications": {
+    "durability": "the change is a deletion of dead code and adds no assertion, so reintroducing imas_codex/embeddings/encoder.py:embed_texts_with_result would redden no test; the guard on embed_texts is tested by tests/embeddings/test_embed_distinct_guard.py but is not this node's change.",
+    "evidence": "gate_base.log and gate_head.log are retained with revision/command headers and summary lines (171 passed, 1 skipped, EXIT=0 each), but the repository-wide search the done_when names is recorded as prose in the manifest rather than captured to a log a reader can rerun.",
+    "fit": "the deletion leaves encoder.py importing cleanly (ruff check on the head revision: All checks passed) with time and np still used, and the conventional commit body carries no plan, sprint or ticket label.",
+    "goal_fidelity": "imas_codex/embeddings/encoder.py at head carries no embed_texts_with_result and the surviving embed_texts (encoder.py:378) returns both arms through _reject_identical_vectors, so the unguarded second route is gone exactly as the goal states.",
+    "reuse": "the change adds no definition; it consolidates imas_codex/embeddings/encoder.py:378 embed_texts as the single owner of the remote-validate/reconnect/encode dispatch, removing a duplicate rather than forking one.",
+    "scope_discipline": "the only path in the diff is imas_codex/embeddings/encoder.py, which is inside the declared write paths, and nothing the goal does not imply was added."
+  },
+  "node": "review-of-encoder-single-dispatch",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to delete the uncalled unguarded duplicate embed path; the diff removes Encoder.embed_texts_with_result from imas_codex/embeddings/encoder.py (83 lines) and its sole-use EmbeddingResult import, and I confirmed the method is gone by a marker it removed (grep -c \"def embed_texts_with_result\" is 1 at base a76020e, absent at head).\nVERDICT done_when: the done_when's three measures hold on the code: git grep embed_texts_with_result over imas_codex/**, tests/** and scripts/** returns 0, grep -c \"_reconnect_remote()\" imas_codex/embeddings/encoder.py is 3 at base and 2 at head, and tests/embeddings/ runs 171 passed/1 skipped/6 deselected/EXIT=0 at both base and head with no added failures; residual references survive only as append-only records under docs/state/ and docs/evidence/archive/, which the run discloses in evidence_inputs and which the brief does not treat as callers.\nVERDICT write_paths: the source manifest declared imas_codex/embeddings/encoder.py, tests/embeddings/test_encoder.py and docs/evidence/fragments/sn-catalog-grouping/encoder-single-dispatch.html; the diff touches only encoder.py, all inside the declared set.\nVERDICT manifest: read; status complete, commit 2b2b1f2, landing line present, base and head gate logs named and openable with revision/tree/module.__file__ headers, and the doc-record residue disclosed in evidence_inputs and the fragment.\nVERDICT diff: read commit by commit against a76020e; the single commit 2b2b1f2 removes exactly 83 lines from imas_codex/embeddings/encoder.py (embed_texts_with_result and the now-unused EmbeddingResult import) and changes no other path.\nCALL_SITES: imas_codex/embeddings/description.py:86, imas_codex/graph/client.py:663, imas_codex/graph/dd_search.py:461, imas_codex/standard_names/search.py:57, imas_codex/llm/server.py:716, imas_codex/clusters/extractor.py:695, imas_codex/discovery/wiki/pipeline.py:1269\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/embeddings/encoder.py at head carries no embed_texts_with_result and the surviving embed_texts (encoder.py:378) returns both arms through _reject_identical_vectors, so the unguarded second route is gone exactly as the goal states.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate_base.log and gate_head.log are retained with revision/command headers and summary lines (171 passed, 1 skipped, EXIT=0 each), but the repository-wide search that the done_when names is recorded as prose in the manifest rather than captured to a log a reader can rerun.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the only path in the diff is imas_codex/embeddings/encoder.py, which is inside the declared write paths, and nothing the goal does not imply was added.\nSCORE durability: 8\nJUSTIFICATION durability: the change is a deletion of dead code and adds no assertion, so reintroducing imas_codex/embeddings/encoder.py:embed_texts_with_result would redden no test; the guard on embed_texts is tested by tests/embeddings/test_embed_distinct_guard.py but is not this node's change.\nSCORE fit: 19\nJUSTIFICATION fit: the deletion leaves encoder.py importing cleanly (/.venv/bin/ruff check: All checks passed) with time and np still used, and the conventional commit body names no plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition; it consolidates imas_codex/embeddings/encoder.py:378 embed_texts as the single owner of the remote-validate/reconnect/encode dispatch, removing a duplicate rather than forking one.",
+  "review_run_id": "r-20261012T191850880614-review-of-encoder-single-dispatch",
+  "reviewed_base_sha": "a76020e640e64b108f7d04864841bf5c794cb1d3",
+  "reviewed_head_sha": "2b2b1f2dab2c96aa1222e42063550b5cf74c18dc",
+  "reviewed_run_id": "r-20261012T190439531594-encoder-single-dispatch",
+  "reviewer_run_id": "r-20261012T191850880614-review-of-encoder-single-dispatch",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T190439531594-encoder-single-dispatch/gate_head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T190439531594-encoder-single-dispatch/gate_base.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:30:00.000000+00:00",
+  "total": 102
+}
