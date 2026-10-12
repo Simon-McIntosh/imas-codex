@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (6 failed: 4 test_export_exclusion_ledger.py, 2 test_export_release_holds.py) and after_suite (same 6 ids) share an identical failure_ids set, so added = 0; the after arm adds exactly the pin test as +1 passed (33 -> 34), no new failure.",
+  "backend": "clive",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T19:31:37.138Z",
+  "dispatched_at": "2026-10-12T19:23:10Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_export_empty_refusal.py",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "the new module re-declares _ReadOnlyGraphClient byte-identical to the class already defined at tests/standard_names/test_export_bound_adjacent.py:15 and tests/standard_names/test_export_status_authority.py:15, a third copy of a test double the package already carries; no shared owner exists so this is recorded rather than scored as a capability fork, but a shared fixture would remove the copy."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T185639144812-sib-empty-export-refusal/manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the manifest's baseline_suite and after_suite revision fields both read 345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd (the diff base) while the logs they name (baseline_suite.log:1, after_suite.log:1) each state revision: 743d4ef6eb18209d7d97cb37d9386155eb208d19 on their first line, so a reader reconciling the manifest against the gate log it cites finds a mismatch; the measurements themselves are unaffected."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none \u2014 the landed change is a test module and an evidence fragment; no production runtime code reaches a test, so there is no production call site to name",
+    "diff": "git diff 345868c92..743d4ef6 is exactly two files in one commit 743d4ef6e: tests/standard_names/test_export_empty_refusal.py (83 added lines, one test driving the CLI over an empty population) and docs/evidence/fragments/sn-integrity-backlog/sib-empty-export-refusal.html (27 added lines, the landing record), with no product source changed.",
+    "done_when": "The node done_when (prompt.txt:175) asks that one named test export an empty candidate set and see a non-zero exit, fail with the empty-population refusal removed in a scratch copy, and add no export-test failures against base; gate_new_test.log records 1 passed (EXIT=0), negative_control.log:1 stamps revision/tree/module.__file__/cwd for the refusal-removed scratch arm at 1 failed EXIT=1, and after_suite.log:38 adds no failure id over baseline_suite.log:38.",
+    "goal": "The reviewed node goal (prompt.txt:30) is to pin by test that an export over an empty candidate set exits non-zero; tests/standard_names/test_export_empty_refusal.py:59-83 drives sn release --export-only over a population patched empty and asserts a non-zero exit with the refusal named, meeting it, and the diff changes no product source.",
+    "manifest": "Read the reviewed run's manifest: status complete, one commit 743d4ef6e, changed_paths the test and fragment, baseline_suite and after_suite both completed:true with failure_count 6 and identical failure_ids, negative_control_log named with its note, follow_ons listing pre-existing export-test failures, blockers none.",
+    "write_paths": "The manifest declares tests/standard_names/test_export_empty_refusal.py, docs/evidence/fragments/sn-integrity-backlog/sib-empty-export-refusal.html and an unused docs/figures/sn-integrity-backlog/sib-empty-export-refusal; git diff --stat 345868c92..743d4ef6 touches exactly the first two files and no path outside the fence."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_export_empty_refusal.py:81-83 fails when the empty_input_population branch at imas_codex/standard_names/export.py:925 is removed, as negative_control.log shows (['fully_excluded_population'] != ['empty_input_population']), and lines 71-72 fail if the export exits zero or writes catalog.yml, so the pin reddens on the regression it guards.",
+    "evidence": "gate_new_test.log:1 and negative_control.log:1 name their revision, tree and command, negative_control.log stamps module.__file__ and cwd with the scratch export.py, and after_suite.log:38 adds no failure id over baseline_suite.log:38; docked because the manifest's baseline_suite/after_suite revision fields read 345868c92 while both cited logs' own headers read 743d4ef6, so the record disagrees with the artefact it names.",
+    "fit": "tests/standard_names/test_export_empty_refusal.py:59-69 follows the CliRunner / runner.invoke(sn, ['release', '--export-only']) idiom already at tests/standard_names/test_cli_export.py:73-74, and neither the module, test name nor docstring carries a plan, revision or ticket label.",
+    "goal_fidelity": "tests/standard_names/test_export_empty_refusal.py:59-83 invokes sn release --export-only over the population patched empty and asserts result.exit_code != 0 plus the empty_input_population issue in the persisted report, exactly the goal's non-zero-exit pin, with no product source in the diff.",
+    "reuse": "the file adds no production mechanism the repository owns and is distinct CLI-exit coverage from the report-gate assertion at tests/standard_names/test_export_exclusion_ledger.py:142, though it re-declares the byte-identical _ReadOnlyGraphClient already at tests/standard_names/test_export_bound_adjacent.py:15.",
+    "scope_discipline": "git diff --stat 345868c92..743d4ef6 shows exactly the two declared paths, the test and the fragment, and no product, generated or unrelated file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The reviewed node goal (prompt.txt:30) is to pin by test that an export over an empty candidate set exits non-zero; tests/standard_names/test_export_empty_refusal.py:59-83 drives sn release --export-only over a population patched empty and asserts a non-zero exit with the refusal named, meeting it, and the diff changes no product source.\nVERDICT done_when: The node done_when asks that one named test export an empty candidate set and see a non-zero exit, fail with the empty-population refusal removed in a scratch copy, and add no export-test failures against base; gate_new_test.log records 1 passed (EXIT=0 at line 20), negative_control.log records the refusal-removed arm at 1 failed EXIT=1 with module.__file__ and cwd stamped, and after_suite.log adds no failure id over baseline_suite.log.\nVERDICT write_paths: The manifest declares tests/standard_names/test_export_empty_refusal.py, docs/evidence/fragments/sn-integrity-backlog/sib-empty-export-refusal.html and an unused docs/figures/sn-integrity-backlog/sib-empty-export-refusal; git diff --stat 345868c92..743d4ef6 touches exactly the first two files and no path outside the fence.\nVERDICT manifest: Read the reviewed run's manifest: status complete, one commit 743d4ef6e, changed_paths the test and fragment, baseline_suite and after_suite both completed:true with failure_count 6 and identical ids, negative_control_log named with its note, follow_ons listing pre-existing export-test failures, blockers none.\nVERDICT diff: git diff 345868c92..743d4ef6 is exactly two files in one commit: tests/standard_names/test_export_empty_refusal.py (83 added lines, one test driving the CLI over an empty population) and docs/evidence/fragments/sn-integrity-backlog/sib-empty-export-refusal.html (27 added lines, the landing record), with no product source changed.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_export_empty_refusal.py:59-83 invokes sn release --export-only over the population patched empty and asserts result.exit_code != 0 plus the empty_input_population issue in the persisted report, exactly the goal's non-zero-exit pin, with no product source in the diff.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate_new_test.log:1 and negative_control.log:1 name their revision, tree and command, negative_control.log stamps module.__file__ and cwd with the scratch export.py, and after_suite.log:38 adds no failure id over baseline_suite.log:38; docked because the manifest's baseline_suite/after_suite revision fields read 345868c92 while both cited logs' own headers read 743d4ef6, so the record disagrees with the artefact it names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 345868c92..743d4ef6 shows exactly the two declared paths, the test and the fragment, and no product, generated or unrelated file.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_export_empty_refusal.py:81-83 fails when the empty_input_population branch at imas_codex/standard_names/export.py:925 is removed, as negative_control.log shows (['fully_excluded_population'] != ['empty_input_population']), and lines 71-72 fail if the export exits zero or writes catalog.yml.\nSCORE fit: 18\nJUSTIFICATION fit: tests/standard_names/test_export_empty_refusal.py:59-69 follows the CliRunner / runner.invoke(sn, ['release', '--export-only']) idiom already at tests/standard_names/test_cli_export.py:73-74, and neither the module, test name nor docstring carries a plan, revision or ticket label.\nSCORE reuse: 18\nJUSTIFICATION reuse: the file adds no production mechanism the repository owns and is distinct CLI-exit coverage from the report-gate assertion at tests/standard_names/test_export_exclusion_ledger.py:142, though it re-declares the byte-identical _ReadOnlyGraphClient already at tests/standard_names/test_export_bound_adjacent.py:15.\nFINDING tests/standard_names/test_export_empty_refusal.py:21 follow-on: the new module re-declares _ReadOnlyGraphClient byte-identical to the class already at tests/standard_names/test_export_bound_adjacent.py:15 and tests/standard_names/test_export_status_authority.py:14, a third copy of a test double the package already carries; no shared owner exists, so it is recorded rather than scored as a capability fork.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T185639144812-sib-empty-export-refusal/manifest.md:1 follow-on: the manifest's baseline_suite and after_suite revision fields both read 345868c92 (the diff base) while the logs they name each state revision: 743d4ef6 on their first line, so a reader reconciling the record against the gate log it cites finds a mismatch.",
+  "review_run_id": "r-20261012T192256939920-review-of-sib-empty-export-refusal",
+  "reviewed_base_sha": "345868c92c61fb3fa86fc5dd3f41ccb43d95dfcd",
+  "reviewed_head_sha": "743d4ef6eb18209d7d97cb37d9386155eb208d19",
+  "reviewed_run_id": "r-20261012T185639144812-sib-empty-export-refusal",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:29:51.865509+00:00",
+  "total": 112
+}
