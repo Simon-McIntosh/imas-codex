@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="fragment">
+  <title>Report-only judge stage beside the audit stage</title>
+</head>
+<body>
+  <section id="shs-judge-stage-summary">
+    <h2>Report-only judge stage beside the audit stage</h2>
+    <p>
+      A deterministic pattern decides what it can: a forbidden variant written
+      exactly as its registered pattern, a forbidden symbol spelling, an opening
+      matching a selected template. The cases the registry states only as
+      equivalence classes — an equation written in one of several equivalent
+      ways, a gloss that equates two loci, an opening that paraphrases a
+      template — cannot be decided by a pattern. Those go to an asynchronous
+      judge stage that runs beside the audit stage in the review pipeline.
+    </p>
+    <p>
+      A judged entry is a selected concept that carries forbidden variants: a
+      concept with none has nothing a pattern cannot decide. For each judged
+      entry the stage asks one categorising <code>Choice</code> through the
+      shared decisions owner (<code>decide_batch</code>), booked under the
+      <code>sn-judge</code> seat. The results join the same per-name findings
+      list the reviewer receives, each line marked
+      <code>report-only:judge:concept_form</code>. A report-only finding is
+      never booked into the error-lint findings the score cap reads, so it never
+      caps a score. A name whose selected entries carry no forbidden variant
+      makes no call.
+    </p>
+    <p>
+      The stage lives in
+      <code>imas_codex/standard_names/review/judge_stage.py</code> and is wired
+      into <code>enrich_review_worker</code> in
+      <code>imas_codex/standard_names/review/pipeline.py</code>, where the audit
+      findings are attached per batch.
+    </p>
+  </section>
+
+  <section id="shs-judge-stage-wiring">
+    <h2>Wiring and report-only guarantee</h2>
+    <p>
+      With the decisions owner stubbed at the judgment layer's
+      <code>acall_decisions</code> seam, the enrich worker asks exactly one
+      <code>Choice</code> per judged entry per name, and the results appear in
+      the batch's per-name findings marked report-only. The guard test fails
+      when the stage is unwired from the pipeline: with the judge block disabled
+      the guarding test id
+      <code>test_one_choice_per_judged_entry_reaches_the_reviewer_findings</code>
+      fails and the run ends non-zero. A report-only result leaves the reviewer
+      score uncapped, because the cap reads only the error-lint findings the
+      judge never writes. A name with no judged entry makes no call.
+    </p>
+  </section>
+
+  <section id="shs-judge-stage-live">
+    <h2>Live run over four boundary fixtures</h2>
+    <p>
+      The four flux-surface-average boundary names were read from the live graph
+      and driven through the real stage with the live decisions seat. Each name
+      carries two judged concepts (<code>flux_surface_averaged</code> and
+      <code>plasma_boundary</code>), so the run made <strong>eight calls</strong>
+      — the pre-declared ceiling. Booked cost: <strong>USD 0.000321</strong>.
+    </p>
+    <table>
+      <thead>
+        <tr><th>Fixture</th><th>Judged concept</th><th>Choice</th><th>Probability</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>carbon</td><td><code>flux_surface_averaged</code></td><td>forbidden</td><td>0.96</td></tr>
+        <tr><td>carbon</td><td><code>plasma_boundary</code></td><td>forbidden</td><td>0.97</td></tr>
+        <tr><td>argon</td><td><code>flux_surface_averaged</code></td><td>forbidden</td><td>0.89</td></tr>
+        <tr><td>argon</td><td><code>plasma_boundary</code></td><td>forbidden</td><td>0.94</td></tr>
+        <tr><td>beryllium</td><td><code>flux_surface_averaged</code></td><td>canonical</td><td>0.99</td></tr>
+        <tr><td>beryllium</td><td><code>plasma_boundary</code></td><td>forbidden</td><td>0.87</td></tr>
+        <tr><td>electron</td><td><code>flux_surface_averaged</code></td><td>canonical</td><td>1.00</td></tr>
+        <tr><td>electron</td><td><code>plasma_boundary</code></td><td>forbidden</td><td>0.91</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The three expectations hold: the carbon entry's <code>dl/B</code> equation
+      is classified forbidden, the beryllium entry's surface form is classified
+      canonical, and a "separatrix" gloss is classified forbidden. One result is
+      a surprise worth naming: the <code>plasma_boundary</code> gloss was
+      classified forbidden for <em>all four</em> fixtures, including the
+      beryllium and electron entries whose boundary is written as the last
+      closed flux surface. The stage reports only, and the run stopped at the
+      eight-call ceiling as declared; the over-fire is recorded here rather than
+      chased, and is a candidate for a later measurement against a labelled
+      sample before any check leaves report-only.
+    </p>
+  </section>
+
+  <section id="shs-judge-stage-negative-control">
+    <h2>Negative control</h2>
+    <p>
+      Unwiring the judge stage from the pipeline and re-running the stage's
+      guard test ends with a non-zero <code>EXIT=</code> and fails
+      <code>test_one_choice_per_judged_entry_reaches_the_reviewer_findings</code>
+      — a test id the wired head arm passes. The log last line is
+      <code>EXIT=1</code>.
+    </p>
+  </section>
+</body>
+</html>
