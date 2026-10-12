@@ -45,6 +45,11 @@
     <p><code>tests/standard_names/test_export_empty_refusal.py</code> exports an empty candidate set and sees the non-zero exit of the empty-population refusal in <code>imas_codex/standard_names/export.py</code>; removing the refusal turns it red. The defect the census recorded was already fixed; this pins it. Merge <code>e7c26a149</code>. Independent review 112/120, no added failures. Follow-on: the test carries a third copy of a read-only graph double that two other export tests also define.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-empty-export-refusal">sib-empty-export-refusal</a>.</p>
   </section>
 
+  <section id="s11">
+    <h2>§11 — a fold keeps the richer documentation</h2>
+    <p>The identity fold in <code>imas_codex/standard_names/edit.py</code> now states which side's documentation survives (<code>_fold_carries_source_documentation</code>, <code>_fold_target_documentation</code>). A documented target is kept over a sparser source, a richer source carries over a sparse target, and the incumbent target wins a stage tie. The rule is wired into the fold's mutation query and into the receipt's expected post-state, so the postflight proof agrees with it. Gate: 135 passed against 130 at base; reverting the choice to always take the source turns two tests red. Merge <code>24484a91d</code>. Independent review 110/120, no added failures. Follow-on: the tests drive a hand-written mirror of the mutation query, so the real query's documentation <code>SET</code> lines are exercised only by a live-graph test, which does not exist yet.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-fold-keeps-richer-prose">sib-fold-keeps-richer-prose</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>

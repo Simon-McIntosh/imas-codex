@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;,&quot;s24&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;,&quot;s24&quot;:&quot;implementable&quot;}">
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -137,7 +137,7 @@
 <p>A one-word family anchor cannot clear the name gate (census, §4 grammar-refinement row; no owning reader). The gate is on the <code>sn edit</code> path WEST repairs take.</p><p><strong>Done when:</strong> a one-word anchor that the grammar parses clears the gate in a test, a one-word token the grammar rejects still fails it, and the first test fails with the fix reverted.</p>
 
     <h2 id="s11">§11 — A fold onto an occupied identity keeps the richer prose</h2>
-<section data-reckon="section" data-id="s11" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s11" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
 <p>Folding one spelling into an identity that already exists can overwrite the better documentation (census, §4). The grouping plan's synonym folds take this path.</p><p><strong>Done when:</strong> a fold of a sparse source onto a richly documented target keeps the target's documentation, a fold of a rich source onto a sparse target carries the source's, and the first test fails with the fix reverted.</p>
 
     <h2 id="s12">§12 — The fold postflight accepts a fold its dry run accepts</h2>
@@ -259,7 +259,10 @@
     <div class="r-comment-body"><p>review-of-sib-restore-origin-refusal: independent review of r-20261012T185444831401-sib-restore-origin-refusal stored at reviewed pair 345868c92-&gt;97f4dcc26; scores goal_fidelity 14, evidence 16, scope_discipline 19, durability 12, fit 16, reuse 3; the node's three tests duplicate three existing tests in tests/standard_names/test_archive_reconstruction_entry_point.py, so the brief's premise that no test pinned the refusal is false.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261012T193320201939-review-of-sib-restore-origin-refusal" data-who="reckon-build" data-when="2026-10-12T19:42:29.376Z">
-    <div class="r-comment-body"><p>review-of-sib-restore-origin-refusal: independent review of r-20261012T185444831401-sib-restore-origin-refusal at head 8987d7312245020864e8dd3aa0a262515827408e scored goal_fidelity 6, evidence 15, scope_discipline 18, durability 6, fit 16, reuse 20; one blocking finding — the withdrawal removed the only test that composes from a catalog_edit archive and observes the composer&#x27;s refusal, which plan §9&#x27;s done-when names.</p></div>
+    <div class="r-comment-body"><p>review-of-sib-restore-origin-refusal: independent review of r-20261012T185444831401-sib-restore-origin-refusal at head 8987d7312245020864e8dd3aa0a262515827408e scored goal_fidelity 6, evidence 15, scope_discipline 18, durability 6, fit 16, reuse 20; one blocking finding — the withdrawal removed the only test that composes from a catalog_edit archive and observes the composer's refusal, which plan §9's done-when names.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-close-s11" data-who="reckon-build" data-when="2026-10-12T19:47:00Z">
+    <div class="r-comment-body"><p>§11 landed: a fold keeps whichever side carries the richer documentation, in the mutation and in its receipt (merge <code>24484a91d</code>); review 110/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s11">evidence</a></p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
