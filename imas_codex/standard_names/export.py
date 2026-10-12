@@ -20,6 +20,7 @@ import logging
 import os
 import re
 import subprocess
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -2757,27 +2758,77 @@ def _load_waived_source_paths(declaration: Path) -> frozenset[str]:
 
 def _refuse_waiver_that_reached_a_name(
     source_path: str,
-    standard_name_id: str,
+    landed_identities: Iterable[str],
 ) -> None:
     """Refuse a source the declaration waives and the pipeline also named.
 
     The declaration and the composition pipeline are two sources of truth about
     one source, and a source that is declared a settled, non-nameable exclusion
-    while it also reached an identity the cut carries has no honest
-    disposition. The declaration entry is stale (the source does produce a
-    nameable quantity) or the composition that produced the identity is wrong;
+    while its successor chain also reached an identity the cut carries has no
+    honest disposition. The declaration entry is stale (the source does produce
+    a nameable quantity) or the composition that produced the identity is wrong;
     one of the two must be corrected, and only a human can say which. Neither
-    fact may win quietly, so this names both rather than letting the test order
-    decide what a reader sees.
+    fact may win quietly, so this names the source, every identity its chain
+    published, and the disagreement rather than letting the test order decide
+    what a reader sees. Every identity is named because the chain's terminal is
+    not the only one a cut can carry: an intermediate the pipeline accepted is
+    published just the same.
     """
+    identities = sorted(set(landed_identities))
+    rendered = ", ".join(repr(identity) for identity in identities)
     raise WaivedSourceDeclarationError(
         f"waived-source declaration waives source {source_path!r}, but that "
-        f"source also resolved to the exported identity {standard_name_id!r}. "
+        f"source's chain also resolved to exported identities {rendered}. "
         "The declaration entry is stale (the source does produce a nameable "
         "quantity) or the composition that produced the identity is wrong. A "
         "human must decide which, and correct the declaration or the "
         "composition, before this cut can be staged."
     )
+
+
+def _fetch_waived_source_chain_identities(
+    source_paths: Iterable[str],
+    waived_paths: frozenset[str],
+) -> dict[str, set[str]]:
+    """Return every identity each waived source's successor chain carries.
+
+    A cut publishes whatever the pipeline accepted, and a source's chain emits
+    one identity per accepted stage, not only the terminal one. The manifest
+    source row carries the chain terminal, so the identities behind it are read
+    from the graph: the source's produced name and every name reachable from it
+    along ``HAS_SUCCESSOR``. The row set is the waived manifest sources, so the
+    lookup is index-anchored on ``StandardNameSource`` and bounded by the
+    successor depth rather than scanning the identity population.
+    """
+    waived_in_manifest = sorted(
+        {str(path) for path in source_paths if str(path) in waived_paths}
+    )
+    if not waived_in_manifest:
+        return {}
+
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $paths AS path
+            MATCH (source:StandardNameSource {id: 'dd:' + path})
+            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(seed:StandardName)
+            OPTIONAL MATCH (seed)-[:HAS_SUCCESSOR*0..25]->(member:StandardName)
+            RETURN path AS source_path,
+                   collect(DISTINCT coalesce(member.id, seed.id)) AS identities
+            """,
+            paths=waived_in_manifest,
+        )
+
+    by_path: dict[str, set[str]] = {}
+    for row in rows or []:
+        identities = {
+            str(identity) for identity in (row.get("identities") or []) if identity
+        }
+        if identities:
+            by_path[str(row["source_path"])] = identities
+    return by_path
 
 
 def _source_disposition(
@@ -2788,19 +2839,28 @@ def _source_disposition(
     standard_name_id: str | None,
     exported_ids: set[str],
     exclusion_reason: str | None,
+    chain_identities: Iterable[str] | None = None,
 ) -> tuple[str, str]:
     """Classify one manifest source and name the reason its row carries.
 
     ``waived`` is granted only by exact membership of the declaration's
     enumerated set. It is never inferred from a refusal reason, a category, a
     resemblance to a settled exclusion, an absent row, or another disposition.
-    A source that is both declared waived and carried by the cut is the one
-    case this function refuses rather than classifies: the two sources of truth
-    disagree and a human must reconcile them.
+    A waived source whose chain -- its terminal or any intermediate the pipeline
+    accepted -- reached an identity the cut carries is the one case this
+    function refuses rather than classifies: the two sources of truth disagree
+    and a human must reconcile them. ``chain_identities`` names the intermediate
+    identities the terminal does not, so the refusal cannot be evaded by a
+    published intermediate.
     """
     if source_path in waived_paths:
-        if standard_name_id is not None and standard_name_id in exported_ids:
-            _refuse_waiver_that_reached_a_name(source_path, str(standard_name_id))
+        reached = sorted(
+            identity
+            for identity in {standard_name_id, *(chain_identities or ())}
+            if identity is not None and identity in exported_ids
+        )
+        if reached:
+            _refuse_waiver_that_reached_a_name(source_path, reached)
         return "waived", ""
     if non_nameable_reason:
         return "documented_non_nameable", non_nameable_reason
@@ -2900,6 +2960,13 @@ def run_export(
     # a missing or inconsistent one refuses the export here rather than after a
     # partial tree has been written.
     waived_paths = _load_waived_source_paths(_WAIVED_SOURCES_DECLARATION)
+    # A waived source's chain can publish an identity at any accepted stage, so
+    # read each waived manifest source's full identity set once, before any
+    # staging output exists, and hand it to the one waiver decision.
+    waived_chain_identities = _fetch_waived_source_chain_identities(
+        [str(source["source_path"]) for source in manifest_sources or []],
+        waived_paths,
+    )
 
     # ── 1. Fetch the upstream population and classify eligibility ──
     logger.info("Fetching accepted export population from graph...")
@@ -3357,6 +3424,9 @@ def run_export(
                     standard_name_id=source.get("standard_name_id"),
                     exported_ids=published_names,
                     exclusion_reason=None,
+                    chain_identities=waived_chain_identities.get(
+                        str(source["source_path"])
+                    ),
                 )
 
         identity_token_gate = _identity_token_collision_gate(domain_entries)
@@ -3459,6 +3529,7 @@ def run_export(
                 standard_name_id=standard_name_id,
                 exported_ids=exported_ids,
                 exclusion_reason=exclusion.reason if exclusion is not None else None,
+                chain_identities=waived_chain_identities.get(source_path),
             )
             report.source_disposition_records.append(
                 SourceDispositionRecord(
