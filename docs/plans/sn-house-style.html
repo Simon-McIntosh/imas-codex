@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b">
 </head>
@@ -298,7 +298,10 @@
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-house-style/shs-conformance-checks.html — adds registry conformance findings to docs_gates.py (four classes: forbidden equation variant, forbidden locus gloss, forbidden symbol spelling, template opening) and routes them through run_house_style_checks into run_all_audits' AuditReport; live WEST roster census records forbidden_equation_variant 1, forbidden_locus_gloss 1, template_opening 1, forbidden_symbol_spelling 0, no_entry 188, parse_failures 1 over 220 names.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261012T171900516419-review-of-shs-conformance-checks" data-who="reckon-build" data-when="2026-10-12T17:27:54.550Z">
-    <div class="r-comment-body"><p>An independent review of r-20261012T165650462245-shs-conformance-checks is stored at reviews/imas-codex/r-20261012T165650462245-shs-conformance-checks.json (and its .at-489a1a81 sibling): status parsed, total 105 over six dimensions (goal_fidelity 16, evidence 18, scope_discipline 19, durability 17, fit 17, reuse 18), reviewed_base_sha c833c0a16, reviewed_head_sha 489a1a81, added_failure_count 0 with no ids derived from the reviewed run&#x27;s baseline.log/after.log, four follow-on findings and no blocking finding.</p></div>
+    <div class="r-comment-body"><p>An independent review of r-20261012T165650462245-shs-conformance-checks is stored at reviews/imas-codex/r-20261012T165650462245-shs-conformance-checks.json (and its .at-489a1a81 sibling): status parsed, total 105 over six dimensions (goal_fidelity 16, evidence 18, scope_discipline 19, durability 17, fit 17, reuse 18), reviewed_base_sha c833c0a16, reviewed_head_sha 489a1a81, added_failure_count 0 with no ids derived from the reviewed run's baseline.log/after.log, four follow-on findings and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261012T172844325767-shs-documentation-gates-in-audit" data-who="reckon-build" data-when="2026-10-12T17:44:20.387Z">
+    <div class="r-comment-body"><p>run_all_audits routes the documentation gates into the AuditReport (new run_documentation_gate_checks feeding each name&#x27;s COCOS type and unit into score_documentation) and _template_opening_findings reports only when an opening matches none of the selected templates; gate suite 85 passed at base vs 90 passed at head, 0 failures both.</p></div>
 </div>
 </section>
 </main>
