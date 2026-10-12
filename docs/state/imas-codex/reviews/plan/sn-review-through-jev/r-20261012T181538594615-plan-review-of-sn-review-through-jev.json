@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:21:56.321Z",
+  "dispatched_at": "2026-10-12T18:16:01Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html:51",
+      "id": "anchors_resolve-1",
+      "reason": "a reader opening the citation lands in the wrong function, and the anchor is corrected by a one-line plan edit.",
+      "text": "\u00a71 cites `_review_single_batch` as \"defined at `imas_codex/standard_names/review/pipeline.py:1882`\", but line 1882 falls inside the preceding function's body (a `return scored, unmatched, revised_count` block) and the `async def _review_single_batch(` definition is at line 1907; the corrected citation still does not resolve to the symbol it names",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html:182",
+      "id": "reasoning-1",
+      "reason": "\u00a72 must add the retrieval-calling flag (or \u00a75 must state how the subset is determined) before the trigger can be implemented as written.",
+      "text": "\u00a75 turns the fanout trigger into \"the maximum probability over the checks that call for retrieval, compared with a calibrated threshold\", but \u00a72 (the sole definition of a check) declares a check's fields as id, axis, docked dimension, one Jev question and the evidence fields it reads, with no per-check property marking which checks call for retrieval and no rule from which the trigger could derive one; the mechanism has no key to reduce over",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c636165c2774bccbd94b358d765a6e67acb3e56b9254ba60409144ed76d2bb0f",
+  "plan_slug": "sn-review-through-jev",
+  "plan_version": 5,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-12T18:27:59.372187+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T18:28:00.341435+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:27:59.372187+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:28:00.341435+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-review-through-jev.v5.json",
+  "review_run_id": "r-20261012T181538594615-plan-review-of-sn-review-through-jev",
+  "reviewed_blob_sha": "1a2dff0971574100ccb394dbc56ce48647d6a647",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 `_review_single_batch` is cited at `review/pipeline.py:1882`, but the definition now sits at line 1907.",
+    "done_when": "pass \u2014 every node's measure can fail and carries a control: \u00a72's evidence-field test, \u00a73's excluded-arm and the \u00a77 deployment gate, \u00a74's veto-removal test, \u00a75's keyword-reintroduction test, \u00a76's both-ways cohort, \u00a77's restored-path assertions.",
+    "evidence_paths": "pass \u2014 the plan names evidence fragments and the shadow store of sn-judgment-evaluation \u00a76; no gate is directed at a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach a symbol; the only identifiers named (`refine_trigger_keywords`, `sn-judge`, `should_trigger_fanout`, `_run_rd_quorum_cycles`) are existing code symbols, and `golden A`/`golden B` are data labels defined by the evaluation plan.",
+    "reasoning": "a finding \u2014 \u00a75's fanout trigger keys on \"the checks that call for retrieval\", a per-check property the \u00a72 taxonomy never declares, so the stated mechanism cannot be built from the taxonomy as specified.",
+    "single_goal": "pass \u2014 \u00a75 now owns the keyword-list retirement alone and \u00a77 explicitly disclaims it (\u00a77:223-224), so the previous double-ownership is resolved; \u00a75's two clauses both serve its one goal, refine reading the failed checks.",
+    "wiring": "pass \u2014 every `plan-section-depends-on` target resolves (sn-judgment-evaluation \u00a72/\u00a73/\u00a74/\u00a75/\u00a76/\u00a77, sn-selection-over-generation \u00a74, sn-house-style \u00a74 all exist), and each section cites the dependency it names."
+  },
+  "section_digests": {
+    "_document": "543d4a9b36d0ffd3b6d48ae55e20ad33ac58257be049be48bded4d4bde22d77e",
+    "s1": "0925eb0d5312897fc643e2b9ea3b219225e1a69881d7eb5e1320ef63373608d7",
+    "s2": "69fcb1c19306cfb90ff2da4a175be4bc71db8b2e6d011aab38a0914491add3fc",
+    "s3": "82d51a77c26ae07933f012ccecb84e177e87b43c91b5cc909713ed332088bbf2",
+    "s4": "e78806378f26a26e205e71908b31a7cc50522c0f562ceab8c62c76181e212f2e",
+    "s5": "35ab7dfac99635ae758e0e991b757d2e62e3d05fbd28932d5e4331d7d1d0e421",
+    "s6": "302fcd03fbde84ccac2e27b1a967b5abe0865d72c784a3232ff0113f5720b038",
+    "s7": "fb477768b44f7ce245281c7986ffdfcf74871a6c841ca83d809682f1ebc062f2"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:27:38.279541+00:00"
+}
