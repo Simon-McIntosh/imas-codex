@@ -1,0 +1,189 @@
+<section id="ssfms-pooled-labels" data-reckon="fragment">
+  <h2 id="ssfms-pooled-labels-title">Pooled labels on the golden signal fixture</h2>
+
+  <p id="ssfms-pooled-labels-what">
+    Every arm in <code>tests/llm/test_signal_search_goldens.py</code> is scored on the population the
+    fixture's predicate admits, and every candidate an arm places in its top ten carries a grade. The
+    predicate is declared as data in the fixture (<code>eligibility.facility</code> <code>jt-60sa</code>,
+    <code>eligibility.enriched_at_cutover</code> <code>2026-10-11T21:08:54Z</code>) and is applied by
+    <code>eligible_signal_ids</code>; <code>filter_eligible</code> removes every excluded candidate from an
+    arm's order <em>before</em> the cut at <code>K</code>, so a signal enriched before the cutover is
+    dropped rather than scored, and the slot it held is taken by the next eligible candidate.
+    <code>current_tool</code> (the product ranking), <code>additive_rule</code> (the product's additive
+    rule frozen in the harness), <code>vector_only</code> (pool 100) and <code>rrf</code> (100-vector
+    fused with a 50-full-text pool) are scored on this population, beside the seeded random control
+    (<code>CONTROL_SEED</code> 20261012). The predicate admits 14312 of the facility's signals; the
+    fixture labels 1551 of them across 22 questions, 11 held out.
+  </p>
+
+  <p id="ssfms-pooled-labels-frozen">
+    <code>additive_rule</code> reproduces the product's ranking arithmetic itself — vector search and
+    full-text search, <code>0.7</code> of the cosine plus <code>0.3</code> of the text score plus
+    <code>0.1</code> for a signal found by both, the text score alone for a text-only signal, cut at
+    <code>K</code> — rather than calling <code>_rank_signals</code>, so the arm keeps measuring the rule
+    the product ships today after the product ranking is rewritten.
+    <code>test_the_frozen_additive_rule_reproduces_the_product_ranking</code> pins the copy to the head it
+    was taken from: the two arms return the same order on every question, which is what makes the frozen
+    arm a faithful stand-in rather than a rewrite.
+  </p>
+
+  <figure id="ssfms-pooled-labels-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-pooled-labels/arm-ndcg.svg"
+         alt="Mean nDCG@10 per arm with the seeded control marked as a dotted vertical line">
+    <figcaption>
+      Mean nDCG@10 over the 22 questions for each arm scored on the eligible population, with the seeded
+      control drawn as a dotted grey line. Every arm sits above the control; <code>rrf</code> is the
+      highest, and <code>additive_rule</code> is drawn one lightness step from <code>current_tool</code>
+      because it is the same rule. Held-out-only means are 0.519 for <code>current_tool</code>,
+      0.743 for <code>vector_only</code> and 0.830 for <code>rrf</code>. Measured 2026-10-12 on the fleet
+      allocation, fixture at 1551 pooled labels.
+    </figcaption>
+  </figure>
+
+  <table id="ssfms-pooled-labels-table">
+    <caption>Four arms and the control on the eligible population, 22 questions</caption>
+    <thead>
+      <tr><th>Arm</th><th>mean nDCG@10</th><th>grade-3 precision@5</th><th>grade-3 recall@30</th><th>grade-3 hit@30</th><th>held-out mean nDCG@10</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>current_tool</td><td>0.5656</td><td>0.5182</td><td>0.3901</td><td>0.9091</td><td>0.5189</td></tr>
+      <tr><td>additive_rule</td><td>0.5656</td><td>0.5182</td><td>0.3901</td><td>0.9091</td><td>0.5189</td></tr>
+      <tr><td>vector_only</td><td>0.6846</td><td>0.5545</td><td>0.5828</td><td>1.0000</td><td>0.7434</td></tr>
+      <tr><td>rrf</td><td>0.7963</td><td>0.7182</td><td>0.7429</td><td>1.0000</td><td>0.8297</td></tr>
+      <tr><td>random_control</td><td>0.5218</td><td>0.3545</td><td>0.6631</td><td>1.0000</td><td>0.5142</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-pooled-labels-control-note">
+    The control is a seeded permutation of each question's labelled pool, so it measures the label set
+    rather than a ranking. It scores lowest on mean nDCG@10 (0.5218), below every arm, which is the check
+    that the labels carry almost no accidental rank signal. Its grade-3 recall@30 is high (0.6631) because
+    the pool it permutes contains every graded signal, so a random order still reaches most of them within
+    the recall window; the precision and nDCG metrics separate it from the arms.
+  </p>
+
+  <h3 id="ssfms-pooled-labels-log-title">Labelling log</h3>
+
+  <p id="ssfms-pooled-labels-log-what">
+    Labelling started from the 1107 labels on the fixture at the harness commit (<code>14d99f2e6</code>)
+    and reached 1551 by reading each candidate an
+    arm surfaced and grading it against its question's <code>intent</code>, which is the rubric. Two
+    corrections were needed when a sweep proved wider than the quantity a question asks for.
+  </p>
+
+  <table id="ssfms-pooled-labels-log">
+    <caption>Pooled label set, in the order the labels were added or removed</caption>
+    <thead><tr><th>Step</th><th>Change</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Prune pre-cutover labels</td><td>labels removed from signals enriched before the cutover</td>
+        <td>Family sweeps had labelled signals enriched before the cutover, which the eligibility gate
+        named; the labels on those signals were removed rather than the predicate widened.</td>
+      </tr>
+      <tr>
+        <td>Label the eligible union</td><td>the top-10 union under the filter, candidate by candidate</td>
+        <td>The top-10 union of the arms under the filter was collected and each candidate read and
+        graded.</td>
+      </tr>
+      <tr>
+        <td>Correct the toroidal-field voltage sweep</td><td>−69 on <code>toroidal-field-coil-voltage</code></td>
+        <td>A sweep on <code>cryomag_m1t</code> matched the TF structure's temperature channels as well as
+        its voltage channels; only channels whose name carries <em>voltage</em> are kept in a voltage
+        question.</td>
+      </tr>
+      <tr>
+        <td>Grade the gas-analysis channels</td><td>+413 on <code>hydrogen-isotope-partial-pressure</code></td>
+        <td>Mass-to-charge one and two are the isotope channels (grade 3), three is adjacent (grade 2), and
+        every other channel is a different species (grade 0), following the fixture's own precedent.</td>
+      </tr>
+      <tr>
+        <td>Grade the CryoCTB toroidal-field family</td><td>+12 on each voltage question</td>
+        <td><code>cryoctb_mt*</code> channels are toroidal-field feeder and heater voltages: a feeder quench
+        voltage answers the toroidal-field question (3), every one of them is grade 0 for the
+        poloidal-field question, and a heater supply is grade 0.</td>
+      </tr>
+      <tr>
+        <td>Grade the pre-programmed reference family</td><td>+41 on <code>booster-power-supply-output-voltage</code></td>
+        <td>A voltage reference takes the reference-voltage grade (2) and a current reference the
+        reference-current grade (1), which is the distinction the question's rubric draws.</td>
+      </tr>
+      <tr>
+        <td>Grade the converter voltages that are not the DC output</td><td>+12 on <code>power-supply-dc-output-voltage-for-the-coil-converters</code></td>
+        <td>The switching-network terminal, the quench-protection dump resistor and its drop are measured
+        voltages of the same converter and take grade 2, following the fixture's existing grade for the one
+        such channel it already carried.</td>
+      </tr>
+      <tr>
+        <td>Grade the HTS current-lead family</td><td>+51 on <code>temperature-of-the-high-temperature-superconductor-current-leads</code></td>
+        <td>Each lead's warm and cold ends take grade 3 and the 300 K return temperature on the
+        neighbouring structure takes grade 1, which is the rubric the question states.</td>
+      </tr>
+      <tr>
+        <td>Label the candidates the arms lifted</td><td>+9 across seven questions</td>
+        <td>Nine candidates the arms lifted were read and graded from their names and descriptions,
+        including one grade-0 (an elongation command surfaced for the soft-x-ray question).</td>
+      </tr>
+      <tr>
+        <td>Label the additive-rule arm</td><td>no new labels</td>
+        <td>The frozen additive rule returns the same order as the product ranking on every question, so
+        it lifts no candidate the product arm had not already surfaced; the suite's labelling gate
+        confirms this by passing with <code>additive_rule</code> scored.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="ssfms-pooled-labels-control">Negative control</h3>
+
+  <p id="ssfms-pooled-labels-control-what">
+    One pooled label was removed from a held-out question and the table test run against the altered
+    fixture. The arm that had surfaced the signal refused and named it, so the run failed rather than
+    scoring a silent miss:
+  </p>
+
+  <pre id="ssfms-pooled-labels-control-log"><code>removed label: plasma-current-total jt-60sa:general/dhc_obsip
+E   tests.llm.test_signal_search_goldens.UnlabelledCandidates: arm 'current_tool' on question
+    'plasma-current-total' top 10 holds 1 unlabelled candidate(s): jt-60sa:general/dhc_obsip
+============================= 1 failed, 1 warning in 8.51s =========================
+EXIT=1</code></pre>
+
+  <p id="ssfms-pooled-labels-control-restored">
+    The fixture was restored from a copy taken before the edit and re-read afterwards at 1551 labels, so
+    the removed grade is present in the committed fixture.
+  </p>
+
+  <h3 id="ssfms-pooled-labels-gates-title">Gates</h3>
+
+  <table id="ssfms-pooled-labels-gates">
+    <thead><tr><th>Gate</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td><code>tests/llm/test_signal_search_goldens.py</code> (default markers plus <code>graph</code>)</td><td>11 passed — the eligibility gate, the pre-cutover filter tests, the refusal test, the metrics, the frozen-rule equivalence pin and the four-arm table</td></tr>
+      <tr><td><code>tests/llm/test_search_tools.py</code></td><td>106 passed, 8 skipped — unchanged from the harness commit, so the ranking extraction is untouched</td></tr>
+      <tr><td>Negative control: one pooled label removed</td><td>1 failed, <code>EXIT=1</code>, naming the removed signal</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="ssfms-pooled-labels-scope-title">The two rerank arms move out of the test suite</h3>
+
+  <p id="ssfms-pooled-labels-scope">
+    The section closes on the four arms above and the control. The two rerank arms
+    (<code>rrf_rerank</code>, <code>rrf_rerank_role</code>) are scored by a measurement that runs outside
+    pytest, over labels pooled against its own candidate pool, and no test here reaches the paid endpoint.
+  </p>
+
+  <p id="ssfms-pooled-labels-scope-why">
+    Two structural reasons, neither a labelling gap. First, <code>tests/conftest.py</code> installs an
+    autouse fixture, <code>no_live_decisions_requests</code>, that raises on any HTTP request to
+    <code>openrouter.ai/api/alpha/decisions</code>, which is the endpoint both rerank arms spend on, so a
+    pytest run cannot score them by design. Second, the rerank reorders a 60-candidate pool
+    nondeterministically, so any of those 60 can reach the top ten on a given run; the fixture's labels
+    are the top-10 union over the arms, so a rerank run can surface a family the union has not reached —
+    four consecutive live runs each did, and each was labelled before the next moved the boundary again.
+  </p>
+
+  <p id="ssfms-pooled-labels-scope-kept">
+    The module keeps what that measurement needs — <code>_rerank_arm</code>, the <code>JEV_ARMS</code>
+    tuple, <code>JEV_ARMS_ENV</code> and the role-aware question constants — and <code>arm_ranking</code>
+    still builds a rerank arm when <code>ctx.spend_jev</code> is set. No test sets it, so the committed
+    suite never reaches the guarded endpoint and spends nothing.
+  </p>
+</section>

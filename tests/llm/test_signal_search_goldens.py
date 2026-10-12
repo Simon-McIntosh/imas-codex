@@ -1,28 +1,38 @@
 """Golden harness for facility signal search over the graded question fixture.
 
-Five ranking arms and a seeded random control are scored on the questions in
+Four ranking arms and a seeded random control are scored on the questions in
 ``tests/llm/fixtures/signal_search_questions.json``:
 
 ``current_tool``  the product ranking (``_rank_signals`` in ``search_tools``):
                   vector on descriptions boosted by a full-text keyword match.
+``additive_rule`` that same additive rule frozen here (vector and full-text,
+                  0.7 of the cosine plus 0.3 of the text score plus 0.1 for a
+                  signal found by both, the text score alone for a text-only
+                  signal, cut at ``K``), so the arm goes on measuring the rule
+                  the product ships today even after the product ranking is
+                  rewritten.
 ``vector_only``   vector on descriptions alone, pool 100.
 ``rrf``           reciprocal rank fusion of the 100-candidate vector pool and
                   the 50-candidate full-text pool.
-``rrf_rerank``    ``rrf``'s top 60 reordered by a generic Jev relevance score.
-``rrf_rerank_role``  ``rrf``'s top 60 reordered by the role-aware Jev question.
 
-The two Jev arms spend money on the discovery-relevance seat, so a default run
-does not build them: ``arm_ranking`` returns the fused order for a Jev arm and
-records that the rerank permutation was not applied, unless the environment
-sets ``SSFMS_JEV_ARMS=1``. A stub rerank is used only where a test needs the
-arm to produce an order without spending.
+Two further arms, ``rrf_rerank`` and ``rrf_rerank_role``, reorder the fused
+pool with a Jev relevance score and so spend on the discovery-relevance seat;
+they are scored by a measurement that runs outside pytest. ``arm_ranking`` can
+still build them when ``ctx.spend_jev`` is set, and this module keeps the
+functions and the role-aware question they need, but no test here reaches the
+paid endpoint, so a default run spends nothing.
 
 Every question's candidates that an arm places in its top 10 must be labelled
-under the section's grading rule before that arm is scored. A candidate with no
+under the fixture's grading rule before that arm is scored. A candidate with no
 label is not the same as one read and judged irrelevant (grade 0): the first is
 a gap in the fixture and makes the arm refuse, naming the candidate; the second
 is scored. Labelling is pooled across all arms, so an arm is never penalised
 for lifting a relevant signal a sibling arm found and no other arm had labelled.
+
+The fixture declares the enrichment cutover its labels were drawn against, and
+every labelled signal must lie at or after it: a label on a signal the Jev-era
+pipeline has not enriched is a stale seed the population does not contain, and
+the eligibility gate fails by name rather than skipping it.
 
 Reports mean nDCG@10, grade-3 precision@5, grade-3 recall@30 and the count of
 questions with no grade-3 hit in the top 30, per arm. The control is a seeded
@@ -34,9 +44,9 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import random
 from dataclasses import dataclass, field
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -50,14 +60,27 @@ K = 30
 TOP_K = 10
 CONTROL_SEED = 20261012
 
+# The cutover the golden population is enumerated against: the first run whose
+# signal pipeline reranked enrichment context within its budget. The fixture
+# carries this value as data; the gate below pins it so a fixture that declares
+# an earlier cutover (and so admits signals enriched before the fix) fails
+# rather than silently widening the population.
+CANONICAL_ENRICHED_AT_CUTOVER = "2026-10-11T21:08:54Z"
+
+# Set to "1" to select the two Jev rerank arms in the measurement that scores
+# them outside pytest. This suite reads it nowhere, so a pytest run never
+# spends on the discovery-relevance seat.
+JEV_ARMS_ENV = "SIGNAL_SEARCH_JEV_ARMS"
+
 # Arms whose ranking is reordered by a Jev judgement and therefore spends on the
-# discovery-relevance seat. A default run does not build them.
+# discovery-relevance seat. No test in this module builds them.
 JEV_ARMS = ("rrf_rerank", "rrf_rerank_role")
 
-# The role-aware relevance question, written to the five levels §7 names: a
-# different quantity, through a commanded or reference value, to a measurement
-# of exactly the quantity asked for. Kept here until the rerank ships and it
-# moves into the product beside the generic question.
+# The role-aware relevance question, written to five relevance levels: a
+# measurement of the quantity asked for, through a measurement of a related
+# quantity, a commanded or reference value of it, related hardware, to a
+# different quantity. Kept here until the rerank ships and it moves into the
+# product beside the generic question.
 _ROLE_RERANK_LEVELS = [
     "a different quantity, unrelated to the one asked for",
     "related hardware: a status flag, configuration value or neighbouring measurement",
@@ -231,29 +254,94 @@ def _rf_ranks(ids: list[str]) -> list[dict]:
     return [{"id": sid} for sid in ids]
 
 
+def _additive_rank(gc, embedding, question: Question, k: int) -> list[str]:
+    """The additive rule, frozen here rather than read from ``_rank_signals``.
+
+    Vector search on descriptions over ``k`` candidates, then each full-text
+    hit over ``k`` candidates: a signal found by both takes ``0.7`` of its
+    cosine plus ``0.3`` of its text score plus ``0.1``; a text-only signal
+    takes its text score alone and is appended. The result is a stable sort by
+    descending score, so ties keep the vector order first and the text-only
+    appends after, cut at ``k``. Freezing the rule here is what lets the arm
+    keep measuring the product's current ranking after the product rewrote it.
+    """
+    from imas_codex.llm.search_tools import _text_search_signals, _vector_search_signals
+
+    facility = json_fixture["eligibility"]["facility"]
+    signal_ids, scores = _vector_search_signals(gc, embedding, facility, k, None, None)
+    for row in _text_search_signals(gc, question.query, facility, k):
+        sid = row["id"]
+        text_score = round(row["score"], 3)
+        if sid in scores:
+            scores[sid] = round(scores[sid] * 0.7 + text_score * 0.3 + 0.1, 3)
+        else:
+            scores[sid] = text_score
+            signal_ids.append(sid)
+    return sorted(set(signal_ids), key=lambda sid: scores.get(sid, 0), reverse=True)[:k]
+
+
+def eligible_signal_ids(gc=None) -> set[str]:
+    """Signal ids the fixture's predicate admits, for the fixture's facility.
+
+    The population is the signals the Jev-era pipeline enriched at or after the
+    fixture's declared cutover. An arm is scored on this population only, so the
+    same predicate that governs the labels governs what is ranked: a signal
+    enriched before the cutover is dropped from the ranking before the cut, and
+    never reaches the point where it would need a label.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    gc = gc if gc is not None else GraphClient()
+    rows = gc.query(
+        "MATCH (s:FacilitySignal) "
+        "WHERE s.enriched_at >= datetime($cutover) AND s.id STARTS WITH $prefix "
+        "RETURN s.id AS id",
+        cutover=json_fixture["eligibility"]["enriched_at_cutover"],
+        prefix=json_fixture["eligibility"]["facility"] + ":",
+    )
+    return {r["id"] for r in rows}
+
+
+def filter_eligible(ids: list[str], eligible: set[str]) -> list[str]:
+    """``ids`` in order with every signal the fixture's predicate excludes removed."""
+    return [sid for sid in ids if sid in eligible]
+
+
 def arm_ranking(question: Question, ctx) -> list[str]:
     """Ordered signal ids for one arm on one question, cut at ``K``.
 
-    ``ctx`` carries the open graph client, the encoder and per-question
-    embedding so a run reuses one vector per question across arms.
+    ``ctx`` carries the eligible population beside the open graph client, the
+    encoder and the per-question embedding, so a run reuses one vector per
+    question across arms. Every arm's order is restricted to that population
+    before the cut: a signal the fixture's predicate excludes is dropped rather
+    than scored, and it makes room for the next eligible candidate.
     """
     from imas_codex.llm.search_tools import _rank_signals
 
     facility = json_fixture["eligibility"]["facility"]
     arm = ctx.arm
+
+    def keep(ids: list[str]) -> list[str]:
+        return filter_eligible(ids, ctx.eligible)
+
     if arm == "current_tool":
         ids, _ = _rank_signals(
             ctx.gc, ctx.embedding, question.query, facility, K, None, None
         )
-        return ids
+        return keep(ids)[:K]
+    if arm == "additive_rule":
+        # The frozen rule cuts at K before the filter, exactly as the product
+        # ranking does, so the two are the same order while the product still
+        # carries this rule.
+        return keep(_additive_rank(ctx.gc, ctx.embedding, question, K))[:K]
     vec_ids, text_ids = _fusion_streams(ctx.gc, ctx.embedding, question)
     if arm == "vector_only":
-        return vec_ids[:K]
+        return keep(vec_ids)[:K]
     fused = [sid for sid, _ in _rrf_fuse([_rf_ranks(vec_ids), _rf_ranks(text_ids)])]
     if arm == "rrf":
-        return fused[:K]
+        return keep(fused)[:K]
     if arm in JEV_ARMS:
-        pool = fused[:RERANK_POOL]
+        pool = keep(fused)[:RERANK_POOL]
         if not ctx.spend_jev:
             # No Jev spent: return the pool order and record that the rerank
             # permutation was not applied.
@@ -325,6 +413,7 @@ class ArmContext:
     gc: object
     encoder: object
     arm: str
+    eligible: set[str] = field(default_factory=set)
     spend_jev: bool = False
     rerank_applied: bool = False
     _embeddings: dict[str, list[float]] = field(default_factory=dict)
@@ -350,14 +439,21 @@ def score_arm(arm: str, ctx, questions=QUESTIONS) -> list[dict]:
     return rows
 
 
-def control_ranking(question: Question) -> list[str]:
-    """A seeded permutation of the question's labelled pool."""
+def control_ranking(question: Question, eligible: set[str] | None = None) -> list[str]:
+    """A seeded permutation of the question's labelled pool.
+
+    The pool is the fixture's labels, which the eligibility gate already
+    restricts to the eligible population; ``eligible`` filters again where a
+    caller scores against a population resolved at run time.
+    """
     pool = sorted(question.relevant)
+    if eligible is not None:
+        pool = filter_eligible(pool, eligible)
     random.Random(CONTROL_SEED).shuffle(pool)
     return pool
 
 
-def score_control(questions=QUESTIONS) -> list[dict]:
+def score_control(questions=QUESTIONS, eligible: set[str] | None = None) -> list[dict]:
     rows: list[dict] = []
     for question in questions:
         row = {
@@ -365,7 +461,7 @@ def score_control(questions=QUESTIONS) -> list[dict]:
             "question": question.id,
             "held_out": question.held_out,
         }
-        row.update(score_ranking(question, control_ranking(question)))
+        row.update(score_ranking(question, control_ranking(question, eligible)))
         rows.append(row)
     return rows
 
@@ -402,6 +498,57 @@ def test_every_question_is_phrased_without_facility_or_source_vocabulary() -> No
         assert not any(
             tok.isupper() and tok.isalpha() and len(tok) >= 3 for tok in q.query.split()
         ), (q.id, q.query)
+
+
+def _as_utc(value: object) -> datetime | None:
+    if value is None:
+        return None
+    try:
+        return datetime.fromisoformat(str(value)).astimezone(UTC)
+    except ValueError:
+        return None
+
+
+def _label_enrichment(ids: list[str]) -> dict[str, object]:
+    """``enriched_at`` per id, or None where the signal is absent or unset."""
+    from imas_codex.graph.client import GraphClient
+
+    rows = GraphClient().query(
+        "UNWIND $ids AS sid OPTIONAL MATCH (s:FacilitySignal {id: sid}) "
+        "RETURN sid AS id, s.enriched_at AS enriched_at",
+        ids=ids,
+    )
+    return {r["id"]: r["enriched_at"] for r in rows}
+
+
+@pytest.mark.graph
+def test_every_labelled_signal_is_eligible() -> None:
+    """Every labelled signal lies at or after the Jev-era enrichment cutover.
+
+    A label on a signal the pipeline enriched before the cutover is a seed the
+    golden population does not contain, so the fixture fails by name rather than
+    skipping it. The check pins the cutover the fixture declares: an earlier
+    value readmits the seeds enriched in the window before the fix, so it must
+    fail rather than silently widen the population.
+    """
+    declared = json_fixture["eligibility"]["enriched_at_cutover"]
+    assert declared == CANONICAL_ENRICHED_AT_CUTOVER, (
+        f"fixture declares enrichment cutover {declared!r}; the canonical "
+        f"cutover is {CANONICAL_ENRICHED_AT_CUTOVER!r}"
+    )
+    cutover = _as_utc(CANONICAL_ENRICHED_AT_CUTOVER)
+    labelled = sorted({sid for q in QUESTIONS for sid in q.relevant})
+    enrichment = _label_enrichment(labelled)
+    ineligible = [
+        sid
+        for sid in labelled
+        if _as_utc(enrichment.get(sid)) is None or _as_utc(enrichment[sid]) < cutover
+    ]
+    assert not ineligible, (
+        f"fixture labels {len(ineligible)} signal(s) enriched before the cutover "
+        f"{CANONICAL_ENRICHED_AT_CUTOVER}, or absent from the graph: "
+        + ", ".join(ineligible)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -470,12 +617,65 @@ def test_an_unlabelled_candidate_refuses_the_arm_and_names_it() -> None:
 
 
 # ---------------------------------------------------------------------------
+# The eligible population
+# ---------------------------------------------------------------------------
+
+
+def test_the_filter_drops_a_pre_cutover_candidate_before_the_cut() -> None:
+    """A signal outside the population is dropped, not scored, before the cut.
+
+    The excluded candidate sits first in the order, so leaving it in place
+    would consume a top-10 slot and displace the eligible candidate that
+    occupies position ``TOP_K``.
+    """
+    outside = "sig:enriched-before-the-cutover"
+    order = [outside] + [f"sig:e{i}" for i in range(TOP_K + 1)]
+    eligible = {sid for sid in order if sid != outside}
+
+    kept = filter_eligible(order, eligible)
+
+    assert outside not in kept
+    assert kept == [f"sig:e{i}" for i in range(TOP_K + 1)]
+    assert kept[:TOP_K][-1] == f"sig:e{TOP_K - 1}"
+
+
+@pytest.mark.graph
+def test_a_pre_cutover_signal_is_outside_the_eligible_population() -> None:
+    """The predicate excludes a pre-cutover signal and admits a post-cutover one.
+
+    Both ids are real jt-60sa signals: the first was enriched in the window
+    before the cutover, the second at it or after, so a filter that keeps the
+    second while dropping the first is reading the same predicate the
+    eligibility gate applies to the labels.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    gc = GraphClient()
+    rows = gc.query(
+        "MATCH (s:FacilitySignal) "
+        "WHERE s.id STARTS WITH $prefix AND s.enriched_at < datetime($cutover) "
+        "RETURN s.id AS id LIMIT 1",
+        prefix=json_fixture["eligibility"]["facility"] + ":",
+        cutover=json_fixture["eligibility"]["enriched_at_cutover"],
+    )
+    assert rows, "no pre-cutover signal found to test the filter against"
+    before = rows[0]["id"]
+    after = sorted({sid for q in QUESTIONS for sid in q.relevant})[0]
+
+    eligible = eligible_signal_ids(gc)
+
+    assert before not in eligible
+    assert after in eligible
+    assert filter_eligible([before, after], eligible) == [after]
+
+
+# ---------------------------------------------------------------------------
 # Graph arms (live database)
 # ---------------------------------------------------------------------------
 
 
 def _open_context(
-    arm: str, spend_jev: bool = False, gc=None, encoder=None
+    arm: str, spend_jev: bool = False, gc=None, encoder=None, eligible=None
 ) -> ArmContext:
     from imas_codex.embeddings import Encoder
     from imas_codex.embeddings.config import EncoderConfig
@@ -485,67 +685,28 @@ def _open_context(
         gc = GraphClient()
     if encoder is None:
         encoder = Encoder(EncoderConfig())
-    return ArmContext(gc=gc, encoder=encoder, arm=arm, spend_jev=spend_jev)
+    if eligible is None:
+        eligible = eligible_signal_ids(gc)
+    return ArmContext(
+        gc=gc, encoder=encoder, arm=arm, eligible=eligible, spend_jev=spend_jev
+    )
 
 
 @pytest.mark.graph
-def test_each_arm_refuses_the_incompletely_labelled_fixture() -> None:
-    """On the fixture as it stands, every arm refuses and names its candidates.
+def test_four_arm_table_matches_the_control_below_every_arm() -> None:
+    """Four-arm table on pooled labels; the control sits below every arm.
 
-    The draft questions carry incomplete labels (pooled labelling is a separate node), so
-    each arm's top 10 holds candidates the fixture does not label. The refusal
-    names them and the arm is not scored.
-
-    The two Jev arms are built without spending: their rank order is the fused
-    pool, which is what the rerank reorders. The refusal depends only on the
-    pool holding unlabelled candidates, so it fires for them as it does for the
-    free arms.
+    Scores the four deterministic arms and the control and asserts the control
+    is below each arm on mean nDCG@10. An unlabelled candidate in any arm's top
+    10 fails the test, naming it, rather than skipping: a skipped table would
+    read as a pass.
     """
-    spend_jev = os.environ.get("SSFMS_JEV_ARMS") == "1"
-    arms = ["current_tool", "vector_only", "rrf", *JEV_ARMS]
-    shared = _open_context("current_tool", spend_jev=spend_jev)
-    refusals: dict[str, list[str]] = {}
-    for arm in arms:
-        ctx = _open_context(
-            arm, spend_jev=spend_jev, gc=shared.gc, encoder=shared.encoder
-        )
-        named: list[str] = []
-        for question in QUESTIONS:
-            ctx.embedding = ctx.embedding_for(question)
-            ranked = arm_ranking(question, ctx)
-            try:
-                require_labelled(arm, question, ranked)
-            except UnlabelledCandidates as exc:
-                named.append(f"{question.id}:{','.join(exc.candidates[:3])}")
-        assert named, (
-            f"arm {arm} was scored without refusing: fixture is fully labelled"
-        )
-        refusals[arm] = named
-        print(f"{arm}: refused {len(named)} questions, e.g. {named[0]}")
-
-    assert set(refusals) == set(arms)
-
-
-@pytest.mark.graph
-def test_five_arm_table_matches_the_control_below_every_arm() -> None:
-    """Five-arm table on pooled labels; the control sits below every arm.
-
-    Skipped until the fixture is fully labelled (pooling is a separate node);
-    the refusal test above is what runs on the fixture as it stands. When the
-    labels are complete this scores all five arms and the control and asserts
-    the control is below each arm on mean nDCG@10.
-    """
-    spend_jev = os.environ.get("SSFMS_JEV_ARMS") == "1"
-    arms = ["current_tool", "vector_only", "rrf"]
-    if spend_jev:
-        arms += list(JEV_ARMS)
+    arms = ["current_tool", "additive_rule", "vector_only", "rrf"]
+    eligible = eligible_signal_ids()
     rows: list[dict] = []
-    try:
-        for arm in arms:
-            rows.extend(score_arm(arm, _open_context(arm, spend_jev=spend_jev)))
-    except UnlabelledCandidates as exc:
-        pytest.skip(f"fixture not yet fully labelled: {exc}")
-    rows.extend(score_control())
+    for arm in arms:
+        rows.extend(score_arm(arm, _open_context(arm, eligible=eligible)))
+    rows.extend(score_control(eligible=eligible))
     table = {
         a: mean([r for r in rows if r["arm"] == a], "ndcg@10")
         for a in {r["arm"] for r in rows}
@@ -554,3 +715,34 @@ def test_five_arm_table_matches_the_control_below_every_arm() -> None:
     control = table["random_control"]
     for arm in arms:
         assert table[arm] > control, (arm, table[arm], control)
+
+
+@pytest.mark.graph
+def test_the_frozen_additive_rule_reproduces_the_product_ranking() -> None:
+    """``additive_rule`` and ``current_tool`` order every question identically.
+
+    The frozen rule is a copy of the product ranking's arithmetic, so on the
+    head where it was copied the two arms must return the same order on every
+    question — if they differ, the copy is wrong. When the product ranking is
+    rewritten the frozen arm keeps measuring the old rule and this pin is
+    retired: a divergence here is then the product change, not a defect.
+    """
+    from imas_codex.embeddings import Encoder
+    from imas_codex.embeddings.config import EncoderConfig
+    from imas_codex.graph.client import GraphClient
+
+    gc = GraphClient()
+    encoder = Encoder(EncoderConfig())
+    eligible = eligible_signal_ids(gc)
+    current_ctx = _open_context(
+        "current_tool", gc=gc, encoder=encoder, eligible=eligible
+    )
+    frozen_ctx = _open_context(
+        "additive_rule", gc=gc, encoder=encoder, eligible=eligible
+    )
+    for question in QUESTIONS:
+        current_ctx.embedding = current_ctx.embedding_for(question)
+        frozen_ctx.embedding = frozen_ctx.embedding_for(question)
+        assert arm_ranking(question, frozen_ctx) == arm_ranking(
+            question, current_ctx
+        ), question.id

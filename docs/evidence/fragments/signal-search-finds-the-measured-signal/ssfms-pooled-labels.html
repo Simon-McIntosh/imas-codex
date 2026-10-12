@@ -1,0 +1,43 @@
+<section id="ssfms-pooled-labels-node" data-reckon="fragment">
+  <h2 id="ssfms-pooled-labels-node-title">Pooled labelling and the eligible population</h2>
+
+  <p id="ssfms-pooled-labels-node-what">
+    This node made an arm's candidate set and its label set resolve through one predicate. The fixture
+    declares the facility (<code>jt-60sa</code>) and the enrichment cutover its labels were drawn against
+    (<code>2026-10-11T21:08:54Z</code>); <code>eligible_signal_ids</code> resolves that predicate against
+    the graph, and <code>filter_eligible</code> drops every excluded candidate from an arm's order before
+    the cut at <code>K</code>. A signal enriched before the cutover is therefore never scored, and the slot
+    it held goes to the next eligible candidate. The same filter governs the control's permutation, and
+    the predicate is resolved with <code>datetime($cutover)</code> because a bare string comparison against
+    <code>enriched_at</code> returns zero rows.
+  </p>
+
+  <p id="ssfms-pooled-labels-node-result">
+    The full evidence — the arm table, the figure, the labelling log, the negative control and the
+    scope note — is the section's evidence fragment,
+    <a href="/imas-codex/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html">pooled
+    labels on the golden signal fixture</a>. In one line: the harness suite is green at 11 passed, the
+    fixture holds 1551 labels all inside the population of 14312, the filter drops a pre-cutover candidate
+    before the cut in a synthetic order and against a real pre-cutover signal, the control fails by name on
+    a removed label, and four arms are scored beside the control — <code>rrf</code> 0.7963,
+    <code>vector_only</code> 0.6846, <code>current_tool</code> and <code>additive_rule</code> 0.5656
+    against the control's 0.5218 mean nDCG@10.
+  </p>
+
+  <p id="ssfms-pooled-labels-node-frozen">
+    A fifth arm, <code>additive_rule</code>, freezes the product's additive ranking arithmetic in the
+    harness rather than calling <code>_rank_signals</code>, so the measurement survives a rewrite of the
+    product ranking; a test pins it to the head it was copied from, asserting it equals
+    <code>current_tool</code> on every question.
+  </p>
+
+  <p id="ssfms-pooled-labels-node-scope">
+    <strong>What moved out of the suite, and why.</strong> The two rerank arms (<code>rrf_rerank</code>,
+    <code>rrf_rerank_role</code>) are scored by a measurement outside pytest. Inside pytest the
+    repository's autouse <code>no_live_decisions_requests</code> guard refuses the paid decisions endpoint
+    both arms spend on, and outside pytest a nondeterministic rerank over a 60-candidate pool surfaces a
+    family the top-ten labelling union has not reached. The section therefore closes on the four arms and
+    the control, and the module keeps the rerank functions and the role-aware question for that
+    measurement. Recorded in <code>goldens.html</code>.
+  </p>
+</section>
