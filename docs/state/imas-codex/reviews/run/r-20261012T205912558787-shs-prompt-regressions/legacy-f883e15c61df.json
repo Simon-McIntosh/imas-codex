@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:9658",
+    "imas_codex/standard_names/workers.py:10334",
+    "imas_codex/standard_names/workers.py:10696"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-12T20:59:25Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/review/pipeline.py:2042",
+      "class": "incomplete_guard",
+      "id": "incomplete-guard-1",
+      "severity": "follow-on",
+      "text": "_review_single_batch selects the same registry conventions the node guarded at three sites, calling conventions_context_for(item.get('standard_name') or item['id']) with no try/except, so an unparseable id still raises ParseError and aborts that docs-review batch exactly as it did before the fix; the node was fenced to workers.py so the repair is out of scope, and it did not name this site in its manifest (the brief asked that a cause in review/pipeline.py be named). test_conventions_wiring.py:190 drives this site only with a parseable name, so no test reddens on it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the helper is reached by three production render sites, imas_codex/standard_names/workers.py:9658 (process_generate_docs_batch), :10334 (prepare_docs_review_request) and :10696 (process_refine_docs_batch); a fourth production site that selects the same conventions, imas_codex/standard_names/review/pipeline.py:2042 (_review_single_batch), was not routed through it and stays unguarded.",
+    "diff": "read 30da80473 (workers.py +17/-6, three goldens) and 0c97c1049 (fragment +68) against base 3035a198 commit by commit; workers.py adds one helper and replaces three direct conventions_context_for calls, and the three goldens are recaptured by rendering (run-dir helper capture_goldens.py:33 renders each template with a no-edit context and writes it), never hand-edited.",
+    "done_when": "the done_when asks that each test passes at head via a product fix or a golden update stated per test, and that the prompt/review/pool gate add no failure against base with baseline_suite and after_suite recorded; both suite arms are completed true (logs/baseline_suite.log 33 failed/1891 passed, logs/after_suite.log 21 failed/1916 passed) and the after ids minus the base ids is the empty set, so zero are added.",
+    "goal": "the node goal is that each of the six documentation-prompt tests passes at head, repaired at its cause and stated per test; the landed change adds _conventions_for_prompt at imas_codex/standard_names/workers.py:9501 and routes the generate (:9658), review (:10334) and refine (:10696) render sites through it, and the six pass at head (logs/head_six_after.log: 6 passed, EXIT=0).",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T205912558787-shs-prompt-regressions/manifest.md; status complete, commits 30da80473 and 0c97c1049, the six pass at head and at the base arm, baseline_suite and after_suite both completed true, and a bare negative_control_log path whose last line is EXIT=1.",
+    "write_paths": "the declared scope is workers.py, the four documentation prompts, the three documentation goldens, four test files and the fragment; the diff touches imas_codex/standard_names/workers.py, tests/standard_names/golden_edit_prompts/{generate,refine,review}_docs_user.txt and docs/evidence/fragments/sn-house-style/shs-prompt-regressions.html, all inside it."
+  },
+  "justifications": {
+    "durability": "the existing six tests are the guard and the negative control demonstrates them: restoring the pre-repair content of the four files (logs/negative_control.log) reddens all six with EXIT=1, so the suite fails if this fix regresses.",
+    "evidence": "the gate the worker ran is the prompt/review/pool file set over the six, with the delta measured from recorded arms (logs/baseline_suite.log 33 failed/1891 passed at 776b372e6 versus logs/after_suite.log 21 failed/1916 passed at head), giving 0 added ids; the base arm is a revision older than the node's parent 3035a198, so the delta is conservative and could not hide a failure the node introduced that is absent at 776b372e6.",
+    "fit": "the helper at imas_codex/standard_names/workers.py:9501 uses the same try/except-Exception-degrade idiom as the neighbouring scored-example load at workers.py:9610, is named by mechanism, and carries no plan or ticket label.",
+    "goal_fidelity": "the goal is the six passing at head, and logs/head_six_after.log:6 records '6 passed' EXIT=0 at the reviewed head while logs/negative_control.log:24 records the same six red with EXIT=1 when the repaired files are reverted.",
+    "reuse": "it wraps the owner of conventions selection, imas_codex/standard_names/context.py:28 conventions_context_for, rather than re-implementing select_conventions, but placing the degrade in a worker-local helper leaves the sibling production site at imas_codex/standard_names/review/pipeline.py:2042 outside the guard, which a degrade in the owner would have covered.",
+    "scope_discipline": "every path in the two commits is inside the manifest's declared write paths, and the four test files and two prompt templates that were in scope are correctly left untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "",
+  "review_run_id": "legacy-f883e15c61df",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "3035a1982388a407c5069ed67a8ecdc64305b325",
+  "reviewed_head_sha": "0c97c104928ba4853f79c0db10c8b20159b4e3aa",
+  "reviewed_run_id": "r-20261012T205912558787-shs-prompt-regressions",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "complete",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:34:09Z",
+  "total": 108
+}
