@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T05:24:43.076Z",
+  "dispatched_at": "2026-10-12T05:16:45Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-house-style.html:99",
+      "id": "reasoning-1",
+      "reason": "without a usage-enumeration output in \u00a74 (or a redirection of \u00a73 to the \u00a72 selector, which does parse a name's tokens), \u00a73's done-when \"every concept, symbol and pattern the \u00a74 lint finds\" is unsatisfiable.",
+      "text": "\u00a73 states \"the lint in \u00a74 lists which concepts and symbols the 220 entries actually use, and that list ... is the authoring worklist\", but \u00a74 defines the lint as returning five classes of conformance findings and a per-class census, so nothing in \u00a74 enumerates the concepts and symbols in use \u2014 a node building \u00a74 to its own done-when produces no worklist and \u00a73 cannot be started as written",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:109",
+      "id": "done_when-1",
+      "reason": "\u00a75's template rendering needs docs-opening-style and \u00a72's location is settled by registry-home, so an unnamed \"three\" leaves a decision the downstream sections consume un-locked.",
+      "text": "\u00a73's done-when says \"The three decisions below are locked\" while four decision blocks are declared (registry-home, fsa-canonical-form, plasma-boundary-gloss, docs-opening-style) and followup f-shs-001 says \"bring the four decisions to the lead\", so a node closing \u00a73 cannot tell which decisions its gate requires and can close with one unlocked",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:147",
+      "id": "anchors_resolve-1",
+      "reason": "the followup's resolution records that its work is carried here and its substance (pipeline.py:1964 sets audit_findings, no template reads it) is independently verified true, so the plan's \u00a75 mechanism is right and only the status word is stale.",
+      "text": "\u00a75 calls f-scai-audit-findings-reach-no-template \"the open followup this plan inherits\" but the followup carries data-status=\"resolved\" (resolved 2026-10-12T05:11:52Z, outcome \"Carried to sn-house-style \u00a75\"), so the citation names a closed node as open",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "9111157dd2f76718d25d7a1ddbc2cea152966a74faf79ed9e7489175727c495a",
+  "plan_slug": "sn-house-style",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T051635922653-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "36e2e75a012807ca2e4d256cfe4c6d0c9928f8c1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 every file, section and line anchor resolves (census doc, grouping \u00a72/\u00a74, pipeline.py:1964 confirmed to set audit_findings with no prompt template reading it), but \u00a75 calls f-scai-audit-findings-reach-no-template \"the open followup\" while that followup is recorded resolved at 2026-10-12T05:11:52Z.",
+    "done_when": "a finding \u2014 \u00a73's done-when requires \"the three decisions below are locked\" while four decision blocks are declared, and the inherited followup f-shs-001 says \"bring the four decisions to the lead\", so the section's gate is ambiguous about which decisions it closes.",
+    "evidence_paths": "pass \u2014 no node directs evidence at a session scratchpad or node-local temporary path; \u00a72's selector test, \u00a74's census and \u00a75's render tests are left to the repository's test/evidence convention rather than a transient path.",
+    "naming": "pass \u2014 concepts.yml, notation.yml, templates.yml, lint.py and the conventions package are named by what they hold, and no plan label, stage name, ticket number or version tag appears in a symbol, filename or comment.",
+    "reasoning": "a finding \u2014 \u00a73 draws its authoring worklist from a \u00a74 lint capability that \u00a74 does not define; \u00a74's lint returns only conformance findings (five classes) and a per-class census, never the \"concepts and symbols the 220 entries actually use\" that \u00a73 names as its worklist.",
+    "single_goal": "pass \u2014 each implementable section names one deliverable (\u00a72 the registry, \u00a73 the authored entries, \u00a74 the lint, \u00a75 the registry reaching the pipeline), and each done-when is a single coherent gate.",
+    "wiring": "pass \u2014 plan-blocks names sn-harmonize-command and sn-west-prototype-release, both of which declare the matching depends-on (sn-harmonize-command#s4/#s5, sn-west-prototype-release#s3 in their plan-section-depends-on), and sn-catalog-audit-instrument carries status superseded and a comment naming sn-house-style as its successor."
+  },
+  "section_digests": {
+    "_document": "883632b806b91887e70409ef33ee10c526074cff2052b6dd82bef08c3ef1cfec",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s2": "360ce1662497385b8f041821ed6a26116b9baf547cae0243a87a506b755ec68c",
+    "s3": "57be452284ec82e081cbf6252febb7d8631f14150588829d8bb8504373e7e5f9",
+    "s4": "ffd517183dd4b935be3e02d58ed4594ceb97764f414d95fcce7f9f0398c97756",
+    "s5": "2139eb6aee1bd7817f2ba0f99ebfa845a92d752d015896e42e4576453272f774",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T05:33:39.799198+00:00"
+}
