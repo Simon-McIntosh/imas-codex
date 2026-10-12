@@ -24,7 +24,7 @@
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -109,8 +109,13 @@
       the caller's <code>PipelineCost</code>. Move the booking into the shared owner, which takes
       an optional cost tracker and step and books the reported cost there. Then delete the wrapper
       and route its callers through the shared owner, before a third owner appears for standard
-      names. If the synchronous callers need a single-state entry point, it is built on
-      <code>decide_batch</code> inside <code>judgment.py</code>, not beside it.
+      names. If the synchronous callers need a single-state entry point, it lives inside
+      <code>judgment.py</code> and shares <code>decide_batch</code>'s per-call transport handling,
+      not beside it. The two fail-soft rules differ and both are kept: a
+      <code>DecisionsValidationError</code> (a malformed answer) is raised to the single-state
+      caller, as <code>_call_judgment</code> does today and
+      <code>tests/ids/test_candidate_judgment.py</code> asserts, while any other transport fault
+      returns <code>None</code>. <code>decide_batch</code>'s own batch behaviour is unchanged.
       Surface: one seat table is added and the private wrapper is retired. Then add a <code>[tool.imas-codex.sn-judge]</code> seat
       naming the pinned Jev version and the service tag <code>standard-names</code>, so standard
       names' Jev spend is attributed separately from discovery's.
