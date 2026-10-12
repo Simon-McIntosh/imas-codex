@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "base-release-tests.log (rev 1d5af84b) and after-release-tests-clean.log (rev 5dc0fb78) both report 5 failed / 430 passed with identical failure ids, so the head adds no failure over the base",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T22:15:49.700Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "the run is discarded unmerged: it bypasses the worker git wrapper instead of cheapening the fixtures, and \u00a726 is re-planned with that finding",
+      "recorded_at": "2026-10-12T22:15:37.291603+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-12T22:06:23Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_review_release.py",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "follow-on: the module-scoped fixture is a timed improvement only; it adds no assertion, so no test reddens if it regresses and the change's property is unguarded by the suite."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-release-review-durations.html",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: the \"File passes twice\" evidence rests on after-run1/2.log, whose headers name rev 1d5af84b (the base) rather than the landed 5dc0fb78, because both durations runs predate the commit; the claim cannot be tied to the landed revision from those logs, though this review reproduced it at 5dc0fb78."
+    },
+    {
+      "file": "tests/standard_names/test_review_release.py",
+      "line": "38",
+      "severity": "follow-on",
+      "text": "follow-on: plan section 26 requires the fixtures themselves get cheaper and excludes alternatives, yet every repository construction and git call is unchanged and the speed comes from resolving the real git binary ahead of the reckon worker wrapper -- a mechanism inert wherever git is not wrapped, so the section's stated remedy is not applied and the coordinator should weigh it against the measured done-when."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none -- only a test file is changed and no production runtime code reaches it",
+    "diff": "read commit by commit from 1d5af84b to 5dc0fb78 -- a single commit +84 over two paths: the test file gains `import os`, `_real_git_binary()` (line 38) and a module-scoped autouse fixture `_git_resolves_to_the_real_binary` (line 65) that symlinks the real binary into a temp dir and prepends it to PATH, and the fragment is a 35-line evidence record.",
+    "done_when": "the section's done-when is every test under 10 s, the file passing twice, and the release tests adding no failure against base; the durations gate is recorded (after-run1.log 52 passed in 19.54 s, after-run2.log 52 passed in 18.77 s, both EXIT=0) and the release-suite base/after arms carry identical failure ids (base-release-tests.log, after-release-tests-clean.log).",
+    "goal": "the reviewed node's goal is to make tests/standard_names/test_review_release.py's tests fit the 10-second measure by cheapening the git fixtures; the landed commit changes no fixture construction and instead resolves the real git binary ahead of a worker wrapper (tests/standard_names/test_review_release.py:38 and :65), which meets the measured bound in this environment with every test under 10 s (independently re-run at 5dc0fb78: 52 passed in 19.29 s, slowest call 3.81 s).",
+    "manifest": "read; status complete at head 5dc0fb78 with one commit, and it records baseline_suite (rev 1d5af84b, 5 failed / 430 passed) and after_suite (rev 5dc0fb78, same 5 ids) so added_failure_count is derivable and is zero.",
+    "write_paths": "the manifest declares three write paths and the diff touches exactly two of them -- tests/standard_names/test_review_release.py and docs/evidence/fragments/sn-integrity-backlog/sib-release-review-durations.html -- with no figure landing in the third; nothing outside is touched."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_release.py:38-65 adds no assertion, so reverting the fixture (or forcing `_real_git_binary` to return None) leaves the suite green and merely slow -- the fix's property is a duration measurement, not a guard.",
+    "evidence": "the durations gate and both suite arms are recorded with EXIT sentinels (after-run1.log, after-run2.log, base-release-tests.log, after-release-tests-clean.log) and the two suite arms carry identical failure ids, though after-run1/2.log are headed rev=1d5af84b rather than the landed 5dc0fb78.",
+    "fit": "`_real_git_binary` (tests/standard_names/test_review_release.py:38) and the fixture at :65 follow the module's docstring-and-pathlib idiom and carry no plan, sprint or ticket label.",
+    "goal_fidelity": "tests/standard_names/test_review_release.py:65 meets the 10-second measure (52 passed in 19.29 s at 5dc0fb78), but plan section 26 requires the git fixtures themselves get cheaper and every fixture here (isnc_repo, tests/standard_names/test_review_release.py:88) is unchanged, the speed coming from bypassing a worker git wrapper at :38 instead.",
+    "reuse": "a search of tests/ and imas_codex/ found no owner of a git-binary or wrapper-skipping resolution, so the addition forks nothing, though its natural shared home is a conftest given the same wrapper inflates every git-shelling test file.",
+    "scope_discipline": "the single commit touches only tests/standard_names/test_review_release.py and docs/evidence/fragments/sn-integrity-backlog/sib-release-review-durations.html, both inside the node's declared write paths, and changes no plan, index or sprint state."
+  },
+  "limitations": [
+    "The durations gate was re-run once at the reviewed head 5dc0fb78 from outside the reviewed worktree (review-durations.log: 52 passed in 19.29 s, slowest call 3.81 s, EXIT=0); the release-suite base/after arms were read, not re-run.",
+    "The node declared three write paths and landed into two; the third (a figures directory) carries no file, which is not a defect -- the node is text-only."
+  ],
+  "node": "review-of-sib-release-review-durations",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to make tests/standard_names/test_review_release.py's tests fit the 10-second measure by cheapening the git fixtures; the landed commit changes no fixture construction and instead resolves the real git binary ahead of a worker wrapper (tests/standard_names/test_review_release.py:38 and :65), which meets the measured bound in this environment with every test under 10 s (independently re-run at 5dc0fb78: 52 passed in 19.29 s, slowest call 3.81 s).\nVERDICT done_when: the section's done-when is every test under 10 s, the file passing twice, and the release tests adding no failure against base; the durations gate is recorded (after-run1.log 52 passed in 19.54 s, after-run2.log 52 passed in 18.77 s, both EXIT=0) and the release-suite base/after arms carry identical failure ids (base-release-tests.log, after-release-tests-clean.log).\nVERDICT write_paths: the manifest declares three write paths and the diff touches exactly two of them -- tests/standard_names/test_review_release.py and docs/evidence/fragments/sn-integrity-backlog/sib-release-review-durations.html -- with no figure landing in the third; nothing outside is touched.\nVERDICT manifest: read; status complete at head 5dc0fb78 with one commit, and it records baseline_suite (rev 1d5af84b, 5 failed / 430 passed) and after_suite (rev 5dc0fb78, same 5 ids) so added_failure_count is derivable and is zero.\nVERDICT diff: read commit by commit from 1d5af84b to 5dc0fb78 -- a single commit +84 over two paths: the test file gains `import os`, `_real_git_binary()` (line 38) and a module-scoped autouse fixture `_git_resolves_to_the_real_binary` (line 65) that symlinks the real binary into a temp dir and prepends it to PATH, and the fragment is a 35-line evidence record.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: tests/standard_names/test_review_release.py:65 meets the 10-second measure (52 passed in 19.29 s at 5dc0fb78), but plan section 26 requires the git fixtures themselves get cheaper and every fixture here (isnc_repo, tests/standard_names/test_review_release.py:88) is unchanged, the speed coming from bypassing a worker git wrapper at :38 instead.\nSCORE evidence: 15\nJUSTIFICATION evidence: the durations gate and both suite arms are recorded with EXIT sentinels (after-run1.log, after-run2.log, base-release-tests.log, after-release-tests-clean.log) and the two suite arms carry identical failure ids, though after-run1/2.log are headed rev=1d5af84b rather than the landed 5dc0fb78.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit touches only tests/standard_names/test_review_release.py and docs/evidence/fragments/sn-integrity-backlog/sib-release-review-durations.html, both inside the node's declared write paths, and changes no plan, index or sprint state.\nSCORE durability: 9\nJUSTIFICATION durability: tests/standard_names/test_review_release.py:38-65 adds no assertion, so reverting the fixture (or forcing `_real_git_binary` to return None) leaves the suite green and merely slow -- the fix's property is a duration measurement, not a guard.\nSCORE fit: 18\nJUSTIFICATION fit: `_real_git_binary` (tests/standard_names/test_review_release.py:38) and the fixture at :65 follow the module's docstring-and-pathlib idiom and carry no plan, sprint or ticket label.\nSCORE reuse: 17\nJUSTIFICATION reuse: a search of tests/ and imas_codex/ found no owner of a git-binary or wrapper-skipping resolution (no tests that import shutil.which, no shared conftest helper), so the addition forks nothing, though its natural shared home is a conftest given the same wrapper inflates every git-shelling test file.\nFINDING tests/standard_names/test_review_release.py:65 follow-on: the module-scoped fixture is a timed improvement only; it adds no assertion, so no test reddens if it regresses and the change's property is unguarded by the suite.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-release-review-durations.html:28 follow-on: the \"File passes twice\" evidence rests on after-run1/2.log, whose headers name rev 1d5af84b (the base) rather than the landed 5dc0fb78, because both durations runs predate the commit; the claim cannot be tied to the landed revision from those logs, though this review reproduced it at 5dc0fb78.\nFINDING tests/standard_names/test_review_release.py:38 follow-on: plan section 26 requires the fixtures themselves get cheaper and excludes alternatives, yet every repository construction and git call is unchanged and the speed comes from resolving the real git binary ahead of the reckon worker wrapper -- a mechanism inert wherever git is not wrapped, so the section's stated remedy is not applied and the coordinator should weigh it against the measured done-when.",
+  "review_run_id": "r-20261012T220611162066-review-of-sib-release-review-durations",
+  "review_scope": "Independent review of the sib-release-review-durations node (plan sn-integrity-backlog section 26), covering the one commit that landed at 5dc0fb78 against its base 1d5af84b: a module-scoped autouse fixture in tests/standard_names/test_review_release.py that resolves the real git binary ahead of a reckon worker wrapper, plus a 35-line evidence fragment.",
+  "reviewed_base_sha": "1d5af84bd3107ad903111a6e37196b4e14df3b9f",
+  "reviewed_commits": [
+    "5dc0fb781eb3b9efdfef74a97943910347a238d8"
+  ],
+  "reviewed_head_sha": "5dc0fb781eb3b9efdfef74a97943910347a238d8",
+  "reviewed_run_id": "r-20261012T213434913404-sib-release-review-durations",
+  "reviewer": "review-of-sib-release-review-durations",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:15:57.620558+00:00",
+  "total": 94,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T220611162066-review-of-sib-release-review-durations/review-durations.log"
+  ]
+}
