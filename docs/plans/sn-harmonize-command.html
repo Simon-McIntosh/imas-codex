@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -64,7 +64,8 @@
     <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       <code>imas-codex sn harmonize</code> takes one scope — <code>--batch &lt;manifest&gt;</code>
-      (for example <code>west-task-2e</code>), <code>--family &lt;seed name&gt;</code>,
+      (a roster token such as <code>v0.4.0rc7+west-task-2e</code>, resolved by
+      <code>resolve_batch_token</code>), <code>--family &lt;seed name&gt;</code>,
       <code>--concept &lt;registry id&gt;</code> or <code>--all</code> — and one mode:
     </p>
     <ul>
@@ -77,16 +78,35 @@
         bounding the spend.</li>
     </ul>
     <p>
-      In the same change, delete <code>--families</code> from <code>sn run</code> and
-      <code>--target groups</code> from <code>sn review</code>, and update their tests and
-      documentation. There is one route to family harmonization afterwards, not three.
+      The lint is read, never rebuilt. Its source is the <code>AuditReport</code> in
+      <code>imas_codex/standard_names/review/audits.py</code>: the lexical lint, the
+      house-style findings of <code>sn-house-style</code> §4 and the documentation gates,
+      composed by <code>run_all_audits</code>, plus link integrity
+      (<code>run_link_integrity</code>). The report calls that composition without the
+      embedding preflight, which writes, so <code>run_all_audits</code> and the report share
+      one function rather than two lists of calls. Families are enumerated through one
+      mechanism; <code>build_worklist</code> carries a second parentless grouping beside
+      <code>assemble_family</code>, and only one survives.
     </p>
     <p>
-      <strong>Done when:</strong> <code>sn harmonize --report --batch west-task-2e</code>
-      runs against a fixture graph and prints per-family findings. With
+      In the same change, delete <code>--families</code> from <code>sn run</code> and
+      <code>--target groups</code> from <code>sn review</code>, and update their tests and
+      documentation. There is one route to family harmonization afterwards, not three. The
+      helpers only those routes reach go with them: <code>_refuse_grouped_review_scoping</code>
+      and <code>_report_drifting_families</code> in <code>imas_codex/cli/sn.py</code>,
+      <code>mark_families_for_regen</code> (keyed on <code>HAS_PARENT</code>, the grouping
+      §1 retires) and <code>lint_links</code> (a duplicate of
+      <code>run_link_integrity</code> with no production caller) in
+      <code>harmonize.py</code>, and <code>build_worklist</code> unless the report is its
+      caller.
+    </p>
+    <p>
+      <strong>Done when:</strong> <code>sn harmonize --report --batch v0.4.0rc7+west-task-2e</code>
+      runs against a fixture graph and prints per-family findings, and writes nothing. With
       <code>--family</code> it prints the same rows for one family. Both deleted flags are
       gone from <code>imas_codex/cli/sn.py</code>, and a test asserts each is rejected as an
-      unknown option. The CLI test suite shows no added failures against its base.
+      unknown option. None of the retired helpers is left without a production caller. The
+      CLI test suite shows no added failures against its base.
     </p>
 
     <h2 id="s3">§3 — Apply: the anchor first, the members from the anchor</h2>
@@ -113,7 +133,12 @@
       Names and identities are never touched: this is a documentation-axis operation, so
       every identity, source binding and spend record survives. Names already recommended into
       a catalog pull request are refused, with the refusal naming each one, unless
-      <code>--force</code> is given with a reason that the run records. The lead ruled this on
+      <code>--force</code> is given with a reason that the run records. The refusal reads
+      <code>imas_codex/standard_names/protection.py</code>, which already owns
+      "this name is committed, do not move it" (<code>automatic_deletion_protections</code>
+      names <code>approved</code> and a recorded catalog pull request): it gains the roster and
+      <code>contested</code> reasons, and the command reuses its evidence rather than a second
+      query. The lead ruled this on
       2026-10-12. "Recommended" covers:
     </p>
     <ul>
@@ -127,11 +152,11 @@
     <p>
       Moving one of these would change text a physicist has been asked to review, or has
       already reviewed. The previous documentation
-      is snapshotted before reset. <code>sn harmonize --apply</code> is the caller of
-      <code>mark_families_for_regen</code> in <code>imas_codex/standard_names/harmonize.py</code>,
-      adapted to take a pattern family, and that function takes the snapshot. Its only
-      production caller today is the <code>sn run --families</code> handler that §2 deletes,
-      so this command inherits it rather than leaving it unreached. Name-level fixes go
+      is snapshotted before reset. <code>sn harmonize --apply</code> calls
+      <code>mark_members_for_regen</code> in <code>imas_codex/standard_names/harmonize.py</code>
+      directly on the pattern family's members (from <code>fetch_pattern_family</code>); it
+      already snapshots each member's documentation, resets the documentation pipeline and
+      stamps a scope run id, so no family-level wrapper is needed. Name-level fixes go
       through <code>sn edit</code>.
     </p>
     <p>
