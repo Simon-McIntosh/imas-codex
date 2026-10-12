@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -308,6 +308,9 @@
 </div>
 <div class="r-comment" data-section="s20" data-id="c-close-s20" data-who="reckon-build" data-when="2026-10-12T20:55:00Z">
     <div class="r-comment-body"><p>§20 landed: the signed supersede writes a receipt-stamped successor edge, and its postcondition requires exactly one (merges <code>0d94713db</code>, <code>3a2ff5b5f</code>); reviews 112 and 118/120. §21's backfill can now run through it. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s20">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s20" data-id="c-run-r-20261012T202918702946-sib-supersede-postcondition" data-who="reckon-build" data-when="2026-10-12T20:45:40.382Z">
+    <div class="r-comment-body"><p>The signed supersede postcondition now counts every HAS_SUCCESSOR edge from the predecessor without grouping and requires exactly one carrying the minting receipt (base 130 passed / after 130 passed, 0 added failures); test_supersede_postcondition_refuses_a_second_successor_edge passes on the fix (3 passed, EXIT=0) and fails with the grouped query restored (1 failed, EXIT=1).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
