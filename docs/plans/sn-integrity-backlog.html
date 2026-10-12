@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -140,6 +140,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T174509995339-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T17:57:42.445Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at 5b0f62ece against base c7b4c626e; total 104/120 (goal_fidelity 17, evidence 16, scope_discipline 20, durability 13, fit 18, reuse 20); the two prior blocking count findings (landing-record tallies, manifest row-count) are fixed — 38 rows = 13/11/14 read 2 fixed / 7 changed / 15 still true / 8 ruling / 6 write; three follow-on findings (deleted negative-control script, lifecycle six-vs-seven rows, missing anchor-resolution count); CALL_SITES none.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261012T145528571333-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:44:35.966Z">
+    <div class="r-comment-body"><p>row-census.html re-confirms every §2-§4 item read-only at c7b4c626e — controls fire (pedestal-top family present, 20 rows; schema_digest absent); 38 rows (13 §2, 11 §3, 14 §4): 2 fixed, 7 changed, 15 still true, 8 needing a ruling, 6 needing a write to confirm</p></div>
 </div>
 </section>
 </main>
