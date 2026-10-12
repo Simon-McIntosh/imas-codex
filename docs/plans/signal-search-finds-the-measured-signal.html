@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="045d63386">
 </head>
@@ -117,10 +117,15 @@
       eligibility. A signal enters the golden set only after the Jev-era signal pipeline has enriched it. That pipeline
       reranks enrichment context through Jev (<code>43290a049</code>, 2026-10-07). It keeps the catalogue wording
       (<code>b4c89a8fc</code>, 2026-10-09). Its context rerank completes within its budget (<code>93bfb7e9d</code>,
-      2026-10-11T19:08:21Z). The predicate is <code>enriched_at</code> at or after that instant. It holds today for
-      14,991 JT-60SA signals and for no JET signal. JET was enriched earlier by another model and joins only when it is
+      committed 2026-10-11T21:08:21Z). The cutover is 2026-10-11T21:08:54Z, when the first run with that commit loaded
+      started; the run before it took SIGTERM at 21:08:29Z and finished its last batches with the old code, so the
+      commit time would admit them. The predicate is <code>enriched_at</code> at or after the cutover. It holds today
+      for 14,190 JT-60SA signals and for no JET signal. JET was enriched earlier by another model and joins only when it is
       re-extracted (§11). The predicate and its cutover live in the fixture as data, not code. A labelled signal that is
-      no longer eligible fails the fixture by name rather than being skipped.
+      no longer eligible fails the fixture by name rather than being skipped. The fixture was first written with
+      2026-10-11T19:08:21Z, two hours early, which admitted 801 signals enriched before the fix, two of the held-out
+      seeds among them. The labelling node sets the fixture's cutover to 2026-10-11T21:08:54Z, lets the harness name
+      those two seeds, and replaces them with eligible signals.
     </p>
     <p>
       Second, the questions. The eleven draft questions in <code>goldens_draft.json</code> are kept. At least six held-out
@@ -459,6 +464,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-20261012T1938-s3-heldout" data-who="reckon-build" data-when="2026-10-12T19:38:00Z">
     <div class="r-comment-body"><p>First of three nodes landed: <code>tests/llm/fixtures/signal_search_questions.json</code> (commit <code>045d63386</code>, merged in <code>25d8a7235</code>) holds 11 held-out questions written by a worker briefed without this plan, the prototype data or any search tool, with 65 grade-3 seeds across ten EDDB categories (CAM, DHC, GAS, MAG, N2GAS, PSRC, QMS, SXR, TCIFW, VV). All 65 seeds are eligible; no query carries a facility name or any of the 87 category codes; both checks fail on a mutated copy. The harness and labelling nodes remain.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-20261012T1958-s11-cutover" data-who="reckon-build" data-when="2026-10-12T19:58:00Z">
+    <div class="r-comment-body"><p>Gate <code>g-ssfms-1</code> states its cutover as 2026-10-11T19:08:21Z, which is two hours early. The cutover is 2026-10-11T21:08:54Z, the start of the first run with <code>93bfb7e9d</code> loaded (§3 gives the derivation). Count JET re-enrichment against 21:08:54Z when closing the gate; reckon offers no op to rewrite a declared gate's measure.</p></div>
 </div>
 </section>
 </main>
