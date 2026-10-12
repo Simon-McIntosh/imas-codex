@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T22:37:34.301Z",
+  "dispatched_at": "2026-10-12T22:30:45Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:308",
+      "id": "single_goal-1",
+      "reason": "the plan must either give the RRF-top-60 labelling its own node, as \u00a73 gave its top-10 labelling one, or state the labelling as an explicit precondition in \u00a77's done-when, so the node's single verdict covers one deliverable.",
+      "text": "\u00a77 now carries a second deliverable beside the rerank: \"this section first labels RRF's top 60 on every question, under \u00a73's rule and into \u00a73's fixture\", yet \u00a73 sized exactly that work as its own node (\"The harness then takes two nodes, because labelling and code do not fit one hour together\") and \u00a77's done-when closes only the rerank's ship decision, so a node could ship with the labelling half-done and neither verdict would catch it",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:294",
+      "id": "reasoning-1",
+      "reason": "a node reading \u00a77's first paragraph would look for the question text in the prototype instead of writing it from the five levels into the harness, and would find nothing.",
+      "text": "\u00a77 says the product rerank \"gets the role-aware question from the prototype\", but \u00a73 states \"The prototype did not keep its role-aware question text, so write it from \u00a77's five levels and keep it in the harness\", and the prototype directory (`~/.config/reckon/crew/reports/imas-codex/signal-search-prototype/`) holds only `arms.json`, `embedding_drift.json`, `fig_signal_search_arms.py` and `goldens_draft.json` \u2014 no question text \u2014 so the mechanism \u00a77 names reaches an artifact that does not exist, and \u00a77's own third paragraph now says the harness keeps it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:305",
+      "id": "reasoning-2",
+      "reason": "the plan's operational instruction (call the harness arm functions from a run outside pytest) is unaffected and reaches the same place through the env-var gate, so the false premise misleads a reader but does not send the node down a different path.",
+      "text": "\u00a77 states \"the suite's guard refuses paid requests inside a test process\" as its reason for scoring the rerank arms from a measurement run outside pytest, but the harness implements no such guard: it gates the two Jev arms behind the opt-in environment variable `SSFMS_JEV_ARMS` (tests/llm/test_signal_search_goldens.py) and otherwise returns the fused pool order without spending",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "8c87d1c22edf404d7b4be3325e9a65b1f2ad0f2e91750ec046306ef1a668254d",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 25,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T223027256177-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "da7c1ae4616f6727bdedb4c0e41b755d8e0df851",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the code anchors \u00a77 names (`rerank_candidates`, `_RERANK_QUESTION`) exist, and the plan's hrefs resolve as `<path>.html`; the one unresolvable citation is reported against the reasoning item.",
+    "done_when": "pass \u2014 \u00a77's done-when is unchanged by this review's unit (only its third paragraph changed) and measures the rerank against fusion alone with a ship decision that can go either way; the labelling it now carries is enforced by \u00a73's refusal guard.",
+    "evidence_paths": "pass \u2014 \u00a77 names no session scratchpad or node-local temporary path; its evidence fragment convention matches the sibling sections.",
+    "naming": "pass \u2014 \u00a77's changed text introduces no plan labels, stage names, ticket numbers or changelog prose.",
+    "reasoning": "a finding \u2014 \u00a77's stated source of the role-aware question and its stated reason for scoring outside pytest do not match what the repository and the prototype hold.",
+    "single_goal": "a finding \u2014 \u00a77 now owns labelling RRF's top 60 into \u00a73's fixture as well as implementing and scoring the rerank, while its gate closes only the ship decision.",
+    "wiring": "pass \u2014 \u00a77's dependency on \u00a74 is declared in the followup (\"\u00a77 follows \u00a74\"), and its use of \u00a73's fixture and rule is stated in \u00a77's own text, so the relationships it needs resolve."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "21cb67ae2f717525df04e4e4da39715e179eedb4bf5d77aee908cf4919b8264d",
+    "s4": "ff798997815d5f566c82571e887c792ba4db14c9b54cd6306c43a26e35044551",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "b63d54057fc7e6488f10f31bbea64aaa52be7e815c73b9dddc1b437af419d6b3",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:39:17.118175+00:00"
+}
