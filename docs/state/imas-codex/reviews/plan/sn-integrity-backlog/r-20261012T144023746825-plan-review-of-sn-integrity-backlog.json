@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:51:01.043Z",
+  "dispatched_at": "2026-10-12T14:40:35Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:112",
+      "id": "anchors_resolve-1",
+      "reason": "the row is dropped and its followup is independently resolved, so correcting the surface name fixes a citation, not the work.",
+      "text": "\u00a75 drops `f-scai-groups-wiring` with \"Its surface is replaced by `sn harmonize`\", but `imas-codex sn --help` lists no `harmonize` subcommand; the surface that actually carries the grouped review is `sn review --target groups` (`imas_codex/cli/sn.py:6103`), and `imas_codex/standard_names/harmonize.py:12` itself points at a `sn harmonize --report` that does not exist",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:121",
+      "id": "reasoning-1",
+      "reason": "without a fourth disposition (a decision or external-blocked row routed to the lead) the census node must invent a verdict for these rows or silently drop them, and the plan does not say which.",
+      "text": "\u00a76 gives each surviving item one verdict from {still true, fixed, changed} and assigns it to \"one proposed repair section with its write paths, its gate and an effort estimate\", but \u00a73 carries \"four questions recorded for the lead\" and a \"wait on an ISN token\" and \u00a74 carries \"Whether one DD path may hold several source nodes\" and \"Domain routes and terminal stages\" \u2014 none of these is a measurable drift and none yields a repair section with write paths, so the row schema cannot represent them",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4300afb9e0f40abbd7c1b2ee70d567813136fd44762fb515cb3b357fd840e438",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-12T14:52:54.884404+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T14:52:56.343127+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:52:54.884404+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:52:56.343127+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v4.json",
+  "review_run_id": "r-20261012T144023746825-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "8f3d75dc751a61c8b560fe450e9c168344d3dcc2",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a75 cites the replacement surface `sn harmonize`, which is not a command in this tree.",
+    "done_when": "pass \u2014 \u00a76's done-when names a durable census artifact and two calibration controls (the rebuilt `*_density_at_pedestal_top` family reading present, and `schema_digest` still absent), so the instrument is shown able to see both a fix and a defect.",
+    "evidence_paths": "pass \u2014 the census lands at `docs/evidence/fragments/sn-integrity-backlog/row-census.html`, a durable repository path matching the fragments convention used by sibling directories.",
+    "naming": "pass \u2014 the deliverable directory reuses a plan slug, matching the existing `docs/evidence/fragments/<slug>/` convention; no plan label, stage name or ticket number reaches a symbol or comment.",
+    "reasoning": "a finding \u2014 \u00a76's verdict vocabulary and its \"assign each survivor to a repair section\" mechanism cannot represent the decision and externally-blocked rows that \u00a73 and \u00a74 carry.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, the row census; \u00a7\u00a72\u20134 are tables declared `deferred`, not nodes.",
+    "wiring": "pass \u2014 \u00a76 is the plan's only node; its release relationship is declared by `plan-blocks=\"sn-west-prototype-release\"` and the downstream repair sections it gates do not yet exist, so no `depends-on`/`informs`/`gates` link is dangling."
+  },
+  "section_digests": {
+    "_document": "dafeebf52a1e87468aa2cabd5149aa973174c25633b2a32218519b5d980f1b14",
+    "s1": "5c436b5cc337a48171153f80f3379b295fc3cbfdf5739c277014cc16b3e8a370",
+    "s2": "7aa37c2bbbfa53cbf3145d6abf322688f1e71d8ff36605186c70a29c43e80661",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "a458ff5439a63685250ff94ecd8219233512a6cb4c1774e5634aa35e0d1780b2",
+    "s6": "20ee239abf12d5d2b13a45a4a103e64b53c6ad0a6a8c06fb85d7197b6b25c468"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:52:54.119132+00:00"
+}
