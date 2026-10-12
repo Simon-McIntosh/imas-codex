@@ -83,6 +83,13 @@
       "finding": "done_when-1",
       "reason": "section 5 is human labelling with no code to guard; its falsifiable check is the recorded coordinator-lead kappa on the 50-item overlap with the disagreements and rulings, and a planted-defect control has nothing to act on",
       "when": "2026-10-12T07:14:59.313426+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T07:15:04.696558+00:00"
     }
   ],
   "responses": {
@@ -96,7 +103,7 @@
       "action": "acted",
       "by": "",
       "reason": "",
-      "when": "2026-10-12T07:14:50.262715+00:00"
+      "when": "2026-10-12T07:15:04.696558+00:00"
     },
     "reasoning-2": {
       "action": "acted",
