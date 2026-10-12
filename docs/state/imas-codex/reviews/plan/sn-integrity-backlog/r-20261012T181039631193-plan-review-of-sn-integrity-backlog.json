@@ -1,0 +1,137 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:17:20.910Z",
+  "dispatched_at": "2026-10-12T18:10:52Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:161",
+      "id": "done_when-1",
+      "reason": "a worker closing \u00a716 must either fail an unsatisfiable gate or silently reinterpret the rg scope, and the earlier review of this same done-when was acted on precisely because the measure exceeded the removal scope.",
+      "text": "\u00a716's done-when requires `rg -n superseded_by` over the tree to find only the migration, but the string survives in files outside the removal set the section defines (\"every reader the record lists\", the 20 files of the successor-scalar reader record) \u2014 this plan's own HTML, `docs/architecture/standard-names.md`, `docs/research/09-codex-pivot-analysis.html`, the `docs/figures/` SVGs and `plans/features/standard-names/artefacts/field-audit.json`, all confirmed present by a tree-wide `rg` at 827f9642a \u2014 so the measure cannot pass even when the work is done",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:173",
+      "id": "done_when-2",
+      "reason": "the census's whole product is one number that decides whether a ~12-hour rebuild section follows, and an uncontrolled zero inverts that decision.",
+      "text": "\u00a719's done-when records \"the current count, its bounded query and the query's elapsed time\" but names no control showing the query can see the population it counts, so a re-derivation wrongly returning zero reads as \"the 72 are gone\" rather than as a broken query, whereas the sibling measurement section \u00a76 does carry both a fix-seeing and a defect-seeing control",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:160",
+      "id": "reasoning-1",
+      "reason": "the plan schedules and budgets on the attribute, not the prose, so \u00a716 is under-declared by four hours.",
+      "text": "\u00a716's declared effort is `data-effort-hours=\"8.0\"` while its own prose states \"This is about 12 hours, not the 8 first estimated\", and the census row it cites also carries \"~8 h\", so the section's recorded estimate is stale against its revised figure",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:224",
+      "id": "anchors_resolve-1",
+      "reason": "the stale \"(a)\" is cosmetic now that \u00a715 is single, and a reader reaches the right section from \"\u00a715\" alone.",
+      "text": "question q-sib-path-source-cardinality says the dual-bound ruling \"shapes \u00a715(a)\", but \u00a715 (rewritten as the single compose-supersede reproduction) has no (a) subdivision, so the reference resolves to nothing",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "d43501691a345e716192def85023d5683c26b2bbdeb64fb5e2dcfe3fba6701fb",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 13,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-12T18:20:18.487241+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "",
+      "when": "2026-10-12T18:20:21.956880+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T18:20:25.407337+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "the question body sits inside a structured questions region that edit_plan cannot rewrite in text mode and has no set path; '\u00a715' alone still reaches the right section, as the finding notes",
+      "when": "2026-10-12T18:20:28.200405+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the question body sits inside a structured questions region that edit_plan cannot rewrite in text mode and has no set path; '\u00a715' alone still reaches the right section, as the finding notes",
+      "when": "2026-10-12T18:20:28.200405+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:20:18.487241+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:20:21.956880+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:20:25.407337+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v13.json",
+  "review_run_id": "r-20261012T181039631193-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "b53df60b2d18dafc3d3e41494b96fcea87518c90",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 q-sib-path-source-cardinality points at \"\u00a715(a)\", but \u00a715 was rewritten to a single unsubdivided reproduction and carries no (a).",
+    "done_when": "a finding \u2014 \u00a716's done-when measures \"`rg -n superseded_by` over the tree finds only the migration\", a whole-tree scope wider than the removal set the same section defines, and \u00a719's census records a count with no control that the query can see the population it counts.",
+    "evidence_paths": "pass \u2014 \u00a715 and \u00a719 name durable fragment paths under `docs/evidence/fragments/sn-integrity-backlog/`, \u00a76 names `row-census.html`, and the repair sections gate on repository tests; no path resolves to a scratch or node-local directory.",
+    "naming": "pass \u2014 the changed sections use mechanism language (\"an edits-scoped run skips global maintenance\", \"an export that filters every candidate\"); no plan labels, stage names or ticket ids reach a symbol, and no changelog prose is introduced.",
+    "reasoning": "a finding \u2014 \u00a716's declared effort (`data-effort-hours=\"8.0\"`) contradicts its own text (\"about 12 hours, not the 8 first estimated\").",
+    "single_goal": "pass \u2014 \u00a714 (one confirm-by-test), \u00a715 (one reproduction), \u00a716 (one retirement), \u00a718 (one confirm-by-test) and \u00a719 (one re-derivation) each carry a single deliverable.",
+    "wiring": "pass \u2014 the plan encodes its one real ordering through \u00a76 (census, status done) and followup f-sib-002 (\"build \u00a76 before anything else\"); no section declares a depends-on that a live sibling has not already satisfied, and the plan-blocks meta names the WEST release it feeds."
+  },
+  "section_digests": {
+    "_document": "4e581db3ee9c35616bb1a8149cec70a7ebdd6eee314282bf1afd99d707992e4e",
+    "s1": "571d1542955f1382d7e0f47b5f8def69e8d4201f948c3933a15fd1cc2c98e7f8",
+    "s10": "84c8bdeb15133e22cd2f08ee96d429ac3f92f85d28d6720d5e2fd0a87a97cbf2",
+    "s11": "499a319e38a73614c326b3607a7d1cae481dac12714fad0562ffe74a78694c89",
+    "s12": "62e459e2a7b4232b44e54b32969fb970620d613ef8797e09b993d36d4b44d757",
+    "s13": "80e90ea7c45053ae6c5de9d69ac1ef80a87289bb80c7afb2f796f3c31b3235d7",
+    "s14": "4981171151a50aafb83f844e0ad63c7df82749d58b56d7fb8590f5ee8cccfb9b",
+    "s15": "0e2bcb71a7aac4d1ddeae8e3a5959c43e1f3e90ae3ea89c3ca3b16303b3f87b2",
+    "s16": "a30d746d7279c9321a39bdc48551a6ee31587cb2b2872dec029baf9fb9e512ef",
+    "s17": "32359142ba3b6f1263abefa9f37711fbc5fdefe9548620b20287985e5858d673",
+    "s18": "c6a5bf0492c322e4f1c9ebe6e0e4b880f6312ab30ec62992d8c786d321fa2d82",
+    "s19": "2b4a86eca9f6a344a553a204a183768a3550efb083903a840d9cf7189eacec39",
+    "s2": "af2703cbe346dcd322398505bfee69c50a6bcd1238937227f17cdb6c5fc75c58",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s6": "e6bf01013b7bd341cf2f86ebf24dc60084ea8cabeb4cf4cd2664c1109ac5ca62",
+    "s7": "1930b98dfc66a2e1f9a1ce5149fbb73fe208b66c3e0c35664330a12e7e945933",
+    "s8": "6b362f87f941f8c95d562c95cdf93e578892ff32c85156fd5565c76548c58eab",
+    "s9": "20748220a6f94f6c422b1b677587d4456ccf3be5fbe204daac414373443327bd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:20:07.269337+00:00"
+}
