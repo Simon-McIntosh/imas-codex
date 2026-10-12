@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs named in its manifest: baseline_suite (revision f5aafd581, log baseline.log, 29 passed, EXIT=0, completed:true, failure_count 0, failure_ids []) and after_suite (revision 52458a414, log after.log, 34 passed, EXIT=0, completed:true, failure_count 0, failure_ids []). Head adds no failing test; the +5 are the reviewed node's own new passing cases (29 -> 34).",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/evaluation-known-answers uv run pytest -p no:cacheprovider tests/discovery/test_evaluation.py tests/discovery/test_path_category_gate.py tests/test_bench_discrimination.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T164514832410-evaluation-known-answers/after.log",
+    "revision": "52458a41446482e72ed7dcaa47b1b6207e89d243"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/evaluation-known-answers uv run pytest -p no:cacheprovider tests/discovery/test_evaluation.py tests/discovery/test_path_category_gate.py tests/test_bench_discrimination.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T164514832410-evaluation-known-answers/baseline.log",
+    "revision": "f5aafd581f61e8a7972c87415fb4af55a6d3b7ee"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T17:10:32.991Z",
+  "dispatched_at": "2026-10-12T17:05:16Z",
+  "findings": [
+    {
+      "anchor": "tests/discovery/test_evaluation.py:151",
+      "cites": "new",
+      "class": "non_discriminating_assertion",
+      "id": "durability-1",
+      "item": "non_discriminating_assertion",
+      "severity": "follow-on",
+      "text": "test_reversed_arm_gives_unit_difference asserts point == 1.0, a value the module also returns when scores_b is dropped (auc_a alone is 1.0 for this fully separating arm), so the assertion passes under the paired-arm regression it appears to guard; the paired-difference capability therefore rests on test_identical_arms_give_zero_difference_bracketed_by_its_interval at :153 alone, and test_paired_interval_is_narrower_than_independent_resampling at :158 likewise did not redden under either recorded negative control (negative_control_scores_b.log shows only the identical-arms id red)."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified no production call site",
+    "diff": "read commit by commit against base f5aafd581f61e8a7972c87415fb4af55a6d3b7ee; one commit 52458a414 adds 5 tests (TestBootstrapCopyGroups at tests/discovery/test_evaluation.py:94-123 and TestPairedDifferenceInterval at :141-170) plus the _independent_difference_interval reference helper at :39, rewrites the two self-comparing assertions at :87 and :128-133, imports numpy, and rewrites the option_order_stability docstring at imas_codex/discovery/base/evaluation.py:347; the fragment docs/evidence/fragments/sn-judgment-evaluation/evaluation-known-answers.html is a new 54-line record; nothing else moves.",
+    "done_when": "the brief asks each new test to fail when its target is broken, both mutations shown once with the runner's EXIT lines kept, and the gate files recorded with revision/exit_status/completed:true; negative_control_copy_groups.log carries EXIT=1 with the two TestBootstrapCopyGroups ids red and negative_control_scores_b.log carries EXIT=1 with the identical-arms id red, and baseline.log/after.log carry 29 and 34 passed with EXIT=0 at their named revisions.",
+    "goal": "the goal is to guard the two capabilities only the evaluation module carries (copy_group resampling of bootstrap_interval and the scores_b paired-difference interval) with known-answer tests, replace two self-comparing assertions, and drop a version-pinned docstring; tests/discovery/test_evaluation.py:94-170 adds the tests, :87 and :133 replace the self-comparing assertions with literals, and imas_codex/discovery/base/evaluation.py:347-350 states the mechanism instead of jev-1.13.",
+    "manifest": "read; it records status complete, commit 52458a414, changed_paths tests/discovery/test_evaluation.py + imas_codex/discovery/base/evaluation.py + the fragment, gate '34 passed EXIT=0', baseline_suite and after_suite with revision/exit_status/completed:true, and negative_control_log negative_control_copy_groups.log plus a second control note.",
+    "write_paths": "the manifest declares tests/discovery/test_evaluation.py, imas_codex/discovery/base/evaluation.py (the version-pinned docstring only) and docs/evidence/fragments/sn-judgment-evaluation/evaluation-known-answers.html; git diff --stat f5aafd581..52458a414 lists exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "reverting copy-group handling reddens tests/discovery/test_evaluation.py:109 and :118 (negative_control_copy_groups.log, 2 failed EXIT=1) and dropping scores_b reddens :153 (negative_control_scores_b.log, 1 failed EXIT=1), so two capabilities each have a failing-on-regression guard, but :151 and :158 were not shown to fail under either mutation so two of the five additions are unproven guards.",
+    "evidence": "baseline.log records 29 passed EXIT=0 at f5aafd581 and after.log records 34 passed EXIT=0 at 52458a414, and the two negative-control logs carry the runner's own EXIT=1 lines with the failing ids, so the gate result is recorded on disk rather than merely claimed.",
+    "fit": "the additions follow the file's existing known-answer idiom with literal answers at tests/discovery/test_evaluation.py:87 and :133, the new test names describe the behaviour (no plan/sprint/ticket identifiers), and imas_codex/discovery/base/evaluation.py:347-350 now states the mechanism ('a judge that leans to the first option') rather than pinning a model version.",
+    "goal_fidelity": "tests/discovery/test_evaluation.py:94-170 adds the copy-group and paired-difference known answers the brief names, the two self-comparing assertions at :87 and :133 now read off the labels (0.75 and 0.25) instead of the code, and imas_codex/discovery/base/evaluation.py:347-350 no longer pins jev-1.13.",
+    "reuse": "a repository-wide search for `np.percentile` and `def bootstrap` finds the only percentile-interval owner is imas_codex/discovery/base/evaluation.py:144 itself, so the new definitions extend that owner, and the test-local _independent_difference_interval at tests/discovery/test_evaluation.py:39 is a deliberate reference computation (it must not reuse the module under test), not a production capability fork.",
+    "scope_discipline": "git diff --stat f5aafd581..52458a414 lists only the three declared write paths, and the imas_codex/discovery/base/evaluation.py hunk is confined to the option_order_stability docstring with no code change."
+  },
+  "node": "review-of-evaluation-known-answers",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to guard the two capabilities only the evaluation module carries (copy_group resampling of bootstrap_interval and the scores_b paired-difference interval) with known-answer tests, replace two self-comparing assertions, and drop a version-pinned docstring; tests/discovery/test_evaluation.py:94-170 adds the tests, :87 and :133 replace the self-comparing assertions with literals, and imas_codex/discovery/base/evaluation.py:347-350 states the mechanism instead of jev-1.13.\nVERDICT done_when: the brief asks each new test to fail when its target is broken, both mutations shown once with the runner's EXIT lines kept, and the gate files recorded with revision/exit_status/completed:true; negative_control_copy_groups.log carries EXIT=1 with the two TestBootstrapCopyGroups ids red and negative_control_scores_b.log carries EXIT=1 with the identical-arms id red, and baseline.log/after.log carry 29 and 34 passed with EXIT=0 at their named revisions.\nVERDICT write_paths: the manifest declares tests/discovery/test_evaluation.py, imas_codex/discovery/base/evaluation.py (the version-pinned docstring only) and docs/evidence/fragments/sn-judgment-evaluation/evaluation-known-answers.html; git diff --stat f5aafd581..52458a414 lists exactly those three paths and nothing else.\nVERDICT manifest: read; it records status complete, commit 52458a414, changed_paths tests/discovery/test_evaluation.py + imas_codex/discovery/base/evaluation.py + the fragment, gate '34 passed EXIT=0', baseline_suite and after_suite with revision/exit_status/completed:true, and negative_control_log negative_control_copy_groups.log plus a second control note.\nVERDICT diff: read commit by commit against base f5aafd581f61e8a7972c87415fb4af55a6d3b7ee; one commit 52458a414 adds 5 tests (TestBootstrapCopyGroups at tests/discovery/test_evaluation.py:94-123 and TestPairedDifferenceInterval at :141-170) plus the _independent_difference_interval reference helper at :39, rewrites the two self-comparing assertions at :87 and :128-133, imports numpy, and rewrites the option_order_stability docstring at imas_codex/discovery/base/evaluation.py:347; the fragment docs/evidence/fragments/sn-judgment-evaluation/evaluation-known-answers.html is a new 54-line record; nothing else moves.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/discovery/test_evaluation.py:94-170 adds the copy-group and paired-difference known answers the brief names, the two self-comparing assertions at :87 and :133 now read off the labels (0.75 and 0.25) instead of the code, and imas_codex/discovery/base/evaluation.py:347-350 no longer pins jev-1.13.\nSCORE evidence: 19\nJUSTIFICATION evidence: baseline.log records 29 passed EXIT=0 at f5aafd581 and after.log records 34 passed EXIT=0 at 52458a414, and the two negative-control logs carry the runner's own EXIT=1 lines with the failing ids, so the gate result is recorded on disk rather than merely claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat f5aafd581..52458a414 lists only the three declared write paths, and the imas_codex/discovery/base/evaluation.py hunk is confined to the option_order_stability docstring with no code change.\nSCORE durability: 17\nJUSTIFICATION durability: reverting copy-group handling reddens tests/discovery/test_evaluation.py:109 and :118 (negative_control_copy_groups.log, 2 failed EXIT=1) and dropping scores_b reddens :153 (negative_control_scores_b.log, 1 failed EXIT=1), so two capabilities each have a failing-on-regression guard, but :151 and :158 were not shown to fail under either mutation so two of the five additions are unproven guards.\nSCORE fit: 19\nJUSTIFICATION fit: the additions follow the file's existing known-answer idiom with literal answers at tests/discovery/test_evaluation.py:87 and :133, the new test names describe the behaviour (no plan/sprint/ticket identifiers), and imas_codex/discovery/base/evaluation.py:347-350 now states the mechanism ('a judge that leans to the first option') rather than pinning a model version.\nSCORE reuse: 20\nJUSTIFICATION reuse: a repository-wide search for `np.percentile` and `def bootstrap` finds the only percentile-interval owner is imas_codex/discovery/base/evaluation.py:144 itself, so the new definitions extend that owner, and the test-local _independent_difference_interval at tests/discovery/test_evaluation.py:39 is a deliberate reference computation (it must not reuse the module under test), not a production capability fork.\nFINDING tests/discovery/test_evaluation.py:151 follow-on: test_reversed_arm_gives_unit_difference asserts point == 1.0, a value the module also returns when scores_b is dropped (auc_a alone is 1.0 for this fully separating arm), so the assertion passes under the paired-arm regression it appears to guard; the paired-difference capability therefore rests on test_identical_arms_give_zero_difference_bracketed_by_its_interval at :153 alone, and test_paired_interval_is_narrower_than_independent_resampling at :158 likewise did not redden under either recorded negative control (negative_control_scores_b.log shows only the identical-arms id red).",
+  "review_run_id": "r-20261012T170457337559-review-of-evaluation-known-answers",
+  "reviewed_base_sha": "f5aafd581f61e8a7972c87415fb4af55a6d3b7ee",
+  "reviewed_head_sha": "52458a41446482e72ed7dcaa47b1b6207e89d243",
+  "reviewed_run_id": "r-20261012T164514832410-evaluation-known-answers",
+  "reviewer_run_id": "r-20261012T170457337559-review-of-evaluation-known-answers",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T164514832410-evaluation-known-answers/baseline.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T164514832410-evaluation-known-answers/after.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T164514832410-evaluation-known-answers/negative_control_copy_groups.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T164514832410-evaluation-known-answers/negative_control_scores_b.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T17:09:10.351069+00:00",
+  "total": 115
+}
