@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-signed-supersede-edge">
+<title>Landing record — sib-signed-supersede-edge</title>
+</head>
+<body>
+<main>
+<h1 id="sib-signed-supersede-edge-landing-title">Landing record: the signed supersede mutation mints its receipt-stamped successor edge</h1>
+<p id="sib-signed-supersede-edge-landing-change">
+A signed <code>supersede</code> now MERGEs
+<code>(predecessor:StandardName)-[:HAS_SUCCESSOR {receipt_id, signed_at}]-&gt;(successor:StandardName)</code>
+inside the same apply, in <code>imas_codex/standard_names/signed_manifest.py</code>.
+The edge carries the minting receipt's id in <code>receipt_id</code>, so a signed
+edge is distinguishable from one a scalar-derived rebuild creates, which carries no
+such property. <code>superseded_by</code> still writes. A missing successor leaves
+the edge unwritten through an <code>OPTIONAL MATCH … FOREACH</code> guard.
+</p>
+<p id="sib-signed-supersede-edge-landing-postcondition">
+The mutation's postcondition now requires that edge: it reads the
+<code>HAS_SUCCESSOR</code> relationship, requires exactly one row, and requires its
+<code>receipt_id</code> to equal the receipt the apply minted for that row. A
+supersede whose edge is absent or unstamped raises <code>SignedManifestConflict</code>.
+</p>
+<p id="sib-signed-supersede-edge-landing-measure">
+Pinned by
+<code>tests/standard_names/test_signed_supersede_edge.py</code>: one test applies a
+signed supersede on a disposable graph and asserts the edge reads back with the
+minting receipt's id; one asserts the postcondition refuses the supersede when the
+edge write is stubbed out. Gate: base <strong>166 passed, EXIT=0</strong>; after
+<strong>168 passed, EXIT=0</strong> — the two new tests, zero added failures.
+</p>
+<p id="sib-signed-supersede-edge-landing-negative-control">
+Negative control: stubbing the edge write (<code>_supersede_successor_edge_write</code>
+returns <code>""</code>) makes
+<code>test_signed_supersede_mints_receipt_stamped_successor_edge</code> fail
+(<code>EXIT=1</code>); log at <code>negative_control.log</code>.
+</p>
+</main>
+</body>
+</html>

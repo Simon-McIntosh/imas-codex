@@ -2364,6 +2364,26 @@ def _signed_supersede_successor(mutation: Mapping[str, Any]) -> str | None:
     return str(successor_id) if successor_id is not None else None
 
 
+def _supersede_successor_edge_write(successor_id: str | None) -> str:
+    """Cypher fragment that mints the signed successor edge.
+
+    The edge carries the minting receipt's id in ``receipt_id``, so a signed
+    edge is distinguishable from one a scalar-derived rebuild creates, which
+    has no such property. A missing successor leaves the edge unwritten; the
+    supersede postcondition then refuses the row.
+    """
+    if successor_id is None:
+        return ""
+    return """
+        WITH target
+        OPTIONAL MATCH (successor:StandardName {id: $successor_id})
+        FOREACH (_ IN CASE WHEN successor IS NULL THEN [] ELSE [1] END |
+          MERGE (target)-[edge:HAS_SUCCESSOR]->(successor)
+          SET edge.receipt_id = $receipt_id,
+              edge.signed_at = datetime())
+        """
+
+
 def _receipt_names(row: _LoadedRow) -> tuple[str, str]:
     from_name = str(
         row.identity.get("target_id") or row.identity.get("source_id") or row.id
@@ -3933,6 +3953,7 @@ def _verify_postconditions(
     query: _Query,
     authority: _Authority,
     row_ids: list[str],
+    manifest_sha256: str,
     actions: list[dict[str, Any]] | None = None,
 ) -> None:
     if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
@@ -4110,6 +4131,27 @@ def _verify_postconditions(
                     raise SignedManifestConflict(
                         "recorded signed-manifest repair lost its postcondition"
                     )
+                if successor_id is not None:
+                    successor_edge = query.query(
+                        """
+                        MATCH (node:StandardName {id: $id})
+                              -[relationship:HAS_SUCCESSOR]->
+                              (successor:StandardName {id: $successor_id})
+                        RETURN relationship.receipt_id AS receipt_id,
+                               count(relationship) AS count
+                        """,
+                        id=participant["id"],
+                        successor_id=successor_id,
+                    )
+                    expected_receipt_id = _change_id(manifest_sha256, row.id)
+                    if (
+                        not successor_edge
+                        or int(successor_edge[0].get("count") or 0) != 1
+                        or successor_edge[0].get("receipt_id") != expected_receipt_id
+                    ):
+                        raise SignedManifestConflict(
+                            "recorded signed-manifest repair lost its successor edge"
+                        )
         guard_names = _guard_names(row)
         if guard_names & {_NO_LIVE_PRODUCER, _NO_LIVE_STRUCTURAL_CHILD}:
             target_id = str(row.identity.get("target_id") or row.id)
@@ -4231,7 +4273,7 @@ def _replay(
         )
     ):
         raise SignedManifestConflict("signed-manifest receipt cohort is incomplete")
-    _verify_postconditions(query, authority, admitted_ids)
+    _verify_postconditions(query, authority, admitted_ids, manifest_sha256)
     return {
         "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
         "outcome": "already_applied",
@@ -4564,7 +4606,7 @@ def _apply_unbound_source_attachment(query: _Query, action: dict[str, Any]) -> i
     return len(row.mutations)
 
 
-def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
+def _apply_mutation(query: _Query, action: dict[str, Any], manifest_sha256: str) -> int:
     if "stale_action" in action:
         expected = action["stale_action"]
         changed = query.query(
@@ -4723,6 +4765,7 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
                 if successor_id is not None
                 else ""
             )
+            successor_edge_update = _supersede_successor_edge_write(successor_id)
             result = query.query(
                 f"""
                 MATCH (target:StandardName)
@@ -4735,10 +4778,12 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
                     {source_path_update}
                     target.claimed_at = null,
                     target.claim_token = null
+                {successor_edge_update}
                 RETURN count(target) AS changed
                 """,  # noqa: S608 - the inserted fragment is selected locally
                 element_id=snapshot["element_id"],
                 successor_id=successor_id,
+                receipt_id=_change_id(manifest_sha256, row.id),
             )
         else:
             result = query.query(
@@ -7856,7 +7901,8 @@ def apply_signed_manifest(
                 )[0]
                 authority.data["counters_before"] = counters_before
                 mutation_count = sum(
-                    _apply_mutation(query, action) for action in locked_preview.admitted
+                    _apply_mutation(query, action, locked_preview.manifest_sha256)
+                    for action in locked_preview.admitted
                 )
                 change_ids = _write_receipts(
                     query,
@@ -7873,6 +7919,7 @@ def apply_signed_manifest(
                     query,
                     authority,
                     [action["row"].id for action in locked_preview.admitted],
+                    locked_preview.manifest_sha256,
                     locked_preview.admitted,
                 )
                 collateral_after = _collateral_snapshot(
