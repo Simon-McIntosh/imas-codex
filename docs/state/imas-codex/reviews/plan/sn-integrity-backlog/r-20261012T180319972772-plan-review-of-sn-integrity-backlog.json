@@ -1,0 +1,156 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:08:00.120Z",
+  "dispatched_at": "2026-10-12T18:03:33Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:161",
+      "id": "reasoning-1",
+      "reason": "the node as written sends the repair at six modules while its gate requires touching twenty, and the one derived-edge reader needs a replacement mechanism the plan does not state, so the section would fail its own done-when or destroy successor resolution.",
+      "text": "\u00a716 scopes the removal to \"the modules the successor-derivation record names\" (the census, `docs/evidence/fragments/sn-integrity-backlog/row-census.html:70`, states this as \"six modules\"), but its own done-when asserts \"`superseded_by` has no reader in the tree\", which the cited record contradicts: that record enumerates 42 reader lines across 20 files and names surfaces outside the six production modules \u2014 the LinkML declaration at `schemas/standard_name.yaml:925`, its three generated artefacts, a documentation row and nine test files \u2014 and reports that `graph_ops.py:3193` derives the `HAS_SUCCESSOR` edges *from* the scalar, so removing that read removes the very edge \u00a716 relies on to resolve successors; a worker following the six-module scope cannot close the \"no reader\" gate, and a worker that instead strips every occurrence risks the edge derivation.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:75",
+      "id": "reasoning-2",
+      "reason": "\u00a76's census exists to replace recorded figures with live ones, and a repair or scoping decision resting on 334 would understate the population by 78 names.",
+      "text": "\u00a72 states \"334 live names are labelled scaffolding while carrying reviewed documentation\", and \u00a71's lead paragraph repeats \"334 live names\", but the census \u00a76 cites gives `Recorded: \u2026 334 \u2026 Live: {\"docs_acc_nonempty\": 412} \u2026 the misleading derived-while-documented population is now 412` (`docs/evidence/fragments/sn-integrity-backlog/row-census.html:136-137`); 334 is the recorded figure and \u00a717 uses the correct live figure, 412, for the same population, so the plan carries two different \"live\" counts for one defect.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:153",
+      "id": "single_goal-1",
+      "reason": "the node cannot be closed on one verdict, since either guard can land and pass while the other is absent or still-unfixed, and its single gate proves neither fix.",
+      "text": "\u00a714 is one node carrying two independent release-path fixes with two independent guards: an edits-scoped `sn run` honouring `--skip-global-maintenance` in `imas_codex/cli/sn.py`, and an export that filters every candidate refusing instead of exiting 0, whose done-when itself separates into \"one test \u2026 and one shows \u2026\".",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:157",
+      "id": "single_goal-2",
+      "reason": "one verdict cannot close a node whose two results point at different follow-on repairs, and a partial result is unclassifiable.",
+      "text": "\u00a715 is headed \"Two measurements before repair\" and carries (a) a reproduction of the compose-supersede failure over a dual-bound source and (b) a re-derivation of the unsourced-ancestry census, two unrelated measurements whose results each \"decide whether a repair section follows\".",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:157",
+      "id": "evidence_paths-1",
+      "reason": "\u00a76 establishes the fragment directory convention, so the worker has a durable home and the omission is a naming tightening rather than a redirect.",
+      "text": "\u00a715's done-when requires that \"an evidence fragment records both\" measurements but names no path for it, unlike \u00a76 which names `docs/evidence/fragments/sn-integrity-backlog/row-census.html`.",
+      "type": "evidence_paths",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "0197d79308ec0d991bd055a67603d933e0ece585db9fc6445f5904b7f3849e89",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 11,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T18:10:02.353798+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-12T18:10:04.612504+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "",
+      "when": "2026-10-12T18:10:06.386245+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "single_goal-2",
+      "reason": "",
+      "when": "2026-10-12T18:10:08.590479+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "evidence_paths-1",
+      "reason": "",
+      "when": "2026-10-12T18:10:11.335716+00:00"
+    }
+  ],
+  "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:10:11.335716+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:10:02.353798+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:10:04.612504+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:10:06.386245+00:00"
+    },
+    "single_goal-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:10:08.590479+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v11.json",
+  "review_run_id": "r-20261012T180319972772-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "33c4d0b6d7e6b2a21c93863de81c681223dab96c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited files and symbols resolve (`ledger.py:96` `find_provenance_orphans`, `ledger.py:123` `find_edge_scalar_desyncs`, `provenance_lifecycle.py:1229` `find_semantic_source_invariant_violations`, `tests/graph/test_sn_integrity_ratchets.py`, `imas_codex/standard_names/edit.py`, `protection.py`, `export.py`, `tests/standard_names/test_export_release_holds.py`), the \u00a79 refusal string resolves at `imas_codex/cli/sn.py:8426`, `schema_digest` is absent from the tree as \u00a76 asserts, and the cited commits `04b0794b4` and `b138bca23` both resolve; the one extensionless-looking anchor, \"the successor-derivation record\", resolves to the reader enumeration the lifecycle plan links as `/imas-codex/evidence/sn-lifecycle-integrity/successor-scalar-readers`.",
+    "done_when": "pass \u2014 every repair node states a measure that can fail against the census's recorded state: \u00a77/\u00a710/\u00a711/\u00a712 name a revert control (\"fails with its fix reverted\"), \u00a79 names it (\"fails with the refusal removed\"), \u00a714 names it (\"fails with its guard removed\"), and \u00a76 names both a see-a-fix and a see-a-defect control (`*_density_at_pedestal_top` present, `schema_digest` absent); \u00a78/\u00a713/\u00a716 omit the explicit revert line but remain falsifiable against the census's recorded absent state.",
+    "evidence_paths": "a finding \u2014 \u00a715 sends two measurements to \"an evidence fragment\" without naming its path.",
+    "naming": "pass \u2014 no proposed symbol, filename or comment carries a plan label, stage name, ticket number or version tag; the section ids and followup ids appear only as plan-document references, and the done-whens name mechanisms rather than tracker entries.",
+    "reasoning": "two findings \u2014 \u00a716's mechanism cannot produce its own done-when, and \u00a72's \"334 live\" figure is the census's recorded figure, not its live one.",
+    "single_goal": "two findings \u2014 \u00a714 and \u00a715 each carry two independently-stateable deliverables under one gate.",
+    "wiring": "pass \u2014 the \u00a76-first ordering and the release-path priority of the repair rows are carried explicitly in prose and durably in f-sib-002 (`data-recommends-skill=\"/reckon-build sn-integrity-backlog \u00a76\"`), and each routed row resolves to a section that exists; no section declares a `data-links` relationship, but no row depends on a node the plan omits."
+  },
+  "section_digests": {
+    "_document": "c8e2d59f6f5ce4b888f267f6c74f3f490361351c841be5c115f8cc88707068fa",
+    "s1": "5c436b5cc337a48171153f80f3379b295fc3cbfdf5739c277014cc16b3e8a370",
+    "s10": "84c8bdeb15133e22cd2f08ee96d429ac3f92f85d28d6720d5e2fd0a87a97cbf2",
+    "s11": "499a319e38a73614c326b3607a7d1cae481dac12714fad0562ffe74a78694c89",
+    "s12": "62e459e2a7b4232b44e54b32969fb970620d613ef8797e09b993d36d4b44d757",
+    "s13": "80e90ea7c45053ae6c5de9d69ac1ef80a87289bb80c7afb2f796f3c31b3235d7",
+    "s14": "ad4a76017bedf9e8b15b07a33cfe3d92fd2eca61f182359f9f0849b215def3e8",
+    "s15": "c7e38be46f73ab067d54fc62c11b81440497f32deb01b7ee2a723272c64feecd",
+    "s16": "d367a71529e2475f99e659daa5992eb906242aacbbac5db9a00e517a6c6428bd",
+    "s17": "32359142ba3b6f1263abefa9f37711fbc5fdefe9548620b20287985e5858d673",
+    "s2": "7aa37c2bbbfa53cbf3145d6abf322688f1e71d8ff36605186c70a29c43e80661",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s6": "e6bf01013b7bd341cf2f86ebf24dc60084ea8cabeb4cf4cd2664c1109ac5ca62",
+    "s7": "1930b98dfc66a2e1f9a1ce5149fbb73fe208b66c3e0c35664330a12e7e945933",
+    "s8": "6b362f87f941f8c95d562c95cdf93e578892ff32c85156fd5565c76548c58eab",
+    "s9": "20748220a6f94f6c422b1b677587d4456ccf3be5fbe204daac414373443327bd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:09:59.361190+00:00"
+}
