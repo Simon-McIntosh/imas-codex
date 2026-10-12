@@ -1,0 +1,79 @@
+{
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T202007287409-review-of-ssfms-verify-golden-harness/o1_gate1.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T202007287409-review-of-ssfms-verify-golden-harness/o2_gate3.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T202007287409-review-of-ssfms-verify-golden-harness/o3_gate2.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T200433784944-ssfms-verify-golden-harness/manifest.md"
+  ],
+  "claim_lines": [
+    "CLAIM 1: reproduced: re-ran gate 1 from the report's directory (uv run pytest tests/llm/test_signal_search_goldens.py -p no:cacheprovider at the reviewed head) and got 6 passed, 2 deselected, EXIT=0 - the figure the report states",
+    "CLAIM 2: reproduced: re-ran gate 2 from the report's directory (uv run pytest tests/llm/test_signal_search_goldens.py -k refuses -m graph -p no:cacheprovider -s) against the live graph and got 1 passed, 7 deselected, EXIT=0 with the five arms refusing 19/20/18/18/18 questions and naming their candidates - the counts the report states",
+    "CLAIM 3: reproduced: re-ran gate 3 from the report's directory (uv run pytest tests/llm/test_search_tools.py -p no:cacheprovider) and got 106 passed, 8 skipped, EXIT=0 - the figure the report states",
+    "CLAIM_SUMMARY: agrees: the report's summary line (its checkpoint: all four runs complete; gate1 6 passed / 2 deselected, gate2 1 passed / 7 deselected with five arms refusing, gate3 106 passed / 8 skipped, negative control 1 failed / 5 passed) quotes exactly the figures its tests: table carries for each run, and the summary adds no figure the table lacks"
+  ],
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "uv run pytest tests/llm/test_signal_search_goldens.py -p no:cacheprovider",
+      "detail": "Ran the cited command from the report's own directory with UV_NO_SYNC=1, UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv and PYTHONPATH=$PWD; result 6 passed, 2 deselected, 1 warning in 5.87s, EXIT=0 - identical to the report's figure.",
+      "finding": "rank 1: the default-marker golden harness passes in full (6 passed, 2 deselected, EXIT=0)",
+      "verdict": "reproduced"
+    },
+    "CLAIM 2": {
+      "cites": "uv run pytest tests/llm/test_signal_search_goldens.py -m graph -k refuses -p no:cacheprovider -s",
+      "detail": "Ran the cited command against the live graph (worktree .env resolves to /home/ITER/mcintos/Code/imas-codex/.env); result 1 passed, 7 deselected, 1 warning in 12.59s, EXIT=0, with per-arm refusals current_tool 19, vector_only 20, rrf 18, rrf_rerank 18, rrf_rerank_role 18 - the counts the report states. One illustrative third candidate on the current_tool line differs (glw_curglwp06 here vs glw_curglwp11 in the reviewed log); the ranked figure the report quotes, the count 19, is identical.",
+      "finding": "rank 2: the live-graph refusal test passes and each of the five arms refuses and names its candidates (19/20/18/18/18)",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "uv run pytest tests/llm/test_search_tools.py -p no:cacheprovider",
+      "detail": "Ran the cited command from the report's own directory; result 106 passed, 8 skipped, 1 warning in 13.24s, EXIT=0 - identical to the report's figure.",
+      "finding": "rank 3: the search-tools regression suite matches its stated base (106 passed, 8 skipped)",
+      "verdict": "reproduced"
+    },
+    "CLAIM_SUMMARY": {
+      "detail": "The report's summary line is its checkpoint: 'all four runs complete at 196d42191; gate1 6 passed / 2 deselected EXIT=0, gate2 1 passed / 7 deselected EXIT=0 with the five arms printing refusals, gate3 106 passed / 8 skipped EXIT=0, negative control 1 failed / 5 passed EXIT=1 ...'. The table beneath it is the tests: line, whose four entries are '6 passed, 2 deselected, EXIT=0', '1 passed, 7 deselected, EXIT=0', '106 passed, 8 skipped, EXIT=0' and '1 failed, 5 passed, 2 deselected, EXIT=1'. Every figure the summary quotes matches its row; the summary omits the negative control's 2 deselected and gate2's arm counts, but adds no figure the table lacks.",
+      "verdict": "agrees"
+    }
+  },
+  "claims": [
+    {
+      "cites": "uv run pytest tests/llm/test_signal_search_goldens.py -p no:cacheprovider",
+      "finding": "the default-marker golden harness passes in full: 6 passed, 2 deselected, EXIT=0",
+      "rank": 1,
+      "report_figure": "6 passed, 2 deselected, EXIT=0",
+      "rerun_figure": "6 passed, 2 deselected, 1 warning in 5.87s, EXIT=0",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "uv run pytest tests/llm/test_signal_search_goldens.py -m graph -k refuses -p no:cacheprovider -s",
+      "finding": "the live-graph refusal test passes and prints, for each of the five arms, the questions it refused and the candidates it named: current_tool 19, vector_only 20, rrf 18, rrf 18, rrf_rerank_role 18, rrf_rerank 18",
+      "rank": 2,
+      "report_figure": "1 passed, 7 deselected, EXIT=0; five arms refused 19/20/18/18/18 questions",
+      "rerun_figure": "1 passed, 7 deselected, 1 warning in 12.59s, EXIT=0; five arms refused 19/20/18/18/18 questions (one illustrative third candidate on the current_tool line differs - glw_curglwp06 here vs glw_curglwp11 in the reviewed log - but the ranked count, 19, is identical)",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "uv run pytest tests/llm/test_search_tools.py -p no:cacheprovider",
+      "finding": "the search-tools regression suite matches its stated base exactly: 106 passed, 8 skipped",
+      "rank": 3,
+      "report_figure": "106 passed, 8 skipped, EXIT=0",
+      "rerun_figure": "106 passed, 8 skipped, 1 warning in 13.24s, EXIT=0",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-12T20:29:02.554Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-12T20:20:18Z",
+  "method": "The reviewed run is a read-only verification node (its manifest records 'commits: none' and 'changed_paths: none'), so no diff was landed and no gate suite exists for the landed-node rubric's six dimensions or its added-failure count; those fields are intentionally omitted. Its report is the run's own manifest.md, whose claims are the four brief-named runs. The three highest-ranked findings (gate 1 pure goldens, gate 2 live-graph refusal, gate 3 search_tools) were each re-run by taking the exact command the report cites and running it from the report's own directory. The report's cited commands are relative to the reviewed worktree; the reviewed worktree exists at 196d42191 and its tests/llm/test_signal_search_goldens.py, tests/llm/test_search_tools.py and the imas_codex/llm non-prompt source are byte-identical to this reviewer's worktree (git diff --stat 196d42191..HEAD changes neither), so the re-runs were executed in the reviewer's own worktree and read the same blobs the reviewed run did. Environment: UV_NO_SYNC=1, UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv, PYTHONPATH=$PWD; the worktree .env resolves to /home/ITER/mcintos/Code/imas-codex/.env so the live-graph arm authenticated normally. Each run was captured whole to its own log under the review run's directory.",
+  "project": "imas-codex",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T200433784944-ssfms-verify-golden-harness/manifest.md",
+  "review_run_id": "r-20261012T202007287409-review-of-ssfms-verify-golden-harness",
+  "reviewed_base_sha": "196d421911ab5ddb557a1e6b6016b6eb22525d14",
+  "reviewed_head_sha": "196d421911ab5ddb557a1e6b6016b6eb22525d14",
+  "reviewed_run_id": "r-20261012T200433784944-ssfms-verify-golden-harness",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run landed no change and ran no gate suite.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12 20:27:34.882129+00:00"
+}
