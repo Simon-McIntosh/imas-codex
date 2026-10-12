@@ -1,0 +1,124 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:21:25.732Z",
+  "dispatched_at": "2026-10-12T18:15:27Z",
+  "findings": [
+    {
+      "anchor": "plan.html:170",
+      "id": "single_goal-1",
+      "reason": "a coordinator reading \u00a74 as done will never dispatch the judge stage, which then silently disappears from the plan.",
+      "text": "\u00a74's text makes a Jev-backed asynchronous judge stage part of \u00a74 (\"They run as their own asynchronous judge stage in the review pipeline, beside the audit stage\"), but \u00a74's done-when measures only the deterministic conformance checks, and the section is declared `data-status=\"done\"` with the close comment itself recording \"Open within \u00a74's text: the Jev-backed judge stage\" \u2014 so \u00a74 is closed on one deliverable while a second, named inside the same section, is unfinished",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:214",
+      "id": "reasoning-1",
+      "reason": "without a named home for the cap a node wires the prompt block, finds the document still accepted, and the section's gate cannot be met by the described change.",
+      "text": "\u00a75 asserts \"An unresolved lint error caps the documentation score below the acceptance threshold\" as the mechanism that makes its own done-when (\"A review over a seeded non-conforming document cannot accept it\") true, but no module or caller enforcing that cap is named: the review pipeline carries only a general `score < 0.40` threshold (review/pipeline.py:1888) and no cap keyed to audit findings, so the rendering mechanism \u00a75 does name (findings into the prompt) cannot by itself produce the capped outcome",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:23",
+      "id": "wiring-1",
+      "reason": "with no declared edge, \u00a75 can be dispatched before the entries exist and its gate measures an empty registry rather than the mechanism it asserts.",
+      "text": "the plan declares a dependency only for \u00a72 (`{\"s2\":[\"imas-standard-names:concept-and-notation-registry#s2\"]}`), yet \u00a75 renders entries authored in \u00a73 and the plan's own followup states \"\u00a75 follows once the WEST entries exist\"; \u00a75's done-when (\"a rendered prompt for a flux-surface-averaged name carries the canonical equation\") needs real entries from \u00a73, and \u00a73/\u00a74 need the \u00a72 accessor, none of which is declared",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:209",
+      "id": "anchors_resolve-1",
+      "reason": "the module and the variable both resolve and the defect is real; only the line number has drifted, so the node's target is unambiguous and no plan change beyond correcting the citation is required.",
+      "text": "\u00a75 locates the unwired route as \"sets audit_findings on the render context at line 1964\", but in imas_codex/standard_names/review/pipeline.py line 1964 is `prompt_name = \"sn/review_docs\"`; the render-context assignment `\"audit_findings\": audit_findings` is at line 1989",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "579d8d981054cf8578b1b8875f3b2bd131d07769194bc8e838c4daf01f14aa03",
+  "plan_slug": "sn-house-style",
+  "plan_version": 13,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "",
+      "when": "2026-10-12T18:27:55.050831+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T18:27:56.256813+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-12T18:27:57.313654+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-12T18:27:58.394723+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:27:57.313654+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:27:56.256813+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:27:55.050831+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:27:58.394723+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-house-style.v13.json",
+  "review_run_id": "r-20261012T181508561897-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "333e8a39468245cb6d8afd353200882194fae8c2",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the \u00a75 pointer \"sets audit_findings on the render context at line 1964\" does not resolve (line 1964 is `prompt_name = \"sn/review_docs\"`); every other anchor resolves, including the cross-project ISN plan and the extensionless hrefs resolved as `<path>.html`.",
+    "done_when": "pass \u2014 every section's measured clause carries a negative control (\u00a72 removed-concept registry, \u00a73 removed-entry scratch registry, \u00a74 canonical-entry-yields-zero plus revert-sensitive tests, \u00a75 template-line-removed and cap-removed counterfactual); \u00a71/\u00a76 are narrative sections with no gate.",
+    "evidence_paths": "pass \u2014 every cited path is a durable repository artifact (docs/research/sn-catalog-consistency-census, docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.html and .py, docs/evidence/fragments/sn-house-style/*, docs/evidence/archive/sn-house-style-landed.html); no scratchpad or node-local temporary path is named.",
+    "naming": "pass \u2014 the symbols the plan names (run_house_style_checks, house_style_findings, run_documentation_gate_checks, select_conventions) are named by mechanism; no plan label, stage name or ticket number enters code.",
+    "reasoning": "a finding \u2014 \u00a75's cap mechanism (\"an unresolved lint error caps the documentation score below the acceptance threshold\") names no module or caller, so the described mechanism does not produce \u00a75's own done-when.",
+    "single_goal": "a finding \u2014 \u00a74 carries two deliverables, the deterministic conformance checks and a Jev-backed asynchronous judge stage, and it is declared done with the second still open.",
+    "wiring": "a finding \u2014 the declared external dependency (\u00a72 on imas-standard-names:concept-and-notation-registry#s2) and the two blocks relationships resolve correctly, but the intra-plan dependencies the plan's own followup asserts (\u00a75 \"follows once the WEST entries exist\") are not declared."
+  },
+  "section_digests": {
+    "_document": "77a40e495a1bf407034434c1f885a25f404d4eda585a946eabb49fe01da0fe60",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s2": "a68b18b0a4122caff66d27ab77f0d6f94f3c046d2a034c6ef489ffc38f438ddb",
+    "s3": "50e289cff8fb10f82f4114f3e51de9e7d184bd4777b80c4f5ee7e617bbdd3c56",
+    "s4": "aff774ede3efa5e4b7f1dfb6b060663a807d303a51f1ed88563fad080faf2895",
+    "s5": "3208be29326928c4ea9f1693a1493465ae47938e6f2188f57252dd9cadbcaa0b",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:27:37.097643+00:00"
+}
