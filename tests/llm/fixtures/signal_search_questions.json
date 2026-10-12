@@ -1,0 +1,174 @@
+{
+  "description": "Graded physics questions for facility signal search. Grades: 3 a measurement of the queried quantity; 2 a commanded, reference or setpoint value of it, or the same quantity at an adjacent point; 1 related hardware; 0 read and judged irrelevant.",
+  "k": 10,
+  "eligibility": {
+    "facility": "jt-60sa",
+    "enriched_at_cutover": "2026-10-11T19:08:21Z"
+  },
+  "questions": [
+    {
+      "id": "plasma-current-total",
+      "query": "the total plasma current carried by the discharge",
+      "held_out": true,
+      "intent": "a grade-3 signal measures the total toroidal plasma current itself; a programmed or feedback reference waveform of it, or a current in a magnet coil rather than in the plasma, is only grade 2",
+      "categories": ["DHC", "PSRC"],
+      "relevant": {
+        "jt-60sa:general/dhc_obsip": 3,
+        "jt-60sa:general/psrc_calip": 3
+      }
+    },
+    {
+      "id": "plasma-stored-energy-magnetic",
+      "query": "the stored energy of the plasma inferred from magnetic measurements",
+      "held_out": true,
+      "intent": "a grade-3 signal is a measured global plasma stored energy obtained from the diamagnetic flux; a raw diamagnetic loop voltage or surface integral, or an equilibrium-reconstruction estimate rather than the diamagnetic measurement, is only grade 2",
+      "categories": ["PSRC", "MAG"],
+      "relevant": {
+        "jt-60sa:general/psrc_calwdia": 3,
+        "jt-60sa:general/psrc_calwdiacor": 3,
+        "jt-60sa:general/mag_wdia7rt": 3
+      }
+    },
+    {
+      "id": "magnetic-fluctuation-toroidal-mode-one",
+      "query": "the amplitude of the toroidal mode number one magnetic fluctuation",
+      "held_out": true,
+      "intent": "a grade-3 signal is a measured amplitude, or its sine or cosine component, of the n=1 toroidal magnetic field fluctuation from Mirnov-type probes; a raw probe signal at an unspecified mode, or an instability detection flag, is only grade 2 or lower",
+      "categories": ["MAG"],
+      "relevant": {
+        "jt-60sa:general/mag_tmode1": 3,
+        "jt-60sa:general/mag_tmode1cos": 3,
+        "jt-60sa:general/mag_tmode1sin": 3
+      }
+    },
+    {
+      "id": "soft-x-ray-emission",
+      "query": "soft x-ray emission from the plasma along a viewing chord",
+      "held_out": true,
+      "intent": "a grade-3 signal is a measured soft x-ray emission or intensity along a viewing chord, including filtered photodiode channels; a hard x-ray signal, a bolometric total radiated power, or a camera image of the plasma is only grade 1 or 2",
+      "categories": ["SXR"],
+      "relevant": {
+        "jt-60sa:general/sxr_sxh": 3,
+        "jt-60sa:general/sxr_sxu": 3,
+        "jt-60sa:general/sxr_sxl": 3,
+        "jt-60sa:general/sxr_sxlo": 3,
+        "jt-60sa:general/sxr_sxuo": 3,
+        "jt-60sa:general/sxr_sxpin07": 3,
+        "jt-60sa:general/sxr_sxpin50": 3
+      }
+    },
+    {
+      "id": "divertor-tile-surface-temperature",
+      "query": "the surface temperature of the divertor target tiles measured by infrared thermography",
+      "held_out": true,
+      "intent": "a grade-3 signal is a time series of divertor target tile surface temperature from an infrared camera region of interest; the camera's raw image frame, or a thermocouple in the supporting structure rather than the tile surface, is only grade 2",
+      "categories": ["CAM"],
+      "relevant": {
+        "jt-60sa:general/cam_divirmp15r1": 3,
+        "jt-60sa:general/cam_divirmp15r2": 3,
+        "jt-60sa:general/cam_divirmp15r3": 3,
+        "jt-60sa:general/cam_divirmp15r4": 3,
+        "jt-60sa:general/cam_divirmp15r5": 3,
+        "jt-60sa:general/cam_divirmp15r6": 3,
+        "jt-60sa:general/cam_divirmp15r7": 3,
+        "jt-60sa:general/cam_divirmp15r8": 3,
+        "jt-60sa:general/cam_divirmp15r9": 3,
+        "jt-60sa:general/cam_divirmp15r10": 3
+      }
+    },
+    {
+      "id": "first-wall-surface-temperature",
+      "query": "the surface temperature of the inboard first wall panels",
+      "held_out": true,
+      "intent": "a grade-3 signal is a measured surface temperature of a plasma-facing first wall panel; a coolant inlet or outlet temperature of the wall's cooling circuit, or a temperature of a neighbouring structure such as a port plug, is only grade 2",
+      "categories": ["TCIFW"],
+      "relevant": {
+        "jt-60sa:general/tcifw_temfw1in": 3,
+        "jt-60sa:general/tcifw_temfw2in": 3,
+        "jt-60sa:general/tcifw_temfw3in": 3,
+        "jt-60sa:general/tcifw_temfw10in": 3,
+        "jt-60sa:general/tcifw_temfw11in": 3,
+        "jt-60sa:general/tcifw_temfw12in": 3
+      }
+    },
+    {
+      "id": "vacuum-vessel-port-temperature",
+      "query": "the temperature of the vacuum vessel port structures",
+      "held_out": true,
+      "intent": "a grade-3 signal is a measured temperature of a vacuum vessel port structure; a port plug or other in-vessel component temperature is a different structure and grade 2, as is a cooling circuit inlet temperature",
+      "categories": ["VV"],
+      "relevant": {
+        "jt-60sa:general/vv_temhp06a1": 3,
+        "jt-60sa:general/vv_temhp06a2": 3,
+        "jt-60sa:general/vv_temhp06b1": 3,
+        "jt-60sa:general/vv_temhp06b2": 3,
+        "jt-60sa:general/vv_temhp06c1": 3,
+        "jt-60sa:general/vv_temhp06c2": 3,
+        "jt-60sa:general/vv_temhp07a": 3,
+        "jt-60sa:general/vv_temhp07b": 3,
+        "jt-60sa:general/vv_temhp07c": 3,
+        "jt-60sa:general/vv_temhp12a": 3,
+        "jt-60sa:general/vv_temhp12b": 3,
+        "jt-60sa:general/vv_temhp12c": 3
+      }
+    },
+    {
+      "id": "cryostat-vacuum-pressure",
+      "query": "the vacuum pressure in the cryostat measured by cold cathode gauges",
+      "held_out": true,
+      "intent": "a grade-3 signal is a cold cathode gauge pressure in the cryostat or cryogenic pumping volume, in pascals; a pirani gauge reading at the same location, or the cryoplant's own helium temperature or valve position, is only grade 2",
+      "categories": ["QMS"],
+      "relevant": {
+        "jt-60sa:general/qms_prep12cryo": 3,
+        "jt-60sa:general/qms_prep14cryo": 3,
+        "jt-60sa:general/qms_prep18cryo": 3
+      }
+    },
+    {
+      "id": "hydrogen-isotope-partial-pressure",
+      "query": "the partial pressure of hydrogen isotopes in the vacuum vessel measured with a mass spectrometer",
+      "held_out": true,
+      "intent": "a grade-3 signal is a mass-spectrometer partial pressure, or the ion current or partial pressure ratio from which it is derived, attributed to mass-to-charge ratio one; a valve status or manifold channel on the same spectrometer is only grade 1",
+      "categories": ["QMS"],
+      "relevant": {
+        "jt-60sa:general/qms_mz01a": 3,
+        "jt-60sa:general/qms_mz01acur": 3,
+        "jt-60sa:general/qms_mz01c": 3,
+        "jt-60sa:general/qms_mz01dcur": 3,
+        "jt-60sa:general/qms_mz01p08hcur": 3
+      }
+    },
+    {
+      "id": "nitrogen-seeding-flow-into-vessel",
+      "query": "the flow rate of nitrogen injected into the vacuum vessel for radiative divertor cooling",
+      "held_out": true,
+      "intent": "a grade-3 signal is a measured volumetric nitrogen flow rate at a vacuum vessel inlet used for impurity seeding; an inlet pressure or temperature of the same line, or a deuterium fuelling flow, is only grade 2 or lower",
+      "categories": ["N2GAS"],
+      "relevant": {
+        "jt-60sa:general/n2gas_flwinleta": 3,
+        "jt-60sa:general/n2gas_flwinletb": 3,
+        "jt-60sa:general/n2gas_flwinletc": 3,
+        "jt-60sa:general/n2gas_flwinletd": 3,
+        "jt-60sa:general/n2gas_flwinlete": 3,
+        "jt-60sa:general/n2gas_flwinletg": 3,
+        "jt-60sa:general/n2gas_flwinleth": 3,
+        "jt-60sa:general/n2gas_flwinleti": 3
+      }
+    },
+    {
+      "id": "deuterium-fuelling-flow-into-vessel",
+      "query": "the deuterium fuelling flow rate injected into the vacuum vessel",
+      "held_out": true,
+      "intent": "a grade-3 signal is a measured deuterium flow rate delivered through a fuelling line into the vacuum vessel; a gas puff valve command or setpoint, a pressure of the same line, or a plasma density derived from it, is only grade 2 or lower",
+      "categories": ["GAS"],
+      "relevant": {
+        "jt-60sa:general/gas_flwdip12": 3,
+        "jt-60sa:general/gas_flwdip2": 3,
+        "jt-60sa:general/gas_flwdop12": 3,
+        "jt-60sa:general/gas_flwdop2": 3,
+        "jt-60sa:general/gas_flwlbp10": 3,
+        "jt-60sa:general/gas_flwubp2": 3
+      }
+    }
+  ]
+}
