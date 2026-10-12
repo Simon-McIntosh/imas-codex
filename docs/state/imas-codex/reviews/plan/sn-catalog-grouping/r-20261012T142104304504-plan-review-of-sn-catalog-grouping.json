@@ -1,0 +1,121 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:25:51.737Z",
+  "dispatched_at": "2026-10-12T14:21:13Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/audits.py:1239",
+      "id": "reuse_search-1",
+      "reason": "the \u00a74 worklist is the same species of mechanism as three existing detectors, and without naming them the author cannot tell whether the new worklist is a fourth near-dup pass over the same embeddings.",
+      "text": "\u00a74 generates a near-duplicate pair worklist (same unit, cosine \u22650.95, >1-token difference) without citing the near-duplicate detectors that already exist in the same package: `audits.py:1239 synonym_check` (cosine >0.92 name near-dup), `context.py:589 fetch_review_neighbours` (nearest-neighbour pair injection) and `vocab_semantic_dedup.py:204 nearest_registered_token` (cosine token dedup); \u00a74 should extend one of these or state why all three are the wrong axis",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/embeddings/description.py:28",
+      "id": "thin_wrapper-1",
+      "reason": "if the constant vector originates in the shared Encoder the wrapper guard never fires on the path that produced the 38 names, and the plan should name the owner to extend rather than one of three wrappers.",
+      "text": "\u00a75 puts the identical-vector guard in `embed_descriptions_batch`, a batch-collect wrapper that only fills `embedding_field` before graph persistence, while the embedding behaviour it guards lives in the shared `Encoder.embed_texts` (`imas_codex/embeddings/encoder.py:334`); the guard is also bypassed by `embed_description` and `embed_query_texts` in the same file, so a name embedded through either is unguarded",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/workers.py:4187",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owner to extend (workers injection vs consolidation merge) determines whether the rule table is consulted once or forked into two divergent consult sites, and the plan's own text flags the duplication without resolving it.",
+      "text": "\u00a73 assigns the domain from the quantity in a third mechanism (rule table or Jev Choice) and says the winner \"must be consulted at both\" existing sites \u2014 the compose injection at `workers.py:4187` (\"Inject physics_domain from DD\") and the merge at `consolidation.py:49 _resolve_physics_domainss` \u2014 patching two owners instead of naming one; the quantity-derived assignment should replace the DD-source value at its single point of ownership rather than be wired into both, and the new `domain_rules.yml` sits beside `domain_priority.py pick_primary_domain` / `domain_ranking.py domain_rank`, which already own domain ranking and coercion",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html#s2",
+      "id": "interface_budget-1",
+      "reason": "with all four budget counts at zero, a section that adds public definition or refusal surface must account for it in its own text, and \u00a72's retained second family route and \u00a75's new refusal both go unaccounted.",
+      "text": "\u00a72 adds a new public pattern-family definition in `families.py` and explicitly keeps a family-eligible `HAS_PARENT` edge \"as a second, explicit route\", so the family surface grows rather than converges; \u00a75 adds a guard whose refusal is new surface (refusal_families 0 this week); neither section names a definition, option, view or refusal family it retires or merges, or states why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f26bc506b56b6fd40b2124cca76302819bd2644267ecdcd9186eda3ee4f596e8",
+  "plan_slug": "sn-catalog-grouping",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:41.141108+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "thin_wrapper-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:42.963136+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:44.962181+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-12T14:32:46.235923+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:44.962181+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:46.235923+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:41.141108+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:32:42.963136+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-catalog-grouping.v2.json",
+  "review_run_id": "r-20261012T142104304504-plan-review-of-sn-catalog-grouping",
+  "reviewed_blob_sha": "22aeed43d97c38505bbd5db52e1202fabb58b554",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 a single pattern-family definition added to the 394-line `families.py` (which already owns family detection and axis ordering) is read by `fetch_sibling_family`, `assemble_family` and catalog ordering, so one interface hides the grouping and three consumers share it.",
+    "duplicate_owner": "a finding \u2014 \u00a73 wires a new quantity-derived domain assigner into both existing assignment sites rather than consolidating them under one owner, and places `domain_rules.yml` beside the `domain_priority.py`/`domain_ranking.py` pair that already owns domain ranking and coercion.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a public pattern-family definition while keeping `HAS_PARENT` as a second route, \u00a73 authors a new `domain_rules.yml` rule table beside a Jev Choice, and \u00a75 adds a refusal that no section names as a retirement, a merge, or a case where nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a72 and \u00a73 cite the owners they extend (`families.py:209 detect_families`, `harmonize.py:235 assemble_family`, `context.py:798 fetch_sibling_family`, `domain_priority.py`, `workers.py:4187`, `consolidation.py:49`), but \u00a74 proposes a fresh pair-worklist without citing the near-duplicate machinery that already exists in the same package.",
+    "thin_wrapper": "a finding \u2014 \u00a75 adds a refusal to `embed_descriptions_batch` in `description.py`, a thin artifact-building wrapper over the shared `Encoder.embed_texts`, rather than extending the owner, and the plan does not say why the owner cannot carry the guard."
+  },
+  "section_digests": {
+    "_document": "502a2bfa69c4863a9cd34bcc0968e350e314683f2c0e58fd0858bdf994c91f0e",
+    "s1": "6bc3b44a7fd794158b4e454dd07668ea7d805f53ea1a5e11fac0c4b9a32edd70",
+    "s2": "34ac2d2767f629f7e4dd1a6c0e0fb59ed8cd20adb3ca821f03b454a57dfbaf81",
+    "s3": "78292c4318c2c3556d1029ed3403ea10c4c645184c43ae20acebff221f30d3bc",
+    "s4": "4f43ffee16d90451f50530868b42b9baf83ed4a7ff4e760684be4d275d71e850",
+    "s5": "ea0ea78d8eb9c536eb9b5abd7755fba1d6c03de82525f8979ca15c017d7cd642"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:32:14.517186+00:00"
+}
