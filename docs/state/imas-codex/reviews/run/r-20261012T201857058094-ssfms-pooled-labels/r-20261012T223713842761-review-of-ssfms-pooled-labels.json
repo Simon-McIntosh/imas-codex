@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest carries no baseline_suite or after_suite keys (armed-only), so no base/head pair exists to diff; its recorded gates (goldens_suite 11 passed; search_tools 106 passed, 8 skipped) show zero failures, so the added-failure count is 0 against an empty head failure set.",
+  "base_log_revision": null,
+  "blocking_finding_count": 0,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T22:48:49.023Z",
+  "dispatched_at": "2026-10-12T22:37:25Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html",
+      "line": "39",
+      "severity": "follow-on",
+      "text": "follow-on: the table carries four arms, but the node's goal and done_when name a five-arm table with both Jev arms; the Jev arms refuse on an unlabelled candidate (logs/five_arm_table_live.log: arm 'rrf_rerank_role' on 'nitrogen-seeding-flow-into-vessel' holds jt-60sa:general/gau_p0pngdi) and are moved out unscored, so the evidence the goal names is not delivered (mitigated: plan section 3's own arm set is the four arms and section 7 owns the reranks)."
+    },
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "257",
+      "severity": "follow-on",
+      "text": "follow-on: _additive_rank re-implements the product ranking _rank_signals at imas_codex/llm/search_tools.py:235 rather than extending an owner; the duplication is plan-mandated to freeze the baseline and the equivalence pin at :721 guards drift, but it is a capability fork."
+    },
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "328",
+      "severity": "follow-on",
+      "text": "follow-on: current_tool calls _rank_signals at K=30 and then filters, so an ineligible candidate consumes a slot instead of being replaced, and the docstring's \"makes room for the next eligible candidate\" holds only for the pool-100 arms; the added test at :624 guards the helper, not this integration."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T201857058094-ssfms-pooled-labels/manifest.md",
+      "line": "7",
+      "severity": "follow-on",
+      "text": "follow-on: the commits line lists four shas (5cf8ff5ac df7721c40 8d260cf4b 44792accf) while base..head holds seven (also 1602ff51b, 3715b55f6, 14d99f2e6), so the record under-reports the work a coordinator must audit."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T201857058094-ssfms-pooled-labels/logs/negative_control.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the declared negative control has two clauses (the eligibility check when the cutover moves back, and the table test on a removed label), but only the second is recorded, so the first mutation's receipt is absent."
+    }
+  ],
+  "follow_on_finding_count": 5,
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the landed change is confined to a test module, its fixture and docs, so no production runtime code reaches it; the product surfaces the test exercises were examined (imas_codex/llm/search_tools.py:235 _rank_signals, :623 _vector_search_signals, :690 _text_search_signals) but none imports or is modified by the change.",
+    "diff": "read commit by commit from 75a6127f4 to 44792accf: 1602ff51b drops the superseded refusal test, 3715b55f6 and 14d99f2e6 add pooled labels, 5cf8ff5ac adds the eligible-population filter and its tests, df7721c40 adds the node fragment, 8d260cf4b adds the frozen additive_rule arm, 44792accf closes the evidence on four arms; every changed path is inside the declared scope.",
+    "done_when": "the done_when asks for the cutover 2026-10-11T21:08:54Z, a fail-by-name on a pre-cutover label, every top-10 candidate graded 0..3, the table test failing not skipping, SIGNAL_SEARCH_JEV_ARMS with no plan-section comment, and a five-arm table with both Jev arms in goldens.html; the fixture cutover, test_every_labelled_signal_is_eligible, require_labelled in score_arm and goldens_suite.log (11 passed) confirm all but the five-arm clause, which is unmeasured.",
+    "goal": "the goal is to label every arm's pooled top 10 on the golden fixture with the five-arm table as evidence; tests/llm/fixtures/signal_search_questions.json carries 1551 labels (grade 0..3) over 22 questions and the labelling gate passes, but the evidence table carries four arms, not the five the goal names.",
+    "manifest": "read; it names four commits, five changed paths, the four-arm table, three test logs and the negative control, but the base..head range holds seven commits and its artifacts line calls the fixture 'unchanged this landing' though it grew from 636 to 1551 labels.",
+    "write_paths": "read the manifest's five declared paths; the five paths the diff touches are all inside them."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_signal_search_goldens.py:624 fails if filter_eligible drops the wrong candidate and :721 fails if the frozen rule diverges from the product, but :624 guards the helper rather than the arm's own before-cut path at :328.",
+    "evidence": "goldens_suite.log records 11 passed and four_arm_table.log reproduces the table in docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html, but the five-arm clause of the done_when is unmeasured and the gate logs carry no revision or tree header.",
+    "fit": "the module follows the surrounding llm-test idiom and no comment in tests/llm/test_signal_search_goldens.py cites a plan section.",
+    "goal_fidelity": "tests/llm/fixtures/signal_search_questions.json carries the pooled labels and :216 require_labelled enforces the top-10 labelling, but the table at docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html:39 lists four arms where the goal names five.",
+    "reuse": "tests/llm/test_signal_search_goldens.py:257 _additive_rank re-implements imas_codex/llm/search_tools.py:235 _rank_signals without extending it, while eligible_signal_ids and filter_eligible have no prior owner.",
+    "scope_discipline": "every path in git diff --stat 75a6127f4 44792accf is inside the manifest's five declared write paths."
+  },
+  "limitations": [
+    "The four-arm table was not re-run: it needs a live database and the production embedding backend, so its numbers are read from the reviewed run's own four_arm_table.log, which matches the evidence table exactly.",
+    "The two Jev rerank arms were never scored by the reviewed node (logs/five_arm_table_live.log shows the arm refusing on an unlabelled candidate); the review reads that outcome and does not re-run them.",
+    "The eligibility filter's effect on current_tool's slot-filling was read from arm_ranking at tests/llm/test_signal_search_goldens.py:328, not exercised against the live graph (K=30 against the scored TOP_K=10 bounds the effect)."
+  ],
+  "node": "review-of-ssfms-pooled-labels",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to label every arm's pooled top 10 on the signal search golden fixture with the five-arm table as evidence; tests/llm/fixtures/signal_search_questions.json carries 1551 grade-0..3 labels over 22 questions and tests/llm/test_signal_search_goldens.py:216 require_labelled refuses any arm whose top 10 holds an unlabelled candidate, so the pooled labelling is done, but the evidence table carries four arms rather than the five (with both Jev arms) the goal names.\nVERDICT done_when: the done_when demands the cutover 2026-10-11T21:08:54Z, a fail-by-name on a pre-cutover label, every top-10 candidate graded 0..3, the table test failing not skipping, the opt-in variable SIGNAL_SEARCH_JEV_ARMS with no plan-section comment, and a five-arm table with both Jev arms in goldens.html; the fixture cutover (verified at the reviewed head), test_every_labelled_signal_is_eligible, require_labelled inside score_arm, and the 11-passed goldens_suite.log confirm all but the last, and the Jev arms are unscored and absent from the table.\nVERDICT write_paths: read the manifest's five declared paths; the diff touches exactly tests/llm/test_signal_search_goldens.py, tests/llm/fixtures/signal_search_questions.json, docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-pooled-labels.html and docs/figures/signal-search-finds-the-measured-signal/ssfms-pooled-labels/arm-ndcg.svg, all inside them.\nVERDICT manifest: read; it records the four-arm table (rrf 0.7963, vector_only 0.6846, current_tool 0.5656, additive_rule 0.5656, control 0.5218), the 11-passed gate and the negative control, but its commits line lists four shas while base..head holds seven and its artifacts line calls the fixture \"unchanged this landing\" though it grew from 636 to 1551 labels.\nVERDICT diff: read commit by commit from 75a6127f4 to 44792accf; seven commits add the eligible-population filter and its pre-cutover tests, the pooled labels (636 to 1551), the frozen additive_rule arm and the four-arm evidence, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: tests/llm/fixtures/signal_search_questions.json eligibility carries the pooled labels and tests/llm/test_signal_search_goldens.py:216 require_labelled enforces the top-10 labelling, but the table at docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html:39 lists four arms where the goal names five.\nSCORE evidence: 14\nJUSTIFICATION evidence: goldens_suite.log records 11 passed and four_arm_table.log reproduces the table in docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html, but the five-arm clause of the done_when is unmeasured and the gate logs carry no revision or tree header.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --stat 75a6127f4 44792accf is inside the manifest's five declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/llm/test_signal_search_goldens.py:624 fails if filter_eligible drops the wrong candidate and :721 fails if the frozen rule diverges from the product, but :624 guards the helper and not the arm's own path at :328.\nSCORE fit: 18\nJUSTIFICATION fit: the module follows the surrounding llm-test idiom and no comment in tests/llm/test_signal_search_goldens.py cites a plan section.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/llm/test_signal_search_goldens.py:257 _additive_rank re-implements the product ranking imas_codex/llm/search_tools.py:235 _rank_signals without extending it, while eligible_signal_ids and filter_eligible have no prior owner.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html:39 follow-on: the table carries four arms, but the node's goal and done_when name a five-arm table with both Jev arms; the Jev arms refuse on an unlabelled candidate (logs/five_arm_table_live.log: arm 'rrf_rerank_role' on 'nitrogen-seeding-flow-into-vessel' holds jt-60sa:general/gau_p0pngdi) and are moved out unscored, so the evidence the goal names is not delivered (mitigated: plan section 3's own arm set is the four arms and section 7 owns the reranks).\nFINDING tests/llm/test_signal_search_goldens.py:257 follow-on: _additive_rank re-implements the product ranking _rank_signals at imas_codex/llm/search_tools.py:235 rather than extending an owner; the duplication is plan-mandated to freeze the baseline and the equivalence pin at :721 guards drift, but it is a capability fork.\nFINDING tests/llm/test_signal_search_goldens.py:328 follow-on: current_tool calls _rank_signals at K=30 and then filters, so an ineligible candidate consumes a slot instead of being replaced, and the docstring's \"makes room for the next eligible candidate\" holds only for the pool-100 arms; the added test at :624 guards the helper, not this integration.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T201857058094-ssfms-pooled-labels/manifest.md:7 follow-on: the commits line lists four shas (5cf8ff5ac df7721c40 8d260cf4b 44792accf) while base..head holds seven (also 1602ff51b, 3715b55f6, 14d99f2e6), so the record under-reports the work a coordinator must audit.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T201857058094-ssfms-pooled-labels/logs/negative_control.log:1 follow-on: the declared negative control has two clauses (the eligibility check when the cutover moves back, and the table test on a removed label), but only the second is recorded, so the first mutation's receipt is absent.\nreviewed_base_sha: 75a6127f4f5b8a2979ec4b84b2e907371aac6916\nreviewed_head_sha: 44792accfae6f7423618619b696559e2312a0736",
+  "review_run_id": "r-20261012T223713842761-review-of-ssfms-pooled-labels",
+  "review_scope": "Independent review of the ssfms-pooled-labels node (plan signal-search-finds-the-measured-signal section 3): the pooled labelling of every arm's top ten, the four-arm table and control, the eligible-population filter and the evidence fragment. Read-only: the diff was read from the shared object store, the cited gate logs were opened, and no test was re-run.",
+  "reviewed_base_sha": "75a6127f4f5b8a2979ec4b84b2e907371aac6916",
+  "reviewed_commits": [
+    "1602ff51b",
+    "3715b55f6",
+    "14d99f2e6",
+    "5cf8ff5ac",
+    "df7721c40",
+    "8d260cf4b",
+    "44792accfae6f7423618619b696559e2312a0736"
+  ],
+  "reviewed_head_sha": "44792accfae6f7423618619b696559e2312a0736",
+  "reviewed_run_id": "r-20261012T201857058094-ssfms-pooled-labels",
+  "reviewer": "review-of-ssfms-pooled-labels",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "scores_complete": true,
+  "summary": "Six dimensions scored on the four-arm pooled-labelling closure: goal_fidelity 15, evidence 14, scope_discipline 20, durability 17, fit 18, reuse 5; 0 blocking and 5 follow-on findings; read at base 75a6127f4f5b8a2979ec4b84b2e907371aac6916 and head 44792accfae6f7423618619b696559e2312a0736.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:50:29.689644+00:00"
+}
