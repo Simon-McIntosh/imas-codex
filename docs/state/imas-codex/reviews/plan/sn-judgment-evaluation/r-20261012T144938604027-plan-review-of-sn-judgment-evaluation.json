@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:54:12.029Z",
+  "dispatched_at": "2026-10-12T14:49:49Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-judgment-evaluation.html:119",
+      "id": "reasoning-1",
+      "reason": "an implementer following the sentence would add a pyproject key nothing reads and leave the call-site `service=` at the mapping tag, so the standard-name Jev spend the sentence exists to attribute separately would stay booked under discovery.",
+      "text": "\u00a72 has the `[tool.imas-codex.sn-judge]` seat name \"the pinned Jev version and the service tag `standard-names`\", but no pyproject seat can carry a service tag: `get_model_config` (`imas_codex/settings.py:296`) returns only `model`, `api_base`, `api_key_env` and `endpoint_class`, and the decisions call takes the tag as the runtime `service` argument (`imas_codex/discovery/base/llm.py:3484`, `candidates.py:64 JUDGMENT_SERVICE = \"imas-mapping\"`).",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a95585c3418f7432d1b7b634b78c4f8cb929ad5420ba732cea6e9c3d04b05b70",
+  "plan_slug": "sn-judgment-evaluation",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T14:57:06.242444+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:57:06.242444+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-judgment-evaluation.v6.json",
+  "review_run_id": "r-20261012T144938604027-plan-review-of-sn-judgment-evaluation",
+  "reviewed_blob_sha": "568d5b20b1ae03873979145fe9e356c60912e522",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/ids/candidates.py:331` is `def _call_judgment`, `imas_codex/discovery/base/judgment.py` defines `decide_batch`, `tests/ids/test_candidate_judgment.py` exists and asserts the malformed-answer raise (`test_malformed_answer_is_rejected`, line 124), and the plan's \"last touched \u2026 2026-10-09\" matches `git log -1` (01144e63b).",
+    "done_when": "pass \u2014 \u00a72's done-when is measurable and names a control that can fail: removing the shared owner's cost-booking line reddens `tests/ids/test_candidate_judgment.py:185` (`cost.steps[\"candidate_judgment\"] == pytest.approx(COST)`), which exists today and is reached through the production callers at `imas_codex/ids/workers.py:1392,1427`.",
+    "evidence_paths": "pass \u2014 \u00a72's gate is the `tests/ids` and `tests/discovery` suites plus the cost assertion; no evidence or gate log is placed on a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 `sn-judge` follows the existing seat vocabulary (`sn-docs`, `sn-refine`); no plan label, stage name, ticket number or version tag is introduced. The pinned `typesafe/jev-1.13` is a model id the neighbouring seat `mapping-candidates` already carries.",
+    "reasoning": "a finding \u2014 the root cause matches the cited evidence (`decide_batch` books into no tracker and `_call_judgment` does, both verified in the cited files), the mechanism produces the done-when, and the mechanism runs on a real code path whose production callers are `imas_codex/ids/workers.py:1392,1427`. One statement attributes an effect to a surface that cannot carry it \u2014 the service tag is put on the pyproject seat.",
+    "single_goal": "pass \u2014 the earlier `single_goal-1` (the section title names the wrapper retirement and the seat) was declined, and s2's deliverable set is unchanged since that ruling; the wrapper retirement, its control and the seat still close on one conjunctive verdict.",
+    "wiring": "pass \u2014 `plan-blocks` names sn-review-through-jev, sn-selection-over-generation and sn-catalog-grouping, all of which resolve under `docs/plans/`, and \u00a72's only external precondition (a live-claim scope check on `imas_codex/ids/candidates.py`) is stated inline."
+  },
+  "section_digests": {
+    "_document": "02df77104c1099b844a5f6b2dd5ca012d1d90ef89f1e34c7c97d37e12e17647a",
+    "s1": "5114b8af1e76d8a510b61c2e503198fd87fa18973725482c4142adbab2c2a31d",
+    "s2": "fc82b35fe10363b5e30f1fbf5a46173dedaed8832c32b06a1dda76c65b1097e2",
+    "s3": "e050c3a4a19a5b58f2ffb23ee0511cb7ae3a3999fa0ab3fe65bf9500cab4dab7",
+    "s4": "3de6eaf51fecb7b7b9278de355854565fcf917d8a9f2ea60490e68331b2b4590",
+    "s5": "e96e2a5e957303794e4ca627cfbf4cb728fe0986d32392c589be55e2069a5231",
+    "s6": "d9cd2ca796b17134ec671bed226f04646abc40471521cbf7864f1479b6d55543",
+    "s7": "f7e6c5fa222a8d7b8423efc56b40e7719908581039312fdd6e1b178113433e11"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:57:05.473515+00:00"
+}
