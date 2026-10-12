@@ -41,6 +41,20 @@ class EmbeddingBackendError(Exception):
     pass
 
 
+class DegenerateEmbeddingError(Exception):
+    """Raised when one call returns the same vector for different texts.
+
+    Two different input texts producing an identical vector means the
+    vector was not computed from the text it was stored against. Such a
+    vector is indistinguishable from any other name's, so semantic search,
+    near-duplicate detection and the compose comparator all silently lose
+    the name. Refusing it here keeps the failure visible instead of writing
+    the wrong vector to the graph.
+    """
+
+    pass
+
+
 class Encoder:
     """Load a sentence transformer model and produce embeddings with optional caching.
 
@@ -236,6 +250,36 @@ class Encoder:
         norms = np.where(norms == 0, 1.0, norms)
         return truncated / norms
 
+    @staticmethod
+    def _reject_identical_vectors(
+        texts: list[str], embeddings: np.ndarray
+    ) -> np.ndarray:
+        """Refuse a batch where different texts share one vector.
+
+        Returns *embeddings* unchanged when every distinct text has its own
+        vector. Raises :class:`DegenerateEmbeddingError` when two different
+        texts came back with a byte-identical vector, which means the vector
+        was not computed from its own text. Repeating the same text is
+        allowed: identical input legitimately yields an identical vector.
+        """
+        if embeddings is None or len(texts) < 2:
+            return embeddings
+        arr = np.asarray(embeddings)
+        if arr.ndim != 2 or arr.shape[0] != len(texts):
+            return embeddings
+        first_text_for_vector: dict[bytes, str] = {}
+        for text, vector in zip(texts, arr, strict=True):
+            key = np.ascontiguousarray(vector).tobytes()
+            prior = first_text_for_vector.get(key)
+            if prior is not None and prior != text:
+                raise DegenerateEmbeddingError(
+                    "Embedding backend returned an identical vector for two "
+                    f"different texts in one call ({prior!r} and {text!r}); "
+                    "the vector was not computed from its own text."
+                )
+            first_text_for_vector.setdefault(key, text)
+        return embeddings
+
     @property
     def current_source(self) -> str:
         """Get current embedding source identifier.
@@ -366,7 +410,9 @@ class Encoder:
                     )
                 else:
                     raise
-            return self._truncate_embeddings(embeddings)
+            return self._reject_identical_vectors(
+                texts, self._truncate_embeddings(embeddings)
+            )
 
         # Local backend — truncate_dim set on model at init
         model = self.get_model()
@@ -379,7 +425,9 @@ class Encoder:
         }
         if prompt_name is not None:
             encode_kwargs["prompt_name"] = prompt_name
-        return model.encode(texts, **encode_kwargs)
+        return self._reject_identical_vectors(
+            texts, model.encode(texts, **encode_kwargs)
+        )
 
     def embed_texts_with_result(
         self, texts: list[str], *, prompt_name: str | None = None, **kwargs

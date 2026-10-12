@@ -1,0 +1,43 @@
+<section id="scg-embedding-guard">
+  <h2 id="scg-embedding-guard-title">Refuse a constant vector, then repair the names built from one</h2>
+
+  <p id="scg-embedding-guard-what">
+    <code>Encoder.embed_texts</code> now refuses a batch in which two different
+    input texts come back with a byte-identical vector, raising
+    <code>DegenerateEmbeddingError</code>. Every wrapper in
+    <code>description.py</code> reaches it; <code>embed_descriptions_batch</code>
+    already turns the refusal into a <code>None</code> embedding, so a refused
+    batch writes no wrong vector.
+  </p>
+
+  <h3 id="scg-embedding-guard-census">Census over live accepted names</h3>
+  <p id="scg-embedding-guard-census-query">
+    Row-set predicate: <code>name_stage IN ['accepted','approved'] AND embedding
+    IS NOT NULL</code>. Grouping by a SHA-256 of the embedding's bytes; elapsed
+    query 0.67&nbsp;s over 2528 rows. Before: 4 clusters of sizes 18, 14, 4 and 2
+    (38 names). After re-embedding the 38 through
+    <code>_embed_single_standard_name</code>: 0 clusters.
+  </p>
+  <p id="scg-embedding-guard-census-clusters">
+    Before, cluster members included
+    <code>flux_due_to_pumping</code>, <code>permeability_of_ferritic_element</code>,
+    <code>plasma_heating_power</code>, <code>width_of_spectrometer_channel</code>
+    (18); <code>time</code>, <code>momentum_source_rate</code>,
+    <code>energy_flux_limiter_coefficient</code> (14); then 4 and 2.
+  </p>
+  <p id="scg-embedding-guard-census-fresh">
+    Re-embedding each member's own text through today's encoder yields 0
+    identical vectors among the 38, so the defect was historical and the repair
+    does not recreate it.
+  </p>
+
+  <h3 id="scg-embedding-guard-guard-test">Guard test</h3>
+  <p id="scg-embedding-guard-guard-test-body">
+    <code>tests/embeddings/test_embed_distinct_guard.py</code> drives a stub
+    backend returning one vector for two different texts through
+    <code>embed_texts</code> and asserts the refusal; a healthy backend and a
+    repeated identical text pass through. Removing the refusal makes three of
+    its tests fail (<code>EXIT=1</code>, log
+    <code>negative_control.log</code>).
+  </p>
+</section>

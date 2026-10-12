@@ -82,7 +82,11 @@ class TestEncoder:
     def test_embed_texts_delegates_to_model(self, encoder):
         """embed_texts delegates to the loaded model."""
         mock_model = MagicMock()
-        mock_model.encode.return_value = np.zeros((3, 256))
+        # Distinct rows: a real backend never returns one vector for
+        # different texts, and the encoder now refuses that shape.
+        mock_model.encode.return_value = np.arange(3 * 256, dtype=np.float32).reshape(
+            3, 256
+        )
         encoder._model = mock_model
 
         result = encoder.embed_texts(["text1", "text2", "text3"])
@@ -590,7 +594,9 @@ class TestTruncateDim:
         """Local embed_texts relies on model's truncate_dim (no manual truncation)."""
         mock_model = MagicMock()
         # Model already returns truncated output (256-dim) because truncate_dim is set
-        mock_model.encode.return_value = np.zeros((3, 256))
+        mock_model.encode.return_value = np.arange(3 * 256, dtype=np.float32).reshape(
+            3, 256
+        )
         encoder._model = mock_model
 
         result = encoder.embed_texts(["text1", "text2", "text3"])
