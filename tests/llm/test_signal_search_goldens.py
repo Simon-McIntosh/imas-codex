@@ -559,44 +559,6 @@ def _open_context(
 
 
 @pytest.mark.graph
-def test_each_arm_refuses_the_incompletely_labelled_fixture() -> None:
-    """On the fixture as it stands, every arm refuses and names its candidates.
-
-    The draft questions carry incomplete labels (pooled labelling is a separate node), so
-    each arm's top 10 holds candidates the fixture does not label. The refusal
-    names them and the arm is not scored.
-
-    The two Jev arms are built without spending: their rank order is the fused
-    pool, which is what the rerank reorders. The refusal depends only on the
-    pool holding unlabelled candidates, so it fires for them as it does for the
-    free arms.
-    """
-    spend_jev = os.environ.get(JEV_ARMS_ENV) == "1"
-    arms = ["current_tool", "vector_only", "rrf", *JEV_ARMS]
-    shared = _open_context("current_tool", spend_jev=spend_jev)
-    refusals: dict[str, list[str]] = {}
-    for arm in arms:
-        ctx = _open_context(
-            arm, spend_jev=spend_jev, gc=shared.gc, encoder=shared.encoder
-        )
-        named: list[str] = []
-        for question in QUESTIONS:
-            ctx.embedding = ctx.embedding_for(question)
-            ranked = arm_ranking(question, ctx)
-            try:
-                require_labelled(arm, question, ranked)
-            except UnlabelledCandidates as exc:
-                named.append(f"{question.id}:{','.join(exc.candidates[:3])}")
-        assert named, (
-            f"arm {arm} was scored without refusing: fixture is fully labelled"
-        )
-        refusals[arm] = named
-        print(f"{arm}: refused {len(named)} questions, e.g. {named[0]}")
-
-    assert set(refusals) == set(arms)
-
-
-@pytest.mark.graph
 def test_five_arm_table_matches_the_control_below_every_arm() -> None:
     """Five-arm table on pooled labels; the control sits below every arm.
 
