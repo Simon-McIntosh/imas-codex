@@ -257,6 +257,20 @@ call them out explicitly in `comments`:
 {% endfor %}
 {% endif %}
 
+{% if audit_findings %}
+## Layer 1 Audit Findings — deterministic input
+
+The catalog audit has already inspected these candidates and reports the
+following. Each line is a fact about catalog state, not an opinion to weigh:
+take every finding into account when you score the name, and say so in
+`comments`. An error-severity lint finding (a name that fails its own grammar
+round-trip) is a real defect.
+
+{% for finding in audit_findings %}
+- {{ finding }}
+{% endfor %}
+{% endif %}
+
 {% if batch_context %}
 ## Source Context (same as composer received)
 

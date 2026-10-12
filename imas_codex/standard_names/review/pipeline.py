@@ -25,6 +25,7 @@ from imas_codex.standard_names.budget import (
     charge_billable_exception,
     model_provider_exposure,
 )
+from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 from imas_codex.standard_names.review.audits import AuditReport
 
 # Defense-in-depth: strict SN id pattern used to reject reviewer-hallucinated
@@ -574,8 +575,12 @@ async def enrich_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
             batch_ids = {n.get("id", "") for n in batch.get("names", [])}
             findings = _extract_audit_findings(state.audit_report, batch_ids)
             batch["audit_findings"] = findings
+            batch["error_lint_findings"] = _extract_error_lint_ids(
+                state.audit_report, batch_ids
+            )
         else:
             batch["audit_findings"] = []
+            batch["error_lint_findings"] = {}
 
         state.enrich_stats.processed = i + 1
         state.enrich_stats.record_batch(1)
@@ -1099,6 +1104,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     neighborhood=batch.get("neighborhood", []),
                     existing_names=existing_names,
                     audit_findings=batch.get("audit_findings", []),
+                    error_lint_findings=batch.get("error_lint_findings", {}),
                     wlog=wlog,
                     name_only=state.name_only,
                     target=review_target,
@@ -1185,6 +1191,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     neighborhood=batch.get("neighborhood", []),
                     existing_names=existing_names,
                     audit_findings=batch.get("audit_findings", []),
+                    error_lint_findings=batch.get("error_lint_findings", {}),
                     wlog=wlog,
                     name_only=state.name_only,
                     target=review_target,
@@ -1361,6 +1368,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     neighborhood=batch.get("neighborhood", []),
                     existing_names=existing_names,
                     audit_findings=batch.get("audit_findings", []),
+                    error_lint_findings=batch.get("error_lint_findings", {}),
                     wlog=wlog,
                     name_only=state.name_only,
                     target=review_target,
@@ -1776,6 +1784,27 @@ def _extract_audit_findings(
     return findings[:20]
 
 
+def _extract_error_lint_ids(
+    audit_report: AuditReport | None, batch_ids: set[str]
+) -> dict[str, str]:
+    """Map each batch name carrying an error-severity lint finding to its summary.
+
+    The summary string is identical to the one ``_extract_audit_findings``
+    renders for the reviewer, so the deterministic input and the score cap
+    name the same finding.
+    """
+    errors: dict[str, str] = {}
+    if audit_report is None:
+        return errors
+    for finding in audit_report.lint_findings:
+        if finding.severity == "error" and finding.name_id in batch_ids:
+            errors[finding.name_id] = (
+                f"[{finding.severity}:lint:{finding.finding_type}] "
+                f"{finding.name_id}: {finding.detail[:200]}"
+            )
+    return errors
+
+
 def _match_reviews_to_entries(
     reviews: list,
     names: list[dict],
@@ -1904,6 +1933,40 @@ def _match_reviews_to_entries(
     return scored, unmatched, revised_count
 
 
+def _cap_docs_scores_for_lint_errors(
+    scored: list[dict],
+    error_lint_findings: dict[str, str],
+    wlog: logging.LoggerAdapter,
+) -> None:
+    """Hold documentation scores of entries carrying an unresolved lint error below acceptance.
+
+    A documentation cannot be accepted while an error-severity lint finding
+    stands against its name, so each such score above the documentation
+    acceptance threshold is clamped just below it and the entry records the
+    finding that forced the cap.
+    """
+    if not error_lint_findings:
+        return
+    floor = DEFAULT_MIN_SCORE - 0.001
+    for entry in scored:
+        entry_id = entry.get("id") or entry.get("_original_id") or ""
+        finding = error_lint_findings.get(entry_id)
+        if finding is None:
+            continue
+        score = entry.get("reviewer_score")
+        if score is None or score < DEFAULT_MIN_SCORE:
+            continue
+        entry["reviewer_score"] = min(score, floor)
+        entry["audit_cap_applied"] = True
+        entry["audit_cap_finding"] = finding
+        wlog.info(
+            "Docs score for %r capped at %.3f by lint error: %s",
+            entry_id,
+            entry["reviewer_score"],
+            finding,
+        )
+
+
 async def _review_single_batch(
     *,
     names: list[dict],
@@ -1913,6 +1976,7 @@ async def _review_single_batch(
     batch_context: str,
     neighborhood: list[dict],
     audit_findings: list[str],
+    error_lint_findings: dict[str, str] | None = None,
     wlog: logging.LoggerAdapter,
     existing_names: list[str] | None = None,
     name_only: bool = False,
@@ -2077,6 +2141,8 @@ async def _review_single_batch(
     scored, unmatched, revised_count = _match_reviews_to_entries(
         result.reviews, names, wlog, name_only=name_only, target=target
     )
+    if target == "docs":
+        _cap_docs_scores_for_lint_errors(scored, error_lint_findings or {}, wlog)
 
     total_cost = cost
     total_tokens = tokens
@@ -2107,6 +2173,7 @@ async def _review_single_batch(
             neighborhood=neighborhood,
             existing_names=existing_names,
             audit_findings=audit_findings,
+            error_lint_findings=error_lint_findings,
             wlog=wlog,
             name_only=name_only,
             target=target,
