@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="045d63386">
 </head>
@@ -190,7 +190,11 @@
       else, and have the standard-name search and these four callers import it from there. This moves a definition
       rather than adding one. Do not write a second fusion. The code path fuses three streams: chunk vector, chunk text
       with its reference hits, and code-example vector, which today adds 0.05 to the larger score at line 1678. Signal search over-fetches 100 vector and 50 full-text candidates before fusing, the prototype's
-      values, then cuts to <code>k</code>.
+      values, then cuts to <code>k</code>. <code>_vector_search_signals</code> duplicates
+      <code>_find_signals_semantic</code> in <code>imas_codex/graph/domain_queries.py</code>: both build the
+      <code>facility_id</code>-prefiltered query over <code>facility_signal_desc_embedding</code>. Raising the pool in one
+      copy would leave the two disagreeing, so give that query one owner and have the other call it, adding no helper
+      beside both.
     </p>
     <p>
       The docs and code tools rerank after fusing, so their gain will be smaller. Their 18 JT-60SA questions and hand labels, built
