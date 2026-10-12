@@ -21,6 +21,7 @@ from imas_codex.llm.search_tools import (
     _vector_search_wiki_chunks,
     rerank_candidates,
 )
+from imas_codex.search.fusion import rrf_fuse
 
 
 def _text_search_documents(
@@ -57,23 +58,14 @@ def _text_search_documents(
 
 def _hybrid_ids(
     ids: list[str],
-    scores: dict[str, float],
     text_hits: list[dict[str, Any]],
     limit: int,
 ) -> tuple[list[str], dict[str, float]]:
-    """Blend lexical and vector scores using the search tools' hybrid rule."""
-    scores = dict(scores)
-    for hit in text_hits:
-        item_id = hit["id"]
-        text_score = round(hit["score"], 3)
-        if item_id in scores:
-            scores[item_id] = round(scores[item_id] * 0.7 + text_score * 0.3 + 0.1, 3)
-        else:
-            scores[item_id] = text_score
-            ids.append(item_id)
-    return sorted(set(ids), key=lambda item_id: scores[item_id], reverse=True)[
-        :limit
-    ], scores
+    """Fuse the lexical and vector rankings with reciprocal rank fusion."""
+    fused = rrf_fuse([ids, text_hits])
+    ranked = [item_id for item_id, _ in fused][:limit]
+    scores = dict(fused)
+    return ranked, scores
 
 
 def _item(kind: str, row: Mapping[str, Any], score: float) -> dict[str, Any]:
@@ -146,12 +138,11 @@ def build_slot_context(
     embedding = _embed(encoder, retrieval_query)
     pool: list[dict[str, Any]] = []
 
-    code_ids, code_scores = _vector_search_code_chunks(
+    code_ids, _ = _vector_search_code_chunks(
         gc, embedding, facility, candidates_per_kind
     )
     code_ids, code_scores = _hybrid_ids(
         code_ids,
-        code_scores,
         _text_search_code_chunks(gc, retrieval_query, facility, candidates_per_kind),
         candidates_per_kind,
     )
@@ -163,12 +154,11 @@ def build_slot_context(
             if item_id in code_rows
         )
 
-    wiki_ids, wiki_scores = _vector_search_wiki_chunks(
+    wiki_ids, _ = _vector_search_wiki_chunks(
         gc, embedding, facility, candidates_per_kind
     )
     wiki_ids, wiki_scores = _hybrid_ids(
         wiki_ids,
-        wiki_scores,
         _text_search_wiki_chunks(gc, retrieval_query, facility, candidates_per_kind),
         candidates_per_kind,
     )
@@ -180,7 +170,7 @@ def build_slot_context(
             if item_id in wiki_rows
         )
 
-    document_rows, document_scores = _vector_search_documents(
+    document_rows, _ = _vector_search_documents(
         gc, embedding, facility, candidates_per_kind
     )
     document_rows = [row for row in document_rows if "url" in row]
@@ -192,7 +182,6 @@ def build_slot_context(
     )
     document_ids, document_scores = _hybrid_ids(
         [row["id"] for row in document_rows],
-        document_scores,
         text_documents,
         candidates_per_kind,
     )
@@ -203,12 +192,11 @@ def build_slot_context(
         if item_id in documents
     )
 
-    signal_ids, signal_scores = _vector_search_signals(
+    signal_ids, _ = _vector_search_signals(
         gc, embedding, facility, candidates_per_kind, None, None
     )
     signal_ids, signal_scores = _hybrid_ids(
         signal_ids,
-        signal_scores,
         _text_search_signals(gc, retrieval_query, facility, candidates_per_kind),
         candidates_per_kind,
     )

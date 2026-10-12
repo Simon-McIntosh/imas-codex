@@ -101,9 +101,9 @@ def test_four_kinds_have_origins_and_shared_judgment_changes_order(monkeypatch):
     result = _context(encoder)
     assert [item["id"] for item in result] == [
         "code-low",
-        "signal",
         "wiki",
         "doc",
+        "signal",
         "code-high",
     ]
     assert {item["kind"] for item in result} == {"code", "wiki", "document", "signal"}
@@ -138,9 +138,9 @@ def test_no_key_keeps_retrieval_order(monkeypatch):
     result = _context(encoder)
     assert [item["id"] for item in result] == [
         "code-high",
-        "signal",
         "wiki",
         "doc",
+        "signal",
         "code-low",
     ]
 

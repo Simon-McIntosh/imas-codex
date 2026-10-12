@@ -113,6 +113,45 @@ def find_signals(
     return gc.query(cypher, **params)
 
 
+def signal_vector_search_block(
+    *,
+    diagnostic: bool = False,
+    physics_domain: bool = False,
+    has_data: bool = False,
+    k: str = "$k",
+    node_alias: str = "s",
+    score_alias: str = "score",
+) -> str:
+    """Cypher for the facility-prefiltered vector search over signal descriptions.
+
+    The single owner of the ``facility_signal_desc_embedding`` query: the
+    facility predicate renders inside ``SEARCH`` as an in-index pre-filter
+    (``facility_id`` is a registered index property), so the ANN cut is taken
+    over the facility's own signals rather than a global candidate set. The
+    ``diagnostic``/``physics_domain``/``has_data`` predicates are not index
+    properties and stay as post-filters over the returned signals. Callers
+    append their own ``RETURN`` clause and supply the matching parameters.
+    """
+    prefilter_clauses = [f"{node_alias}.facility_id = $facility"]
+    where_clauses: list[str] = []
+    if diagnostic:
+        where_clauses.append(f"{node_alias}.diagnostic = $diagnostic")
+    if physics_domain:
+        where_clauses.append(f"{node_alias}.physics_domain = $physics_domain")
+    if has_data:
+        where_clauses.append(f"{node_alias}.checked = $has_data")
+
+    return build_vector_search(
+        "facility_signal_desc_embedding",
+        "FacilitySignal",
+        prefilter_clauses=prefilter_clauses,
+        where_clauses=where_clauses or None,
+        k=k,
+        node_alias=node_alias,
+        score_alias=score_alias,
+    )
+
+
 def _find_signals_semantic(
     query: str,
     *,
@@ -128,34 +167,23 @@ def _find_signals_semantic(
     """Semantic search branch for find_signals."""
     embedding = embed_fn(query)
 
-    # facility_id is registered on facility_signal_desc_embedding, so its
-    # predicate renders inside SEARCH and pre-filters the ANN cut.
-    # diagnostic/physics_domain/checked are not index properties and stay as
-    # post-filters over the returned signals.
-    pre_filter_parts = ["s.facility_id = $facility"]
-    where_parts: list[str] = []
     params: dict[str, Any] = {
         "facility": facility,
         "k": limit,
         "embedding": embedding,
     }
     if diagnostic is not None:
-        where_parts.append("s.diagnostic = $diagnostic")
         params["diagnostic"] = diagnostic
     if physics_domain is not None:
-        where_parts.append("s.physics_domain = $physics_domain")
         params["physics_domain"] = physics_domain
     if has_data is not None:
-        where_parts.append("s.checked = $has_data")
         params["has_data"] = has_data
 
-    search_block = build_vector_search(
-        "facility_signal_desc_embedding",
-        "FacilitySignal",
-        prefilter_clauses=pre_filter_parts,
-        where_clauses=where_parts or None,
+    search_block = signal_vector_search_block(
+        diagnostic=diagnostic is not None,
+        physics_domain=physics_domain is not None,
+        has_data=has_data is not None,
         node_alias="s",
-        score_alias="score",
     )
 
     access_clause = ""

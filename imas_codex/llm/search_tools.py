@@ -19,6 +19,7 @@ from neo4j.exceptions import ClientError, DatabaseError, ServiceUnavailable
 
 from imas_codex.embeddings.encoder import EmbeddingBackendError, Encoder
 from imas_codex.graph.client import GraphClient
+from imas_codex.graph.domain_queries import signal_vector_search_block
 from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.graph.vector_search import build_vector_search
 from imas_codex.llm.search_formatters import (
@@ -27,6 +28,7 @@ from imas_codex.llm.search_formatters import (
     format_fetch_report,
     format_signals_report,
 )
+from imas_codex.search.fusion import rrf_fuse
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +68,12 @@ _DOC_SIGNAL_CAP = 16
 # answers the census placed at ranks 159 to 181, and no pool the budget can score
 # reaches those.
 RERANK_POOL = 60
+
+# Reciprocal rank fusion discards score magnitude, so each signal stream is
+# over-fetched before the fusion and the fused order is cut to the requested k.
+# 100 vector and 50 full-text candidates are the prototype's pool sizes.
+SIGNAL_VECTOR_POOL = 100
+SIGNAL_TEXT_POOL = 50
 
 # Wall-time budget for one query's rerank, sized from the prototype's ~2 s for
 # 30 candidates. A slow rerank returns the embedding order rather than delaying
@@ -241,32 +249,22 @@ def _rank_signals(
     diagnostic: str | None = None,
     physics_domain: str | None = None,
 ) -> tuple[list[str], dict[str, float]]:
-    """Rank facility signals by the tool's own rule; return (ordered ids, scores).
+    """Rank facility signals by reciprocal rank fusion; return (ordered ids, scores).
 
-    Vector search on signal descriptions, boosted by a full-text keyword match.
-    A signal found by both keeps 0.7 of its cosine score and adds 0.3 of its
-    BM25 score plus 0.1; a signal found only by text keeps its BM25 score. The
-    ordered ids are the fused order cut at ``k``.
+    The vector stream over signal descriptions and the full-text keyword stream
+    are fused by rank. Each stream is over-fetched before the fusion and the
+    fused order is cut at ``k``. The fused mass is the returned score.
     """
-    signal_ids, scores = _vector_search_signals(
-        gc, embedding, facility, k, diagnostic, physics_domain
+    signal_ids, _ = _vector_search_signals(
+        gc, embedding, facility, SIGNAL_VECTOR_POOL, diagnostic, physics_domain
     )
 
-    # Text search for keyword matches (hybrid boost)
-    text_signals = _text_search_signals(gc, query, facility, k)
-    for r in text_signals:
-        sid = r["id"]
-        text_score = round(r["score"], 3)
-        if sid in scores:
-            scores[sid] = round(scores[sid] * 0.7 + text_score * 0.3 + 0.1, 3)
-        else:
-            scores[sid] = text_score
-            signal_ids.append(sid)
+    text_signals = _text_search_signals(gc, query, facility, SIGNAL_TEXT_POOL)
 
-    signal_ids = sorted(
-        set(signal_ids), key=lambda sid: scores.get(sid, 0), reverse=True
-    )[:k]
-    return signal_ids, scores
+    fused = rrf_fuse([signal_ids, text_signals])
+    ranked = [sid for sid, _ in fused][:k]
+    scores = dict(fused)
+    return ranked, scores
 
 
 def _search_signals(
@@ -630,17 +628,12 @@ def _vector_search_signals(
 ) -> tuple[list[str], dict[str, float]]:
     """Vector search on facility_signal_desc_embedding index.
 
-    Facility filtering is pushed inside SEARCH as an in-index pre-filter:
-    ``facility_signal_desc_embedding`` registers ``facility_id`` as an
-    additional vector index property, so the ANN cut is taken over the
-    facility's own signals rather than over a global candidate set that a
-    small facility's signals would not survive. ``diagnostic`` and
-    ``physics_domain`` stay as post-filters over the returned signals, so the
-    ANN limit is widened to ``max(k*2, 50)`` when either is present; with no
-    post-filter the cut is the requested ``k``.
+    The facility predicate is pushed inside SEARCH as an in-index pre-filter by
+    :func:`signal_vector_search_block`, which owns the query; ``diagnostic`` and
+    ``physics_domain`` stay as post-filters, so the ANN limit is widened to
+    ``max(k*2, 50)`` when either is present and the cut is the requested ``k``
+    otherwise.
     """
-    prefilter_parts = ["s.facility_id = $facility"]
-    where_parts: list[str] = []
     params: dict[str, Any] = {
         "k": k,
         "embedding": embedding,
@@ -649,25 +642,20 @@ def _vector_search_signals(
     }
 
     if diagnostic is not None:
-        where_parts.append("s.diagnostic = $diagnostic")
         params["diagnostic"] = diagnostic
     if physics_domain is not None:
-        where_parts.append("s.physics_domain = $physics_domain")
         params["physics_domain"] = physics_domain
 
     # diagnostic/physics_domain discard rows after the ANN cut, so the cut is
     # widened to keep the requested k reachable; with no such post-filter the
     # facility pre-filter alone bounds the cut and the over-fetch is retired.
-    if where_parts:
+    if diagnostic is not None or physics_domain is not None:
         params["k"] = max(k * 2, 50)
 
     cypher = (
-        build_vector_search(
-            "facility_signal_desc_embedding",
-            "FacilitySignal",
-            prefilter_clauses=prefilter_parts,
-            where_clauses=where_parts or None,
-            k="$k",
+        signal_vector_search_block(
+            diagnostic=diagnostic is not None,
+            physics_domain=physics_domain is not None,
             node_alias="s",
         )
         + "\n"
@@ -923,30 +911,11 @@ def _search_docs(
             score_dimension=score_dimension,
         )
 
-        # Keep the raw cosine so a tied hybrid score can be broken by it below
-        # rather than by set-iteration order.
-        vector_cosine = dict(scores)
-
-        # Step 1b: Text search for keyword matches (hybrid boost)
+        # Step 1b: Fuse the chunk vector and text streams by rank.
         text_chunks = _text_search_wiki_chunks(gc, query, facility, pool)
-        for r in text_chunks:
-            cid = r["id"]
-            text_score = round(r["score"], 3)
-            if cid in scores:
-                scores[cid] = round(scores[cid] * 0.7 + text_score * 0.3 + 0.1, 3)
-            else:
-                scores[cid] = text_score
-                chunk_ids.append(cid)
-
-        # Re-sort and limit to the pool. The hybrid score ties at the same value
-        # for many chunks, so the raw cosine breaks every tie deterministically
-        # and the order no longer depends on set-iteration order.
-        ranked = sorted(
-            set(chunk_ids),
-            key=lambda cid: (scores.get(cid, 0), vector_cosine.get(cid, -1.0)),
-            reverse=True,
-        )
-        chunk_ids = ranked[:pool]
+        fused = rrf_fuse([chunk_ids, text_chunks])
+        chunk_ids = [cid for cid, _ in fused][:pool]
+        scores = dict(fused)
 
         # Step 2: Vector search on documents/images
         document_results, document_scores = _vector_search_documents(
@@ -1678,33 +1647,18 @@ def _search_code(
             score_dimension=score_dimension,
         )
 
-        # Step 1b: Text search for keyword matches (hybrid boost)
+        # Step 1b: Text search for keyword matches, including reference hits
         text_chunks = _text_search_code_chunks(gc, query, facility, pool)
         text_chunks.extend(_reference_search_code_chunks(gc, query, facility, pool))
-        for r in text_chunks:
-            cid = r["id"]
-            text_score = round(r["score"], 3)
-            if cid in scores:
-                scores[cid] = round(scores[cid] * 0.7 + text_score * 0.3 + 0.1, 3)
-            else:
-                scores[cid] = text_score
-                chunk_ids.append(cid)
 
         # Step 1c: CodeExample-level vector search (find relevant examples by description)
         example_chunks = _vector_search_code_examples(gc, embedding, facility, pool)
-        for r in example_chunks:
-            cid = r["id"]
-            ex_score = round(r["score"], 3)
-            if cid in scores:
-                scores[cid] = round(max(scores[cid], ex_score) + 0.05, 3)
-            else:
-                scores[cid] = ex_score
-                chunk_ids.append(cid)
 
-        # Re-sort and limit to the pool
-        chunk_ids = sorted(
-            set(chunk_ids), key=lambda cid: scores.get(cid, 0), reverse=True
-        )[:pool]
+        # Fuse the chunk vector, chunk text and code-example vector streams by
+        # rank, then cut to the pool.
+        fused = rrf_fuse([chunk_ids, text_chunks, example_chunks])
+        chunk_ids = [cid for cid, _ in fused][:pool]
+        scores = dict(fused)
 
         if not chunk_ids:
             facility_msg = f" at {facility}" if facility else ""

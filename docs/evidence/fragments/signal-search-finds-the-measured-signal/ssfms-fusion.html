@@ -1,0 +1,14 @@
+<section id="ssfms-fusion" data-plan="signal-search-finds-the-measured-signal" data-node="ssfms-fusion">
+  <h3>ssfms-fusion — one reciprocal rank fusion for every search tool</h3>
+  <p id="ssfms-fusion-landing">
+    Moved <code>rrf_fuse</code> and <code>RRF_K</code> into
+    <code>imas_codex/search/fusion.py</code> and replaced the additive blend
+    <code>score*0.7 + text*0.3 + 0.1</code> with it at the four tool sites
+    (<code>_rank_signals</code>, <code>_search_docs</code>,
+    <code>_search_code</code>, <code>_hybrid_ids</code>); signal search now fuses
+    a 100-candidate vector pool against a 50-candidate full-text pool before
+    cutting at <code>k</code>, and the facility-prefiltered signal vector query
+    has one owner (<code>signal_vector_search_block</code>). Measured: the four
+    scoped test files pass — 129 passed, 8 skipped, 1 deselected, EXIT=0.
+  </p>
+</section>
