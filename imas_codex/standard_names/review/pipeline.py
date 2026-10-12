@@ -2036,6 +2036,12 @@ async def _review_single_batch(
     for item in names:
         item_data = dict(item)
         item_data["validation_issues"] = item.get("validation_issues", [])
+        if target == "docs":
+            from imas_codex.standard_names.context import conventions_context_for
+
+            item_data["conventions"] = conventions_context_for(
+                item.get("standard_name") or item["id"]
+            )
         items_with_issues.append(item_data)
 
     # Merge compose context with review-specific keys

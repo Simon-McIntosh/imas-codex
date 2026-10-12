@@ -128,7 +128,7 @@ acceptance threshold, so score it down and say so in `comments`.
 {% if nearby_existing_names %}
 ## Nearby Existing Standard Names
 
-These names already exist in the catalog. Compare docs for consistency and cross-referencing:
+These names already exist in the catalog. Compare documentation depth and cross-referencing:
 {% for name in nearby_existing_names %}
 - **{{ name.id }}**: {{ name.description | default('', true) }} ({{ name.kind | default('scalar', true) }}, {{ name.unit | default('dimensionless', true) }})
 {% endfor %}
@@ -151,6 +151,8 @@ recognise — check the candidate against these before treating a citation as va
 {% for item in items %}
 ### Candidate {{ loop.index }}
 - **Standard name**: {{ item.standard_name or item.id }}
+{% set conventions = item.conventions %}
+{% include ("sn/_conventions.md") %}
 {% if item.derived_children %}
 > **DERIVED FAMILY PARENT — score its documentation as an abstraction over its children.**
 > {{ item.derived_parent_note }}

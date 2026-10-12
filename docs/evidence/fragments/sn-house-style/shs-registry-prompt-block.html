@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="fragment">
+  <title>Documentation prompts read selected conventions</title>
+</head>
+<body>
+  <section id="shs-registry-prompt-block-landing">
+    <h2>Documentation prompts read selected conventions</h2>
+    <p>The generate, refine, single-item review, and batch review prompts render
+    only the registry entries selected for each name. The prompt block carries
+    concepts, canonical equations and symbols, forbidden variants, notation,
+    and the description and documentation openings. A name with no selected
+    entry receives no block.</p>
+    <h3>Free-text passages replaced</h3>
+    <table>
+      <thead><tr><th>Prompt</th><th>Removed passage</th><th>Registry field now used</th></tr></thead>
+      <tbody>
+        <tr><td>generate_docs_system</td><td>“One template per family,” including its example openings and anchor-defined opening rule</td><td>templates.description and templates.documentation</td></tr>
+        <tr><td>generate_docs_system</td><td>“Substitution test” for a sibling opening</td><td>templates.description and templates.documentation</td></tr>
+        <tr><td>generate_docs_system</td><td>“Consistent symbols and conventions” as a sibling-derived notation check</td><td>notation.symbol, notation.forbidden_spellings, concepts.equation, concepts.forbidden_variants; the COCOS paragraph requirement remains in the existing prompt rule</td></tr>
+        <tr><td>generate_docs_system</td><td>“One canonical opening per family (short description included)” and its “Total,” “Unweighted,” and “Charge-state-summed” opening examples</td><td>templates.description and templates.documentation</td></tr>
+        <tr><td>generate_docs_system</td><td>Family-anchoring introduction listing competing number-density openings, and the instruction to choose an opening from species context</td><td>templates.description and templates.documentation</td></tr>
+        <tr><td>generate_docs_user</td><td>Sibling matched-set opening advice and “Mirror this member's opening template”</td><td>templates.description and templates.documentation</td></tr>
+        <tr><td>generate_docs_user</td><td>No-anchor advice to invent a family opening pattern</td><td>templates.description and templates.documentation</td></tr>
+        <tr><td>generate_docs_user</td><td>Family rule “Same opening template”</td><td>templates.description and templates.documentation</td></tr>
+        <tr><td>generate_docs_user</td><td>Family rule's member-specific symbol and sign-wording examples</td><td>notation.symbol and notation.parameters; COCOS wording remains in the existing prompt rule</td></tr>
+        <tr><td>refine_docs_user</td><td>Sibling-family noun-phrase opening and member-specific symbol advice</td><td>templates.description, templates.documentation, and notation.symbol</td></tr>
+        <tr><td>refine_docs_user</td><td>“One canonical opening per family (HARD)” with adjective examples</td><td>templates.description and templates.documentation</td></tr>
+        <tr><td>review_docs_system</td><td>Neighbour comparison of equation style, equation symbol, and sign wording</td><td>concepts.equation, concepts.forbidden_variants, and notation.symbol; COCOS wording remains in the rubric</td></tr>
+        <tr><td>review_docs_system</td><td>Sibling opening substitution test and no-anchor opening judgement</td><td>templates.description and templates.documentation</td></tr>
+        <tr><td>review_docs_user</td><td>Sibling “terminology and conventions” and parallel-opening test</td><td>concepts.definition, notation.symbol, and templates.documentation</td></tr>
+        <tr><td>review_docs</td><td>Nearby-name instruction to compare docs for general consistency</td><td>concepts, notation, and templates selected for each candidate</td></tr>
+      </tbody>
+    </table>
+    <p>Comparable gate: 104 passed at the base and 113 passed after adding nine
+    render checks, with no added failures. Removing the generate-docs include
+    made its selected-conventions render check fail alone (EXIT=1).</p>
+  </section>
+</body>
+</html>

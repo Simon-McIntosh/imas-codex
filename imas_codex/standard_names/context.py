@@ -25,6 +25,20 @@ logger = logging.getLogger(__name__)
 _CONTEXT_CACHE: dict[str, Any] | None = None
 
 
+def conventions_context_for(name: str) -> dict[str, list[dict[str, Any]]] | None:
+    """Return only the registry conventions selected for this name's prompt."""
+    from imas_standard_names.grammar.terms import select_conventions
+
+    selected = select_conventions(name)
+    if not (selected.concepts or selected.notation or selected.templates):
+        return None
+    return {
+        "concepts": [entry.model_dump() for entry in selected.concepts],
+        "notation": [entry.model_dump() for entry in selected.notation],
+        "templates": [entry.model_dump() for entry in selected.templates],
+    }
+
+
 def _get_isn_context() -> dict[str, Any]:
     """Return the ISN grammar context (cached by ISN internally)."""
     from imas_standard_names.grammar.context import get_grammar_context

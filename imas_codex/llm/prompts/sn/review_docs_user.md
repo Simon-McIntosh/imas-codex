@@ -14,6 +14,7 @@ registry or parser error text; do not score the name's grammar here.
 ## Candidate
 
 - **Standard name**: {{ item.id }}
+{% include ("sn/_conventions.md") %}
 - **Unit**: {{ item.unit | default('N/A', true) }}
 - **Kind**: {{ item.kind | default('N/A', true) }}
 {% if item.source_paths %}- **Source paths** (provenance context — dock if cited in output): {{ item.source_paths | join(', ') }}
@@ -52,7 +53,7 @@ every definitional claim in the candidate documentation against this text:
 
 Use these accepted, in-catalog names as your **third-party reference set**.
 They are NOT to be re-reviewed. Compare the candidate's documentation
-*depth*, *terminology*, and *conventions* to them. Cite specific sibling
+*depth* and physical scope to them. Cite specific sibling
 `id`s when you dock points.
 
 {% if vector_neighbours %}
@@ -79,12 +80,11 @@ They are NOT to be re-reviewed. Compare the candidate's documentation
 {% if sibling_family %}
 ### Sibling family — PARALLEL-STRUCTURE CHECK{% if sibling_family.parent %} (shared parent `{{ sibling_family.parent.name }}`){% else %} (shared pattern){% endif %}
 
-The candidate is one member of a matched sibling set. Its opening sentence and
-documentation section structure MUST be parallel to the family template —
-differing only in the axis/species/zone-specific token, member-specific
-symbols, and genuinely member-specific physics.
+The candidate is one member of a matched sibling set. Compare its section
+structure and physical scope with the accepted members. Use a selected registry
+template to judge its opening when one applies.
 
-{% if sibling_family.anchor %}The family template anchor is
+{% if sibling_family.anchor %}The accepted sibling anchor is
 **`{{ sibling_family.anchor.name }}`**{% if sibling_family.anchor.is_parent %} (the family parent){% endif %}:
 - Anchor description: {{ sibling_family.anchor.description }}
 {% endif %}
@@ -94,12 +94,9 @@ Members:
   - documentation opens: "{{ s.documentation_opening }}"{% endif %}
 {% endfor %}
 
-Dock Description Quality and Documentation Quality points (citing the sibling
-`id`s) when the candidate's opening template or section structure diverges
-from its **accepted** siblings without a physics reason. Do NOT dock for
-faithful per-member physics differences expressed inside the shared template —
-flattening distinct physics into false uniformity is a Physics Accuracy
-failure, not consistency.
+Dock Documentation Quality points (citing sibling `id`s) when section structure
+diverges without a physics reason. Do not dock faithful per-member physics
+differences; flattening distinct physics is a Physics Accuracy failure.
 {% endif %}
 
 For a derived parent, the dedicated parent-review path supplies the children as

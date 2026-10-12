@@ -9545,6 +9545,7 @@ async def process_generate_docs_batch(
         # (otherwise the grammar block is empty). Cached after first call.
         from imas_codex.standard_names.context import (
             build_compose_context,
+            conventions_context_for,
             locus_context_for,
         )
 
@@ -9560,6 +9561,7 @@ async def process_generate_docs_batch(
             # normalized_poloidal_flux_coordinate_of_pedestal. None when the name
             # has no locus or the locus carries no gloss/defining quantity.
             "locus_context": locus_context_for(sn_id),
+            "conventions": conventions_context_for(sn_id),
         }
 
         try:
@@ -10235,6 +10237,9 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
         **neighbours,
         "review_scored_examples": review_examples,
     }
+    from imas_codex.standard_names.context import conventions_context_for
+
+    prompt_context["conventions"] = conventions_context_for(prepared_item["id"])
     is_parent = bool(prepared_item.get("derived_children"))
     user_template = "sn/review_docs_parent_user" if is_parent else "sn/review_docs_user"
     system_template = (
@@ -10242,6 +10247,8 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
     )
     user_prompt = render_prompt(user_template, prompt_context)
     system_prompt = render_prompt(system_template, prompt_context)
+    if is_parent and prompt_context["conventions"]:
+        user_prompt += "\n\n" + render_prompt("sn/_conventions", prompt_context)
     response_model = (
         StandardNameQualityReviewDocsParentBatch
         if is_parent
@@ -10594,6 +10601,9 @@ async def process_refine_docs_batch(
             "edit_reason": item.get("edit_reason"),
             "edit_origin": item.get("edit_origin"),
         }
+        from imas_codex.standard_names.context import conventions_context_for
+
+        prompt_context["conventions"] = conventions_context_for(sn_id)
 
         # Best-effort DD path enrichment
         from imas_codex.standard_names.dd_resolutions import DDResolutionError

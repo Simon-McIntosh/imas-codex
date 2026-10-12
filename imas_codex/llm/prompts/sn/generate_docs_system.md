@@ -111,20 +111,8 @@ variants). When the user prompt carries a "Sibling Family" block, the entry
 you write is one member of a matched set and MUST be structurally parallel to
 its siblings:
 
-- **One template per family.** All members share the same opening noun-phrase
-  pattern and the same documentation section ordering (definition → governing
-  physics → symbol definitions → scope → exclusions/distinctions → essential
-  relationships → sign convention). The anchor member (or, absent an anchor,
-  the pattern you set) defines that template.
-  - ✅ `"Poloidal mode number $m$ is the dimensionless integer Fourier harmonic…"` /
-    `"Toroidal mode number $n$ is the dimensionless integer Fourier harmonic…"`
-  - ❌ one sibling opening `"{Axis} mode number … is"` while another opens
-    `"Dimensionless non-negative integer labeling…"` — same quantity-shape,
-    gratuitously different template.
-- **Substitution test.** A reader should be able to derive any sibling's
-  opening from yours by swapping only the axis/species/zone token and the
-  member-specific symbol. If more than that changes, the structure has
-  drifted.
+- **Shared structure.** Compare section ordering and physics scope with
+  siblings. Where a selected registry template supplies an opening, use it.
 - **Faithfulness outranks uniformity (HARD).** Parallel structure applies to
   the TEMPLATE, never the physics. Distinct per-member physics — a genuinely
   different defining relation, a different symbol convention ($m$ vs $n$),
@@ -132,37 +120,13 @@ its siblings:
   boundary behaviour — must be stated accurately inside the shared structure,
   not averaged away. Never copy a sibling's physics claim that does not hold
   for this member.
-- **Consistent symbols and conventions.** Sibling entries must not disagree
-  on notation for the same shared concept, and sign-convention paragraphs
-  must be present for exactly the members whose quantity is sign-dependent.
 
-## Family Anchoring & Species Semantics (data-driven — HARD)
-
-Sibling families drift into many gratuitously different openings for the same
-physics (number-density entries alone have been seen opening with
-"Charge-state-summed…", "Total…", "Unweighted…", "Number density of…", and
-more for one quantity kind). The rules below make the Family Parallel Structure
-section concrete. **None of them enumerates vocabulary** — the species, loci,
-and charge-state facts come from the per-name context supplied with each item
-(the sibling-family block, the subject/species semantics, and the injected
-locus context). Apply each PATTERN to whatever tokens that context provides.
-
-### One canonical opening per family (short description included)
-
-When the per-name context places this entry in a sibling family, open BOTH the
-`description` and the `documentation` with the SAME noun-phrase template as the
-family anchor, substituting only the member-specific token(s) — species, axis,
-locus — that the context supplies. **The short `description` field is explicitly
-subject to this family-anchor rule** — it is not exempt because it is short.
-Do not invent a per-member opening shape (a leading "Total…", "Unweighted…", or
-"Charge-state-summed…" adjective, or a differently-shaped bare opening) for what
-is one quantity kind; that sibling drift is exactly what the anchor prevents.
+## Species Semantics (data-driven — HARD)
 
 For number-density quantities (a particle count per unit volume — not a mass,
-charge, current, or power per unit volume), the opening names the species (from
-context) and its number density: a bare species defaults to the
-charge-state-summed reading, while an explicitly charge-state-resolved member
-states its specific state instead.
+charge, current, or power per unit volume), a bare species denotes the
+charge-state-summed quantity, while an explicitly charge-state-resolved member
+denotes its stated charge state.
 
 ### State the charge-state aggregation convention
 
