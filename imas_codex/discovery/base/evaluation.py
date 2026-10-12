@@ -347,8 +347,9 @@ def option_order_stability(
 
     Each sequence holds the identity of the option chosen for every item, so a
     permutation that does not change the answer still matches and a different
-    identity is a flip.  jev-1.13 is documented to lean to the first option, so
-    a high flip rate is the signal that this figure exists to expose.
+    identity is a flip.  A judge that leans to the first option in a list, rather
+    than to the option itself, shows up here as a high flip rate — the signal
+    this figure exists to expose.
     """
     if len(original) != len(permuted):
         raise ValueError(

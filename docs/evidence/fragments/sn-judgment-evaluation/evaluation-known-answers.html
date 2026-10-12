@@ -1,0 +1,54 @@
+<!-- Landing record for known-answer tests over the shared evaluation module.
+     Tests: tests/discovery/test_evaluation.py.
+     Module touched for its version-pinned docstring only:
+     imas_codex/discovery/base/evaluation.py (option_order_stability).
+     Negative controls:
+     /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T164514832410-evaluation-known-answers/negative_control_copy_groups.log
+     /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T164514832410-evaluation-known-answers/negative_control_scores_b.log -->
+<section id="evaluation-known-answers" data-reckon="evidence">
+  <h2 id="evaluation-known-answers-heading">Known answers for copy-group resampling and the paired-difference interval</h2>
+
+  <p id="evaluation-known-answers-intro">
+    <code>tests/discovery/test_evaluation.py</code> now pins the two capabilities
+    the library lacks. Copy-group resampling is checked to keep near-duplicate
+    copies together: resampling by copy group must give a wider interval than
+    resampling by observation at a fixed seed, and collapsing every copy of an
+    item into one group must reproduce the interval of the de-duplicated data
+    exactly. The paired-difference interval is checked with arms whose answers are
+    known independently of the code: a perfectly separating arm against its
+    reverse gives a difference of exactly <code>1.0</code>, identical arms give a
+    difference of <code>0.0</code> bracketed by its interval, and on correlated
+    arms the paired interval is narrower than a difference of two independently
+    resampled arms.
+  </p>
+
+  <table id="evaluation-known-answers-table">
+    <caption>Gate over the three covering test files. Base: 29 passed at <code>f5aafd581</code>. After: 34 passed. Exit 0 both arms.</caption>
+    <thead>
+      <tr><th>Measure</th><th>Figure</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Estimated interval (single arm, known-answer data)</td><td>point 0.75, bracketed by its percentile interval</td></tr>
+      <tr><td>Copy group vs observation interval width</td><td>0.80 (grouped) &gt; 0.392 (per observation), seed 123</td></tr>
+      <tr><td>Copy group vs de-duplicated interval</td><td>identical bounds (0.2, 1.0)</td></tr>
+      <tr><td>Reversed perfectly separating arm</td><td>paired difference 1.0</td></tr>
+      <tr><td>Identical arms</td><td>paired difference 0.0, interval [0.0, 0.0]</td></tr>
+      <tr><td>Paired vs independent difference width</td><td>0.059 (paired) &lt; 0.081 (independent), seed 123</td></tr>
+    </tbody>
+  </table>
+
+  <p id="evaluation-known-answers-reading">
+    Both self-comparing assertions are gone: the interval's point estimate is now
+    asserted against the hand-computed AUC <code>0.75</code> for its data, and
+    <code>paired_auc</code>'s difference is asserted as <code>0.25</code> with each
+    arm read off the labels (<code>auc_a</code> 1.0, <code>auc_b</code> 0.75) rather
+    than against its own dict. The declared negative control &mdash; making
+    <code>bootstrap_interval</code> resample per observation regardless of
+    <code>copy_groups</code> &mdash; turns both copy-group test ids red at
+    <code>EXIT=1</code>; a second control that drops <code>scores_b</code> from the
+    interval turns the identical-arms test red at <code>EXIT=1</code>. The docstring
+    on <code>option_order_stability</code> no longer pins a model version: it now
+    states the mechanism, that a judge leaning to the first option in a list shows
+    up as a high flip rate.
+  </p>
+</section>

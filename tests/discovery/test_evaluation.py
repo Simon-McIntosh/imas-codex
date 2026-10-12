@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 
+import numpy as np
 import pytest
 
 from imas_codex.discovery.base import evaluation as ev
@@ -35,6 +36,33 @@ def _separable_arm():
     return labels, scores
 
 
+def _independent_difference_interval(
+    labels, scores_a, scores_b, *, seed, n_resamples=1000, level=0.95
+):
+    """Percentile interval for AUC(a) - AUC(b) with each arm resampled alone.
+
+    A reference computation, not the module's: every draw resamples the two
+    arms on independent index sets, so it carries no pairing.  On correlated
+    arms this is the wider interval; the paired interval the module builds must
+    beat it.
+    """
+    y = np.asarray(labels, dtype=float)
+    a = np.asarray(scores_a, dtype=float)
+    b = np.asarray(scores_b, dtype=float)
+    rng = np.random.default_rng(seed)
+    n = y.size
+    draws: list[float] = []
+    while len(draws) < n_resamples:
+        idx_a = rng.integers(0, n, n)
+        idx_b = rng.integers(0, n, n)
+        if np.unique(y[idx_a]).size < 2 or np.unique(y[idx_b]).size < 2:
+            continue
+        draws.append(ev.roc_auc(y[idx_a], a[idx_a]) - ev.roc_auc(y[idx_b], b[idx_b]))
+    tail = (1.0 - level) / 2.0
+    lower, upper = np.percentile(draws, [tail * 100.0, (1.0 - tail) * 100.0])
+    return {"lower": float(lower), "upper": float(upper)}
+
+
 class TestRocAuc:
     def test_perfect_separation_scores_one(self):
         assert ev.roc_auc([1, 1, 0, 0], [0.9, 0.8, 0.2, 0.1]) == 1.0
@@ -51,25 +79,94 @@ class TestRocAuc:
 
 
 class TestBootstrapInterval:
-    def test_interval_contains_its_point_estimate(self):
+    def test_point_estimate_is_the_known_auc_and_interval_brackets_it(self):
         labels, scores = _separable_arm()
+        # 12 of the 16 positive/negative pairs are ordered correctly, so the
+        # rank AUC is 0.75 independently of any code under test.
         out = ev.bootstrap_interval(labels, scores, seed=7)
-        assert out["point"] == ev.roc_auc(labels, scores)
+        assert out["point"] == 0.75
         assert out["lower"] < out["upper"]
         assert out["lower"] <= out["point"] <= out["upper"]
         assert out["seed"] == 7
         assert out["n_resamples"] == 1000
 
 
+class TestBootstrapCopyGroups:
+    """Near-duplicate copies resample together, not one copy at a time."""
+
+    _BASE_LABELS = [1, 1, 1, 0, 0, 0]
+    _BASE_SCORES = [0.9, 0.55, 0.4, 0.6, 0.35, 0.1]
+    _COPIES = 4
+
+    def _duplicated(self):
+        labels = [lab for lab in self._BASE_LABELS for _ in range(self._COPIES)]
+        scores = [score for score in self._BASE_SCORES for _ in range(self._COPIES)]
+        groups = [
+            item for item in range(len(self._BASE_LABELS)) for _ in range(self._COPIES)
+        ]
+        return labels, scores, groups
+
+    def test_collapsing_copies_reproduces_the_deduplicated_interval(self):
+        labels, scores, groups = self._duplicated()
+        grouped = ev.bootstrap_interval(labels, scores, copy_groups=groups, seed=123)
+        deduplicated = ev.bootstrap_interval(
+            self._BASE_LABELS, self._BASE_SCORES, seed=123
+        )
+        assert grouped["lower"] == deduplicated["lower"]
+        assert grouped["upper"] == deduplicated["upper"]
+
+    def test_copy_group_interval_is_wider_than_per_observation(self):
+        labels, scores, groups = self._duplicated()
+        grouped = ev.bootstrap_interval(labels, scores, copy_groups=groups, seed=123)
+        per_observation = ev.bootstrap_interval(labels, scores, seed=123)
+        grouped_width = grouped["upper"] - grouped["lower"]
+        per_observation_width = per_observation["upper"] - per_observation["lower"]
+        assert grouped_width > per_observation_width
+
+
 class TestPairedAuc:
-    def test_difference_is_arm_a_minus_arm_b(self):
+    def test_known_aucs_and_their_difference(self):
+        # Arm A separates both positives from both negatives (AUC 1.0); arm B
+        # orders 3 of the 4 pairs correctly (AUC 0.75), so the difference is
+        # 0.25 — all three read off the labels alone.
         labels = [1, 0, 1, 0]
         a = [0.9, 0.1, 0.8, 0.2]
         b = [0.9, 0.1, 0.2, 0.8]
         out = ev.paired_auc(labels, a, b)
         assert out["auc_a"] == 1.0
-        assert out["difference"] == out["auc_a"] - out["auc_b"]
-        assert out["difference"] > 0
+        assert out["auc_b"] == 0.75
+        assert out["difference"] == 0.25
+
+
+class TestPairedDifferenceInterval:
+    """The interval over the paired difference, not over one arm alone."""
+
+    _LABELS = [1, 1, 1, 1, 0, 0, 0, 0]
+    _A = [0.9, 0.8, 0.7, 0.6, 0.4, 0.3, 0.2, 0.1]
+
+    def test_reversed_arm_gives_unit_difference(self):
+        out = ev.bootstrap_interval(
+            self._LABELS, self._A, scores_b=self._A[::-1], seed=123
+        )
+        assert out["point"] == 1.0
+
+    def test_identical_arms_give_zero_difference_bracketed_by_its_interval(self):
+        out = ev.bootstrap_interval(self._LABELS, self._A, scores_b=self._A, seed=123)
+        assert out["point"] == 0.0
+        assert out["lower"] <= 0.0 <= out["upper"]
+
+    def test_paired_interval_is_narrower_than_independent_resampling(self):
+        rng = np.random.default_rng(5)
+        n = 60
+        labels = [1] * 30 + [0] * 30
+        latent = rng.random(n)
+        arm_a = np.array(labels) * 0.3 + 0.5 * (0.7 * latent + 0.3 * rng.random(n))
+        arm_b = np.array(labels) * 0.3 + 0.5 * (0.7 * latent + 0.3 * rng.random(n))
+        paired = ev.bootstrap_interval(labels, arm_a, scores_b=arm_b, seed=123)
+        independent = _independent_difference_interval(labels, arm_a, arm_b, seed=123)
+        paired_width = paired["upper"] - paired["lower"]
+        independent_width = independent["upper"] - independent["lower"]
+        assert paired_width < independent_width
 
 
 class TestOperatingPoint:
