@@ -40,7 +40,24 @@
   "plan_slug": "sn-review-through-jev",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-12T07:16:09.332059+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T07:16:09.332059+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-review-through-jev/r-20261012T063215270678-plan-review-of-sn-review-through-jev.json",
   "review_run_id": "r-20261012T063215270678-plan-review-of-sn-review-through-jev",
   "reviewed_blob_sha": "874af74c57171dd4473f3872427764384a147022",
   "rubric": "content",
