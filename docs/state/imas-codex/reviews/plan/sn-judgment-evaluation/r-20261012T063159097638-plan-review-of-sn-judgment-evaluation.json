@@ -1,0 +1,77 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T06:38:43.665Z",
+  "dispatched_at": "2026-10-12T06:32:09Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-judgment-evaluation.html:177",
+      "id": "reasoning-1",
+      "reason": "a \u00a74 node implementing the table literally is blocked (or silently drops rows), so it must be told the cohort figures are pool sizes to subsample, not fixture contents.",
+      "text": "golden A lists 659 grammar quarantines as negatives and caps every source at a quarter of a fixture sized \"about 900 to 1,400\": 659 exceeds 350, and golden C's WEST-sourced rows (74+24+206) exceed half of its \"about 445\"; the two constraints are unsatisfiable together as written",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-judgment-evaluation.html:97",
+      "id": "single_goal-1",
+      "reason": "a node closing on the low-risk seat or the config change could leave the production wrapper deletion, or the behavioural test it owes, unlanded on one verdict.",
+      "text": "the section title itself names two deliverables (\"One decisions owner, and a seat for standard names\"), and its done-when adds a third, the rewrite of the source-text assertion at tests/ids/test_candidates.py:306",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-judgment-evaluation.html:104",
+      "id": "reasoning-2",
+      "reason": "the remedy (delete the wrapper, route callers through decide_batch) is unchanged; only the justification overstates one of the three duplicated responsibilities.",
+      "text": "\u00a72 states _call_judgment \"re-implement[s]\" the shared owner's \"concurrency bound\", but candidates.py:331 is a single synchronous call with no semaphore or batch; it duplicates only the fail-soft transport handling and the cost booking",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sn-judgment-evaluation.html:215",
+      "id": "done_when-1",
+      "reason": "\u00a75 assembles human labels by a procedure with no guard to falsify; its measure is count-based and a plant-a-defect control would not apply.",
+      "text": "\u00a75's done-when measures counts and a kappa but names no control that could fail, unlike \u00a72/\u00a73/\u00a74/\u00a76 which each declare one",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sn-judgment-evaluation.html:198",
+      "id": "reasoning-3",
+      "reason": "both figures sit far above the 300-item threshold the section argues from, so the conclusion is unaffected by which count is right.",
+      "text": "\u00a75 reports \"16,282 incumbent docs reviews\" where \u00a71 line 48 reports review_docs at 15,413 calls for the same corpus",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "74199569d1b2aaad52663bdb3815f15bc60165c2c09d3bbfb856e06bf43e68f1",
+  "plan_slug": "sn-judgment-evaluation",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T063159097638-plan-review-of-sn-judgment-evaluation",
+  "reviewed_blob_sha": "85bcd2242da74f191eb9cd5a96b637f2a8ac6e40",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 decide_batch (imas_codex/discovery/base/judgment.py:69), _call_judgment (imas_codex/ids/candidates.py:331), _build_review_record (imas_codex/standard_names/review/pipeline.py:173), the source-text assertion at tests/ids/test_candidates.py:306, labelled-path-categories.json, examples_curated.yaml and the three cited runs all resolve; the only hrefs are stylesheet links.",
+    "done_when": "a finding \u2014 \u00a75 is the only node whose done-when (400 labels, kappa, 40 synonym pairs) declares no negative control, so nothing in it can be shown to refuse.",
+    "evidence_paths": "pass \u2014 fixtures land under docs/evidence/fragments/sn-judgment-evaluation/ and the module under imas_codex/discovery/base/, both durable; no session scratchpad or run directory is named.",
+    "naming": "pass \u2014 paired_auc, choose_operating_point, frozen_state_variation, option_order_stability and cost_latency_summary name their mechanisms, the sn-judge seat matches the existing [tool.imas-codex.sn-*] convention, and no ticket number or changelog prose appears.",
+    "reasoning": "a finding \u2014 the \u00a74 golden table's stated cohort sizes cannot hold under its own fraction caps.",
+    "single_goal": "a finding \u2014 \u00a72 carries the decisions-owner removal, the sn-judge seat and a test rewrite in one node.",
+    "wiring": "pass \u2014 the plan declares blocks=[sn-review-through-jev, sn-selection-over-generation], and the reciprocal depends-on on sn-review-through-jev (meta plan-section-depends-on: s3\u2190sje#s3,#s4; s4\u2190sje#s5; s6\u2190sje#s6) points at the right nodes."
+  },
+  "section_digests": {
+    "_document": "268a06c1276ade7f09e6ee17d19f39239c753359219e78257d4076bc1e5188fb",
+    "s1": "81ffea5ba72e6435b11dfded52a654d7a904d7a809be19eab813d16b3150c8e0",
+    "s2": "9ee2d2eb53dcfcf8eac82ebf292959aac3bcb3c0025a391a7c1593d0d70da5c3",
+    "s3": "f6e80c001e1fd409644609246dc79b2ed810b696cdece44773f8c32905e8f424",
+    "s4": "7ad31c46ef5c91d05c00088ba0033fccf4f73c6853c625e1a425a8a42c1a2a9c",
+    "s5": "af4be1df1ed4f7ea8c32944e43c62e52246465343a0cf25a0c3d35a4a0a1f441",
+    "s6": "be28006b8882327e072f350947fe65c3b01dd73827066fdec60d54936bc3fc26",
+    "s7": "3a32bb54d214a57fc64a6622d96226ec81d2a95cf7d2427dadc6c8c8b86b9228"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T07:11:29.390134+00:00"
+}
