@@ -1,0 +1,102 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T21:31:59.801Z",
+  "dispatched_at": "2026-10-12T21:20:01Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:201",
+      "id": "done_when-1",
+      "reason": "the node must be given a concrete reproducible stress (the exact command and parallel width that reproduces the shedding) or the load clause must be reduced to a plain twice-in-a-row pass with a stated per-test duration, otherwise its gate is unverifiable.",
+      "text": "\u00a726's done-when requires the file to \"passes twice in a row under the same concurrent load that made it shed tests (state the load)\", but that load is \u00a724's ambient, uncontrolled head run (the 47-file export set taking 20 m 01 s, in which 12 review_release tests shed) \u2014 it is neither named in \u00a726 nor reproducible on demand, so the gate measures the machine's incidental load rather than the fixture fix and cannot be deterministically satisfied or failed by the \u00a726 node",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-integrity-backlog.html:181",
+      "id": "reasoning-1",
+      "reason": "\u00a721's own done-when re-measures the HAS_SUCCESSOR count (48 when recorded) before acting, so a stale premise is caught at the gate rather than acted on.",
+      "text": "\u00a721 asserts \"They carry no HAS_SUCCESSOR edge today: the record lists 'derived edge: no' for each ... and the live graph agrees\", but the record it quotes is a single-time read of 2026-09-17 and the live census it also cites (`docs/evidence/fragments/sn-integrity-backlog/row-census.html`, the successor-scalar row) re-confirms only `superseded: 2163, scalar_set: 18` \u2014 it does not state that the three carry no `HAS_SUCCESSOR` edge, so \"the live graph agrees\" is asserted without a live measurement",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "f9728740031956e1c77d779fba796ab14f19d87d9cb415843fbcb6eef7ef74e0",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 57,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-12T21:33:03.297960+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "a prior content review of this plan measured it live (each of the three: superseded_by set, has_edge false), and \u00a721's own dry run re-measures the edge counts before acting",
+      "when": "2026-10-12T21:33:05.682482+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T21:33:03.297960+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "a prior content review of this plan measured it live (each of the three: superseded_by set, has_edge false), and \u00a721's own dry run re-measures the edge counts before acting",
+      "when": "2026-10-12T21:33:05.682482+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v57.json",
+  "review_run_id": "r-20261012T211948187818-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "e2b42e38500d445ac88fca9c3871f91bd4b8239d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a721's two citations resolve: the record `docs/evidence/sn-lifecycle-integrity/successor-without-the-scalar.md` exists and the surface serves a suffixed target as-is (`reckon/serve.py:3542` appends `.html` only when the target has no suffix), and every test file \u00a725 names (`test_export_exit_accounting.py`, `test_export_deprecation.py`, `test_export_domain_resolution.py`, `test_export_status_authority.py`, `test_export_sidecar_surface.py`, `test_export_bound_adjacent.py`, `test_catalog_status_reconcile.py`, `test_catalog_layout_hierarchy.py`) and \u00a726's `test_review_release.py` exist.",
+    "done_when": "a finding \u2014 \u00a726's measure rests on an unnamed, uncontrolled load (see FINDING), while \u00a721's and \u00a725's done-whens are measurable and their controls fire (\u00a721 reports the live HAS_SUCCESSOR/REFINED_FROM counts; \u00a725 judges the delta by failing ids because \u00a726's file is load-fragile).",
+    "evidence_paths": "pass \u2014 \u00a721 writes its applied manifest and receipt under `docs/evidence/fragments/sn-integrity-backlog/` (durable), and \u00a725/\u00a726 change files under `tests/standard_names/`; no scratchpad or node-local path is named.",
+    "naming": "pass \u2014 the in-scope units carry no plan labels, stage names, ticket numbers or version tags into paths, symbols or comments.",
+    "reasoning": "a finding \u2014 \u00a721's claim that the three names \"carry no HAS_SUCCESSOR edge today ... and the live graph agrees\" reaches past its cited live census (see FINDING); its other reasoning holds: the \"derived edge: no\" row of the cited record matches the revised \u00a721 text, \u00a725's \"15\" reconciles exactly with the head log (5+3+2+1+1+1+1+1) and with the base log, and \u00a721's mechanism runs on a real code path \u2014 the signed supersede mutation at `imas_codex/standard_names/signed_manifest.py:4767` matches by `elementId` and sets `name_stage='superseded'` unconditionally, so it can stamp the edge on an already-superseded name.",
+    "single_goal": "pass \u2014 each in-scope node carries one deliverable: \u00a721 backfills three successor edges, \u00a725 diagnoses and greens the 15 named export/catalog tests, \u00a726 makes one test file fit its per-test bound.",
+    "wiring": "pass \u2014 the plan declares `blocks: [\"sn-west-prototype-release\"]`, and the ordering it relies on (\u00a720 \u2192 \u00a721 \u2192 \u00a716, with \u00a721 \"runs only after \u00a720 merges\") is carried correctly in the \u00a716/\u00a720/\u00a721 prose; \u00a720 has landed as \u00a721 requires, and \u00a721's build is already in flight."
+  },
+  "section_digests": {
+    "_document": "68c25a69e63f53c8db0618d4a53bc479ea3a14f7518b4f756839a0d746d94b68",
+    "s1": "571d1542955f1382d7e0f47b5f8def69e8d4201f948c3933a15fd1cc2c98e7f8",
+    "s10": "84c8bdeb15133e22cd2f08ee96d429ac3f92f85d28d6720d5e2fd0a87a97cbf2",
+    "s11": "499a319e38a73614c326b3607a7d1cae481dac12714fad0562ffe74a78694c89",
+    "s12": "62e459e2a7b4232b44e54b32969fb970620d613ef8797e09b993d36d4b44d757",
+    "s13": "80e90ea7c45053ae6c5de9d69ac1ef80a87289bb80c7afb2f796f3c31b3235d7",
+    "s14": "4981171151a50aafb83f844e0ad63c7df82749d58b56d7fb8590f5ee8cccfb9b",
+    "s15": "0e2bcb71a7aac4d1ddeae8e3a5959c43e1f3e90ae3ea89c3ca3b16303b3f87b2",
+    "s16": "0ea017c6ac78ad295a75878f5d17514576fb4cc4c0b96f3acbde1adf6dbce703",
+    "s17": "32359142ba3b6f1263abefa9f37711fbc5fdefe9548620b20287985e5858d673",
+    "s18": "c6a5bf0492c322e4f1c9ebe6e0e4b880f6312ab30ec62992d8c786d321fa2d82",
+    "s19": "f735f604bc9a9d5ff1664a38976a03f6a4ede1a90baa42b16f38af66702d3c4b",
+    "s2": "af2703cbe346dcd322398505bfee69c50a6bcd1238937227f17cdb6c5fc75c58",
+    "s20": "805e801ca7a749b7317a6427d250b1a67bead66a292735383165c6e4e1877825",
+    "s21": "47e390d3695f9b02e65881501ddd52ecd87022d600dc4e915c6d282fa6da35bd",
+    "s22": "ba8506427fb29722b2940dcd76473585cc4f09fe8f4baa48ecff9fa7a723597a",
+    "s23": "44670189f5cafaaefa0ad448ffffd16b3b33a1cc017a2be6b72d08a2a911b48a",
+    "s24": "9c7844d14a2768bfd77971a05dac1d799cff7466e3e9f6802dd0336fadc6fee1",
+    "s25": "40eced7f771252fb9ab48c78df7b98f91a7c1d3300462bc4ecae8c5d4ccc9908",
+    "s26": "c0b9951843f1d683939497fe40c951d9dc4ecb2f924631fd9132cc98b027522f",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s6": "e6bf01013b7bd341cf2f86ebf24dc60084ea8cabeb4cf4cd2664c1109ac5ca62",
+    "s7": "1930b98dfc66a2e1f9a1ce5149fbb73fe208b66c3e0c35664330a12e7e945933",
+    "s8": "6b362f87f941f8c95d562c95cdf93e578892ff32c85156fd5565c76548c58eab",
+    "s9": "20748220a6f94f6c422b1b677587d4456ccf3be5fbe204daac414373443327bd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T21:32:59.252531+00:00"
+}
