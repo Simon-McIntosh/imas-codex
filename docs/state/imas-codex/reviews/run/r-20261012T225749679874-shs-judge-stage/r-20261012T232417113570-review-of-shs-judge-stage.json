@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "37dce5e3b369ee2f132c180d37483b6556b3a871",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/standard_names/review/pipeline.py:595 (enrich_review_worker)"
+  ],
+  "completed_at": "2026-10-12T23:32:26.874Z",
+  "dispatched_at": "2026-10-12T23:24:28Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/judge_stage.py",
+      "line": "76",
+      "severity": "follow-on",
+      "text": "follow-on: the judge question's `forbidden`/`canonical` options do not reuse the smoke read's calibrated Choice \u2014 the brief's 'reuse its question and options' \u2014 and instead hand the model the registry's `forbidden_variants` (regex patterns such as '\\$\\$[^$]*(dl_p/B_p|dl/B)[^$]*\\$\\$' and 'the separatrix') as literal written forms; the recorded live run over-fired plasma_boundary as forbidden for all four fixtures, including the beryllium and electron entries whose boundary is the last closed flux surface, where the smoke read's boundary gloss Choice was correct on all four. Report-only, so nothing is capped; recorded here as a candidate measurement before the check leaves report-only."
+    },
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "589",
+      "severity": "follow-on",
+      "text": "follow-on: the judge stage is gated on `not state.skip_audit`, so `--skip-audit` silently disables the Jev-backed judgement too, though plan 7 and the brief describe it as a stage of its own beside the audit stage; a user skipping only the deterministic Layer 1 audits also loses the judge, and no test exercises the skip_audit=true branch."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-house-style/shs-judge-stage.html",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: the live run is evidenced only by the fragment's prose table (8 calls, USD 0.000321, per-fixture answers); no driver script or raw decisions log is committed beside it and no live-run log is listed in test_logs, so the calls/answers/cost cannot be re-derived, unlike the referenced flux-surface-average smoke read which ships its script beside it."
+    }
+  ],
+  "head_log_revision": "4b5ebece1b0d08a00120585437c218c0682ed951",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "one production call site, imas_codex/standard_names/review/pipeline.py:595 judge_review_stage inside enrich_review_worker; judged_entries_for_names is called only from judge_stage.py:187 within the stage, and the node's own tests do not count.",
+    "diff": "Read commit 4b5ebece1 against base 37dce5e3; one commit, four files, +535/-0, all inside the declared write paths.",
+    "done_when": "The done_when names the three stage tests and a live run over four boundary fixtures at eight calls with the booked cost; tests/standard_names/test_judge_stage.py:111/:151/:177 assert the three stage behaviours, gate-after.log records 322 passed / 0 failed at head, and the fragment records the eight live calls and USD 0.000321.",
+    "goal": "The node's goal is a report-only judge stage beside the audit stage: judge_stage.py:153 judge_review_stage builds one Choice per judged entry through decide_batch and pipeline.py:595 attaches the results to the reviewer's findings, matching plan 7.",
+    "manifest": "Read; it states the stage tests and the full review-pipeline plus discovery-judgment gate pass 322 at head against 319 at base, negative_control_log is the bare path, and it records the eight-call live run and the plasma_boundary over-fire as a follow-on.",
+    "write_paths": "The manifest declares pipeline.py, judge_stage.py, the new test file and the fragment; git diff 37dce5e3..4b5ebece1 touches exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_judge_stage.py:135/:147/:148 assert one state per judged entry, the report-only marker, and that the canonical beryllium entry produces no finding, and negative-control.log shows test_one_choice_per_judged_entry_reaches_the_reviewer_findings and test_report_only_result_leaves_the_score_uncapped red with EXIT=1 when the stage is unwired; the assertions read the real registry via conventions_context_for and the code-produced error_lint_findings, not a value the test passed in.",
+    "evidence": "gate-base.log records 319 passed / 0 failed and gate-after.log 322 passed / 0 failed at head 4b5ebece1, both EXIT=0, and negative-control.log records the red arm at the same revision; the live-run result (8 calls, USD 0.000321) is recorded only in the fragment table with no raw log.",
+    "fit": "judge_stage.py follows the surrounding private-helper and module-constant idiom and carries no plan label, but pipeline.py:22 imports PipelineCost from imas_codex.ids.mapping where the standard-names package tracks cost as a float (progress.py:630 WorkerStats.cost), and the forbidden variants are handed to the model as regex source.",
+    "goal_fidelity": "judge_stage.py:153 judge_review_stage and pipeline.py:595 deliver the plan's report-only judge stage beside the audit stage, one Choice per judged entry, results in the reviewer's per-name findings marked report-only, and no call when no selected entry carries a forbidden variant, though the question framing departs from the smoke-authorised calibration the brief names.",
+    "reuse": "decide_batch (discovery/base/judgment.py:230) is reused as the single decisions owner and PipelineCost (ids/mapping.py:78) as the shared cost tracker; git grep shows no other SN review judge stage, and nothing is forked.",
+    "scope_discipline": "git diff 37dce5e3..4b5ebece1 touches only imas_codex/standard_names/review/judge_stage.py, imas_codex/standard_names/review/pipeline.py, tests/standard_names/test_judge_stage.py and docs/evidence/fragments/sn-house-style/shs-judge-stage.html, all within the declared write paths."
+  },
+  "node": "review-of-shs-judge-stage",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node's goal is a report-only judge stage beside the audit stage: judge_stage.py:153 judge_review_stage builds one Choice per judged entry through decide_batch and pipeline.py:595 attaches the results to the reviewer's findings, matching plan 7.\nVERDICT done_when: The done_when names the three stage tests and a live run over four boundary fixtures at eight calls with the booked cost; tests/standard_names/test_judge_stage.py:111/:151/:177 assert the three stage behaviours, gate-after.log records 322 passed / 0 failed at head, and the fragment records the eight live calls and USD 0.000321.\nVERDICT write_paths: The manifest declares pipeline.py, judge_stage.py, the new test file and the fragment; git diff 37dce5e3..4b5ebece1 touches exactly those four paths and nothing else.\nVERDICT manifest: Read; it states the stage tests and the full review-pipeline plus discovery-judgment gate pass 322 at head against 319 at base, negative_control_log is the bare path, and it records the eight-call live run and the plasma_boundary over-fire as a follow-on.\nVERDICT diff: Read commit 4b5ebece1 against base 37dce5e3; one commit, four files, +535/-0, all inside the declared write paths.\nCALL_SITES: imas_codex/standard_names/review/pipeline.py:595 (enrich_review_worker)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: judge_stage.py:153 judge_review_stage and pipeline.py:595 deliver the plan's report-only judge stage beside the audit stage, one Choice per judged entry, results in the reviewer's per-name findings marked report-only, and no call when no selected entry carries a forbidden variant, though the question framing departs from the smoke-authorised calibration the brief names.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-base.log records 319 passed / 0 failed and gate-after.log 322 passed / 0 failed at head 4b5ebece1, both EXIT=0, and negative-control.log records the red arm at the same revision; the live-run result (8 calls, USD 0.000321) is recorded only in the fragment table with no raw log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 37dce5e3..4b5ebece1 touches only imas_codex/standard_names/review/judge_stage.py, imas_codex/standard_names/review/pipeline.py, tests/standard_names/test_judge_stage.py and docs/evidence/fragments/sn-house-style/shs-judge-stage.html, all within the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_judge_stage.py:135/:147/:148 assert one state per judged entry, the report-only marker, and that the canonical beryllium entry produces no finding, and negative-control.log shows test_one_choice_per_judged_entry_reaches_the_reviewer_findings and test_report_only_result_leaves_the_score_uncapped red with EXIT=1 when the stage is unwired; the assertions read the real registry via conventions_context_for and the code-produced error_lint_findings, not a value the test passed in.\nSCORE fit: 16\nJUSTIFICATION fit: judge_stage.py follows the surrounding private-helper and module-constant idiom and carries no plan label, but pipeline.py:22 imports PipelineCost from imas_codex.ids.mapping where the standard-names package tracks cost as a float (progress.py:630 WorkerStats.cost), and the forbidden variants are handed to the model as regex source.\nSCORE reuse: 19\nJUSTIFICATION reuse: decide_batch (discovery/base/judgment.py:230) is reused as the single decisions owner and PipelineCost (ids/mapping.py:78) as the shared cost tracker; git grep shows no other SN review judge stage, and nothing is forked.\nFINDING imas_codex/standard_names/review/judge_stage.py:76 follow-on: the judge question's `forbidden`/`canonical` options do not reuse the smoke read's calibrated Choice \u2014 the brief's 'reuse its question and options' \u2014 and instead hand the model the registry's `forbidden_variants` (regex patterns such as '\\\\$\\\\$[^$]*(dl_p/B_p|dl/B)[^$]*\\\\$\\\\$' and 'the separatrix') as literal written forms; the recorded live run over-fired plasma_boundary as forbidden for all four fixtures, including the beryllium and electron entries whose boundary is the last closed flux surface, where the smoke read's boundary gloss Choice was correct on all four. Report-only, so nothing is capped; recorded here as a candidate measurement before the check leaves report-only.\nFINDING imas_codex/standard_names/review/pipeline.py:589 follow-on: the judge stage is gated on `not state.skip_audit`, so `--skip-audit` silently disables the Jev-backed judgement too, though plan 7 and the brief describe it as a stage of its own beside the audit stage; a user skipping only the deterministic Layer 1 audits also loses the judge, and no test exercises the skip_audit=true branch.\nFINDING docs/evidence/fragments/sn-house-style/shs-judge-stage.html:57 follow-on: the live run is evidenced only by the fragment's prose table (8 calls, USD 0.000321, per-fixture answers); no driver script or raw decisions log is committed beside it and no live-run log is listed in test_logs, so the calls/answers/cost cannot be re-derived, unlike the referenced flux-surface-average smoke read which ships its script beside it.",
+  "review_run_id": "r-20261012T232417113570-review-of-shs-judge-stage",
+  "reviewed_base_sha": "37dce5e3b369ee2f132c180d37483b6556b3a871",
+  "reviewed_head_sha": "4b5ebece1b0d08a00120585437c218c0682ed951",
+  "reviewed_run_id": "r-20261012T225749679874-shs-judge-stage",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shs-judge-stage",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T23:35:00+00:00",
+  "total": 105
+}
