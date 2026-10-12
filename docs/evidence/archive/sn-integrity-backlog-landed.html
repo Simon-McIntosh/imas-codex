@@ -50,6 +50,11 @@
     <p>The identity fold in <code>imas_codex/standard_names/edit.py</code> now states which side's documentation survives (<code>_fold_carries_source_documentation</code>, <code>_fold_target_documentation</code>). A documented target is kept over a sparser source, a richer source carries over a sparse target, and the incumbent target wins a stage tie. The rule is wired into the fold's mutation query and into the receipt's expected post-state, so the postflight proof agrees with it. Gate: 135 passed against 130 at base; reverting the choice to always take the source turns two tests red. Merge <code>24484a91d</code>. Independent review 110/120, no added failures. Follow-on: the tests drive a hand-written mirror of the mutation query, so the real query's documentation <code>SET</code> lines are exercised only by a live-graph test, which does not exist yet.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-fold-keeps-richer-prose">sib-fold-keeps-richer-prose</a>.</p>
   </section>
 
+  <section id="s13">
+    <h2>§13 — the export waiver refusal sees every produced identity</h2>
+    <p><code>_source_disposition</code> in <code>imas_codex/standard_names/export.py</code> now weighs every identity a waived source's successor chain would publish (<code>_fetch_waived_source_chain_identities</code>), not only the terminal. A waived source whose chain publishes an intermediate is refused, and an all-unwaived chain passes; reverting the change turns two of the four new tests red. Gate: 105 passed against 101 at base, with the same seven export failures at both (§24). Merge <code>56510dc86</code>. Independent review 113/120, no added failures. Follow-on: the chain traversal stops at depth 25, so a deeper chain would evade the refusal; it should refuse rather than truncate at its bound.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-export-waiver-intermediates">sib-export-waiver-intermediates</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>

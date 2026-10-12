@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;,&quot;s24&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;implementable&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;,&quot;s24&quot;:&quot;implementable&quot;}">
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -145,7 +145,7 @@
 <p>The fold postflight proof refuses a fold whose dry run succeeds (census, §4). The two must agree.</p><p><strong>Done when:</strong> a fixture fold that passes its dry run passes its postflight, a fold the dry run refuses is still refused, and the first test fails with the fix reverted.</p>
 
     <h2 id="s13">§13 — The export waiver refusal sees every produced identity</h2>
-<section data-reckon="section" data-id="s13" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s13" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
 <p><code>_source_disposition</code> is handed only a chain's terminal while the cut publishes whatever is accepted, so a published intermediate evades the waiver refusal (census, §3; latent today because no declared-waived source produces an identity). Path: the export waiver path in <code>imas_codex/standard_names/export.py</code>.</p><p><strong>Done when:</strong> a test with a declared-waived source whose chain publishes an intermediate is refused, a chain whose intermediates are all unwaived passes, and <code>tests/standard_names/test_export_release_holds.py</code> adds no failure.</p>
 
     <h2 id="s14">§14 — An edits-scoped run skips global maintenance, by test</h2>
@@ -269,6 +269,9 @@
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261012T193420385382-review-of-sib-fold-keeps-richer-prose" data-who="reckon-build" data-when="2026-10-12T19:44:56.936Z">
     <div class="r-comment-body"><p>Reviewed r-20261012T191240981935-sib-fold-keeps-richer-prose at base 343bb1ab6 / head d01b5463c; stored a parsed six-dimension record (goal_fidelity 20, evidence 16, scope_discipline 20, durability 15, fit 19, reuse 20; total 110) with two follow-on findings — the fold's new query SET lines are guarded only by a hand-mirrored test harness, and the negative-control log header names the base revision for a tree that carried the change.</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-close-s13" data-who="reckon-build" data-when="2026-10-12T19:58:00Z">
+    <div class="r-comment-body"><p>§13 landed: the waiver refusal weighs every identity a waived chain publishes (merge <code>56510dc86</code>); review 113/120. The depth-25 traversal bound is a recorded follow-on. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s13">evidence</a></p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
