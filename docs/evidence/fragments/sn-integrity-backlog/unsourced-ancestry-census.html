@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<title>Unsourced chain-cap ancestry census</title>
+</head>
+<body>
+<main>
+<h1 id="sib-unsourced-ancestry-census-census-title">How many chain-cap identities have no sourced ancestor now</h1>
+
+<p id="sib-unsourced-ancestry-census-census-method">
+Re-derived read-only on the live graph through <code>imas_codex.graph.client.GraphClient</code>
+from the run worktree, against the active <code>codex</code> graph. No mutation was
+performed: every statement is a <code>MATCH</code>/<code>count</code>. The definitions are
+reused verbatim from the 2026-09-01 record
+(<a href="/imas-codex/evidence/sn-release-readiness/unsourced-ancestry.md"><code>unsourced-ancestry.md</code></a>)
+and the 2026-09-17 re-measure
+(<a href="/imas-codex/evidence/sn-release-readiness/unsourced-cohort-partition.md"><code>unsourced-cohort-partition.md</code></a>),
+so the numbers are comparable:
+</p>
+<ul id="sib-unsourced-ancestry-census-census-defs">
+<li><strong>chain-cap</strong> — <code>sn.chain_length &gt;= 3</code>.</li>
+<li><strong>unsourced</strong> — <code>NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn) }</code>.</li>
+<li><strong>has a sourced ancestor</strong> — <code>EXISTS { MATCH (sn)-[:REFINED_FROM*1..10]-&gt;(a:StandardName) WHERE EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(a) } }</code>.</li>
+</ul>
+<p id="sib-unsourced-ancestry-census-census-bounds">
+Every query names its row set (the <code>StandardName</code> label, filtered by
+<code>chain_length</code> and the unsourced predicate); the ancestry walk is depth-bounded
+at <code>*1..10</code>, which the short <code>REFINED_FROM</code> chains never reach. Counts are
+identity counts, not row counts: the producer and ancestry predicates are expressed as
+<code>EXISTS</code> subqueries, so each <code>StandardName</code> contributes exactly one row.
+</p>
+
+<h2 id="sib-unsourced-ancestry-census-census-controls">Positive controls (a predicate that can never fire proves nothing)</h2>
+<table id="sib-unsourced-ancestry-census-census-controls-table">
+<thead><tr><th>Control</th><th>Live value</th><th>Elapsed</th></tr></thead>
+<tbody>
+<tr><td>sourced <code>StandardName</code> under <code>PRODUCED_NAME</code></td><td>2,790</td><td>0.034 s</td></tr>
+<tr><td><code>(:StandardNameSource)-[:PRODUCED_NAME]-&gt;(:StandardName)</code> edges</td><td>5,494</td><td>0.025 s</td></tr>
+<tr><td><code>StandardName</code> with non-null <code>chain_length</code></td><td>3,589</td><td>0.031 s</td></tr>
+</tbody>
+</table>
+<p id="sib-unsourced-ancestry-census-census-controls-note">
+The producer predicate fires on 2,790 names over the label, so the unsourced part is an
+absence the predicate can see through, not an inability to match. Both properties the
+negative tests rest on — a populated <code>chain_length</code> and a live
+<code>PRODUCED_NAME</code> ledger — exist and are non-empty.
+</p>
+
+<h2 id="sib-unsourced-ancestry-census-census-split">The split, and the independently counted total</h2>
+<table id="sib-unsourced-ancestry-census-census-split-table">
+<thead><tr><th>Measure</th><th>Live value</th><th>Elapsed</th></tr></thead>
+<tbody>
+<tr><td>chain-cap total (<code>chain_length &gt;= 3</code>)</td><td>174</td><td>0.031 s</td></tr>
+<tr><td>unsourced chain-cap (independent total)</td><td><strong>102</strong></td><td>0.040 s</td></tr>
+<tr><td>— has a sourced ancestor at any depth</td><td><strong>10</strong></td><td>0.065 s</td></tr>
+<tr><td>— has no sourced ancestor at any depth</td><td><strong>92</strong></td><td>0.057 s</td></tr>
+<tr><td>— sourced-in-cohort (cross-check)</td><td>72</td><td>0.046 s</td></tr>
+</tbody>
+</table>
+<p id="sib-unsourced-ancestry-census-census-sum">
+The two parts sum to the independently counted total, and the two cross-checks agree:
+</p>
+<pre id="sib-unsourced-ancestry-census-census-accounting">10 with a sourced ancestor + 92 with none = 102 unsourced   (split == independent total)
+72 sourced-in-cohort + 102 unsourced     = 174 chain-cap
+disjoint: no id in both parts            = true</pre>
+
+<h2 id="sib-unsourced-ancestry-census-census-queries">The bounded queries</h2>
+<pre id="sib-unsourced-ancestry-census-census-cypher">// chain-cap total
+MATCH (sn:StandardName) WHERE sn.chain_length &gt;= 3
+RETURN count(sn)  -- 174
+
+// unsourced (independent total)
+MATCH (sn:StandardName) WHERE sn.chain_length &gt;= 3
+  AND NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn) }
+RETURN count(sn)  -- 102
+
+// has a sourced ancestor at any depth (depth bound 10)
+MATCH (sn:StandardName) WHERE sn.chain_length &gt;= 3
+  AND NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn) }
+  AND EXISTS { MATCH (sn)-[:REFINED_FROM*1..10]-&gt;(a:StandardName)
+               WHERE EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(a) } }
+RETURN count(sn)  -- 10
+
+// has no sourced ancestor at any depth
+MATCH (sn:StandardName) WHERE sn.chain_length &gt;= 3
+  AND NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn) }
+  AND NOT EXISTS { MATCH (sn)-[:REFINED_FROM*1..10]-&gt;(a:StandardName)
+                   WHERE EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(a) } }
+RETURN count(sn)  -- 92</pre>
+
+<h2 id="sib-unsourced-ancestry-census-census-result">Result</h2>
+<p id="sib-unsourced-ancestry-census-census-verdict">
+<strong>102 unsourced chain-cap identities: 10 with a sourced ancestor, 92 with none.</strong>
+The 2026-09-01 figures (78 unsourced, 72 with none) have drifted; the live graph now
+matches the 2026-09-17 re-measure exactly (174 / 102 / 10 / 92), so the population has
+been stable since 2026-09-17. The ten "has a sourced ancestor" identities are unchanged
+from that re-measure's list. Every query finished in under 0.07 s, far below the ten-second
+ceiling, and the split closes against the independent total.
+</p>
+</main>
+</body>
+</html>
