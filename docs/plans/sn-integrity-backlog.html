@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -362,6 +362,9 @@
 </div>
 <div class="r-comment" data-section="s26" data-id="c-run-sib-release-review-durations" data-who="reckon-build" data-when="2026-10-12T22:20:00Z">
     <div class="r-comment-body"><p>The first attempt was discarded unmerged. It found the real cause: in a worker sandbox, the first <code>git</code> on <code>PATH</code> is the worker wrapper, which starts a new interpreter on every call. A release test makes dozens of git calls, so the wrapper's startup makes up the 17 to 25 seconds; against the real binary each test takes 0.02 to 4.27 s. But its fix made the test module put the real binary ahead of the wrapper. That bypasses a sandbox component for every worker running the file, and it is not the fixture-cheapening this section asks for, so it was not merged (its commit was <code>5dc0fb781</code>, recorded here before the worktree was removed). Outside a worker sandbox the file is already within its bound. The section's remedy stands: fewer git calls per test serve both environments. The wrapper's per-call startup cost is reported to reckon.</p></div>
+</div>
+<div class="r-comment" data-section="s27" data-id="c-run-r-20261012T221804056415-review-of-sib-approval-setup-errors" data-who="reckon-build" data-when="2026-10-12T22:23:02.485Z">
+    <div class="r-comment-body"><p>landing: reviewed r-20261012T214944025500-sib-approval-setup-errors (base 821c80b42, head 3c5522596); goal met (real git pinned ahead of the reckon worker PATH wrapper, 61/61 at 1a630ab72) but the base arm reproduced only 3 of the plan&#x27;s 26 setup errors and neither named TestResolveTagRemote failure, so the premise coverage is partial; 6 dimensions scored, added_failure_count 0, no blocking findings</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (rev 821c80b42) records 3 failed / 58 passed with ids [test_contested_entry_is_removed_from_main_by_a_correction_commit, test_undo_restores_catalog_main_and_graph_lifecycle, test_undo_restores_the_exact_rc_tag]; after_suite (rev 1a630ab72) records 0 failed / 61 passed, so the head adds no failure over the base and added_failure_ids is empty",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T22:23:02.485Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-12T22:18:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/approval-setup-errors.html",
+      "line": "32",
+      "severity": "follow-on",
+      "text": "follow-on: the plan names 26 setup errors (23 in test_sn_approve_tag.py, 3 in test_sn_approve.py) plus 2 TestResolveTagRemote failures, but the base arm reproduced only 3 timeouts and no setup errors; the two named TestResolveTagRemote failures (test_matches_pr_url_owner_repo_to_a_remote, test_unmatched_url_defaults_to_origin) passed at base in base-both-files.log:833-834 and are never individually reproduced or explained, so the record covers each *reproduced* item rather than each item the plan named -- the mechanism is sound but the coverage of the plan's premise is partial."
+    },
+    {
+      "file": "tests/standard_names/test_sn_approve_tag.py",
+      "line": "84",
+      "severity": "follow-on",
+      "text": "follow-on: `_real_git_binary` and the `pinned_git` fixture are duplicated verbatim into tests/standard_names/test_sn_approve.py:528 and :552, while tests/standard_names/conftest.py already owns every cross-file autouse fixture for this package (_bound_synthetic_model_exposure, _block_live_graph, _cache_grammar_context); a single copy in that conftest would be the established owner, though the node was fenced to only the two test files so it could not extend it -- worth consolidating when scope allows."
+    },
+    {
+      "file": "tests/standard_names/test_sn_approve_tag.py",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "follow-on: `_real_git_binary` falls back to the bare string \"git\" when no non-script git is on PATH, and the fixture then does (bindir / \"git\").symlink_to(\"git\") -- a self-referential symlink resolving to itself -- so the fallback silently produces a broken bindir entry instead of leaving PATH unchanged; harmless while the wrapper remains later in PATH but it is a latent defect in the added helper."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T214944025500-sib-approval-setup-errors/base-both-files.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's baseline_suite.command records `uv run --no-sync pytest ...` but the command header of the log it cites (base-both-files.log:2) reads `uv run pytest ...` with no `--no-sync`, so the recorded command is a reconstruction rather than the literal command that ran; the after arm did carry --no-sync, so the two arms were not invoked identically."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none -- the diff changes only two test modules and two evidence fragments; no production runtime module is modified or newly reached, and the node's own test files are excluded by the definition",
+    "diff": "read commit by commit from 821c80b42 to 3c5522596 -- two commits over four new/edited paths: 1a630ab72 adds `import os`, `_real_git_binary()` (tests/standard_names/test_sn_approve_tag.py:84, tests/standard_names/test_sn_approve.py:528) and an autouse `pinned_git` fixture (:108 and :552) that symlinks the real binary into a temp dir and prepends it to PATH, plus both evidence fragments; 3c5522596 reconciles the two fragment rows to the committed head arm (3 insertions, 3 deletions).",
+    "done_when": "the plan's measure is each named error/failure recorded with its traceback, both files passing with an EXIT sentinel, and the approval/release tests adding no failure against base; the base arm (513.49 s) and head arm (15.18 s, 61 passed, EXIT=0) are in base-both-files.log / after-both-files.log and added_failure_count is 0, but the 26 setup errors and 2 TestResolveTagRemote failures were not reproduced, so the 'each error' half is met only for the 3 timeouts the node could see.",
+    "goal": "the node's goal is to settle whether the catalog approval tests' setup errors are sandbox- or code-caused and, if sandbox-only, make the tests independent of the cause; the landed fixture at tests/standard_names/test_sn_approve_tag.py:108 pins the compiled git ahead of the reckon worker PATH wrapper (verified present at /home/ITER/mcintos/Code/reckon/reckon/worker_shims/git), and both files pass 61/61 at 1a630ab72, so the sandbox cause is named and removed.",
+    "manifest": "read; status complete at head 3c5522596, recording commits 1a630ab72 and 3c5522596, baseline_suite (rev 821c80b42, 3 failed / 58 passed) and after_suite (rev 1a630ab72, 0 failed / 61 passed) so added_failure_count is derivable and is zero, and a negative_control_log pointing at negative-control-reverted.log.",
+    "write_paths": "the manifest declares two test files, two evidence fragments and a figures directory; the diff touches exactly the two test files and the two fragments, with no figure landing in the directory, and nothing outside the declared set is written."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_sn_approve_tag.py:108 adds a fixture and no assertion; removing it reddens the git-heavy tests only where git is PATH-wrapped (negative-control-reverted.log: 2 failed, EXIT=1), and the negative control ran a 9-item subset reproducing 2 of the base arm's 3 failures, so the guard is real but environment-conditional and partially exercised.",
+    "evidence": "the base arm, head arm and negative control are each captured with an EXIT sentinel (base-both-files.log EXIT=1, after-both-files.log EXIT=0, negative-control-reverted.log EXIT=1), but base-both-files.log reproduces only 3 of the plan's 26 setup errors and neither TestResolveTagRemote failure, and the manifest's baseline_suite.command carries --no-sync that base-both-files.log:2 does not.",
+    "fit": "`_real_git_binary` (tests/standard_names/test_sn_approve_tag.py:84) and `pinned_git` (:108) follow the module's pathlib/docstring idiom and carry no plan, sprint or ticket label, matching the sibling pattern the same wrapper forced in tests/standard_names/test_review_release.py.",
+    "goal_fidelity": "tests/standard_names/test_sn_approve_tag.py:108 pins the real git ahead of the worker wrapper, meeting the plan's sandbox-only branch (cause named, tests made independent), and both files pass 61/61 at 1a630ab72 -- though the causal claim rests on a mechanism instantiated for the 3 timeouts rather than for the 26 setup errors the premise named.",
+    "reuse": "a search of tests/ and imas_codex/ found no owner of a git-binary or wrapper-skipping resolution, so the addition forks no existing capability, but it does duplicate itself verbatim across tests/standard_names/test_sn_approve_tag.py:84 and tests/standard_names/test_sn_approve.py:528 when tests/standard_names/conftest.py owns the package's shared autouse fixtures.",
+    "scope_discipline": "the two commits touch only tests/standard_names/test_sn_approve.py, tests/standard_names/test_sn_approve_tag.py and the two docs/evidence/fragments/sn-integrity-backlog fragments, all inside the declared write paths, and change no plan, index or sprint state."
+  },
+  "limitations": [
+    "The wrapper cost was re-measured in this review session as ~0.10 s per git --version call (real /usr/bin/git ~0.003 s), lower than the node's recorded ~1 s; the negative-control setup durations (14.4 s for tests building a repo with ~15 git calls) corroborate the node's figure, so the cost is environment-dependent and the node's number stands for its load.",
+    "The base and head arms were read, not re-run; only the wrapper's presence and per-call cost were independently checked.",
+    "The 2 TestResolveTagRemote failures and the 26 setup errors named by the plan were not reproduced by this review either, so the cause is confirmed for the reproducible failures only."
+  ],
+  "node": "review-of-sib-approval-setup-errors",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to settle whether the catalog approval tests' setup errors are sandbox- or code-caused and, if sandbox-only, make the tests independent of the cause; the landed fixture at tests/standard_names/test_sn_approve_tag.py:108 pins the compiled git ahead of the reckon worker PATH wrapper (verified present at /home/ITER/mcintos/Code/reckon/reckon/worker_shims/git), and both files pass 61/61 at 1a630ab72, so the sandbox cause is named and removed.\nVERDICT done_when: the plan's measure is each named error/failure recorded with its traceback, both files passing with an EXIT sentinel, and the approval/release tests adding no failure against base; the base arm (513.49 s) and head arm (15.18 s, 61 passed, EXIT=0) are in base-both-files.log / after-both-files.log and added_failure_count is 0, but the 26 setup errors and 2 TestResolveTagRemote failures were not reproduced, so the 'each error' half is met only for the 3 timeouts the node could see.\nVERDICT write_paths: the manifest declares two test files, two evidence fragments and a figures directory; the diff touches exactly the two test files and the two fragments, with no figure landing in the directory, and nothing outside the declared set is written.\nVERDICT manifest: read; status complete at head 3c5522596, recording commits 1a630ab72 and 3c5522596, baseline_suite (rev 821c80b42, 3 failed / 58 passed) and after_suite (rev 1a630ab72, 0 failed / 61 passed) so added_failure_count is derivable and is zero, and a negative_control_log pointing at negative-control-reverted.log.\nVERDICT diff: read commit by commit from 821c80b42 to 3c5522596 -- two commits over four new/edited paths: 1a630ab72 adds `import os`, `_real_git_binary()` (tests/standard_names/test_sn_approve_tag.py:84, tests/standard_names/test_sn_approve.py:528) and an autouse `pinned_git` fixture (:108 and :552) that symlinks the real binary into a temp dir and prepends it to PATH, plus both evidence fragments; 3c5522596 reconciles the two fragment rows to the committed head arm (3 insertions, 3 deletions).\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/standard_names/test_sn_approve_tag.py:108 pins the real git ahead of the worker wrapper, meeting the plan's sandbox-only branch (cause named, tests made independent), and both files pass 61/61 at 1a630ab72 -- though the causal claim rests on a mechanism instantiated for the 3 timeouts rather than for the 26 setup errors the premise named.\nSCORE evidence: 12\nJUSTIFICATION evidence: the base arm, head arm and negative control are each captured with an EXIT sentinel (base-both-files.log EXIT=1, after-both-files.log EXIT=0, negative-control-reverted.log EXIT=1), but base-both-files.log reproduces only 3 of the plan's 26 setup errors and neither TestResolveTagRemote failure, and the manifest's baseline_suite.command carries --no-sync that base-both-files.log:2 does not.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the two commits touch only tests/standard_names/test_sn_approve.py, tests/standard_names/test_sn_approve_tag.py and the two docs/evidence/fragments/sn-integrity-backlog fragments, all inside the declared write paths, and change no plan, index or sprint state.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_sn_approve_tag.py:108 adds a fixture and no assertion; removing it reddens the git-heavy tests only where git is PATH-wrapped (negative-control-reverted.log: 2 failed, EXIT=1), and the negative control ran a 9-item subset reproducing 2 of the base arm's 3 failures, so the guard is real but environment-conditional and partially exercised.\nSCORE fit: 17\nJUSTIFICATION fit: `_real_git_binary` (tests/standard_names/test_sn_approve_tag.py:84) and `pinned_git` (:108) follow the module's pathlib/docstring idiom and carry no plan, sprint or ticket label, matching the sibling pattern the same wrapper forced in tests/standard_names/test_review_release.py.\nSCORE reuse: 12\nJUSTIFICATION reuse: a search of tests/ and imas_codex/ found no owner of a git-binary or wrapper-skipping resolution, so the addition forks no existing capability, but it does duplicate itself verbatim across tests/standard_names/test_sn_approve_tag.py:84 and tests/standard_names/test_sn_approve.py:528 when tests/standard_names/conftest.py owns the package's shared autouse fixtures.\nFINDING docs/evidence/fragments/sn-integrity-backlog/approval-setup-errors.html:32 follow-on: the plan names 26 setup errors (23 in test_sn_approve_tag.py, 3 in test_sn_approve.py) plus 2 TestResolveTagRemote failures, but the base arm reproduced only 3 timeouts and no setup errors; the two named TestResolveTagRemote failures (test_matches_pr_url_owner_repo_to_a_remote, test_unmatched_url_defaults_to_origin) passed at base in base-both-files.log:833-834 and are never individually reproduced or explained, so the record covers each *reproduced* item rather than each item the plan named -- the mechanism is sound but the coverage of the plan's premise is partial.\nFINDING tests/standard_names/test_sn_approve_tag.py:84 follow-on: `_real_git_binary` and the `pinned_git` fixture are duplicated verbatim into tests/standard_names/test_sn_approve.py:528 and :552, while tests/standard_names/conftest.py already owns every cross-file autouse fixture for this package (_bound_synthetic_model_exposure, _block_live_graph, _cache_grammar_context); a single copy in that conftest would be the established owner, though the node was fenced to only the two test files so it could not extend it -- worth consolidating when scope allows.\nFINDING tests/standard_names/test_sn_approve_tag.py:104 follow-on: `_real_git_binary` falls back to the bare string \"git\" when no non-script git is on PATH, and the fixture then does (bindir / \"git\").symlink_to(\"git\") -- a self-referential symlink resolving to itself -- so the fallback silently produces a broken bindir entry instead of leaving PATH unchanged; harmless while the wrapper remains later in PATH but it is a latent defect in the added helper.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T214944025500-sib-approval-setup-errors/base-both-files.log:2 follow-on: the manifest's baseline_suite.command records `uv run --no-sync pytest ...` but the command header of the log it cites (base-both-files.log:2) reads `uv run pytest ...` with no `--no-sync`, so the recorded command is a reconstruction rather than the literal command that ran; the after arm did carry --no-sync, so the two arms were not invoked identically.",
+  "review_run_id": "r-20261012T221804056415-review-of-sib-approval-setup-errors",
+  "review_scope": "Independent review of the sib-approval-setup-errors node (plan sn-integrity-backlog section 27), covering the two commits that landed at 3c5522596 against its base 821c80b42: an autouse fixture in each approval test module that resolves the compiled git binary ahead of the reckon worker PATH wrapper, plus two evidence fragments.",
+  "reviewed_base_sha": "821c80b42fdf4592413a62fbc5ab73a474f51e06",
+  "reviewed_commits": [
+    "3c55225960f635031dae4f402db65bf766bf4b38",
+    "1a630ab724eb6068dce5af9fde1d72c7359a589e"
+  ],
+  "reviewed_head_sha": "3c55225960f635031dae4f402db65bf766bf4b38",
+  "reviewed_run_id": "r-20261012T214944025500-sib-approval-setup-errors",
+  "reviewer": "review-of-sib-approval-setup-errors",
+  "scores": {
+    "durability": 14,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:23:35.695307+00:00",
+  "total": 91,
+  "verification_logs": []
+}
