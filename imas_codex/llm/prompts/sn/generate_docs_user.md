@@ -42,8 +42,9 @@ invent physics beyond them.
 {% if item.sibling_family %}
 ## Sibling Family — parallel structure REQUIRED
 
-`{{ item.name }}` belongs to a family of sibling standard names sharing the
-parent `{{ item.sibling_family.parent.name }}`. Family members must read as a
+`{{ item.name }}` belongs to a family of sibling standard names{% if item.sibling_family.parent %} sharing the
+parent `{{ item.sibling_family.parent.name }}`{% else %} that share a common
+pattern{% endif %}. Family members must read as a
 **matched set**: the same opening noun-phrase template and the same
 documentation section structure, differing ONLY where the physics genuinely
 differs (axis, species, zone, locus — and the symbols that go with them).
@@ -87,9 +88,9 @@ template.
    Fourier harmonic), keep the family's opening template but state the
    distinction explicitly in the body. Faithfulness outranks uniformity —
    harmonize the STRUCTURE, never the physics claims.
-4. **Cross-link the family.** Link the parent
+4. **Cross-link the family.**{% if item.sibling_family.parent %} Link the parent
    `[{{ item.sibling_family.parent.name }}](name:{{ item.sibling_family.parent.name }})`
-   and at least one adjacent sibling inline where the prose supports it.
+   and at least{% else %} Link at least{% endif %} one adjacent sibling inline where the prose supports it.
 {% endif %}
 
 ## Why this name was accepted (reviewer feedback)

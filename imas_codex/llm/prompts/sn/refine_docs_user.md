@@ -61,7 +61,7 @@ strictly on what the children attest.
 {% endif %}
 
 {% if sibling_family %}
-### Sibling family — converge on the family template (shared parent `{{ sibling_family.parent.name }}`)
+### Sibling family — converge on the family template{% if sibling_family.parent %} (shared parent `{{ sibling_family.parent.name }}`){% else %} (shared pattern){% endif %}
 
 `{{ sn_name }}` is one member of a matched sibling set. Your rewrite must be
 **structurally parallel** to the family: same opening noun-phrase template and

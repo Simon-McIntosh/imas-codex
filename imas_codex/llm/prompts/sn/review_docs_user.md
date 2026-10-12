@@ -77,7 +77,7 @@ They are NOT to be re-reviewed. Compare the candidate's documentation
 {% endif %}
 
 {% if sibling_family %}
-### Sibling family — PARALLEL-STRUCTURE CHECK (shared parent `{{ sibling_family.parent.name }}`)
+### Sibling family — PARALLEL-STRUCTURE CHECK{% if sibling_family.parent %} (shared parent `{{ sibling_family.parent.name }}`){% else %} (shared pattern){% endif %}
 
 The candidate is one member of a matched sibling set. Its opening sentence and
 documentation section structure MUST be parallel to the family template —
