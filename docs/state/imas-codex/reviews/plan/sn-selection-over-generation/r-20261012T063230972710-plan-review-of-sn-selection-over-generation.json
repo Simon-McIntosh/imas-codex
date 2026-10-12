@@ -40,7 +40,24 @@
   "plan_slug": "sn-selection-over-generation",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "",
+      "when": "2026-10-12T07:16:18.916048+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T07:16:18.916048+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-selection-over-generation/r-20261012T063230972710-plan-review-of-sn-selection-over-generation.json",
   "review_run_id": "r-20261012T063230972710-plan-review-of-sn-selection-over-generation",
   "reviewed_blob_sha": "424a2ea972f3614b55eaa117329a5004bc0ac58e",
   "rubric": "content",
