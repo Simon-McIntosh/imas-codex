@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="66">
+<meta name="plan-version" content="67">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -358,7 +358,10 @@
     <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261012T213409866604-sib-export-set-red.at-7eb27a00a64b8095b9a2de87fdfb11ed0ec1ef53.json</p></div>
 </div>
 <div class="r-comment" data-section="s26" data-id="c-run-r-20261012T220611162066-review-of-sib-release-review-durations" data-who="reckon-build" data-when="2026-10-12T22:15:49.700Z">
-    <div class="r-comment-body"><p>independent review of sib-release-review-durations stored at r-20261012T213434913404-sib-release-review-durations.json and its .at-5dc0fb781eb3b9efdfef74a97943910347a238d8.json twin; scores goal_fidelity 15, evidence 15, scope_discipline 20, durability 9, fit 18, reuse 17 (total 94); three follow-on findings (no assertion guards the fixture, the durations logs are headed at the base rev, plan section 26&#x27;s fixture-cheapening remedy is not applied); added_failure_count 0 from identical base/head failure id sets</p></div>
+    <div class="r-comment-body"><p>independent review of sib-release-review-durations stored at r-20261012T213434913404-sib-release-review-durations.json and its .at-5dc0fb781eb3b9efdfef74a97943910347a238d8.json twin; scores goal_fidelity 15, evidence 15, scope_discipline 20, durability 9, fit 18, reuse 17 (total 94); three follow-on findings (no assertion guards the fixture, the durations logs are headed at the base rev, plan section 26's fixture-cheapening remedy is not applied); added_failure_count 0 from identical base/head failure id sets</p></div>
+</div>
+<div class="r-comment" data-section="s26" data-id="c-run-sib-release-review-durations" data-who="reckon-build" data-when="2026-10-12T22:20:00Z">
+    <div class="r-comment-body"><p>The first attempt was discarded unmerged. It found the real cause: in a worker sandbox, the first <code>git</code> on <code>PATH</code> is the worker wrapper, which starts a new interpreter on every call. A release test makes dozens of git calls, so the wrapper's startup makes up the 17 to 25 seconds; against the real binary each test takes 0.02 to 4.27 s. But its fix made the test module put the real binary ahead of the wrapper. That bypasses a sandbox component for every worker running the file, and it is not the fixture-cheapening this section asks for, so it was not merged (its commit was <code>5dc0fb781</code>, recorded here before the worktree was removed). Outside a worker sandbox the file is already within its bound. The section's remedy stands: fewer git calls per test serve both environments. The wrapper's per-call startup cost is reported to reckon.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
