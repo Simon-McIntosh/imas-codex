@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T05:21:11.236Z",
+  "dispatched_at": "2026-10-12T05:13:54Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/graph-maintenance-leaves-the-store-whole.html:202",
+      "id": "done_when-1",
+      "reason": "the node would either fail its own gate or be forced to edit a file outside its declared write scope.",
+      "text": "the \u00a76 done-when requires `rg -n \"pkill\" imas_codex/graph imas_codex/cli/services.py` to print nothing, but `imas_codex/graph/remote.py:57-58` carries two `pkill -f` invocations (in `_neo4j_lifecycle_bash`, live at five call sites), and \u00a76's write paths list `neo4j_ops.py` and `cli/services.py` but not `remote.py`, so the measure cannot pass",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/graph-maintenance-leaves-the-store-whole.html:192",
+      "id": "reasoning-1",
+      "reason": "the plan under-enumerates the risk sites, so the fix would leave a pattern kill on the export path that its own rationale condemns.",
+      "text": "\u00a76 asserts the repair leaves \"No step [selecting] by pattern alone\", but it enumerates only `Neo4jOperation._stop_neo4j` (neo4j_ops.py:292-299) and `_stop_login_services` (cli/services.py:864), and misses `imas_codex/graph/remote.py`'s generated `pkill -u \"$USER\" -f \"neo4j.*{service_var}\"` \u2014 the same pattern-kill-on-a-shared-node class the node exists to remove",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a1b05112f21cffad50b3c3fa268aba86011e87427168d041cc4793bd448dcc52",
+  "plan_slug": "graph-maintenance-leaves-the-store-whole",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T051345079542-plan-review-of-graph-maintenance-leaves-the-store-whole",
+  "reviewed_blob_sha": "e00fa4a87cb296a315033e8699acd8a5b49e088d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 commits `410162d5b`, `184996eb8`, `2061f2990` exist; every cited file exists; the runbook section \"When the graph goes away\" resolves at `imas_codex/graph/AGENTS.md:410`.",
+    "done_when": "a finding \u2014 \u00a76's done-when (`rg -n \"pkill\" imas_codex/graph imas_codex/cli/services.py` prints nothing) is unreachable within the node's declared write paths.",
+    "evidence_paths": "pass \u2014 each node writes its fragment under `docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/`, the house convention (ten sibling plan-slug fragment dirs exist), a durable repository path.",
+    "naming": "pass \u2014 test filenames name behaviour (`test_services_scheduler_route.py`, `test_offsite_currency_live_tree.py`), the fragment directory carries the plan slug by house convention, and no plan label or ticket number reaches a symbol.",
+    "reasoning": "a finding \u2014 \u00a76 claims \"No step selects by pattern alone\" after the repair, but a live pattern-kill site on the export path, `imas_codex/graph/remote.py`, is neither cited nor in scope.",
+    "single_goal": "pass \u2014 each node names one deliverable; \u00a77's four pipelines (paths/wiki/code/documents) are one goal, \"every discovery queue fails closed\".",
+    "wiring": "pass \u2014 `plan-depends-on: offsite-recovery-cadence` resolves to `docs/plans/offsite-recovery-cadence.html`, the root `AGENTS.md` runbook pointer resolves (`AGENTS.md:103`), and the \u00a73\u2192\u00a74 and \u00a75/\u00a76-serialize sequencing is recorded in the followup body (`docs/plans/graph-maintenance-leaves-the-store-whole.html:269`)."
+  },
+  "section_digests": {
+    "_document": "846a235fcfe7091cdba7d06bf1624bf39803eff634a9bb1078ca55b4ebe643bb",
+    "s1": "5feef9e18de01233d52959c6a9f47610c75587005558b9941454b52637921ff2",
+    "s2": "de05765c58c65ee67f217fa111a702d17df94844dc5718a48b831ec2f2c5a9ae",
+    "s3": "ebe831c037ab5810d2478d88d3e7cef69f9ed30b971222f45146f58b688e21e1",
+    "s4": "e9a890cb6a5219afc37674056024d3c9e989e966098287ec300a8b5a5af52150",
+    "s5": "9c3d4883933a92826626b5bc87b74e3c647d4f0429f4dd64a7d84e87ae5cdee6",
+    "s6": "e00cef613e3c937045466bb2de7e09813aa83a639703d237f6a7b80aa8b07a92",
+    "s7": "5af7538b1ac65546949ab42d2d775dbc919db152c94ff8f87edfcb7fc04841ee",
+    "s8": "8c5d3ddea8ead466acd69b5ca829620f6a6ed70ac38af00dbe36860e55305816"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T05:23:42.079434+00:00"
+}
