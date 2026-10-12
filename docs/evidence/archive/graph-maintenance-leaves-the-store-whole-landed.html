@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="graph-maintenance-leaves-the-store-whole-landed">
+  <meta name="plan-title" content="Graph Maintenance Leaves the Store Whole — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Graph Maintenance Leaves the Store Whole: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="graph-maintenance-leaves-the-store-whole">
+  <meta name="plan-verdict" content="qualified">
+  <title>Graph Maintenance Leaves the Store Whole — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Graph Maintenance Leaves the Store Whole — landed record</h1>
+  <p>Closure synthesis for Graph Maintenance Leaves the Store Whole: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="recovered-store-in-service">
+    <h2>The recovered store is in service and checks clean</h2>
+    <p>The graph was stopped through the fixed stop at 07:08, the torn store moved to <code>~/.local/share/imas-codex/recovery/torn-20261012/</code>, and trial C's store copied into the live data directory. The lead authorised the restart, and job 1283595 came up at 07:34 with no <code>ERROR</code> in the service or debug log.</p><p>A <code>GraphClient</code> census then read 1,768,490 nodes, 4,556,357 relationships and 15,111 JT-60SA <code>FacilitySignal</code>s. None lacked a facility; the torn store had 35. The previously damaged <code>jt-60sa:general/lcdb_a048717_ate.s003_iflg_fit</code> again carried its <code>MEMBER_OF</code>, <code>DATA_ACCESS</code> and <code>AT_FACILITY</code> edges.</p><p>A checkpoint taken through the fixed stop between 07:35 and 07:38 was the first live use of it. The shutdown checkpoint completed in 1.1 s, no file was deleted while the database ran, and <code>neo4j-admin database check</code> on <code>imas-codex-graph-dev-a03c849-20261012T053513Z.tar.gz</code> exits 0.</p><p>That archive's census matches the 07:34 live census. It was pushed offsite at 07:57 as <code>ghcr.io/simon-mcintosh/imas-codex-graph:dev-a03c849-20261012T053513Z-r1</code>, and offsite currency now reads current.</p><p><code>graph push --schedule</code> installed <code>OnCalendar=daily</code> at 07:50, next run 2026-10-13 00:00.</p><p>Two things were observed but not repaired here, both owned by §5 and §6:</p><ul><li>ssh from the login node to the graph node was refused, so the SIGTERM step fell through to <code>scancel</code>.</li><li>Every deploy printed <em>Killed login Neo4j process</em> with a new pid.</li></ul>
+  </section>
+
+</main>
+</body>
+</html>

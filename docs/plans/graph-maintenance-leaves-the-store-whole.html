@@ -19,12 +19,13 @@
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="graph-service,discovery">
   <meta name="plan-depends-on" content="offsite-recovery-cadence">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
   <title>Graph Maintenance Leaves the Store Whole | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-10-12">
+<meta name="plan-commits" content="410162d5b,184996eb8">
 </head>
 <body>
   <main class="plan-doc">
@@ -85,67 +86,19 @@
       <code>imas_codex/graph/AGENTS.md</code>, with a pointer in the root <code>AGENTS.md</code>.
     </p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-12</span>
     <h2 id="s3">§3 — The live store runs on the recovered copy</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-status="implementable" data-links=""></section>
-    <p>
-      Recovery replays the transaction log over the torn store, from the last checkpoint that completed before the stop.
-      The dd copies only replaced <code>neostore*</code> record files; the transaction log and index files were left
-      whole. Three trials ran on node-local copies:
-    </p>
-    <table>
-      <thead><tr><th>Trial</th><th>Store</th><th>Replay</th><th>Consistency check</th></tr></thead>
-      <tbody>
-        <tr><td>A</td><td>live store at 06:14</td><td>21:59 checkpoint to the end of the log, post-restart transactions included</td><td>598 errors; 389 relationship records</td></tr>
-        <tr><td>B</td><td>live store at 06:14</td><td>21:59 checkpoint to transaction 2341903, id files rebuilt</td><td>243 errors: the post-restart writes were already in the record files</td></tr>
-        <tr><td>C</td><td>the 00:00 archive, which carries its own transaction log</td><td>21:59 checkpoint to transaction 2341903, id files rebuilt</td><td><strong>0 errors</strong>; 1,768,490 nodes, 4,556,357 relationships, 15,111 JT-60SA signals</td></tr>
-      </tbody>
-    </table>
-    <p>
-      The cut works like this. <code>transactions/neo4j/checkpoint.1</code> is a 128-byte header followed by 232-byte
-      little-endian entries; each entry holds the log version at byte 2, the byte offset at 10 and the time in
-      milliseconds at 34. Keeping entries up to the 21:59:28 one makes Neo4j recover from log 175, offset 60,425,926.
-      The throwaway instance needs the image's default <code>server.jvm.additional</code> options, because the id-file
-      rebuild fails without <code>--add-opens=java.base/java.nio=ALL-UNNAMED</code>.
-    </p>
-    <p>
-      State at 07:09: the graph was stopped through the fixed stop and the torn store moved to
-      <code>~/.local/share/imas-codex/recovery/torn-20261012/</code>. Trial C's store is now in the live data directory.
-      The restart is waiting on the lead, because the auto-mode classifier refused <code>graph start</code>.
-    </p>
-    <p>
-      Node <code>recovered-store-in-service</code>, role test, 1.0 h. Write path:
-      <code>docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/recovered-store-in-service.html</code>.
-      <strong>Done when</strong> all of these hold:
-    </p>
-    <ul>
-      <li>The <code>codex-neo4j</code> job runs on the recovered store, and a <code>GraphClient</code> census returns 1,768,490 nodes, 15,111 JT-60SA <code>FacilitySignal</code>s and zero <code>FacilitySignal</code>s without a facility.</li>
-      <li>A checkpoint taken with <code>imas-codex graph export</code> passes the offline <code>neo4j-admin database check</code> with exit 0.</li>
-      <li>The service log shows no <code>ERROR</code> line after the start.</li>
-    </ul>
-    <p>
-      The fragment records the archive path and both logs. The torn copy stays in the recovery directory until the lead
-      releases it.
-    </p>
+<section data-reckon="section" data-id="s3" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">The live graph runs on trial C's recovered store (07:34): 1,768,490 nodes, 15,111 JT-60SA signals, none without a facility; a checkpoint through the fixed stop passes the offline consistency check with exit 0 and was pushed offsite at 07:57. The torn store is kept under recovery/torn-20261012. <a href="/imas-codex/evidence/archive/graph-maintenance-leaves-the-store-whole-landed.html#recovered-store-in-service">full record</a></p>
+</section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-12</span>
     <h2 id="s4">§4 — The daily push timer is installed and observed</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>
-      The installed timer still reads <code>OnCalendar=weekly</code> until it is reinstalled. Reinstalling waits for §3:
-      once the timer is daily, the first night would find the offsite copy (2026-09-27) overdue and push whatever store
-      is live. Installing it changes a systemd unit on the shared login node, so the lead runs it, or authorises it in
-      the session that does.
-    </p>
-    <p>
-      Node <code>daily-push-timer</code>, role test, 0.5 h. Write path:
-      <code>docs/evidence/fragments/graph-maintenance-leaves-the-store-whole/daily-push-timer.html</code>.
-      <strong>Done when</strong> all of these hold:
-    </p>
-    <ul>
-      <li><code>imas-codex graph push --schedule</code> has run on <code>98dci4-srv-1006</code>.</li>
-      <li><code>systemctl --user cat imas-codex-graph-push.timer</code> shows <code>OnCalendar=daily</code>.</li>
-      <li><code>imas-codex graph push --cycle --dry-run</code> prints its decision.</li>
-      <li>The next scheduled run leaves a receipt in <code>~/.local/share/imas-codex/offsite-push/receipts/</code> whose outcome is <code>pushed</code>, <code>not_due</code> or <code>deferred</code>, with its activity observation recorded.</li>
-    </ul>
+<section data-reckon="section" data-id="s4" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">graph push --schedule installed OnCalendar=daily at 07:50; next run 2026-10-13 00:00, which will find the offsite copy of 07:57 current. <a href="/imas-codex/evidence/archive/graph-maintenance-leaves-the-store-whole-landed.html#recovered-store-in-service">full record</a></p>
+</section>
 
     <h2 id="s5">§5 — Graph lifecycle commands work from a compute node</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>

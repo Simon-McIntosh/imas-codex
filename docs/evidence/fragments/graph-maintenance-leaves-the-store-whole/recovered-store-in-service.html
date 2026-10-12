@@ -1,0 +1,46 @@
+<!-- The live graph runs on the store recovered by replaying the midnight
+     archive's own transaction log from the 21:59:28 UTC checkpoint, and the
+     daily, idle-guarded push timer is installed. Checks:
+     neo4j-admin database check on the recovered copy (exit 0) and on a
+     checkpoint of the live store taken through the fixed stop path
+     (imas-codex-graph-dev-a03c849-20261012T053513Z.tar.gz, exit 0, empty
+     report; log ~/.cache/imas-codex-graph-check/check-20261012T053513Z.log). -->
+<section id="recovered-store-in-service" data-reckon="evidence">
+  <h2 id="recovered-store-in-service-heading">The recovered store is in service and checks clean</h2>
+  <p id="recovered-store-in-service-landing">
+    The graph was stopped through the fixed stop at 07:08, the torn store moved
+    to <code>~/.local/share/imas-codex/recovery/torn-20261012/</code>, and trial
+    C's store copied into the live data directory. The lead authorised the
+    restart, and job 1283595 came up at 07:34 with no <code>ERROR</code> in the
+    service or debug log, only the usual GPFS cache-advice warnings.
+  </p>
+  <p>
+    A <code>GraphClient</code> census then read 1,768,490 nodes, 4,556,357
+    relationships and 15,111 JT-60SA <code>FacilitySignal</code>s, of which 15,019
+    are described. No <code>FacilitySignal</code> lacked a facility; the torn store
+    had 35. The previously damaged
+    <code>jt-60sa:general/lcdb_a048717_ate.s003_iflg_fit</code> again carried its
+    <code>MEMBER_OF</code>, <code>DATA_ACCESS</code> and <code>AT_FACILITY</code>
+    edges.
+  </p>
+  <p>
+    The confirming checkpoint (07:35 to 07:38) is the first live use of the
+    fixed stop. The debug log shows the shutdown checkpoint complete in 1.1 s
+    and the database stop successfully at 05:35:16 UTC, with no file deleted
+    while the database ran. The dump began only after the job had left
+    <code>squeue</code>. The offline check of that archive exits 0 with an empty
+    report.
+  </p>
+  <p>
+    <code>imas-codex graph push --schedule</code> reinstalled the timer at 07:50:
+    <code>OnCalendar=daily</code>, next run 2026-10-13 00:00. The cycle's dry run
+    reports a push due, with the offsite copy 14.323 days stale.
+  </p>
+  <p>
+    Two things were observed but not repaired here. Both fall under §5 and §6:
+  </p>
+  <ul>
+    <li>ssh from the login node to the graph node was refused, so the SIGTERM step fell through to <code>scancel</code>.</li>
+    <li>Every deploy printed <em>Killed login Neo4j process</em> with a new pid each time, consistent with the pattern kill matching its own wrapper shell.</li>
+  </ul>
+</section>
