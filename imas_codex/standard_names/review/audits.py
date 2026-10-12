@@ -671,12 +671,53 @@ def run_duplicate_detection(names: list[dict[str, Any]]) -> list[DuplicateCompon
 # ---------------------------------------------------------------------------
 
 
+def run_house_style_checks(names: list[dict[str, Any]]) -> list[LintFinding]:
+    """Emit the registry conformance findings for each name.
+
+    Each finding joins the ``convention_violation`` family beside the lexical
+    lint's, so a reviewer reads one finding type, and names the registry entry
+    it came from. Selection and matching are deterministic and model-free; a
+    name the grammar cannot parse is skipped rather than guessed at.
+    """
+
+    from imas_standard_names.grammar.terms import load_conventions, select_conventions
+
+    from imas_codex.standard_names.docs_gates import house_style_findings
+
+    registry = load_conventions()
+    findings: list[LintFinding] = []
+    for name in names:
+        name_id = name.get("id", "")
+        try:
+            conventions = select_conventions(name_id, registry=registry)
+        except Exception:
+            logger.debug("no registry selection for '%s'", name_id, exc_info=True)
+            continue
+        for finding in house_style_findings(
+            conventions,
+            description=name.get("description") or "",
+            documentation=name.get("documentation") or "",
+        ):
+            findings.append(
+                LintFinding(
+                    name_id=name_id,
+                    finding_type="convention_violation",
+                    detail=(
+                        f"{finding.finding_class.value}: {finding.detail} "
+                        f"[{finding.registry_entry}]"
+                    ),
+                    severity="warning",
+                )
+            )
+    return findings
+
+
 def run_all_audits(names: list[dict[str, Any]]) -> AuditReport:
     """Run all Layer 1 deterministic audits and return a combined report.
 
     Execution order:
       1. Embedding preflight (ensures fresh embeddings for duplicate detection)
-      2. Lexical lint
+      2. Lexical lint, including the registry conformance checks
       3. Link integrity
       4. Duplicate detection
     """
@@ -684,6 +725,7 @@ def run_all_audits(names: list[dict[str, Any]]) -> AuditReport:
 
     embedding = run_embedding_preflight(names)
     lint_findings = run_lexical_lint(names)
+    lint_findings = [*lint_findings, *run_house_style_checks(names)]
     link_findings = run_link_integrity(names)
     duplicate_components = run_duplicate_detection(names)
 
