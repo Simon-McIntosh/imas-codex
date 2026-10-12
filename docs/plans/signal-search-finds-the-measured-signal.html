@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -154,8 +154,10 @@
       and descriptions. It must not run any search tool or open the prototype directory. It writes at least eight
       questions, so that six survive if pooled labelling finds one ill-posed, spread over at least four EDDB categories,
       and records for each the grade-3 signals it found by enumeration. It commits them to the fixture marked
-      <code>held_out</code>. The second node adds the eleven draft questions, pools and labels every arm's top 10, and
-      builds the harness.
+      <code>held_out</code>. The harness then takes two nodes, because labelling and code do not fit one hour together.
+      The second node builds the harness and adds the eleven draft questions; it shows the refusal naming the unlabelled
+      candidates of the fixture as it stands. The third pools and labels every arm's top 10, runs the five arms and the
+      control, and writes the evidence.
     </p>
     <p>
       A label of 0 records a candidate that was read and judged irrelevant, so an unlabelled candidate stays distinct
