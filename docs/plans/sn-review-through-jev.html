@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -204,16 +204,16 @@
     <section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       For each decision that passed the rule, delete the incumbent's code path and seat rather
-      than leaving both. That covers the quorum cycles that no longer run, the comment-keyword
-      trigger, and the review seats beyond the one chat reviewer the cascade keeps. A decision
-      that did not pass keeps its incumbent and its recorded numbers.
+      than leaving both. That covers the quorum cycles that no longer run and the review seats
+      beyond the one chat reviewer the cascade keeps. The comment-keyword trigger is not here:
+      §5 retires it when it switches the trigger to check probabilities. A decision that did not
+      pass keeps its incumbent and its recorded numbers.
     </p>
     <p>
       <strong>Done when:</strong> the deleted paths and seats are listed with line counts. A
       test asserts that the quorum cycle function is no longer defined, that no review seat
-      beyond the cascade's single chat reviewer resolves through <code>get_model</code>, and
-      that the fanout trigger takes no comment argument. Each assertion fails when its deleted
-      path is restored. The <code>LLMCost</code> phase split over the next production run shows
+      beyond the cascade's single chat reviewer resolves through <code>get_model</code>. Each
+      assertion fails when its deleted path is restored. The <code>LLMCost</code> phase split over the next production run shows
       review spend by judge kind.
     </p>
 
