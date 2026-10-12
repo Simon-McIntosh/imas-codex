@@ -1,0 +1,81 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:48:41.691Z",
+  "dispatched_at": "2026-10-12T14:40:17Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:116",
+      "id": "reasoning-1",
+      "reason": "the mechanism as written leaves the majority of composed names with no domain owner, so the node's done-when (\"zero names in the WEST roster carry a null domain\") cannot be reached by the described route and the plan must name the call site that also covers singleton candidates.",
+      "text": "\u00a73 claims the adopted mechanism sets the primary at one owner, `_resolve_physics_domains`, \"through which every composed candidate passes\"; in `consolidate_candidates` (imas_codex/standard_names/consolidation.py:322-327) a name whose group holds one candidate is appended straight to `approved` and only a group of two or more goes through `_merge_duplicates` \u2014 the sole caller of `_resolve_physics_domains` (consolidation.py:117) \u2014 so a unique composed name never reaches that owner and would keep whatever the compose injection at workers.py:4187 leaves it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:148",
+      "id": "reasoning-2",
+      "reason": "a worker building the worklist to spec produces one that cannot contain the one-token pairs the done-when requires a recorded ruling and an upstream ISN filing for, so the filter must admit at least a one-token difference or the example pair must move out of \u00a74.",
+      "text": "\u00a74's worklist filter requires \"more than a one-token difference\", which excludes the one-token pair it names as a vocabulary overlap in the same section (`neutral` and `neutral_state`, line 179)",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "2277885d9053bed0af9d0fad65d1fcc203816781c6bd693b57998ba6b68e2427",
+  "plan_slug": "sn-catalog-grouping",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T14:51:39.361530+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "",
+      "when": "2026-10-12T14:51:41.279854+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:51:39.361530+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T14:51:41.279854+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-catalog-grouping.v3.json",
+  "review_run_id": "r-20261012T144007145815-plan-review-of-sn-catalog-grouping",
+  "reviewed_blob_sha": "008e4816a142284ea8e4ab35a2757f14df0d786f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited module and symbol resolves (`families.py` axis ordering, `fetch_sibling_family` context.py:798, `assemble_family` harmonize.py:235 with its `physical_base` fallback, `synonym_check` audits.py:1239, `fetch_review_neighbours` context.py:589, `nearest_registered_token` vocab_semantic_dedup.py:204, `_resolve_physics_domains` consolidation.py:49, `dd_domain_classifier.py`, `pick_primary_domain` domain_priority.py:72, `Encoder.embed_texts` encoder.py:334 and the three description.py wrappers), the extensionless href `/imas-codex/research/sn-catalog-consistency-census` resolves as `.html`, the cited `sn-judgment-evaluation` \u00a75 and \u00a77 exist, and `docs/plans/sn-grammar-refinement.html` is present.",
+    "done_when": "pass \u2014 \u00a73 and \u00a75 each declare a red arm (\"it fails with the lookup removed\", \"With the guard removed, the same test fails\"), \u00a72's measure fails on current code because \u00a71 records the 17 species names as 17 families of one, and \u00a74 is recorded human adjudication with a falsifiable end state (the roster still resolves), already ruled on by a prior review.",
+    "evidence_paths": "pass \u2014 the plan deposits no evidence or gate log in a session scratchpad or node-local temporary directory; the counts and censuses it records are additional artifacts, not stand-inside-a-run files.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag is carried into a symbol, and \u00a72's one prose reference to \"the retired grammar-refinement plan\" names no code.",
+    "reasoning": "a finding \u2014 \u00a73's adopted mechanism sets the primary domain at `_resolve_physics_domains`, which the plan says \"every composed candidate passes\", but that resolver is reached only for duplicate merge groups, so the common single-candidate name bypasses it.",
+    "single_goal": "pass \u2014 \u00a72 builds pattern families, \u00a73 assigns domains, \u00a74 adjudicates overlaps, \u00a75 repairs the embedding clusters and guards their cause; each closes on one verdict.",
+    "wiring": "pass \u2014 \u00a73\u2192`sn-judgment-evaluation#s3` (the evaluation module it scores against) and \u00a74\u2192`sn-integrity-backlog#s6` (whose followup f-sib-002 makes the grouping plan's \u00a74 synonym folds wait on the fold rows) both resolve to the sections that supply what each node builds on."
+  },
+  "section_digests": {
+    "_document": "502a2bfa69c4863a9cd34bcc0968e350e314683f2c0e58fd0858bdf994c91f0e",
+    "s1": "6bc3b44a7fd794158b4e454dd07668ea7d805f53ea1a5e11fac0c4b9a32edd70",
+    "s2": "9829b62e199aad73fe00988b32b523e91b14bb1e6717aae8cd2c24cf36ca5e86",
+    "s3": "96dde1413e4904016d3772bf401b52effaf7b852286f91f9085096742ef874cf",
+    "s4": "da8ba4034d7e4496a8901bf61affa5f342dbc0dbc4f9c73f15ee4bf80a4a1fde",
+    "s5": "6a583a112984f320b52d30c670be604713b3d4204e41c7dd12230c311f9ff0e3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:51:28.103582+00:00"
+}
