@@ -54,9 +54,22 @@
       "finding": "wiring-1",
       "reason": "",
       "when": "2026-10-12T07:16:40.359421+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-12T07:16:42.778082+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T07:16:42.778082+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
