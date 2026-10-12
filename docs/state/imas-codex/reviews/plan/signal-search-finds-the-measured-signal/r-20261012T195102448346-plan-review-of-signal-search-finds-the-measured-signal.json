@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T19:58:57.878Z",
+  "dispatched_at": "2026-10-12T19:51:15Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:469",
+      "id": "reasoning-1",
+      "reason": "with the op available the correct action is to re-declare `g-ssfms-1` with the 21:08:54Z measure, not to leave a wrong declared measure that prose must override; a false premise about the tool turns a fixable defect into a standing one.",
+      "text": "the new comment `c-20261012T1958-s11-cutover` tells a reader to carry the corrected cutover 2026-10-11T21:08:54Z in prose because \"reckon offers no op to rewrite a declared gate's measure\", yet gate `g-ssfms-1` still declares `enriched_at at or after 2026-10-11T19:08:21Z`, and that editing surface does exist (`{\"op\":\"gate\",\"id\":\"g-<slug>-<n>\",\"section\":\u2026,\"gated_sections\":\u2026,\"measure\":\u2026,\"required_evidence\":\u2026}`, reckon-edit SKILL.md:266-269) \u2014 so the machine-readable measure a worker closing the gate reads stays on the superseded instant",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7e4f859ef1997ada0181cccc00ead21c5b9c36b771ca53cdc89c1392b28df0bc",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 11,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T195102448346-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "9ccfe901884d1cbaeda0264534efa8b28e6fe5e9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every anchor \u00a73 cites resolves: commits `43290a049` (2026-10-07, Jev context rerank), `b4c89a8fc` (2026-10-09, catalogue wording) and `93bfb7e9d` (2026-10-11T23:08:21+02:00 = 21:08:21Z, matching the text) all existing with matching subjects; `tests/llm/fixtures/signal_search_questions.json` and `tests/tools/fixtures/dd_mapping_questions.json` exist; the extensionless href `discovery-judgments-through-jev` resolves as `<path>.html` under the house convention.",
+    "done_when": "pass \u2014 \u00a73's done-when is measurable (fixture \u226517 questions, six held out; harness refuses and names an unlabelled candidate in any arm's top 10; five-arm table on pooled labels) and names a declared negative control, the seeded random ordering. That control can fail: \"the random control scores below every arm on mean nDCG@10; a control that does not means the labels are wrong.\"",
+    "evidence_paths": "pass \u2014 \u00a73's evidence is the durable repo path `docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html`, and the fixture lives under `tests/llm/fixtures/`; the harness runs on the fleet allocation, not a scratchpad.",
+    "naming": "pass \u2014 the changed text introduces no plan label, ticket number or version tag into a symbol or path; the plan-slug-named evidence directory is the plan system's own convention for evidence anchors.",
+    "reasoning": "a finding \u2014 \u00a73's numbers are correct, but the new cutover comment on `s11` rests on a false premise about the editing surface (FINDING below).",
+    "single_goal": "pass \u2014 \u00a73 now declares \"three nodes\" and enumerates exactly three (held-out questions; harness + drafts; pooling/labelling/evaluation), so the count no longer contradicts the body.",
+    "wiring": "pass \u2014 \u00a73's changed text adds no relationship, and the node table's `depends-on`/`informs`/gate wiring (followup `f-ssfms-001`, gate `g-ssfms-1` on `s11`) is unchanged and resolves."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "cf982272fd460a86fda6e1e842be09d9379c78a3a79efdca6b775ada334cfbaf",
+    "s4": "bbfa57f0f787e5833fdbccdbece0e75658e4bfe6f10d389c40ec5c8c4ef64720",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:59:09.953416+00:00"
+}
