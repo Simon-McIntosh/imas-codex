@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T23:29:14.992Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "exempted",
+      "reason": "the run is discarded unmerged: its test duplicates the existing pin test_dry_run_and_live_transaction_return_the_same_verdict (80c42c6ad), and \u00a712 closes on that pin and the fix a3ad987cc",
+      "recorded_at": "2026-10-12T23:25:32.763784+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the run is discarded unmerged: its test duplicates the existing pin test_dry_run_and_live_transaction_return_the_same_verdict (80c42c6ad), and \u00a712 closes on that pin and the fix a3ad987cc",
+      "recorded_at": "2026-10-12T23:25:33.754182+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-12T23:17:37Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_fold_postflight_agrees.py",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "follow-on: _ClockFidelityTransaction re-implements the mutation-stamp mirror already owned by tests/standard_names/test_fold_dry_run_predicts_live.py:69 _mutation_stamp (the new module already imports its siblings) instead of extending it, and test_dry_run_passing_fold_passes_its_postflight:106 duplicates test_dry_run_and_live_transaction_return_the_same_verdict:101."
+    },
+    {
+      "file": "tests/standard_names/test_fold_postflight_agrees.py",
+      "line": "61",
+      "severity": "follow-on",
+      "text": "follow-on: the mirror fires only when the literal marker ATOMIC_FOLD_MUTATE_NAMES is present and the query omits the literal datetime($changed_at), so a production restructure that renamed either literal would silently stop the control from firing."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site can reach the landed change: the two commits add only a test file and an evidence fragment, so CALL_SITES is none.",
+    "diff": "read ca86a8bc91717caf0d42535ada40bbe087007b77 (test) and 4bcb65dd667ae8de6997b60a7f5119a0331c2f05 (docs) against base 587b81fc48775b7af787e578435e701b0e3dac3f commit by commit; two files, +172 lines, no production change.",
+    "done_when": "plan s12's three clauses are measured: a dry-run-passing fold passes its postflight (gate-head-fold-postflight.log, 3 passed, EXIT=0), a dry-run-refused fold is still refused (tests/standard_names/test_fold_postflight_agrees.py:120), and the first test fails with the fix reverted (negative-control-reverted-stamp.log: 1 failed, EXIT=1 at imas_codex/standard_names/edit.py:3106).",
+    "goal": "the node goal is to prove a fold its dry run accepts passes its postflight and, since it already did at head, to land that regression test plus a fragment naming the closing change; tests/standard_names/test_fold_postflight_agrees.py:106 does exactly that.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T225835489734-sib-fold-postflight/manifest.md; status complete, commits ca86a8bc/4bcb65dd, baseline_suite 18 passed/0 failed and after_suite 21 passed/0 failed (both completed true), and a bare negative-control path whose last line is EXIT=1.",
+    "write_paths": "the declared scope is imas_codex/standard_names/edit.py, tests/standard_names/test_fold_postflight_agrees.py and docs/evidence/fragments/sn-integrity-backlog/sib-fold-postflight.html; the two commits touch only the test file and the fragment, and edit.py is correctly left unchanged."
+  },
+  "justifications": {
+    "durability": "reverting the stamp derivation makes the mirror write the undeclared server clock and reddens tests/standard_names/test_fold_postflight_agrees.py:114 (negative-control-reverted-stamp.log EXIT=1), while tests/standard_names/test_fold_postflight_agrees.py:133 guards the opposite direction with a corrupted readback.",
+    "evidence": "the done_when's clauses are recorded, not claimed: gate-head-fold-postflight.log ends \"3 passed ... EXIT=0\" and negative-control-reverted-stamp.log ends \"1 failed, 2 passed ... EXIT=1\" against a mutated imas_codex/standard_names/edit.py.",
+    "fit": "the module mirrors tests/standard_names/test_fold_dry_run_predicts_live.py:1's structure and docstring idiom and introduces no plan, sprint or ticket label in any name.",
+    "goal_fidelity": "tests/standard_names/test_fold_postflight_agrees.py:106 drives a fixture fold through imas_codex/standard_names/edit.py:supersede_into and asserts the done_when's postflight holds, which is the goal's deliverable.",
+    "reuse": "tests/standard_names/test_fold_postflight_agrees.py:47 re-implements the mutation-stamp mirror owned by tests/standard_names/test_fold_dry_run_predicts_live.py:69 without extending it, and tests/standard_names/test_fold_postflight_agrees.py:106 re-covers tests/standard_names/test_fold_dry_run_predicts_live.py:101.",
+    "scope_discipline": "every path in the diff (tests/standard_names/test_fold_postflight_agrees.py:1, docs/evidence/fragments/sn-integrity-backlog/sib-fold-postflight.html:1) is inside the declared write paths, and edit.py was declared but correctly left untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to prove a fold its dry run accepts passes its postflight and, since it already did at head, to land that regression test plus a fragment naming the closing change; tests/standard_names/test_fold_postflight_agrees.py:106 does exactly that.\nVERDICT done_when: plan s12's three clauses are measured: a dry-run-passing fold passes its postflight (gate-head-fold-postflight.log, 3 passed, EXIT=0), a dry-run-refused fold is still refused (tests/standard_names/test_fold_postflight_agrees.py:120), and the first test fails with the fix reverted (negative-control-reverted-stamp.log: 1 failed, EXIT=1 at imas_codex/standard_names/edit.py:3106).\nVERDICT write_paths: the declared scope is imas_codex/standard_names/edit.py, tests/standard_names/test_fold_postflight_agrees.py and docs/evidence/fragments/sn-integrity-backlog/sib-fold-postflight.html; the two commits touch only the test file and the fragment, and edit.py is correctly left unchanged.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T225835489734-sib-fold-postflight/manifest.md; status complete, commits ca86a8bc/4bcb65dd, baseline_suite 18 passed/0 failed and after_suite 21 passed/0 failed (both completed true), and a bare negative-control path whose last line is EXIT=1.\nVERDICT diff: read ca86a8bc91717caf0d42535ada40bbe087007b77 (test) and 4bcb65dd667ae8de6997b60a7f5119a0331c2f05 (docs) against base 587b81fc48775b7af787e578435e701b0e3dac3f commit by commit; two files, +172 lines, no production change.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/test_fold_postflight_agrees.py:106 drives a fixture fold through imas_codex/standard_names/edit.py:supersede_into and asserts the done_when's postflight holds, which is the goal's deliverable.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done_when's clauses are recorded, not claimed: gate-head-fold-postflight.log ends \"3 passed ... EXIT=0\" and negative-control-reverted-stamp.log ends \"1 failed, 2 passed ... EXIT=1\" against a mutated imas_codex/standard_names/edit.py.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff (tests/standard_names/test_fold_postflight_agrees.py:1, docs/evidence/fragments/sn-integrity-backlog/sib-fold-postflight.html:1) is inside the declared write paths, and edit.py was declared but correctly left untouched.\nSCORE durability: 16\nJUSTIFICATION durability: reverting the stamp derivation makes the mirror write the undeclared server clock and reddens tests/standard_names/test_fold_postflight_agrees.py:114 (negative-control-reverted-stamp.log EXIT=1), while tests/standard_names/test_fold_postflight_agrees.py:133 guards the opposite direction with a corrupted readback.\nSCORE fit: 18\nJUSTIFICATION fit: the module mirrors tests/standard_names/test_fold_dry_run_predicts_live.py:1's structure and docstring idiom and introduces no plan, sprint or ticket label in any name.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/standard_names/test_fold_postflight_agrees.py:47 re-implements the mutation-stamp mirror owned by tests/standard_names/test_fold_dry_run_predicts_live.py:69 without extending it, and tests/standard_names/test_fold_postflight_agrees.py:106 re-covers tests/standard_names/test_fold_dry_run_predicts_live.py:101.\nFINDING tests/standard_names/test_fold_postflight_agrees.py:47 follow-on: _ClockFidelityTransaction re-implements the mutation-stamp mirror already owned by tests/standard_names/test_fold_dry_run_predicts_live.py:69 _mutation_stamp (the new module already imports its siblings) instead of extending it, and test_dry_run_passing_fold_passes_its_postflight:106 duplicates test_dry_run_and_live_transaction_return_the_same_verdict:101.\nFINDING tests/standard_names/test_fold_postflight_agrees.py:61 follow-on: the mirror fires only when the literal marker ATOMIC_FOLD_MUTATE_NAMES is present and the query omits the literal datetime($changed_at), so a production restructure that renamed either literal would silently stop the control from firing.",
+  "review_run_id": "r-20261012T231725399100-review-of-sib-fold-postflight",
+  "reviewed_base_sha": "587b81fc48775b7af787e578435e701b0e3dac3f",
+  "reviewed_head_sha": "4bcb65dd667ae8de6997b60a7f5119a0331c2f05",
+  "reviewed_run_id": "r-20261012T225835489734-sib-fold-postflight",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T23:30:12.627214+00:00",
+  "total": 94
+}
