@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -141,6 +141,23 @@
       <code>plasma_boundary</code>; an opening that does not match the pattern template; and
       a sign-convention paragraph present or absent against the COCOS rule. In this plan,
       "the lint" means these checks.
+    </p>
+    <p>
+      Three of the five classes already have a deterministic owner, and the checks extend it
+      rather than restating it. <code>imas_codex/standard_names/docs_gates.py</code> decides
+      sign-convention prose from the COCOS transformation type
+      (<code>_sign_convention_result</code>), gates the defining equation
+      (<code>_defining_equation_result</code>) and gates symbol definitions
+      (<code>_symbols_are_defined</code>). The registry supplies what those gates lack: the
+      canonical equation form and its forbidden variants, and the canonical symbol per
+      quantity. The template-opening check is added in the same module. The forbidden locus
+      gloss joins the existing <code>convention_violation</code> family that
+      <code>run_lexical_lint</code> emits, not a new class. Today only the hold-out evaluator
+      calls <code>score_documentation</code>, so no review has seen these gates: the audit
+      stage calls it from <code>run_all_audits</code>, and its findings join the
+      <code>AuditReport</code> the review pipeline reads. The registry's forbidden variants
+      are keyed by documentation content and are distinct from the name-decomposition
+      gallery in <code>anti_patterns.yaml</code>.
     </p>
     <p>
       Some checks a pattern can decide, and those stay pure code. Others need judgment: which

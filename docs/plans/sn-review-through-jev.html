@@ -19,12 +19,12 @@
   <meta name="plan-sprint" content="S18">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -92,10 +92,17 @@
       <li>the 136 distinct reasons written in human <code>sn edit</code> corrections.</li>
     </ul>
     <p>
-      The taxonomy lives beside the review prompts as data, not prose.
+      The taxonomy lives beside the review prompts as data, not prose. A check that code
+      already decides is not re-asked: the house-style checks of <code>sn-house-style</code> §4
+      and the Layer 1 audits enter the taxonomy as the <code>AuditReport</code> finding class
+      that already reaches the review pipeline, with no Jev question. Jev questions are
+      reserved for the failures that need judgment. Surface: the taxonomy and its loader are
+      added here; §5 retires the keyword list and §7 the quorum cycles and extra review
+      seats.
     </p>
     <p>
-      <strong>Done when:</strong> every check has a Jev question and evidence fields. The 136
+      <strong>Done when:</strong> every check has evidence fields, and either a Jev question or
+      the audit finding class that decides it. The 136
       human edit reasons are each mapped to a check or listed as unmapped, and at least 80% map.
       A test fails when a check names an evidence field that the review state does not carry.
     </p>
@@ -103,7 +110,14 @@
     <h2 id="s3">§3 — Name review through Jev, measured, not wired</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Build the Jev name review as question and state builders that nothing calls yet. Following
+      Build the Jev name review as question and state builders that nothing calls yet, in one
+      module that §4 extends for the documentation axis: one state builder and one question
+      table per axis, both read from the §2 taxonomy, rather than two builder families. Every
+      call goes through the shared decisions owner in
+      <code>imas_codex/discovery/base/judgment.py</code> (<code>decide_batch</code>,
+      <code>judge_rows</code>, <code>rerank_pool</code>) under the <code>sn-judge</code> seat,
+      both of which <code>sn-judgment-evaluation</code> §2 creates, so no third decisions owner
+      appears. Following
       discovery's categorise-first result, each dimension is asked as categories with the
       decision derived in code, and each failed-check question is a separate Noul or Choice. The
       state is the candidate name, its grammar segments, kind, unit, description, source DD paths
@@ -166,7 +180,8 @@
       The refine prompts render the failed checks as their instruction list: id, the criterion
       text, the evidence it pointed at, and the segment or sentence concerned. The fanout trigger
       becomes the maximum probability over the checks that call for retrieval, compared with a
-      calibrated threshold, which retires the keyword list in <code>refine-trigger-keywords</code>.
+      calibrated threshold, which retires the keyword list in <code>refine-trigger-keywords</code> and the field that
+      holds it in <code>imas_codex/standard_names/fanout/config.py</code>.
       The free-text comment field remains for people and no code path reads it.
     </p>
     <p>
