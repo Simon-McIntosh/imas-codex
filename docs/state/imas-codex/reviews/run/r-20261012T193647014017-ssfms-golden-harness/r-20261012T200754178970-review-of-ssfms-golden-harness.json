@@ -1,0 +1,94 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "blocking_finding_count": 0,
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/llm/search_tools.py:314 (_search_signals calls _rank_signals)",
+    "imas_codex/llm/server.py:2436 (imports _search_signals)"
+  ],
+  "completed_at": "2026-10-12T20:18:31.236Z",
+  "dispatched_at": "2026-10-12T20:08:06Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T193647014017-ssfms-golden-harness/goldens-pure.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log records \"1 failed, 5 passed\" -- test_a_fully_labelled_arm_is_scored_not_refused expected nDCG 1.0 at a revision before the assertion was corrected to 0.9468 -- yet the manifest cites this log for a \"6 passed\" claim, so the receipt contradicts the claim (the pure harness re-runs green, 6 passed, at the reviewed head)."
+    },
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: the comment cites a plan section number, a reference that rots when the plan is renumbered; a source comment must stand alone."
+    },
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "504",
+      "severity": "follow-on",
+      "text": "follow-on: the env var SSFMS_JEV_ARMS is named by the plan acronym rather than the capability it gates, so the knob is meaningless without the plan document."
+    },
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "151",
+      "severity": "follow-on",
+      "text": "follow-on: ndcg_at_k duplicates the graded-nDCG implementation at tests/tools/test_dd_path_search_rerank.py:72 rather than sharing an owner; no production metric module exists in imas_codex/."
+    }
+  ],
+  "follow_on_finding_count": 4,
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read sequentially from 78397b48f to 196d42191 -- 6e3b83550 extracts _rank_signals and adds the fixture and harness, 196d42191 adds TestRankSignals and the evidence fragment; every changed path is inside the declared scope.",
+    "done_when": "the done_when asks for mean nDCG@10, grade-3 precision@5, recall@30 and the zero-hit count per arm plus a seeded control, a graph run refusing each arm and naming its candidates, 11 draft beside the held-out, and a ranking function in _search_signals with test_search_tools passing; score_ranking/require_labelled assert the measure and goldens-graph-refusal.log (1 passed, five arms refuse) and search_tools_regression.log (106 passed, 8 skipped) record the claimed results, but the cited pure-harness log shows a failure.",
+    "goal": "the node goal is to build the signal-search golden harness over the fixture with the eleven draft questions added; tests/llm/test_signal_search_goldens.py builds the five-arm harness and tests/llm/fixtures/signal_search_questions.json now holds 11 draft beside 11 held-out questions (22 total), with the product arm's ranking extracted as _rank_signals (imas_codex/llm/search_tools.py:235).",
+    "manifest": "read; it names both of its shas, five changed paths, four test logs and the negative control, but its claim of \"pure harness 6 passed\" cites goldens-pure.log, which records 1 failed / 5 passed.",
+    "write_paths": "read the manifest's six declared paths; all five paths changed by the diff are inside them."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_search_tools.py:205 pins _rank_signals against independent constants and the refusal assertion at tests/llm/test_signal_search_goldens.py:466 is shown to redden by the recorded negative control.",
+    "evidence": "the graph-refusal (goldens-graph-refusal.log, 1 passed) and search_tools (search_tools_regression.log, 106 passed, 8 skipped) results are recorded as claimed, but goldens-pure.log records 1 failed / 5 passed at a revision before the fix while the manifest claims 6 passed.",
+    "fit": "the modules follow the surrounding llm-test idiom, but tests/llm/test_signal_search_goldens.py:57 cites a plan section and line 504 reads a plan-acronym env var.",
+    "goal_fidelity": "tests/llm/test_signal_search_goldens.py builds the five-arm harness and the fixture carries 11 draft beside 11 held-out questions, with _rank_signals (imas_codex/llm/search_tools.py:235) extracted as the product arm's ranking.",
+    "reuse": "_fusion_streams and _rerank_arm reuse rrf_fuse (imas_codex/standard_names/search.py:243) and rerank_pool (imas_codex/discovery/base/judgment.py:350), but ndcg_at_k (tests/llm/test_signal_search_goldens.py:151) re-implements the graded nDCG already implemented at tests/tools/test_dd_path_search_rerank.py:72.",
+    "scope_discipline": "the diff 78397b48f..196d42191 changes five paths, all inside the manifest's six declared write paths."
+  },
+  "limitations": [
+    "The graph refusal arm was not re-run (it needs a live database and the production embedding backend); its result is read from the reviewed run's own goldens-graph-refusal.log.",
+    "The pure harness was re-run once at the reviewed head (6 passed, 2 deselected) to settle the discrepancy between the manifest's claim and the cited log, and not re-run again.",
+    "The two Jev reranked arms are unscored here, as the reviewed node records: they are built only under SSFMS_JEV_ARMS=1."
+  ],
+  "node": "review-of-ssfms-golden-harness",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to build the signal-search golden harness over the fixture with the eleven draft questions added; tests/llm/test_signal_search_goldens.py builds the five-arm harness and tests/llm/fixtures/signal_search_questions.json now holds 11 draft beside 11 held-out questions (22 total), with the product arm's ranking extracted as _rank_signals (imas_codex/llm/search_tools.py:235).\nVERDICT done_when: the done_when asks for mean nDCG@10, grade-3 precision@5, recall@30 and the zero-hit count per arm plus a seeded control, a graph run refusing each arm and naming its candidates, 11 draft beside the held-out, and a ranking function in _search_signals with test_search_tools passing; score_ranking/require_labelled assert the measure and goldens-graph-refusal.log (1 passed, five arms refuse) and search_tools_regression.log (106 passed, 8 skipped) record the claimed results, but the cited pure-harness log shows a failure.\nVERDICT write_paths: read the manifest's six declared paths; all five paths changed by the diff are inside them.\nVERDICT manifest: read; it names both of its shas, five changed paths, four test logs and the negative control, but its claim of \"pure harness 6 passed\" cites goldens-pure.log, which records 1 failed / 5 passed.\nVERDICT diff: read sequentially from 78397b48f to 196d42191 -- 6e3b83550 extracts _rank_signals and adds the fixture and harness, 196d42191 adds TestRankSignals and the evidence fragment; every changed path is inside the declared scope.\nCALL_SITES: imas_codex/llm/search_tools.py:314 (_search_signals calls _rank_signals), imas_codex/llm/server.py:2436 (imports _search_signals)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/llm/test_signal_search_goldens.py builds the five-arm harness and the fixture carries 11 draft beside 11 held-out questions, with _rank_signals (imas_codex/llm/search_tools.py:235) extracted as the product arm's ranking.\nSCORE evidence: 14\nJUSTIFICATION evidence: the graph-refusal (goldens-graph-refusal.log, 1 passed) and search_tools (search_tools_regression.log, 106 passed, 8 skipped) results are recorded as claimed, but goldens-pure.log records 1 failed / 5 passed at a revision before the fix while the manifest claims 6 passed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff 78397b48f..196d42191 changes five paths, all inside the manifest's six declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/llm/test_search_tools.py:205 pins _rank_signals against independent constants and the refusal assertion at tests/llm/test_signal_search_goldens.py:466 is shown to redden by the recorded negative control.\nSCORE fit: 15\nJUSTIFICATION fit: the modules follow the surrounding llm-test idiom, but tests/llm/test_signal_search_goldens.py:57 cites a plan section and line 504 reads a plan-acronym env var.\nSCORE reuse: 12\nJUSTIFICATION reuse: _fusion_streams and _rerank_arm reuse rrf_fuse (imas_codex/standard_names/search.py:243) and rerank_pool (imas_codex/discovery/base/judgment.py:350), but ndcg_at_k (tests/llm/test_signal_search_goldens.py:151) re-implements the graded nDCG already implemented at tests/tools/test_dd_path_search_rerank.py:72.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T193647014017-ssfms-golden-harness/goldens-pure.log:1 follow-on: the log records \"1 failed, 5 passed\" -- test_a_fully_labelled_arm_is_scored_not_refused expected nDCG 1.0 at a revision before the assertion was corrected to 0.9468 -- yet the manifest cites this log for a \"6 passed\" claim, so the receipt contradicts the claim (the pure harness re-runs green, 6 passed, at the reviewed head).\nFINDING tests/llm/test_signal_search_goldens.py:57 follow-on: the comment cites a plan section number, a reference that rots when the plan is renumbered; a source comment must stand alone.\nFINDING tests/llm/test_signal_search_goldens.py:504 follow-on: the env var SSFMS_JEV_ARMS is named by the plan acronym rather than the capability it gates, so the knob is meaningless without the plan document.\nFINDING tests/llm/test_signal_search_goldens.py:151 follow-on: ndcg_at_k duplicates the graded-nDCG implementation at tests/tools/test_dd_path_search_rerank.py:72 rather than sharing an owner; no production metric module exists in imas_codex/.\nreviewed_base_sha: 78397b48fa5fecd168b37c01f1a13ddaab55329d\nreviewed_head_sha: 196d421911ab5ddb557a1e6b6016b6eb22525d14",
+  "review_run_id": "r-20261012T200754178970-review-of-ssfms-golden-harness",
+  "review_scope": "Independent review of the ssfms-golden-harness node (plan signal-search-finds-the-measured-signal section 3): the signal golden harness, the eleven draft questions, the _rank_signals extraction and the evidence fragment. Read-only, outside the reviewed worktree: the diff was read from the shared object store, the cited gate logs were opened, and the pure harness was re-run once against the reviewed head.",
+  "reviewed_base_sha": "78397b48fa5fecd168b37c01f1a13ddaab55329d",
+  "reviewed_commits": [
+    "6e3b83550",
+    "196d421911ab5ddb557a1e6b6016b6eb22525d14"
+  ],
+  "reviewed_head_sha": "196d421911ab5ddb557a1e6b6016b6eb22525d14",
+  "reviewed_run_id": "r-20261012T193647014017-ssfms-golden-harness",
+  "reviewer": "review-of-ssfms-golden-harness",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:18:06.694128+00:00",
+  "total": 97,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T200754178970-review-of-ssfms-golden-harness/reviewer-pure-rerun.log"
+  ]
+}

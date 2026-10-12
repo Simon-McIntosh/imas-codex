@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191">
 </head>
@@ -470,6 +470,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261012T2020-s3-harness" data-who="reckon-build" data-when="2026-10-12T20:20:00Z">
     <div class="r-comment-body"><p>Second of three nodes landed (merged in <code>488cc00ee</code>): <code>tests/llm/test_signal_search_goldens.py</code> scores the current tool, vector only, RRF and the two Jev reranks plus a seeded random control, and refuses any arm whose top 10 holds an unlabelled candidate. On the fixture as it stands every arm refuses, on 18 to 20 of 22 questions, and names its candidates. <code>_search_signals</code> now ranks through <code>_rank_signals</code>, moved without change, so later sections measure their own head. The fixture holds 22 questions, 11 held out. An independent test run at <code>196d42191</code> reproduced every gate, and the negative control fails the refusal test. Carried to the labelling node from the landing review: the table test skips rather than fails on an unlabelled candidate; there is no eligibility check against the cutover yet; the opt-in variable <code>SSFMS_JEV_ARMS</code> and a comment citing a plan section name the plan rather than the mechanism. <a href="/imas-codex/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-golden-harness.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261012T200754178970-review-of-ssfms-golden-harness" data-who="reckon-build" data-when="2026-10-12T20:18:31.236Z">
+    <div class="r-comment-body"><p>review of r-20261012T193647014017-ssfms-golden-harness stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261012T193647014017-ssfms-golden-harness.json (and the .at-196d421911ab5ddb557a1e6b6016b6eb22525d14.json sibling); scored six dimensions (goal_fidelity 18, evidence 14, scope_discipline 20, durability 18, fit 15, reuse 12; total 97), 0 blocking and 4 follow-on findings, read at base 78397b48f and head 196d42191.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261012T1958-s11-cutover" data-who="reckon-build" data-when="2026-10-12T19:58:00Z">
     <div class="r-comment-body"><p>Gate <code>g-ssfms-1</code> states its cutover as 2026-10-11T19:08:21Z, which is two hours early. The cutover is 2026-10-11T21:08:54Z, the start of the first run with <code>93bfb7e9d</code> loaded (§3 gives the derivation). Count JET re-enrichment against 21:08:54Z when closing the gate; reckon offers no op to rewrite a declared gate's measure.</p></div>
