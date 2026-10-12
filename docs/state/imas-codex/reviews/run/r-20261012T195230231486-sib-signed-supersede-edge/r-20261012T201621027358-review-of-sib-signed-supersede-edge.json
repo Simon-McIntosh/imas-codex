@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:8705"
+  ],
+  "completed_at": "2026-10-12T20:28:19.374Z",
+  "dispatched_at": "2026-10-12T20:16:31Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": "4140",
+      "severity": "follow-on",
+      "text": "the successor-edge postcondition reads RETURN relationship.receipt_id, count(relationship), which Cypher groups by receipt_id, so when a derived HAS_SUCCESSOR edge (receipt_id null) coexists with the signed one the result is two rows of count 1 and successor_edge[0] picks whichever comes first; the exactly-one-edge the commit claims is therefore not enforced against a derived twin, and only duplicates sharing the signed receipt id are caught. The done-when's absent-edge case is still refused deterministically because an empty MATCH yields an empty result."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-signed-supersede-edge.html",
+      "line": "40",
+      "severity": "follow-on",
+      "text": "the fragment cites the negative-control log as negative_control.log, but the retained log is logs/negative-control-edge-write-removed.log, so the citation resolves to no file and a reader cannot open the red run the fragment points at."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T195230231486-sib-signed-supersede-edge/manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "baseline_suite and after_suite record their command with the angle-bracket placeholder <19 SN files: tests/standard_names/test_*.py from gate_files.txt> instead of the literal command that ran, so the recorded gate cannot be re-run as written; the explicit file list survives only in the base log header and the after log's summary line (168 passed, EXIT=0) is the operative evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read 64ed55fd8 against base 18d19d73; one commit changing signed_manifest.py (a new _supersede_successor_edge_write fragment helper, its insertion into the supersede query, a successor-edge postcondition block, and the manifest_sha256 threaded through _verify_postconditions/_apply_mutation/_replay), the new 277-line test file, and the landing fragment.",
+    "done_when": "the done_when asks that a signed supersede in a test writes the receipt-stamped edge and that the test fails when the edge write is removed (logged with EXIT=), that the postcondition refuse a supersede whose edge is absent (test), and that the signed-manifest tests add no failure against base with baseline_suite and after_suite recorded; the manifest records after_suite 168 passed EXIT=0 against baseline_suite 166 passed EXIT=0, and negative-control-edge-write-removed.log records EXIT=1.",
+    "goal": "the node goal is for the signed supersede mutation to mint HAS_SUCCESSOR to its signed successor stamped with the minting receipt; imas_codex/standard_names/signed_manifest.py:2367 adds _supersede_successor_edge_write, and line 4781 inserts it into the existing supersede query, so the edge is minted inside the signed mutation, never a side write.",
+    "manifest": "read at the run directory; status complete, one landed revision 64ed55fd8, changed_paths listing the three declared files, test_logs naming the base, after, head and negative-control logs, and negative_control_log a bare path whose last line is EXIT=1.",
+    "write_paths": "the declared scope is imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_signed_supersede_edge.py and docs/evidence/fragments/sn-integrity-backlog/sib-signed-supersede-edge.html; every path in the diff is one of those three and no other file changes."
+  },
+  "justifications": {
+    "durability": "negative-control-edge-write-removed.log shows test_signed_supersede_mints_receipt_stamped_successor_edge reddens (EXIT=1) when _supersede_successor_edge_write returns empty, and test_supersede_postcondition_refuses_missing_successor_edge reddens if the successor-edge bound at signed_manifest.py:4146 were removed.",
+    "evidence": "the manifest's baseline_suite (166 passed, EXIT=0) and after_suite (168 passed, EXIT=0) and negative-control-edge-write-removed.log (EXIT=1, one failed, one passed) bound the gate the done_when names, though both suite command strings carry an angle-bracket placeholder at manifest.md:19-20 rather than the literal command.",
+    "fit": "the new helper at signed_manifest.py:2367 follows the sibling cypher-fragment builders (successor_update, source_path_update) and both test names describe behaviour with no plan or gate label.",
+    "goal_fidelity": "imas_codex/standard_names/signed_manifest.py:2367-2384 builds the MERGE that stamps the edge with receipt_id, and line 4781 runs it inside the same MATCH/SET query, satisfying the one-sentence deliverable.",
+    "reuse": "no owner of a receipt-stamped successor edge exists; the only other HAS_SUCCESSOR producer is the scalar-reading derivation in imas_codex.standard_names.graph_ops that the section leaves for a later node, and a capability search of signed_manifest.py's MERGE sites found only HAS_INTERNAL_CHANGE and HAS_STANDARD_NAME builders, no successor-edge writer to extend.",
+    "scope_discipline": "every path in the diff between base 18d19d73 and head 64ed55fd8 is one of the three declared write paths, and the signature changes stay inside signed_manifest.py."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is for the signed supersede mutation to mint HAS_SUCCESSOR to its signed successor stamped with the minting receipt; imas_codex/standard_names/signed_manifest.py:2367 adds _supersede_successor_edge_write, and line 4781 inserts it into the existing supersede query, so the edge is minted inside the signed mutation, never a side write.\nVERDICT done_when: the done_when asks that a signed supersede in a test writes the receipt-stamped edge and that the test fails when the edge write is removed (logged with EXIT=), that the postcondition refuse a supersede whose edge is absent (test), and that the signed-manifest tests add no failure against base with baseline_suite and after_suite recorded; the manifest records after_suite 168 passed EXIT=0 against baseline_suite 166 passed EXIT=0, and negative-control-edge-write-removed.log records EXIT=1.\nVERDICT write_paths: the declared scope is imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_signed_supersede_edge.py and docs/evidence/fragments/sn-integrity-backlog/sib-signed-supersede-edge.html; every path in the diff is one of those three and no other file changes.\nVERDICT manifest: read at the run directory; status complete, one landed revision 64ed55fd8, changed_paths listing the three declared files, test_logs naming the base, after, head and negative-control logs, and negative_control_log a bare path whose last line is EXIT=1.\nVERDICT diff: read 64ed55fd8 against base 18d19d73; one commit changing signed_manifest.py (a new _supersede_successor_edge_write fragment helper, its insertion into the supersede query, a successor-edge postcondition block, and the manifest_sha256 threaded through _verify_postconditions/_apply_mutation/_replay), the new 277-line test file, and the landing fragment.\nCALL_SITES: imas_codex/cli/sn.py:8705\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/signed_manifest.py:2367-2384 builds the MERGE that stamps the edge with receipt_id, and line 4781 runs it inside the same MATCH/SET query, satisfying the one-sentence deliverable.\nSCORE evidence: 17\nJUSTIFICATION evidence: the manifest's baseline_suite (166 passed, EXIT=0) and after_suite (168 passed, EXIT=0) and negative-control-edge-write-removed.log (EXIT=1, one failed, one passed) bound the gate the done_when names, though both suite command strings carry an angle-bracket placeholder at manifest.md:19-20 rather than the literal command.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff between base 18d19d73 and head 64ed55fd8 is one of the three declared write paths, and the signature changes stay inside signed_manifest.py.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control-edge-write-removed.log shows test_signed_supersede_mints_receipt_stamped_successor_edge reddens (EXIT=1) when _supersede_successor_edge_write returns empty, and test_supersede_postcondition_refuses_missing_successor_edge reddens if the successor-edge bound at signed_manifest.py:4146 were removed.\nSCORE fit: 18\nJUSTIFICATION fit: the new helper at signed_manifest.py:2367 follows the sibling cypher-fragment builders (successor_update, source_path_update) and both test names describe behaviour with no plan or gate label.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner of a receipt-stamped successor edge exists; the only other HAS_SUCCESSOR producer is the scalar-reading derivation in imas_codex.standard_names.graph_ops that the section leaves for a later node, and a capability search of signed_manifest.py's MERGE sites found only HAS_INTERNAL_CHANGE and HAS_STANDARD_NAME builders, no successor-edge writer to extend.\nFINDING imas_codex/standard_names/signed_manifest.py:4140 follow-on: the successor-edge postcondition reads RETURN relationship.receipt_id, count(relationship), which Cypher groups by receipt_id, so when a derived HAS_SUCCESSOR edge (receipt_id null) coexists with the signed one the result is two rows of count 1 and successor_edge[0] picks whichever comes first; the exactly-one-edge the commit claims is therefore not enforced against a derived twin, and only duplicates sharing the signed receipt id are caught. The done-when's absent-edge case is still refused deterministically because an empty MATCH yields an empty result.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-signed-supersede-edge.html:40 follow-on: the fragment cites the negative-control log as negative_control.log, but the retained log is logs/negative-control-edge-write-removed.log, so the citation resolves to no file and a reader cannot open the red run the fragment points at.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T195230231486-sib-signed-supersede-edge/manifest.md:19 follow-on: baseline_suite and after_suite record their command with the angle-bracket placeholder <19 SN files: tests/standard_names/test_*.py from gate_files.txt> instead of the literal command that ran, so the recorded gate cannot be re-run as written; the explicit file list survives only in the base log header and the after log's summary line (168 passed, EXIT=0) is the operative evidence.",
+  "review_run_id": "r-20261012T201621027358-review-of-sib-signed-supersede-edge",
+  "reviewed_base_sha": "18d19d7301110828d9ee31a428ca728a1b767703",
+  "reviewed_head_sha": "64ed55fd8c8c6bab59ea1da95227f81eb78f3037",
+  "reviewed_run_id": "r-20261012T195230231486-sib-signed-supersede-edge",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:27:02.076498+00:00",
+  "total": 112
+}
