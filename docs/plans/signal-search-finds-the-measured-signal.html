@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191">
 </head>
@@ -132,8 +132,8 @@
       800 JT-60SA signals enriched before the cutover among them, and pooled labelling would otherwise have to grade
       signals the eligibility check forbids. So before cutting an arm at <code>k</code>, the harness drops each candidate
       outside the population, and labels hold eligible signals only. An arm is neither credited nor refused for a signal
-      the golden set does not describe, and a signal that becomes eligible later enters the pool the next time an arm
-      places it in its top 10.
+      outside the eligible population. An eligible signal without a label still refuses the arm, and a signal that
+      becomes eligible later enters the pool the next time an arm places it in its top 10.
     </p>
     <p>
       Second, the questions. The eleven draft questions in <code>goldens_draft.json</code> are kept. At least six held-out
