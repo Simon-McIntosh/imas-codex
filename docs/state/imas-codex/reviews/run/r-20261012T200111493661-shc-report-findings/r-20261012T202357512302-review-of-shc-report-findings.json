@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6025",
+    "imas_codex/standard_names/harmonize.py:553",
+    "imas_codex/cli/sn.py:4132",
+    "imas_codex/standard_names/harmonize.py:413"
+  ],
+  "completed_at": "2026-10-12T20:37:51.354Z",
+  "dispatched_at": "2026-10-12T20:24:11Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/families.py",
+      "line": "716",
+      "severity": "follow-on",
+      "text": "fetch_pattern_families keeps the `gc: Any | None = None` default from harmonize.py but now dereferences it directly at families.py:736, so the omitted argument that harmonize.py resolved via _resolve_gc raises AttributeError; no production caller omits it, but the signature advertises a path the move removed."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_command.py",
+      "line": "255",
+      "severity": "follow-on",
+      "text": "the assertion `[row[\"lint_total\"] for row in rows] == [sum(row[\"lint\"].values()) for row in rows]` compares the report's own output to itself, and lint_total is built as the sum of lint values (harmonize.py:599, harmonize.py:628), so it holds whatever the attribution does and cannot catch the regression it appears to guard."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T200111493661-shc-report-findings/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "baseline_suite and after_suite record their command as the placeholder `<13 gate files>` rather than the literal command that ran, so the recorded gate cannot be re-run as written; the file list survives only in the gate-base.log and gate-after.log headers."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read c3d968453 against base 649795961 commit by commit; harmonize.py gains the domain attribution and drops the moved enumeration and its __all__ entry, families.py gains _family_member_collect/_pattern_family_rows_query/fetch_pattern_families, and the test, doc sentence and fragment change.",
+    "done_when": "the done-when asks for a domain-scoped test that reddens with the attribution removed, `def fetch_pattern_families` only in families.py, no `--families` in the architecture doc, and baseline_suite/after_suite recorded; both greps are empty (verified), negative-control.log ends EXIT=1, and the manifest records after_suite 136 passed EXIT=0 over base 135 passed EXIT=0.",
+    "goal": "the node goal is to close the four review findings left open on the read-only `sn harmonize` family report; imas_codex/standard_names/harmonize.py:560 now routes a `[domain:<d>]` lint finding to its families and harmonize.py:622-628 counts it once, and imas_codex/standard_names/families.py:715 owns the enumeration.",
+    "manifest": "read at the run directory; status complete, commits c3d968453 and 9ff90163, changed_paths matching the diff, negative_control_log a bare path; baseline_suite/after_suite carry revision, exit_status and completed:true, but their command field is the placeholder `<13 gate files>`.",
+    "write_paths": "the declared scope is harmonize.py, families.py, test_harmonize_command.py, test_pattern_families.py, docs/architecture/standard-names.md and the landing fragment; the diff touches five of those and no file outside them."
+  },
+  "justifications": {
+    "durability": "negative-control.log shows both a domain-attribution removal that reddens the guard, but families.py:716's moved signature and test_harmonize_command.py:255's tautological assertion are not covered by any failing case.",
+    "evidence": "the base arm is genuine \u2014 /tmp/reckon-crew-scratch/r-20261012T200111493661-shc-report-findings/base-arm/imas_codex/standard_names/harmonize.py has no `_domain_scoped_finding` \u2014 and negative-control.log ends EXIT=1 with the named test red.",
+    "fit": "the moved fetch_pattern_families follows the gc-direct idiom of families.py:736 beside fetch_pattern_family at families.py:605, and no plan or ticket label appears in the new symbols.",
+    "goal_fidelity": "harmonize.py:583-628 attributes a domain-scoped finding to every family in its domain and adds it to one owner row, and families.py:715 houses the moved enumeration, closing items 1-4 of the brief.",
+    "reuse": "the enumeration now extends families.py and is built on its _invariant_projection/_invariant_equality primitives (families.py:671), and a search found no other owner of the `[domain:` parse the new _domain_scoped_finding introduces.",
+    "scope_discipline": "every path in the diff (harmonize.py, families.py, test_harmonize_command.py, docs/architecture/standard-names.md, the fragment) is inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to close the four review findings left open on the read-only `sn harmonize` family report; imas_codex/standard_names/harmonize.py:560 now routes a `[domain:<d>]` lint finding to its families and harmonize.py:622-628 counts it once, and imas_codex/standard_names/families.py:715 owns the enumeration.\nVERDICT done_when: the done-when asks for a domain-scoped test that reddens with the attribution removed, `def fetch_pattern_families` only in families.py, no `--families` in the architecture doc, and baseline_suite/after_suite recorded; both greps are empty (verified), negative-control.log ends EXIT=1, and the manifest records after_suite 136 passed EXIT=0 over base 135 passed EXIT=0.\nVERDICT write_paths: the declared scope is harmonize.py, families.py, test_harmonize_command.py, test_pattern_families.py, docs/architecture/standard-names.md and the landing fragment; the diff touches five of those and no file outside them.\nVERDICT manifest: read at the run directory; status complete, commits c3d968453 and 9ff90163, changed_paths matching the diff, negative_control_log a bare path; baseline_suite/after_suite carry revision, exit_status and completed:true, but their command field is the placeholder `<13 gate files>`.\nVERDICT diff: read c3d968453 against base 649795961 commit by commit; harmonize.py gains the domain attribution and drops the moved enumeration and its __all__ entry, families.py gains _family_member_collect/_pattern_family_rows_query/fetch_pattern_families, and the test, doc sentence and fragment change.\nCALL_SITES: imas_codex/cli/sn.py:6025, imas_codex/standard_names/harmonize.py:553, imas_codex/cli/sn.py:4132, imas_codex/standard_names/harmonize.py:413\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: harmonize.py:583-628 attributes a domain-scoped finding to every family in its domain and adds it to one owner row, and families.py:715 houses the moved enumeration, closing items 1-4 of the brief.\nSCORE evidence: 18\nJUSTIFICATION evidence: the base arm is genuine \u2014 /tmp/reckon-crew-scratch/r-20261012T200111493661-shc-report-findings/base-arm/imas_codex/standard_names/harmonize.py has no `_domain_scoped_finding` \u2014 and negative-control.log ends EXIT=1 with the named test red.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff (harmonize.py, families.py, test_harmonize_command.py, docs/architecture/standard-names.md, the fragment) is inside the declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: negative-control.log shows both a domain-attribution removal that reddens the guard, but families.py:716's moved signature and test_harmonize_command.py:255's tautological assertion are not covered by any failing case.\nSCORE fit: 18\nJUSTIFICATION fit: the moved fetch_pattern_families follows the gc-direct idiom of families.py:736 beside fetch_pattern_family at families.py:605, and no plan or ticket label appears in the new symbols.\nSCORE reuse: 20\nJUSTIFICATION reuse: the enumeration now extends families.py and is built on its _invariant_projection/_invariant_equality primitives (families.py:671), and a search found no other owner of the `[domain:` parse the new _domain_scoped_finding introduces.\nFINDING imas_codex/standard_names/families.py:716 follow-on: fetch_pattern_families keeps the `gc: Any | None = None` default from harmonize.py but now dereferences it directly at families.py:736, so the omitted argument that harmonize.py resolved via _resolve_gc raises AttributeError; no production caller omits it, but the signature advertises a path the move removed.\nFINDING tests/standard_names/test_harmonize_command.py:255 follow-on: the assertion `[row[\"lint_total\"] for row in rows] == [sum(row[\"lint\"].values()) for row in rows]` compares the report's own output to itself, and lint_total is built as the sum of lint values (harmonize.py:599, harmonize.py:628), so it holds whatever the attribution does and cannot catch the regression it appears to guard.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T200111493661-shc-report-findings/manifest.md:21 follow-on: baseline_suite and after_suite record their command as the placeholder `<13 gate files>` rather than the literal command that ran, so the recorded gate cannot be re-run as written; the file list survives only in the gate-base.log and gate-after.log headers.\n",
+  "review_run_id": "r-20261012T202357512302-review-of-shc-report-findings",
+  "reviewed_base_sha": "649795961d11c230e60a049cc119b75c54aa1867",
+  "reviewed_head_sha": "9ff90163e2f72593c7b114342bd81552d4622e9c",
+  "reviewed_run_id": "r-20261012T200111493661-shc-report-findings",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:36:02.651575+00:00",
+  "total": 110
+}
