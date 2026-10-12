@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -82,11 +82,13 @@
       <code>imas_codex/standard_names/review/audits.py</code>: the lexical lint, the
       house-style findings of <code>sn-house-style</code> §4 and the documentation gates,
       composed by <code>run_all_audits</code>, plus link integrity
-      (<code>run_link_integrity</code>). The report calls that composition without the
-      embedding preflight, which writes, so <code>run_all_audits</code> and the report share
-      one function rather than two lists of calls. Families are enumerated through one
-      mechanism; <code>build_worklist</code> carries a second parentless grouping beside
-      <code>assemble_family</code>, and only one survives.
+      (<code>run_link_integrity</code>). <code>run_all_audits</code> always runs the
+      embedding preflight first, which re-embeds and writes, so the report cannot call it.
+      The lint composition moves into its own function in <code>audits.py</code>;
+      <code>run_all_audits</code> calls it after the preflight, and the report calls it
+      directly. There is then one list of lint calls, not two. Families are enumerated
+      through one mechanism: <code>build_worklist</code> carries a second parentless grouping
+      beside <code>assemble_family</code>, and only one survives.
     </p>
     <p>
       In the same change, delete <code>--families</code> from <code>sn run</code> and
@@ -97,8 +99,8 @@
       <code>mark_families_for_regen</code> (keyed on <code>HAS_PARENT</code>, the grouping
       §1 retires) and <code>lint_links</code> (a duplicate of
       <code>run_link_integrity</code> with no production caller) in
-      <code>harmonize.py</code>, and <code>build_worklist</code> unless the report is its
-      caller.
+      <code>harmonize.py</code>. <code>build_worklist</code> stays: <code>sn status</code>
+      calls it for its sibling-family drift count, so only its duplicate grouping goes.
     </p>
     <p>
       <strong>Done when:</strong> <code>sn harmonize --report --batch v0.4.0rc7+west-task-2e</code>
