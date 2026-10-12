@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -358,6 +358,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-10-12T20:58:00Z">
     <div class="r-comment-body"><p>§8 landed: one test per render site guards the conventions block (merge <code>c2d5c8417</code>); review 111/120. Its broad gate exposed six tests broken by §5's prompt changes, sectioned as §10. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s8">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261012T202300713648-shs-conventions-wiring" data-who="reckon-build" data-when="2026-10-12T20:46:38.524Z">
+    <div class="r-comment-body"><p>shs-conventions-wiring landed tests/standard_names/test_conventions_wiring.py — one test per documentation render site asserts the context passed to render_prompt carries the conventions selected for the item; each test fails with KeyError: &#x27;conventions&#x27; when its site&#x27;s key is removed in a scratch copy (4 of 4 controls red, EXIT=1), and the 113-file prompt/context gate adds no failure against base.</p></div>
 </div>
 </section>
 </main>
