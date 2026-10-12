@@ -33,10 +33,10 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Final
 
 from imas_codex.discovery.base.judgment import (
+    decide_one,
     decisions_key_absent_reason,
     decisions_key_present,
 )
-from imas_codex.discovery.base.llm import DecisionsValidationError, call_decisions
 from imas_codex.graph.dd_search import hybrid_dd_search, related_dd_search
 from imas_codex.ids.graph_ops import dd_path_lifecycles
 from imas_codex.models.constants import SearchMode
@@ -328,37 +328,6 @@ def _judgment_templates() -> dict[str, Any]:
     return json.loads(render_prompt("mapping/candidate_judgment", {}))
 
 
-def _call_judgment(
-    model: str,
-    state: Mapping[str, Any],
-    questions: Mapping[str, Any],
-    *,
-    service: str,
-    step: str,
-    cost: PipelineCost | None = None,
-) -> dict[str, Any] | None:
-    """Run one decisions call, returning ``None`` when the transport fails.
-
-    A malformed answer (a :class:`DecisionsValidationError`) is raised, not
-    swallowed: it is a deterministic contract violation to reject, never a
-    reason to leave a source silently unjudged. Any other failure returns
-    ``None`` so the source is neither selected nor rejected and can be retried.
-
-    The transport's reported ``usage.cost`` is added to ``cost`` under ``step``
-    when a tracker is passed, the way the map pipeline's ``_acall_llm`` does.
-    """
-    try:
-        answers, spent = call_decisions(model, state, questions, service=service)
-    except DecisionsValidationError:
-        raise
-    except Exception as exc:  # noqa: BLE001 - fail closed on any transport fault
-        logger.warning("candidate decisions call failed: %s", exc)
-        return None
-    if cost is not None:
-        cost.add(step, spent, 0)
-    return answers
-
-
 def _ids_criteria(gc: GraphClient) -> dict[str, str]:
     """Every IDS id keyed to its one-line description, drawn from the graph."""
     rows = gc.query(
@@ -401,7 +370,7 @@ def route_ids(
     routing["criteria"] = criteria
     resolved_model = model or get_model("mapping-candidates")
     state = {"signal_source": {"description": description}}
-    answers = _call_judgment(
+    answers = decide_one(
         resolved_model,
         state,
         {"ids_routing": routing},
@@ -486,7 +455,7 @@ def judge_candidates(
         }
     resolved_model = model or get_model("mapping-candidates")
     state = _judgment_state(source, facility, candidates)
-    answers = _call_judgment(
+    answers = decide_one(
         resolved_model,
         state,
         questions,

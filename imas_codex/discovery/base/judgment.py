@@ -4,7 +4,8 @@
 endpoint under one concurrency bound and one wall-time budget. It is the
 single loop the judge-and-apply callers build on, so the retry policy, the
 concurrency limit and the budget live in one place rather than being repeated
-per feature.
+per feature. :func:`decide_one` is the synchronous single-state counterpart for
+a caller that judges one item and needs its answer now.
 
 A decision state is the ``state`` object the decisions endpoint takes (the
 judgement context). Results come back positionally, so a caller can re-attach
@@ -22,7 +23,12 @@ import logging
 from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
-from imas_codex.discovery.base.llm import acall_decisions, get_api_key
+from imas_codex.discovery.base.llm import (
+    DecisionsValidationError,
+    acall_decisions,
+    call_decisions,
+    get_api_key,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +40,64 @@ JudgedRow = tuple[Mapping[str, Any], dict[str, Any], float]
 # The decisions endpoint is asked for at most this many judgements at once,
 # matching the triage worker's own bound.
 _DEFAULT_CONCURRENCY = 8
+
+# Pipeline-cost step a decision books to when the caller names no other.
+DEFAULT_COST_STEP = "decision"
+
+
+def _book_cost(cost: Any | None, step: str, spent: float) -> None:
+    """Add one call's reported USD cost to a caller's tracker.
+
+    Every decisions call this module makes reports its own cost; this is the
+    single place that turns one into a tracker entry, so a caller cannot
+    silently drop the spend and the two entry points below cannot drift in how
+    they book it. A ``None`` tracker is a caller that does not accumulate cost.
+    """
+    if cost is not None:
+        cost.add(step, spent, 0)
+
+
+def decide_one(
+    model: str,
+    state: Mapping[str, Any],
+    questions: Mapping[str, Any],
+    *,
+    service: str,
+    cost: Any | None = None,
+    step: str = DEFAULT_COST_STEP,
+) -> dict[str, Any] | None:
+    """Judge a single state, returning ``None`` when the call itself fails.
+
+    The synchronous single-state counterpart of :func:`decide_batch` for a
+    caller that judges one item and needs its answer now. It differs from the
+    batch in one deliberate way: a malformed answer raises
+    :class:`DecisionsValidationError` rather than being swallowed, because a
+    contract violation is deterministic and must be rejected, never mistaken
+    for a retryable transport fault. Any other failure returns ``None``, so a
+    caller that ranks rather than gates leaves the item unjudged for a retry.
+
+    Args:
+        model: Decisions model id.
+        state: The one judgement context.
+        questions: Question definitions keyed by question name.
+        service: Service tag for the API key and the ``X-Title`` header.
+        cost: Optional run cost tracker; the call's reported cost is booked to
+            it under ``step``.
+        step: Pipeline-cost step name the reported cost is booked to.
+
+    Returns:
+        The validated answers keyed by question name, or ``None`` when the
+        transport failed.
+    """
+    try:
+        answers, spent = call_decisions(model, state, questions, service=service)
+    except DecisionsValidationError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - a failed judgement is data
+        logger.warning("decision call failed: %s", exc)
+        return None
+    _book_cost(cost, step, spent)
+    return answers
 
 
 def decisions_key_present() -> bool:
@@ -74,6 +138,8 @@ async def decide_batch(
     service: str,
     concurrency: int = _DEFAULT_CONCURRENCY,
     budget_seconds: float | None = None,
+    cost: Any | None = None,
+    step: str = DEFAULT_COST_STEP,
 ) -> tuple[list[DecisionResult | None], float]:
     """Judge a batch of states under a concurrency bound and a wall-time budget.
 
@@ -92,6 +158,9 @@ async def decide_batch(
         concurrency: Maximum calls in flight at once.
         budget_seconds: Wall-time budget for the batch; ``None`` waits for
             every call.
+        cost: Optional run cost tracker; the batch's summed reported cost is
+            booked to it under ``step``.
+        step: Pipeline-cost step name the reported cost is booked to.
 
     Returns:
         ``(results, total_cost)`` — ``results[i]`` is ``(answers, cost)`` for
@@ -118,18 +187,19 @@ async def decide_batch(
         if task not in done:
             continue
         try:
-            answers, cost = task.result()
+            answers, spent = task.result()
         except Exception as exc:  # noqa: BLE001 - a failed judgement is data
             logger.warning("decision batch item %d failed: %s", index, exc)
             continue
-        results[index] = (answers, cost)
-        total_cost += cost
+        results[index] = (answers, spent)
+        total_cost += spent
 
     for task in pending:
         task.cancel()
     if pending:
         await asyncio.gather(*pending, return_exceptions=True)
 
+    _book_cost(cost, step, total_cost)
     return results, total_cost
 
 

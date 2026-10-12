@@ -17,10 +17,11 @@ import pytest
 
 from imas_codex.discovery.base import judgment
 
-
-@pytest.fixture(autouse=True)
-def _decisions_key(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+# The decision core skips its calls when the decisions key is absent, so every
+# test here that measures an ordering or a booking requests the shared key
+# fixture rather than measuring the skip. It lives in tests/conftest.py so the
+# candidate-judgment suite shares one copy.
+pytestmark = pytest.mark.usefixtures("_decisions_key")
 
 
 QUESTIONS = {
@@ -244,23 +245,54 @@ async def test_rerank_pool_of_nothing_returns_nothing():
     assert cost == 0.0
 
 
-def test_judgment_imports_nothing_from_the_llm_package():
-    """The discovery core must not depend on the search-side llm package."""
-    import ast
-    import pathlib
+_IMPORT_BLOCK_PROGRAM = """\
+import importlib.abc
+import sys
 
-    tree = ast.parse(pathlib.Path(judgment.__file__).read_text())
-    modules: list[str] = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            modules.extend(alias.name for alias in node.names)
-        elif isinstance(node, ast.ImportFrom):
-            modules.append(node.module or "")
-    assert not [
-        module
-        for module in modules
-        if module == "imas_codex.llm" or module.startswith("imas_codex.llm.")
-    ], modules
+
+class _ForbidSearchLlm(importlib.abc.MetaPathFinder):
+    def find_spec(self, name, path=None, target=None):
+        if name == "imas_codex.llm" or name.startswith("imas_codex.llm."):
+            raise ImportError("forbidden search-side package reached: " + name)
+        return None
+
+
+sys.meta_path.insert(0, _ForbidSearchLlm())
+__import__("__TARGET__")
+"""
+
+
+def _import_under_block(target: str):
+    """Import ``target`` in a fresh interpreter that refuses imas_codex.llm."""
+    import subprocess
+    import sys
+
+    repo_root = str(judgment.__file__).rsplit("/imas_codex/", 1)[0]
+    return subprocess.run(
+        [sys.executable, "-c", _IMPORT_BLOCK_PROGRAM.replace("__TARGET__", target)],
+        capture_output=True,
+        text=True,
+        cwd=repo_root,
+    )
+
+
+def test_judgment_imports_nothing_from_the_search_llm_package():
+    """The discovery core must not depend on the search-side llm package.
+
+    The guard is behavioural: a fresh interpreter installs an import hook that
+    raises on ``imas_codex.llm`` and then imports the judgment module. A module
+    that reached the package through any import — direct or a re-export — makes
+    that interpreter fail, which the source-text check this replaced could not
+    see. The second run is the control: the hook refuses a package that does
+    reach ``imas_codex.llm``, so a clean first run means absence, not a hook
+    that never fires.
+    """
+    result = _import_under_block("imas_codex.discovery.base.judgment")
+    assert result.returncode == 0, result.stderr
+
+    control = _import_under_block("imas_codex.llm.search_tools")
+    assert control.returncode != 0
+    assert "forbidden search-side package reached" in control.stderr
 
 
 async def test_judge_rows_applies_only_answers_and_returns_reported_cost(monkeypatch):

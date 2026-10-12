@@ -31,10 +31,11 @@ from imas_codex.settings import RouteThresholds, get_mapping_route_thresholds
 MODEL = "typesafe/jev-1.13"
 COST = 2.0e-4
 
-
-@pytest.fixture(autouse=True)
-def _decisions_key(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+# The candidate stage skips its decisions calls when the key is absent, so every
+# test here that measures an answer or a booking requests the shared key
+# fixture. It lives in tests/conftest.py so the judgment-core suite shares one
+# copy.
+pytestmark = pytest.mark.usefixtures("_decisions_key")
 
 
 class _FakeResponse:

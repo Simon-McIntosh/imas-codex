@@ -7,8 +7,6 @@ live Neo4j or a real encoder.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 import pytest
 
@@ -301,6 +299,13 @@ def test_section_prompt_lists_candidate_edge_dicts(monkeypatch):
 
 
 def test_mapping_module_no_longer_imports_cluster_searcher():
+    """The mapping module no longer reaches the retired cluster searcher.
+
+    Behavioural rather than a source-text scan: importing the module and
+    inspecting its namespace shows the symbol is bound nowhere in it, which a
+    re-export or an ``import ... as`` would surface and a text search of the
+    one file would not.
+    """
     import imas_codex.ids.mapping as mapping
 
-    assert "ClusterSearcher" not in Path(mapping.__file__).read_text()
+    assert not hasattr(mapping, "ClusterSearcher")

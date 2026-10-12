@@ -1,0 +1,83 @@
+<!-- Landing record for the candidate-stage decisions ownership move, 2026-10-12.
+     Node sje-decisions-owner. Base revision 427d872afc96eab56f250d54437bd66d6abde0a0.
+     Commit 428878833. Gate: 800 passed, 13 skipped, 1 pre-existing failure. -->
+<section id="sje-decisions-owner" data-reckon="evidence">
+  <h2 id="sje-decisions-owner-heading">Candidate decisions now travel the shared judgment owner</h2>
+
+  <p id="sje-decisions-owner-summary">
+    The candidate stage carried its own private decisions wrapper
+    (<code>_call_judgment</code>). It duplicated what the shared discovery
+    judgment owner already does — the sync transport call, the fail-closed rule
+    for a malformed answer, and the booking of the transport's reported
+    <code>usage.cost</code> into a <code>PipelineCost</code>. The wrapper is
+    deleted; <code>route_ids</code> and <code>judge_candidates</code> now call
+    <code>judgment.decide_one</code>. Which questions the stage asks, its model
+    and its thresholds are untouched — this is an ownership move, not a
+    behaviour change.
+  </p>
+
+  <p id="sje-decisions-owner-topology">
+    <img src="/imas-codex/figures/sn-judgment-evaluation/sje-decisions-owner/decisions-call-topology.svg"
+         alt="Before: the candidate stage carried a private _call_judgment that duplicated transport handling and cost booking. After: route_ids and judge_candidates call judgment.decide_one, which shares the transport handling with decide_batch and books spend through one _book_cost helper into PipelineCost."/>
+  </p>
+
+  <p id="sje-decisions-owner-decide-one">
+    <code>decide_one</code> is the synchronous single-state entry point beside
+    the asynchronous <code>decide_batch</code>. It shares the transport but
+    deliberately not the batch's fail-soft rule: a malformed answer raises
+    <code>DecisionsValidationError</code> to the single-state caller, because a
+    contract violation is deterministic and must be rejected, while any other
+    transport fault returns <code>None</code> so the item is left unjudged and
+    can be retried. <code>decide_batch</code>'s own batch behaviour is
+    unchanged. The reported cost is booked in one place
+    (<code>_book_cost</code>), so the two entry points cannot drift in how they
+    record spend.
+  </p>
+
+  <p id="sje-decisions-owner-seat">
+    A <code>[tool.imas-codex.sn-judge]</code> seat (model
+    <code>typesafe/jev-1.13</code>) sits beside the discovery-relevance and
+    mapping-candidates seats, so the standard-names judgment model resolves
+    through <code>get_model("sn-judge")</code> independently of the other
+    stages.
+  </p>
+
+  <h3 id="sje-decisions-owner-gates-heading">Gates</h3>
+
+  <p id="sje-decisions-owner-gates">
+    The gate covers <code>tests/ids</code>, the judgment-core suite, the
+    decisions-key skip suite, and the two files that import the touched code.
+    At the base revision that same gate carries one failure,
+    <code>TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping</code>,
+    a signature mismatch between <code>_run_rich_mode</code> and its test that
+    predates this work (the base has no <code>no_activate</code> parameter and
+    the base test passes one). After the change the gate is 800 passed, 13
+    skipped, 1 failed — that same pre-existing failure, no new failures.
+  </p>
+
+  <h3 id="sje-decisions-owner-negative-control-heading">Negative control</h3>
+
+  <p id="sje-decisions-owner-negative-control">
+    Removing the shared owner's cost-booking line
+    (<code>_book_cost</code>'s <code>cost.add(step, spent, 0)</code>) turns the
+    two candidate spend assertions red:
+    <code>test_judge_candidates_adds_reported_cost_to_the_pipeline_cost</code>
+    fails with <code>KeyError: 'candidate_judgment'</code> and
+    <code>test_route_ids_adds_reported_cost_to_the_pipeline_cost</code> with
+    <code>KeyError: 'candidate_route'</code> — exit 1, both red. The source was
+    restored afterwards and the assertions pass again.
+  </p>
+
+  <h3 id="sje-decisions-owner-scope-heading">Scope note</h3>
+
+  <p id="sje-decisions-owner-scope">
+    Two files changed outside the declared write paths, both as an unavoidable
+    consequence of the move. <code>imas_codex/settings.py</code> gains the
+    <code>sn-judge</code> seat entry — the seat cannot resolve without it, and
+    the write scope named only <code>pyproject.toml</code>. And
+    <code>tests/discovery/test_decisions_key_skip.py</code> patched the removed
+    module-level <code>candidates.call_decisions</code>; it now patches the same
+    sync transport where it lives, <code>judgment.call_decisions</code>, with
+    its assertions unchanged.
+  </p>
+</section>

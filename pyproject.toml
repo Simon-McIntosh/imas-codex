@@ -443,6 +443,15 @@ model = "typesafe/jev-1.13"
 # decisions call layer; cost is read from the response usage.
 model = "typesafe/jev-1.13"
 
+[tool.imas-codex.sn-judge]
+# Standard-name judgements — name and documentation review, family and
+# docs-context decisions — through the same OpenRouter alpha decisions
+# endpoint. Its own seat so the standard-names stage's model changes
+# independently of the discovery and mapping seats. Called directly by the
+# decisions call layer; cost is read from the response usage. The service tag
+# is the runtime ``service`` argument of the call, not a key here.
+model = "typesafe/jev-1.13"
+
 [tool.imas-codex.cluster-labels]
 # Cluster labelling. Keeps the OpenRouter model so nothing outside discovery
 # changes model. batch-size is the clusters-per-LLM-call setting that

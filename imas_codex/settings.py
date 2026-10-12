@@ -147,6 +147,7 @@ MODEL_SECTIONS = frozenset(
         "discovery-vision",
         "discovery-relevance",
         "mapping-candidates",
+        "sn-judge",
         "cluster-labels",
         "ids-mapping",
         "agent",
@@ -183,6 +184,10 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # same decisions endpoint. Its own seat so the candidate stage's model
     # changes independently of the code-relevance seat.
     "mapping-candidates": "typesafe/jev-1.13",
+    # Standard-name judgements through the same decisions endpoint. Its own
+    # seat so the standard-names stage's model changes independently of the
+    # discovery and mapping seats.
+    "sn-judge": "typesafe/jev-1.13",
     "cluster-labels": "openrouter/openai/gpt-5.4",
     "ids-mapping": "openrouter/openai/gpt-5.4",
     "agent": "openrouter/anthropic/claude-sonnet-4.6",
