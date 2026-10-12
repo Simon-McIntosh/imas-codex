@@ -20,13 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
   <meta name="plan-blocks" content="sn-review-through-jev,sn-selection-over-generation,sn-catalog-grouping">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-10-12">
-<meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2">
+<meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2,e000241de910e5a4d0d21825593e12ecd6934ec5,d7e3860a7c6e85a5fbfde1103dc0bded5af7203e,77815e0ea71be4c94a0dd52d386dc0987045dc9b">
 </head>
 <body>
   <main class="plan-doc">
@@ -254,7 +254,7 @@
     </p>
 
     <h2 id="s6">§6 — A shadow store, read by no gate</h2>
-    <section data-reckon="section" data-id="s6" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s6" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Jev answers are stored beside the incumbent's, in the convention the facility schema
       already uses: each value <code>X</code>, its distribution <code>X_probs</code>, its
@@ -343,6 +343,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T155037257528-sje-shadow-write" data-who="reckon-build" data-when="2026-10-12T16:05:13Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-judgment-evaluation/sje-shadow-write.html — shadow fields persist with null score; 362 passed, 1 deselected, zero added failures; writer and accept mutations each fail their target test.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-12T16:20:00Z">
+    <div class="r-comment-body"><p>§6 landed: Jev shadow judgments persist on <code>StandardNameReview</code> beside the incumbent's, never canonical, no score, read by no accept, refine or export path (merge <code>48b16079b</code>); round-trip and accept controls fail as intended; reviews 96/120 and 100/120. <a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s6">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-12T15:55:00Z">
     <div class="r-comment-body"><p>§2 landed: candidates route through <code>decide_one</code> in the shared owner with one cost-booking helper (commit <code>428878833</code>); the booking control reddens both spend assertions; <code>sn-judge</code> resolves; review 96/120, no added failures. Follow-on: share one per-call unit between <code>decide_one</code> and <code>decide_batch</code>. <a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s2">evidence</a></p></div>
