@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T22:06:45.543Z",
+  "dispatched_at": "2026-10-12T21:55:20Z",
+  "findings": [],
+  "plan_fingerprint": "8dd93dd7ea4f3466455c5bbcef68d3f7072f1a16997fdd2607b96b50a4ec204d",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 23,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T215506547402-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "fd1187c91cc2f0c1fd1b3d2c93bd87dc81f4b620",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every \u00a74 anchor resolves: `RRF_K = 60` at `imas_codex/standard_names/search.py:40` and `rrf_fuse` at `:243`; the additive rule at `search_tools.py:261` (inside `_rank_signals`), `:936` (inside `_search_docs`), `:1688` (inside `_search_code`) and `ids/slot_context.py:70` (inside `_hybrid_ids`); the code-example boost `max(scores[cid], ex_score) + 0.05` at `search_tools.py:1699`; `_find_signals_semantic` at `imas_codex/graph/domain_queries.py:116`, building the same `facility_id`-prefiltered query as `_vector_search_signals`; `hybrid_dd_search` at `imas_codex/graph/dd_search.py:97` with its 0\u20131 BM25 normalisation at `imas_codex/tools/graph_search.py:2398`; `SearchService` has no production constructor; `queries.json` (18 questions, 12 code + 6 docs, all JT-60SA) and `labels.json` exist in the search-rerank-prototype directory; and `discovery-judgments-through-jev` \u00a713 places the four code and docs answers at ranks 159 to 181.",
+    "done_when": "pass \u2014 \u00a74's done-when names a negative control (\"the old rule must fail the same test\") beside the vector-vs-BM25 ordering test, and each bullet (signal win over the additive arm, docs/code nDCG within 0.02 of 0.4821, no facility name in the fusion or ranking code) can fail.",
+    "evidence_paths": "pass \u2014 \u00a74 is measured by \u00a73's harness, whose table and labelling log land at `docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html`, and \u00a74's docs/code regression is read from `docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html`; neither is a scratchpad or node-local path.",
+    "naming": "pass \u2014 \u00a74 introduces `imas_codex/search/fusion.py`, `rrf_fuse` and `RRF_K`, none carrying a plan label, stage name, ticket number or version tag.",
+    "reasoning": "pass \u2014 \u00a74's root cause matches its cited evidence (a raw BM25 of 5\u201314 added to a cosine that never exceeds 1 lets every keyword match outrank every semantic match, per \u00a71's table); its mechanism (RRF over a 100/50 over-fetch, one owned vector query) produces its done-when; and every mechanism names its production caller \u2014 `_search_signals` calls `_rank_signals` at `search_tools.py:314`, and the docs/code tools rerank after fusing at `:991` and `:1722`.",
+    "single_goal": "pass \u2014 \u00a74 carries one deliverable: replace the additive rule at the four sites and move `rrf_fuse`/`RRF_K` into one shared module.",
+    "wiring": "pass \u2014 the followup orders \u00a73 first, \u00a74 and \u00a75 after it in parallel, and \u00a77 after \u00a74, which matches \u00a74's dependence on \u00a73's pooled labels and frozen additive arm."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "678697cd4ae9726258304fb4f6cd0fa2b12cb6b3f19b3b34a052fffb3c46c8fc",
+    "s4": "ff798997815d5f566c82571e887c792ba4db14c9b54cd6306c43a26e35044551",
+    "s5": "9f6594283f98a811b1794c48076bd0ed700209a4aebc66b9ee23e49988c77d6c",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:07:39.835152+00:00"
+}
