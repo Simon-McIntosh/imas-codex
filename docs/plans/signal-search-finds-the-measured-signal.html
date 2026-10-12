@@ -18,13 +18,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="34">
 <meta name="plan-modified" content="2026-10-13">
-<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69">
+<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf">
 </head>
 <body>
   <main class="plan-doc">
@@ -111,7 +111,7 @@
     </table>
 
     <h2 id="s3">§3 — A golden set any facility can join</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       This section builds the instrument every later section is judged by. It has four parts. The first is
       eligibility. A signal enters the golden set only after the Jev-era signal pipeline has enriched it. That pipeline
@@ -181,7 +181,10 @@
       change in behaviour. The other arms live in the harness. The additive rule among them is frozen there, as its own
       arm beside the product arm, so the baseline survives §4 rewriting the product ranking. The prototype did not keep its role-aware question text, so write it from §7's five
       levels and keep it in the harness; §7 moves it into the product beside <code>_RERANK_QUESTION</code>. The random
-      control is a seeded permutation of each question's labelled pool.
+      control is a seeded permutation of each question's labelled pool. The live graph moves between runs: two runs
+      minutes apart moved the tool arms, which cut at 30, by up to 0.012 mean nDCG@10, while the pool-100 arms did not
+      move. A later section comparing its head with its base runs the two back to back and treats a difference inside
+      that spread as no change.
     </p>
     <p>
       <strong>Done when</strong> the fixture holds at least seventeen questions, six of them held out. The harness refuses to
@@ -237,7 +240,7 @@
       The section is two nodes. The first writes the fusion: the shared module, the four call sites, one owner for the
       signal vector query, and the two unit tests. The second measures it: the signal harness at the first node's head
       against the frozen additive-rule arm, labelling any eligible candidate the fused tool lifts into a top 10 under
-      §3's rule, and the docs and code question set at pool 60, which spends Jev on their rerank. Its table goes in
+      §3's rule, and the docs and code question set at pool 60, which spends Jev on their rerank and so runs as a measurement outside pytest, as §7's does. Its table goes in
       <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/fusion.html</code>.
     </p>
     <p>
@@ -282,7 +285,8 @@
     </p>
     <p>
       <strong>Done when</strong> a census over all FacilitySignal nodes finds none whose <code>embedded_text_hash</code>
-      differs from the hash of its current embed text. A test shows that an individualisation write re-embeds, and the
+      is missing or differs from the hash of its current embed text. A missing hash counts as a mismatch, so the census
+      cannot pass by comparing against nulls. A test shows that an individualisation write re-embeds, and the
       same test fails against the current writer. The harness on the head of this section is no lower than on the revision the section
       was dispatched from, so the comparison holds whether §4 has landed or not.
     </p>
@@ -525,7 +529,10 @@
     <div class="r-comment-body"><p>review record stored at both fenced paths; reviewed_run_id r-20261012T201857058094-ssfms-pooled-labels, reviewed_base_sha 75a6127f4f5b8a2979ec4b84b2e907371aac6916, reviewed_head_sha 44792accfae6f7423618619b696559e2312a0736; all six items verdicted, all six dimensions scored 0..20 and summed 95, four follow-on findings, CALL_SITES none.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261012T201857058094-ssfms-pooled-labels" data-who="reckon-build" data-when="2026-10-12T22:36:45.125Z">
-    <div class="r-comment-body"><p>signal-search-finds-the-measured-signal §3 closed on four arms and the control — current_tool, additive_rule (the product&#x27;s additive rule frozen in the harness and pinned equal to current_tool on every question), vector_only and rrf, each scored on the eligible population of 14312 signals with every arm above the seeded control on mean nDCG@10, and the two Jev rerank arms moved to a measurement outside pytest so no test reaches the paid decisions endpoint.</p></div>
+    <div class="r-comment-body"><p>signal-search-finds-the-measured-signal §3 closed on four arms and the control — current_tool, additive_rule (the product's additive rule frozen in the harness and pinned equal to current_tool on every question), vector_only and rrf, each scored on the eligible population of 14312 signals with every arm above the seeded control on mean nDCG@10, and the two Jev rerank arms moved to a measurement outside pytest so no test reaches the paid decisions endpoint.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-12T23:15:00Z">
+    <div class="r-comment-body"><p>§3 landed (final merge <code>12a6d84e6</code>): 22 questions, 11 held out, 1,551 eligible labels; on mean nDCG@10 RRF scores 0.796, vector only 0.685, the current tool and the frozen additive rule 0.563, and the random control 0.522. Every arm is scored on the eligible population and refuses on an unlabelled candidate. The rerank arms moved to §7. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s3">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261012T1958-s11-cutover" data-who="reckon-build" data-when="2026-10-12T19:58:00Z">
     <div class="r-comment-body"><p>Gate <code>g-ssfms-1</code> states its cutover as 2026-10-11T19:08:21Z, which is two hours early. The cutover is 2026-10-11T21:08:54Z, the start of the first run with <code>93bfb7e9d</code> loaded (§3 gives the derivation). Count JET re-enrichment against 21:08:54Z when closing the gate; reckon offers no op to rewrite a declared gate's measure.</p></div>
