@@ -5932,6 +5932,31 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
     help="Report mode (the default and, for now, the only mode).",
 )
 @click.option(
+    "--apply",
+    "apply_mode",
+    is_flag=True,
+    default=False,
+    help=(
+        "Run the anchor-gated apply: drain each family's anchor first, then "
+        "its members, halting a family whose anchor does not converge."
+    ),
+)
+@click.option(
+    "--dry-run",
+    "dry_run",
+    is_flag=True,
+    help="With --apply: print the planned calls and estimated cost, write nothing.",
+)
+@click.option(
+    "-c",
+    "--cost-limit",
+    "cost_limit",
+    type=float,
+    default=10.0,
+    show_default=True,
+    help="With --apply: per-family drain cost cap in USD.",
+)
+@click.option(
     "--json",
     "as_json",
     is_flag=True,
@@ -5945,6 +5970,9 @@ def sn_harmonize(
     all_families: bool,
     min_size: int,
     report_mode: bool,
+    apply_mode: bool,
+    dry_run: bool,
+    cost_limit: float,
     as_json: bool,
 ) -> None:
     """Read-only pattern-family harmonization report.
@@ -6020,6 +6048,96 @@ def sn_harmonize(
         seeds = family_ids
     else:
         seeds = None  # --all
+
+    if apply_mode:
+        from imas_codex.standard_names.campaign import CampaignBudget
+        from imas_codex.standard_names.harmonize import (
+            ESTIMATED_DOC_CALL_COST_USD,
+            apply_families,
+            plan_family_applies,
+        )
+
+        with GraphClient() as gc:
+            plans = plan_family_applies(gc, seeds=seeds, min_size=min_size)
+
+            if dry_run:
+                total_calls = sum(p["planned_calls"] for p in plans)
+                for plan in plans:
+                    console.print(
+                        f"family {plan['physical_base']}  "
+                        f"decision={plan['decision']}  "
+                        f"anchor={plan['anchor'] or '—'}  "
+                        f"members={plan['n']}  calls={plan['planned_calls']}"
+                    )
+                console.print(
+                    f"[green]Dry run[/green]: {len(plans)} family(ies), "
+                    f"{total_calls} planned call(s), estimated cost "
+                    f"${total_calls * ESTIMATED_DOC_CALL_COST_USD:.2f}. Wrote nothing."
+                )
+                return
+
+            def _harmonize_drain(run_id: str, batch_cost_cap: float) -> float | None:
+                row = _run_sn_cmd(
+                    cost_limit=batch_cost_cap,
+                    per_domain_limit=None,
+                    dry_run=False,
+                    quiet=False,
+                    skip_generate=True,
+                    docs_only=True,
+                    flush=True,
+                    source="dd",
+                    scope_run_id=run_id,
+                )
+                if row is None:
+                    return None
+                cost = row.get("cost_spent")
+                return float(cost) if cost is not None else None
+
+            outcome = apply_families(
+                gc,
+                seeds=seeds,
+                min_size=min_size,
+                drain_fn=_harmonize_drain,
+                plan=plans,
+                budget=CampaignBudget(
+                    per_batch_cost_cap=cost_limit,
+                    campaign_cost_ceiling=cost_limit,
+                ),
+            )
+
+        if as_json:
+            summary = [
+                {k: v for k, v in entry.items() if k != "result"}
+                for entry in outcome["applied"]
+            ]
+            for entry, applied in zip(summary, outcome["applied"], strict=True):
+                result = applied.get("result")
+                if result is not None:
+                    entry["result"] = result.summary()
+            console.print(
+                json.dumps(summary, sort_keys=True), soft_wrap=True, markup=False
+            )
+            return
+
+        applied_n = sum(1 for e in outcome["applied"] if e["applied"])
+        stamped_n = sum(1 for e in outcome["applied"] if e["stamped"])
+        for entry in outcome["applied"]:
+            result = entry.get("result")
+            if result is None:
+                console.print(
+                    f"family {entry['physical_base']}  {entry['decision']}  (no apply)"
+                )
+                continue
+            status = "halted" if result.halted else "converged"
+            tail = ": " + "; ".join(result.halt_reasons) if result.halted else ""
+            console.print(
+                f"family {entry['physical_base']}  anchor={entry['anchor']}  "
+                f"batches={result.batches_run}  "
+                f"accepted={result.total_accepted}/{result.total_touched}  "
+                f"{status}{tail}"
+            )
+        console.print(f"apply: {applied_n} family(ies) applied, {stamped_n} stamped.")
+        return
 
     with GraphClient() as gc:
         rows = report_family_rows(gc, seeds=seeds, min_size=min_size)

@@ -729,6 +729,173 @@ def stamp_harmonized(
     return {"stamped": stamped, "deferred": deferred}
 
 
+# ── Pattern-family apply: the anchor-gated campaign ─────────────────────────
+# A pattern family has no parent node, so its idempotency mark lives on the
+# members themselves (``harmonized_group_signature``). The apply is one
+# CampaignRunner per family with an explicit two-batch plan: the anchor alone,
+# then the remaining members. See ``plan_family_applies`` / ``apply_families``.
+
+#: Rough per-name estimate for the dry-run cost figure. The pool drain reports
+#: its own measured spend; this only gives ``--dry-run`` a number before any
+#: call is placed.
+ESTIMATED_DOC_CALL_COST_USD = 0.05
+
+
+def plan_family_applies(
+    gc: Any | None = None,
+    *,
+    seeds: list[str] | None = None,
+    min_size: int = 1,
+) -> list[dict[str, Any]]:
+    """Read-only plan of the anchor-gated applies over the families in scope.
+
+    One plan per pattern family: its anchor (``select_anchor``), its members,
+    and the batch sequence an apply would run — the anchor alone, then the
+    other members. A family whose members already carry the current
+    ``harmonized_group_signature`` is ``harmonized`` and plans no batch; a
+    family with no selectable anchor is ``deferred``. Writes nothing.
+    """
+    from imas_codex.standard_names.campaign import anchor_gated_batches
+
+    resolved_gc, own_gc = _resolve_gc(gc)
+    try:
+        families = fetch_pattern_families(resolved_gc, seeds=seeds, min_size=min_size)
+    finally:
+        _close_if_owned(resolved_gc, own_gc)
+
+    plans: list[dict[str, Any]] = []
+    for family in families:
+        members = family["members"]
+        member_ids = sorted(m.get("id") for m in members if m.get("id"))
+        signature = group_signature(members)
+        stored = {
+            m.get("harmonized_group_signature")
+            for m in members
+            if m.get("harmonized_group_signature") is not None
+        }
+        anchor = select_anchor(None, None, None, members)
+        if member_ids and stored == {signature}:
+            decision, batches = "harmonized", []
+        elif anchor is None:
+            decision, batches = "deferred", []
+        else:
+            rest = [mid for mid in member_ids if mid != anchor]
+            decision, batches = "apply", anchor_gated_batches(anchor, rest)
+        plans.append(
+            {
+                "physical_base": family["physical_base"],
+                "invariant": list(family["invariant"]),
+                "anchor": anchor,
+                "members": member_ids,
+                "n": len(member_ids),
+                "group_signature": signature,
+                "harmonized": decision == "harmonized",
+                "decision": decision,
+                "batches": batches,
+                "planned_calls": sum(len(b) for b in batches),
+            }
+        )
+    return plans
+
+
+def _stamp_applied_family(gc: Any, anchor_id: str) -> bool:
+    """Re-read a converged family and stamp its current group signature."""
+    from imas_codex.standard_names.graph_ops import stamp_harmonized_families
+
+    families = fetch_pattern_families(gc, seeds=[anchor_id])
+    if not families:
+        return False
+    members = families[0]["members"]
+    member_ids = sorted(m.get("id") for m in members if m.get("id"))
+    if not member_ids:
+        return False
+    return bool(
+        stamp_harmonized_families(
+            [
+                {
+                    "parent": None,
+                    "members": member_ids,
+                    "signature": group_signature(members),
+                }
+            ]
+        )
+    )
+
+
+def apply_families(
+    gc: Any | None = None,
+    *,
+    seeds: list[str] | None = None,
+    min_size: int = 1,
+    drain_fn: Any,
+    plan: list[dict[str, Any]] | None = None,
+    budget: Any | None = None,
+    thresholds: Any | None = None,
+    runner_factory: Any | None = None,
+    runner_kwargs: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Run the anchor-gated apply over each family in scope.
+
+    One :class:`~imas_codex.standard_names.campaign.CampaignRunner` per family
+    marked ``apply``: the anchor drained as the first batch, the remaining
+    members as the second. The single-member anchor batch accepts at rate 1.0
+    when the anchor reaches documentation acceptance and 0.0 otherwise, so the
+    runner's convergence gate halts the family before the member batch is ever
+    marked or drained when the anchor was not accepted — the members are then
+    never reset and no DocsRevision snapshot is taken. A family that converges
+    is stamped with its new ``harmonized_group_signature`` so a repeated apply
+    over the unchanged scope plans nothing.
+
+    ``drain_fn`` and the entries of ``runner_kwargs`` are forwarded to the
+    runner unchanged, so the orchestration is drivable against a fixture graph.
+    """
+    from imas_codex.standard_names.campaign import (
+        CampaignBudget,
+        CampaignRunner,
+        CampaignSpec,
+        ConvergenceThresholds,
+    )
+
+    resolved_gc, own_gc = _resolve_gc(gc)
+    budget = budget or CampaignBudget()
+    thresholds = thresholds or ConvergenceThresholds()
+    plans = (
+        plan
+        if plan is not None
+        else plan_family_applies(resolved_gc, seeds=seeds, min_size=min_size)
+    )
+    spec = CampaignSpec(raw="harmonize-pattern-family")
+    kwargs = dict(runner_kwargs or {})
+
+    applied: list[dict[str, Any]] = []
+    try:
+        for fam_plan in plans:
+            if fam_plan["decision"] != "apply":
+                applied.append({**fam_plan, "applied": False, "stamped": False})
+                continue
+            runner = (
+                runner_factory(spec)
+                if runner_factory is not None
+                else CampaignRunner(spec, budget, thresholds)
+            )
+            result = runner.run(
+                gc=resolved_gc,
+                target_ids=fam_plan["members"],
+                drain_fn=drain_fn,
+                batch_plan=fam_plan["batches"],
+                **kwargs,
+            )
+            stamped = False
+            if not result.halted:
+                stamped = _stamp_applied_family(resolved_gc, fam_plan["anchor"])
+            applied.append(
+                {**fam_plan, "applied": True, "result": result, "stamped": stamped}
+            )
+    finally:
+        _close_if_owned(resolved_gc, own_gc)
+    return {"plans": plans, "applied": applied}
+
+
 __all__ = [
     "doc_sig",
     "mark_members_for_regen",
@@ -741,6 +908,9 @@ __all__ = [
     "build_worklist",
     "concept_member_ids",
     "report_family_rows",
+    "ESTIMATED_DOC_CALL_COST_USD",
+    "plan_family_applies",
+    "apply_families",
 ]
 
 
