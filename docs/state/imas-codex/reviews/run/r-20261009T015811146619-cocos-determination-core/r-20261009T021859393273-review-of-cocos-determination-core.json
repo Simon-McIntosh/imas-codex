@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate fields: its after_suite (cocos-graph-head.log, rev 5b040644) records 53 passed, EXIT=0, 0 failures, so no failure was added; its baseline_suite field is empty, so reckon's reader reports the count as unmeasured rather than zero. The added set is empty either way because the head arm carries no failure.",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cocos/calculator.py:457 (validate_cocos_from_data calls determine_cocos)",
+    "imas_codex/llm/server.py:1391 (determine_cocos LLM tool)",
+    "imas_codex/llm/server.py:1343 (validate_cocos LLM tool)"
+  ],
+  "completed_at": "2026-10-09T02:32:28.433Z",
+  "dispatched_at": "2026-10-09T02:19:11Z",
+  "findings": [
+    {
+      "file": "imas_codex/cocos/calculator.py",
+      "line": "457",
+      "severity": "blocking",
+      "text": "validate_cocos_from_data still calls the rebuilt determine_cocos, which now raises ValueError when the observations contradict (status not-cocos-expressible) or the psi gradient is zero, so the validator raises for exactly the inconsistent inputs it exists to report and its documented ValidationResult contract is broken. Reproduction at head 5b040644: validate_cocos_from_data(declared_cocos=17, psi_axis=0.0, psi_edge=1.0, ip=1e6, b0=5.0, dp_dpsi=1e3) raises ValueError('Equilibrium observations are not-cocos-expressible'), while at base 6c7be873 the same call returns ValidationResult(is_consistent=False, inconsistencies=['psi gradient: expected decreasing, got increasing (sigmaIp=1, sigmaBp=-1)']). Production call sites imas_codex/llm/server.py:1343 and :1391 forward without catching, so an LLM tool call now surfaces an unhandled exception; fix by having validate_cocos_from_data record the not-cocos-expressible state as an inconsistency rather than propagating the raise."
+    },
+    {
+      "file": "imas_codex/cocos/transforms.py",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "dd_cocos_class is verified only by tests/cocos/test_cocos_survivors.py:73 whose mock re-implements the query's ordering, so the real Cypher at imas_codex/cocos/transforms.py:20-31 (ORDER BY candidate.depth DESC over IMASNode ids against path prefixes) is confirmed by no recorded artifact; the reviewed manifest's evidence_inputs claims a live graph probe returned psi_like for magnetics/flux_loop/flux/data, but no log in the run directory and no bolt:// URI in the stream record that query, so the claim is uncorroborated. Add the live-probe log or an EXPLAIN-level check of the statement."
+    },
+    {
+      "file": "imas_codex/cocos/calculator.py",
+      "line": "285",
+      "severity": "follow-on",
+      "text": "the new exported dataclass COCOSDetermination reuses the exact name of the auto-generated enum imas_codex/graph/models.py:452 (values metadata/calculated/documented/asserted), so 'from imas_codex.cocos import COCOSDetermination' and 'from imas_codex.graph.models import COCOSDetermination' name different concepts; the second commit's body says it renamed records to avoid a schema class collision, but this one remains, so rename it by what it holds (for example COCOSEquilibriumDetermination) or state the deliberate reuse."
+    }
+  ],
+  "head_log_revision": "5b040644d5dbed8877d0e6f5908ed9e65035e441",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against the base; 3f8e6cd adds SignObservation/COCOSSurvivorResult/score_cocos_survivors and rebuilds determine_cocos on them, and 5b040644 replaces dd_cocos_class with a graph ancestor query and renames the observation record.",
+    "done_when": "every clause has a recorded, independently reproduced artifact \u2014 tests/cocos/test_cocos_survivors.py:26 asserts survivors {3,4} at e_bp=0, :29 asserts the unanimous 2*pi psi_like factor and :30 the split ip_like None, :35 one survivor under a declaration, :47 polarity-incomplete with lowered confidence, :57 not-cocos-expressible, :64 determine_cocos returning the unique survivor with assumed e_bp and sigma_r_phi_z, :105 dd_cocos_class psi_like for magnetics/flux_loop/flux/data and :130 None for an unlabelled path; my own rerun of tests/cocos records 53 passed, EXIT=0.",
+    "goal": "plan \u00a75's core node asks a survivor scorer to filter the sixteen canonical conventions from measured signs and explicit declarations and a dd_cocos_class resolver to read a DD class through its ancestors; imas_codex/cocos/calculator.py:207 score_cocos_survivors and imas_codex/cocos/transforms.py:13 dd_cocos_class implement both, and imas_codex/cocos/calculator.py:300 rebuilds determine_cocos on the scorer.",
+    "manifest": "read; status complete, names both commits and cocos-graph-head.log (53 passed, EXIT=0), and carries a red negative-control log, but its baseline_suite field is empty so no baseline arm is recorded, and its evidence_inputs claims a live graph probe with no log artifact in the run directory or stream.",
+    "write_paths": "read the manifest's declared write paths; git diff 6c7be873..5b040644 touches only imas_codex/cocos/calculator.py, imas_codex/cocos/transforms.py, imas_codex/cocos/__init__.py and tests/cocos/test_cocos_survivors.py, all inside them and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/cocos/test_cocos_survivors.py:23-131 assert behaviour against independent literals and the negative control reddens the one-survivor case at EXIT=1, but the ValueError path the rebuild added to imas_codex/cocos/calculator.py:300 and its effect on validate_cocos_from_data at :457 carry no test, so the changed refusal is unguarded.",
+    "evidence": "cocos-graph-head.log records rev 5b040644 with the wrong signature, ugly hack and 0 failures and my independent rerun agrees (53 passed, EXIT=0), and negative-control-graph-head.log is red at EXIT=1, but the reviewed manifest records no baseline_suite arm and no log corroborates the live graph probe its evidence_inputs claims.",
+    "fit": "the change follows the module's frozen-dataclass and Literal idioms with conventional commits carrying bodies, but the new dataclass COCOSDetermination at imas_codex/cocos/calculator.py:285 reuses the name of the auto-generated enum imas_codex/graph/models.py:452.",
+    "goal_fidelity": "imas_codex/cocos/calculator.py:207-282 filters VALID_COCOS by measured signs and declared e_bp/sigma_r_phi_z/sigma_rho_theta_phi, reports polarity-incomplete and not-cocos-expressible, and imas_codex/cocos/transforms.py:13 resolves the DD class through ancestor prefixes, meeting the stated goal while the determine_cocos rebuild silently changed a sibling validator's contract (see the blocking finding).",
+    "reuse": "imas_codex/cocos/calculator.py:207 extends the owner module of COCOS identification and reuses cocos_to_parameters, and imas_codex/cocos/calculator.py:196 reuses the existing cocos_sign from imas_codex/ids/transforms.py, forking no capability.",
+    "scope_discipline": "git diff 6c7be873..5b040644 touches only the four declared write paths (imas_codex/cocos/calculator.py, imas_codex/cocos/transforms.py, imas_codex/cocos/__init__.py, tests/cocos/test_cocos_survivors.py) with no out-of-scope edit."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 6c7be87309ba5736c5d4263f6d9d37c293eb79d4\nreviewed_head_sha: 5b040644d5dbed8877d0e6f5908ed9e65035e441\nVERDICT goal: plan \u00a75's core node asks a survivor scorer to filter the sixteen canonical conventions from measured signs and explicit declarations and a dd_cocos_class resolver to read a DD class through its ancestors; imas_codex/cocos/calculator.py:207 score_cocos_survivors and imas_codex/cocos/transforms.py:13 dd_cocos_class implement both, and imas_codex/cocos/calculator.py:300 rebuilds determine_cocos on the scorer.\nVERDICT done_when: every clause has a recorded, independently reproduced artifact \u2014 tests/cocos/test_cocos_survivors.py:26 asserts survivors {3,4} at e_bp=0, :29 asserts the unanimous 2*pi psi_like factor and :30 the split ip_like None, :35 one survivor under a declaration, :47 polarity-incomplete with lowered confidence, :57 not-cocos-expressible, :64 determine_cocos returning the unique survivor with assumed e_bp and sigma_r_phi_z, :105 dd_cocos_class psi_like for magnetics/flux_loop/flux/data and :130 None for an unlabelled path; my own rerun of tests/cocos records 53 passed, EXIT=0.\nVERDICT write_paths: read the manifest's declared write paths; git diff 6c7be873..5b040644 touches only imas_codex/cocos/calculator.py, imas_codex/cocos/transforms.py, imas_codex/cocos/__init__.py and tests/cocos/test_cocos_survivors.py, all inside them and nothing else.\nVERDICT manifest: read; status complete, names both commits and cocos-graph-head.log (53 passed, EXIT=0), and carries a red negative-control log, but its baseline_suite field is empty so no baseline arm is recorded, and its evidence_inputs claims a live graph probe with no log artifact in the run directory or stream.\nVERDICT diff: read commit by commit against the base; 3f8e6cd adds SignObservation/COCOSSurvivorResult/score_cocos_survivors and rebuilds determine_cocos on them, and 5b040644 replaces dd_cocos_class with a graph ancestor query and renames the observation record.\nCALL_SITES: imas_codex/cocos/calculator.py:457 (validate_cocos_from_data calls determine_cocos), imas_codex/llm/server.py:1391 (determine_cocos LLM tool), imas_codex/llm/server.py:1343 (validate_cocos LLM tool)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/cocos/calculator.py:207-282 filters VALID_COCOS by measured signs and declared e_bp/sigma_r_phi_z/sigma_rho_theta_phi, reports polarity-incomplete and not-cocos-expressible, and imas_codex/cocos/transforms.py:13 resolves the DD class through ancestor prefixes, meeting the stated goal while the determine_cocos rebuild silently changed a sibling validator's contract (see the blocking finding).\nSCORE evidence: 15\nJUSTIFICATION evidence: cocos-graph-head.log records rev 5b040644 with the wrong signature, ugly hack and 0 failures and my independent rerun agrees (53 passed, EXIT=0), and negative-control-graph-head.log is red at EXIT=1, but the reviewed manifest records no baseline_suite arm and no log corroborates the live graph probe its evidence_inputs claims.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 6c7be873..5b040644 touches only the four declared write paths (imas_codex/cocos/calculator.py, imas_codex/cocos/transforms.py, imas_codex/cocos/__init__.py, tests/cocos/test_cocos_survivors.py) with no out-of-scope edit.\nSCORE durability: 15\nJUSTIFICATION durability: tests/cocos/test_cocos_survivors.py:23-131 assert behaviour against independent literals and the negative control reddens the one-survivor case at EXIT=1, but the ValueError path the rebuild added to imas_codex/cocos/calculator.py:300 and its effect on validate_cocos_from_data at :457 carry no test, so the changed refusal is unguarded.\nSCORE fit: 16\nJUSTIFICATION fit: the change follows the module's frozen-dataclass and Literal idioms with conventional commits carrying bodies, but the new dataclass COCOSDetermination at imas_codex/cocos/calculator.py:285 reuses the name of the auto-generated enum imas_codex/graph/models.py:452.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/cocos/calculator.py:207 extends the owner module of COCOS identification and reuses cocos_to_parameters, and imas_codex/cocos/calculator.py:196 reuses the existing cocos_sign from imas_codex/ids/transforms.py, forking no capability.\nFINDING imas_codex/cocos/calculator.py:457 blocking: validate_cocos_from_data still calls the rebuilt determine_cocos, which now raises ValueError when the observations contradict (status not-cocos-expressible) or the psi gradient is zero, so the validator raises for exactly the inconsistent inputs it exists to report and its documented ValidationResult contract is broken. Reproduction at head 5b040644: validate_cocos_from_data(declared_cocos=17, psi_axis=0.0, psi_edge=1.0, ip=1e6, b0=5.0, dp_dpsi=1e3) raises ValueError('Equilibrium observations are not-cocos-expressible'), while at base 6c7be873 the same call returns ValidationResult(is_consistent=False, inconsistencies=['psi gradient: expected decreasing, got increasing (sigmaIp=1, sigmaBp=-1)']). Production call sites imas_codex/llm/server.py:1343 and :1391 forward without catching, so an LLM tool call now surfaces an unhandled exception; fix by having validate_cocos_from_data record the not-cocos-expressible state as an inconsistency rather than propagating the raise.\nFINDING imas_codex/cocos/transforms.py:13 follow-on: dd_cocos_class is verified only by tests/cocos/test_cocos_survivors.py:73 whose mock re-implements the query's ordering, so the real Cypher at imas_codex/cocos/transforms.py:20-31 (ORDER BY candidate.depth DESC over IMASNode ids against path prefixes) is confirmed by no recorded artifact; the reviewed manifest's evidence_inputs claims a live graph probe returned psi_like for magnetics/flux_loop/flux/data, but no log in the run directory and no bolt:// URI in the stream record that query, so the claim is uncorroborated. Add the live-probe log or an EXPLAIN-level check of the statement.\nFINDING imas_codex/cocos/calculator.py:285 follow-on: the new exported dataclass COCOSDetermination reuses the exact name of the auto-generated enum imas_codex/graph/models.py:452 (values metadata/calculated/documented/asserted), so 'from imas_codex.cocos import COCOSDetermination' and 'from imas_codex.graph.models import COCOSDetermination' name different concepts; the second commit's body says it renamed records to avoid a schema class collision, but this one remains, so rename it by what it holds (for example COCOSEquilibriumDetermination) or state the deliberate reuse.\n",
+  "review_run_id": "r-20261009T021859393273-review-of-cocos-determination-core",
+  "reviewed_base_sha": "6c7be87309ba5736c5d4263f6d9d37c293eb79d4",
+  "reviewed_head_sha": "5b040644d5dbed8877d0e6f5908ed9e65035e441",
+  "reviewed_run_id": "r-20261009T015811146619-cocos-determination-core",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T02:30:33.406037+00:00",
+  "total": 103,
+  "verdict": "SOUND WITH FINDINGS"
+}
