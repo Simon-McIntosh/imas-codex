@@ -61,6 +61,13 @@
       "finding": "anchors_resolve-1",
       "reason": "",
       "when": "2026-10-12T07:16:42.778082+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "section 4 delivers recorded human rulings over a generated worklist, so there is no guard to invert; each synonym ruling is applied through sn supersede or sn edit, whose own tests carry the refusals, and the roster-still-resolves check is the falsifiable end-state",
+      "when": "2026-10-12T07:16:45.128493+00:00"
     }
   ],
   "responses": {
@@ -69,6 +76,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-12T07:16:42.778082+00:00"
+    },
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 4 delivers recorded human rulings over a generated worklist, so there is no guard to invert; each synonym ruling is applied through sn supersede or sn edit, whose own tests carry the refusals, and the roster-still-resolves check is the falsifiable end-state",
+      "when": "2026-10-12T07:16:45.128493+00:00"
     },
     "reasoning-1": {
       "action": "acted",
