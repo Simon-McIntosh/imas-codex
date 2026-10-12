@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T05:21:56.122Z",
+  "dispatched_at": "2026-10-12T05:13:39Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/mapping-validation-and-assembly-report-what-they-drop.html:180",
+      "id": "done_when-1",
+      "reason": "a node following the gate literally sees two lines the plan says should not be there and one it says should, cannot close on it, and must silently reinterpret the search to proceed.",
+      "text": "\u00a75's second bullet requires `rg -n \"status = 'active'|status='active'\" imas_codex/ids` to list \"only the guarded activation statement in `imas_codex/cli/map.py`\", but `imas_codex/cli/map.py` is not under `imas_codex/ids`, so that path argument can never return it, and after the \u00a75 deletion the command returns two read-side matches (`WHERE m.status = 'active'` at `imas_codex/ids/graph_ops.py:77` and `WHERE r.status = 'active'` at `imas_codex/ids/assembler.py:541`) \u2014 the done-when as written can never be satisfied and names output the command does not produce.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-validation-and-assembly-report-what-they-drop.html:97",
+      "id": "reasoning-1",
+      "reason": "the plan's stated premise that every drop already warns is false for the `outside_section` case, so a worker writing \u00a73's first test against \"the existing warning\" is arguing from evidence the code does not support; the sentence must say the outside-section drop is still entirely silent.",
+      "text": "\u00a73 asserts `IDSAssembler._apply_mappings` \"skips three kinds of active mapping, and now logs a warning for each\" (echoed by the \u00a71 table at :45, \"each drop now logs a warning\"), but the cited code logs for only two: the nested-path branch (`logger.warning` at `imas_codex/ids/assembler.py:326`) and the `set_nested` failure (`:353`); the section-prefix branch at `:311\u2013313` is a bare `continue` with no warning, and the patch's own message (`7fa932305`) names only those two cases.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-validation-and-assembly-report-what-they-drop.html:112",
+      "id": "reasoning-2",
+      "reason": "the two nodes write the same file and \u00a74's test asserts a `missing_member` entry into \u00a73's list, so the entry shape must make the id optional (or the gap be reported separately) before either node can be built without inventing an id.",
+      "text": "\u00a73 defines each skip entry as carrying \"the mapping id, the target path and the reason\", but \u00a74 (`:144`) routes sparse-array gaps into \"\u00a73's skip report with reason `missing_member`\", and a gap is a member number with no node \u2014 there is no mapping to supply an id, so the shared entry's mandatory id field contradicts \u00a74's entry.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "0e59dd1ec029d5c6da176357b4549b4852f48054cf1fd8fc93d6a9d7d2529c1e",
+  "plan_slug": "mapping-validation-and-assembly-report-what-they-drop",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T051330411119-plan-review-of-mapping-validation-and-assembly-report-what-they-drop",
+  "reviewed_blob_sha": "c71fc1919764563842924f0c8d8e7b71a42e394a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file (`imas_codex/ids/validation.py`, `imas_codex/ids/assembler.py`, `imas_codex/ids/graph_ops.py`, `imas_codex/cli/imas_dd.py`, `imas_codex/cli/map.py`, `tests/ids/test_graph_ops.py`) exists; commits `93bfb7e9d` and `7fa932305` both resolve as commits; the report at `~/.config/reckon/crew/reports/map-review-validation.md` exists; and the extensionless href `/imas-codex/plans/mapping-generation-accounts-for-every-source` resolves to `docs/plans/mapping-generation-accounts-for-every-source.html`.",
+    "done_when": "a finding \u2014 \u00a75's second done-when bullet (`docs/plans/mapping-validation-and-assembly-report-what-they-drop.html:180`) states an outcome its own command cannot produce.",
+    "evidence_paths": "pass \u2014 every node's evidence fragment sits under `docs/evidence/fragments/mapping-validation-and-assembly-report-what-they-drop/` in the repository, and no gate log is routed to a scratchpad or a node-local temporary directory.",
+    "naming": "pass \u2014 node names (`transform-result-fits-target`, `assembly-reports-skips`, `members-keep-their-number`, `retire-active-at-creation`) and their test files name the mechanism; no plan label, stage name, ticket number or version tag reaches a symbol or path.",
+    "reasoning": "a finding \u2014 \u00a73's premise that each of the three drops already warns is contradicted by the cited code, and \u00a73's skip-entry shape contradicts \u00a74's gap entry.",
+    "single_goal": "pass \u2014 each of \u00a72\u2013\u00a75 names exactly one node with one deliverable; \u00a73's three bullets (collect the skip list, print it in the CLI, and the export exit behaviour gated on the open decision) are one capability: making an unplaced mapping visible to the caller.",
+    "wiring": "pass \u2014 `plan-depends-on` names `jt60sa-mapping-study-expansion`, which resolves to `docs/plans/jt60sa-mapping-study-expansion.html` and is fully done; the intra-plan \u00a73\u2192\u00a74 ordering on `imas_codex/ids/assembler.py` is declared in \u00a74's prose and in the `f-mvar-001` followup body."
+  },
+  "section_digests": {
+    "_document": "fc96c69169532278002962bbdc3f5e93b6ef6ef6996ae63f73d85b6e1bf43067",
+    "s1": "364d2cef1a65f5f7d6c64595184d535f716e6e050f41af271df2a6bcfa718051",
+    "s2": "f9a7207b8c8d23e06ca53aba96cc5bffcc297e6b3efabb2899e1fefe4c63ba80",
+    "s3": "128a07266af577a597b2628f83a4bfb1898f89d9eab8894aa89396d7976b8cdd",
+    "s4": "6b1dfaf8bfa3584c21967f66b645633170fbc594e856a5be02c87575df83e5d8",
+    "s5": "33fd872dcea56cc1c7e5ca0355d069bfbff7a36c49cc68cdf0eb72dfd969c21d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T05:23:22.824150+00:00"
+}
