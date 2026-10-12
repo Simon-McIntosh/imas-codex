@@ -121,22 +121,12 @@ its siblings:
   not averaged away. Never copy a sibling's physics claim that does not hold
   for this member.
 
-## Family Anchoring & Species Semantics (data-driven — HARD)
-
-Sibling families drift into many gratuitously different openings for the same
-physics (number-density entries alone have been seen opening with
-"Charge-state-summed…", "Total…", "Unweighted…", "Number density of…", and
-more for one quantity kind). The rules below make the Family Parallel Structure
-section concrete. **None of them enumerates vocabulary** — the species, loci,
-and charge-state facts come from the per-name context supplied with each item
-(the sibling-family block, the subject/species semantics, and the injected
-locus context). Apply each PATTERN to whatever tokens that context provides.
+## Species Semantics (data-driven — HARD)
 
 For number-density quantities (a particle count per unit volume — not a mass,
-charge, current, or power per unit volume), the opening names the species (from
-context) and its number density: a bare species defaults to the
-charge-state-summed reading, while an explicitly charge-state-resolved member
-states its specific state instead.
+charge, current, or power per unit volume), a bare species denotes the
+charge-state-summed quantity, while an explicitly charge-state-resolved member
+denotes its stated charge state.
 
 ### State the charge-state aggregation convention
 

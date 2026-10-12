@@ -62,14 +62,14 @@ strictly on what the children attest.
 {% endif %}
 
 {% if sibling_family %}
-### Sibling family — converge on the family template{% if sibling_family.parent %} (shared parent `{{ sibling_family.parent.name }}`){% else %} (shared pattern){% endif %}
+### Sibling family — compare section structure{% if sibling_family.parent %} (shared parent `{{ sibling_family.parent.name }}`){% else %} (shared pattern){% endif %}
 
 `{{ sn_name }}` is one member of a matched sibling set. Your rewrite must be
 **structurally parallel** to the family in section order and scope. Use the
 selected registry opening when one applies. Never copy a sibling's physics
 claim that does not hold for this member.
 
-{% if sibling_family.anchor %}Template anchor **`{{ sibling_family.anchor.name }}`**{% if sibling_family.anchor.is_parent %} (the family parent){% endif %}:
+{% if sibling_family.anchor %}Accepted sibling anchor **`{{ sibling_family.anchor.name }}`**{% if sibling_family.anchor.is_parent %} (the family parent){% endif %}:
 - Anchor description: {{ sibling_family.anchor.description }}
 {% if sibling_family.anchor.documentation %}- Anchor documentation:
 

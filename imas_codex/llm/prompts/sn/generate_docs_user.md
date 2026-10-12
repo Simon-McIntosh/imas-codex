@@ -51,7 +51,7 @@ pattern{% endif %}. Family members must read as a
 differs (axis, species, zone, locus — and the symbols that go with them).
 
 {% if item.sibling_family.anchor %}
-### Template anchor: `{{ item.sibling_family.anchor.name }}`{% if item.sibling_family.anchor.is_parent %} (the family parent){% endif %}
+### Accepted sibling anchor: `{{ item.sibling_family.anchor.name }}`{% if item.sibling_family.anchor.is_parent %} (the family parent){% endif %}
 
 Compare this member's section ordering and physical scope.
 

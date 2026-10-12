@@ -84,7 +84,7 @@ The candidate is one member of a matched sibling set. Compare its section
 structure and physical scope with the accepted members. Use a selected registry
 template to judge its opening when one applies.
 
-{% if sibling_family.anchor %}The family template anchor is
+{% if sibling_family.anchor %}The accepted sibling anchor is
 **`{{ sibling_family.anchor.name }}`**{% if sibling_family.anchor.is_parent %} (the family parent){% endif %}:
 - Anchor description: {{ sibling_family.anchor.description }}
 {% endif %}
