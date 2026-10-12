@@ -251,9 +251,10 @@ def test_domain_scoped_finding_is_attributed_and_counted_once(
     ]
     # ...and counted in the scope total exactly once.
     assert sum(row["lint"].get("domain_convention_violation", 0) for row in rows) == 1
-    assert [row["lint_total"] for row in rows] == [
-        sum(row["lint"].values()) for row in rows
-    ]
+    # Row lint_totals written out independently: alpha_base carries its two
+    # member findings plus the one domain finding (folded in at the first
+    # family in report order), beta_base its two member findings only.
+    assert [row["lint_total"] for row in rows] == [3, 2]
 
 
 def test_concept_scope_reports_its_families(monkeypatch: Any) -> None:

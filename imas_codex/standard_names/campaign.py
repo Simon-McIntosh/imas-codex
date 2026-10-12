@@ -170,6 +170,8 @@ class CampaignSpec:
             parts.append("any audit finding" if cat == "" else f"audit:{cat}")
         if self.include_quarantined:
             parts.append("audit-quarantined")
+        if not parts:
+            return self.raw
         return "; ".join(parts)
 
 
@@ -503,9 +505,13 @@ def anchor_gated_batches(anchor_id: str, member_ids: Sequence[str]) -> list[list
     1.0 when the anchor reaches documentation acceptance and 0.0 otherwise, so
     the ordinary gate halts the run before the member batch when the anchor was
     not accepted. The members are one batch, scoped to exactly the non-anchor
-    ids.
+    ids; a family whose only member is the anchor carries no member batch.
     """
-    return [[anchor_id], list(member_ids)]
+    batches = [[anchor_id]]
+    rest = list(member_ids)
+    if rest:
+        batches.append(rest)
+    return batches
 
 
 # ── Convergence gate ──────────────────────────────────────────────────────────

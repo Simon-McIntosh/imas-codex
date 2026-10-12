@@ -713,7 +713,7 @@ RETURN {segments}, members
 
 
 def fetch_pattern_families(
-    gc: Any | None = None,
+    gc: Any,
     *,
     seeds: list[str] | None = None,
     node_filter: str = "",
