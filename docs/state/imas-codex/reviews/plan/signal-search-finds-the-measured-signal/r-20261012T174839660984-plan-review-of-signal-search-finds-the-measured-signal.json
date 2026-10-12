@@ -1,0 +1,81 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T17:56:43.754Z",
+  "dispatched_at": "2026-10-12T17:49:16Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html \u00a75",
+      "id": "wiring-1",
+      "reason": "a builder must either serialize \u00a74 before \u00a75 (contradicting the declared order) or restate \u00a75's baseline as \u00a73's head, and either choice changes the plan's build graph.",
+      "text": "the followup allows \u00a74 and \u00a75 to \"run in parallel once \u00a73 lands\", but \u00a75's done-when says \"The harness on the head of this section is no lower than on \u00a74's head\", and on a parallel branch \u00a74's head is not an ancestor of \u00a75's head, so \u00a75's gate cannot be evaluated as written",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html \u00a79",
+      "id": "done_when-1",
+      "reason": "\u00a79's gate has no baseline a builder can resolve, so it would be closed on an unverifiable comparison or re-specified, both of which edit the plan.",
+      "text": "the done-when measures the harness \"no lower than on the previous head\" without naming which section that head belongs to, while the followup declares \u00a79 independent of both \u00a78 and \u00a710, so no head is defined for the comparison",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html \u00a73",
+      "id": "done_when-2",
+      "reason": "\u00a73 carries a genuine, falsifiable control in the random-order arm, so the tautological bullet is redundant rather than load-bearing.",
+      "text": "\"Every arm's top 10 on every question carries a label\" restates the pooled-labelling rule that \u00a73 itself imposes (\"Every candidate that any arm places in its top 10 is labelled\"), so the assertion holds however the code behaves and cannot fail",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html \u00a74",
+      "id": "anchors_resolve-1",
+      "reason": "\u00a74's regression gate (\"stays within 0.02 of its recorded 0.4821\") cannot be run without the label set, so the plan must name where those labels are or the gate is unsatisfiable.",
+      "text": "the citation \"Their 18-question JT-60SA labels from discovery-judgments-through-jev \u00a79\" points at \u00a79, which is the rerank landing and names no question count; the 18 questions are \u00a713's, whose labels live in `~/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/`, a path this plan never cites",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html \u00a710",
+      "id": "anchors_resolve-2",
+      "reason": "a builder searching the facility config lands on `signal_glossary` and would add only the genuinely missing terms, so the residue is a naming imprecision rather than a wrong mechanism.",
+      "text": "the instruction targets \"the facility configuration's EDAS enrichment glossary\", but the config exposes no such artifact; the key is `signal_glossary` (`imas_codex/config/facilities/jt-60sa.yaml:219`), read at `imas_codex/discovery/signals/parallel.py:4192`, and it already carries an `EFCC` entry, so the \"add ... EFCC\" half of the instruction is partly already satisfied",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "197d57c95c380c0141b5e1d4761d201c65252d03374f3c7fac27c05fa7035c52",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T174839660984-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "c547e63e5cc28d2a20a8a219437cd2ac771f6c09",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a74 cites \"discovery-judgments-through-jev \u00a79\" for the docs/code \"18-question JT-60SA labels\", but \u00a79 is the rerank landing and does not carry those labels; and \u00a710 names a config artifact (\"EDAS enrichment glossary\") that appears nowhere in the config.",
+    "done_when": "a finding \u2014 \u00a79's gate is measured against \"the previous head\" without naming a section, and the followup declares \u00a79 independent, so the comparison has no defined baseline; \u00a73's \"every arm's top 10 carries a label\" is also guaranteed by the pooled-labelling rule and so cannot fail.",
+    "evidence_paths": "pass \u2014 gate evidence lands in `docs/evidence/fragments/signal-search-finds-the-measured-signal/` and the harness fixture at `tests/llm/fixtures/signal_search_questions.json`, both durable in-repo paths; the prototype data under `~/.config/reckon/crew/reports/imas-codex/signal-search-prototype/` survives the run.",
+    "naming": "pass \u2014 the new symbols (`embedded_text_hash`, `signal_role`), test module `test_signal_search_goldens.py`, fixture and fragment names carry no plan labels, stage names or ticket numbers, and no comment states a mechanism by tracker entry.",
+    "reasoning": "pass \u2014 the root causes match the cited code (`create_nodes` auto-embeds only when `description and not embedding` at `imas_codex/graph/client.py:650-671`; the additive rule at `imas_codex/llm/search_tools.py:287,915,1667` and `imas_codex/ids/slot_context.py:70`; `_vector_search_signals` cuts at `k`), each section's mechanism can produce its measure, and the callers are named (`_search_signals`, `rerank_candidates`, the `_rerank_dd_paths` switch at `imas_codex/llm/server.py:1882`).",
+    "single_goal": "pass \u2014 each section names one deliverable (golden harness, fusion replacement, embedding writer, index widening, rerank routing, role property, report collapse, description correction), and \u00a78's prototype-then-backfill is gated by decision `signal-role` rather than carried as two goals.",
+    "wiring": "a finding \u2014 the followup's build order says \"\u00a74 and \u00a75 touch different files and can run in parallel once \u00a73 lands\", while \u00a75's own done-when measures its harness against \"\u00a74's head\", a baseline that does not exist on a parallel branch."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "dcf18d59a139fbf7d1e7f6ad4fb3b4c5729db5cae21f3304e6a52d38ade222c1",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "e1b4ec5526f6a9655616552b3f8e21729167dcf1f6fc3eec7fa0698967b3dffc",
+    "s4": "6bab3b601607c6cfee0eca6de19243563f107ae4816ee5bf2aacc49af87ed5e9",
+    "s5": "5102cd429fba64f6a5c146ebb7e9a0f3f629de61867da3ddeef9a0dd18bdfa70",
+    "s6": "076990c0d159d3b25d40abc9977a599478f8cbb96e4e9d112f381210040e9e3c",
+    "s7": "9b0bd3d1c102f2831d133cba09d135360c67d859ab5d8fa00a88eecfc42c15a6",
+    "s8": "4c4aa85bb83ca8a1e6ddca3e35a88085df2cd964d8989ee3010b5d26037d5775",
+    "s9": "f6b83e0e63bf06873eafacdff8629b7f528dc6b2819a3ee6ba19589ae6951b88"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T17:59:45.529308+00:00"
+}
