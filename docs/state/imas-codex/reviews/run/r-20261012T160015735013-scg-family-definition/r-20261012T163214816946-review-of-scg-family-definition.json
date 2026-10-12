@@ -1,0 +1,117 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: logs/baseline_suite.log records 76 passed EXIT=0 at 38f0a7336 and logs/after_suite.log records 83 passed EXIT=0 at the change with logs/cypher_property_check.log recording 4 passed, so head adds no failing test; the +7 are the reviewed node's own new passing cases in tests/standard_names/test_pattern_families.py.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=<reviewed worktree> uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_pattern_families.py tests/standard_names/test_docs_context_injection.py tests/standard_names/test_review_neighbours.py tests/standard_names/test_family_harmonization_auto.py tests/standard_names/test_harmonize.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160015735013-scg-family-definition/logs/after_suite.log",
+    "revision": "5c666533b9b786ec14259e85d0a6eb42cae1125c"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=<reviewed worktree> uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_pattern_families.py tests/standard_names/test_docs_context_injection.py tests/standard_names/test_review_neighbours.py tests/standard_names/test_family_harmonization_auto.py tests/standard_names/test_harmonize.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160015735013-scg-family-definition/logs/baseline_suite.log",
+    "revision": "38f0a7336ce3b86ab37ebf5cb353a00363c32274"
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/context.py:734 fetch_review_neighbours",
+    "imas_codex/standard_names/workers.py:9367",
+    "imas_codex/standard_names/workers.py:10680",
+    "imas_codex/cli/sn.py:4189",
+    "imas_codex/cli/sn.py:6211"
+  ],
+  "completed_at": "2026-10-12T16:44:19.419Z",
+  "dispatched_at": "2026-10-12T16:32:26Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_pattern_families.py",
+      "line": 306,
+      "severity": "follow-on",
+      "text": "test_members_query_compares_every_invariant_segment asserts set(_compared_columns(_PATTERN_FAMILY_MEMBERS_QUERY)) == set(PATTERN_INVARIANT_SEGMENTS), but _PATTERN_FAMILY_MEMBERS_QUERY is generated from that same constant through _invariant_equality (families.py:457), so the assertion's two sides move together: dropping a segment from PATTERN_INVARIANT_SEGMENTS drops it from the query too and this test stays green. It guards only an independent edit to the query generator, not the constant it names; the behavioural guard for the entity column is the entity-owner control."
+    },
+    {
+      "file": "imas_codex/standard_names/context.py",
+      "line": 781,
+      "severity": "follow-on",
+      "text": "the fetch_sibling_family docstring still states the invariant segments are physical_base, geometric_base, transformation and process and lists the variation axes without geometry, contradicting the code beneath it, which now holds object invariant and geometry varying; a reader of the changed function is told the old rule."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-family-definition.html",
+      "line": 27,
+      "severity": "follow-on",
+      "text": "the census prose says 'The locus rule is read from the ISN registry (load_locus_registry())', but production pattern_signature and PATTERN_INVARIANT_SEGMENTS (families.py:417,524) hard-code the segment set; only the test at tests/standard_names/test_pattern_families.py:221 reads the registry, so the record misstates the landed mechanism."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160015735013-scg-family-definition/manifest.md",
+      "line": 28,
+      "severity": "follow-on",
+      "text": "the after_suite entry claims 87 passed over six files while its cited log logs/after_suite.log records 83 passed over five (tests/graph/test_cypher_property_check.py ran separately, logs/cypher_property_check.log, 4 passed); the JSON also uses non-canonical keys (files/passed/failed/exit/rev/log) with no command or failure_ids, so a schema reader sees an unreadable suite arm even though zero added failures is the true reading."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": 471,
+      "severity": "follow-on",
+      "text": "build_worklist re-implements the invariant projection string inline (coalesce(c.{seg}, '') AS {seg}) instead of reusing families.py:449 _invariant_projection, so the projection expression \u2014 though not the segment list \u2014 is still stated in two places and can drift."
+    },
+    {
+      "file": "imas_codex/llm/prompts/sn/generate_docs_user.md",
+      "line": 46,
+      "severity": "follow-on",
+      "text": "the docs prompt renders item.sibling_family.parent.name unguarded (also refine_docs_user.md:64 and review_docs_user.md:80); the landed change makes parent None when the base token names no node (context.py:859), so such a render now yields an empty parent anchor. Out of the node's write scope; recorded as the reachable consequence of the change."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s): context.py:734 fetch_review_neighbours reads fetch_sibling_family into the review context, workers.py:9367 and workers.py:10680 read it for docs generation/refinement, and cli/sn.py:4189 and cli/sn.py:6211 call harmonize.build_worklist; the node's own test files do not count.",
+    "diff": "read commit by commit against base 38f0a7336ce3b86ab37ebf5cb353a00363c32274; 5c666533b adds the entity locus to PATTERN_INVARIANT_SEGMENTS and moves geometry to the variation axes, derives the members and census Cypher from the constant through families.py:449/457, groups build_worklist's parentless bucket by the signature, makes fetch_sibling_family's parent None when no node backs the base token, deletes row_pattern_signature, and adds the entity-owner, phantom-parent and compared-column tests; 17f084e2d adds the evidence fragment and the census figure; nothing outside the declared files moves.",
+    "done_when": "the done_when names an entity-owner fixture yielding no cohort and failing without the rule, the 17-member boundary density family still resolving to 17, a test that executes the family Cypher and fails when an invariant column is dropped, an empty `rg row_pattern_signature`, and baseline/after suite arms with completed:true; the entity-owner controls at tests/standard_names/test_pattern_families.py:400 and test_docs_context_injection.py:502 are red with the locus dropped and green with it present in logs/negative_control.log while the 17-member family holds (17 asserted at test_pattern_families.py:320/332/384), `git grep row_pattern_signature` over the tree returns nothing, and both suite arms completed at their summary lines.",
+    "goal": "the goal is one family definition the docs prompt, the harmonize command and the catalog ordering all read, with the ISN locus rule applied and the six named defects repaired; families.py:417 now holds the entity locus (`object`) invariant, families.py:449 derives the members and census Cypher from that one constant, harmonize.py:471 groups the parentless bucket by the same signature, context.py:859 returns no parent when no node backs the base token, and row_pattern_signature is deleted \u2014 five of the six briefed defects are repaired and the sixth (cli/sn.py:4170) is declared out of scope.",
+    "manifest": "read; it records status complete, commits 5c666533b and 17f084e2d, gate base 76 passed and after 83 passed plus tests/graph/test_cypher_property_check.py 4 passed all EXIT=0, the negative-control log path, the census numbers (180 pattern families >=3 / 2198 members; 220 HAS_PARENT; 7 HAS_PARENT-only) and two follow-ons; the after_suite entry however claims 87 passed over six files against a cited log that shows 83 over five (finding at manifest.md:28).",
+    "write_paths": "the manifest declares imas_codex/standard_names/families.py, context.py, harmonize.py, the five named test files, docs/evidence/fragments/sn-catalog-grouping/scg-family-definition.html and docs/figures/sn-catalog-grouping/scg-family-definition; `git show --name-only` for 5c666533b and 17f084e2d lists exactly those paths and nothing else, so every changed path is inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the entity-owner controls redden when the entity locus is dropped from PATTERN_INVARIANT_SEGMENTS and hold when it is present (logs/negative_control.log), so a real regression guard exists, but the members-query guard at tests/standard_names/test_pattern_families.py:306 compares the query against the constant the query is generated from (finding there) and the fixture reads the columns out of the query text rather than executing the Cypher against an engine.",
+    "evidence": "the gate logs record 76 passed at base (logs/baseline_suite.log) and 83 passed at the change (logs/after_suite.log) plus tests/graph/test_cypher_property_check.py 4 passed, all EXIT=0 and completed, and the entity-locus control is logged; the residual is that the manifest's after_suite record overstates its cited log and one named guard is tautological (findings at manifest.md:28 and test_pattern_families.py:306).",
+    "fit": "the additions sit in families.py beside the module's existing family constants and follow its module-constant and helper style with no plan or ticket identifier in the changed source, but the fetch_sibling_family docstring at context.py:781 still describes the pre-change four-segment invariant.",
+    "goal_fidelity": "the landed definition is read by both named consumers (context.py:734 fetch_sibling_family, harmonize.py:471 build_worklist) and row_pattern_signature is deleted from families.py, so the one-definition goal lands for the surfaces the brief scopes; cli/sn.py:4170 still runs the inline HAS_PARENT count but the brief declares it out of scope.",
+    "reuse": "the added helpers extend imas_codex/standard_names/families.py, the module that already owns the pattern family, and build_worklist now reuses PATTERN_INVARIANT_SEGMENTS rather than a second physical_base definition; the only duplication is the projection expression re-implemented inline at harmonize.py:471 instead of reusing families.py:449 _invariant_projection (finding there).",
+    "scope_discipline": "every changed code, test and docs path is inside the manifest's declared write paths and no plan meta line is edited, so nothing outside the goal moves."
+  },
+  "node": "review-of-scg-family-definition",
+  "project": "imas-codex",
+  "raw_text": "VERDICT-note: the emission below is the review record.\nVERDICT goal: the goal is one family definition the docs prompt, the harmonize command and the catalog ordering all read, with the ISN locus rule applied and the six named defects repaired; families.py:417 now holds the entity locus (`object`) invariant, families.py:449 derives the members and census Cypher from that one constant, harmonize.py:471 groups the parentless bucket by the same signature, context.py:859 returns no parent when no node backs the base token, and row_pattern_signature is deleted \u2014 five of the six briefed defects are repaired and the sixth (cli/sn.py:4170) is declared out of scope.\nVERDICT done_when: the done_when names an entity-owner fixture yielding no cohort and failing without the rule, the 17-member boundary density family still resolving to 17, a test that executes the family Cypher and fails when an invariant column is dropped, an empty `rg row_pattern_signature`, and baseline/after suite arms with completed:true; the entity-owner controls at tests/standard_names/test_pattern_families.py:400 and test_docs_context_injection.py:502 are red with the locus dropped and green with it present in logs/negative_control.log while the 17-member family holds (17 asserted at test_pattern_families.py:320/332/384), `git grep row_pattern_signature` over the tree returns nothing, and both suite arms completed at their summary lines.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/families.py, context.py, harmonize.py, the five named test files, docs/evidence/fragments/sn-catalog-grouping/scg-family-definition.html and docs/figures/sn-catalog-grouping/scg-family-definition; `git show --name-only` for 5c666533b and 17f084e2d lists exactly those paths and nothing else, so every changed path is inside the declared scope.\nVERDICT manifest: read; it records status complete, commits 5c666533b and 17f084e2d, gate base 76 passed and after 83 passed plus tests/graph/test_cypher_property_check.py 4 passed all EXIT=0, the negative-control log path, the census numbers (180 pattern families >=3 / 2198 members; 220 HAS_PARENT; 7 HAS_PARENT-only) and two follow-ons; the after_suite entry however claims 87 passed over six files against a cited log that shows 83 over five (finding at manifest.md:28).\nVERDICT diff: read commit by commit against base 38f0a7336ce3b86ab37ebf5cb353a00363c32274; 5c666533b adds the entity locus to PATTERN_INVARIANT_SEGMENTS and moves geometry to the variation axes, derives the members and census Cypher from the constant through families.py:449/457, groups build_worklist's parentless bucket by the signature, makes fetch_sibling_family's parent None when no node backs the base token, deletes row_pattern_signature, and adds the entity-owner, phantom-parent and compared-column tests; 17f084e2d adds the evidence fragment and the census figure; nothing outside the declared files moves.\nCALL_SITES: imas_codex/standard_names/context.py:734 fetch_review_neighbours, imas_codex/standard_names/workers.py:9367, imas_codex/standard_names/workers.py:10680, imas_codex/cli/sn.py:4189 build_worklist caller, imas_codex/cli/sn.py:6211 _report_drifting_families\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the landed definition is read by both named consumers (context.py:734 fetch_sibling_family, harmonize.py:471 build_worklist) and row_pattern_signature is deleted from families.py, so the one-definition goal lands for the surfaces the brief scopes; cli/sn.py:4170 still runs the inline HAS_PARENT count but the brief declares it out of scope.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate logs record 76 passed at base (logs/baseline_suite.log) and 83 passed at the change (logs/after_suite.log) plus tests/graph/test_cypher_property_check.py 4 passed, all EXIT=0 and completed, and the entity-locus control is logged; the residual is that the manifest's after_suite record overstates its cited log and one named guard is tautological (findings at manifest.md:28 and test_pattern_families.py:306).\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed code, test and docs path is inside the manifest's declared write paths and no plan meta line is edited, so nothing outside the goal moves.\nSCORE durability: 14\nJUSTIFICATION durability: the entity-owner controls redden when the entity locus is dropped from PATTERN_INVARIANT_SEGMENTS and hold when it is present (logs/negative_control.log), so a real regression guard exists, but the members-query guard at tests/standard_names/test_pattern_families.py:306 compares the query against the constant the query is generated from (finding there) and the fixture reads the columns out of the query text rather than executing the Cypher against an engine.\nSCORE fit: 15\nJUSTIFICATION fit: the additions sit in families.py beside the module's existing family constants and follow its module-constant and helper style with no plan or ticket identifier in the changed source, but the fetch_sibling_family docstring at context.py:781 still describes the pre-change four-segment invariant.\nSCORE reuse: 16\nJUSTIFICATION reuse: the added helpers extend imas_codex/standard_names/families.py, the module that already owns the pattern family, and build_worklist now reuses PATTERN_INVARIANT_SEGMENTS rather than a second physical_base definition; the only duplication is the projection expression re-implemented inline at harmonize.py:471 instead of reusing families.py:449 _invariant_projection (finding there).\nFINDING tests/standard_names/test_pattern_families.py:306 follow-on: test_members_query_compares_every_invariant_segment asserts set(_compared_columns(_PATTERN_FAMILY_MEMBERS_QUERY)) == set(PATTERN_INVARIANT_SEGMENTS), but _PATTERN_FAMILY_MEMBERS_QUERY is generated from that same constant through _invariant_equality (families.py:457), so the assertion's two sides move together: dropping a segment from PATTERN_INVARIANT_SEGMENTS drops it from the query too and this test stays green. It guards only an independent edit to the query generator, not the constant it names; the behavioural guard for the entity column is the entity-owner control.\nFINDING imas_codex/standard_names/context.py:781 follow-on: the fetch_sibling_family docstring still states the invariant segments are physical_base, geometric_base, transformation and process and lists the variation axes without geometry, contradicting the code beneath it, which now holds object invariant and geometry varying; a reader of the changed function is told the old rule.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-family-definition.html:27 follow-on: the census prose says 'The locus rule is read from the ISN registry (load_locus_registry())', but production pattern_signature and PATTERN_INVARIANT_SEGMENTS (families.py:417,524) hard-code the segment set; only the test at tests/standard_names/test_pattern_families.py:221 reads the registry, so the record misstates the landed mechanism.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160015735013-scg-family-definition/manifest.md:28 follow-on: the after_suite entry claims 87 passed over six files while its cited log logs/after_suite.log records 83 passed over five (tests/graph/test_cypher_property_check.py ran separately, logs/cypher_property_check.log, 4 passed); the JSON also uses non-canonical keys (files/passed/failed/exit/rev/log) with no command or failure_ids, so a schema reader sees an unreadable suite arm even though zero added failures is the true reading.\nFINDING imas_codex/standard_names/harmonize.py:471 follow-on: build_worklist re-implements the invariant projection string inline (coalesce(c.{seg}, '') AS {seg}) instead of reusing families.py:449 _invariant_projection, so the projection expression \u2014 though not the segment list \u2014 is still stated in two places and can drift.\nFINDING imas_codex/llm/prompts/sn/generate_docs_user.md:46 follow-on: the docs prompt renders item.sibling_family.parent.name unguarded (also refine_docs_user.md:64 and review_docs_user.md:80); the landed change makes parent None when the base token names no node (context.py:859), so such a render now yields an empty parent anchor. Out of the node's write scope; recorded as the reachable consequence of the change.",
+  "review_run_id": "r-20261012T163214816946-review-of-scg-family-definition",
+  "reviewed_base_sha": "38f0a7336ce3b86ab37ebf5cb353a00363c32274",
+  "reviewed_head_sha": "17f084e2d28d7145d9288c8a5a542d03a7519f4a",
+  "reviewed_run_id": "r-20261012T160015735013-scg-family-definition",
+  "reviewer_run_id": "r-20261012T163214816946-review-of-scg-family-definition",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160015735013-scg-family-definition/logs/baseline_suite.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160015735013-scg-family-definition/logs/after_suite.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160015735013-scg-family-definition/logs/cypher_property_check.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160015735013-scg-family-definition/logs/negative_control.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T160015735013-scg-family-definition/logs/census.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T16:40:10.303073+00:00",
+  "total": 94
+}
