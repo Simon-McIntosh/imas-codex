@@ -240,7 +240,35 @@ signal_glossary:
   - term: EFCC
     meaning: >-
       error field correction coil, one of the in-vessel coils on the stabilizing
-      plate; not an equilibrium field coil
+      plate; not an equilibrium field coil and not a converter
+  - term: EFC
+    meaning: >-
+      error field correction coil, one of the in-vessel coils on the stabilizing
+      plate (the catalogue spells the abbreviation EFCC); not an equilibrium
+      field coil and not a converter
+  - term: SNU
+    meaning: >-
+      switching network unit: a bank of resistors in the coil power supply,
+      switched in to apply a high loop voltage across the coil at plasma
+      breakdown (V = I·R). Not a snubber and not a superconducting unit
+  - term: BPS
+    meaning: >-
+      booster power supply: the high-voltage coil power supply that augments the
+      base power supply for fast coil current ramp
+  - term: QPC
+    meaning: >-
+      quench protection circuit: the circuit that extracts and absorbs the
+      stored energy of a superconducting coil when it quenches
+  - term: DR
+    meaning: >-
+      dump resistor (discharge resistor): the resistor in the quench protection
+      circuit that absorbs the coil's stored energy during a fast discharge
+  - term: HTS
+    meaning: high-temperature superconductor
+  - term: FPPCC
+    meaning: >-
+      fast plasma position control coil: the in-vessel coil driven for fast
+      vertical position control of the plasma
   - term: RWMC
     meaning: >-
       resistive wall mode control coil, one of the in-vessel coils on the

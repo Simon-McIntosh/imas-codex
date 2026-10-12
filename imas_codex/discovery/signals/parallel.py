@@ -2028,11 +2028,14 @@ def propagate_source_enrichment(
         Number of member signals updated
     """
     with GraphClient() as gc:
-        # Find members via MEMBER_OF → SignalSource (excluding the representative)
+        # A source is identified by its ``representative_id``, not by the
+        # representative's own MEMBER_OF edge: a representative may be a
+        # member of a different source (one shot-templated source and one
+        # shot-pinned source can share a representative), and binding through
+        # MEMBER_OF then silently skips every source it represents.
         count_result = gc.query(
             """
-            MATCH (rep:FacilitySignal {id: $rep_id})
-                  -[:MEMBER_OF]->(sg:SignalSource)
+            MATCH (sg:SignalSource {representative_id: $rep_id})
             MATCH (s:FacilitySignal)-[:MEMBER_OF]->(sg)
             WHERE s.id <> $rep_id
               AND s.status = $discovered
@@ -2051,8 +2054,7 @@ def propagate_source_enrichment(
         # already individualized and leave the followers holding the copy.
         gc.query(
             """
-            MATCH (rep:FacilitySignal {id: $rep_id})
-                  -[:MEMBER_OF]->(sg:SignalSource)
+            MATCH (sg:SignalSource {representative_id: $rep_id})
             SET sg.status = 'enriched',
                 sg.description = $description,
                 sg.keywords = $keywords,
@@ -2075,8 +2077,7 @@ def propagate_source_enrichment(
         # Propagate enrichment: discovered → enriched
         result = gc.query(
             """
-            MATCH (rep:FacilitySignal {id: $rep_id})
-                  -[:MEMBER_OF]->(sg:SignalSource)
+            MATCH (sg:SignalSource {representative_id: $rep_id})
             MATCH (s:FacilitySignal)-[:MEMBER_OF]->(sg)
             WHERE s.id <> $rep_id
               AND s.status = $discovered
@@ -2115,8 +2116,7 @@ def propagate_source_enrichment(
         if enrichment.get("diagnostic"):
             gc.query(
                 """
-                MATCH (rep:FacilitySignal {id: $rep_id})
-                      -[:MEMBER_OF]->(sg:SignalSource)
+                MATCH (sg:SignalSource {representative_id: $rep_id})
                 MATCH (s:FacilitySignal)-[:MEMBER_OF]->(sg)
                 WHERE s.id <> $rep_id
                   AND s.status = $enriched
@@ -2150,7 +2150,7 @@ def sweep_source_enrichment(facility: str) -> int:
         representatives = gc.query(
             """
             MATCH (sg:SignalSource {facility_id: $facility})
-            MATCH (rep:FacilitySignal {id: sg.representative_id})-[:MEMBER_OF]->(sg)
+            MATCH (rep:FacilitySignal {id: sg.representative_id})
             WHERE rep.status IN $enriched_statuses
               AND EXISTS {
                   MATCH (member:FacilitySignal)-[:MEMBER_OF]->(sg)
@@ -3754,6 +3754,46 @@ async def mdsplus_promote_worker(
     state.promote_phase.mark_done()
 
 
+def glossary_term_reaches(term: str, text: str) -> bool:
+    """Whether ``term`` names a word of ``text``, case-insensitively.
+
+    A term reaches a signal only across word and camel-case boundaries. It
+    begins a word at the start of the text, after a non-alphanumeric, at a
+    lower-case-to-upper-case turn, or where a capitalised word follows a
+    capital or a digit without a lower-case letter between them. So ``HiTe``
+    reaches ``curCS1HiTe`` across the digit, and ``curLFPHiTe`` where the
+    capital run hands off; a digit inside a token's capital run does not start a
+    word, so ``DR`` does not reach ``mC01DR``. A term written as capitals may
+    open onto a following word, so ``UFP`` reaches ``curUFPdisr``; a term not
+    written as capitals may not run into a following lower-case run, so ``EFC``
+    reaches ``refvcEFC1`` — across the camel turn — but not ``refcurEF1``, where
+    ``efc`` lies inside ``refcur``, and ``DR`` does not reach the ``Drop`` of a
+    pressure-drop description.
+    """
+    if not term:
+        return False
+    for match in re.finditer(re.escape(term), text, re.IGNORECASE):
+        start, end = match.start(), match.end()
+        begins_word = (
+            start == 0
+            or not text[start - 1].isalnum()
+            or (text[start - 1].islower() and text[start].isupper())
+            or (
+                (text[start - 1].isupper() or text[start - 1].isdigit())
+                and text[start].isupper()
+                and text[start + 1 : start + 2].islower()
+            )
+        )
+        ends_word = (
+            end == len(text)
+            or not text[end].islower()
+            or (text[start:end].isupper() and text[end].islower() and term.isupper())
+        )
+        if begins_word and ends_word:
+            return True
+    return False
+
+
 async def enrich_worker(
     state: DataDiscoveryState,
     on_progress: Callable | None = None,
@@ -4381,10 +4421,10 @@ async def enrich_worker(
                     catalogue_text = " ".join(
                         str(signal.get(field) or "")
                         for field in ("data_source_path", "name", "source_description")
-                    ).casefold()
+                    )
                     for entry in signal_glossary:
                         term = entry["term"]
-                        if term and term.casefold() in catalogue_text:
+                        if term and glossary_term_reaches(term, catalogue_text):
                             user_lines.append(f"glossary: {term} — {entry['meaning']}")
                 if signal.get("is_static"):
                     user_lines.append("is_static: true")
