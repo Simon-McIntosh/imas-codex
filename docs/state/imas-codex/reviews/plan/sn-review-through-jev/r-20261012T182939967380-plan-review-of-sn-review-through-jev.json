@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:34:06.010Z",
+  "dispatched_at": "2026-10-12T18:29:52Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html:106",
+      "id": "reasoning-1",
+      "reason": "a node wiring the trigger must either be told that audit-class checks never set the retrieval flag or be given a probability for them, otherwise the reduce over flagged checks is undefined on exactly the class of check the section introduces.",
+      "text": "\u00a72's done-when requires every check to hold a retrieval flag and permits a check to be decided by the audit finding class instead of a Jev question, so a flag-set audit-class check has no probability, and \u00a75's trigger (\"the maximum probability over the checks whose retrieval flag (\u00a72) is set\") then has a member with no defined input",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a852d4c471a346c45325495fbebe751a465b05bdfeb83570f6f6830cdeac3b79",
+  "plan_slug": "sn-review-through-jev",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T18:36:09.260367+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:36:09.260367+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-review-through-jev.v6.json",
+  "review_run_id": "r-20261012T182939967380-plan-review-of-sn-review-through-jev",
+  "reviewed_blob_sha": "1fb58e63a1a84055eac07222f5f4beec25b1edb9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `review_names.md` resolves to `imas_codex/llm/prompts/sn/review_names.md`, `sn-house-style` \u00a74 is \"Conformance checks in the Layer 1 audits\", and the `AuditReport` claim resolves at `imas_codex/standard_names/review/pipeline.py:1740`, where the report is turned into per-name findings.",
+    "done_when": "pass \u2014 \u00a72's done-when is measurable (at least 80% of the 136 human edit reasons mapped) and declares a negative control (a test that fails when a check names an evidence field the review state does not carry).",
+    "evidence_paths": "pass \u2014 \u00a72 produces a taxonomy and a test rather than a gate log, and cites no scratchpad or node-local path.",
+    "naming": "pass \u2014 \u00a72 carries no plan label, stage name, ticket number or version tag, and no changelog prose.",
+    "reasoning": "a finding \u2014 \u00a72 requires a retrieval flag on every check while allowing a check to be decided by the `AuditReport` class with no Jev question, but \u00a75 reduces the fanout trigger over the maximum probability of the flag-set checks, and an audit-class check carries no probability.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, the named-check taxonomy and its loader, with the keyword list and quorum deletion owned by \u00a75 and \u00a77.",
+    "wiring": "pass \u2014 \u00a72 declares no cross-plan dependency and needs none (followup f-srtj-001 states it is the one section that needs no harness), and its consumers (\u00a73 reads the taxonomy, \u00a75 reduces over the flag) are named in prose."
+  },
+  "section_digests": {
+    "_document": "543d4a9b36d0ffd3b6d48ae55e20ad33ac58257be049be48bded4d4bde22d77e",
+    "s1": "e0844621e4e94cdade939b1fe4902913058a1e80db41c644caae9b0ac084a800",
+    "s2": "b0d251917e3803e82c6003cfad44e327e0dbf0a7c36f72f34588a4dcb7e50352",
+    "s3": "82d51a77c26ae07933f012ccecb84e177e87b43c91b5cc909713ed332088bbf2",
+    "s4": "e78806378f26a26e205e71908b31a7cc50522c0f562ceab8c62c76181e212f2e",
+    "s5": "be121bdbde22a6066c710c8c0cddc8d852a3ad3066a476cef38d39eda5a2bdae",
+    "s6": "302fcd03fbde84ccac2e27b1a967b5abe0865d72c784a3232ff0113f5720b038",
+    "s7": "fb477768b44f7ce245281c7986ffdfcf74871a6c841ca83d809682f1ebc062f2"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:36:07.549294+00:00"
+}
