@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -215,10 +215,13 @@
     <div class="r-comment-body"><p>§14 landed: an edits-scoped run's maintenance bypass is pinned by a test that fails with the forwarding removed (merge <code>0f694fa07</code>); review 106/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s14">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s14" data-id="c-run-r-20261012T185548037836-sib-scoped-maintenance-test" data-who="reckon-build" data-when="2026-10-12T19:12:47.360Z">
-    <div class="r-comment-body"><p>Added tests/standard_names/test_edit_scope_skips_maintenance.py — an edits-scoped `sn run` (scope_run_id + edits_only) forwards --skip-global-maintenance to run_sn_pools and skips the CLI&#x27;s own graph-wide startup steps; removing the forwarding makes the test fail (negative_control.log EXIT=1).</p></div>
+    <div class="r-comment-body"><p>Added tests/standard_names/test_edit_scope_skips_maintenance.py — an edits-scoped `sn run` (scope_run_id + edits_only) forwards --skip-global-maintenance to run_sn_pools and skips the CLI's own graph-wide startup steps; removing the forwarding makes the test fail (negative_control.log EXIT=1).</p></div>
 </div>
 <div class="r-comment" data-section="s19" data-id="c-close-s19" data-who="reckon-build" data-when="2026-10-12T19:25:00Z">
     <div class="r-comment-body"><p>§19 landed: 92 of 102 unsourced chain-cap identities have no sourced ancestor (72 when recorded), with a split that sums to the independent total (merge <code>81af07164</code>); review 103/120. §22 carries the treatment, deferred to the lead. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s19">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s19" data-id="c-run-r-20261012T190000550736-sib-unsourced-ancestry-census" data-who="reckon-build" data-when="2026-10-12T19:07:54.818Z">
+    <div class="r-comment-body"><p>sib-unsourced-ancestry-census — re-derived §19 read-only: 102 unsourced chain-cap identities split 10 with a sourced ancestor + 92 with none, summing to the independently counted total (cross-check 72 sourced-in-cohort + 102 = 174 chain-cap, disjoint); 2026-09-01&#x27;s 78/72 has drifted, live matches the 2026-09-17 re-measure; every query depth-bounded at *1..10 and under 0.07 s.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
