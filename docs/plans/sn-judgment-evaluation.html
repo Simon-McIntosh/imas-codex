@@ -19,12 +19,12 @@
   <meta name="plan-sprint" content="S18">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
-  <meta name="plan-blocks" content="sn-review-through-jev,sn-selection-over-generation">
+  <meta name="plan-blocks" content="sn-review-through-jev,sn-selection-over-generation,sn-catalog-grouping">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;done&quot;}">
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -100,9 +100,9 @@
       The 2026-10-12 code review of the discovery judgment neighbourhood (run
       <code>review-code-f64de2151701</code>) found the decisions-call contract owned twice.
       <code>decide_batch</code> in <code>imas_codex/discovery/base/judgment.py</code> owns the
-      concurrency bound, fail-soft transport handling and cost booking.
-      <code>_call_judgment</code> at <code>imas_codex/ids/candidates.py:331</code> re-implements
-      them. Delete the wrapper and route its callers through the shared owner before a third
+      fail-soft transport handling and the cost booking. <code>_call_judgment</code> at
+      <code>imas_codex/ids/candidates.py:331</code> is a single synchronous call that
+      re-implements both. Delete the wrapper and route its callers through the shared owner before a third
       owner appears for standard names. Then add a <code>[tool.imas-codex.sn-judge]</code> seat
       naming the pinned Jev version and the service tag <code>standard-names</code>, so standard
       names' Jev spend is attributed separately from discovery's.
@@ -117,11 +117,7 @@
       <code>imas_codex/discovery/base/judgment.py</code>. The <code>tests/ids</code> and
       <code>tests/discovery</code> suites add no failures against their base. Removing the shared
       owner's cost-booking line turns the candidate spend assertion red. The <code>sn-judge</code>
-      seat resolves through <code>get_model</code>. The assertion at
-      <code>tests/ids/test_candidates.py:306</code> reads source text
-      (<code>"ClusterSearcher" not in …read_text()</code>), so a comment can turn it red and a
-      behavioural regression can pass it. Replace it with a test of the mapping's actual
-      dependency.
+      seat resolves through <code>get_model</code>.
     </p>
 
     <h2 id="s3">§3 — The evaluation module</h2>
@@ -167,7 +163,10 @@
     <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       Three goldens can be assembled now from sources the census found independent of the
-      incumbent. Each is a fixture under
+      incumbent. The counts in the table are the pools available. Each fixture subsamples
+      them, stratified by domain and pattern family, to a size at which every cap holds: about
+      800 rows for A with at most 200 from any source, and about 300 for C with at most 150
+      from WEST. Each is a fixture under
       <code>docs/evidence/fragments/sn-judgment-evaluation/</code>, never in a run directory, and
       each row names its label source and evidence.
     </p>
@@ -196,7 +195,8 @@
     <p>
       <strong>B — documentation acceptable</strong> cannot be assembled from what exists.
       Fewer than 300 independent items carry a docs label, almost all negative, against 16,282
-      incumbent docs reviews. Any docs-axis claim made before this golden exists would be the
+      incumbent docs-axis review records (the 15,413 <code>review_docs</code> calls of §1,
+      each writing one or more records). Any docs-axis claim made before this golden exists would be the
       incumbent grading itself.
     </p>
     <p>
@@ -253,31 +253,36 @@
       <li>Its cost per decision is lower.</li>
     </ul>
     <p>
-      A judge that fails stays in shadow mode, with its numbers recorded. Ordering surfaces —
+      A judge that falls short is not dropped. On 2026-10-12 the lead ruled that a shortfall
+      signals the design needs work, not that Jev should be abandoned. The judge stays in
+      shadow mode while its design is iterated: the state it is given, the question shape and
+      criteria, the templates, and the context retrieved and reranked for it (itself a Jev
+      rerank). Each iteration records what changed and its re-measured interval, so the path
+      to passing is visible. Ordering surfaces —
       queues, candidate lists, comparators — may adopt a Jev rerank without passing the rule,
       because a rerank that keeps the incumbent order on failure can never be worse than it.
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="non-inferiority-margin" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="non-inferiority-margin" data-choice="0.02" data-by="Simon McIntosh" data-when="2026-10-12T07:03:51+00:00">
     <p class="r-dec-q">How far below the incumbent may a Jev judge&#x27;s AUC fall and still take the decision?</p>
     <p class="r-dec-ctx">The gate compares the lower 95% bound of the paired difference with this margin. A cheaper judge that is no worse is a win, but &quot;no worse&quot; needs a number.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="0.02">−0.02 AUC (recommended)</button>
+      <button class="r-opt chosen" data-value="0.02">−0.02 AUC (recommended)</button>
       <button class="r-opt" data-value="0.00">0.00: Jev must be at least as good</button>
       <button class="r-opt" data-value="0.05">−0.05 AUC</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead ruling 2026-10-12: −0.02 AUC at the 95% bound. The lead expects Jev to be better on experience so far. A judge that falls short is a signal that the design needs work — prompt, templates, context search and Jev reranking of that context — not a reason to drop the judge. It stays in shadow and is iterated and re-measured.</p>
     </div>
-<div class="r-dec" data-key="jev-spend-ceiling" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="jev-spend-ceiling" data-choice="usd-10" data-by="Simon McIntosh" data-when="2026-10-12T07:03:51+00:00">
     <p class="r-dec-q">What Jev spend is authorised for standard-name prototypes and shadow runs?</p>
     <p class="r-dec-ctx">Discovery held each run under USD 3 and spent cents. A shadow pass over all 5,130 names at five questions each is about USD 1 to 2.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="usd-10">USD 10 for the sprint (recommended)</button>
+      <button class="r-opt chosen" data-value="usd-10">USD 10 for the sprint (recommended)</button>
       <button class="r-opt" data-value="usd-3-per-run">USD 3 per run</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead ruling 2026-10-12: USD 10 of Jev spend for the sprint&#x27;s standard-name prototypes and shadow runs, each run reporting against it.</p>
     </div>
 </section>
 

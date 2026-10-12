@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -117,19 +117,24 @@
     </p>
     <p>
       <strong>Done when:</strong> the accessor run over the WEST roster reports zero tokens
-      without an entry. All four decisions below are locked, which they are as of 2026-10-12.
+      without an entry. The run is shown able to report a gap: with one entry removed from a
+      scratch copy of the registry, it lists that token as missing. All four decisions below are locked, which they are as of 2026-10-12.
       The lead has read <code>concepts.yml</code>.
     </p>
 
     <h2 id="s4">§4 — Conformance checks in the Layer 1 audits</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
-      The checks join the existing Layer 1 audits in
-      <code>imas_codex/standard_names/audits.py</code>, beside <code>latex_def_check</code>,
-      which already enforces the symbol-definition policy. A second lint module is not built.
-      In that position their findings ride the <code>AuditReport</code> that already flows to
-      the reviewer (once §5 wires the template), and the harmonize command reads the same
-      report. The checks read a name's description and documentation against its selected
+      The deterministic checks join the Layer 1 review audits in
+      <code>imas_codex/standard_names/review/audits.py</code>, beside
+      <code>run_lexical_lint</code>. That module builds the <code>AuditReport</code> the review
+      pipeline reads (<code>imas_codex/standard_names/review/pipeline.py</code>, where
+      <code>state.audit_report</code> is turned into per-name findings), so these findings reach
+      the reviewer once §5 wires the template, and the harmonize command reads the same report.
+      A second lint module is not built. The generation-path <code>run_audits</code> in
+      <code>imas_codex/standard_names/audits.py</code>, which holds
+      <code>latex_def_check</code>, is synchronous and per-candidate. It is the wrong home,
+      because its findings never reach the reviewer's report. The checks read a name's description and documentation against its selected
       registry entries and return findings in five classes:
       a forbidden variant of a registered concept's equation; a non-canonical symbol for a
       registered quantity; a forbidden locus gloss, such as "separatrix" for
@@ -142,8 +147,13 @@
       form an equation takes when it is written several equivalent ways, whether a gloss equates
       two loci, which template an opening follows. A regex can only be tuned around those, so
       they ask Jev one categorising Choice each, through the shared decisions owner of
-      <code>sn-judgment-evaluation</code> §2. A Choice is used rather than a narrow Noul because
-      of the 2026-10-12 smoke read:
+      <code>sn-judgment-evaluation</code> §2. They cannot live in
+      <code>review/audits.py</code>, whose contract is deterministic checks runnable without
+      model access. They run as their own asynchronous judge stage in the review pipeline,
+      beside the audit stage, and add their findings to the same per-name list the reviewer
+      receives. A Choice is used rather than a narrow Noul because of the 2026-10-12 smoke read
+      (<a href="/imas-codex/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke">the
+      flux-surface-average smoke read</a>, with its script beside it):
     </p>
     <ul>
       <li>a Choice over flux-surface-average forms classified all four boundary entries correctly

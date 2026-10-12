@@ -17,15 +17,15 @@
   <meta name="plan-capability-context" content="extended">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="critical">
-  <meta name="plan-sprint" content="S18">
+  <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release,review">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-harmonize-command#s3&quot;,&quot;sn-house-style#s3&quot;],&quot;s4&quot;:[&quot;sn-catalog-grouping#s2&quot;],&quot;s5&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-catalog-grouping#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-review-through-jev#s6&quot;,&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-harmonize-command#s3&quot;,&quot;sn-house-style#s3&quot;,&quot;sn-review-through-jev#s6&quot;],&quot;s4&quot;:[&quot;sn-catalog-grouping#s2&quot;],&quot;s5&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-catalog-grouping#s3&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;}">
   <title>WEST Prototype: One House Style, Read By A Person, Then Released | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -165,7 +165,9 @@
     </p>
     <p>
       <strong>Done when:</strong> no roster name carries a null domain. In the staged
-      catalog, every pattern family appears contiguously within its domain (asserted by a
+      catalog, every pattern family appears contiguously within its domain. The assertion is
+      shown able to fail: with the family key removed from the ordering it reports the split
+      family (asserted by a
       test over the staged files).
     </p>
 
@@ -197,23 +199,19 @@
     </p>
 
     <h2 id="s7">§7 — The fold-back, rehearsed before it is needed</h2>
-    <section data-reckon="section" data-id="s7" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s7" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
     <p>
-      Carried from <code>catalog-review-surface</code> §4. Before a physicist's edits come
-      back, exercise the approval fold-back with one accepted and one refused reviewer edit
-      on a rehearsal branch. The writer exists and has never run in production. The
-      traceability fields (<code>catalog_pr_number</code>, <code>catalog_merge_commit_sha</code>,
-      <code>catalog_approved_at</code>, <code>catalog_reviewer_actor</code>) are set by
-      <code>imas_codex/standard_names/promote.py</code> through <code>sn approve</code>, and the
-      2026-09-01 census found all of them null across 4,666 rows. This rehearsal is that
-      writer's first real exercise, so confirm first that it is the path a merged catalog
-      pull request reaches.
-    </p>
-    <p>
-      <strong>Done when:</strong> the accepted edit is in the graph and traceable to its
-      author and pull request. The refused edit changed nothing. The unwind leaves no
-      lasting change, shown by a before-and-after property digest over the touched
-      identities.
+      Carried from <code>catalog-review-surface</code> §4, and already done. On 2026-09-17 the
+      fold-back ran end to end on fork request 20, which carried one edit the lifecycle guard
+      promoted and one it refused. The traceability receipt read back
+      <code>catalog_pr_number</code> 20 with a non-null <code>catalog_reviewer_actor</code>. The
+      unwind left zero differing properties. The refusal was surfaced on the request itself on
+      2026-09-18. The record is
+      <a href="/imas-codex/evidence/catalog-review-surface/fold-back-rehearsal">the fold-back
+      rehearsal</a>. The traceability fields read null across the graph today because the
+      rehearsal was unwound, not because the writer never ran. The release reuses this receipt
+      rather than repeating it. If the fold-back code changes before the physicist's edits
+      return, the rehearsal is re-run.
     </p>
 
     <h2 id="s8">§8 — What this plan does not do</h2>
@@ -226,10 +224,10 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="name-repair-ceiling" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="name-repair-ceiling" data-choice="USD 40, spent only after the Jev work has landed" data-by="Simon McIntosh" data-when="2026-10-12T07:07:10+00:00">
     <p class="r-dec-q">What spend ceiling is authorised for the WEST name repairs and the harmonize run?</p>
     <p class="r-dec-ctx">61 repairs through sn edit plus one documentation pass over 220 entries. The documented campaign spend stood at 107.18 USD on 2026-09-15.</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead ruling 2026-10-12: USD 40 for the WEST name repairs and the harmonize documentation pass, but the Jev judges (evaluation, review cascade) land fully first, since review through Jev is expected to make both passes much cheaper. §2&#x27;s repairs and §3&#x27;s harmonize run are therefore gated on sn-review-through-jev §6.</p>
     </div>
 </section>
 
@@ -241,6 +239,11 @@
     <pre class="r-fu-prompt">/reckon-build sn-west-prototype-release §2</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s7" data-id="c-close-s7" data-who="reckon-review" data-when="2026-10-12T07:20:00Z">
+    <div class="r-comment-body"><p>§7 closes on an existing receipt, not new work. The fold-back rehearsal ran on 2026-09-17 on fork request 20 (one promoted and one refused edit, traceability read back, unwind at zero differing properties), and the refusal was surfaced on the request on 2026-09-18 (2390f87f9). <a href="/imas-codex/evidence/catalog-review-surface/fold-back-rehearsal">evidence</a>. Found by the 2026-10-12 content review, which corrected this plan's earlier claim that the writer had never run.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

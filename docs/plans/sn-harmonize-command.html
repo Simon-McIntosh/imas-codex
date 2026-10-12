@@ -4,27 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-harmonize-command">
-  <meta name="plan-title"     content="sn harmonize: Apply the House Style Family by Family">
-  <meta name="plan-summary"   content="One command that reports and applies house-style conformance over pattern families, replacing sn run --families and sn review --target groups.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort-hours" content="8">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-harmonize-command">
+  <meta name="plan-title" content="sn harmonize: Apply the House Style Family by Family">
+  <meta name="plan-summary" content="One command that reports and applies house-style conformance over pattern families, replacing sn run --families and sn review --target groups.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="8.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S18">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="standard-names,catalog-release">
-  <meta name="plan-blocks"    content="sn-west-prototype-release">
+  <meta name="plan-sprint" content="S18">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names,catalog-release">
+  <meta name="plan-blocks" content="sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-house-style#s4&quot;],&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -59,7 +61,7 @@
     </p>
 
     <h2 id="s2">§2 — One surface, and the two it replaces</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       <code>imas-codex sn harmonize</code> takes one scope — <code>--batch &lt;manifest&gt;</code>
       (for example <code>west-task-2e</code>), <code>--family &lt;seed name&gt;</code>,
@@ -88,7 +90,7 @@
     </p>
 
     <h2 id="s3">§3 — Apply: the anchor first, the members from the anchor</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="3.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>
       For each pattern family in scope:
     </p>
@@ -109,7 +111,22 @@
     </ol>
     <p>
       Names and identities are never touched: this is a documentation-axis operation, so
-      every identity, source binding and spend record survives. The previous documentation
+      every identity, source binding and spend record survives. Names already recommended into
+      a catalog pull request are refused, with the refusal naming each one, unless
+      <code>--force</code> is given with a reason that the run records. The lead ruled this on
+      2026-10-12. "Recommended" covers:
+    </p>
+    <ul>
+      <li>members of a frozen review roster under
+        <code>imas_codex/standard_names/manifests/reviews/</code> whose candidate request is
+        open;</li>
+      <li>names at <code>name_stage</code> <code>approved</code>, accepted through a merged
+        catalog request;</li>
+      <li>names at <code>contested</code>, edited by a reviewer during one.</li>
+    </ul>
+    <p>
+      Moving one of these would change text a physicist has been asked to review, or has
+      already reviewed. The previous documentation
       is snapshotted before reset. <code>sn harmonize --apply</code> is the caller of
       <code>mark_families_for_regen</code> in <code>imas_codex/standard_names/harmonize.py</code>,
       adapted to take a pattern family, and that function takes the snapshot. Its only
@@ -122,12 +139,15 @@
       leaves zero lint errors, one opening template and one flux-surface-average equation.
       Every member stays accepted on the documentation axis. A second
       <code>--apply</code> over the same scope plans zero calls. An anchor deliberately
-      failed in a test leaves its members untouched. A test shows the snapshot exists before
+      failed in a test leaves its members untouched. A family containing one member of an open
+      candidate roster and one <code>approved</code> name is refused for both without
+      <code>--force</code>, and harmonized with it, with the reason recorded on the run. The
+      refusal test fails when the guard is removed. A test shows the snapshot exists before
       the reset, and that the family can be restored from it.
     </p>
 
     <h2 id="s4">§4 — Convergence and cost, measured on a real scope</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="1.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       Before the WEST run, prove the command on one non-WEST family per pattern kind
       (species, component, locus). For each, record calls, spend, wall time, lint findings
@@ -144,32 +164,27 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="command-name" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What is the command called?</p>
-        <p class="r-dec-ctx">"refine" already names the per-name refine pools and sn release-refine-claim.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="harmonize">sn harmonize (recommended)</button>
-          <button class="r-opt" data-value="refine">sn refine</button>
-          <button class="r-opt" data-value="polish">sn polish</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="command-name" data-choice="harmonize" data-by="Simon McIntosh" data-when="2026-10-12T07:04:47+00:00">
+    <p class="r-dec-q">What is the command called?</p>
+    <p class="r-dec-ctx">&quot;refine&quot; already names the per-name refine pools and sn release-refine-claim.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="harmonize">sn harmonize (recommended)</button>
+      <button class="r-opt" data-value="refine">sn refine</button>
+      <button class="r-opt" data-value="polish">sn polish</button>
+      </p>
+    <p class="r-dec-rat">Lead ruling 2026-10-12: sn harmonize. Names recommended into a catalog pull request must not be moved by it except under --force.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-shc-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="general"
-               data-written-by="reckon-review" data-written-at="2026-10-12"
-               data-recommends-skill="/reckon-build sn-harmonize-command §2">
-        <h4 class="r-fu-title">Build the surface and delete the two flags it replaces</h4>
-        <div class="r-fu-body">
-          <p>§2 and §3 both wait on pattern families (<code>sn-catalog-grouping</code> §2) and the conformance checks (<code>sn-house-style</code> §4). A report over the <code>HAS_PARENT</code> grouping would measure the very grouping this command replaces. It writes <code>imas_codex/cli/sn.py</code>, which every review-surface change also writes, so it cannot run beside another node holding that file.</p>
-        </div>
-        <pre class="r-fu-prompt">/reckon-build sn-harmonize-command §2</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-shc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-harmonize-command §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the surface and delete the two flags it replaces</h4>
+    <div class="r-fu-body"><p>§2 and §3 both wait on pattern families (<code>sn-catalog-grouping</code> §2) and the conformance checks (<code>sn-house-style</code> §4). A report over the <code>HAS_PARENT</code> grouping would measure the very grouping this command replaces. It writes <code>imas_codex/cli/sn.py</code>, which every review-surface change also writes, so it cannot run beside another node holding that file.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-harmonize-command §2</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

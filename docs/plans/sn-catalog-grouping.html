@@ -20,11 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-presentation">
   <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;]}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -133,7 +134,8 @@
       pairs with at least one WEST member first.
     </p>
     <p>
-      Jev first judges each pair in the shape of the entity-alignment cookbook:
+      Jev first judges each pair in the shape of the
+      <a href="https://docs.typesafe.ai/cookbooks/entity_alignment.md">entity-alignment cookbook</a>:
     </p>
     <ul>
       <li>one Score with three levels — distinct quantities; related and needing a ruling;
@@ -142,9 +144,13 @@
     </ul>
     <p>
       The worklist is then ordered by that verdict, and every pair arrives showing where it
-      diverges. The verdicts are measured against golden D of
-      <code>sn-judgment-evaluation</code> §4. They order the coordinator's reading and decide
-      nothing on their own. The coordinator classifies each overlap rather than each pair, since
+      diverges. Golden D is binary, so for measurement the Score is read as one number: the
+      probability of its top level, the same quantity. That number's AUC against golden D's
+      synonym-versus-distinct labels is reported once the synonym side exists
+      (<code>sn-judgment-evaluation</code> §5, at least 40 lead-ruled pairs). The middle level
+      routes a pair to the coordinator and is not scored. Until that measurement exists, the
+      verdicts order the coordinator's reading and decide nothing on their own, so the
+      adjudication need not wait for the golden. The coordinator classifies each overlap rather than each pair, since
       one ruling settles every pair the overlap produces:
     </p>
     <ul>

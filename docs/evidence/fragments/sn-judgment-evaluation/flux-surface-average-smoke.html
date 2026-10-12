@@ -1,0 +1,42 @@
+<!-- Coordinator smoke read of Jev on standard-name documentation, 2026-10-12.
+     Script: docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.py
+     (bounded read of four named StandardName nodes; one call_decisions request per entry,
+     model typesafe/jev-1.13, service standard-names). No graph write. Spend USD 0.000183. -->
+<section id="flux-surface-average-smoke" data-reckon="evidence">
+  <h2 id="flux-surface-average-smoke-heading">Smoke read: can Jev tell flux-surface-average forms and boundary glosses apart?</h2>
+
+  <p id="flux-surface-average-smoke-intro">
+    Four boundary flux-surface-averaged density entries were each asked three questions in one
+    request. Two were categorising Choices: the form of the flux-surface-average equation, and
+    how the plasma boundary is glossed. One was a narrow Noul: whether the equation weights the
+    line element by the total field <code>B</code> where the poloidal field <code>B_p</code>
+    belongs. The expected answers come from reading the stored documentation. The carbon entry
+    writes <code>\oint n_C\,dl/B</code>, the argon entry the poloidal line form, and the
+    beryllium and electron entries the surface form. All four call the boundary the separatrix.
+  </p>
+
+  <table id="flux-surface-average-smoke-table">
+    <caption>Jev answers per entry. Probabilities are those of the chosen option; the wrong-field column is the Noul's probability of yes.</caption>
+    <thead>
+      <tr><th>Entry</th><th>Equation form (expected)</th><th>Choice</th><th>p</th><th>Wrong-field Noul</th><th>Boundary gloss</th><th>Latency</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>carbon</td><td>line, total field (wrong)</td><td>line_total_field</td><td>1.00</td><td>0.53</td><td>separatrix_equated</td><td>0.5 s</td></tr>
+      <tr><td>argon</td><td>line, poloidal field</td><td>line_poloidal</td><td>1.00</td><td>0.03</td><td>separatrix_equated</td><td>0.4 s</td></tr>
+      <tr><td>beryllium</td><td>surface</td><td>surface</td><td>1.00</td><td>0.04</td><td>separatrix_equated</td><td>0.3 s</td></tr>
+      <tr><td>electron</td><td>surface</td><td>surface</td><td>1.00</td><td>0.04</td><td>separatrix_equated</td><td>0.4 s</td></tr>
+    </tbody>
+  </table>
+
+  <p id="flux-surface-average-smoke-reading">
+    The two Choices agree with the reading on all four entries. The Noul separates the
+    defective entry only weakly: 0.53 against 0.03 to 0.04, a gap a threshold could use but
+    that sits near indifference. With four entries this is a smoke read, not a measurement.
+    It supports one design choice and nothing more: ask a categorising Choice over the forms
+    a check must tell apart, rather than a narrow yes-or-no on one defect. The beryllium
+    gloss was confirmed in its text ("evaluated on the separatrix, the outermost closed magnetic
+    flux surface"). The same read found a second defect class. The beryllium entry links
+    "beryllium density at the plasma boundary" to its own identity rather than to the
+    unaveraged quantity.
+  </p>
+</section>

@@ -4,26 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-selection-over-generation">
-  <meta name="plan-title"     content="Select, Don't Generate: New Jev Patterns For Standard Names">
-  <meta name="plan-summary"   content="Prototype untried Jev patterns: grammar segments chosen from the vocabulary, links and anchors selected, prompts reranked, risk-ordered reading.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="mid">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-selection-over-generation">
+  <meta name="plan-title" content="Select, Don&#x27;t Generate: New Jev Patterns For Standard Names">
+  <meta name="plan-summary" content="Prototype untried Jev patterns: grammar segments chosen from the vocabulary, links and anchors selected, prompts reranked, risk-ordered reading.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="12.5">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="moderate">
-  <meta name="plan-sprint"    content="S19">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="standard-names">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+  <meta name="plan-sprint" content="S18">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s7&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-harmonize-command#s3&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="4">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -60,7 +62,7 @@
     </p>
 
     <h2 id="s2">§2 — Grammar segments chosen from the vocabulary</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       Given a DD path, its documentation and its enriched description, Jev answers one Choice
       per grammar slot over that slot's closed ISN vocabulary: physical base, subject, component,
@@ -84,31 +86,36 @@
       the fragment reports exact-name match, per-slot accuracy, and agreement across the members
       of each species family (whether all seventeen boundary densities receive the same base,
       operator and locus). The composer's figures on the same sources sit beside them, along with
-      cost per name. It ends with a stated recommendation: cross-check, generator, or neither.
+      cost per name. The recommendation follows from those numbers by a rule fixed here, before
+      the run:
     </p>
-
-    <h2 id="s3">§3 — Links and anchors selected, not guessed</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="2.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <ul>
-      <li><strong>Link labels.</strong> A Noul per <code>name:</code> link asks whether the link
+      <li><strong>Cross-check</strong> if flagging composer-against-Jev disagreement separates
+        golden A's negatives from its positives with AUC at or above 0.70, and the interval's
+        lower bound is above 0.60.</li>
+      <li><strong>Generator</strong> if Jev's exact-name match on the positives is within 0.02
+        of the composer's, and its family agreement is higher.</li>
+      <li><strong>Both</strong> if both conditions hold; <strong>neither</strong> if neither
+        does.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Links that point where their label says</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      <strong>Link labels.</strong> A Noul per <code>name:</code> link asks whether the link
         text describes the target's description. The 2026-10-12 smoke read found
         <code>flux_surface_averaged_beryllium_density_at_plasma_boundary</code> linking "beryllium
         density at the plasma boundary" to itself rather than to the unaveraged quantity.
         Deterministic code catches self-links. The judgment catches a link to the wrong
-        neighbour.</li>
-      <li><strong>Family anchors.</strong> A Score per family member rates how well its
-        documentation would serve as the family template, compared with
-        <code>select_anchor</code> in <code>imas_codex/standard_names/harmonize.py</code>.</li>
-    </ul>
+        neighbour.
+    </p>
     <p>
       <strong>Done when:</strong> on a coordinator-labelled sample of at least 150 links,
-      including every self-link found, link-label AUC is reported with its interval. On ten
-      families, the Jev-chosen anchor and the heuristic anchor are each used to harmonize, and the
-      lint findings after each are compared.
+      including every self-link found, link-label AUC is reported with its interval.
     </p>
 
     <h2 id="s4">§4 — Prompts that see the right neighbours</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="2.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
       The compose and documentation prompts carry a comparator block of nearby names and a set of
       scored exemplars, both selected by embedding similarity. Rerank each with
@@ -125,7 +132,7 @@
     </p>
 
     <h2 id="s5">§5 — Read the riskiest entries first</h2>
-    <section data-reckon="section" data-id="s5" data-effort-hours="1.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s5" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
       A person's reading time is the scarcest resource in the release: the WEST polish pass, then
       the physicist's review. Order both by a Jev risk composite of the named checks most likely
@@ -138,7 +145,7 @@
     </p>
 
     <h2 id="s6">§6 — Acceptance learned from judgments</h2>
-    <section data-reckon="section" data-id="s6" data-effort-hours="2.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       The feature-discovery pattern: treat Jev's answers (check probabilities and dimension
       distributions) as features, and fit a small, inspectable model (logistic regression first)
@@ -153,19 +160,18 @@
       adopt-or-not verdict and its reason.
     </p>
 
+    <h2 id="s7">§7 — The family template chosen, not defaulted</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>When <code>sn harmonize</code> rewrites a family from its anchor, the anchor sets every member's template, so a weak anchor spreads its weaknesses. Today <code>select_anchor</code> in <code>imas_codex/standard_names/harmonize.py</code> picks it by heuristic. Jev asks one Score per member: how well would this member's documentation serve as the template for the whole family? It reads the member's documentation, the family's pattern and the house-style template. The highest-scoring member is the candidate anchor.</p><p><strong>Done when:</strong> on ten families, each is harmonized twice in a scratch graph, once from the heuristic anchor and once from the Jev anchor. The fragment reports the lint findings after each and the documentation review scores of the members, and the Jev anchor is adopted only if its families show fewer findings with no lower scores.</p>
+
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-ssog-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="general"
-               data-written-by="reckon-review" data-written-at="2026-10-12"
-               data-recommends-skill="/reckon-build sn-selection-over-generation §3">
-        <h4 class="r-fu-title">Links and prompt reranks need no golden beyond a small labelled sample; start there</h4>
-        <div class="r-fu-body">
-          <p>§3 and §4 measure against small coordinator-labelled samples and can run as soon as the evaluation module exists. §2, §5 and §6 wait on golden A.</p>
-        </div>
-        <pre class="r-fu-prompt">/reckon-build sn-selection-over-generation §3</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ssog-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-selection-over-generation §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Links and prompt reranks need no golden beyond a small labelled sample; start there</h4>
+    <div class="r-fu-body"><p>§3 and §4 measure against small coordinator-labelled samples and can run as soon as the evaluation module exists. §2, §5 and §6 wait on golden A.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-selection-over-generation §3</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
