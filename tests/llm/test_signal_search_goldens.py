@@ -1,21 +1,26 @@
 """Golden harness for facility signal search over the graded question fixture.
 
-Five ranking arms and a seeded random control are scored on the questions in
+Four ranking arms and a seeded random control are scored on the questions in
 ``tests/llm/fixtures/signal_search_questions.json``:
 
 ``current_tool``  the product ranking (``_rank_signals`` in ``search_tools``):
                   vector on descriptions boosted by a full-text keyword match.
+``additive_rule`` that same additive rule frozen here (vector and full-text,
+                  0.7 of the cosine plus 0.3 of the text score plus 0.1 for a
+                  signal found by both, the text score alone for a text-only
+                  signal, cut at ``K``), so the arm goes on measuring the rule
+                  the product ships today even after the product ranking is
+                  rewritten.
 ``vector_only``   vector on descriptions alone, pool 100.
 ``rrf``           reciprocal rank fusion of the 100-candidate vector pool and
                   the 50-candidate full-text pool.
-``rrf_rerank``    ``rrf``'s top 60 reordered by a generic Jev relevance score.
-``rrf_rerank_role``  ``rrf``'s top 60 reordered by the role-aware Jev question.
 
-The two Jev arms spend money on the discovery-relevance seat, so a default run
-does not build them: ``arm_ranking`` returns the fused order for a Jev arm and
-records that the rerank permutation was not applied, unless the environment
-sets ``SIGNAL_SEARCH_JEV_ARMS=1``. A stub rerank is used only where a test needs
-the arm to produce an order without spending.
+Two further arms, ``rrf_rerank`` and ``rrf_rerank_role``, reorder the fused
+pool with a Jev relevance score and so spend on the discovery-relevance seat;
+they are scored by a measurement that runs outside pytest. ``arm_ranking`` can
+still build them when ``ctx.spend_jev`` is set, and this module keeps the
+functions and the role-aware question they need, but no test here reaches the
+paid endpoint, so a default run spends nothing.
 
 Every question's candidates that an arm places in its top 10 must be labelled
 under the fixture's grading rule before that arm is scored. A candidate with no
@@ -39,7 +44,6 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import random
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timezone
@@ -63,12 +67,13 @@ CONTROL_SEED = 20261012
 # rather than silently widening the population.
 CANONICAL_ENRICHED_AT_CUTOVER = "2026-10-11T21:08:54Z"
 
-# Set to "1" to build and score the two Jev rerank arms, which spend on the
-# discovery-relevance seat. A default run leaves this unset and spends nothing.
+# Set to "1" to select the two Jev rerank arms in the measurement that scores
+# them outside pytest. This suite reads it nowhere, so a pytest run never
+# spends on the discovery-relevance seat.
 JEV_ARMS_ENV = "SIGNAL_SEARCH_JEV_ARMS"
 
 # Arms whose ranking is reordered by a Jev judgement and therefore spends on the
-# discovery-relevance seat. A default run does not build them.
+# discovery-relevance seat. No test in this module builds them.
 JEV_ARMS = ("rrf_rerank", "rrf_rerank_role")
 
 # The role-aware relevance question, written to five relevance levels: a
@@ -249,6 +254,32 @@ def _rf_ranks(ids: list[str]) -> list[dict]:
     return [{"id": sid} for sid in ids]
 
 
+def _additive_rank(gc, embedding, question: Question, k: int) -> list[str]:
+    """The additive rule, frozen here rather than read from ``_rank_signals``.
+
+    Vector search on descriptions over ``k`` candidates, then each full-text
+    hit over ``k`` candidates: a signal found by both takes ``0.7`` of its
+    cosine plus ``0.3`` of its text score plus ``0.1``; a text-only signal
+    takes its text score alone and is appended. The result is a stable sort by
+    descending score, so ties keep the vector order first and the text-only
+    appends after, cut at ``k``. Freezing the rule here is what lets the arm
+    keep measuring the product's current ranking after the product rewrote it.
+    """
+    from imas_codex.llm.search_tools import _text_search_signals, _vector_search_signals
+
+    facility = json_fixture["eligibility"]["facility"]
+    signal_ids, scores = _vector_search_signals(gc, embedding, facility, k, None, None)
+    for row in _text_search_signals(gc, question.query, facility, k):
+        sid = row["id"]
+        text_score = round(row["score"], 3)
+        if sid in scores:
+            scores[sid] = round(scores[sid] * 0.7 + text_score * 0.3 + 0.1, 3)
+        else:
+            scores[sid] = text_score
+            signal_ids.append(sid)
+    return sorted(set(signal_ids), key=lambda sid: scores.get(sid, 0), reverse=True)[:k]
+
+
 def eligible_signal_ids(gc=None) -> set[str]:
     """Signal ids the fixture's predicate admits, for the fixture's facility.
 
@@ -298,6 +329,11 @@ def arm_ranking(question: Question, ctx) -> list[str]:
             ctx.gc, ctx.embedding, question.query, facility, K, None, None
         )
         return keep(ids)[:K]
+    if arm == "additive_rule":
+        # The frozen rule cuts at K before the filter, exactly as the product
+        # ranking does, so the two are the same order while the product still
+        # carries this rule.
+        return keep(_additive_rank(ctx.gc, ctx.embedding, question, K))[:K]
     vec_ids, text_ids = _fusion_streams(ctx.gc, ctx.embedding, question)
     if arm == "vector_only":
         return keep(vec_ids)[:K]
@@ -657,23 +693,19 @@ def _open_context(
 
 
 @pytest.mark.graph
-def test_five_arm_table_matches_the_control_below_every_arm() -> None:
-    """Five-arm table on pooled labels; the control sits below every arm.
+def test_four_arm_table_matches_the_control_below_every_arm() -> None:
+    """Four-arm table on pooled labels; the control sits below every arm.
 
-    Scores all five arms and the control and asserts the control is below each
-    arm on mean nDCG@10. An unlabelled candidate in any arm's top 10 fails the
-    test, naming it, rather than skipping: a skipped table would read as a pass.
+    Scores the four deterministic arms and the control and asserts the control
+    is below each arm on mean nDCG@10. An unlabelled candidate in any arm's top
+    10 fails the test, naming it, rather than skipping: a skipped table would
+    read as a pass.
     """
-    spend_jev = os.environ.get(JEV_ARMS_ENV) == "1"
-    arms = ["current_tool", "vector_only", "rrf"]
-    if spend_jev:
-        arms += list(JEV_ARMS)
+    arms = ["current_tool", "additive_rule", "vector_only", "rrf"]
     eligible = eligible_signal_ids()
     rows: list[dict] = []
     for arm in arms:
-        rows.extend(
-            score_arm(arm, _open_context(arm, spend_jev=spend_jev, eligible=eligible))
-        )
+        rows.extend(score_arm(arm, _open_context(arm, eligible=eligible)))
     rows.extend(score_control(eligible=eligible))
     table = {
         a: mean([r for r in rows if r["arm"] == a], "ndcg@10")
@@ -683,3 +715,34 @@ def test_five_arm_table_matches_the_control_below_every_arm() -> None:
     control = table["random_control"]
     for arm in arms:
         assert table[arm] > control, (arm, table[arm], control)
+
+
+@pytest.mark.graph
+def test_the_frozen_additive_rule_reproduces_the_product_ranking() -> None:
+    """``additive_rule`` and ``current_tool`` order every question identically.
+
+    The frozen rule is a copy of the product ranking's arithmetic, so on the
+    head where it was copied the two arms must return the same order on every
+    question — if they differ, the copy is wrong. When the product ranking is
+    rewritten the frozen arm keeps measuring the old rule and this pin is
+    retired: a divergence here is then the product change, not a defect.
+    """
+    from imas_codex.embeddings import Encoder
+    from imas_codex.embeddings.config import EncoderConfig
+    from imas_codex.graph.client import GraphClient
+
+    gc = GraphClient()
+    encoder = Encoder(EncoderConfig())
+    eligible = eligible_signal_ids(gc)
+    current_ctx = _open_context(
+        "current_tool", gc=gc, encoder=encoder, eligible=eligible
+    )
+    frozen_ctx = _open_context(
+        "additive_rule", gc=gc, encoder=encoder, eligible=eligible
+    )
+    for question in QUESTIONS:
+        current_ctx.embedding = current_ctx.embedding_for(question)
+        frozen_ctx.embedding = frozen_ctx.embedding_for(question)
+        assert arm_ranking(question, frozen_ctx) == arm_ranking(
+            question, current_ctx
+        ), question.id
