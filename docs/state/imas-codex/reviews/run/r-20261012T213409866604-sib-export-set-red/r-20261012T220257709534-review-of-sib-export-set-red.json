@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite resolves to negative_control.log (base 1d5af84bd, fixtures reverted, 12 failed + 3 errors, 15 failing ids), after_suite to head_gate.log (head 0562db25b, 60 passed, 0 failing ids); the symmetric difference is empty, so 0 failures were added.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/export.py:_has_producing_source",
+    "imas_codex/standard_names/export.py:_classify_export_population",
+    "imas_codex/standard_names/export.py:_published_identity_roles"
+  ],
+  "completed_at": "2026-10-12T22:14:15.215Z",
+  "dispatched_at": "2026-10-12T22:03:10Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T213409866604-sib-export-set-red/manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are prose (\"60 selected ...\") rather than a JSON object carrying log_path, so reckon's own annotate_review_of_run resolves no gate log from the reviewed run's manifest and records added_failure_count as unmeasured; the logs exist and are named only inside the prose."
+    },
+    {
+      "file": "tests/standard_names/test_catalog_layout_hierarchy.py",
+      "line": "781",
+      "severity": "follow-on",
+      "text": "follow-on: the comment above the flags says \"a Data Dictionary extraction reached this name directly\", the non-derived producer, while the values set _has_derived_producer=True and _has_non_derived_producer=False, so the comment misdescribes the fixture it annotates."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit-by-commit against 1d5af84b; commit 0562db25b adds five topology flags into eight test fixtures and writes the fragment, commit 7eb27a00a rewrites the fragment's measure table, and no product file changes.",
+    "done_when": "the done_when requires the fifteen to pass at head and the export set to add no failing test id against base with baseline_suite/after_suite recorded; head_gate.log records 60 passed EXIT=0 at 0562db25b and negative_control.log records the base arm at 1d5af84bd as 12 failed/3 errors EXIT=1.",
+    "goal": "the node goal is to restore the fifteen red export/catalog tests by repairing stale fixtures; read against the two-commit diff at base 1d5af84b, the eight repaired builders (tests/standard_names/test_export_exit_accounting.py:66 and peers) now carry the five producing-source flags, and head_gate.log shows all sixty passing.",
+    "manifest": "read; it records commits 0562db25b and 7eb27a00a, the fifteen ids, the base/after arms and the negative-control log, but its baseline_suite/after_suite fields are prose that names no log_path the reader resolves.",
+    "write_paths": "the manifest declares the eight test files, imas_codex/standard_names/export.py and the fragment; git diff --name-only 1d5af84bd..7eb27a00a lists exactly those eight test files plus the fragment, with export.py unchanged, so nothing leaves the fence."
+  },
+  "justifications": {
+    "durability": "negative_control.log reverts only the fixtures over identical product code and reddens the fifteen ids, showing each repaired fixture is load-bearing for its test.",
+    "evidence": "head_gate.log records 60 passed EXIT=0 at 0562db25b and negative_control.log records the base arm at 1d5af84bd as 12 failed/3 errors EXIT=1, but the manifest's baseline_suite line names no resolvable log_path so reckon's annotate_review_of_run derives an unmeasured count from it.",
+    "fit": "the added fixture comments describe the mechanism with no plan or commit label, though tests/standard_names/test_catalog_layout_hierarchy.py:781's comment names a non-derived producer while its value sets _has_derived_producer=True.",
+    "goal_fidelity": "tests/standard_names/test_export_exit_accounting.py:66 now carries _has_non_derived_producer so the classifier admits the row and reaches the branch under test, and head_gate.log records all sixty passing.",
+    "reuse": "the diff adds no function or module and extends the existing candidate-dict shape the population projection defines, so no capability is forked.",
+    "scope_discipline": "git diff --name-only 1d5af84bd..7eb27a00a lists only the eight declared test files and the fragment, and imas_codex/standard_names/export.py is unchanged."
+  },
+  "plan": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to restore the fifteen red export/catalog tests by repairing stale fixtures; read against the two-commit diff at base 1d5af84b, the eight repaired builders (tests/standard_names/test_export_exit_accounting.py:66 and peers) now carry the five producing-source flags, and head_gate.log shows all sixty passing.\nVERDICT done_when: the done_when requires the fifteen to pass at head and the export set to add no failing test id against base with baseline_suite/after_suite recorded; head_gate.log records 60 passed EXIT=0 at 0562db25b and negative_control.log records the base arm at 1d5af84bd as 12 failed/3 errors EXIT=1.\nVERDICT write_paths: the manifest declares the eight test files, imas_codex/standard_names/export.py and the fragment; git diff --name-only 1d5af84bd..7eb27a00a lists exactly those eight test files plus the fragment, with export.py unchanged, so nothing leaves the fence.\nVERDICT manifest: read; it records commits 0562db25b and 7eb27a00a, the fifteen ids, the base/after arms and the negative-control log, but its baseline_suite/after_suite fields are prose that names no log_path the reader resolves.\nVERDICT diff: read commit-by-commit against 1d5af84b; commit 0562db25b adds five topology flags into eight test fixtures and writes the fragment, commit 7eb27a00a rewrites the fragment's measure table, and no product file changes.\nCALL_SITES: imas_codex/standard_names/export.py:_has_producing_source, imas_codex/standard_names/export.py:_classify_export_population, imas_codex/standard_names/export.py:_published_identity_roles\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/test_export_exit_accounting.py:66 now carries _has_non_derived_producer so the classifier admits the row and reaches the branch under test, and head_gate.log records all sixty passing.\nSCORE evidence: 16\nJUSTIFICATION evidence: head_gate.log records 60 passed EXIT=0 at 0562db25b and negative_control.log records the base arm at 1d5af84bd as 12 failed/3 errors EXIT=1, but the manifest's baseline_suite line names no resolvable log_path so reckon's annotate_review_of_run derives an unmeasured count from it.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 1d5af84bd..7eb27a00a lists only the eight declared test files and the fragment, and imas_codex/standard_names/export.py is unchanged.\nSCORE durability: 17\nJUSTIFICATION durability: negative_control.log reverts only the fixtures over identical product code and reddens the fifteen ids, showing each repaired fixture is load-bearing for its test.\nSCORE fit: 17\nJUSTIFICATION fit: the added fixture comments describe the mechanism with no plan or commit label, though tests/standard_names/test_catalog_layout_hierarchy.py:781's comment names a non-derived producer while its value sets _has_derived_producer=True.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function or module and extends the existing candidate-dict shape the population projection defines, so no capability is forked.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T213409866604-sib-export-set-red/manifest.md:1 follow-on: baseline_suite and after_suite are prose (\"60 selected ...\") rather than a JSON object carrying log_path, so reckon's own annotate_review_of_run resolves no gate log from the reviewed run's manifest and records added_failure_count as unmeasured; the logs exist and are named only inside the prose.\nFINDING tests/standard_names/test_catalog_layout_hierarchy.py:781 follow-on: the comment above the flags says \"a Data Dictionary extraction reached this name directly\", the non-derived producer, while the values set _has_derived_producer=True and _has_non_derived_producer=False, so the comment misdescribes the fixture it annotates.\n",
+  "review_run_id": "r-20261012T220257709534-review-of-sib-export-set-red",
+  "reviewed_base_sha": "1d5af84bd3107ad903111a6e37196b4e14df3b9f",
+  "reviewed_commit": "7eb27a00a64b8095b9a2de87fdfb11ed0ec1ef53",
+  "reviewed_head_sha": "7eb27a00a64b8095b9a2de87fdfb11ed0ec1ef53",
+  "reviewed_revision": "7eb27a00a",
+  "reviewed_run_id": "r-20261012T213409866604-sib-export-set-red",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-export-set-red",
+  "reviewer_node": "review-of-sib-export-set-red",
+  "reviewer_run_id": "r-20261012T220257709534-review-of-sib-export-set-red",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "section": "25",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:20:00+00:00",
+  "total": 108
+}
