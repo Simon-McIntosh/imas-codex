@@ -204,6 +204,14 @@ def test_valid_without_observed_validation_is_withheld() -> None:
             "docs_review_quorum_shortfall": None,
             "_has_docs_review": True,
             "_has_winning_docs_review": True,
+            # The producing-source topology the population query projects onto
+            # every candidate; without it the classifier withholds the row
+            # before the validation-observation branch under test.
+            "_has_dd_source_binding": True,
+            "_has_derived_producer": False,
+            "_has_non_derived_producer": True,
+            "_has_live_child": False,
+            "_is_parent": False,
             # ``_validation_observed_at`` deliberately omitted.
         },
         {
@@ -215,6 +223,11 @@ def test_valid_without_observed_validation_is_withheld() -> None:
             "docs_review_quorum_shortfall": None,
             "_has_docs_review": True,
             "_has_winning_docs_review": True,
+            "_has_dd_source_binding": True,
+            "_has_derived_producer": False,
+            "_has_non_derived_producer": True,
+            "_has_live_child": False,
+            "_is_parent": False,
             "_validation_observed_at": None,
         },
         {
@@ -226,6 +239,11 @@ def test_valid_without_observed_validation_is_withheld() -> None:
             "docs_review_quorum_shortfall": None,
             "_has_docs_review": True,
             "_has_winning_docs_review": True,
+            "_has_dd_source_binding": True,
+            "_has_derived_producer": False,
+            "_has_non_derived_producer": True,
+            "_has_live_child": False,
+            "_is_parent": False,
             "_validation_observed_at": "2026-09-08T00:00:00Z",
         },
     ]
