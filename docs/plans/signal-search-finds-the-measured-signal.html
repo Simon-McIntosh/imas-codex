@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -149,8 +149,8 @@
       the fleet allocation, not the login node.
     </p>
     <p>
-      <strong>Done when</strong> the fixture holds at least seventeen questions, six of them held out. Every arm's top 10
-      on every question carries a label. The harness prints the five-arm table on the pooled labels, and the random
+      <strong>Done when</strong> the fixture holds at least seventeen questions, six of them held out. The harness refuses to
+      score an arm whose top 10 on any question holds an unlabelled candidate, and names the candidate. It prints the five-arm table on the pooled labels, and the random
       control scores below every arm on mean nDCG@10; a control that does not means the labels are wrong. The table and
       the labelling log are in
       <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html</code>.
@@ -169,9 +169,11 @@
       values, then cuts to <code>k</code>.
     </p>
     <p>
-      The docs and code tools rerank after fusing, so their gain will be smaller. Their 18-question JT-60SA labels from
-      <a href="/imas-codex/plans/discovery-judgments-through-jev">discovery-judgments-through-jev</a> §9 guard against
-      regression. That plan's §13 places four code and docs answers at embedding ranks 159 to 181; the additive rule may
+      The docs and code tools rerank after fusing, so their gain will be smaller. Their 18 JT-60SA questions and hand labels, built
+      for <a href="/imas-codex/plans/discovery-judgments-through-jev">discovery-judgments-through-jev</a>, guard against
+      regression. The questions and labels are <code>queries.json</code> and <code>labels.json</code> in
+      <code>~/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/</code>, and the recorded 0.4821 comes from
+      the pool sweep in <code>docs/evidence/fragments/discovery-judgments-through-jev/search-rerank.html</code>. That plan's §13 places four code and docs answers at embedding ranks 159 to 181; the additive rule may
       be part of why, so re-place them after this lands. <code>_hybrid_ids</code> feeds the map candidate stage, so land
       this between <code>imas map run</code> invocations, never during one.
     </p>
@@ -208,7 +210,8 @@
     <p>
       <strong>Done when</strong> a census over all FacilitySignal nodes finds none whose <code>embedded_text_hash</code>
       differs from the hash of its current embed text. A test shows that an individualisation write re-embeds, and the
-      same test fails against the current writer. The harness on the head of this section is no lower than on §4's head.
+      same test fails against the current writer. The harness on the head of this section is no lower than on the revision the section
+      was dispatched from, so the comparison holds whether §4 has landed or not.
     </p>
 
     <h2 id="s6">§6 — Index the words a searcher types</h2>
@@ -221,8 +224,8 @@
       DC voltage, which the current index cannot match.
     </p>
     <p>
-      <strong>Done when</strong> the index definition carries the seven fields and the harness is no lower than on §5's
-      head. A positive control passes: a query that matches only through a newly indexed field, such as an alias code or
+      <strong>Done when</strong> the index definition carries the seven fields and the harness is no lower than on the revision
+      the section was dispatched from. A positive control passes: a query that matches only through a newly indexed field, such as an alias code or
       a catalogue phrase, places its target in the top 10. The same query against the old index must not; that is the
       negative control.
     </p>
@@ -284,7 +287,8 @@
     <p>
       <strong>Done when</strong> no golden question's <code>k=20</code> report holds two rows with the same template in
       the same category. The booster question's report falls from 341 lines to at most 120 while still naming all four
-      booster voltages. The harness, which scores members, is no lower than on the previous head.
+      booster voltages. The harness, which scores members, is no lower than on the revision the section was
+      dispatched from.
     </p>
 
     <h2 id="s10">§10 — Correct the descriptions search exposed</h2>
@@ -304,8 +308,12 @@
       </tbody>
     </table>
     <p>
-      Add glossary entries to the facility configuration's EDAS enrichment glossary: <code>SNU</code>, <code>EFCC</code>,
-      <code>BPS</code>, <code>QPC</code>, <code>DR</code>, <code>HTS</code> and <code>FPPCC</code>. Re-enrich the
+      The glossary is <code>signal_glossary</code> in <code>imas_codex/config/facilities/jt-60sa.yaml</code>, read by the
+      enrichment in <code>imas_codex/discovery/signals/parallel.py</code>. It already defines <code>EFCC</code> correctly, yet
+      the <code>PSSCfst/refvcEFC*</code> descriptions still say converter: their data names spell it <code>EFC</code>, which
+      the entry does not match. So make each entry reach the abbreviations the data names actually use, then add the
+      missing terms: <code>SNU</code>, <code>BPS</code>, <code>QPC</code>, <code>DR</code>, <code>HTS</code> and
+      <code>FPPCC</code>. Re-enrich the
       affected families through the pipeline, never by patching rows in place. Check the swapped references against the
       EDDB catalogue first: a swap that exists in the catalogue is recorded, not "corrected". The diagnostic tags come
       from the enrichment judgment that
