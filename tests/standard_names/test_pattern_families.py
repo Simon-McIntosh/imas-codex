@@ -300,12 +300,21 @@ def test_pattern_signature_carries_the_entity_locus():
 
 
 def test_members_query_compares_every_invariant_segment():
-    """Dropping an invariant column from the Cypher drops it from this set."""
+    """The members query keys a family on exactly the invariant segments.
+
+    The expected list is written out here, independent of the constant the
+    query is generated from, so a segment dropped from the generated Cypher
+    fails this test instead of moving both sides of the comparison together.
+    """
     from imas_codex.standard_names.families import _PATTERN_FAMILY_MEMBERS_QUERY
 
-    assert set(_compared_columns(_PATTERN_FAMILY_MEMBERS_QUERY)) == set(
-        PATTERN_INVARIANT_SEGMENTS
-    )
+    assert set(_compared_columns(_PATTERN_FAMILY_MEMBERS_QUERY)) == {
+        "physical_base",
+        "geometric_base",
+        "transformation",
+        "process",
+        "object",
+    }
 
 
 # ---------------------------------------------------------------------------

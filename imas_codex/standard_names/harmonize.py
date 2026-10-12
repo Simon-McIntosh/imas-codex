@@ -21,12 +21,12 @@ from typing import Any
 
 from imas_codex.graph.models import NameStage
 from imas_codex.standard_names.context import DOCUMENTATION_FAMILY_OPERATOR_KINDS
-from imas_codex.standard_names.defaults import (
-    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-)
 from imas_codex.standard_names.families import (
+    DOCS_STAGE_ACCEPTED,
     PATTERN_INVARIANT_SEGMENTS,
+    _invariant_projection,
     fetch_pattern_family,
+    select_anchor,
 )
 
 #: Operator kinds eligible for parent-based family grouping.
@@ -44,9 +44,6 @@ _FAMILY_REDUCTION_OPERATORS: tuple[str, ...] = (
     "minimum_over_flux_surface",
 )
 
-#: docs_stage value indicating an accepted documentation revision.
-_DOCS_STAGE_ACCEPTED = "accepted"
-
 _TOKEN_RE = re.compile(r"[a-zA-Z]+|\d+")
 
 
@@ -61,12 +58,6 @@ def doc_sig(desc: str, n: int = 6) -> str:
     tokens = _TOKEN_RE.findall((desc or "").lower())
     normalized = ["#" if tok.isdigit() else tok for tok in tokens[:n]]
     return " ".join(normalized)
-
-
-def _is_placeholder(description: str | None) -> bool:
-    return (
-        not description or description == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
-    )
 
 
 def drift(members: list[dict[str, Any]], *, n: int = 6) -> float:
@@ -102,66 +93,6 @@ def group_signature(members: list[dict[str, Any]]) -> str:
         per_member_hashes.append(hashlib.sha256(content.encode("utf-8")).hexdigest())
     payload = ids_part + "|" + "|".join(sorted(per_member_hashes))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-
-def select_anchor(
-    parent_id: str | None,
-    parent_docs_stage: str | None,
-    parent_description: str | None,
-    members: list[dict[str, Any]],
-) -> str | None:
-    """Select the documentation anchor for a family.
-
-    Priority order:
-      1. The parent itself, if ``docs_stage == 'accepted'`` and its
-         description is real (non-placeholder).
-      2. The member with the highest ``reviewer_score_docs`` among members
-         with ``docs_stage == 'accepted'`` — the best signal we have that a
-         member already meets the docs standard (accepted-but-unscored breaks
-         ties deterministically by id).
-      3. Last resort (no accepted member): a non-placeholder member chosen
-         deterministically by id — NEVER by longest description, which
-         propagates a verbose, non-canonical opening into the family.
-
-    The anchor deliberately carries NO vocabulary or phrasing knowledge: the
-    canonical opening a family should converge on is defined by the docs
-    prompt/context, not hardcoded here. Score + determinism is the data-driven
-    proxy — a member that already meets the standard scores well.
-
-    Returns ``None`` when no candidate qualifies (family is flagged
-    ``deferred`` by the caller).
-    """
-    if (
-        parent_id
-        and parent_docs_stage == _DOCS_STAGE_ACCEPTED
-        and not _is_placeholder(parent_description)
-    ):
-        return parent_id
-
-    accepted = [
-        m
-        for m in members
-        if m.get("docs_stage") == _DOCS_STAGE_ACCEPTED
-        and not _is_placeholder(m.get("description"))
-    ]
-    scored = [m for m in accepted if m.get("reviewer_score_docs") is not None]
-    if scored:
-        best = max(
-            scored,
-            key=lambda m: (m.get("reviewer_score_docs") or 0.0, m.get("id") or ""),
-        )
-        return best.get("id")
-    if accepted:
-        # Accepted but unscored — deterministic by id (NOT longest description).
-        return min(accepted, key=lambda m: m.get("id") or "").get("id")
-
-    non_placeholder = [m for m in members if not _is_placeholder(m.get("description"))]
-    if non_placeholder:
-        # Last resort — deterministic by id (NOT longest description); picking
-        # by length propagates a verbose, non-canonical opening to the family.
-        return min(non_placeholder, key=lambda m: m.get("id") or "").get("id")
-
-    return None
 
 
 def _top_divergent_member(
@@ -444,7 +375,7 @@ def build_worklist(
                 members,
             )
             docs_accepted = sum(
-                1 for m in members if m.get("docs_stage") == _DOCS_STAGE_ACCEPTED
+                1 for m in members if m.get("docs_stage") == DOCS_STAGE_ACCEPTED
             )
             kinds_seen = sorted(
                 {m.get("operator_kind") for m in members if m.get("operator_kind")}
@@ -469,10 +400,7 @@ def build_worklist(
             )
 
         if include_parentless:
-            invariants = ",\n".join(
-                f"     coalesce(c.{seg}, '') AS {seg}"
-                for seg in PATTERN_INVARIANT_SEGMENTS
-            )
+            invariants = _invariant_projection("c")
             parentless_rows = (
                 resolved_gc.query(
                     f"""
@@ -522,7 +450,7 @@ def build_worklist(
 
                 anchor = select_anchor(None, None, None, members)
                 docs_accepted = sum(
-                    1 for m in members if m.get("docs_stage") == _DOCS_STAGE_ACCEPTED
+                    1 for m in members if m.get("docs_stage") == DOCS_STAGE_ACCEPTED
                 )
                 worklist.append(
                     {
@@ -679,7 +607,7 @@ def stamp_harmonized(
             )
             members = _documentation_family_members([dict(r) for r in rows])
             if not members or any(
-                m.get("docs_stage") != _DOCS_STAGE_ACCEPTED for m in members
+                m.get("docs_stage") != DOCS_STAGE_ACCEPTED for m in members
             ):
                 deferred += 1
                 continue
@@ -814,7 +742,7 @@ def restamp_harmonized_families(gc: Any | None = None) -> dict[str, int]:
         members = _documentation_family_members(list(row.get("members") or []))
         if len(members) < 2:
             continue
-        if any(m.get("docs_stage") != _DOCS_STAGE_ACCEPTED for m in members):
+        if any(m.get("docs_stage") != DOCS_STAGE_ACCEPTED for m in members):
             not_ready += 1
             continue
         sig = group_signature(members)

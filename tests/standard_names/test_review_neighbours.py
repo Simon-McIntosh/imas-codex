@@ -218,6 +218,49 @@ def test_sibling_family_best_sibling_anchor_when_parent_pending():
     assert fam["anchor"]["is_parent"] is False
 
 
+def test_sibling_family_and_select_anchor_agree_on_a_score_tie():
+    """Both readers break a score tie by id, never by description length.
+
+    ``fetch_sibling_family`` and
+    :func:`~imas_codex.standard_names.families.select_anchor` are one anchor
+    rule, so they name the same member for the same family. The retired
+    length tie-break preferred the longer description and disagreed with the
+    harmonize command's anchor.
+    """
+    from imas_codex.standard_names.families import select_anchor
+
+    gc = _flux_fixture()
+    # The parent is not accepted, so the anchor is chosen among the siblings.
+    gc.nodes["density"]["docs_stage"] = "pending"
+    # Two accepted siblings tie on score; the larger id carries the SHORTER
+    # description, so a length tie-break and an id tie-break disagree.
+    smaller_id_longer_desc = _flux_node(
+        "ion",
+        docs_stage="accepted",
+        reviewer_score_docs=0.9,
+        description="A considerably longer accepted description than its sibling.",
+    )
+    larger_id_shorter_desc = _flux_node(
+        "xenon",
+        docs_stage="accepted",
+        reviewer_score_docs=0.9,
+        description="Short accepted description.",
+    )
+    gc.nodes[smaller_id_longer_desc["id"]] = smaller_id_longer_desc
+    gc.nodes[larger_id_shorter_desc["id"]] = larger_id_shorter_desc
+
+    family = fetch_sibling_family(_seed_id(), gc=gc, max_siblings=20)
+    by_shared_rule = select_anchor(
+        "density",
+        "pending",
+        "The density.",
+        [smaller_id_longer_desc, larger_id_shorter_desc],
+    )
+
+    assert family["anchor"]["name"] == by_shared_rule == larger_id_shorter_desc["id"]
+    assert family["anchor"]["is_parent"] is False
+
+
 def test_sibling_family_defers_without_accepted_member():
     gc = _flux_fixture()
     gc.nodes["density"]["docs_stage"] = "pending"

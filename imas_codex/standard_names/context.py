@@ -778,10 +778,12 @@ def fetch_sibling_family(
 
     The family is every live (non-superseded) StandardName whose grammar
     parses identically except along :data:`PATTERN_VARIATION_AXES` (subject /
-    component / coordinate / position / region / device). The invariant
-    segments are ``physical_base``, ``geometric_base``, ``transformation``
-    and ``process``, so a reduction operator and its unreduced parent land in
-    different families. A name with no axis sibling is a family of one.
+    component / coordinate / position / geometry / region / device). The
+    invariant segments are ``physical_base``, ``geometric_base``,
+    ``transformation``, ``process`` and ``object`` (the entity locus), so a
+    reduction operator and its unreduced parent land in different families,
+    and two names describing different entities never share one. A name with
+    no axis sibling is a family of one.
 
     Returns ``None`` when the seed is absent, superseded, or the family's only
     live name (or on any graph failure — never raises). Otherwise a dict:
@@ -793,9 +795,12 @@ def fetch_sibling_family(
       behind it.
     - ``anchor``: the documentation-template authority — the base quantity
       when its docs are accepted and its description is real, else the
-      docs-accepted sibling with the highest ``reviewer_score_docs``; ``None``
-      when the family has no accepted member yet (defer semantics — siblings
-      are still returned for structural comparison).
+      docs-accepted sibling that
+      :func:`~imas_codex.standard_names.families.select_anchor` picks (highest
+      ``reviewer_score_docs``, ties broken by id — the same rule the harmonize
+      command applies, so the prompt names the anchor it does); ``None`` when
+      the family has no accepted member yet (defer semantics — siblings are
+      still returned for structural comparison).
     - ``siblings``: up to *max_siblings* entries of ``{name, operator_kind,
       axis, description, documentation_opening, docs_stage}``, where
       ``operator_kind`` names the variation axis a member differs on and
@@ -808,6 +813,7 @@ def fetch_sibling_family(
         PATTERN_VARIATION_AXES,
         fetch_family_base,
         fetch_pattern_family,
+        select_anchor,
     )
 
     own_gc = False
@@ -887,29 +893,24 @@ def fetch_sibling_family(
     ]
 
     anchor: dict[str, Any] | None = None
-    if parent_docs_accepted:
+    anchor_id = select_anchor(
+        parent_name,
+        base_row.get("docs_stage"),
+        base_row.get("description"),
+        [r for r in other_rows if r.get("docs_stage") == "accepted"],
+    )
+    if anchor_id is not None and anchor_id == parent_name:
         anchor = {
             "name": parent_name,
             "description": parent_desc,
             "documentation": _doc_opening(base_row.get("documentation"), 2000),
             "is_parent": True,
         }
-    else:
-        accepted = [
-            r
-            for r in other_rows
-            if r.get("docs_stage") == "accepted" and _real(r.get("description"))
-        ]
-        if accepted:
-            best = max(
-                accepted,
-                key=lambda r: (
-                    r.get("reviewer_score_docs") or 0.0,
-                    len(_real(r.get("description"))),
-                ),
-            )
+    elif anchor_id is not None:
+        best = next((r for r in other_rows if r.get("id") == anchor_id), None)
+        if best is not None:
             anchor = {
-                "name": best.get("id"),
+                "name": anchor_id,
                 "description": _real(best.get("description")),
                 "documentation": _doc_opening(best.get("documentation"), 2000),
                 "is_parent": False,

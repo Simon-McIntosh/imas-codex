@@ -1,0 +1,53 @@
+<section id="scg-family-cleanup">
+  <h2>One anchor rule for pattern families</h2>
+
+  <p id="scg-family-cleanup-summary">
+    <code>fetch_sibling_family</code> and the harmonize command now choose a
+    family's documentation anchor by one rule. The rule moved to
+    <code>families.py</code> (<code>select_anchor</code>), where both readers
+    call it, and the retired inline copy in <code>context.py</code> is gone.
+    The prompt and the harmonize command name the same member for the same
+    family; a score tie resolves by id in both, never by description length.
+  </p>
+
+  <table id="scg-family-cleanup-changes">
+    <thead>
+      <tr><th>defect</th><th>change</th></tr>
+    </thead>
+    <tbody>
+      <tr id="scg-family-cleanup-anchor-rule">
+        <td>two anchor rules; score tie broken by description length</td>
+        <td><code>select_anchor</code> moved to <code>families.py</code>;
+        <code>fetch_sibling_family</code> calls it over the accepted
+        siblings, keeping its defer semantics</td>
+      </tr>
+      <tr id="scg-family-cleanup-docstring">
+        <td>docstring stated stale invariant segments and omitted geometry</td>
+        <td>invariants now <code>physical_base, geometric_base,
+        transformation, process, object</code>; variation axes include
+        <code>geometry</code></td>
+      </tr>
+      <tr id="scg-family-cleanup-projection">
+        <td><code>build_worklist</code> restated the invariant column list</td>
+        <td>reuses <code>_invariant_projection("c")</code></td>
+      </tr>
+      <tr id="scg-family-cleanup-self-comparing-test">
+        <td>members-query test compared the query with its own source constant</td>
+        <td>expected segment set written out in the test, so a dropped
+        segment fails it</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="scg-family-cleanup-measure">
+    Gate over the six declared files: <strong>88 passed</strong> against a
+    baseline of <strong>87 passed</strong> (the one added test), both
+    <code>EXIT=0</code>. Negative control — the description-length tie-break
+    restored in <code>fetch_sibling_family</code> — fails
+    <code>test_sibling_family_and_select_anchor_agree_on_a_score_tie</code>
+    (<code>EXIT=1</code>). Dropping <code>object</code> from
+    <code>PATTERN_INVARIANT_SEGMENTS</code> fails
+    <code>test_members_query_compares_every_invariant_segment</code>
+    (<code>EXIT=1</code>).
+  </p>
+</section>
