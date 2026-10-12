@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T05:22:00.915Z",
+  "dispatched_at": "2026-10-12T05:13:25Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/mapping-generation-accounts-for-every-source.html#s2",
+      "id": "wiring-1",
+      "reason": "a worker building \u00a72 alone cannot produce or test that sentence, and the current partial report (`unmapped_selected_sources`, per-IDS-with-no-binding) in fact leaves a half-bound source with an unanswered home unnamed.",
+      "text": "\u00a72 states \"the validate stage's partial report names each one\", an outcome delivered by the sibling plan mapping-validation-and-assembly-report-what-they-drop (\u00a73 \"Assembly reports every mapping it did not place\"), yet this plan declares no depends-on/informs to it and \u00a72's write paths do not include the report logic",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-generation-accounts-for-every-source.html#s2",
+      "id": "done_when-1",
+      "reason": "the node would record a green check that measured nothing, and the plan's own hedge \"if it adjudicates edge properties\" leaves the declaration unowned.",
+      "text": "the done-when's clause \"the property checker reports no undeclared property\" cannot fail: `cypher_property_check.py` resolves node bindings only (`_NODE_BINDING_RE` matches `(alias:Label)`; adjudicated rows are keyed by node label), so the new edge properties on `MAPPING_CANDIDATE` are never inspected",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-generation-accounts-for-every-source.html#s5",
+      "id": "done_when-2",
+      "reason": "without a named source that carries two selected homes in one IDS, the proof run cannot show the guard fires and passes on the unfixed code.",
+      "text": "`generation-proof-jt60sa` declares no negative control, and its first assertion \"No home is left without an outcome\" holds on a run whose sources each have one home, where the repaired re-claim path is never exercised",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/mapping-generation-accounts-for-every-source.html#s3",
+      "id": "reasoning-1",
+      "reason": "the ambiguity has nowhere to land and `tests/ids/test_error_derivation.py` pins the return type, so a literal reading reshapes a pinned signature.",
+      "text": "the plan says the ambiguous error signal is reported \"in its log and in the count it returns\", but `match_error_signals_to_imas` returns `list[ValidatedSignalMapping]` and logs only matched-signal counts (mapping.py:2187), so no count of ambiguous signals exists to write to",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "46bfddcab35f6e907563ed90533551d69af9e37f7c87769154315bfc67f6d1ab",
+  "plan_slug": "mapping-generation-accounts-for-every-source",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T051315596244-plan-review-of-mapping-generation-accounts-for-every-source",
+  "reviewed_blob_sha": "0866ab9c91937bd3c70e528e117a01521ef15b27",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 cited files, functions (`claim_sources_for_mapping`, `refresh_mapping_status`, `match_error_signals_to_imas`), commits (`93bfb7e9d`, `ac0710097`), the report path and both plan hrefs (resolved as `<path>.html`) all resolve.",
+    "done_when": "a finding \u2014 \u00a75's node names no negative control, and \u00a72's property-checker clause cannot fail.",
+    "evidence_paths": "pass \u2014 fragments land under `docs/evidence/fragments/mapping-generation-accounts-for-every-source/` (the directory convention exists) and \u00a75's logs under `~/.local/share/imas-codex/logs/`; neither is a scratchpad.",
+    "naming": "pass \u2014 node ids, test filenames and new symbols (`home_outcome`, `home_evidence`, `home_attempts`) are mechanism names carrying no plan label, stage name or ticket number.",
+    "reasoning": "a finding \u2014 \u00a73's ambiguity-report mechanism names a return channel that does not exist; \u00a72's root cause and \u00a74's root cause both match the code I read.",
+    "single_goal": "pass \u2014 each of the four nodes (`every-selected-home`, `error-parent-is-determined`, `filtered-candidate-run`, `generation-proof-jt60sa`) carries one deliverable with its own gate.",
+    "wiring": "a finding \u2014 every declared `depends-on` resolves (`jt60sa-mapping-study-expansion`, shipped), but \u00a72 asserts an outcome owned by the sibling plan whose relationship is not declared."
+  },
+  "section_digests": {
+    "_document": "eda4b5d2abaf4cf053d8310e0fda7f791309d703580fbe5c5067388e5eb182df",
+    "s1": "88f65e12c5bf8bdab43071bd1424edcb24b9d1be368e5eef028fd72b7d6fc84e",
+    "s2": "8ca46c6e1c551cdf3e5f1abece4565823fbe34495bdb066f989738fdd24c3453",
+    "s3": "531b49e32d4c9ec82682cf5b7a1aba6f13f55aa386b1955d6c5578118b35d9c9",
+    "s4": "bddcd8ed8ba5b082cfc404fb051ed1443d747d50d1e970d060a796e574e48fee",
+    "s5": "a1364f57f41e2fc2471538c828c0c4c7123d4cdd9a3658a04c043ace6d83921e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T05:23:03.548268+00:00"
+}
