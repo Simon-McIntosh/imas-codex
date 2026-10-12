@@ -1,0 +1,123 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T14:49:59.096Z",
+  "dispatched_at": "2026-10-12T14:43:22Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/imas_codex/discovery/base/judgment.py:69",
+      "id": "reuse_search-1",
+      "reason": "the plan must name `judgment.py::decide_batch` as the owner it rides and add `sn-judgment-evaluation#s2` to \u00a73's declared dependencies, or it re-creates the duplicate owner \u00a72 exists to prevent, and the `sn-judge` seat (\u00a73 needs it for Zeus/standard-names spend attribution) may not exist when \u00a73 lands.",
+      "text": "the plan builds \u00a73/\u00a74 as \"question and state builders\" but never names the shared decisions owner `decide_batch` (also `judge_rows`:136, `rerank_pool`:179) that they must route through, and it declares no dependency on `sn-judgment-evaluation` \u00a72 \u2014 the section that creates that owner and the `sn-judge` seat \u2014 even though its own \u00a73 lists a rerank that `sn-selection-over-generation` \u00a74 says is `rerank_pool` in this same file; `sn-judgment-evaluation` \u00a72 states the rule verbatim (\"delete the wrapper and route its callers through the shared owner, before a third owner appears for standard names\"), and a standard-names review builder built without it is exactly that third owner, in a file the plan never opens. Second instance of the same type: the plan's \u00a75 names the pyproject option `refine-trigger-keywords` (pyproject.toml:828) as retired but not the field that owns it, `fanout/config.py:95` \u2014 the module the change actually edits.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html#s3",
+      "id": "deep_module-1",
+      "reason": "naming one module (or stating why name and docs states cannot share a builder) is what turns three thin surfaces over `decide_batch` into one deep one, and it is cheaper to decide at plan time than to reconcile two builder families after they diverge.",
+      "text": "\u00a73 (name review) and \u00a74 (docs review) each add a separate set of \"question and state builders\" over the same decisions machinery, and \u00a76 adds a third layer (the cascade) over both, so the review surface is spread across three small pieces that all wrap one call owner rather than one module that hides it; nothing in \u00a73 or \u00a74 states whether a single builder parameterised by a question table serves both axes or why two independent sets must exist.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/imas_codex/standard_names/review/audits.py:296",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should consume the existing `AuditReport` findings as checks (the pipeline already threads them into the batch), and reserve Jev questions for the failures that genuinely need judgment; as written it forks the house-style owner the sibling plan just consolidated.",
+      "text": "\u00a72 admits \"the house-style checks of `sn-house-style` \u00a74\" into the taxonomy, and \u00a74 states \"the house-style conformance checks are added as named checks\", each of which \u00a72 defines as carrying \"one Jev question\"; but `sn-house-style` \u00a74 owns those checks as deterministic findings in this file (`run_lexical_lint`:296, `run_all_audits`:674), rules explicitly that \"a second lint module is not built\", and routes them to the reviewer through the `AuditReport` that the review pipeline already reads and passes as `audit_findings` (`review/pipeline.py:548`, `:1076`); re-asking a deterministic check as a Jev Noul pays a model to re-derive what code already answers.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html#s2",
+      "id": "interface_budget-1",
+      "reason": "the plan does account for the net surface plan-wide through \u00a75 and \u00a77, so this is a placement-of-the-accounting defect rather than an unaccounted addition, and moving one sentence would not change what is built.",
+      "text": "with all four supplied counts at 0, \u00a72 stages a new check-taxonomy asset and a test, and \u00a73/\u00a74 add two builder families to public_definitions, yet none of these three sections names in its own text what it retires or merges or why nothing can be; the plan's retirements are real but live in other sections (\u00a75 retires the keyword list, \u00a77 retires the quorum cycles and the extra review seats), so a reader of the adding sections cannot see the net surface.",
+      "type": "interface_budget",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "3f94d86325e86cdbb59e30e75b9eea8f6f74dd125550fa5c0e8663342da8be64",
+  "plan_slug": "sn-review-through-jev",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-12T15:00:41.692479+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "deep_module-1",
+      "reason": "",
+      "when": "2026-10-12T15:00:43.407822+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-12T15:00:44.878268+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-12T15:00:46.580084+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:43.407822+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:44.878268+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:46.580084+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T15:00:41.692479+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-review-through-jev.v3.json",
+  "review_run_id": "r-20261012T144304880907-plan-review-of-sn-review-through-jev",
+  "reviewed_blob_sha": "0d59b85d2d6cd50b4006c30cc25c142e9750c7a3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a73 and \u00a74 add two independent question-and-state builder sets over the same decisions machinery, with no statement of whether one module builds both axes or why two must exist.",
+    "duplicate_owner": "a finding \u2014 the plan turns the house-style conformance checks into Jev-asked named checks instead of consuming the deterministic owner in `imas_codex/standard_names/review/audits.py`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 stages a new check-taxonomy asset and \u00a73/\u00a74 add builder sets to public_definitions, and neither names what it retires or merges in its own text (the retirements sit later, in \u00a75 and \u00a77).",
+    "reuse_search": "a finding \u2014 the plan cites the review prompts and its sibling plans but never names the shared decisions owner (`imas_codex/discovery/base/judgment.py::decide_batch`) the review would run through, nor declares the dependency on the section (`sn-judgment-evaluation` \u00a72) that creates that owner and the `sn-judge` seat.",
+    "thin_wrapper": "pass \u2014 \u00a75 extends the existing refine prompt rendering and its fan-out trigger (`imas_codex/standard_names/fanout/trigger.py:105`), naming what it retires (the keyword list) rather than adding a parallel path; \u00a76's shadow cascade is justified by its measurement (the incumbent quorum stays callable until \u00a77)."
+  },
+  "section_digests": {
+    "_document": "543d4a9b36d0ffd3b6d48ae55e20ad33ac58257be049be48bded4d4bde22d77e",
+    "s1": "0925eb0d5312897fc643e2b9ea3b219225e1a69881d7eb5e1320ef63373608d7",
+    "s2": "aef487eb41532a66249de3a9bffca7a6b5296e631916efc6a1a7b13fff4c4e57",
+    "s3": "a7ba3c3c07f20adb97527b9e4b83dfb845ae8263c9f1f47fead10aa16ce8dc0b",
+    "s4": "e78806378f26a26e205e71908b31a7cc50522c0f562ceab8c62c76181e212f2e",
+    "s5": "7372d3ea4c0cc45c27bc84ae639373267837ed859544552b37f1b746d860dc7c",
+    "s6": "302fcd03fbde84ccac2e27b1a967b5abe0865d72c784a3232ff0113f5720b038",
+    "s7": "fb477768b44f7ce245281c7986ffdfcf74871a6c841ca83d809682f1ebc062f2"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:00:18.669818+00:00"
+}
