@@ -1,0 +1,95 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured: both arm logs named by the reviewed manifest's test_logs were read (baseline.log base arm at 427d872af: 96 passed, EXIT=0; after.log head arm at e000241de: 168 passed). Neither log reports a FAILED or ERROR node id, so the symmetric difference is empty and 0 failures were added. The reviewed manifest declared no baseline_suite/after_suite keys, so the arms were taken from its test_logs entries.",
+  "call_site_count": 8,
+  "call_sites": [
+    "imas_codex/standard_names/review/pipeline.py:1140",
+    "imas_codex/standard_names/review/pipeline.py:1227",
+    "imas_codex/standard_names/review/pipeline.py:1403",
+    "imas_codex/standard_names/review/pipeline.py:2595",
+    "imas_codex/standard_names/review/pipeline.py:1779",
+    "imas_codex/standard_names/graph_ops.py:6013",
+    "imas_codex/standard_names/graph_ops.py:6281",
+    "imas_codex/standard_names/review/projection.py:151"
+  ],
+  "commits_read": [
+    "e000241de910e5a4d0d21825593e12ecd6934ec5"
+  ],
+  "completed_at": "2026-10-12T15:50:19.761Z",
+  "dispatched_at": "2026-10-12T15:40:21Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "6013",
+      "severity": "blocking",
+      "text": "blocking: the review write path builds its SET clause from a fixed property list, so judge_kind, judgment_model and the three JSON payloads are dropped and a shadow record's score is coerced to 0.0, meaning this node's own done-when arm \"a shadow write round-trips\" is unmet; the repair is outside this node's granted write paths, so the coordinator must extend the writer in a companion node or re-scope \u00a76."
+    },
+    {
+      "file": "tests/standard_names/test_review_shadow_store.py",
+      "line": "218",
+      "severity": "follow-on",
+      "text": "follow-on: \"assert alone == beside\" compares two calls of _mirror_batch on the identical _accept_entries() fixture with independent mocks, and the intervening _write_records writes into a throwaway MagicMock, so no shadow record is visible to either call and the assertion cannot redden if the accept path is pointed at a shadow field."
+    },
+    {
+      "file": "tests/standard_names/test_review_shadow_store.py",
+      "line": "161",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion pins the write path's omission of the shadow fields, so this test reddens when the capability is added and stays green while it is absent \u2014 an inverted guard recorded as evidence that the shadow payload does not round-trip."
+    },
+    {
+      "file": "tests/standard_names/test_review_shadow_store.py",
+      "line": "306",
+      "severity": "follow-on",
+      "text": "follow-on: the refine guard compares a pure name-level predicate over a state dict before and after adding an unrelated judge_kind key the predicate never reads, so the equality holds by construction and would not redden if a judge kind were introduced into the compared state."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-judgment-evaluation/sje-shadow-store.html",
+      "line": "77",
+      "severity": "follow-on",
+      "text": "follow-on: the evidence paragraph cites after.log with EXIT=0, but after.log carries no EXIT line."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 8 production call site(s)",
+    "diff": "read against base 427d872af; one commit e000241de, four files, +503/-4, every path inside the declared scope; no generated model staged.",
+    "done_when": "plan \u00a76 names three arms; the schema arm holds (imas_codex/schemas/standard_name.yaml:3806) and the no-reader arm holds for the accept and refine paths, but the \"A shadow write round-trips\" arm does not \u2014 tests/standard_names/test_review_shadow_store.py:161 asserts the write path omits the shadow fields and the manifest records it as a blocker against status: complete.",
+    "goal": "the node goal is to store a challenge judge's per-question answers on the review record under a distinct judge kind read by no accepting, refining or exporting path (plan \u00a76); imas_codex/standard_names/review/pipeline.py:230 builds and marks such a record, but the graph write path drops all five shadow fields so nothing is stored.",
+    "manifest": "read; it records 96 passing at base and 168 at head with the gate logs named, and discloses the write-path blocker, but its tests field states what the schema declares rather than the command that ran and its result.",
+    "write_paths": "declared paths are imas_codex/schemas/standard_name.yaml, imas_codex/standard_names/review/pipeline.py, tests/standard_names/test_review_shadow_store.py and docs/evidence/fragments/sn-judgment-evaluation/sje-shadow-store.html; git diff --stat 427d872af e000241de shows exactly those four files."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_shadow_store.py:274 reddens when the accept score selection reads judge_confidence_json (negative_control.log, 1 failed / 10 passed), but the mirror-identity assertion at :218 holds whatever the accept path does.",
+    "evidence": "baseline.log (96 passed, EXIT=0) and after.log (168 passed) are on disk and the measured delta is 0, but the fragment cites an EXIT=0 marker after.log does not carry.",
+    "fit": "imas_codex/schemas/standard_name.yaml:3814 spells judgment_model as imas_codex/discovery/paths/scorer.py:84 does and reuses the repository's _json suffix convention; no plan or ticket label appears in the diff.",
+    "goal_fidelity": "imas_codex/standard_names/review/pipeline.py:230 marks the record jev with score null, but imas_codex/standard_names/graph_ops.py:6013 SETs only its fixed property list, so no shadow answer can reach the store.",
+    "reuse": "the change extends _build_review_record at imas_codex/standard_names/review/pipeline.py:173, the sole owner of the record builder, and a search over imas_codex for an existing judge-kind discriminator found none.",
+    "scope_discipline": "git diff --stat 427d872af e000241de is four files, every one inside the declared write paths, with no generated model staged."
+  },
+  "plan": "imas-codex:sn-judgment-evaluation",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to store a challenge judge's per-question answers on the review record under a distinct judge kind read by no accepting, refining or exporting path (plan \u00a76); imas_codex/standard_names/review/pipeline.py:230 builds and marks such a record, but the graph write path drops all five shadow fields so nothing is stored.\nVERDICT done_when: plan \u00a76 names three arms; the schema arm holds (imas_codex/schemas/standard_name.yaml:3806) and the no-reader arm holds for the accept and refine paths, but the \"A shadow write round-trips\" arm does not \u2014 tests/standard_names/test_review_shadow_store.py:161 asserts the write path omits the shadow fields and the manifest records it as a blocker against status: complete.\nVERDICT write_paths: declared paths are imas_codex/schemas/standard_name.yaml, imas_codex/standard_names/review/pipeline.py, tests/standard_names/test_review_shadow_store.py and docs/evidence/fragments/sn-judgment-evaluation/sje-shadow-store.html; git diff --stat 427d872af e000241de shows exactly those four files.\nVERDICT manifest: read; it records 96 passing at base and 168 at head with the gate logs named, and discloses the write-path blocker, but its tests field states what the schema declares rather than the command that ran and its result.\nVERDICT diff: read against base 427d872af; one commit e000241de, four files, +503/-4, every path inside the declared scope; no generated model staged.\nCALL_SITES: imas_codex/standard_names/review/pipeline.py:1140, imas_codex/standard_names/review/pipeline.py:1227, imas_codex/standard_names/review/pipeline.py:1403, imas_codex/standard_names/review/pipeline.py:2595, imas_codex/standard_names/review/pipeline.py:1779, imas_codex/standard_names/graph_ops.py:6013, imas_codex/standard_names/graph_ops.py:6281, imas_codex/standard_names/review/projection.py:151\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/pipeline.py:230 marks the record jev with score null, but imas_codex/standard_names/graph_ops.py:6013 SETs only its fixed property list, so no shadow answer can reach the store.\nSCORE evidence: 13\nJUSTIFICATION evidence: baseline.log (96 passed, EXIT=0) and after.log (168 passed) are on disk and the measured delta is 0, but the fragment cites an EXIT=0 marker after.log does not carry.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 427d872af e000241de is four files, every one inside the declared write paths, with no generated model staged.\nSCORE durability: 12\nJUSTIFICATION durability: tests/standard_names/test_review_shadow_store.py:274 reddens when the accept score selection reads judge_confidence_json (negative_control.log, 1 failed / 10 passed), but the mirror-identity assertion at :218 holds whatever the accept path does.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/schemas/standard_name.yaml:3814 spells judgment_model as imas_codex/discovery/paths/scorer.py:84 does and reuses the repository's _json suffix convention; no plan or ticket label appears in the diff.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends _build_review_record at imas_codex/standard_names/review/pipeline.py:173, the sole owner of the record builder, and a search over imas_codex for an existing judge-kind discriminator found none.\nFINDING imas_codex/standard_names/graph_ops.py:6013 blocking: the review write path builds its SET clause from a fixed property list, so judge_kind, judgment_model and the three JSON payloads are dropped and a shadow record's score is coerced to 0.0, meaning this node's own done-when arm \"a shadow write round-trips\" is unmet; the repair is outside this node's granted write paths, so the coordinator must extend the writer in a companion node or re-scope \u00a76.\nFINDING tests/standard_names/test_review_shadow_store.py:218 follow-on: \"assert alone == beside\" compares two calls of _mirror_batch on the identical _accept_entries() fixture with independent mocks, and the intervening _write_records writes into a throwaway MagicMock, so no shadow record is visible to either call and the assertion cannot redden if the accept path is pointed at a shadow field.\nFINDING tests/standard_names/test_review_shadow_store.py:161 follow-on: the assertion pins the write path's omission of the shadow fields, so this test reddens when the capability is added and stays green while it is absent \u2014 an inverted guard recorded as evidence that the shadow payload does not round-trip.\nFINDING tests/standard_names/test_review_shadow_store.py:306 follow-on: the refine guard compares a pure name-level predicate over a state dict before and after adding an unrelated judge_kind key the predicate never reads, so the equality holds by construction and would not redden if a judge kind were introduced into the compared state.\nFINDING docs/evidence/fragments/sn-judgment-evaluation/sje-shadow-store.html:77 follow-on: the evidence paragraph cites after.log with EXIT=0, but after.log carries no EXIT line.\n",
+  "review_run_id": "r-20261012T154012151828-review-of-sje-shadow-store",
+  "reviewed_base_sha": "427d872afc96eab56f250d54437bd66d6abde0a0",
+  "reviewed_commit": "e000241de910e5a4d0d21825593e12ecd6934ec5",
+  "reviewed_head_sha": "e000241de910e5a4d0d21825593e12ecd6934ec5",
+  "reviewed_run_id": "r-20261012T150536920692-sje-shadow-store",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sje-shadow-store",
+  "reviewer_node": "review-of-sje-shadow-store",
+  "reviewer_run_id": "r-20261012T154012151828-review-of-sje-shadow-store",
+  "scores": {
+    "durability": 12,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T15:51:33.986235+00:00",
+  "total": 96
+}
