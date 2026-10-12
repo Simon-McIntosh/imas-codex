@@ -1,0 +1,30 @@
+<!-- Landing record for node ssfms-description-corrections, plan
+     signal-search-finds-the-measured-signal §10. Change at rev e9aac5b4a.
+     Counts and evidence: docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html -->
+<section id="ssfms-description-corrections-landing" data-reckon="evidence">
+  <h2 id="ssfms-description-corrections-landing-heading">Boundary-respecting signal glossary, and the JT-60SA descriptions it corrected</h2>
+  <p id="ssfms-description-corrections-landing-what">
+    The signal glossary now reaches a term only across word and camel-case boundaries:
+    <code>glossary_term_reaches</code> replaces a case-folded substring test in the
+    enrichment prompt builder, and the JT-60SA glossary gains <code>EFC</code>,
+    <code>SNU</code>, <code>BPS</code>, <code>QPC</code>, <code>DR</code>,
+    <code>SNU</code> and <code>HTS</code> with the missing <code>EFCC</code> meaning
+    corrected. Under the boundary matcher the glossary withdraws from 505 signals it
+    should never have reached (DR 437, LFP 25, EFC 20, FPPCC 13, HiTe 9, UFP 1).
+  </p>
+  <p id="ssfms-description-corrections-landing-measure">
+    Measure: in the EFC/EFCC family the descriptions expanding the abbreviation as
+    "converter" or "equilibrium field coil" fall 16 → 0 and the unexpanded ones 11 → 0,
+    against 155 → 182 expanding it as error field correction coil; in the SNU family
+    "snubber" falls 38 → 7 and "superconducting unit" 3 → 0, against 8 → 42 reading
+    switching network unit. The boundary test passes at head (5 passed) and fails
+    against the substring matcher (2 failed, EXIT=1), admitting the declared string
+    <code>EFC</code> reaching <code>refcurEF1</code>.
+  </p>
+  <p id="ssfms-description-corrections-landing-residual">
+    Residual: seven CS1 pattern members (<code>cs1_temsnur12…222</code>) keep a stale
+    "snubber (SNU)" description because the claim path excludes a group member whose
+    representative differs and the individualisation pass did not refresh them; the
+    representative itself reads switching network unit. Recorded under follow-ons.
+  </p>
+</section>
