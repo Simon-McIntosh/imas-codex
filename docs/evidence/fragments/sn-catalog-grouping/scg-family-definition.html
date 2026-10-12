@@ -1,0 +1,105 @@
+<section id="scg-family-definition">
+  <h2>Pattern family — one definition, entity loci held invariant</h2>
+
+  <p>
+    The pattern family is now the single family definition. Its invariant
+    signature is the invariant segments plus the <strong>entity locus</strong>:
+    the <code>object</code> column carries the ISN entity token, and two names
+    describing different entities are never family-mates. The
+    <code>position</code>, <code>geometry</code> and <code>region</code> loci
+    stay variation axes, and the empty value of an axis is one of its values —
+    so <code>electron_temperature</code> and
+    <code>electron_temperature_at_magnetic_axis</code> remain family-mates.
+  </p>
+
+  <p>
+    Two further definitions are removed. The invariant segment set is stated
+    once and the members and census Cypher project and compare it through
+    shared helpers, so the columns cannot drift from the constant. The
+    parentless worklist bucket in <code>build_worklist</code> now groups by the
+    same signature instead of by <code>physical_base</code>. The base quantity
+    is reported as a parent only when a node actually backs the token, which
+    retires the phantom parent whose token matched no name.
+  </p>
+
+  <p>
+    The locus rule is read from the ISN registry
+    (<code>load_locus_registry()</code>): the segment a token fills is decided
+    by its registered <code>type</code>. The registry holds 105 entity, 72
+    position, 7 region and 3 geometry loci.
+  </p>
+
+  <h3 id="scg-family-definition-census">Bounded live census</h3>
+
+  <p>
+    Read from the live graph, 2026-10-12. New counts beside the previous ones.
+    The pattern census and the live-name scan are bounded by the
+    <code>:StandardName</code> label with <code>name_stage &ne; 'superseded'</code>
+    (2967 live nodes); the <code>HAS_PARENT</code> families use only
+    family-eligible edges (<code>operator_kind IN (projection, qualifier,
+    coordinate)</code> or the averaging reductions), both endpoints live.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>measure</th>
+        <th>previous</th>
+        <th>now</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="scg-family-definition-census-pattern">
+        <td>pattern families with &ge;3 members</td>
+        <td>171 (2643 members)</td>
+        <td><strong>180 (2198 members)</strong></td>
+      </tr>
+      <tr id="scg-family-definition-census-has-parent">
+        <td><code>HAS_PARENT</code> families with &ge;3 members</td>
+        <td>220</td>
+        <td>220 (487 parents, 1056 eligible edges)</td>
+      </tr>
+      <tr id="scg-family-definition-census-only-has-parent">
+        <td>families only the <code>HAS_PARENT</code> route produces</td>
+        <td>7</td>
+        <td>7 (identical member sets)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Adding the entity locus splits cohorts that were never family-mates: family
+    count rises from 171 to 180 while 445 names leave &ge;3 cohorts they did
+    not belong to. The seven <code>HAS_PARENT</code>-only families are
+    unchanged — the reduction operator is still not a pattern axis, so the
+    explicit <code>HAS_PARENT</code> route remains necessary.
+  </p>
+
+  <figure id="scg-family-definition-figure">
+    <img src="/imas-codex/figures/sn-catalog-grouping/scg-family-definition/family-census.svg"
+         alt="Bar chart: pattern families rise from 171 to 180 and members fall from 2643 to 2198; a 34-owner entity cohort collapses to 1" />
+    <figcaption>
+      Left: the pattern census before and after the entity locus joins the
+      invariant signature — families rise 171&nbsp;&rarr;&nbsp;180, members in
+      &ge;3 families fall 2643&nbsp;&rarr;&nbsp;2198. Right: the 34 registered
+      entity tokens sharing one base quantity form 34 families of one, not one
+      34-member cohort. Live graph, 2026-10-12.
+    </figcaption>
+  </figure>
+
+  <h3 id="scg-family-definition-controls">Controls</h3>
+
+  <p>
+    <strong>Entity locus.</strong> Two tests assert that the 34 registered
+    entity tokens yield no cohort. With the entity locus dropped from the
+    invariant set both fail — the fixture collapses them into one 34-member
+    family — and with the rule present both pass. The 17-member boundary
+    density family still resolves to 17 under both, keeping the control honest.
+  </p>
+
+  <p>
+    <strong>Cypher execution.</strong> The fixture graph decides membership by
+    the columns the issued Cypher compares, read back from the query text, so a
+    test fails when one invariant column is dropped from the members query.
+  </p>
+</section>
