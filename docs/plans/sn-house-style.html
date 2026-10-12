@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-house-style">
+  <meta name="plan-title"     content="One Definition, One Notation: The Standard Names House Style">
+  <meta name="plan-summary"   content="Author one conventions registry for shared definitions, notation, locus glosses and templates, and make generation, review and a lint read it.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="12">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint"    content="S18">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="standard-names,catalog-release">
+  <meta name="plan-blocks"    content="sn-harmonize-command,sn-west-prototype-release">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;}">
+  <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; standard names &middot; S18</p>
+      <h1>One definition, one notation</h1>
+      <p class="lead">
+        The catalog defines the flux-surface average in five notations, one of them wrong,
+        and opens its WEST entries in four styles. Each entry passed review on its own, so
+        consistency has to be authored once and then enforced. Choosing the definitions is
+        the coordinator's and the lead's work; applying them is the pipeline's.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — Why a house style, and why it is authored</h2>
+    <p>
+      The measurements are in
+      <a href="/imas-codex/research/sn-catalog-consistency-census">the consistency census</a>.
+      In short: 72 entries re-derive the flux-surface average, 57 the volume average and 35
+      the normalized toroidal-flux coordinate. The 80 boundary-locus names gloss
+      "plasma boundary" eight different ways, and 24 of them equate it with the separatrix,
+      which is wrong for a limited plasma. The poloidal field is written three ways. None of
+      this is visible to per-name review, which is why WEST scores a median 0.94 on
+      documentation while reading as inconsistent.
+    </p>
+    <p>
+      An LLM asked to "be consistent" with a handful of siblings will drift again on the
+      next batch. What converges is a written authority: one entry per shared concept,
+      stating its definition, its one equation, its symbols and the phrases it must never
+      take. Choosing those entries is physics judgement. It is done once, in review with the
+      lead, and is not a pipeline run. Everything downstream — generation, review, the lint
+      and the harmonize command — reads that authority and never restates it.
+    </p>
+
+    <h2 id="s2">§2 — The conventions registry</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="2.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      A versioned package at <code>imas_codex/standard_names/conventions/</code>, with a
+      pydantic model and a loader that refuses an invalid file. It has three YAML files, each
+      keyed by the ISN grammar tokens a name's parse produces, so the entries that apply to
+      a name are selected from its parse and never from a text search.
+    </p>
+    <table>
+      <thead><tr><th>File</th><th>One entry holds</th><th>Selected by</th></tr></thead>
+      <tbody>
+        <tr><td><code>concepts.yml</code></td><td>a shared mathematical or physical concept: its canonical phrase, a one-sentence definition, exactly one canonical LaTeX equation, its symbol table, the forbidden variants as patterns, and whether a name using it restates the equation or only names the concept</td><td>operator, locus, coordinate or physical-base token (for example <code>flux_surface_averaged</code>, <code>volume_averaged</code>, <code>plasma_boundary</code>)</td></tr>
+        <tr><td><code>notation.yml</code></td><td>the one symbol for a quantity or coordinate (<code>T_e</code>, <code>n_e</code>, <code>B_p</code>, <code>\psi</code>, <code>\rho_{tor}</code>, <code>R_{axis}</code>, <code>\phi</code>) and its forbidden spellings</td><td>physical base, subject, component or coordinate token</td></tr>
+        <tr><td><code>templates.yml</code></td><td>one description opening and one documentation opening per name pattern, the section order, and the sign-convention rule by COCOS transformation type</td><td>the name's pattern family (see <code>sn-catalog-grouping</code> §2)</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Where ISN already defines a token, the entry references that definition and adds only
+      what ISN lacks. The registry never contradicts ISN. If the house style needs a
+      different ISN definition, that change goes upstream (decision
+      <em>registry-home</em>).
+    </p>
+    <p>
+      <strong>Done when:</strong> the loader validates all three files and refuses each
+      file with one deliberately malformed entry (one negative control per file, each
+      failing by name). A test shows that for
+      <code>flux_surface_averaged_argon_density_at_plasma_boundary</code> the selector
+      returns exactly the flux-surface-average concept, the plasma-boundary locus, the
+      density notation and the species-density template, and nothing else.
+    </p>
+
+    <h2 id="s3">§3 — Authoring the entries: the coordinator polish a pipeline cannot do</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The coordinator drafts every entry needed by the WEST roster first, then the wider
+      corpus. Each draft starts from the best existing accepted documentation, the DD text
+      and the standard textbook definition. The lead locks the three physics choices in the
+      decisions below, and every other entry follows them. Measured scope for WEST: the
+      lint in §4 lists which concepts and symbols the 220 entries actually use, and that
+      list, not a guess, is the authoring worklist.
+    </p>
+    <p>
+      This is deliberately not dispatched to an LLM worker. A worker drafting definitions
+      reproduces whichever variant is most common, and the census shows the most common
+      variant is sometimes the wrong one.
+    </p>
+    <p>
+      <strong>Done when:</strong> every concept, symbol and pattern the §4 lint finds in the
+      WEST roster has a registry entry. The three decisions below are locked. The lead has
+      read the concepts file.
+    </p>
+
+    <h2 id="s4">§4 — A deterministic conformance lint</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      <code>imas_codex/standard_names/conventions/lint.py</code> reads a name's description
+      and documentation against its selected entries and returns findings in five classes:
+      a forbidden variant of a registered concept's equation; a non-canonical symbol for a
+      registered quantity; a forbidden locus gloss, such as "separatrix" for
+      <code>plasma_boundary</code>; an opening that does not match the pattern template; and
+      a sign-convention paragraph present or absent against the COCOS rule. It is pure: no
+      graph writes and no model calls. It is the instrument the harmonize command and the
+      reviewer both read.
+    </p>
+    <p>
+      <strong>Done when:</strong> on fixtures, the carbon entry's <code>dl/B</code> equation
+      is flagged and the argon entry's canonical one is not. A boundary gloss reading
+      "separatrix" is flagged. A canonical entry yields zero findings. Each check has a
+      revert-sensitive test. A census over the live WEST roster is recorded with its
+      per-class counts, as the baseline <code>sn-west-prototype-release</code> measures
+      against.
+    </p>
+
+    <h2 id="s5">§5 — Generation and review read the registry</h2>
+    <section data-reckon="section" data-id="s5" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The documentation prompts
+      (<code>imas_codex/llm/prompts/sn/generate_docs_system.md</code>,
+      <code>generate_docs_user.md</code>, <code>refine_docs_*</code>,
+      <code>review_docs_*</code>) gain one block, rendered from the entries selected for the
+      item. It replaces the free-text consistency advice those prompts carry now; it does not
+      sit beside it. The reviewer receives the lint findings as deterministic input. The
+      route half exists and is unwired: <code>imas_codex/standard_names/review/pipeline.py</code>
+      extracts Layer 1 audit findings and sets <code>audit_findings</code> on the render
+      context at line 1964, but no template under <code>imas_codex/llm/prompts/sn/</code>
+      reads that variable. So no audit finding has ever reached a reviewer, which is the
+      open followup <code>f-scai-audit-findings-reach-no-template</code> this plan inherits.
+      Render the findings, the lint's among them, in the review templates. An unresolved
+      lint error caps the documentation score below the acceptance threshold.
+    </p>
+    <p>
+      <strong>Done when:</strong> a rendered prompt for a flux-surface-averaged name carries
+      the canonical equation and no unrelated entry (test). A rendered review prompt for a
+      name with an audit finding contains that finding's text, and the same test fails
+      with the template line removed. A review over a seeded
+      non-conforming document cannot accept it, and the same document with the finding fixed
+      can (test, with the cap removed as the counterfactual). The duplicated consistency
+      prose is gone from the prompts.
+    </p>
+
+    <h2 id="s6">§6 — What this absorbs, and what it leaves alone</h2>
+    <p>
+      <code>sn-catalog-audit-instrument</code> set out to build an audit that finds what
+      independent review finds, calibrated against a known red cohort. Its read-only grouped
+      review target landed on 2026-09-21. Its remaining purpose — a catalog-level instrument —
+      is this plan's §4 lint, which is deterministic and needs no calibration against a
+      model. That plan is superseded by this one. Name changes — renames, folds and
+      supersedes — are not this plan's. They go through <code>sn edit</code> under
+      <code>sn-catalog-grouping</code> §4.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="registry-home" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Where does the conventions registry live?</p>
+        <p class="r-dec-ctx">ISN already carries locus definitions. Concepts, notation and templates exist nowhere. An ISN release adds a dependency to a one-week closure.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="codex-then-isn">imas-codex now, keyed by ISN tokens; upstream concept definitions to ISN after WEST ships (recommended)</button>
+          <button class="r-opt" data-value="isn-now">ISN now, released before the WEST re-cut</button>
+          <button class="r-opt" data-value="codex-only">imas-codex permanently</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="fsa-canonical-form" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Which form defines the flux-surface average?</p>
+        <p class="r-dec-ctx">Both correct forms appear in the catalog. The line form matches transport-code usage; the surface form is coordinate-free. Exactly one is written; the other may be named as equivalent in prose.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="line">\langle f\rangle = \oint f\,dl_p/B_p \,/\, \oint dl_p/B_p (recommended)</button>
+          <button class="r-opt" data-value="surface">\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="plasma-boundary-gloss" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How is the plasma boundary glossed?</p>
+        <p class="r-dec-ctx">24 boundary entries call it the separatrix. That is true only for a diverted plasma.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="lcfs">"the last closed flux surface"; the separatrix is named only where a quantity is defined for a diverted configuration (recommended)</button>
+          <button class="r-opt" data-value="separatrix">"the separatrix" throughout</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="docs-opening-style" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Which opening does every documentation entry use?</p>
+        <p class="r-dec-ctx">WEST opens in four styles: "The … is …" (77), "This quantity is …" (55), another noun phrase (53) and "&lt;Name&gt; is …" (33).</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="noun-phrase">A defining noun phrase, the same shape as the description (recommended)</button>
+          <button class="r-opt" data-value="this-quantity">"This quantity is …"</button>
+          <button class="r-opt" data-value="name-is">"&lt;Name&gt; is …"</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-shs-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="orchestrator"
+               data-written-by="reckon-review" data-written-at="2026-10-12"
+               data-recommends-skill="/reckon-build sn-house-style §2">
+        <h4 class="r-fu-title">Land the registry model and the lint, then author the WEST entries</h4>
+        <div class="r-fu-body">
+          <p>§2 and §4 are code and can be dispatched together, since the lint consumes the model. §3 is coordinator work: run the lint over the WEST roster to get the worklist, draft the entries, and bring the four decisions to the lead in one sitting. §5 follows once the WEST entries exist, so the prompts render real content.</p>
+        </div>
+        <pre class="r-fu-prompt">/reckon-build sn-house-style §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

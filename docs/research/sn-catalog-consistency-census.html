@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="imas-codex">
+  <meta name="reckon-type"   content="research">
+  <meta name="plan-slug"     content="sn-catalog-consistency-census">
+  <meta name="plan-title"    content="The Catalog Has No House Style: A Consistency Census of the Accepted Names">
+  <meta name="plan-summary"  content="Measured 2026-10-12: one concept carries many definitions, families share no template, and domains follow the source IDS rather than the physics.">
+  <meta name="plan-tags"     content="standard-names,catalog-release">
+  <meta name="plan-informs"  content="sn-house-style,sn-catalog-grouping,sn-harmonize-command,sn-west-prototype-release">
+  <title>The Catalog Has No House Style | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Research &middot; standard names &middot; 2026-10-12</p>
+      <h1>The catalog has no house style</h1>
+      <p class="lead">
+        Every accepted name passed its own review, and the WEST batch scores a median of
+        0.94 on documentation. Read side by side, the same entries define one concept four
+        ways, open in four styles, and sit in physics domains chosen by the IDS they were
+        extracted from. Consistency is a property of the catalog, and nothing in the
+        pipeline measures it.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — What was measured</h2>
+    <p>
+      The population is every live accepted standard name: <code>name_stage = accepted</code>,
+      <code>docs_stage = accepted</code>, <code>status &lt;&gt; superseded</code>, which is
+      <strong>2,472</strong> names, read from the live graph on 2026-10-12 through bounded
+      read-only Cypher. The WEST population is the frozen roster
+      <code>imas_codex/standard_names/manifests/reviews/v0.4.0rc7+west-task-2e.sn_names.yaml</code>
+      (220 names, minted 2026-09-11). Of those 220, 218 are accepted on both axes; one is
+      superseded with accepted documentation and one superseded with pending documentation.
+      Nothing was written.
+    </p>
+
+    <h2 id="s2">§2 — The scores cannot see it</h2>
+    <p>
+      Per-name review judges each entry against its source and the grammar, alone. It
+      cannot notice that the next entry says the same thing differently. That is why the
+      WEST batch looks finished by every pipeline measure while reading as inconsistent to
+      a physicist.
+    </p>
+    <table>
+      <thead><tr><th>WEST roster, 219 scored rows</th><th>Median</th><th>Minimum</th><th>Below 0.85</th></tr></thead>
+      <tbody>
+        <tr><td>Name review score</td><td>0.975</td><td>0.30</td><td>4</td></tr>
+        <tr><td>Documentation review score</td><td>0.938</td><td>0.54</td><td>2</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s3">§3 — One concept, many definitions</h2>
+    <p>
+      The flux-surface average is the clearest case. Across the accepted corpus,
+      <strong>208</strong> documentation strings mention it and <strong>72</strong> of them
+      re-derive it with an equation near the mention. The boundary flux-surface-averaged
+      family alone carries nine definitions in five notations, and one of them is wrong.
+    </p>
+    <table>
+      <thead><tr><th>Name</th><th>Defining equation as written</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><code>flux_surface_averaged_beryllium_density_at_plasma_boundary</code></td><td><code>\oint n\,dS/|\nabla\psi| / \oint dS/|\nabla\psi|</code></td><td>correct, surface form</td></tr>
+        <tr><td><code>flux_surface_averaged_helium_4_density_at_plasma_boundary</code></td><td><code>\oint n\,dS/|\nabla \psi| / \oint dS/|\nabla \psi|</code></td><td>correct, surface form</td></tr>
+        <tr><td><code>flux_surface_averaged_argon_density_at_plasma_boundary</code></td><td><code>\oint n\,dl/B_p / \oint dl/B_p</code></td><td>correct, line form</td></tr>
+        <tr><td><code>flux_surface_averaged_lithium_density_at_plasma_boundary</code></td><td><code>\oint n\,dl/B_p / \oint dl/B_p</code></td><td>correct, line form</td></tr>
+        <tr><td><code>flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary</code></td><td><code>\oint f\,dl_p/B_p / \oint dl_p/B_p</code></td><td>correct, line form, different symbols</td></tr>
+        <tr><td><code>flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary</code></td><td><code>\oint v\,B_p^{-1}dl / \oint B_p^{-1}dl</code></td><td>correct, line form, different arrangement</td></tr>
+        <tr><td><code>flux_surface_averaged_carbon_density_at_plasma_boundary</code></td><td><code>\oint n_C\,dl/B / \oint dl/B</code></td><td><strong>wrong</strong>: total field <code>B</code> where the poloidal field <code>B_p</code> belongs</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The same pattern holds for every shared concept the census looked for. A mention is
+      fine; a fresh derivation per entry is where the variants come from.
+    </p>
+    <table>
+      <thead><tr><th>Shared concept</th><th>Docs mentioning it</th><th>Docs re-deriving it inline</th></tr></thead>
+      <tbody>
+        <tr><td>flux-surface average</td><td>208</td><td>72</td></tr>
+        <tr><td>volume average</td><td>143</td><td>57</td></tr>
+        <tr><td>line average or line integral</td><td>78</td><td>28</td></tr>
+        <tr><td>normalized toroidal flux coordinate</td><td>46</td><td>35</td></tr>
+        <tr><td>normalized poloidal flux</td><td>39</td><td>9</td></tr>
+        <tr><td>charge-state summation</td><td>70</td><td>20</td></tr>
+        <tr><td>plasma boundary, last closed flux surface, separatrix</td><td>258</td><td>141</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The boundary row is a physics problem rather than a style one. The 80 names spelled
+      <code>*_at_plasma_boundary</code> gloss their locus in eight different combinations of
+      "plasma boundary", "last closed flux surface", "last closed magnetic flux surface"
+      and "separatrix", and 24 of them equate the boundary with the separatrix. Those
+      coincide only for a diverted plasma; for a limited plasma the last closed flux surface
+      touches the limiter and there is no separatrix inside the vessel. The ISN locus
+      registry defines <code>plasma_boundary</code> only as "the surface used to delimit the
+      plasma domain", so the catalog has nothing to agree with.
+    </p>
+    <p>
+      Notation drifts the same way. In the WEST roster the magnetic-axis major radius is
+      written <code>R_0</code> in 9 entries and <code>R_{axis}</code> in 5, and the
+      toroidal-flux coordinate is <code>\rho_{tor}</code> in 7 entries and
+      <code>\rho_{tor,norm}</code> or <code>\rho_N</code> in 3. Across the corpus the poloidal
+      field is <code>B_p</code> in 20 entries, <code>B_\theta</code> in 5 and
+      <code>B_{pol}</code> in 4.
+    </p>
+
+    <h2 id="s4">§4 — Families share no template, because the code cannot see the family</h2>
+    <p>
+      Grouping the accepted names by name template with the subject token wildcarded gives
+      <strong>46</strong> species families of four or more members (430 names). The share of
+      members that open their description with a distinct phrasing has a median of
+      <strong>0.90</strong>, and in 22 of the 46 families every member opens differently.
+      The worst are <code>ratio_of_volume_averaged_&lt;S&gt;_density_to_volume_averaged_electron_density</code>
+      (14 members, 14 openings) and <code>&lt;S&gt;_source_rate</code> (13 of 13).
+    </p>
+    <p>
+      The generation prompt already demands one template per family
+      (<code>imas_codex/llm/prompts/sn/generate_docs_system.md</code>, "Family Parallel
+      Structure"), so this is not a prompt failure. The family it is handed is the wrong
+      one. <code>fetch_sibling_family</code> in <code>imas_codex/standard_names/context.py</code>
+      and <code>assemble_family</code> in <code>imas_codex/standard_names/harmonize.py</code>
+      both build a family from shared <code>HAS_PARENT</code> edges. Each species variant
+      has its own parent: <code>flux_surface_averaged_argon_density_at_plasma_boundary</code>
+      reduces <code>argon_density_at_plasma_boundary</code>, and so on. So the 17
+      boundary-averaged densities are 17 one-member families, the sibling block is empty,
+      and every entry sets its own template.
+    </p>
+    <p>
+      The WEST documentation shows the result at the scale of a batch. Its 218 accepted
+      entries open in four styles in near-equal shares: "The … is …" (77), "This quantity
+      is …" (55), another noun phrase (53) and "&lt;Name&gt; is …" (33). Only 59 carry
+      a sign-convention paragraph, which may be right, but nothing checks it against the
+      COCOS type.
+    </p>
+
+    <h2 id="s5">§5 — Domains follow the source, not the physics</h2>
+    <p>
+      The catalog is published as one directory per physics domain, so the domain is the
+      grouping a reader meets first. It is wrong for the quantities a reader looks for first.
+    </p>
+    <table>
+      <thead><tr><th>Name</th><th>Stored domain</th><th>Where a physicist would look (proposed)</th></tr></thead>
+      <tbody>
+        <tr><td><code>electron_temperature</code></td><td>magnetohydrodynamics</td><td>core_plasma_physics</td></tr>
+        <tr><td><code>effective_charge</code></td><td>magnetohydrodynamics</td><td>core_plasma_physics</td></tr>
+        <tr><td><code>electron_density</code></td><td>equilibrium</td><td>core_plasma_physics</td></tr>
+        <tr><td><code>safety_factor</code></td><td>transport</td><td>equilibrium</td></tr>
+        <tr><td><code>electron_pressure</code></td><td>transport</td><td>core_plasma_physics</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The ISN vocabulary defines <code>core_plasma_physics</code> for "core plasma profiles,
+      kinetic quantities, global parameters", and <strong>no accepted name carries it</strong>.
+      <code>transport</code> holds 850 of the 2,472, <strong>207</strong> carry no domain at
+      all (including the whole restored <code>*_density_at_pedestal_top</code> family), and
+      5 names in the WEST roster have none.
+    </p>
+
+    <h2 id="s6">§6 — Near-duplicate spellings</h2>
+    <p>
+      Pairs with the same unit and an embedding cosine at or above 0.95 number 258 (138 at
+      or above 0.97). That count includes plain species and component swaps and the
+      degenerate vectors of §7. With those removed, the top of the list is mostly
+      vocabulary overlap rather than true duplication, and each overlap is a decision the
+      grammar or the catalog has to make once:
+    </p>
+    <table>
+      <thead><tr><th>Overlap</th><th>Example pair</th><th>Names carrying the token</th></tr></thead>
+      <tbody>
+        <tr><td><code>neutral</code> vs <code>neutral_state</code></td><td><code>neutral_power_density</code> / <code>neutral_state_power_density</code></td><td>27 with <code>neutral_state</code></td></tr>
+        <tr><td><code>ion</code> vs <code>ion_charge_state</code> vs <code>thermal_ion</code></td><td><code>ion_energy_diffusion_coefficient</code> / <code>ion_charge_state_energy_diffusion_coefficient</code></td><td>150 and 58</td></tr>
+        <tr><td><code>at_divertor_target</code> vs <code>of_divertor</code></td><td><code>power_at_divertor_target_due_to_convection</code> / <code>power_of_divertor_due_to_convection</code></td><td>39 and 23</td></tr>
+        <tr><td>bare vs <code>plasma_</code> prefix</td><td><code>momentum_diffusivity</code> / <code>plasma_momentum_diffusivity</code></td><td>—</td></tr>
+        <tr><td>bare vs <code>bulk_</code></td><td><code>neutral_internal_state_velocity</code> / <code>bulk_neutral_internal_state_velocity</code></td><td>—</td></tr>
+        <tr><td><code>ion</code> vs <code>total_ion</code></td><td><code>flux_surface_averaged_ion_density_at_plasma_boundary</code> / <code>flux_surface_averaged_total_ion_density_at_plasma_boundary</code></td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Some of these are real distinctions: a charge-state-resolved quantity is not the
+      species total. Even then the census is evidence of a defect, because the two
+      descriptions sit at cosine 0.98 and do not say what separates them.
+    </p>
+
+    <h2 id="s7">§7 — Thirty-eight names cannot be found by meaning</h2>
+    <p>
+      <strong>38</strong> accepted names fall into four clusters whose members share a
+      bit-identical embedding while carrying different descriptions:
+      <code>flux_due_to_pumping</code>, <code>permeability_of_ferritic_element</code>,
+      <code>plasma_heating_power</code>, <code>width_of_spectrometer_channel</code> and 14
+      more in the first cluster; <code>time</code>, <code>momentum_source_rate</code>,
+      <code>energy_flux_limiter_coefficient</code> and 11 more in the second. Each vector was
+      computed from something other than its own text, so semantic search, near-duplicate
+      detection and the comparator block in the compose prompt are blind to these names.
+      Several of them (<code>diffusion_coefficient_due_to_diffusion</code>,
+      <code>flux_at_first_wall</code> with unit <code>W.m^-2</code>) also look like naming
+      defects in their own right.
+    </p>
+
+    <h2 id="s8">§8 — What this implies</h2>
+    <p>
+      Consistency is a property of the set, and a per-name loop cannot produce it however
+      good its prompts are. Four things are missing, and each is a plan:
+    </p>
+    <ul>
+      <li><strong>An authored house style</strong>: one definition per shared concept, one
+        notation per quantity, one gloss per locus, one opening template per name pattern.
+        Choosing these is physics judgement, made once by the coordinator and the lead
+        rather than by a pipeline run — <code>sn-house-style</code>.</li>
+      <li><strong>Families built from the grammar</strong>, so the template rule has
+        siblings to apply to, with domains assigned by quantity and the vocabulary overlaps
+        adjudicated — <code>sn-catalog-grouping</code>.</li>
+      <li><strong>A command that applies the style family by family</strong>, from an anchor
+        outward, and measures conformance before and after —
+        <code>sn-harmonize-command</code>.</li>
+      <li><strong>A WEST batch brought to that style and read end to end by a person</strong>
+        before a physicist sees it — <code>sn-west-prototype-release</code>.</li>
+    </ul>
+  </main>
+</body>
+</html>

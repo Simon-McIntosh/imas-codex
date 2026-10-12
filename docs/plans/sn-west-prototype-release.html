@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-west-prototype-release">
+  <meta name="plan-title"     content="WEST Prototype: One House Style, Read By A Person, Then Released">
+  <meta name="plan-summary"   content="Repair the WEST names, harmonize their documentation, read every entry by hand, re-cut the batch and put it before a physicist with a traceable fold-back.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="14">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="critical">
+  <meta name="plan-sprint"    content="S18">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="standard-names,catalog-release,review">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-harmonize-command#s3&quot;,&quot;sn-house-style#s3&quot;],&quot;s5&quot;:[&quot;sn-catalog-grouping#s3&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;}">
+  <title>WEST Prototype: One House Style, Read By A Person, Then Released | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; standard names &middot; S18</p>
+      <h1>The WEST prototype</h1>
+      <p class="lead">
+        The WEST batch is the first set of names a physicist will judge, and it sets the bar
+        every later batch is held to. By the pipeline's own measures it is ready. Read as a
+        set, it is not: one in five bindings carries a recorded name defect, and the
+        documentation agrees with itself only by accident. This plan takes the batch from
+        "every entry passed" to "the entries read as one catalog", and only then releases it.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — Starting state, measured 2026-10-12</h2>
+    <p>
+      The frozen roster
+      <code>imas_codex/standard_names/manifests/reviews/v0.4.0rc7+west-task-2e.sn_names.yaml</code>
+      holds 220 names for the 342 sources of
+      <code>imas_codex/standard_names/manifests/west_production_dd_paths.yaml</code>. 218
+      are accepted on both axes, with a median name score of 0.975 and documentation score of
+      0.938. Measured per source on 2026-09-15, 340 of 342 sources are carried, and the two
+      exclusions are understood (<code>calorimetry/group/component/energy_total</code> back at
+      extracted; <code>camera_x_rays/camera/camera_dimensions</code> at its attempt cap).
+    </p>
+    <p>
+      What the scores miss is already written down. The binding-by-binding judgement in
+      <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-repair-worklist">the
+      WEST name repair worklist</a> found 74 of 341 bindings (21.7 %) carrying a name defect,
+      reconciled to 61 repairs (51 renames, 10 splits) behind six unresolved contradictions.
+      The shared-identity description judgement found seven bindings whose description
+      names the wrong object, among them an X-point read as the magnetic axis and the outer
+      strike point read as the inner. The
+      <a href="/imas-codex/research/sn-catalog-consistency-census">consistency census</a>
+      adds four documentation opening styles, conflicting definitions of shared concepts and
+      five roster names with no physics domain. None of this was acted on, because the
+      repairs are paid work that was never authorised and the release plan was busy with
+      its own machinery.
+    </p>
+
+    <h2 id="s2">§2 — Name repairs, ruled on once</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      Names first, because documentation follows a name and harmonizing an entry that is
+      about to be renamed is wasted spend. The coordinator brings three things to the lead
+      in one sitting: the six contradictions in the worklist, each with the options and a
+      recommendation; the 61 repairs, grouped by kind so they are ruled on as classes rather
+      than one by one; and the WEST pairs from <code>sn-catalog-grouping</code> §4. The lead
+      rules and authorises a spend ceiling. The repairs then go through
+      <code>sn edit --hint DIRECTION --reason WHY</code> and the ordinary review quorum. No
+      spelling is invented outside the worklist. The seven wrong-object descriptions take
+      the replacement sentences already written for them, through the documentation route.
+    </p>
+    <p>
+      <strong>Done when:</strong> every worklist row and every contradiction carries a
+      recorded ruling (apply, or decline with a reason). Every applied repair is accepted on
+      the name axis, or held with its reviewer verdict. The seven descriptions are replaced.
+      Actual spend is recorded beside the authorised ceiling. The roster is re-minted, and
+      the re-mint resolves every manifest source to a live identity or a stated exclusion.
+    </p>
+
+    <h2 id="s3">§3 — Harmonize the batch</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="1.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      Run <code>sn harmonize --apply --batch west-task-2e</code> once
+      <code>sn-harmonize-command</code> §3 and the WEST registry entries of
+      <code>sn-house-style</code> §3 exist, with a cost limit set from the per-name figure
+      <code>sn-harmonize-command</code> §4 measures.
+    </p>
+    <p>
+      <strong>Done when:</strong> the lint reports zero errors over the roster. Every entry is
+      accepted on the documentation axis at or above 0.85. The per-class finding counts
+      before and after are recorded against the <code>sn-house-style</code> §4 baseline. A
+      second report-mode run over the batch plans no work.
+    </p>
+
+    <h2 id="s4">§4 — A person reads every entry</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The coordinator reads all of the roster, in pattern-family order, against one
+      checklist:
+    </p>
+    <ul>
+      <li>the description is true of every binding the identity holds;</li>
+      <li>there is exactly one display equation, and it is the canonical one;</li>
+      <li>symbols follow the registry and are defined on first use;</li>
+      <li>the locus is glossed as the registry says;</li>
+      <li>the sign convention is present exactly when the COCOS type requires it;</li>
+      <li>every link resolves;</li>
+      <li>no typical values, recipes or padding.</li>
+    </ul>
+    <p>
+      A failure is fixed through <code>sn edit</code> with a hint and goes back through
+      review. It is never hand-edited in the graph. This is the polish no run can do,
+      because it is the one step that sees the batch the way its reviewer will.
+    </p>
+    <p>
+      <strong>Done when:</strong> <code>docs/evidence/sn-west-prototype-release/polish-ledger.md</code>
+      carries one row per roster name (pass, edited, or withheld with a reason) and no row is
+      open. Every edited row has been re-reviewed to acceptance.
+    </p>
+
+    <h2 id="s5">§5 — The batch arrives grouped the way a physicist reads</h2>
+    <section data-reckon="section" data-id="s5" data-effort-hours="1.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Domains come from <code>sn-catalog-grouping</code> §3. Within a domain, entries are
+      ordered by pattern family, so a reviewer meets the seventeen species of one quantity
+      together and can check them against each other. The catalog ordering module
+      <code>imas_codex/standard_names/catalog_ordering.py</code> applies that ordering.
+    </p>
+    <p>
+      <strong>Done when:</strong> no roster name carries a null domain. In the staged
+      catalog, every pattern family appears contiguously within its domain (asserted by a
+      test over the staged files).
+    </p>
+
+    <h2 id="s6">§6 — The re-cut and the pull request</h2>
+    <section data-reckon="section" data-id="s6" data-effort-hours="2.50" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-status="implementable" data-links=""></section>
+    <p>
+      Cutting is coordinator work from the main checkout, because the release CLI refuses a
+      detached HEAD. The catalog repository's own runbook governs pushing there. The residue
+      carried in from the retired release plan is resolved before the cut, and each item is
+      first confirmed to still reproduce:
+    </p>
+    <ul>
+      <li>a roster declares which set it carries and its own content hash, and a freeze
+        refuses a version that already exists with different bytes;</li>
+      <li>the rehearsal reaches the leg that produces its own accounting;</li>
+      <li>the export gate chain passes for the WEST scope, with the two permanent exclusions
+        waived by exact path;</li>
+      <li>the two recovered names carry accepted documentation;</li>
+      <li>the two vocabulary admissions the tail waits on are either landed upstream or
+        recorded as exclusions;</li>
+      <li>the half-width quantity that the grammar cannot spell is likewise either landed
+        upstream or recorded as an exclusion.</li>
+    </ul>
+    <p>
+      <strong>Done when:</strong> a candidate is cut and its exclusion ledger accounts for
+      all 342 sources (emitted plus each exclusion with its reason). The pull request is
+      open and links <code>REVIEWING.md</code> as markdown. The roster hash is recorded on the
+      plan.
+    </p>
+
+    <h2 id="s7">§7 — The fold-back, rehearsed before it is needed</h2>
+    <section data-reckon="section" data-id="s7" data-effort-hours="2.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      Carried from <code>catalog-review-surface</code> §4. Before a physicist's edits come
+      back, exercise the approval fold-back with one accepted and one refused reviewer edit
+      on a rehearsal branch.
+    </p>
+    <p>
+      <strong>Done when:</strong> the accepted edit is in the graph and traceable to its
+      author and pull request. The refused edit changed nothing. The unwind leaves no
+      lasting change, shown by a before-and-after property digest over the touched
+      identities.
+    </p>
+
+    <h2 id="s8">§8 — What this plan does not do</h2>
+    <p>
+      It does not harmonize the rest of the corpus. That follows WEST, through the same
+      command, once the prototype has been judged. It does not take on the integrity
+      residue parked in <code>sn-integrity-backlog</code>. Where one of those items blocks a
+      step here, it is pulled in by name with its measurement, not by reopening the backlog.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="name-repair-ceiling" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What spend ceiling is authorised for the WEST name repairs and the harmonize run?</p>
+        <p class="r-dec-ctx">61 repairs through sn edit plus one documentation pass over 220 entries. The documented campaign spend stood at 107.18 USD on 2026-09-15.</p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-swpr-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="orchestrator"
+               data-written-by="reckon-review" data-written-at="2026-10-12"
+               data-recommends-skill="/reckon-build sn-west-prototype-release §2">
+        <h4 class="r-fu-title">Prepare the one-sitting ruling on names, and start the release-path residue</h4>
+        <div class="r-fu-body">
+          <p>§2 starts today and needs the lead, not a worker. Assemble the six contradictions and the 61 repairs as classes from the worklist, and confirm each still reproduces on the live graph, since several weeks of adjacent work have passed. §6's residue is independent of everything else and can be dispatched now, one node per item, after a confirm-before-fixing check.</p>
+        </div>
+        <pre class="r-fu-prompt">/reckon-build sn-west-prototype-release §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

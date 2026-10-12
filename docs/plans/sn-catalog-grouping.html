@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-catalog-grouping">
+  <meta name="plan-title"     content="Group Names By What They Share, Not By Where They Came From">
+  <meta name="plan-summary"   content="Build families from the grammar, assign physics domains by quantity, adjudicate near-duplicate spellings and repair degenerate embeddings.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="10.5">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint"    content="S18">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="standard-names,catalog-presentation">
+  <meta name="plan-blocks"    content="sn-harmonize-command,sn-west-prototype-release">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <title>Group Names By What They Share | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; standard names &middot; S18</p>
+      <h1>Group names by what they share</h1>
+      <p class="lead">
+        A family is assembled from <code>HAS_PARENT</code> edges, so seventeen
+        species variants of one quantity are seventeen families of one. A domain is copied
+        from the IDS a name was extracted from, so <code>electron_temperature</code> is filed
+        under MHD. Both groupings come from provenance. This plan makes them come from the
+        grammar and the physics.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — Why the grouping is wrong</h2>
+    <p>
+      Measured in <a href="/imas-codex/research/sn-catalog-consistency-census">the
+      consistency census</a>, §4 to §7. Across 46 species families of four or more members,
+      the median share of members opening their description differently is 0.90, because
+      the family-anchor rule in the docs prompt never sees a sibling. No accepted name
+      carries the ISN domain <code>core_plasma_physics</code>, while <code>transport</code>
+      holds 850 and 207 have no domain. Vocabulary overlaps such as <code>neutral</code>
+      against <code>neutral_state</code> produce pairs at cosine 0.98 whose descriptions do
+      not say what separates them. 38 names have bit-identical embeddings from text that is
+      not their own.
+    </p>
+
+    <h2 id="s2">§2 — Pattern families from the grammar</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      A pattern family is the set of live names whose ISN parse is identical except along
+      one variation axis: subject or species, component, locus, region or device. Build it
+      in <code>imas_codex/standard_names/families.py</code>, which already owns family
+      detection and axis ordering, from the canonical segment columns the graph carries.
+      Then make <code>fetch_sibling_family</code> in
+      <code>imas_codex/standard_names/context.py</code> and <code>assemble_family</code> in
+      <code>imas_codex/standard_names/harmonize.py</code> use it, keeping a family-eligible
+      <code>HAS_PARENT</code> edge as a second, explicit route. There is one definition of a
+      family, and the docs prompt, the harmonize command and the catalog ordering all read
+      it.
+    </p>
+    <p>
+      This also closes the vector-component residue of the retired grammar-refinement plan:
+      the component axis is already parsed into <code>sn.component</code>, and a pattern
+      family over it is the "distinguished dimension" that plan asked for. No schema field is
+      added.
+    </p>
+    <p>
+      <strong>Done when:</strong> the 17
+      <code>flux_surface_averaged_&lt;species&gt;_density_at_plasma_boundary</code> names
+      resolve to one family of 17 in a test over a fixture graph. A name with no axis
+      sibling resolves to a family of one, not an error. The live count of pattern families
+      with three or more members is recorded, beside the <code>HAS_PARENT</code> count it
+      replaces.
+    </p>
+
+    <h2 id="s3">§3 — Domains assigned by the quantity</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Replace "the domain of the first source IDS" with a rule table keyed by physical
+      base, geometric base and operator. It lives beside the conventions registry, at
+      <code>imas_codex/standard_names/conventions/domains.yml</code>. Source IDS is used
+      only to break a tie the table leaves open. Export's
+      <code>pick_primary_domain</code> in <code>imas_codex/standard_names/domain_priority.py</code>
+      reads the stored value and is unchanged. Repair the 207 null domains through the same
+      rule, writing through the ordinary graph-ops path with no hand Cypher.
+    </p>
+    <p>
+      <strong>Done when:</strong> zero names in the WEST roster carry a null domain. The
+      lead approves the domain for twenty named reference quantities, among them
+      <code>electron_temperature</code>, <code>electron_density</code>,
+      <code>safety_factor</code>, <code>plasma_current</code> and
+      <code>poloidal_magnetic_flux</code>. The rule reproduces all twenty. The census of
+      domains before and after is recorded, and <code>core_plasma_physics</code> is no longer
+      empty.
+    </p>
+
+    <h2 id="s4">§4 — Near-duplicate spellings, adjudicated once</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Generate the worklist: live pairs with the same unit, embedding cosine at or above
+      0.95, and more than a one-token difference, excluding the §5 vectors. Scope it to
+      pairs with at least one WEST member first. The coordinator classifies each overlap
+      rather than each pair, since one ruling settles every pair the overlap produces:
+    </p>
+    <ul>
+      <li><strong>Distinct</strong> — both names stand. The house-style template for each
+        gains the sentence that separates them, for example a charge-state-resolved
+        quantity against its species total.</li>
+      <li><strong>Synonym</strong> — one spelling survives, and the other is folded into it
+        with <code>sn supersede</code> or renamed with <code>sn edit</code>. Never by hand,
+        and never deleting an identity that carries spend.</li>
+      <li><strong>Vocabulary overlap</strong> — the grammar offers two tokens for one
+        meaning (<code>neutral</code> and <code>neutral_state</code>,
+        <code>at_divertor_target</code> and <code>of_divertor</code>). The ruling is an ISN
+        vocabulary decision, filed upstream with the measured pairs.</li>
+    </ul>
+    <p>
+      <strong>Done when:</strong> every overlap touching the WEST roster carries a recorded
+      ruling with its pairs. Every synonym ruling inside the roster has been applied through
+      the sanctioned route, and the roster still resolves. The rest of the corpus has a
+      worklist in the same format, ready for the post-WEST pass.
+    </p>
+
+    <h2 id="s5">§5 — Thirty-eight embeddings computed from the wrong text</h2>
+    <section data-reckon="section" data-id="s5" data-effort-hours="1.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      Re-embed the 38 names in the four identical-vector clusters through the ordinary
+      embedding path. Then add a guard on that path, in
+      <code>imas_codex/embeddings/description.py</code>, that refuses to return a vector
+      identical to one it returned in the same batch for different input text. A silent
+      constant vector is how 38 names became unfindable.
+    </p>
+    <p>
+      <strong>Done when:</strong> the identical-vector cluster count over live accepted
+      names is zero. The guard's test feeds two different texts through a stub that returns
+      one vector and watches the refusal. With the guard removed, the same test fails.
+    </p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-scg-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-written-by="reckon-review" data-written-at="2026-10-12"
+               data-recommends-skill="/reckon-build sn-catalog-grouping §2">
+        <h4 class="r-fu-title">Pattern families first; domains and embeddings run beside them</h4>
+        <div class="r-fu-body">
+          <p>§2 is on the critical path, since the harmonize command applies templates per pattern family. §3 and §5 write disjoint files and can run in parallel with it. §4 is coordinator adjudication over a worklist a worker can generate.</p>
+        </div>
+        <pre class="r-fu-prompt">/reckon-build sn-catalog-grouping §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

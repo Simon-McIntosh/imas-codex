@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-integrity-backlog">
+  <meta name="plan-title"     content="Standard Name Integrity Backlog, Parked Behind The WEST Release">
+  <meta name="plan-summary"   content="The live residue of sixteen retired standard-name plans, one row per open item, deferred until the WEST prototype ships.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort-hours" content="40">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="standard-names">
+  <meta name="plan-after"     content="sn-west-prototype-release">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;}">
+  <title>Standard Name Integrity Backlog | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; standard names &middot; backlog, unscheduled</p>
+      <h1>The integrity backlog, parked</h1>
+      <p class="lead">
+        From August to late September the standard-name work was mostly about the machinery
+        that manages names: lifecycle axes, provenance, scalar mirrors, deletion guards and
+        repair receipts. Sixteen plans carried that work, and between them they held 53 open
+        followups while the WEST batch waited. The guards that mattered landed. What remains
+        is real but not urgent, so it is gathered here, one row per item, and deferred until
+        the WEST prototype ships.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — Why this is parked rather than worked</h2>
+    <p>
+      The portfolio review of 2026-10-12 found no standard-name commit after 2026-09-21. It
+      also found the WEST release plan at 538 KB and 293 commits with thirteen open
+      followups, half of them about release tooling rather than the release. Every deferred
+      row below was read against its source plan and kept only if it describes a defect or
+      decision that still exists. Each row names the plan and followup it came from, so the
+      full measurement is one click away in that plan's frozen text. When the WEST prototype
+      ships, this plan is re-sprinted, and each row is re-confirmed against the live graph
+      before any node is dispatched, since adjacent work has fixed recorded defects before.
+    </p>
+    <p>
+      A row needed by the WEST release has already moved to
+      <code>sn-west-prototype-release</code> and is not repeated here: the export gate chain,
+      the two recovered names, the two vocabulary admissions, the half-width base, rehearsal
+      accounting and roster identity.
+    </p>
+
+    <h2 id="s2">§2 — Lifecycle, provenance and authority residue</h2>
+    <table>
+      <thead><tr><th>Source</th><th>Open item</th></tr></thead>
+      <tbody>
+        <tr><td><code>sn-lifecycle-integrity</code> §5</td><td>Seven followups on silent footguns: four sanctioned paths refuse an orphaned identity's exact state (<code>f-sli-the-sanctioned-surface-has-four-holes</code>); the successor scalar can be retired at a named price of three names; the parked-disposition net has no caller; a cap-hit source not yet parked reads as unclassified; the parked-source refusal message and classifier precedence; four bypasses of the defaulted-attribute guard.</td></tr>
+        <tr><td><code>paid-identity-deletion-protection</code> §4, §6</td><td>The guard landed in <code>imas_codex/standard_names/protection.py</code>. The restore is partial and its followup is stale: the <code>*_density_at_pedestal_top</code> family was rebuilt on 2026-09-09, but <code>power_due_to_fusion</code> and <code>plasma_energy</code> are still absent. Re-measure before restoring. The restore CLI must not re-arm the origin value that caused the deletion (<code>f-pidp-the-restore-cli-re-arms-the-deletion-it-exists-to-prevent</code>). 334 live names are labelled scaffolding while carrying reviewed documentation (<code>f-pidp-004</code>).</td></tr>
+        <tr><td><code>sn-origin-provenance-backfill</code></td><td>Recover origin and status from generation evidence and close the import write path (<code>f-sopb-002</code>).</td></tr>
+        <tr><td><code>scalar-edge-authority</code></td><td>43 of 117 produced-name divergences still hold the only record of intent; the derive beat may now run for links.</td></tr>
+        <tr><td><code>sn-schema-ownership-residue</code></td><td>Three properties the schema and the live graph disagree about, parked in a permanent allowance.</td></tr>
+        <tr><td><code>sn-schema-version-authority</code></td><td>A schema digest node so a server refuses to serve against a graph migrated under a different schema. No <code>schema_digest</code> symbol exists in the tree.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s3">§3 — Source coverage residue</h2>
+    <table>
+      <thead><tr><th>Source</th><th>Open item</th></tr></thead>
+      <tbody>
+        <tr><td><code>unbound-source-backlog</code></td><td>Five followups: nine exportable accepted names with no producing source; size the composition pass at 1,268 and decide the 65 placeholders first; six export tests red on main before that work (re-measure); the waiver refusal sees only a chain terminal; four questions recorded for the lead.</td></tr>
+        <tr><td><code>sn-release-readiness</code> §12</td><td>72 never-grounded chain-cap identities need a rebuild rather than a reattachment (<code>f-srr-unsourced</code>). The six strain-gauge measurement-direction names wait on an ISN token. Twelve released manifests record a worktree path as provenance.</td></tr>
+        <tr><td><code>sn-regeneration-decision</code></td><td>Measure the regenerable and protected populations and the cost per identity, then put the regenerate-or-repair scope to the lead (<code>f-srd-001</code>). It absorbs the 31 born-ungrounded rows.</td></tr>
+        <tr><td><code>mast-semantic-source-repair</code></td><td>Rebuild and repair the MAST source manifest on the hardened graph. Facility breadth after WEST.</td></tr>
+        <tr><td><code>dd-defect-upstreaming</code></td><td>File each measured Data Dictionary defect upstream with its evidence, or withdraw it with a reason.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s4">§4 — Fold and repair machinery</h2>
+    <table>
+      <thead><tr><th>Source</th><th>Open item</th></tr></thead>
+      <tbody>
+        <tr><td><code>sn-grammar-refinement</code></td><td>The fold guard reads history where it means the present, so a reverted rename refuses every later fold (<code>f-sgr-fold-guard-current-successor</code>). A one-word family anchor cannot clear the name gate. A fold onto an occupied identity must keep the richer prose. The fold postflight proof refuses a fold whose dry run succeeds. An edits-scoped run still runs whole-graph maintenance.</td></tr>
+        <tr><td><code>sn-west-catalog-release</code></td><td>The compose supersede path fails hard, and spends an attempt, when a source binds another live identity. Exhausted verdicts are reached across a reviewer swing wider than the deciding margin. Domain routes and terminal stages. Whether one DD path may hold several source nodes. An export that filters every candidate exiting 0 (likely closed by the 2026-09-21 export refusals; confirm).</td></tr>
+        <tr><td><code>sn-catalog-audit-instrument</code></td><td>The declared-attribute check can judge 13 of 18 <code>llm_out</code> sites once annotated. An unreachable embedder must not become a finding at three nested sites.</td></tr>
+        <tr><td><code>sn-identity-adjudication-residue</code></td><td>Two identities need a physics adjudication proposed through <code>sn edit</code> (<code>f-siar-001</code>).</td></tr>
+        <tr><td><code>signed-repair-snapshot-cost</code></td><td>Measure the collateral snapshot cost, then digest server-side or narrow to owned dimensions (<code>f-srsc-001</code>).</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s5">§5 — Dropped, with the reason</h2>
+    <table>
+      <thead><tr><th>Item</th><th>Why it is not carried</th></tr></thead>
+      <tbody>
+        <tr><td><code>f-wcr-budget-keyed-per-account</code>, <code>f-srr-stale-run-cannot-be-reconciled</code></td><td>Owned by reckon, not by this repository.</td></tr>
+        <tr><td><code>f-scai-groups-wiring</code></td><td>Landed on 2026-09-21 (<code>04b0794b4</code>). Its surface is replaced by <code>sn harmonize</code>.</td></tr>
+        <tr><td><code>f-scai-audit-findings-reach-no-template</code></td><td>Still true, and carried into <code>sn-house-style</code> §5, which needs it.</td></tr>
+        <tr><td><code>f-scai-lane-sweep-rerun</code></td><td>Measured an engine the local lane no longer runs. Lane admission is now the router's.</td></tr>
+        <tr><td><code>f-srr-the-generate-seat-follows-the-relaunched-local-model</code>, <code>f-srr-compose-seat-unserved</code></td><td>Model seats were reorganised on 2026-10-06 (<code>b138bca23</code>). Re-raise only if a seat is found unserved.</td></tr>
+      </tbody>
+    </table>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-sib-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="orchestrator"
+               data-written-by="reckon-review" data-written-at="2026-10-12"
+               data-recommends-skill="/reckon-build sn-integrity-backlog">
+        <h4 class="r-fu-title">After WEST ships: re-confirm every row, then re-sprint what survives</h4>
+        <div class="r-fu-body">
+          <p>Do not dispatch from this table as written. Each row is a pointer to a measurement that is weeks old. Re-measure it on the live graph, drop what adjacent work has fixed, and turn what remains into sections of a new sprint.</p>
+        </div>
+        <pre class="r-fu-prompt">/reckon-build sn-integrity-backlog</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

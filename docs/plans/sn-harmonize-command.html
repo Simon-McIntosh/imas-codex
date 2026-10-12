@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-harmonize-command">
+  <meta name="plan-title"     content="sn harmonize: Apply the House Style Family by Family">
+  <meta name="plan-summary"   content="One command that reports and applies house-style conformance over pattern families, replacing sn run --families and sn review --target groups.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="8">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S18">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="standard-names,catalog-release">
+  <meta name="plan-blocks"    content="sn-west-prototype-release">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; standard names &middot; S18</p>
+      <h1>sn harmonize</h1>
+      <p class="lead">
+        <code>sn run</code> composes and documents one name at a time, which is right for
+        producing names and wrong for making them agree. The unit of consistency is a
+        family or a shared concept. This command takes that unit, measures it against the
+        house style, and rewrites its documentation from one anchor outward.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — Why a command beside sn run, and why this name</h2>
+    <p>
+      The pieces exist and are scattered. <code>harmonize.py</code> computes drift and a
+      family worklist, and its module docstring still points at an
+      <code>sn harmonize --report</code> command that no longer exists. <code>sn run
+      --families</code> resets a family's documentation and runs a docs-only flush.
+      <code>sn review --target groups</code> reviews the drift worklist read-only. None of
+      them knows the house style, and all three group by <code>HAS_PARENT</code>, which the
+      <a href="/imas-codex/research/sn-catalog-consistency-census">consistency census</a>
+      shows is the wrong family.
+    </p>
+    <p>
+      The name is <code>harmonize</code>, not <code>refine</code>. "Refine" already means the
+      per-name refine pools inside <code>sn run</code> and the
+      <code>sn release-refine-claim</code> command, so a second meaning would mislead every
+      reader of a log. "Harmonize" is the word the module, the prompts and the retired
+      family-harmonization plan already use for this act.
+    </p>
+
+    <h2 id="s2">§2 — One surface, and the two it replaces</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <code>imas-codex sn harmonize</code> takes one scope — <code>--batch &lt;manifest&gt;</code>
+      (for example <code>west-task-2e</code>), <code>--family &lt;seed name&gt;</code>,
+      <code>--concept &lt;registry id&gt;</code> or <code>--all</code> — and one mode:
+    </p>
+    <ul>
+      <li><code>--report</code> (the default): read-only. For each pattern family in scope,
+        it lists the members, the anchor, the drift metric and the lint findings by class.
+        It also prints a scope total, which is the number every later step is judged
+        against.</li>
+      <li><code>--apply</code>: the documentation rewrite of §3, with <code>--dry-run</code>
+        printing the planned calls and an estimated cost, and <code>--cost-limit</code>
+        bounding the spend.</li>
+    </ul>
+    <p>
+      In the same change, delete <code>--families</code> from <code>sn run</code> and
+      <code>--target groups</code> from <code>sn review</code>, and update their tests and
+      documentation. There is one route to family harmonization afterwards, not three.
+    </p>
+    <p>
+      <strong>Done when:</strong> <code>sn harmonize --report --batch west-task-2e</code>
+      runs against a fixture graph and prints per-family findings. With
+      <code>--family</code> it prints the same rows for one family. Both deleted flags are
+      gone from <code>imas_codex/cli/sn.py</code>, and a test asserts each is rejected as an
+      unknown option. The CLI test suite shows no added failures against its base.
+    </p>
+
+    <h2 id="s3">§3 — Apply: the anchor first, the members from the anchor</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="3.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      For each pattern family in scope:
+    </p>
+    <ol>
+      <li><strong>Anchor.</strong> Choose the anchor with the existing
+        <code>select_anchor</code>. Regenerate its documentation with the selected
+        registry entries and the family template in the prompt, then pass it through the
+        ordinary documentation review axis. A family whose anchor does not reach acceptance
+        stops there and is reported. Members are never written against an unaccepted
+        anchor.</li>
+      <li><strong>Members.</strong> Regenerate each member's documentation with the
+        accepted anchor in the sibling block the docs prompt already carries. Member-specific
+        physics — a different charge-state range, a different sign convention — is stated
+        inside the shared template, never averaged away. Each member is then reviewed the
+        same way.</li>
+      <li><strong>Verify.</strong> Re-run the lint over the family and record before and
+        after counts.</li>
+    </ol>
+    <p>
+      Names and identities are never touched: this is a documentation-axis operation, so
+      every identity, source binding and spend record survives. The previous documentation
+      is snapshotted before reset, as <code>mark_families_for_regen</code> already does, so a
+      family can be put back. Name-level fixes go through <code>sn edit</code>.
+    </p>
+    <p>
+      <strong>Done when:</strong> on the 17-member boundary-averaged density family, an apply
+      leaves zero lint errors, one opening template and one flux-surface-average equation.
+      Every member stays accepted on the documentation axis. A second
+      <code>--apply</code> over the same scope plans zero calls. An anchor deliberately
+      failed in a test leaves its members untouched.
+    </p>
+
+    <h2 id="s4">§4 — Convergence and cost, measured on a real scope</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="1.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Before the WEST run, prove the command on one non-WEST family per pattern kind
+      (species, component, locus). For each, record calls, spend, wall time, lint findings
+      before and after, and documentation scores before and after. The scores answer the one
+      question the lint cannot: whether making entries agree made any of them worse.
+    </p>
+    <p>
+      <strong>Done when:</strong> three families are applied with those figures recorded in
+      the plan's evidence. No member's documentation score falls below the acceptance
+      threshold. The per-name cost is known well enough to put a stated limit on the WEST
+      run.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="command-name" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What is the command called?</p>
+        <p class="r-dec-ctx">"refine" already names the per-name refine pools and sn release-refine-claim.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="harmonize">sn harmonize (recommended)</button>
+          <button class="r-opt" data-value="refine">sn refine</button>
+          <button class="r-opt" data-value="polish">sn polish</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-shc-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-written-by="reckon-review" data-written-at="2026-10-12"
+               data-recommends-skill="/reckon-build sn-harmonize-command §2">
+        <h4 class="r-fu-title">Build the surface and delete the two flags it replaces</h4>
+        <div class="r-fu-body">
+          <p>§2 can start now on the existing drift metric and pick up the lint when <code>sn-house-style</code> §4 lands. §3 waits on the lint and on pattern families. It writes <code>imas_codex/cli/sn.py</code>, which every review-surface change also writes, so it cannot run beside another node holding that file.</p>
+        </div>
+        <pre class="r-fu-prompt">/reckon-build sn-harmonize-command §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
