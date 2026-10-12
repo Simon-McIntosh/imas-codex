@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-export-waiver-intermediates">
+<title>Export waiver refusal sees every produced identity</title>
+</head>
+<body>
+<main>
+<h1 id="sib-export-waiver-intermediates-title">The waiver refusal sees every identity a waived source's chain publishes</h1>
+
+<h2 id="sib-export-waiver-intermediates-what">What changed</h2>
+<p>The export waiver refusal compared only the terminal identity of a manifest source's successor chain against the cut's published set. A declared-waived source whose chain accepted an identity at an intermediate stage could therefore be published while the exemption stood. The refusal now reads each waived source's full successor-chain identity set from the graph before any staging output exists and hands it to the one waiver decision, so a published intermediate is named and the cut is refused.</p>
+<table id="sib-export-waiver-intermediates-paths">
+<tbody>
+<tr><th>Module</th><td><code>imas_codex/standard_names/export.py</code> — extended <code>_source_disposition</code> with <code>chain_identities</code>; new <code>_fetch_waived_source_chain_identities</code>; single refusal path kept</td></tr>
+<tr><th>Test</th><td><code>tests/standard_names/test_export_waiver_intermediates.py</code> (new, four tests)</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-export-waiver-intermediates-measure">Measure</h2>
+<table id="sib-export-waiver-intermediates-measure-table">
+<thead><tr><th>Arm</th><th>Command</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>baseline (base <code>export.py</code>)</td><td><code>uv run pytest -p no:cacheprovider &lt;eight export test files&gt;</code></td><td>7 failed, 101 passed, EXIT=1 (4 m 19 s)</td></tr>
+<tr><td>after (fixed <code>export.py</code> + new test)</td><td>same eight files + <code>test_export_waiver_intermediates.py</code></td><td>7 failed, 105 passed, EXIT=1 (3 m 51 s)</td></tr>
+<tr><td>negative control (waiver branch ignores <code>chain_identities</code>)</td><td><code>uv run pytest ... test_export_waiver_intermediates.py</code></td><td>2 failed, 2 passed, <code>EXIT=1</code></td></tr>
+</tbody>
+</table>
+<p>The after arm adds four passing tests and no new failure against the baseline's seven: the same seven ids fail in both arms (six pre-existing export failures on <code>main</code> plus the release-holds pair). The negative control fails exactly the two intermediate-refusal tests — the unit refusal and the cut-level refusal — which the head arm passes.</p>
+<p>Logs: <code>base-export-tests.log</code>, <code>after-export-tests.log</code>, <code>negative-control.log</code> in the run directory.</p>
+</main>
+</body>
+</html>
