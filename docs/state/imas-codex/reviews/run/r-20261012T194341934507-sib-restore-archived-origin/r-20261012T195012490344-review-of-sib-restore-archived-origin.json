@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:8623"
+  ],
+  "completed_at": "2026-10-12T20:01:10.018Z",
+  "dispatched_at": "2026-10-12T19:50:24Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T194341934507-sib-restore-archived-origin/baseline_suite.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate logs name their revision as `# rev: <sha>`, but the store's recorded_log_revision matcher accepts only the token `revision`, so the stored record's base_log_revision and head_log_revision read back as null even though each log's first line names the revision it ran at; the required added_failure_count (0) and added_failure_ids ([]) are derived correctly and are unaffected."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read commit by commit from c51cf292f to f4dffef72; one commit adds 13 lines to the existing test module (a new refusal case) and a 19-line evidence fragment, with no product code changed.",
+    "done_when": "the done_when names the gate file, a scratch-copy fallback mutation kept with EXIT=, and baseline/after suites; baseline_suite.log (21 passed) and after_suite.log (22 passed) at revisions c51cf292f and f4dffef72 plus negative_control.log (1 failed, 1 passed, EXIT=1) supply each.",
+    "goal": "the node's goal is to pin the composer's refusal of an archive's own origin when none is stated; tests/standard_names/test_archive_reconstruction_entry_point.py:203 adds exactly that case over an extraction carrying origin catalog_edit, closing the coverage gap an earlier review identified at line 197.",
+    "manifest": "read; it records status complete, one commit f4dffef72, the gate at 22 passed, baseline 21 passed, and negative_control_log as a bare path whose header names module.__file__ and cwd.",
+    "write_paths": "the reviewed manifest declares tests/standard_names/test_archive_reconstruction_entry_point.py and docs/evidence/fragments/sn-integrity-backlog/sib-restore-archived-origin.html; both files in the diff are inside them and no product code changed."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows test_composition_requires_an_explicit_current_origin at tests/standard_names/test_archive_reconstruction_entry_point.py:197 stays green while the new case at :203 reddens under a composer that sources properties['origin'] when none is stated, so the added assertion is the unique guard for that regression.",
+    "evidence": "baseline_suite.log (21 passed) and after_suite.log (22 passed) at revisions c51cf292f and f4dffef72 record the gate the done_when names, and negative_control.log (EXIT=1, 1 failed, 1 passed) shows the new case red under the fallback mutation.",
+    "fit": "the new case follows the pytest.raises(..., match=...) idiom and docstring style of tests/standard_names/test_archive_reconstruction_entry_point.py:197 and introduces no name the repository naming rules forbid.",
+    "goal_fidelity": "tests/standard_names/test_archive_reconstruction_entry_point.py:203 composes an extraction carrying origin catalog_edit with origin=None and requires refusal, which is the deliverable the goal names.",
+    "reuse": "no production definition is added; the case extends the existing owner module and reuses the pre-existing _extraction(origin=...) parameter at tests/standard_names/test_archive_reconstruction_entry_point.py:41 rather than forking a second factory.",
+    "scope_discipline": "the diff touches only tests/standard_names/test_archive_reconstruction_entry_point.py and docs/evidence/fragments/sn-integrity-backlog/sib-restore-archived-origin.html, both inside the declared paths, with no product code changed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to pin the composer's refusal of an archive's own origin when none is stated; tests/standard_names/test_archive_reconstruction_entry_point.py:203 adds exactly that case over an extraction carrying origin catalog_edit, closing the coverage gap an earlier review identified at line 197.\nVERDICT done_when: the done_when names the gate file, a scratch-copy fallback mutation kept with EXIT=, and baseline/after suites; baseline_suite.log (21 passed) and after_suite.log (22 passed) at revisions c51cf292f and f4dffef72 plus negative_control.log (1 failed, 1 passed, EXIT=1) supply each.\nVERDICT write_paths: the reviewed manifest declares tests/standard_names/test_archive_reconstruction_entry_point.py and docs/evidence/fragments/sn-integrity-backlog/sib-restore-archived-origin.html; both files in the diff are inside them and no product code changed.\nVERDICT manifest: read; it records status complete, one commit f4dffef72, the gate at 22 passed, baseline 21 passed, and negative_control_log as a bare path whose header names module.__file__ and cwd.\nVERDICT diff: read commit by commit from c51cf292f to f4dffef72; one commit adds 13 lines to the existing test module (a new refusal case) and a 19-line evidence fragment, with no product code changed.\nCALL_SITES: imas_codex/cli/sn.py:8623\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/standard_names/test_archive_reconstruction_entry_point.py:203 composes an extraction carrying origin catalog_edit with origin=None and requires refusal, which is the deliverable the goal names.\nSCORE evidence: 19\nJUSTIFICATION evidence: baseline_suite.log (21 passed) and after_suite.log (22 passed) at revisions c51cf292f and f4dffef72 record the gate the done_when names, and negative_control.log (EXIT=1, 1 failed, 1 passed) shows the new case red under the fallback mutation.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only tests/standard_names/test_archive_reconstruction_entry_point.py and docs/evidence/fragments/sn-integrity-backlog/sib-restore-archived-origin.html, both inside the declared paths, with no product code changed.\nSCORE durability: 19\nJUSTIFICATION durability: negative_control.log shows test_composition_requires_an_explicit_current_origin at tests/standard_names/test_archive_reconstruction_entry_point.py:197 stays green while the new case at :203 reddens under a composer that sources properties['origin'] when none is stated, so the added assertion is the unique guard for that regression.\nSCORE fit: 19\nJUSTIFICATION fit: the new case follows the pytest.raises(..., match=...) idiom and docstring style of tests/standard_names/test_archive_reconstruction_entry_point.py:197 and introduces no name the repository naming rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: no production definition is added; the case extends the existing owner module and reuses the pre-existing _extraction(origin=...) parameter at tests/standard_names/test_archive_reconstruction_entry_point.py:41 rather than forking a second factory.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T194341934507-sib-restore-archived-origin/baseline_suite.log:1 follow-on: the gate logs name their revision as `# rev: <sha>`, but the store's recorded_log_revision matcher accepts only the token `revision`, so the stored record's base_log_revision and head_log_revision read back as null even though each log's first line names the revision it ran at; the required added_failure_count (0) and added_failure_ids ([]) are derived correctly and are unaffected.",
+  "review_run_id": "r-20261012T195012490344-review-of-sib-restore-archived-origin",
+  "reviewed_base_sha": "c51cf292fa32aec131a45c9426c55649ce59d8f7",
+  "reviewed_head_sha": "f4dffef72fb269a7f453e2a92ba7a3a4aa8ee4d5",
+  "reviewed_run_id": "r-20261012T194341934507-sib-restore-archived-origin",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:02:16.584662+00:00",
+  "total": 117
+}
