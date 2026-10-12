@@ -1,0 +1,51 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/review/pipeline.py:2055 _review_single_batch",
+    "imas_codex/standard_names/workers.py:9641 process_generate_docs_batch",
+    "imas_codex/standard_names/workers.py:10320 prepare_docs_review_request",
+    "imas_codex/standard_names/workers.py:10683 process_refine_docs_batch"
+  ],
+  "completed_at": "2026-10-12T22:56:19.721Z",
+  "dispatched_at": "2026-10-12T22:49:26Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "four production call sites reach the guard through conventions_context_for: imas_codex/standard_names/review/pipeline.py:2055 (_review_single_batch, the site named in the goal), imas_codex/standard_names/workers.py:9641 (process_generate_docs_batch), :10320 (prepare_docs_review_request) and :10683 (process_refine_docs_batch).",
+    "diff": "read da88e16aa7b229f7964b031878f890c9ccd5df08 against base cb5d100ce429c9535397115693fec985a39bef5f commit by commit; one commit, four files: context.py +16/-1, workers.py -31/+9 (helper removed, three sites rewired), tests/standard_names/test_conventions_parse_guard.py new (+95), docs/evidence/fragments/sn-house-style/shs-conventions-parse-guard.html new (+41).",
+    "done_when": "imas_codex/standard_names/review/pipeline.py:2055 calls conventions_context_for unguarded, and tests/standard_names/test_conventions_parse_guard.py:66 runs _review_single_batch with the unparseable name to completion while :29/:66 fail with the guard removed (negative_control.log: 2 failed, EXIT=1); `git grep _conventions_for_prompt da88e16aa -- imas_codex/` is empty; base_gate.log and after_gate.log record 962 and 966 passed at EXIT=0, added failures 0.",
+    "goal": "the node goal is to move the parse guard for an unparseable name into the conventions owner; imas_codex/standard_names/context.py:36-46 now catches only ParseError from select_conventions and returns None, imas_codex/standard_names/workers.py no longer defines _conventions_for_prompt (git grep at da88e16aa returns nothing) and its three call sites (:9641, :10320, :10683) call conventions_context_for directly.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T223255009505-shs-conventions-parse-guard/manifest.md; status complete, single landed revision da88e16aa, changed_paths the four diff files, baseline_suite and after_suite both completed true with failure_count 0 and empty failure_ids, negative_control_log a bare path whose final line is EXIT=1.",
+    "write_paths": "the declared scope in the manifest is imas_codex/standard_names/context.py, imas_codex/standard_names/workers.py, imas_codex/standard_names/review/pipeline.py, tests/standard_names/test_conventions_parse_guard.py, docs/evidence/fragments/sn-house-style/shs-conventions-parse-guard.html and the unused docs/figures/sn-house-style/shs-conventions-parse-guard; the single commit da88e16aa touches only the first, second, fourth and fifth."
+  },
+  "justifications": {
+    "durability": "removing the guard reddens tests/standard_names/test_conventions_parse_guard.py:29 and :66 (negative_control.log EXIT=1), and test_guard_catches_only_the_grammar_parse_error:44 independently pins the catch to ParseError by raising RuntimeError through the monkeypatched select_conventions.",
+    "evidence": "the done_when's batch test and rg check are both evidenced \u2014 negative_control.log ends \"2 failed, 2 passed ... EXIT=1\" and `git grep _conventions_for_prompt da88e16aa -- imas_codex/` returns nothing, while base_gate.log/after_gate.log read 962 and 966 passed at EXIT=0.",
+    "fit": "context.py:39 keeps the module's lazy in-function import idiom and module logger, workers.py:9622 adds conventions_context_for inside the existing from-import block, and no added name carries a plan or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/context.py:41 wraps select_conventions in try/except ParseError returning None, and imas_codex/standard_names/workers.py:9641/:10320/:10683 call conventions_context_for directly, which is the one-sentence deliverable.",
+    "reuse": "the change removes the forked per-site helper rather than adding one; the only other select_conventions callers (imas_codex/standard_names/docs_gates.py:691, harmonize.py:496, review/audits.py:692) are different capabilities and no second owner of the prompt-conventions selection exists.",
+    "scope_discipline": "every path in da88e16aa's diff (context.py, workers.py, tests/standard_names/test_conventions_parse_guard.py, docs/evidence/fragments/sn-house-style/shs-conventions-parse-guard.html) is inside the declared write paths, and review/pipeline.py was declared but correctly left untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to move the unparseable-name guard into conventions_context_for and drop the per-site helper; imas_codex/standard_names/context.py:28-46 now catches only imas_standard_names.grammar.parser.ParseError and returns None, and _conventions_for_prompt is gone (git grep at da88e16aa finds nothing) with its three sites (imas_codex/standard_names/workers.py:9641, :10320, :10683) calling conventions_context_for directly, so the goal is met.\nVERDICT done_when: the done_when's clauses are measured \u2014 tests/standard_names/test_conventions_parse_guard.py:66 drives _review_single_batch with an unparseable name and fails when the guard is removed (negative_control.log: 2 failed, EXIT=1), `git grep _conventions_for_prompt da88e16aa -- imas_codex/` returns nothing, and the gate logs record base 962 passed/1 skipped/0 failed EXIT=0 and head 966 passed/1 skipped/0 failed EXIT=0.\nVERDICT write_paths: the declared scope is imas_codex/standard_names/context.py, imas_codex/standard_names/workers.py, imas_codex/standard_names/review/pipeline.py, tests/standard_names/test_conventions_parse_guard.py, docs/evidence/fragments/sn-house-style/shs-conventions-parse-guard.html and docs/figures/sn-house-style/shs-conventions-parse-guard; the single commit da88e16aa touches exactly four of these and no other path.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T223255009505-shs-conventions-parse-guard/manifest.md; status complete, one landed revision da88e16aa, changed_paths the four diff files, baseline_suite/after_suite both completed true with failure_count 0 and identical (empty) failure ids, and a bare negative_control_log path whose final line is EXIT=1.\nVERDICT diff: read da88e16aa7b229f7964b031878f890c9ccd5df08\n against base cb5d100ce429c9535397115693fec985a39bef5f commit by commit; context.py wraps select_conventions in try/except ParseError, workers.py deletes _conventions_for_prompt (~-31) and rewires three sites to conventions_context_for, tests/standard_names/test_conventions_parse_guard.py is new (+95, four tests), and docs/evidence/fragments/sn-house-style/shs-conventions-parse-guard.html is new (+41); no other path changes.\nCALL_SITES: imas_codex/standard_names/review/pipeline.py:2055 _review_single_batch, imas_codex/standard_names/workers.py:9641 process_generate_docs_batch, imas_codex/standard_names/workers.py:10320 prepare_docs_review_request, imas_codex/standard_names/workers.py:10683 process_refine_docs_batch\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/context.py:41 wraps select_conventions in try/except ParseError returning None, and imas_codex/standard_names/workers.py:9641/:10320/:10683 call conventions_context_for directly after the helper's deletion, which is the one-sentence deliverable.\nSCORE evidence: 19\nJUSTIFICATION evidence: the batch test and the rg check are both evidenced \u2014 negative_control.log's final line is \"2 failed, 2 passed ... EXIT=1\" and I confirmed at da88e16aa that `git grep _conventions_for_prompt -- imas_codex/` returns nothing while base_gate/after_gate logs read 962 and 966 passed at EXIT=0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in da88e16aa's diff (context.py, workers.py, tests/standard_names/test_conventions_parse_guard.py, docs/evidence/fragments/sn-house-style/shs-conventions-parse-guard.html) is inside the declared write paths, and review/pipeline.py \u2014 declared but needing no edit \u2014 is correctly left unchanged.\nSCORE durability: 19\nJUSTIFICATION durability: removing the guard reddens tests/standard_names/test_conventions_parse_guard.py:29 and :66 (negative_control.log EXIT=1), and test_guard_catches_only_the_grammar_parse_error:44 independently pins the catch to ParseError by routing a RuntimeError through the monkeypatched terms.select_conventions.\nSCORE fit: 19\nJUSTIFICATION fit: context.py:39 keeps the module's lazy in-function import idiom and logger, workers.py:9622 adds conventions_context_for inside the from-import block it already uses, and no added name carries a plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change removes the forked per-site guard rather than adding one; the only other select_conventions callers (imas_codex/standard_names/docs_gates.py:691, harmonize.py:496, review/audits.py:692) are different capabilities and no second owner of \"conventions context for a prompt\" exists.",
+  "review_run_id": "r-20261012T224914430620-review-of-shs-conventions-parse-guard",
+  "reviewed_base_sha": "cb5d100ce429c9535397115693fec985a39bef5f",
+  "reviewed_head_sha": "da88e16aa7b229f7964b031878f890c9ccd5df08",
+  "reviewed_run_id": "r-20261012T223255009505-shs-conventions-parse-guard",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T22:54:48+00:00",
+  "total": 116
+}

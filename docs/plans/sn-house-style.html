@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -392,6 +392,9 @@
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261012T223255009505-shs-conventions-parse-guard" data-who="reckon-build" data-when="2026-10-12T22:48:58.230Z">
     <div class="r-comment-body"><p>shs-conventions-parse-guard landed: moved the parse guard into conventions_context_for (catch ParseError only, return None, DEBUG log), deleted _conventions_for_prompt from workers.py whose three render sites call conventions_context_for directly, so a docs review batch through _review_single_batch with an unparseable name completes with conventions None; gate 966 passed / 1 skipped / 0 failed at head vs 962 / 1 / 0 at base (zero added failures); negative control 2 failed EXIT=1.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261012T224914430620-review-of-shs-conventions-parse-guard" data-who="reckon-build" data-when="2026-10-12T22:56:19.721Z">
+    <div class="r-comment-body"><p>review of r-20261012T223255009505-shs-conventions-parse-guard landed at head da88e16aa7b229f7964b031878f890c9ccd5df08 against base cb5d100ce429c9535397115693fec985a39bef5f: all six dimensions scored (20/19/19/19/19/20, total 116), added_failure_count 0 derived from the reviewed run&#x27;s base_gate 962 passed/0 failed and after_gate 966 passed/0 failed, four production call sites confirmed (review/pipeline.py:2055, workers.py:9641/:10320/:10683), no findings; the guard is genuine durability (negative_control.log 2 failed EXIT=1 with the guard removed) and narrow (ParseError only).</p></div>
 </div>
 </section>
 </main>
