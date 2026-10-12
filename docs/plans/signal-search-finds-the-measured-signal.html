@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-modified" content="2026-10-12">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191">
 </head>
@@ -152,8 +152,9 @@
     </ul>
     <p>
       Fourth, pooled labelling. Every candidate that any arm places in its top 10 is labelled under that rule before
-      arms are compared. The arms are the current tool, vector only, RRF, and both reranks, plus any arm a later section
-      adds. Each label is enumerated by Cypher and confirmed by reading the name and description. This removes the
+      arms are compared. The arms are the product tool at the head being measured, the additive rule frozen in the
+      harness, vector only, RRF, and both reranks, plus any arm a later section adds. Until §4 lands, the first two
+      return the same order. Each label is enumerated by Cypher and confirmed by reading the name and description. This removes the
       prototype's bias, where an arm that lifted an unlabelled but relevant signal was scored as wrong.
     </p>
     <p>
@@ -170,22 +171,22 @@
       and records for each the grade-3 signals it found by enumeration. It commits them to the fixture marked
       <code>held_out</code>. The harness then takes two nodes, because labelling and code do not fit one hour together.
       The second node builds the harness and adds the eleven draft questions; it shows the refusal naming the unlabelled
-      candidates of the fixture as it stands. The third pools and labels every arm's top 10, runs the five arms and the
+      candidates of the fixture as it stands. The third pools and labels every arm's top 10, runs the six arms and the
       control, and writes the evidence.
     </p>
     <p>
       A label of 0 records a candidate that was read and judged irrelevant, so an unlabelled candidate stays distinct
       from an irrelevant one. The tool arm calls the product ranking, so each later section measures its own head:
       extract the ranking inside <code>_search_signals</code> into a function that returns ordered signal ids, with no
-      change in behaviour. The other arms live in the harness, the current additive rule among them, so the baseline
-      survives §4. The two rerank arms spend Jev, so they run only when the harness is asked for them, and a default
+      change in behaviour. The other arms live in the harness. The additive rule among them is frozen there, as its own
+      arm beside the product arm, so the baseline survives §4 rewriting the product ranking. The two rerank arms spend Jev, so they run only when the harness is asked for them, and a default
       graph run spends nothing. The prototype did not keep its role-aware question text, so write it from §7's five
       levels and keep it in the harness; §7 moves it into the product beside <code>_RERANK_QUESTION</code>. The random
       control is a seeded permutation of each question's labelled pool.
     </p>
     <p>
       <strong>Done when</strong> the fixture holds at least seventeen questions, six of them held out. The harness refuses to
-      score an arm whose top 10 on any question holds an unlabelled candidate, and names the candidate. It prints the five-arm table on the pooled labels, and the random
+      score an arm whose top 10 on any question holds an unlabelled candidate, and names the candidate. It prints the arm table on the pooled labels, and the random
       control scores below every arm on mean nDCG@10; a control that does not means the labels are wrong. The table and
       the labelling log are in
       <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/goldens.html</code>.
@@ -236,7 +237,7 @@
       <strong>Done when</strong> all of the following hold:
     </p>
     <ul>
-      <li>On §3's pooled labels, held-out questions included, fused signal search beats the current tool on mean nDCG@10 and grade-3 precision@5, and no question has zero grade-3 hits in its top 30.</li>
+      <li>On §3's pooled labels, held-out questions included, fused signal search beats the frozen additive-rule arm on mean nDCG@10 and grade-3 precision@5, and no question has zero grade-3 hits in its top 30.</li>
       <li>Labelled-only nDCG@10 on the docs and code question set stays within 0.02 of its recorded 0.4821 at pool 60.</li>
       <li>A unit test shows a candidate ranked first by vector alone (cosine 0.9) outranking one ranked fifth by full text alone (BM25 14). The old rule must fail the same test.</li>
       <li>A test asserts that no facility identifier appears in the fusion or ranking code.</li>
