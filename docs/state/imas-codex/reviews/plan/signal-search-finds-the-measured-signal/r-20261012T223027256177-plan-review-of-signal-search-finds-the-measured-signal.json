@@ -39,9 +39,22 @@
       "finding": "single_goal-1",
       "reason": "",
       "when": "2026-10-12T22:39:45.592568+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T22:39:49.016908+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T22:39:49.016908+00:00"
+    },
     "single_goal-1": {
       "action": "acted",
       "by": "",
