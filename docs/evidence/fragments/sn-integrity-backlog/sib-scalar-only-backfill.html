@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-scalar-only-backfill">
+<title>Landing record — sib-scalar-only-backfill</title>
+</head>
+<body>
+<main>
+<h1 id="sib-scalar-only-backfill-landing-title">Landing record: a signed successor edge for the scalar-only superseded names</h1>
+
+<p id="sib-scalar-only-backfill-landing-change">
+Three superseded names reach their successor only through the
+<code>superseded_by</code> scalar and carry no <code>HAS_SUCCESSOR</code> edge and
+no <code>REFINED_FROM</code> route (<code>flux_due_to_thermal_fusion</code>,
+<code>area_of_flux_surface</code>, <code>lower_energy</code>). Each was driven
+through the signed <code>supersede</code> mutation in
+<code>imas_codex/standard_names/signed_manifest.py</code> via
+<code>apply_signed_manifest</code>, never with ad-hoc Cypher. A signed apply wrote
+<strong>2 of the 3</strong> edges, each carrying its minting receipt id; the third
+row was withheld by a mandatory guard and is reported below.
+</p>
+
+<h2 id="sib-scalar-only-backfill-landing-dryrun-first">First dry run (instrument)</h2>
+<p id="sib-scalar-only-backfill-landing-dryrun-first-text">
+Bounded read over the superseded population (2,163 names) selecting those whose
+scalar names an existing successor, with no incoming <code>REFINED_FROM</code> and
+no outgoing <code>HAS_SUCCESSOR</code>. It lists exactly the 3 expected names, so
+the instrument sees the relation it must:
+</p>
+<pre id="sib-scalar-only-backfill-landing-dryrun-first-output">MATCH (n:StandardName {name_stage:'superseded'})
+WHERE n.superseded_by IS NOT NULL AND n.superseded_by &lt;&gt; ''
+  AND EXISTS { MATCH (t:StandardName {id:n.superseded_by}) }       // scalar names a live successor
+  AND NOT EXISTS { MATCH (n)&lt;-[:REFINED_FROM]-(:StandardName) }      // no lineage route to a successor
+  AND NOT EXISTS { MATCH (n)-[:HAS_SUCCESSOR]-&gt;(:StandardName) }    // no successor edge
+RETURN n.id AS id, n.superseded_by AS successor ORDER BY id
+-&gt; [flux_due_to_thermal_fusion, area_of_flux_surface, lower_energy]   // 3 rows</pre>
+
+<h2 id="sib-scalar-only-backfill-landing-counts">Live edge counts (instrument control)</h2>
+<p id="sib-scalar-only-backfill-landing-counts-text">
+The same instrument reports both relations, so a query blind to either would read a
+zero count rather than an empty worklist. Before apply: <code>HAS_SUCCESSOR</code>
+<strong>48</strong>, <code>REFINED_FROM</code> <strong>1850</strong>. After apply:
+<code>HAS_SUCCESSOR</code> <strong>50</strong> (+2), <code>REFINED_FROM</code>
+<strong>1850</strong> (unchanged).
+</p>
+
+<h2 id="sib-scalar-only-backfill-landing-receipt">Applied manifest and receipt</h2>
+<p id="sib-scalar-only-backfill-landing-receipt-text">
+<code>apply_signed_manifest</code> returned outcome <code>applied</code>,
+<code>changed: 2</code>, <code>persistent_writes: 4</code>, with
+<code>manifest_sha256</code>
+<code>38c5ce50e4fb2ce797eca34b11c00696cfd1aa4be4e6f966c7a5c30361489279</code>.
+The two written edges read back stamped, each with its minting receipt id:
+</p>
+<pre id="sib-scalar-only-backfill-landing-receipt-output">{
+  &quot;schema&quot;: &quot;imas-codex.signed-repair-receipt.v1&quot;,
+  &quot;outcome&quot;: &quot;applied&quot;,
+  &quot;changed&quot;: 2,
+  &quot;mutations&quot;: 2,
+  &quot;receipt_rows&quot;: 2,
+  &quot;persistent_writes&quot;: 4,
+  &quot;counts&quot;: {&quot;authority_rows&quot;: 3, &quot;admitted&quot;: 2, &quot;refused&quot;: 1},
+  &quot;refusals&quot;: [
+    {&quot;row_id&quot;: &quot;area_of_flux_surface=&gt;poloidal_plane_cross_sectional_area_of_flux_surface&quot;,
+     &quot;reason&quot;: &quot;target has a live structural child&quot;}
+  ],
+  &quot;manifest_sha256&quot;: &quot;38c5ce50e4fb2ce797eca34b11c00696cfd1aa4be4e6f966c7a5c30361489279&quot;,
+  &quot;authority_file_sha256&quot;: &quot;bf17228b674b8aa22acb35b4fbaaf2d455f71ce9e345022ac6b1502e5e91d6e3&quot;,
+  &quot;authority_payload_sha256&quot;: &quot;92f9a46eebec3aec95b33722389017f3dc34f996e5f9045910bf2e708ad4cacf&quot;,
+  &quot;change_ids&quot;: [
+    &quot;sn-change:signed-manifest:38c5ce50e4fb2ce797eca34b11c00696cfd1aa4be4e6f966c7a5c30361489279:38809319c84957b9f3f4ce5d&quot;,
+    &quot;sn-change:signed-manifest:38c5ce50e4fb2ce797eca34b11c00696cfd1aa4be4e6f966c7a5c30361489279:518817ed9d700a13476cb9dd&quot;
+  ]
+}</pre>
+
+<p id="sib-scalar-only-backfill-landing-manifest">
+The applied signed authority (one <code>supersede</code> row per name,
+<code>arguments</code> = the successor the scalar names, guards
+<code>structural-legitimacy</code> + <code>out-of-allowlist-immutability</code>):
+</p>
+<pre id="sib-scalar-only-backfill-landing-manifest-output">{
+  &quot;authority_mode&quot;: &quot;external_reviewed&quot;,
+  &quot;operation_id&quot;: &quot;scalar-only-successor-edge-backfill&quot;,
+  &quot;orphan_policy&quot;: &quot;refuse&quot;,
+  &quot;receipt_policy&quot;: {
+    &quot;cardinality&quot;: &quot;per_target&quot;,
+    &quot;expected_count&quot;: &quot;admitted_rows&quot;,
+    &quot;id&quot;: &quot;one-per-superseded-identity&quot;,
+    &quot;link_participant_kind&quot;: &quot;standard_name&quot;,
+    &quot;operation&quot;: &quot;supersede_legacy_spelling&quot;,
+    &quot;replay_projection&quot;: [
+      &quot;manifest_sha256&quot;,
+      &quot;row_id&quot;
+    ]
+  },
+  &quot;repair_rows&quot;: [
+    &quot;flux_due_to_thermal_fusion=&gt;total_neutron_source_rate_due_to_thermal_fusion&quot;,
+    &quot;area_of_flux_surface=&gt;poloidal_plane_cross_sectional_area_of_flux_surface&quot;,
+    &quot;lower_energy=&gt;lower_bound_energy_of_neutron_detector&quot;
+  ],
+  &quot;rows&quot;: [
+    {
+      &quot;guards&quot;: [
+        {
+          &quot;id&quot;: &quot;flux_due_to_thermal_fusion=&gt;total_neutron_source_rate_due_to_thermal_fusion:structural-legitimacy&quot;,
+          &quot;implementation&quot;: &quot;structural-legitimacy&quot;,
+          &quot;kind&quot;: &quot;semantic_authority&quot;,
+          &quot;participant_ids&quot;: [
+            &quot;flux_due_to_thermal_fusion&quot;
+          ]
+        },
+        {
+          &quot;id&quot;: &quot;flux_due_to_thermal_fusion=&gt;total_neutron_source_rate_due_to_thermal_fusion:out-of-allowlist-immutability&quot;,
+          &quot;implementation&quot;: &quot;out-of-allowlist-immutability&quot;,
+          &quot;kind&quot;: &quot;collateral_immutability&quot;,
+          &quot;participant_ids&quot;: [
+            &quot;flux_due_to_thermal_fusion&quot;,
+            &quot;total_neutron_source_rate_due_to_thermal_fusion&quot;
+          ]
+        }
+      ],
+      &quot;id&quot;: &quot;flux_due_to_thermal_fusion=&gt;total_neutron_source_rate_due_to_thermal_fusion&quot;,
+      &quot;identity&quot;: {
+        &quot;id&quot;: &quot;flux_due_to_thermal_fusion=&gt;total_neutron_source_rate_due_to_thermal_fusion&quot;,
+        &quot;kind&quot;: &quot;standard_name&quot;,
+        &quot;target_id&quot;: &quot;flux_due_to_thermal_fusion&quot;
+      },
+      &quot;mutations&quot;: [
+        {
+          &quot;arguments&quot;: {
+            &quot;successor_id&quot;: &quot;total_neutron_source_rate_due_to_thermal_fusion&quot;
+          },
+          &quot;id&quot;: &quot;flux_due_to_thermal_fusion:supersede&quot;,
+          &quot;kind&quot;: &quot;supersede&quot;,
+          &quot;order&quot;: 0,
+          &quot;participant_id&quot;: &quot;flux_due_to_thermal_fusion&quot;
+        }
+      ],
+      &quot;orphan_policy&quot;: &quot;refuse&quot;,
+      &quot;participants&quot;: [
+        {
+          &quot;graph_label&quot;: &quot;StandardName&quot;,
+          &quot;id&quot;: &quot;flux_due_to_thermal_fusion&quot;,
+          &quot;kind&quot;: &quot;node&quot;
+        },
+        {
+          &quot;graph_label&quot;: &quot;StandardName&quot;,
+          &quot;id&quot;: &quot;total_neutron_source_rate_due_to_thermal_fusion&quot;,
+          &quot;kind&quot;: &quot;node&quot;
+        }
+      ],
+      &quot;selection&quot;: {
+        &quot;id&quot;: &quot;artifact-rows&quot;,
+        &quot;mode&quot;: &quot;exact_complete_signed_cohort&quot;,
+        &quot;predicate&quot;: &quot;artifact-rows&quot;
+      }
+    },
+    {
+      &quot;guards&quot;: [
+        {
+          &quot;id&quot;: &quot;area_of_flux_surface=&gt;poloidal_plane_cross_sectional_area_of_flux_surface:structural-legitimacy&quot;,
+          &quot;implementation&quot;: &quot;structural-legitimacy&quot;,
+          &quot;kind&quot;: &quot;semantic_authority&quot;,
+          &quot;participant_ids&quot;: [
+            &quot;area_of_flux_surface&quot;
+          ]
+        },
+        {
+          &quot;id&quot;: &quot;area_of_flux_surface=&gt;poloidal_plane_cross_sectional_area_of_flux_surface:out-of-allowlist-immutability&quot;,
+          &quot;implementation&quot;: &quot;out-of-allowlist-immutability&quot;,
+          &quot;kind&quot;: &quot;collateral_immutability&quot;,
+          &quot;participant_ids&quot;: [
+            &quot;area_of_flux_surface&quot;,
+            &quot;poloidal_plane_cross_sectional_area_of_flux_surface&quot;
+          ]
+        }
+      ],
+      &quot;id&quot;: &quot;area_of_flux_surface=&gt;poloidal_plane_cross_sectional_area_of_flux_surface&quot;,
+      &quot;identity&quot;: {
+        &quot;id&quot;: &quot;area_of_flux_surface=&gt;poloidal_plane_cross_sectional_area_of_flux_surface&quot;,
+        &quot;kind&quot;: &quot;standard_name&quot;,
+        &quot;target_id&quot;: &quot;area_of_flux_surface&quot;
+      },
+      &quot;mutations&quot;: [
+        {
+          &quot;arguments&quot;: {
+            &quot;successor_id&quot;: &quot;poloidal_plane_cross_sectional_area_of_flux_surface&quot;
+          },
+          &quot;id&quot;: &quot;area_of_flux_surface:supersede&quot;,
+          &quot;kind&quot;: &quot;supersede&quot;,
+          &quot;order&quot;: 0,
+          &quot;participant_id&quot;: &quot;area_of_flux_surface&quot;
+        }
+      ],
+      &quot;orphan_policy&quot;: &quot;refuse&quot;,
+      &quot;participants&quot;: [
+        {
+          &quot;graph_label&quot;: &quot;StandardName&quot;,
+          &quot;id&quot;: &quot;area_of_flux_surface&quot;,
+          &quot;kind&quot;: &quot;node&quot;
+        },
+        {
+          &quot;graph_label&quot;: &quot;StandardName&quot;,
+          &quot;id&quot;: &quot;poloidal_plane_cross_sectional_area_of_flux_surface&quot;,
+          &quot;kind&quot;: &quot;node&quot;
+        }
+      ],
+      &quot;selection&quot;: {
+        &quot;id&quot;: &quot;artifact-rows&quot;,
+        &quot;mode&quot;: &quot;exact_complete_signed_cohort&quot;,
+        &quot;predicate&quot;: &quot;artifact-rows&quot;
+      }
+    },
+    {
+      &quot;guards&quot;: [
+        {
+          &quot;id&quot;: &quot;lower_energy=&gt;lower_bound_energy_of_neutron_detector:structural-legitimacy&quot;,
+          &quot;implementation&quot;: &quot;structural-legitimacy&quot;,
+          &quot;kind&quot;: &quot;semantic_authority&quot;,
+          &quot;participant_ids&quot;: [
+            &quot;lower_energy&quot;
+          ]
+        },
+        {
+          &quot;id&quot;: &quot;lower_energy=&gt;lower_bound_energy_of_neutron_detector:out-of-allowlist-immutability&quot;,
+          &quot;implementation&quot;: &quot;out-of-allowlist-immutability&quot;,
+          &quot;kind&quot;: &quot;collateral_immutability&quot;,
+          &quot;participant_ids&quot;: [
+            &quot;lower_energy&quot;,
+            &quot;lower_bound_energy_of_neutron_detector&quot;
+          ]
+        }
+      ],
+      &quot;id&quot;: &quot;lower_energy=&gt;lower_bound_energy_of_neutron_detector&quot;,
+      &quot;identity&quot;: {
+        &quot;id&quot;: &quot;lower_energy=&gt;lower_bound_energy_of_neutron_detector&quot;,
+        &quot;kind&quot;: &quot;standard_name&quot;,
+        &quot;target_id&quot;: &quot;lower_energy&quot;
+      },
+      &quot;mutations&quot;: [
+        {
+          &quot;arguments&quot;: {
+            &quot;successor_id&quot;: &quot;lower_bound_energy_of_neutron_detector&quot;
+          },
+          &quot;id&quot;: &quot;lower_energy:supersede&quot;,
+          &quot;kind&quot;: &quot;supersede&quot;,
+          &quot;order&quot;: 0,
+          &quot;participant_id&quot;: &quot;lower_energy&quot;
+        }
+      ],
+      &quot;orphan_policy&quot;: &quot;refuse&quot;,
+      &quot;participants&quot;: [
+        {
+          &quot;graph_label&quot;: &quot;StandardName&quot;,
+          &quot;id&quot;: &quot;lower_energy&quot;,
+          &quot;kind&quot;: &quot;node&quot;
+        },
+        {
+          &quot;graph_label&quot;: &quot;StandardName&quot;,
+          &quot;id&quot;: &quot;lower_bound_energy_of_neutron_detector&quot;,
+          &quot;kind&quot;: &quot;node&quot;
+        }
+      ],
+      &quot;selection&quot;: {
+        &quot;id&quot;: &quot;artifact-rows&quot;,
+        &quot;mode&quot;: &quot;exact_complete_signed_cohort&quot;,
+        &quot;predicate&quot;: &quot;artifact-rows&quot;
+      }
+    }
+  ],
+  &quot;schema&quot;: &quot;imas-codex.repair-authority.v1&quot;,
+  &quot;selection&quot;: {
+    &quot;id&quot;: &quot;artifact-rows&quot;,
+    &quot;mode&quot;: &quot;exact_complete_signed_cohort&quot;,
+    &quot;predicate&quot;: &quot;artifact-rows&quot;
+  },
+  &quot;signature&quot;: {
+    &quot;canonicalization&quot;: &quot;json-sort-keys-v1&quot;,
+    &quot;sha256&quot;: &quot;92f9a46eebec3aec95b33722389017f3dc34f996e5f9045910bf2e708ad4cacf&quot;
+  }
+}</pre>
+
+<h2 id="sib-scalar-only-backfill-landing-dryrun-second">Second dry run</h2>
+<p id="sib-scalar-only-backfill-landing-dryrun-second-text">
+Re-running the instrument after the apply lists <strong>1</strong> name, not 0:
+</p>
+<pre id="sib-scalar-only-backfill-landing-dryrun-second-output">area_of_flux_surface =&gt; poloidal_plane_cross_sectional_area_of_flux_surface</pre>
+
+<h2 id="sib-scalar-only-backfill-landing-blocker">The withheld row</h2>
+<p id="sib-scalar-only-backfill-landing-blocker-text">
+The row for <code>area_of_flux_surface</code> was refused by the
+<code>structural-legitimacy</code> guard (<code>_structural_refusal</code>,
+<code>signed_manifest.py</code>), which <code>_validate_supersede_successor_program</code>
+requires on every <code>supersede</code> mutation. Refusal text:
+<code>target has a live structural child</code>. The name has 3 live
+(<code>name_stage='accepted'</code>) <code>HAS_PARENT</code> children —
+<code>derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</code>,
+<code>derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>,
+<code>surface_area_of_flux_surface</code>. No mutation kind was added and no
+validation was loosened; the route for this row is the coordinator's to decide.
+</p>
+
+<p id="sib-scalar-only-backfill-landing-artifacts">
+Evidence on disk: authority
+<code>scalar-only-successor-edge-authority.json</code>, preview
+<code>preview.log</code>, apply <code>apply.log</code>, in the run directory
+<code>r-20261012T212141763974-sib-scalar-only-backfill</code>. No product code and
+no test file changed.
+</p>
+</main>
+</body>
+</html>
