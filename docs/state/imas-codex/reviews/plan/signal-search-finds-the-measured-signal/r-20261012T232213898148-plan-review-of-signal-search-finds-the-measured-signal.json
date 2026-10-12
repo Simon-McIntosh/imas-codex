@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T23:28:39.769Z",
+  "dispatched_at": "2026-10-12T23:22:26Z",
+  "findings": [],
+  "plan_fingerprint": "ccb5e2e8eea9e01461dc688e3dc55448b4376921e1162f99b92e6fd8e7b0323b",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 35,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261012T232213898148-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "694f4e6ddf6009e09221b722fa180decca2e8888",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `GraphClient.create_nodes` (imas_codex/graph/client.py:605, and its auto-embed branch at 650-672 sets description/embedding/embedded_at only when no embedding is present), `imas_codex/discovery/signals/` (the description rewrites at parallel.py:2059 and 2086 run through Cypher there), `_rank_signals`/`_search_signals`/`_vector_search_signals` (imas_codex/llm/search_tools.py), `_find_signals_semantic` (imas_codex/graph/domain_queries.py:116), `rrf_fuse`/`RRF_K` (imas_codex/standard_names/search.py), `_hybrid_ids`, `hybrid_dd_search`, `_text_search_dd_paths`, `HybridSearchStrategy`, `HybridSearchEngine`, `SearchService`, `_PULSE_SCHEDULE_REFERENCE_RE`, `OPERATIONS_PATTERNS` and `signal_glossary` all resolve, and \u00a71's cosine probe (235 of 612 below 0.995, lowest 0.866) is the measure \u00a75 cites.",
+    "done_when": "pass \u2014 \u00a75's done-when is measurable (a census over all FacilitySignal nodes) and names a declared negative control (\"A test shows that an individualisation write re-embeds, and the same test fails against the current writer\"), with \"A missing hash counts as a mismatch\" closing the vacuous-pass route; \u00a76 declares a positive and a negative control and \u00a77 a switch rule with a worst-pass and p95 bound.",
+    "evidence_paths": "pass \u2014 every section's evidence lands on a durable in-repo path (`docs/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html` for \u00a75, beside `fusion.html`, `rerank.html` and the committed `goldens.html`), none in a session scratchpad or node-local temporary directory.",
+    "naming": "pass \u2014 `embedded_text_hash` and `signal_role` are named for the mechanism they store, and no plan label, stage name, ticket number or version tag reaches the new surface.",
+    "reasoning": "pass \u2014 \u00a75's changed text repairs the null-hash defect the prior review raised: node 3 now \"re-embeds every FacilitySignal whose hash is missing or differs\" and \"selects its rows with the census's own predicate, so the two cannot disagree about a missing hash\", so the re-embed reaches the null-hash rows a bare `<>` filter drops and the census cannot pass on the pre-fix graph; the stated cause (GraphClient.create_nodes embeds only on a write that carries no embedding, while the pipeline rewrites descriptions through Cypher at parallel.py:2059/2086) matches the cited evidence and names its production caller `imas_codex/discovery/signals/`, and the mechanism (one writer setting description/embedding/embedded_at/embedded_text_hash together, then a predicate-shared census) can produce the done-when it asserts.",
+    "single_goal": "pass \u2014 \u00a75's three nodes are steps of one deliverable (embeddings follow their text), the embed-text measurement feeding the writer's default rather than a second deliverable, and each node names one output.",
+    "wiring": "pass \u2014 the ordering (\"\u00a73 comes first ... \u00a74 and \u00a75 ... in parallel once \u00a73 lands. \u00a76 follows \u00a75, \u00a77 follows \u00a74, \u00a78 waits on its decision, \u00a79 and \u00a710 are independent, \u00a711 waits on a JET re-extraction\") is declared in followup f-ssfms-001 and the gate g-ssfms-1 correctly gates s11, and no section relies on a relationship that is absent."
+  },
+  "section_digests": {
+    "_document": "f04e67045f71f47fb35b8b7e81d97865a04b54deacf1459cf7c949e23545640d",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "1533ed956bc1105d3a28eea6cace5d094f539bc91b4ff32e0ee2de78682938e9",
+    "s4": "188bb41592bd1c5edac35672b88404769cb673da2fddfa3191d068f0effabd67",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "62129c4513b7e17583d1210b2596dd537cdefdbbd8fddb81f175d1e6358fd0bf",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T23:29:34.069461+00:00"
+}
