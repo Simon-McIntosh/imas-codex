@@ -26,7 +26,7 @@ from imas_codex.standard_names.budget import (
     model_provider_exposure,
 )
 from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.review.audits import AuditReport
+from imas_codex.standard_names.review.audits import AuditReport, LintFinding
 
 # Defense-in-depth: strict SN id pattern used to reject reviewer-hallucinated
 # revised_name values (e.g. multi-hundred-char stream-of-consciousness strings).
@@ -1744,6 +1744,19 @@ def _query_ids_names(ids_prefix: str) -> set[str]:
         return {r["id"] for r in rows} if rows else set()
 
 
+def _lint_finding_line(finding: LintFinding) -> str:
+    """Render one lint finding as the single line the reviewer and the cap share.
+
+    The reviewer's prompt input and the ``audit_cap_finding`` recorded on a
+    capped entry must name the same finding, so both render it through here
+    rather than repeating the format.
+    """
+    return (
+        f"[{finding.severity}:lint:{finding.finding_type}] "
+        f"{finding.name_id}: {finding.detail[:200]}"
+    )
+
+
 def _extract_audit_findings(
     audit_report: AuditReport | None, batch_ids: set[str]
 ) -> list[str]:
@@ -1759,10 +1772,7 @@ def _extract_audit_findings(
     # Each report list has its own affected-name field and prompt summary.
     for finding in audit_report.lint_findings:
         if finding.name_id in batch_ids:
-            findings.append(
-                f"[{finding.severity}:lint:{finding.finding_type}] "
-                f"{finding.name_id}: {finding.detail[:200]}"
-            )
+            findings.append(_lint_finding_line(finding))
 
     for finding in audit_report.link_findings:
         if finding.name_id in batch_ids:
@@ -1789,19 +1799,16 @@ def _extract_error_lint_ids(
 ) -> dict[str, str]:
     """Map each batch name carrying an error-severity lint finding to its summary.
 
-    The summary string is identical to the one ``_extract_audit_findings``
-    renders for the reviewer, so the deterministic input and the score cap
-    name the same finding.
+    The summary string is rendered by ``_lint_finding_line``, the same format
+    ``_extract_audit_findings`` gives the reviewer, so the deterministic input
+    and the score cap name the same finding.
     """
     errors: dict[str, str] = {}
     if audit_report is None:
         return errors
     for finding in audit_report.lint_findings:
         if finding.severity == "error" and finding.name_id in batch_ids:
-            errors[finding.name_id] = (
-                f"[{finding.severity}:lint:{finding.finding_type}] "
-                f"{finding.name_id}: {finding.detail[:200]}"
-            )
+            errors[finding.name_id] = _lint_finding_line(finding)
     return errors
 
 
@@ -1941,9 +1948,10 @@ def _cap_docs_scores_for_lint_errors(
     """Hold documentation scores of entries carrying an unresolved lint error below acceptance.
 
     A documentation cannot be accepted while an error-severity lint finding
-    stands against its name, so each such score above the documentation
-    acceptance threshold is clamped just below it and the entry records the
-    finding that forced the cap.
+    stands against its name. Each such entry records the finding, whether the
+    cap changed its score or the reviewer had already scored it below
+    acceptance; a score above the documentation acceptance threshold is
+    additionally clamped just below it.
     """
     if not error_lint_findings:
         return
@@ -1953,18 +1961,23 @@ def _cap_docs_scores_for_lint_errors(
         finding = error_lint_findings.get(entry_id)
         if finding is None:
             continue
-        score = entry.get("reviewer_score")
-        if score is None or score < DEFAULT_MIN_SCORE:
-            continue
-        entry["reviewer_score"] = min(score, floor)
-        entry["audit_cap_applied"] = True
         entry["audit_cap_finding"] = finding
-        wlog.info(
-            "Docs score for %r capped at %.3f by lint error: %s",
-            entry_id,
-            entry["reviewer_score"],
-            finding,
-        )
+        score = entry.get("reviewer_score")
+        if score is not None and score >= DEFAULT_MIN_SCORE:
+            entry["audit_cap_applied"] = True
+            entry["reviewer_score"] = min(score, floor)
+            wlog.info(
+                "Docs score for %r capped at %.3f by lint error: %s",
+                entry_id,
+                entry["reviewer_score"],
+                finding,
+            )
+        else:
+            wlog.info(
+                "Docs entry %r already below acceptance with lint error: %s",
+                entry_id,
+                finding,
+            )
 
 
 async def _review_single_batch(
