@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/graph_ops.py:7808",
+    "imas_codex/standard_names/graph_ops.py:19270",
+    "imas_codex/standard_names/edit.py:1924",
+    "imas_codex/standard_names/provenance_lifecycle.py:527",
+    "imas_codex/standard_names/provenance_lifecycle.py:2060"
+  ],
+  "completed_at": "2026-10-12T20:19:04.532Z",
+  "dispatched_at": "2026-10-12T20:12:19Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/provenance_lifecycle.py",
+      "line": "650",
+      "severity": "follow-on",
+      "text": "follow-on: the membership test set(bindings) <= comparison_expected_names counts a migration name at any stage, so a source bound to a live predecessor and a retired successor is classified as a dual-bound adjudicable conflict even though the branch's detail text asserts two live identities."
+    },
+    {
+      "file": "imas_codex/standard_names/provenance_lifecycle.py",
+      "line": "66",
+      "severity": "follow-on",
+      "text": "follow-on: SourceBindingConflictError has no production consumer \u2014 the graph and edit callers catch no name for it \u2014 so the retry-budget withholding the class docstring describes is not yet wired and every caller still treats both branches alike."
+    },
+    {
+      "file": "imas_codex/standard_names/provenance_lifecycle.py",
+      "line": "660",
+      "severity": "follow-on",
+      "text": "follow-on: for the dual-bound case holding_identity is set to old_name, the predecessor the migration is retiring, rather than an actual holder, so a consumer keying on holding_identity reads the retired name as the conflicting identity."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read 6ed434f45 against base 18d19d73; four files change \u2014 29 lines adding an elif in retarget_standard_name_sources, the dual-bound test un-xfailed and rewritten to a typed raises, one new narrowness test, and the landing fragment.",
+    "done_when": "the done_when asks that the dual-bound test pass with its xfail removed asserting SourceBindingConflictError naming the source and both identities, that a second test keep an unrelated compare-and-set failure on the anonymous RuntimeError, and that the provenance gate add no failures; the manifest records after_suite 69 passed EXIT=0 against baseline_suite 67 passed/1 xfailed EXIT=0, with negative_control.log EXIT=1.",
+    "goal": "the node goal is to classify a source still bound to another live identity as the adjudicable binding conflict; imas_codex/standard_names/provenance_lifecycle.py:645 adds the elif that classifies a source bound to both example_old_name and example_new_name as SourceBindingConflictError, reached through the compose supersede chain at graph_ops.py:7808.",
+    "manifest": "read at the run directory; status complete, one landed revision 6ed434f45, a tests line naming the five gate files, test_logs naming baseline_suite.log, after_suite.log and negative_control.log, and negative_control_log a bare path whose header records the base revision and the module under test.",
+    "write_paths": "the declared scope is provenance_lifecycle.py, tests/standard_names/test_compose_supersede_dual_bound.py, tests/standard_names/test_source_migration_conflict.py and the sib-dual-bound-conflict.html fragment; every path in the diff is one of those four."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows test_compose_supersede_over_dual_bound_source_raises_adjudicable_conflict reddens (EXIT=1) with provenance_lifecycle.py reverted, and the new test_single_live_binding_is_not_a_dual_bound_conflict reddens if the len(bindings)>1 bound at line 649 were relaxed.",
+    "evidence": "the manifest's after_suite (69 passed, EXIT=0) and baseline_suite (67 passed, 1 xfailed, EXIT=0) bound the gate the done_when names and negative_control.log records EXIT=1, though the literal \"both fail with the fix reverted\" is met only by the dual-bound test since the narrowness test passes at base by design.",
+    "fit": "the elif follows the surrounding branch idiom at imas_codex/standard_names/provenance_lifecycle.py:624 and both added test names describe behaviour with no plan or gate label.",
+    "goal_fidelity": "imas_codex/standard_names/provenance_lifecycle.py:645 fires exactly for a source whose compared live bindings are both migration names, the state the section's reproduction traced to the anonymous branch.",
+    "reuse": "the branch reuses the existing SourceBindingConflict and binding_conflicts accumulator at imas_codex/standard_names/provenance_lifecycle.py:57, and a search for a prior dual-bound classifier found only its sibling _live_foreign_bindings at line 91.",
+    "scope_discipline": "every path in the diff between base 18d19d73 and head 6ed434f45 is inside the four declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to classify a source still bound to another live identity as the adjudicable binding conflict; imas_codex/standard_names/provenance_lifecycle.py:645 adds the elif that classifies a source bound to both example_old_name and example_new_name as SourceBindingConflictError, reached through the compose supersede chain at graph_ops.py:7808.\nVERDICT done_when: the done_when asks that the dual-bound test pass with its xfail removed asserting SourceBindingConflictError naming the source and both identities, that a second test keep an unrelated compare-and-set failure on the anonymous RuntimeError, and that the provenance gate add no failures; the manifest records after_suite 69 passed EXIT=0 against baseline_suite 67 passed/1 xfailed EXIT=0, with negative_control.log EXIT=1.\nVERDICT write_paths: the declared scope is provenance_lifecycle.py, tests/standard_names/test_compose_supersede_dual_bound.py, tests/standard_names/test_source_migration_conflict.py and the sib-dual-bound-conflict.html fragment; every path in the diff is one of those four.\nVERDICT manifest: read at the run directory; status complete, one landed revision 6ed434f45, a tests line naming the five gate files, test_logs naming baseline_suite.log, after_suite.log and negative_control.log, and negative_control_log a bare path whose header records the base revision and the module under test.\nVERDICT diff: read 6ed434f45 against base 18d19d73; four files change \u2014 29 lines adding an elif in retarget_standard_name_sources, the dual-bound test un-xfailed and rewritten to a typed raises, one new narrowness test, and the landing fragment.\nCALL_SITES: imas_codex/standard_names/graph_ops.py:7808, imas_codex/standard_names/graph_ops.py:19270, imas_codex/standard_names/edit.py:1924, imas_codex/standard_names/provenance_lifecycle.py:527, imas_codex/standard_names/provenance_lifecycle.py:2060\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/provenance_lifecycle.py:645 fires exactly for a source whose compared live bindings are both migration names, the state the section's reproduction traced to the anonymous branch.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest's after_suite (69 passed, EXIT=0) and baseline_suite (67 passed, 1 xfailed, EXIT=0) bound the gate the done_when names and negative_control.log records EXIT=1, though the literal \"both fail with the fix reverted\" is met only by the dual-bound test since the narrowness test passes at base by design.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff between base 18d19d73 and head 6ed434f45 is inside the four declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: negative_control.log shows test_compose_supersede_over_dual_bound_source_raises_adjudicable_conflict reddens (EXIT=1) with provenance_lifecycle.py reverted, and the new test_single_live_binding_is_not_a_dual_bound_conflict reddens if the len(bindings)>1 bound at line 649 were relaxed.\nSCORE fit: 18\nJUSTIFICATION fit: the elif follows the surrounding branch idiom at imas_codex/standard_names/provenance_lifecycle.py:624 and both added test names describe behaviour with no plan or gate label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the branch reuses the existing SourceBindingConflict and binding_conflicts accumulator at imas_codex/standard_names/provenance_lifecycle.py:57, and a search for a prior dual-bound classifier found only its sibling _live_foreign_bindings at line 91.\nFINDING imas_codex/standard_names/provenance_lifecycle.py:650 follow-on: the membership test set(bindings) <= comparison_expected_names counts a migration name at any stage, so a source bound to a live predecessor and a retired successor is classified as a dual-bound adjudicable conflict even though the branch's detail text asserts two live identities.\nFINDING imas_codex/standard_names/provenance_lifecycle.py:66 follow-on: SourceBindingConflictError has no production consumer \u2014 the graph and edit callers catch no name for it \u2014 so the retry-budget withholding the class docstring describes is not yet wired and every caller still treats both branches alike.\nFINDING imas_codex/standard_names/provenance_lifecycle.py:660 follow-on: for the dual-bound case holding_identity is set to old_name, the predecessor the migration is retiring, rather than an actual holder, so a consumer keying on holding_identity reads the retired name as the conflicting identity.",
+  "review_run_id": "r-20261012T201208193497-review-of-sib-dual-bound-conflict",
+  "reviewed_base_sha": "18d19d7301110828d9ee31a428ca728a1b767703",
+  "reviewed_head_sha": "6ed434f453108965148df23f99f75303b4883049",
+  "reviewed_run_id": "r-20261012T195209493584-sib-dual-bound-conflict",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:18:03.232735+00:00",
+  "total": 113
+}
