@@ -1,0 +1,97 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-12T18:40:47.110Z",
+  "dispatched_at": "2026-10-12T18:32:00Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261012T183145752943-plan-review-of-sn-integrity-backlog/plan.html:181",
+      "id": "done_when-1",
+      "reason": "without a see-the-edge control the node's own measure cannot distinguish \"the 3 are done\" from \"the query sees nothing\", which is the same defect the \u00a719 census control was added to close.",
+      "text": "\u00a721's done-when says \"a dry run over superseded names whose scalar names a successor but which have no HAS_SUCCESSOR edge lists exactly these 3\", but it declares no control that the query can see an existing `HAS_SUCCESSOR` edge; the evidence record it cites always states such a control (\"HAS_SUCCESSOR edges in the graph | 48 | ...\", \"REFINED_FROM edges | 1,850 | exceeds zero \u2014 the edge instrument sees edges\"), so a query blind to the relation returns an empty set that reads as \"no name needs an edge\" rather than as a broken query",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261012T183145752943-plan-review-of-sn-integrity-backlog/plan.html:181",
+      "id": "reasoning-1",
+      "reason": "if the predicate does not isolate the 3, \u00a721 either writes edges for the wrong population or cannot close on its own done-when, and \u00a716 then removes the scalar on a premise its measure never established.",
+      "text": "\u00a721 asserts its dry run \"lists exactly these 3\" using the predicate \"scalar names a successor but which have no HAS_SUCCESSOR edge\", but the cited census (`docs/evidence/sn-lifecycle-integrity/successor-without-the-scalar.md`, and \u00a716's own reader record): the 3 are the names whose only successor *pointer* is the scalar, defined by absence of the REFINED_FROM lineage route; the record's controls separate the two relations (48 `HAS_SUCCESSOR` edges vs 1,850 `REFINED_FROM` edges carrying the 1,641-name population), and the derivation that builds `HAS_SUCCESSOR` reads `superseded_by` itself (reader record row #1), so a name carrying the scalar acquires a `HAS_SUCCESSOR` edge and the two conditions do not coincide",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "cc1af346a4d1b1aebc0d0457171cd8ba8f84e5d44eb0e966a837155101eabe57",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 18,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-12T18:45:20.778524+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-12T18:45:33.589883+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:45:20.778524+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-12T18:45:33.589883+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v18.json",
+  "review_run_id": "r-20261012T183145752943-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "3f9c400a3c3c1500883075533289deb34f40e938",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/standard_names/graph_ops.py:3193` (`successor = n.get(\"successor\") or n.get(\"superseded_by\")`, feeding the `HAS_SUCCESSOR` MERGE at :3375), `signed_manifest.py:4712` (the signed `supersede` mutation, `target.superseded_by = $successor_id`, no edge minted) and `signed_manifest.py:4090` (the receipt postcondition) all resolve, and the \u00a716 href to `\u2026/successor-scalar-readers.md` resolves to the file on disk.",
+    "done_when": "a finding \u2014 \u00a721's done-when's dry run names no control showing its query can see an existing `HAS_SUCCESSOR` edge, so a query blind to that relation returns empty and reads as \"nothing to backfill\".",
+    "evidence_paths": "pass \u2014 \u00a716 names `docs/evidence/fragments/sn-integrity-backlog/row-census.html`, \u00a721 names `docs/evidence/fragments/sn-integrity-backlog/`, and the successor-scalar reader record resolves on disk; no gate log is placed on a scratchpad or node-local path.",
+    "naming": "pass \u2014 no plan/stage/ticket identifiers reach the new symbols; \u00a720's `HAS_SUCCESSOR` and \u00a716's `superseded_by` are existing domain names.",
+    "reasoning": "a finding \u2014 \u00a721's target population is defined by absence of a `HAS_SUCCESSOR` edge, while the census it cites defines the 3 names by absence of the *lineage* (REFINED_FROM) route; the cited evidence separates those relations, so the mechanism does not produce the stated done-when.",
+    "single_goal": "pass \u2014 \u00a716 (remove the scalar and its readers), \u00a720 (make the signed supersede mint the edge) and \u00a721 (backfill the 3 names) each carry one deliverable; the earlier two-deliverable \u00a720 was split into \u00a720/\u00a721.",
+    "wiring": "pass \u2014 \u00a716's ordering (\"this section runs only after both land\"), \u00a720 and \u00a721's dependency on \u00a720 are stated in prose and consistent (the plan encodes section order through prose, not links, and no relationship points at the wrong node)."
+  },
+  "section_digests": {
+    "_document": "fc37f9d793c8f202c5afb04d912037dd2a41794b86fd021d61c2c5aac522c0b5",
+    "s1": "571d1542955f1382d7e0f47b5f8def69e8d4201f948c3933a15fd1cc2c98e7f8",
+    "s10": "84c8bdeb15133e22cd2f08ee96d429ac3f92f85d28d6720d5e2fd0a87a97cbf2",
+    "s11": "499a319e38a73614c326b3607a7d1cae481dac12714fad0562ffe74a78694c89",
+    "s12": "62e459e2a7b4232b44e54b32969fb970620d613ef8797e09b993d36d4b44d757",
+    "s13": "80e90ea7c45053ae6c5de9d69ac1ef80a87289bb80c7afb2f796f3c31b3235d7",
+    "s14": "4981171151a50aafb83f844e0ad63c7df82749d58b56d7fb8590f5ee8cccfb9b",
+    "s15": "0e2bcb71a7aac4d1ddeae8e3a5959c43e1f3e90ae3ea89c3ca3b16303b3f87b2",
+    "s16": "0ea017c6ac78ad295a75878f5d17514576fb4cc4c0b96f3acbde1adf6dbce703",
+    "s17": "32359142ba3b6f1263abefa9f37711fbc5fdefe9548620b20287985e5858d673",
+    "s18": "c6a5bf0492c322e4f1c9ebe6e0e4b880f6312ab30ec62992d8c786d321fa2d82",
+    "s19": "f735f604bc9a9d5ff1664a38976a03f6a4ede1a90baa42b16f38af66702d3c4b",
+    "s2": "af2703cbe346dcd322398505bfee69c50a6bcd1238937227f17cdb6c5fc75c58",
+    "s20": "0a06d11043a66e257382363e218754e186f1f6932448c7494fae8a03e9ca13bd",
+    "s21": "f92ec8bdd51135c8e6626f47327b1e2eebf2539f9a03049cff2c549ec9aa30de",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s6": "e6bf01013b7bd341cf2f86ebf24dc60084ea8cabeb4cf4cd2664c1109ac5ca62",
+    "s7": "1930b98dfc66a2e1f9a1ce5149fbb73fe208b66c3e0c35664330a12e7e945933",
+    "s8": "6b362f87f941f8c95d562c95cdf93e578892ff32c85156fd5565c76548c58eab",
+    "s9": "20748220a6f94f6c422b1b677587d4456ccf3be5fbe204daac414373443327bd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:45:15.989059+00:00"
+}
