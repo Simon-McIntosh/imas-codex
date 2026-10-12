@@ -4,26 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-catalog-grouping">
-  <meta name="plan-title"     content="Group Names By What They Share, Not By Where They Came From">
-  <meta name="plan-summary"   content="Build families from the grammar, assign physics domains by quantity, adjudicate near-duplicate spellings and repair degenerate embeddings.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-catalog-grouping">
+  <meta name="plan-title" content="Group Names By What They Share, Not By Where They Came From">
+  <meta name="plan-summary" content="Build families from the grammar, assign physics domains by quantity, adjudicate near-duplicate spellings and repair degenerate embeddings.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.5">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="moderate">
-  <meta name="plan-sprint"    content="S18">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="standard-names,catalog-presentation">
-  <meta name="plan-blocks"    content="sn-harmonize-command,sn-west-prototype-release">
+  <meta name="plan-sprint" content="S18">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names,catalog-presentation">
+  <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -53,7 +55,7 @@
     </p>
 
     <h2 id="s2">§2 — Pattern families from the grammar</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       A pattern family is the set of live names whose ISN parse is identical except along
       one variation axis: subject or species, component, locus, region or device. Build it
@@ -82,13 +84,27 @@
     </p>
 
     <h2 id="s3">§3 — Domains assigned by the quantity</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Replace "the domain of the source" with a rule table keyed by physical base,
-      geometric base and operator, at <code>imas_codex/standard_names/domain_rules.yml</code>
-      beside <code>domain_priority.py</code>. Source IDS is used only to break a tie the
-      table leaves open. The domain is assigned in two places today, and the table must be
-      consulted at both. The compose path in <code>imas_codex/standard_names/workers.py</code>
+      Replace "the domain of the source" with an assignment made from the quantity. Two
+      mechanisms are built and measured, and the better one is adopted:
+    </p>
+    <ul>
+      <li><strong>A rule table</strong> keyed by physical base, geometric base and operator,
+        at <code>imas_codex/standard_names/domain_rules.yml</code> beside
+        <code>domain_priority.py</code>. It is transparent, but it must be authored for every
+        base.</li>
+      <li><strong>A Jev Choice</strong> over the ISN <code>PhysicsDomain</code> values, with
+        their descriptions as the options. It is asked over the name, its grammar segments,
+        unit and description, and needs no table. It must pass the deployment rule of
+        <code>sn-judgment-evaluation</code> §7.</li>
+    </ul>
+    <p>
+      The incumbent is the third arm in the comparison: the domain inherited from the source,
+      which a <code>gpt-5.5</code> classifier in
+      <code>imas_codex/graph/dd_domain_classifier.py</code> assigned to the DD path. Source IDS
+      only breaks a tie the winner leaves open. The domain is assigned in two places today, and
+      the winner must be consulted at both. The compose path in <code>imas_codex/standard_names/workers.py</code>
       injects the DD source item's <code>physics_domain</code> as authoritative ("Inject
       physics_domain from DD"). <code>_resolve_physics_domains</code> in
       <code>imas_codex/standard_names/consolidation.py</code> merges the candidates' values.
@@ -101,19 +117,35 @@
       lead approves the domain for twenty named reference quantities, among them
       <code>electron_temperature</code>, <code>electron_density</code>,
       <code>safety_factor</code>, <code>plasma_current</code> and
-      <code>poloidal_magnetic_flux</code>. The rule reproduces all twenty. A test composing
-      a name through the workers path shows the table's domain, not the source's, and it
-      fails with the table lookup removed. The census of domains before and after is
+      <code>poloidal_magnetic_flux</code>. A further 150 names are coordinator-labelled and
+      split into calibration and validation halves. The rule table, the Jev Choice and the
+      incumbent each report accuracy and macro-F1 on the twenty and on the validation half, and
+      the adopted mechanism reproduces all twenty. A test composing a name through the workers
+      path shows the adopted domain, not the source's, and it fails with the lookup removed. The census of domains before and after is
       recorded, and <code>core_plasma_physics</code> is no longer empty.
     </p>
 
     <h2 id="s4">§4 — Near-duplicate spellings, adjudicated once</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       Generate the worklist: live pairs with the same unit, embedding cosine at or above
       0.95, and more than a one-token difference, excluding the §5 vectors. Scope it to
-      pairs with at least one WEST member first. The coordinator classifies each overlap
-      rather than each pair, since one ruling settles every pair the overlap produces:
+      pairs with at least one WEST member first.
+    </p>
+    <p>
+      Jev first judges each pair in the shape of the entity-alignment cookbook:
+    </p>
+    <ul>
+      <li>one Score with three levels — distinct quantities; related and needing a ruling;
+        the same quantity;</li>
+      <li>a companion Noul per grammar segment, asking whether the two names differ there.</li>
+    </ul>
+    <p>
+      The worklist is then ordered by that verdict, and every pair arrives showing where it
+      diverges. The verdicts are measured against golden D of
+      <code>sn-judgment-evaluation</code> §4. They order the coordinator's reading and decide
+      nothing on their own. The coordinator classifies each overlap rather than each pair, since
+      one ruling settles every pair the overlap produces:
     </p>
     <ul>
       <li><strong>Distinct</strong> — both names stand. The house-style template for each
@@ -135,7 +167,7 @@
     </p>
 
     <h2 id="s5">§5 — Thirty-eight embeddings computed from the wrong text</h2>
-    <section data-reckon="section" data-id="s5" data-effort-hours="1.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s5" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
       Re-embed the 38 names in the four identical-vector clusters through the ordinary
       embedding path. Then add a guard on that path, in
@@ -150,18 +182,13 @@
     </p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-scg-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="general"
-               data-written-by="reckon-review" data-written-at="2026-10-12"
-               data-recommends-skill="/reckon-build sn-catalog-grouping §2">
-        <h4 class="r-fu-title">Pattern families first; domains and embeddings run beside them</h4>
-        <div class="r-fu-body">
-          <p>§2 is on the critical path, since the harmonize command applies templates per pattern family. §3 and §5 write disjoint files and can run in parallel with it. §4 is coordinator adjudication over a worklist a worker can generate.</p>
-        </div>
-        <pre class="r-fu-prompt">/reckon-build sn-catalog-grouping §2</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scg-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-catalog-grouping §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pattern families first; domains and embeddings run beside them</h4>
+    <div class="r-fu-body"><p>§2 is on the critical path, since the harmonize command applies templates per pattern family. §3 and §5 write disjoint files and can run in parallel with it. §4 is coordinator adjudication over a worklist a worker can generate.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-catalog-grouping §2</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

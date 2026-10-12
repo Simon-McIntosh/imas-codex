@@ -4,27 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-west-prototype-release">
-  <meta name="plan-title"     content="WEST Prototype: One House Style, Read By A Person, Then Released">
-  <meta name="plan-summary"   content="Repair the WEST names, harmonize their documentation, read every entry by hand, re-cut the batch and put it before a physicist with a traceable fold-back.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort-hours" content="14">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-west-prototype-release">
+  <meta name="plan-title" content="WEST Prototype: One House Style, Read By A Person, Then Released">
+  <meta name="plan-summary" content="Repair the WEST names, harmonize their documentation, read every entry by hand, re-cut the batch and put it before a physicist with a traceable fold-back.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="14.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-context" content="extended">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="critical">
-  <meta name="plan-sprint"    content="S18">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="standard-names,catalog-release,review">
+  <meta name="plan-sprint" content="S18">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names,catalog-release,review">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-harmonize-command#s3&quot;,&quot;sn-house-style#s3&quot;],&quot;s4&quot;:[&quot;sn-catalog-grouping#s2&quot;],&quot;s5&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-catalog-grouping#s3&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;}">
   <title>WEST Prototype: One House Style, Read By A Person, Then Released | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -69,7 +71,7 @@
     </p>
 
     <h2 id="s2">§2 — Name repairs, ruled on once</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>
       Names first, because documentation follows a name and harmonizing an entry that is
       about to be renamed is wasted spend. The coordinator brings three things to the lead
@@ -82,15 +84,26 @@
       the replacement sentences already written for them, through the documentation route.
     </p>
     <p>
+      The seven came from one audit's sample, so the rest of the roster is checked the same
+      way rather than assumed clean. Code splits each roster entry's description and
+      documentation into claims. Jev asks one Choice per claim: does it support, contradict or
+      say nothing about the bound DD source's documentation. Every contradiction is read by
+      the coordinator. This check is the citation-check pattern, measured on golden C of
+      <code>sn-judgment-evaluation</code> §4 before its findings are trusted. Until it
+      passes, it orders the coordinator's reading rather than deciding anything.
+    </p>
+    <p>
       <strong>Done when:</strong> every worklist row and every contradiction carries a
       recorded ruling (apply, or decline with a reason). Every applied repair is accepted on
       the name axis, or held with its reviewer verdict. The seven descriptions are replaced.
+      The roster-wide claim check is reported: claims checked, contradictions found, and the
+      coordinator's verdict on each.
       Actual spend is recorded beside the authorised ceiling. The roster is re-minted, and
       the re-mint resolves every manifest source to a live identity or a stated exclusion.
     </p>
 
     <h2 id="s3">§3 — Harmonize the batch</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="1.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>
       Run <code>sn harmonize --apply --batch west-task-2e</code> once
       <code>sn-harmonize-command</code> §3 and the WEST registry entries of
@@ -105,7 +118,7 @@
     </p>
 
     <h2 id="s4">§4 — A person reads every entry</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       The coordinator reads all of the roster against one checklist, grouped by pattern
       family as <code>sn-catalog-grouping</code> §2 defines it, so siblings are read side by
@@ -122,6 +135,8 @@
       <li>no typical values, recipes or padding.</li>
     </ul>
     <p>
+      If <code>sn-selection-over-generation</code> §5 has shown that a risk order finds
+      defects faster than random order, the reading follows that order within each domain.
       A failure is fixed through <code>sn edit</code> with a hint and goes back through
       review. It is never hand-edited in the graph. This is the polish no run can do,
       because it is the one step that sees the batch the way its reviewer will.
@@ -136,7 +151,7 @@
     </p>
 
     <h2 id="s5">§5 — The batch arrives grouped the way a physicist reads</h2>
-    <section data-reckon="section" data-id="s5" data-effort-hours="1.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
     <p>
       Domains come from <code>sn-catalog-grouping</code> §3. Within a domain, entries are
       ordered by pattern family, so a reviewer meets the seventeen species of one quantity
@@ -155,7 +170,7 @@
     </p>
 
     <h2 id="s6">§6 — The re-cut and the pull request</h2>
-    <section data-reckon="section" data-id="s6" data-effort-hours="2.50" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s6" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-status="implementable" data-links=""></section>
     <p>
       Cutting is coordinator work from the main checkout, because the release CLI refuses a
       detached HEAD. The catalog repository's own runbook governs pushing there. The residue
@@ -182,7 +197,7 @@
     </p>
 
     <h2 id="s7">§7 — The fold-back, rehearsed before it is needed</h2>
-    <section data-reckon="section" data-id="s7" data-effort-hours="2.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s7" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>
       Carried from <code>catalog-review-surface</code> §4. Before a physicist's edits come
       back, exercise the approval fold-back with one accepted and one refused reviewer edit
@@ -210,27 +225,22 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="name-repair-ceiling" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What spend ceiling is authorised for the WEST name repairs and the harmonize run?</p>
-        <p class="r-dec-ctx">61 repairs through sn edit plus one documentation pass over 220 entries. The documented campaign spend stood at 107.18 USD on 2026-09-15.</p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="name-repair-ceiling" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What spend ceiling is authorised for the WEST name repairs and the harmonize run?</p>
+    <p class="r-dec-ctx">61 repairs through sn edit plus one documentation pass over 220 entries. The documented campaign spend stood at 107.18 USD on 2026-09-15.</p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-swpr-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="orchestrator"
-               data-written-by="reckon-review" data-written-at="2026-10-12"
-               data-recommends-skill="/reckon-build sn-west-prototype-release §2">
-        <h4 class="r-fu-title">Prepare the one-sitting ruling on names, and start the release-path residue</h4>
-        <div class="r-fu-body">
-          <p>§2 starts today and needs the lead, not a worker. Assemble the six contradictions and the 61 repairs as classes from the worklist, and confirm each still reproduces on the live graph, since several weeks of adjacent work have passed. §6's residue is independent of everything else and can be dispatched now, one node per item, after a confirm-before-fixing check.</p>
-        </div>
-        <pre class="r-fu-prompt">/reckon-build sn-west-prototype-release §2</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-swpr-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-west-prototype-release §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Prepare the one-sitting ruling on names, and start the release-path residue</h4>
+    <div class="r-fu-body"><p>§2 starts today and needs the lead, not a worker. Assemble the six contradictions and the 61 repairs as classes from the worklist, and confirm each still reproduces on the live graph, since several weeks of adjacent work have passed. §6's residue is independent of everything else and can be dispatched now, one node per item, after a confirm-before-fixing check.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-west-prototype-release §2</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

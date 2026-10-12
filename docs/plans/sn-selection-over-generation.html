@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-selection-over-generation">
+  <meta name="plan-title"     content="Select, Don't Generate: New Jev Patterns For Standard Names">
+  <meta name="plan-summary"   content="Prototype untried Jev patterns: grammar segments chosen from the vocabulary, links and anchors selected, prompts reranked, risk-ordered reading.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort-hours" content="12.5">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint"    content="S19">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="standard-names">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+  <title>Select, Don't Generate | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; standard names &middot; S19</p>
+      <h1>Select, don't generate</h1>
+      <p class="lead">
+        Wherever the pipeline asks a model to write one of a known set of things, a judgment
+        can choose instead. A standard name is spelled from a closed vocabulary. A link points at
+        a name that exists. A family has one best template. Choosing is cheaper, cannot invent a
+        token, and gives the same answer for the same concept. Each pattern here is a prototype
+        that earns a node only by its numbers.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — The patterns, and what is owned elsewhere</h2>
+    <p>
+      The patterns come from the TypeSafe cookbooks (hierarchical classification, rerank,
+      entity alignment, composite scoring, feature discovery) and the study of discovery's judges
+      (run <code>jev-harness-study</code>). Three Jev uses are owned by other plans and are not
+      repeated here:
+    </p>
+    <ul>
+      <li>review, owned by <code>sn-review-through-jev</code>;</li>
+      <li>physics-domain assignment of standard names and near-duplicate alignment, owned by
+        <code>sn-catalog-grouping</code> §3 and §4;</li>
+      <li>the DD-path domain classifier that names inherit from (today <code>gpt-5.5</code> in
+        <code>imas_codex/graph/dd_domain_classifier.py</code>), owned by
+        <code>discovery-judgments-through-jev</code> §6.</li>
+    </ul>
+    <p>
+      Every prototype here measures through <code>sn-judgment-evaluation</code> and is built
+      unwired.
+    </p>
+
+    <h2 id="s2">§2 — Grammar segments chosen from the vocabulary</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Given a DD path, its documentation and its enriched description, Jev answers one Choice
+      per grammar slot over that slot's closed ISN vocabulary: physical base, subject, component,
+      operator, locus and process, plus "none" where a slot is empty. Large vocabularies are
+      walked as a tree, with a beam of three and the geometric mean of the choices as the path
+      score, which is the hierarchical-classification cookbook's method. Code renders the name
+      through the ISN renderer. So the result can never contain a token the grammar lacks, and
+      the same concept always yields the same tokens.
+    </p>
+    <p>
+      Composition is cheap today (USD 21 of all-time spend), so the case is consistency, not
+      cost. There are two possible deployments:
+    </p>
+    <ul>
+      <li>a cross-check, where a composed name whose segments disagree with Jev's selection is
+        flagged to review;</li>
+      <li>a candidate generator, used beside the composer.</li>
+    </ul>
+    <p>
+      <strong>Done when:</strong> on golden A's positives and the human-edit target spellings,
+      the fragment reports exact-name match, per-slot accuracy, and agreement across the members
+      of each species family (whether all seventeen boundary densities receive the same base,
+      operator and locus). The composer's figures on the same sources sit beside them, along with
+      cost per name. It ends with a stated recommendation: cross-check, generator, or neither.
+    </p>
+
+    <h2 id="s3">§3 — Links and anchors selected, not guessed</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="2.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <ul>
+      <li><strong>Link labels.</strong> A Noul per <code>name:</code> link asks whether the link
+        text describes the target's description. The 2026-10-12 smoke read found
+        <code>flux_surface_averaged_beryllium_density_at_plasma_boundary</code> linking "beryllium
+        density at the plasma boundary" to itself rather than to the unaveraged quantity.
+        Deterministic code catches self-links. The judgment catches a link to the wrong
+        neighbour.</li>
+      <li><strong>Family anchors.</strong> A Score per family member rates how well its
+        documentation would serve as the family template, compared with
+        <code>select_anchor</code> in <code>imas_codex/standard_names/harmonize.py</code>.</li>
+    </ul>
+    <p>
+      <strong>Done when:</strong> on a coordinator-labelled sample of at least 150 links,
+      including every self-link found, link-label AUC is reported with its interval. On ten
+      families, the Jev-chosen anchor and the heuristic anchor are each used to harmonize, and the
+      lint findings after each are compared.
+    </p>
+
+    <h2 id="s4">§4 — Prompts that see the right neighbours</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="2.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      The compose and documentation prompts carry a comparator block of nearby names and a set of
+      scored exemplars, both selected by embedding similarity. Rerank each with
+      <code>rerank_pool</code> from <code>imas_codex/discovery/base/judgment.py</code>: one Score
+      per candidate for its relevance to the item, with the embedding order kept on any failure.
+      A rerank can never do worse than the order it replaces, so it is exempt from the deployment
+      rule and adopted on a positive measurement.
+    </p>
+    <p>
+      <strong>Done when:</strong> labelled-only nDCG@10 for the comparator block is reported
+      before and after on a coordinator-labelled set of 30 items. A held-out batch run both ways
+      reports first-pass review acceptance under the same reviewer. A test shows the embedding
+      order survives a failed rerank.
+    </p>
+
+    <h2 id="s5">§5 — Read the riskiest entries first</h2>
+    <section data-reckon="section" data-id="s5" data-effort-hours="1.50" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      A person's reading time is the scarcest resource in the release: the WEST polish pass, then
+      the physicist's review. Order both by a Jev risk composite of the named checks most likely
+      to have failed, so the first hour of reading finds the most defects.
+    </p>
+    <p>
+      <strong>Done when:</strong> on goldens A and C, the recall of known defects in the first
+      10%, 25% and 50% of the risk order is reported. Random order and the incumbent's review
+      score order are reported beside it.
+    </p>
+
+    <h2 id="s6">§6 — Acceptance learned from judgments</h2>
+    <section data-reckon="section" data-id="s6" data-effort-hours="2.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      The feature-discovery pattern: treat Jev's answers (check probabilities and dimension
+      distributions) as features, and fit a small, inspectable model (logistic regression first)
+      on golden A's calibration split to predict acceptance. A fitted weighting can find
+      combinations a hand-set composite misses. It is adopted only if it beats the hand-set
+      composite on the validation split by more than its interval, and its weights are published
+      beside it.
+    </p>
+    <p>
+      <strong>Done when:</strong> the validation AUC of the learned model and of the hand-set
+      composite is reported with intervals, with the fitted weights. The section closes with an
+      adopt-or-not verdict and its reason.
+    </p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-ssog-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-written-by="reckon-review" data-written-at="2026-10-12"
+               data-recommends-skill="/reckon-build sn-selection-over-generation §3">
+        <h4 class="r-fu-title">Links and prompt reranks need no golden beyond a small labelled sample; start there</h4>
+        <div class="r-fu-body">
+          <p>§3 and §4 measure against small coordinator-labelled samples and can run as soon as the evaluation module exists. §2, §5 and §6 wait on golden A.</p>
+        </div>
+        <pre class="r-fu-prompt">/reckon-build sn-selection-over-generation §3</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

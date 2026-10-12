@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-review-through-jev">
+  <meta name="plan-title"     content="Review As Named Checks: Jev Judges, The Language Model Writes">
+  <meta name="plan-summary"   content="Decompose name and documentation review into Jev Scores and named-check Nouls, feed refine the failed checks, and keep a chat reviewer only for uncertain cases.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="22">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S19">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="standard-names,review">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <title>Review As Named Checks | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; standard names &middot; S19</p>
+      <h1>Review as named checks</h1>
+      <p class="lead">
+        Review and the refine loop it drives are 89% of what the standard-names pipeline has
+        spent. Review is a judgment, and judgment is what Jev does. The obstacle is not
+        capability but plumbing: refine reads the reviewer's prose. Replace that prose with a
+        list of named checks that failed, and review can move to Jev while the language model
+        keeps the writing.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — What review does today, and what blocks the move</h2>
+    <p>
+      The inventory of 2026-10-12 (run <code>sn-judgment-inventory</code>) traces review end to
+      end. Name review (<code>_run_rd_quorum_cycles</code>,
+      <code>imas_codex/standard_names/workers.py:7881</code>) and docs review
+      (<code>_review_single_batch</code>, <code>imas_codex/standard_names/review/pipeline.py:2008</code>)
+      each score four dimensions from 0 to 20. The total over 80 is the accept gate, computed in
+      code. A primary and a secondary model run, and an escalator runs when any dimension
+      disagrees by more than 0.20.
+    </p>
+    <p>
+      The free-text comments are load-bearing in two places:
+    </p>
+    <ul>
+      <li>Refine renders <code>reviewer_comments_per_dim_*</code>, a JSON string parsed with
+        <code>fromjson</code> in <code>refine_name_user.md</code> and
+        <code>refine_docs_user.md</code>, as its instruction list.</li>
+      <li>The fanout trigger keyword-scans the same comments
+        (<code>should_trigger_fanout</code>, <code>workers.py:7070</code>).</li>
+    </ul>
+    <p>
+      That dependency is why the discovery plan left standard-name review as "evaluated only". It
+      is also the reason this plan starts by naming the checks.
+    </p>
+    <p>
+      The incumbent's misses make the quality case alongside the cost case. All 61 names the WEST
+      binding audit rejects are accepted with passing reviews
+      (<code>sn-judgment-evaluation</code> §1).
+    </p>
+
+    <h2 id="s2">§2 — A taxonomy of named checks</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Every failure the reviewer can find becomes a check with an id, an axis, the dimension it
+      docks, one Jev question (a Noul whose true case is the defect, or a categorising Choice
+      where the defect is one of several forms), and the evidence fields it reads. Sources:
+    </p>
+    <ul>
+      <li>the defect list in <code>review_names.md</code>: malformed physical base, novel token
+        in a closed segment, non-canonical operator join, advisory-alias collapse, ambiguity in
+        isolation, a dropped distinguishing axis, an over-specialised parent;</li>
+      <li>the four docs dimensions;</li>
+      <li>the WEST worklist's defect classes, and the wrong-object description class;</li>
+      <li>the house-style checks of <code>sn-house-style</code> §4;</li>
+      <li>the 136 distinct reasons written in human <code>sn edit</code> corrections.</li>
+    </ul>
+    <p>
+      The taxonomy lives beside the review prompts as data, not prose.
+    </p>
+    <p>
+      <strong>Done when:</strong> every check has a Jev question and evidence fields. The 136
+      human edit reasons are each mapped to a check or listed as unmapped, and at least 80% map.
+      A test fails when a check names an evidence field that the review state does not carry.
+    </p>
+
+    <h2 id="s3">§3 — Name review through Jev, measured, not wired</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Build the Jev name review as question and state builders that nothing calls yet. Following
+      discovery's categorise-first result, each dimension is asked as categories with the
+      decision derived in code, and each failed-check question is a separate Noul or Choice. The
+      state is the candidate name, its grammar segments, kind, unit, description, source DD paths
+      with their documentation, and sibling names. Each neighbourhood field records whether it was
+      observed, since unknown is not empty.
+    </p>
+    <p>
+      Run it over golden A from <code>sn-judgment-evaluation</code> §4.
+    </p>
+    <p>
+      <strong>Done when:</strong> the prototype's evidence fragment reports:
+    </p>
+    <ul>
+      <li>the paired AUC of Jev against each of the six incumbent models and against the quorum
+        decision, with 95% intervals;</li>
+      <li>the option-order flip rate and the frozen-state variation;</li>
+      <li>cost and latency per name;</li>
+      <li>the verdict under the deployment rule of <code>sn-judgment-evaluation</code> §7.</li>
+    </ul>
+    <p>
+      An arm that hands Jev the incumbent's own comments is excluded, since the point is to
+      measure Jev without them.
+    </p>
+
+    <h2 id="s4">§4 — Documentation review through Jev, claim by claim</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      The docs rubric already defines physics accuracy as "a claim-level verification against
+      the DD ground truth". That is the citation-check pattern:
+    </p>
+    <ul>
+      <li>Code splits the documentation into claims.</li>
+      <li>Each claim gets a Choice — supports, contradicts or says nothing — against the DD
+        documentation and the enriched description.</li>
+      <li>One contradiction is a veto, because an averaged score would hide it.</li>
+    </ul>
+    <p>
+      Description quality, documentation quality and completeness take categorising questions
+      with concrete levels. The house-style conformance checks are added as named checks.
+    </p>
+    <p>
+      <strong>Done when:</strong> paired AUC against the incumbent on golden B (not on the
+      incumbent's own docs reviews) is reported with intervals, along with the variation, the
+      option-order flip rate, the cost, and a per-claim confusion table on the planted-defect
+      subset. A documentation entry whose one claim contradicts its DD source is rejected even
+      when every other dimension scores at the top, and the test fails when the veto is removed.
+    </p>
+
+    <h2 id="s5">§5 — Refine reads the failed checks</h2>
+    <section data-reckon="section" data-id="s5" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      The refine prompts render the failed checks as their instruction list: id, the criterion
+      text, the evidence it pointed at, and the segment or sentence concerned. The fanout trigger
+      becomes the maximum probability over the checks that call for retrieval, compared with a
+      calibrated threshold, which retires the keyword list in <code>refine-trigger-keywords</code>.
+      The free-text comment field remains for people and no code path reads it.
+    </p>
+    <p>
+      <strong>Done when:</strong> an A/B over a held-out cohort compares one refine rotation
+      driven by checks with one driven by comments. It reports the post-refine acceptance rate
+      judged against golden labels rather than by the reviewer that requested the refine, and the
+      cost per accepted name. <code>should_trigger_fanout</code> reads no comment text, and a test
+      fails when a keyword list is reintroduced.
+    </p>
+
+    <h2 id="s6">§6 — The cascade</h2>
+    <section data-reckon="section" data-id="s6" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      Jev reviews every candidate:
+    </p>
+    <ul>
+      <li>Above the calibrated accept threshold with no failed check, it accepts.</li>
+      <li>With any failed check above its threshold, it routes to refine with those checks.</li>
+      <li>Only the uncertain band, where the decision is close and the distribution spread, goes
+        to one chat reviewer, not a quorum.</li>
+    </ul>
+    <p>
+      Thresholds come from the calibration split. The cascade runs in shadow first, through the
+      store of <code>sn-judgment-evaluation</code> §6, and decides only after shadow agreement and
+      the §3 and §4 verdicts pass the deployment rule.
+    </p>
+    <p>
+      <strong>Done when:</strong> on a fixed cohort run both ways, the fragment reports the share
+      of items that reached the chat reviewer, spend per accepted name before and after, and
+      non-inferior AUC on the golden validation split. The incumbent quorum path remains callable
+      for comparison until §7.
+    </p>
+
+    <h2 id="s7">§7 — Delete what Jev took over</h2>
+    <section data-reckon="section" data-id="s7" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      For each decision that passed the rule, delete the incumbent's code path and seat rather
+      than leaving both. That covers the quorum cycles that no longer run, the comment-keyword
+      trigger, and the review seats beyond the one chat reviewer the cascade keeps. A decision
+      that did not pass keeps its incumbent and its recorded numbers.
+    </p>
+    <p>
+      <strong>Done when:</strong> the deleted paths and seats are listed with line counts, and the
+      <code>LLMCost</code> phase split over the next production run shows review spend by judge
+      kind.
+    </p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-srtj-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="orchestrator"
+               data-written-by="reckon-review" data-written-at="2026-10-12"
+               data-recommends-skill="/reckon-build sn-review-through-jev §2">
+        <h4 class="r-fu-title">Name the checks first; it is the only section that needs no harness</h4>
+        <div class="r-fu-body">
+          <p>§2 can start now and is coordinator-heavy, since mapping 136 human reasons to checks is reading, not code. §3 waits on the evaluation module and golden A, and §4 on golden B, so the docs prototype is the one that takes longest to become measurable.</p>
+        </div>
+        <pre class="r-fu-prompt">/reckon-build sn-review-through-jev §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

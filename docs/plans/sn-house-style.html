@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -134,9 +134,27 @@
       a forbidden variant of a registered concept's equation; a non-canonical symbol for a
       registered quantity; a forbidden locus gloss, such as "separatrix" for
       <code>plasma_boundary</code>; an opening that does not match the pattern template; and
-      a sign-convention paragraph present or absent against the COCOS rule. Like the other
-      audits, they are pure: no graph writes and no model calls. In this plan, "the lint"
-      means these checks.
+      a sign-convention paragraph present or absent against the COCOS rule. In this plan,
+      "the lint" means these checks.
+    </p>
+    <p>
+      Some checks a pattern can decide, and those stay pure code. Others need judgment: which
+      form an equation takes when it is written several equivalent ways, whether a gloss equates
+      two loci, which template an opening follows. A regex can only be tuned around those, so
+      they ask Jev one categorising Choice each, through the shared decisions owner of
+      <code>sn-judgment-evaluation</code> §2. A Choice is used rather than a narrow Noul because
+      of the 2026-10-12 smoke read:
+    </p>
+    <ul>
+      <li>a Choice over flux-surface-average forms classified all four boundary entries correctly
+        at probability 1.0, including the carbon entry's wrong <code>dl/B</code>;</li>
+      <li>a Choice over boundary glosses was right on all four;</li>
+      <li>a Noul asking whether the wrong field was used read 0.53 on the defective entry.</li>
+    </ul>
+    <p>
+      Each Jev-backed check is measured on a coordinator-labelled sample through
+      <code>sn-judgment-evaluation</code> §3 before it raises a finding. Until it passes, it
+      reports only.
     </p>
     <p>
       <strong>Done when:</strong> on fixtures, the carbon entry's <code>dl/B</code> equation
