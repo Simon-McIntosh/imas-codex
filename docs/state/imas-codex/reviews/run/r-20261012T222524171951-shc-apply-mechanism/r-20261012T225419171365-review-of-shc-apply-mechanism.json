@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "7597c4f6ff911c6eba153684cd598b858c935799",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:sn_harmonize",
+    "imas_codex/standard_names/harmonize.py:apply_families",
+    "imas_codex/standard_names/campaign.py:CampaignRunner.run"
+  ],
+  "completed_at": "2026-10-12T23:05:01.822Z",
+  "dispatched_at": "2026-10-12T22:54:31Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": "5935",
+      "severity": "follow-on",
+      "text": "follow-on: the --report help text reads \"Report mode (the default and, for now, the only mode)\" and the command docstring at sn.py:5978 opens \"Read-only pattern-family harmonization report.\", both made false by the --apply option added in the same change, so sn harmonize --help tells a reader no apply mode exists."
+    },
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": "6078",
+      "severity": "follow-on",
+      "text": "follow-on: _harmonize_drain duplicates the existing _campaign_drain closure at sn.py:2797-2824 near-verbatim (same row lookup and cost_spent extraction), leaving two copies to drift as the drain contract changes."
+    }
+  ],
+  "head_log_revision": "102ff8b596986eef5e309086c88804f785d84d2b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against 7597c4f6ff911c6eba153684cd598b858c935799; 4f93f24bd adds batch_plan to CampaignRunner.run and anchor_gated_batches, 24e68d8c8 adds plan_family_applies/apply_families plus the CLI --apply, and 102ff8b59 adds the fragment.",
+    "done_when": "the done_when asks for a failed anchor to leave members untouched with the gate removed, an accepted anchor followed by one member batch, a snapshot before every reset restorable from, a second apply planning zero calls, and a --dry-run writing nothing; tests/standard_names/test_harmonize_apply.py holds one test per item and the manifest records baseline 161 passed and after 166 passed at 102ff8b59.",
+    "goal": "the node goal is the sn harmonize --apply mechanism \u2014 the anchor-first two-batch apply of one pattern family, proven on fixtures; imas_codex/standard_names/harmonize.py:754 plan_family_applies builds the batch sequence through campaign.py:500 anchor_gated_batches and harmonize.py:825 apply_families drives one CampaignRunner per family, so the landed change is exactly that mechanism.",
+    "manifest": "read; it records status complete, the three commits 4f93f24bd 24e68d8c8 102ff8b59, baseline_suite 161 passed EXIT=0 completed, after_suite 166 passed EXIT=0 completed, and the negative control negcontrol-apply.log.",
+    "write_paths": "the manifest declares imas_codex/cli/sn.py, imas_codex/standard_names/harmonize.py, imas_codex/standard_names/campaign.py, imas_codex/standard_names/families.py, the two test files and the fragment; git diff --name-only 7597c4f6f..102ff8b59 names exactly those plus no other file."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize_apply.py:210 fails when the anchor acceptance gate is removed through SHC_NO_ANCHOR_GATE, proving the assertion guards the gate rather than restating an input.",
+    "evidence": "the manifest records the gate run at 102ff8b59 as 166 passed EXIT=0 in after-suite.log with baseline 161 passed, and negcontrol-apply.log reproduces the failing gate-removal arm the done_when requires.",
+    "fit": "imas_codex/cli/sn.py:5935 still reads \"for now, the only mode\" and the docstring at sn.py:5978 still says read-only, both made false by the --apply option this same change adds.",
+    "goal_fidelity": "imas_codex/standard_names/harmonize.py:783 anchors the batch plan through anchor_gated_batches and harmonize.py:880 runs the anchor batch ahead of the member batch, which is the delivered goal.",
+    "reuse": "the runner gains an optional batch_plan at imas_codex/standard_names/campaign.py:957 rather than a second runner and reuses select_anchor, group_signature and stamp_harmonized_families, but imas_codex/cli/sn.py:6078 _harmonize_drain duplicates the existing _campaign_drain closure at sn.py:2797.",
+    "scope_discipline": "every path in git diff 7597c4f6f..102ff8b59 is inside the manifest's declared write paths, with only the small describe() fallback at imas_codex/standard_names/campaign.py:172 beyond the goal's direct reach but inside a declared path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is the sn harmonize --apply mechanism \u2014 the anchor-first two-batch apply of one pattern family, proven on fixtures; imas_codex/standard_names/harmonize.py:754 plan_family_applies builds the batch sequence through campaign.py:500 anchor_gated_batches and harmonize.py:825 apply_families drives one CampaignRunner per family, so the landed change is exactly that mechanism.\nVERDICT done_when: the done_when asks for a failed anchor to leave members untouched with the gate removed, an accepted anchor followed by one member batch, a snapshot before every reset restorable from, a second apply planning zero calls, and a --dry-run writing nothing; tests/standard_names/test_harmonize_apply.py holds one test per item and the manifest records baseline 161 passed and after 166 passed at 102ff8b59.\nVERDICT write_paths: the manifest declares imas_codex/cli/sn.py, imas_codex/standard_names/harmonize.py, imas_codex/standard_names/campaign.py, imas_codex/standard_names/families.py, the two test files and the fragment; git diff --name-only 7597c4f6f..102ff8b59 names exactly those plus no other file.\nVERDICT manifest: read; it records status complete, the three commits 4f93f24bd 24e68d8c8 102ff8b59, baseline_suite 161 passed EXIT=0 completed, after_suite 166 passed EXIT=0 completed, and the negative control negcontrol-apply.log.\nVERDICT diff: read commit by commit against 7597c4f6ff911c6eba153684cd598b858c935799; 4f93f24bd adds batch_plan to CampaignRunner.run and anchor_gated_batches, 24e68d8c8 adds plan_family_applies/apply_families plus the CLI --apply, and 102ff8b59 adds the fragment.\nCALL_SITES: imas_codex/cli/sn.py:sn_harmonize, imas_codex/standard_names/harmonize.py:apply_families, imas_codex/standard_names/campaign.py:CampaignRunner.run\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/harmonize.py:783 anchors the batch plan through anchor_gated_batches and harmonize.py:880 runs the anchor batch ahead of the member batch, which is the delivered goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest records the gate run at 102ff8b59 as 166 passed EXIT=0 in after-suite.log with baseline 161 passed, and negcontrol-apply.log reproduces the failing gate-removal arm the done_when requires.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff 7597c4f6f..102ff8b59 is inside the manifest's declared write paths, with only the small describe() fallback at imas_codex/standard_names/campaign.py:172 beyond the goal's direct reach but inside a declared path.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_harmonize_apply.py:210 fails when the anchor acceptance gate is removed through SHC_NO_ANCHOR_GATE, proving the assertion guards the gate rather than restating an input.\nSCORE fit: 15\nJUSTIFICATION fit: imas_codex/cli/sn.py:5935 still reads \"for now, the only mode\" and the docstring at sn.py:5978 still says read-only, both made false by the --apply option this same change adds.\nSCORE reuse: 16\nJUSTIFICATION reuse: the runner gains an optional batch_plan at imas_codex/standard_names/campaign.py:957 rather than a second runner and reuses select_anchor, group_signature and stamp_harmonized_families, but imas_codex/cli/sn.py:6078 _harmonize_drain duplicates the existing _campaign_drain closure at sn.py:2797.\nFINDING imas_codex/cli/sn.py:5935 follow-on: the --report help text reads \"Report mode (the default and, for now, the only mode)\" and the command docstring at sn.py:5978 opens \"Read-only pattern-family harmonization report.\", both made false by the --apply option added in the same change, so sn harmonize --help tells a reader no apply mode exists.\nFINDING imas_codex/cli/sn.py:6078 follow-on: _harmonize_drain duplicates the existing _campaign_drain closure at sn.py:2797-2824 near-verbatim (same row lookup and cost_spent extraction), leaving two copies to drift as the drain contract changes.\n",
+  "review_run_id": "r-20261012T225419171365-review-of-shc-apply-mechanism",
+  "reviewed_base_sha": "7597c4f6ff911c6eba153684cd598b858c935799",
+  "reviewed_head_sha": "102ff8b596986eef5e309086c88804f785d84d2b",
+  "reviewed_run_id": "r-20261012T222524171951-shc-apply-mechanism",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T23:03:03.798948+00:00",
+  "total": 104
+}
