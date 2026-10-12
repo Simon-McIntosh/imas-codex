@@ -2028,11 +2028,14 @@ def propagate_source_enrichment(
         Number of member signals updated
     """
     with GraphClient() as gc:
-        # Find members via MEMBER_OF → SignalSource (excluding the representative)
+        # A source is identified by its ``representative_id``, not by the
+        # representative's own MEMBER_OF edge: a representative may be a
+        # member of a different source (one shot-templated source and one
+        # shot-pinned source can share a representative), and binding through
+        # MEMBER_OF then silently skips every source it represents.
         count_result = gc.query(
             """
-            MATCH (rep:FacilitySignal {id: $rep_id})
-                  -[:MEMBER_OF]->(sg:SignalSource)
+            MATCH (sg:SignalSource {representative_id: $rep_id})
             MATCH (s:FacilitySignal)-[:MEMBER_OF]->(sg)
             WHERE s.id <> $rep_id
               AND s.status = $discovered
@@ -2051,8 +2054,7 @@ def propagate_source_enrichment(
         # already individualized and leave the followers holding the copy.
         gc.query(
             """
-            MATCH (rep:FacilitySignal {id: $rep_id})
-                  -[:MEMBER_OF]->(sg:SignalSource)
+            MATCH (sg:SignalSource {representative_id: $rep_id})
             SET sg.status = 'enriched',
                 sg.description = $description,
                 sg.keywords = $keywords,
@@ -2060,7 +2062,6 @@ def propagate_source_enrichment(
                 sg.claimed_at = null,
                 sg.members_described = false
             """,
-            rep_id=representative_id,
             description=enrichment.get("description", ""),
             keywords=enrichment.get("keywords", []),
             physics_domain=enrichment.get("physics_domain", ""),
@@ -2075,8 +2076,7 @@ def propagate_source_enrichment(
         # Propagate enrichment: discovered → enriched
         result = gc.query(
             """
-            MATCH (rep:FacilitySignal {id: $rep_id})
-                  -[:MEMBER_OF]->(sg:SignalSource)
+            MATCH (sg:SignalSource {representative_id: $rep_id})
             MATCH (s:FacilitySignal)-[:MEMBER_OF]->(sg)
             WHERE s.id <> $rep_id
               AND s.status = $discovered
@@ -2115,8 +2115,7 @@ def propagate_source_enrichment(
         if enrichment.get("diagnostic"):
             gc.query(
                 """
-                MATCH (rep:FacilitySignal {id: $rep_id})
-                      -[:MEMBER_OF]->(sg:SignalSource)
+                MATCH (sg:SignalSource {representative_id: $rep_id})
                 MATCH (s:FacilitySignal)-[:MEMBER_OF]->(sg)
                 WHERE s.id <> $rep_id
                   AND s.status = $enriched
@@ -2150,7 +2149,7 @@ def sweep_source_enrichment(facility: str) -> int:
         representatives = gc.query(
             """
             MATCH (sg:SignalSource {facility_id: $facility})
-            MATCH (rep:FacilitySignal {id: sg.representative_id})-[:MEMBER_OF]->(sg)
+            MATCH (rep:FacilitySignal {id: sg.representative_id})
             WHERE rep.status IN $enriched_statuses
               AND EXISTS {
                   MATCH (member:FacilitySignal)-[:MEMBER_OF]->(sg)

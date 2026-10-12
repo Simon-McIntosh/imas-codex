@@ -141,6 +141,40 @@ def test_the_boundary_matcher_holds_a_term_to_whole_words():
     assert "efc" in "PSSCfst/refcurEF1".casefold()
 
 
+def test_a_source_is_swept_for_its_representative_not_its_member_edge():
+    """A representative may itself be a member of a different source.
+
+    Binding the source through the representative's own MEMBER_OF edge then
+    skips every source it represents, so the source is located by
+    ``representative_id`` instead.
+    """
+    recorded = []
+
+    class StubGraph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_exc):
+            return False
+
+        def query(self, cypher, **params):
+            recorded.append(cypher)
+            return [
+                {"representative_id": "jt-60sa:general/cs1_temsnur11", "enrichment": {}}
+            ]
+
+    with (
+        patch.object(parallel, "GraphClient", StubGraph),
+        patch.object(
+            parallel, "propagate_source_enrichment", return_value=7
+        ) as propagate,
+    ):
+        assert parallel.sweep_source_enrichment("jt-60sa") == 7
+
+    assert "MATCH (rep:FacilitySignal {id: sg.representative_id})" in recorded[0]
+    propagate.assert_called_once_with("jt-60sa:general/cs1_temsnur11", {})
+
+
 @pytest.mark.asyncio
 async def test_a_coil_abbreviation_reaches_its_own_signal_not_a_lookalike():
     prompt = await _enrichment_prompt(
