@@ -1,7 +1,8 @@
 <!-- A challenge judge's per-question answers are declared on StandardNameReview,
      discriminated by judge_kind, and built by _build_review_record. Every test
      here is offline: GraphClient is mocked, no graph write, no Jev call.
-     Logs: ~/.config/reckon/crew/runs/r-20261012T150536920692-sje-shadow-store/{baseline,gate,after,shadow_tests,negative_control}.log -->
+     Earlier logs: ~/.config/reckon/crew/runs/r-20261012T150536920692-sje-shadow-store/{baseline,gate,after,shadow_tests,negative_control}.log
+     Writer logs: ~/.config/reckon/crew/runs/r-20261012T155037257528-sje-shadow-write/{baseline,after,negative-control,accept-negative-control}.log -->
 <section id="sje-shadow-store" data-reckon="evidence">
   <h2 id="sje-shadow-store-heading">A shadow store, read by no gate</h2>
 
@@ -71,32 +72,26 @@
   </figure>
 
   <p id="sje-shadow-store-evidence">
-    The gate is <code>tests/standard_names/test_review_shadow_store.py</code> (11
-    tests) with the review, quorum, pool and schema suites beside it: 96 passing at
-    the base revision, 168 at the head, no added failures
-    (<code>after.log</code>, <code>EXIT=0</code>). A negative control points the
-    accept gate's score selection at a shadow confidence instead of the reviewer's
-    score; the identical-decisions test fails on exactly that change
-    (<code>negative_control.log</code>, 1 failed / 10 passed), so the equality it
-    asserts is load-bearing rather than a property of the fixture.
+    The earlier <code>after.log</code> ends with 168 passed and 9 deselected; it
+    does not contain an <code>EXIT=</code> line. The writer gate covers the review
+    tests and Cypher property check: 364 passed at the base, then 362 passed
+    with one deselected at the repaired head, with no added failures
+    (<code>r-20261012T155037257528-sje-shadow-write/after.log</code>,
+    <code>EXIT=0</code>). Dropping <code>judge_kind</code> from the writer's
+    assignments fails the round-trip test. Pointing accept score selection at
+    persisted shadow confidence fails the accept test.
   </p>
 
   <p id="sje-shadow-store-gaps">
-    Two gaps found and <strong>not</strong> closed here, because both live outside
-    this node's write scope:
+    The writer now persists the five shadow fields and keeps a shadow score null.
+    One reader gap remains outside this repair's scope:
   </p>
   <ul id="sje-shadow-store-gap-list">
-    <li id="sje-shadow-store-gap-write">
-      <code>imas_codex/standard_names/graph_ops.py</code> — <code>write_reviews</code>
-      builds its batch (line 6150) and its <code>SET</code> clause (ending line 6145)
-      from an explicit property list, so a shadow payload is dropped at write time.
-      A test asserts the omission and trips as soon as the list is extended.
-    </li>
     <li id="sje-shadow-store-gap-readers">
-      <code>imas_codex/standard_names/review/projection.py:151</code> takes
+      <code>imas_codex/standard_names/review/projection.py</code> takes
       <code>rows[0]["review_group_id"]</code> as the latest group from an unfiltered
       <code>HAS_REVIEW</code> scan, and
-      <code>imas_codex/standard_names/graph_ops.py:6281</code>
+      <code>imas_codex/standard_names/graph_ops.py</code>
       (<code>update_review_aggregates</code>) counts, means and spreads every
       <code>StandardNameReview</code> regardless of kind. Both would follow a shadow
       record once one is attached.
