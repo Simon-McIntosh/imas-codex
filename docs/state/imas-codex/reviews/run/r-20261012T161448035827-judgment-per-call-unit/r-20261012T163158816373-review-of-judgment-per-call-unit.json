@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "1c099e9badd6806e335d4249de7e9e32531094e4",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/ids/candidates.py:373",
+    "imas_codex/ids/candidates.py:458",
+    "imas_codex/discovery/code/workers.py:364",
+    "imas_codex/discovery/wiki/scoring.py:171",
+    "imas_codex/discovery/paths/scorer.py:176"
+  ],
+  "completed_at": "2026-10-12T16:42:34.085Z",
+  "dispatched_at": "2026-10-12T16:32:11Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/base/judgment.py",
+      "line": "113",
+      "severity": "follow-on",
+      "text": "follow-on: cost booking moved from one summed entry per batch to one _book_cost per successful call, so a batch whose calls all fail now writes no step key where the old code wrote a batch entry; the accumulated PipelineCost total is unchanged and the production batch path passes cost=None, so impact is nil but the brief's \"behaviour must not change\" is not strictly held."
+    }
+  ],
+  "head_log_revision": "dd5b301f02e10bdd3f5557ee80db9674ebd494fd",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read the single commit dd5b301f0 in full; it adds CallStatus/CallOutcome/_settle_call/_await_call/_resume to judgment.py, the four-outcome test, and the landing fragment.",
+    "done_when": "The done_when requires a shared unit, a four-outcome test that reddens on a changed classification, and recorded baseline/after suites; tests/discovery/test_judgment.py:333 adds that test and the manifest records both suites.",
+    "goal": "The node goal is one per-call unit shared by both decision entry points; imas_codex/discovery/base/judgment.py:88 defines _settle_call, and decide_one (:117) and decide_batch (:230) both rest on it.",
+    "manifest": "Read; it records status complete, 193 passed/8 skipped after vs 192/8 baseline, names the gate command and result, and the negative-control log.",
+    "write_paths": "The declared paths are imas_codex/discovery/base/judgment.py, tests/discovery/test_judgment.py and the fragment HTML; the diff touches exactly those three and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_judgment.py:365 pytest.raises(DecisionsValidationError) reddens when the shared unit is mutated to classify a malformed answer as transport, as negative_control.log records.",
+    "evidence": "after_suite.log (dd5b301f0, 193 passed/8 skipped) and baseline_suite.log (192/8) are recorded with completed true, and negative_control.log shows the added test reddening with EXIT=1.",
+    "fit": "CallStatus and CallOutcome at judgment.py:61/74 follow the file's docstring-heavy idiom and carry no plan or ticket label, with a plain Enum where sibling modules use StrEnum being the only minor deviation.",
+    "goal_fidelity": "judgment.py:88 _settle_call is the single unit decide_one (:117) and decide_batch (:230) both call, and neither retains its own exception classification or cost booking.",
+    "reuse": "no prior owner of call-fault classification exists in imas_codex/discovery/base/, and _settle_call extends the existing _book_cost (judgment.py:48) rather than duplicating it.",
+    "scope_discipline": "the single commit dd5b301f0 changes only judgment.py, tests/discovery/test_judgment.py and the fragment HTML, all inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is one per-call unit shared by both decision entry points; imas_codex/discovery/base/judgment.py:88 defines _settle_call, and decide_one (:117) and decide_batch (:230) both rest on it.\nVERDICT done_when: The done_when requires a shared unit, a four-outcome test that reddens on a changed classification, and recorded baseline/after suites; tests/discovery/test_judgment.py:333 adds that test and the manifest records both suites.\nVERDICT write_paths: The declared paths are imas_codex/discovery/base/judgment.py, tests/discovery/test_judgment.py and the fragment HTML; the diff touches exactly those three and nothing else.\nVERDICT manifest: Read; it records status complete, 193 passed/8 skipped after vs 192/8 baseline, names the gate command and result, and the negative-control log.\nVERDICT diff: Read the single commit dd5b301f0 in full; it adds CallStatus/CallOutcome/_settle_call/_await_call/_resume to judgment.py, the four-outcome test, and the landing fragment.\nCALL_SITES: imas_codex/ids/candidates.py:373, imas_codex/ids/candidates.py:458, imas_codex/discovery/code/workers.py:364, imas_codex/discovery/wiki/scoring.py:171, imas_codex/discovery/paths/scorer.py:176\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: judgment.py:88 _settle_call is the single unit decide_one (:117) and decide_batch (:230) both call, and neither retains its own exception classification or cost booking.\nSCORE evidence: 19\nJUSTIFICATION evidence: after_suite.log (dd5b301f0, 193 passed/8 skipped) and baseline_suite.log (192/8) are recorded with completed true, and negative_control.log shows the added test reddening with EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit dd5b301f0 changes only judgment.py, tests/discovery/test_judgment.py and the fragment HTML, all inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_judgment.py:365 pytest.raises(DecisionsValidationError) reddens when the shared unit is mutated to classify a malformed answer as transport, as negative_control.log records.\nSCORE fit: 18\nJUSTIFICATION fit: CallStatus and CallOutcome at judgment.py:61/74 follow the file's docstring-heavy idiom and carry no plan or ticket label, with a plain Enum where sibling modules use StrEnum being the only minor deviation.\nSCORE reuse: 20\nJUSTIFICATION reuse: no prior owner of call-fault classification exists in imas_codex/discovery/base/, and _settle_call extends the existing _book_cost (judgment.py:48) rather than duplicating it.\nFINDING imas_codex/discovery/base/judgment.py:113 follow-on: cost booking moved from one summed entry per batch to one _book_cost per successful call, so a batch whose calls all fail now writes no step key where the old code wrote a batch entry; the accumulated PipelineCost total is unchanged and the production batch path passes cost=None, so impact is nil but the brief's \"behaviour must not change\" is not strictly held.\n",
+  "review_run_id": "r-20261012T163158816373-review-of-judgment-per-call-unit",
+  "reviewed_base_sha": "1c099e9badd6806e335d4249de7e9e32531094e4",
+  "reviewed_head_sha": "dd5b301f02e10bdd3f5557ee80db9674ebd494fd",
+  "reviewed_run_id": "r-20261012T161448035827-judgment-per-call-unit",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T16:41:47.153586+00:00",
+  "total": 115
+}
