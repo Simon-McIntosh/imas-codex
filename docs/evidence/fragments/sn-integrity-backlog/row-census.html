@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-row-census">
+<title>Row census — re-confirmation of every integrity backlog row</title>
+</head>
+<body>
+<main>
+<h1 id="sib-row-census-title">Row census: re-confirming every §2–§4 item on the live graph</h1>
+
+<h2 id="sib-row-census-header">Census header</h2>
+<table id="sib-row-census-header-table">
+<tbody>
+<tr><th>Invocation commit</th><td><code>c7b4c626e21cc93a2fc9cfefe200ef066b800829</code></td></tr>
+<tr><th>Worktree</th><td><code>/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-row-census</code></td></tr>
+<tr><th>Graph endpoint</th><td>SLURM-hosted Neo4j, resolved by <code>GraphClient()</code> on fleet job 1281970 (node 98dci4-clu-2002)</td></tr>
+<tr><th>Posture</th><td>Read-only. No graph write, no code change. No <code>sn</code> command that mutates state was run.</td></tr>
+<tr><td colspan="2"><strong>Row-set predicates.</strong> Each row names its cohort. Cohorts backed by an existing reader call that reader; the reader definition (not re-implemented here) is the predicate. Cohorts with no owning reader are marked <em>no owning reader</em> and were read with a bounded query or a tree search.</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-row-census-controls">Built-in controls</h2>
+<p>The census must be able to see a fix and to see a defect. Both controls fire.</p>
+<table id="sib-row-census-controls-table">
+<thead><tr><th>Control</th><th>Expected</th><th>Measured</th><th>Query / command (verbatim)</th><th>Elapsed</th></tr></thead>
+<tbody>
+<tr>
+<td>See a fix</td>
+<td><code>*_density_at_pedestal_top</code> family reads present; restore row reads <em>changed</em></td>
+<td><strong>20 rows present</strong> (1 parent <code>density_at_pedestal_top</code> + 19 species), all <code>name_stage=accepted</code></td>
+<td><code>MATCH (n:StandardName) WHERE n.id CONTAINS 'density_at_pedestal_top' RETURN n.id AS id, n.name_stage AS stage ORDER BY id</code></td>
+<td>0.004 s</td>
+</tr>
+<tr>
+<td>See a defect</td>
+<td><code>schema_digest</code> still absent from the tree</td>
+<td><strong>Absent</strong> — <code>rg -l schema_digest imas_codex/</code> returns no file (grep exit 1)</td>
+<td><code>rg -l "schema_digest" imas_codex/</code></td>
+<td>&lt;0.1 s</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="sib-row-census-s2">§2 — Lifecycle, provenance and authority residue</h2>
+<table id="sib-row-census-s2-table">
+<thead><tr><th>Item</th><th>Source</th><th>Verdict</th><th>Live evidence</th><th>Owning reader</th><th>Proposed repair section</th></tr></thead>
+<tbody>
+
+<tr id="sib-row-census-s2-four-holes">
+<td>Four sanctioned paths refuse the exact state an orphaned identity is in</td>
+<td><code>sn-lifecycle-integrity</code> §5 <code>f-sli-the-sanctioned-surface-has-four-holes</code></td>
+<td><strong>changed</strong> — one of four holes closed; three remain in code (code read, not a live query)</td>
+<td>Hole 4 (unscoped global maintenance): the flag now exists and is forwarded —
+<code>rg -n skip_global_maintenance imas_codex/cli/sn.py</code> returns
+<code>sn.py:1762 "--skip-global-maintenance"</code> and <code>sn.py:2087</code> forwards it. The followup recorded the inline runner launching <code>run_sn_pools</code> with <em>no</em> control (observed twice on 2026-09-09). Holes 1–3 (rename-on-collision with a superseded row; <code>sn rescore</code> leaving <code>status='superseded'</code>; <code>sn edit --docs</code> refusing while <code>docs_stage='pending'</code>) are unchanged by inspection.</td>
+<td>no owning reader (code read)</td>
+<td>Section: <em>make the sanctioned surface reach an orphaned identity</em>. Paths <code>imas_codex/cli/sn.py</code>, <code>imas_codex/standard_names/edit.py</code>. Gate <code>tests/standard_names/</code> (edit + lifecycle). ~6 h. Release path (reached through <code>sn edit</code>).</td>
+</tr>
+
+<tr id="sib-row-census-s2-successor-scalar">
+<td>The successor scalar can be retired at a named price of three names</td>
+<td><code>sn-lifecycle-integrity</code> §5 <code>f-sli-retire-the-successor-scalar-on-the-measured-cost</code></td>
+<td><strong>still true</strong></td>
+<td>Recorded: 2,163 superseded names, 18 carry the scalar, scalar is the only pointer for 3.
+Live: <code>{"superseded": 2163, "scalar_set": 18}</code> — identical to the recorded figure, so no part of the removal has been started.</td>
+<td>no owning reader (bounded query)</td>
+<td>Section: <em>retire the superseded_by scalar</em>. Paths six modules enumerated in the successor-derivation record + a migration over the superseded population. Gate <code>tests/standard_names/</code> + a migration dry-run. ~8 h. Release path (the scalar is read on the fold/supersede path).</td>
+</tr>
+
+<tr id="sib-row-census-s2-parked-net">
+<td>The parked-disposition net has no caller and the value is never cleared</td>
+<td><code>sn-lifecycle-integrity</code> §5 <code>f-sli-the-parked-disposition-net-is-unwired-and-never-cleared</code></td>
+<td><strong>still true</strong></td>
+<td><code>rg -n "census_parked_dispositions|disposition_parked_sources" imas_codex/ tests/</code> returns the two definitions and three call sites, <em>all three in <code>tests/standard_names/test_attempt_cap_disposition.py</code></em> — zero production callers, exactly as recorded.</td>
+<td>no owning reader (code read)</td>
+<td>Section: <em>wire the parked-disposition net</em>. Path <code>imas_codex/standard_names/graph_ops.py</code> (27k lines — probe with <code>--dry-run</code> first, or extract to a smaller module). Gate <code>tests/standard_names/test_attempt_cap_disposition.py</code>. ~4 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s2-cap-unclassified">
+<td>A cap-hit source not yet parked reads as unclassified</td>
+<td><code>sn-lifecycle-integrity</code> §5 <code>f-sli-011</code> (and §3 cap-hit footgun)</td>
+<td><strong>changed</strong> — cap-hit population grew; census currently reports no unclassified rows</td>
+<td>Recorded: 216 sources at <code>attempt_count=5</code>. Live: <code>{"cap_hit": 234}</code>. The census cohort (attempt_count ≥ cap, any status) now returns
+<code>{"parked": 234, "counts": {...}, "unclassified": [], "unclassified unexpected": []</code>} via
+<code>census_parked_dispositions(gc=gc)</code>, so the recorded "false red in normal operation" is not tripping at this instant.</td>
+<td><code>census_parked_dispositions</code> (graph_ops.py:11641)</td>
+<td>Section: <em>narrow the parked census cohort to the writer's</em>. Path <code>imas_codex/standard_names/graph_ops.py</code>. Gate <code>tests/standard_names/test_attempt_cap_disposition.py</code>. ~2 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s2-parked-refusal">
+<td>Parked-source refusal message raises the wrong exception; classifier precedence is unasserted</td>
+<td><code>sn-lifecycle-integrity</code> §5 <code>f-sli-010</code> → <code>f-sli-012</code></td>
+<td><strong>still true</strong></td>
+<td>The guard is kept and its message still subscripts the row: <code>graph_ops.py</code> carries
+<code>raise ValueError(f"row {row['id']!r} has no triage disposition")</code> — a row lacking <code>id</code> raises <code>KeyError</code> while formatting the refusal. <code>f-sli-010</code>'s supersede note confirms the guard is retained deliberately.</td>
+<td>no owning reader (code read)</td>
+<td>Section: <em>make the parked refusal safe and pin precedence</em>. Path <code>imas_codex/standard_names/graph_ops.py</code>. Gate <code>tests/standard_names/test_attempt_cap_disposition.py</code> (add a two-signal precedence case). ~2 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s2-defaulted-getattr">
+<td>Four bypasses of the defaulted-attribute guard</td>
+<td><code>sn-lifecycle-integrity</code> §5 <code>f-sli-013</code></td>
+<td><strong>still true</strong> (a fifth iteration was declined; the four remain as recorded)</td>
+<td><code>tests/standard_names/test_defaulted_attributes_exist.py</code> is present with its aperture, a <code>MINIMUM_SCANNED_MODULES</code> floor, a <code>MINIMUM_LITERAL_DEFAULTED_GETATTRS</code> floor and an exemption mapping — the four measured bypasses (tree-derived requirement, substitution, candidate-floor-vs-union, attribute-keyed exemption) are in that structure unchanged.</td>
+<td>no owning reader (code read)</td>
+<td>Section: <em>close findings three and four of the defaulted-attribute guard</em>. Path <code>tests/standard_names/test_defaulted_attributes_exist.py</code> only. Gate that file. ~1 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s2-restore-partial">
+<td>Restore is partial: pedestal-top family rebuilt, <code>power_due_to_fusion</code> and <code>plasma_energy</code> still absent</td>
+<td><code>paid-identity-deletion-protection</code> §4, §6</td>
+<td><strong>changed</strong></td>
+<td>Recorded: family rebuilt 2026-09-09; <code>power_due_to_fusion</code>, <code>plasma_energy</code> absent.
+Live (<code>MATCH (n:StandardName) WHERE n.id IN [...]</code>): the 20-member pedestal family reads present (control row above), and <code>power_due_to_fusion</code>, <code>plasma_energy</code>, <code>etendue_of_spectrometer_channel</code> all read <strong>absent</strong> (0 rows). So one half is fixed and the named remainder still stands.</td>
+<td><code>find_provenance_orphans</code> for the sibling cohort (ledger.py:96)</td>
+<td>Section: <em>finish the restore remainder</em>. Path the restore adapter and its per-identity origin judgement. Gate the restore parity tests. ~10 h. Release path (the restore command).</td>
+</tr>
+
+<tr id="sib-row-census-s2-restore-cli-origin">
+<td>The restore CLI re-arms the origin value that caused the deletion</td>
+<td><code>paid-identity-deletion-protection</code> <code>f-pidp-the-restore-cli-re-arms-the-deletion-it-exists-to-prevent</code></td>
+<td><strong>changed</strong> — a compose-time refusal now exists where the recorded defect was a pass-through</td>
+<td>Recorded: <code>sn restore compose</code> carried <code>origin</code> through from the archive (<code>sn.py:8130-8132</code>), so a pre-correction dump restored <code>origin: catalog_edit</code>.
+Live: <code>sn.py</code> now carries <code>"archive reconstruction origin must be stated at compose time"</code> beside the restore adapter's entry point — the composer no longer silently takes the archived value.</td>
+<td>no owning reader (code read)</td>
+<td>verify-plus-test: confirm the refusal fires and add a regression test (the composer must refuse to carry <code>origin</code> from the extraction). Path <code>imas_codex/cli/sn.py</code>. ~2 h after the above. Release path (restore command).</td>
+</tr>
+
+<tr id="sib-row-census-s2-scaffolding-origin">
+<td>Names labelled scaffolding while carrying reviewed documentation</td>
+<td><code>paid-identity-deletion-protection</code> <code>f-pidp-004</code></td>
+<td><strong>changed</strong> — the population grew from the recorded figure</td>
+<td>Recorded: 412 derived; 397 accepted/approved; <strong>334</strong> carry <code>docs_stage='accepted'</code> with non-empty documentation; $116.91 across 2,339 <code>LLMCost</code> rows.
+Live: <code>{"derived": 428, "acc_appr": 401, "docs_acc_nonempty": 412}</code>. The misleading <code>derived</code>-while-documented population is now <strong>412</strong>, i.e. it has grown by 78 since the record.</td>
+<td>no owning reader (bounded query)</td>
+<td>Section: <em>adjudicate the origin label per name</em>. Path the origin-classification path + the readers that branch on <code>origin='derived'</code> (<code>parents.py</code>, <code>attachment_audit.py</code>, <code>desc_name_sim.py</code> read it today, confirmed by <code>rg</code>). Gate <code>tests/standard_names/</code>. ~8 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s2-origin-backfill">
+<td>Recover origin and status from generation evidence and close the import write path</td>
+<td><code>sn-origin-provenance-backfill</code> <code>f-sopb-002</code></td>
+<td><strong>changed</strong> — the import write path is now refused; the recovery remains</td>
+<td>Recorded: derive origin/status, prove zero misclassifications on the 1,798 accepted controls, then remove the import path's ability to clear/overwrite <code>origin</code>/<code>status</code>.
+Live: <code>imas_codex/standard_names/catalog_import.py:61</code> states it "cannot set, clear, or replace <code>origin</code> or <code>status</code>", and line 73 refuses when either key is present (<code>rg -n origin imas_codex/standard_names/catalog_import.py</code>). The import half is closed; the generation-evidence derivation is not started.</td>
+<td>no owning reader (code read)</td>
+<td>Section: <em>derive origin and status from generation evidence</em>. Path the origin backfill. Gate the import refusal test + <code>tests/standard_names/</code>. ~6 h. Not on the release path.</td>
+</tr>
+
+<tr id="sib-row-census-s2-scalar-edge">
+<td>43 of 117 produced-name divergences still hold the only record of intent</td>
+<td><code>scalar-edge-authority</code></td>
+<td><strong>fixed</strong></td>
+<td>Recorded: 43 of 117 divergences.
+Live: <code>find_edge_scalar_desyncs(gc=gc)</code> returns <strong>0 rows</strong> (0.091–0.194 s). No produced-name divergence holds a scalar-only record.</td>
+<td><code>find_edge_scalar_desyncs</code> (ledger.py:123)</td>
+<td>none — row is fixed by the reader's own cohort.</td>
+</tr>
+
+<tr id="sib-row-census-s2-schema-ownership">
+<td>Three properties the schema and the live graph disagree about</td>
+<td><code>sn-schema-ownership-residue</code></td>
+<td><strong>still true</strong> (recorded as permanent allowances; the plan refuses to settle them without a decision)</td>
+<td>The three are <code>related_ids</code> (CodeChunk 4,826 vs CodeExample declared), <code>alternatives</code> (0 of 271,460 on both readers), <code>embed_failed_at</code> (CodeChunk 1,649, undeclared), <code>patterns_found</code> (0 of 275,315, declared and correct). Nothing in the tree moves them; the residue is a standing allowance.</td>
+<td>no owning reader (plan-recorded allowance)</td>
+<td><strong>needs a ruling</strong> — the plan states either repair expands durable schema authority to cover operational state, a different decision. Ruled by the lead (schema ownership). Unblocks: whether <code>embed_failed_at</code> is declared.</td>
+</tr>
+
+<tr id="sib-row-census-s2-schema-digest">
+<td>A schema-digest node so a server refuses to serve against a drifted graph</td>
+<td><code>sn-schema-version-authority</code></td>
+<td><strong>still true</strong> (control 2)</td>
+<td><code>rg -l "schema_digest" imas_codex/</code> returns nothing (exit 1). No symbol exists in the tree.</td>
+<td>no owning reader (tree search)</td>
+<td>Section: <em>write and check a schema digest</em>. Path the graph client / server startup. Gate a refusal test. ~4 h. Not on the release path.</td>
+</tr>
+
+</tbody>
+</table>
+</main>
+</body>
+</html>
