@@ -19,6 +19,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Literal
 
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
+from imas_codex.ids.mapping import PipelineCost
 from imas_codex.standard_names.budget import (
     LLMCostEvent,
     bind_attempt_exposure,
@@ -27,6 +28,7 @@ from imas_codex.standard_names.budget import (
 )
 from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 from imas_codex.standard_names.review.audits import AuditReport, LintFinding
+from imas_codex.standard_names.review.judge_stage import judge_review_stage
 
 # Defense-in-depth: strict SN id pattern used to reject reviewer-hallucinated
 # revised_name values (e.g. multi-hundred-char stream-of-consciousness strings).
@@ -581,6 +583,22 @@ async def enrich_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
         else:
             batch["audit_findings"] = []
             batch["error_lint_findings"] = {}
+
+        # Judge stage (report-only), beside the audit stage: the entries a
+        # pattern cannot decide ask the judge one categorising Choice each. The
+        # results join the same per-name findings the reviewer receives, marked
+        # report-only, and are never booked as error-lint findings, so they
+        # never cap a score. A batch whose names carry no judged entry makes no
+        # call.
+        if not state.skip_audit:
+            judge_cost = PipelineCost()
+            judge_findings = await judge_review_stage(
+                batch.get("names", []), cost=judge_cost
+            )
+            for lines in judge_findings.values():
+                batch["audit_findings"].extend(lines)
+            if judge_cost.total_usd:
+                state.enrich_stats.cost += judge_cost.total_usd
 
         state.enrich_stats.processed = i + 1
         state.enrich_stats.record_batch(1)
