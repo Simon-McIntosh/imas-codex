@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded no gate arms: it is a read-only census fragment with no test file in its write paths and records 'read-only census, no test gate' in its manifest, so no baseline_suite or after_suite log exists to derive failures from; added_failure_count and added_failure_ids are therefore zero and empty respectively.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-12T14:55:38Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145528571333-sib-row-census/manifest.md",
+      "line": 16,
+      "severity": "follow-on",
+      "summary": "negative_control_log carries a prose description and names count_check.py, which the worker deleted as scratch after the run, so the field names no openable path and the recorded negative control cannot be re-run or checked."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/row-census.html",
+      "line": 103,
+      "severity": "follow-on",
+      "summary": "the \u00a72 lifecycle source row is represented by six rows though the plan \u00a76 done_when names \"the seven footguns of the lifecycle row are seven rows;\" the plan's \u00a72 row text lists six clauses, so either one footgun was dropped from the census or the plan's count word is loose, and a reader cannot tell which."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/row-census.html",
+      "line": 21,
+      "severity": "follow-on",
+      "summary": "the census header records the invocation commit and a row-set-predicate statement but no anchor-resolution count, which the plan \u00a76 requires to follow reuse-map-residual-closure.md (\"6 capability rows / 6 paths / 6 anchors: 6 resolved, 0 unresolved\")."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read commit by commit against c7b4c626e; 2a5bacad9 adds 184 census lines, a7a70db00 completes the census (244 lines) and adds the 31-line landing record, 5b0f62ece corrects the landing record tally only \u2014 459 insertions across the two declared paths and nothing else.",
+    "done_when": "the done_when asks for one row per separately named item, the pedestal-top restore row read changed, schema_digest absent, and every query bounded under ten seconds; row-census.html:27-40 records both controls (pedestal family 20 rows at 0.004 s; schema_digest absent, rg exit 1) and row sib-row-census-s2-restore-partial reads changed, and the 38-row and 2 fixed / 7 changed / 15 still true / 8 ruling / 6 write tallies now match the landing record.",
+    "goal": "the node goal is to re-confirm every integrity backlog row on the live graph as a read-only census fragment; docs/evidence/fragments/sn-integrity-backlog/row-census.html holds 38 verdict rows (13 in \u00a72, 11 in \u00a73, 14 in \u00a74), one per item named in \u00a72 through \u00a74, each carrying its query or command, owning reader and proposed section.",
+    "manifest": "read; status complete, commits 2a5bacad9/a7a70db00/5b0f62ece, landing line present, \"read-only census, no test gate\", and the two prior findings answered, but its negative_control_log names a scratch script a reader cannot open.",
+    "write_paths": "the source declared docs/evidence/fragments/sn-integrity-backlog/row-census.html, docs/evidence/fragments/sn-integrity-backlog/sib-row-census.html and an unused docs/figures/sn-integrity-backlog/sib-row-census; the diff touches exactly the first two."
+  },
+  "justifications": {
+    "durability": "the only guard over the census figures, count_check.py, was deleted as scratch, so no retained check reddens if the landing-record tallies drift from the delivered rows again.",
+    "evidence": "row-census.html:27-40 records both controls with their verbatim queries and elapsed times and row-census.html:117 reads the restore row changed against its recorded figure, but the plan \u00a76 anchor-resolution count is not reported.",
+    "fit": "row-census.html follows the evidence-fragment idiom (reckon-type, plan-slug and node-id meta plus per-row ids) set by the fragments under docs/evidence/sn-integrity-residual-closure/.",
+    "goal_fidelity": "row-census.html holds 38 rows covering all six \u00a72 source rows (13 rows), all five \u00a73 source rows (11) and all five \u00a74 source rows (14), but the lifecycle source row carries six rows where the plan \u00a76 done_when cites \"seven footguns of the lifecycle row are seven rows\".",
+    "reuse": "the census calls the repository's existing readers \u2014 find_provenance_orphans (imas_codex/standard_names/ledger.py:96), find_edge_scalar_desyncs (ledger.py:123), find_semantic_source_invariant_violations (provenance_lifecycle.py:1229) and census_parked_dispositions (graph_ops.py:11655) \u2014 and adds no code.",
+    "scope_discipline": "every path in the diff against c7b4c626e is inside the declared write paths, and row-census.html:22 records the posture as read-only with no graph write and no code change."
+  },
+  "node": "review-of-sib-row-census",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to re-confirm every integrity backlog row on the live graph as a read-only census fragment; docs/evidence/fragments/sn-integrity-backlog/row-census.html holds 38 verdict rows (13 in \u00a72, 11 in \u00a73, 14 in \u00a74), one per item named in \u00a72 through \u00a74, each carrying its query or command, owning reader and proposed section.\nVERDICT done_when: the done_when asks for one row per separately named item, the pedestal-top restore row read changed, schema_digest absent, and every query bounded under ten seconds; row-census.html:27-40 records both controls (pedestal family 20 rows at 0.004 s; schema_digest absent, rg exit 1) and row sib-row-census-s2-restore-partial reads changed, and the 38-row and 2 fixed / 7 changed / 15 still true / 8 ruling / 6 write tallies now match the landing record.\nVERDICT write_paths: the source declared docs/evidence/fragments/sn-integrity-backlog/row-census.html, docs/evidence/fragments/sn-integrity-backlog/sib-row-census.html and an unused docs/figures/sn-integrity-backlog/sib-row-census; the diff touches exactly the first two.\nVERDICT manifest: read; status complete, commits 2a5bacad9/a7a70db00/5b0f62ece, landing line present, \"read-only census, no test gate\", and the two prior findings answered, but its negative_control_log names a scratch script a reader cannot open.\nVERDICT diff: read commit by commit against c7b4c626e; 2a5bacad9 adds 184 census lines, a7a70db00 completes the census (244 lines) and adds the 31-line landing record, 5b0f62ece corrects the landing record tally only \u2014 459 insertions across the two declared paths and nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: row-census.html holds 38 rows covering all six \u00a72 source rows (13 rows), all five \u00a73 source rows (11) and all five \u00a74 source rows (14), but the lifecycle source row carries six rows where the plan \u00a76 done_when cites \"seven footguns of the lifecycle row are seven rows\".\nSCORE evidence: 16\nJUSTIFICATION evidence: row-census.html:27-40 records both controls with their verbatim queries and elapsed times and row-census.html:117 reads the restore row changed against its recorded figure, but the plan \u00a76 anchor-resolution count is not reported.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff against c7b4c626e is inside the declared write paths, and row-census.html:22 records the posture as read-only with no graph write and no code change.\nSCORE durability: 13\nJUSTIFICATION durability: the only guard over the census figures, count_check.py, was deleted as scratch, so no retained check reddens if the landing-record tallies drift from the delivered rows again.\nSCORE fit: 18\nJUSTIFICATION fit: row-census.html follows the evidence-fragment idiom (reckon-type, plan-slug and node-id meta plus per-row ids) set by the fragments under docs/evidence/sn-integrity-residual-closure/.\nSCORE reuse: 20\nJUSTIFICATION reuse: the census calls the repository's existing readers \u2014 find_provenance_orphans (imas_codex/standard_names/ledger.py:96), find_edge_scalar_desyncs (ledger.py:123), find_semantic_source_invariant_violations (provenance_lifecycle.py:1229) and census_parked_dispositions (graph_ops.py:11655) \u2014 and adds no code.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T145528571333-sib-row-census/manifest.md:16 follow-on: negative_control_log carries a prose description and names count_check.py, which the worker deleted as scratch after the run, so the field names no openable path and the recorded negative control cannot be re-run or checked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/row-census.html:103 follow-on: the \u00a72 lifecycle source row is represented by six rows though the plan \u00a76 done_when names \"the seven footguns of the lifecycle row are seven rows\"; the plan's \u00a72 row text lists six clauses, so either one footgun was dropped from the census or the plan's count word is loose, and a reader cannot tell which.\nFINDING docs/evidence/fragments/sn-integrity-backlog/row-census.html:21 follow-on: the census header records the invocation commit and a row-set-predicate statement but no anchor-resolution count, which the plan \u00a76 requires to follow reuse-map-residual-closure.md (\"6 capability rows / 6 paths / 6 anchors: 6 resolved, 0 unresolved\").",
+  "review_run_id": "legacy-074a3a4464ea",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "c7b4c626e21cc93a2fc9cfefe200ef066b800829",
+  "reviewed_head_sha": "5b0f62ece1309e0c6eee790de65a6e21c8f233a4",
+  "reviewed_run_id": "r-20261012T145528571333-sib-row-census",
+  "reviewer_run_id": "r-20261012T174509995339-review-of-sib-row-census",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T17:55:58.000000+00:00",
+  "total": 104
+}
