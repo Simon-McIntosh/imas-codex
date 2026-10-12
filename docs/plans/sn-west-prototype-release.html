@@ -20,7 +20,7 @@
   <meta name="plan-sprint"    content="S18">
   <meta name="plan-owner"     content="Simon McIntosh">
   <meta name="plan-tags"      content="standard-names,catalog-release,review">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-harmonize-command#s3&quot;,&quot;sn-house-style#s3&quot;],&quot;s5&quot;:[&quot;sn-catalog-grouping#s3&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-harmonize-command#s3&quot;,&quot;sn-house-style#s3&quot;],&quot;s4&quot;:[&quot;sn-catalog-grouping#s2&quot;],&quot;s5&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-catalog-grouping#s3&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;}">
   <title>WEST Prototype: One House Style, Read By A Person, Then Released | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -58,7 +58,9 @@
       reconciled to 61 repairs (51 renames, 10 splits) behind six unresolved contradictions.
       The shared-identity description judgement found seven bindings whose description
       names the wrong object, among them an X-point read as the magnetic axis and the outer
-      strike point read as the inner. The
+      strike point read as the inner
+      (<a href="/imas-codex/evidence/sn-west-catalog-release/west-name-description-truthfulness">the
+      description truthfulness record</a>, which also holds the replacement sentences). The
       <a href="/imas-codex/research/sn-catalog-consistency-census">consistency census</a>
       adds four documentation opening styles, conflicting definitions of shared concepts and
       five roster names with no physics domain. None of this was acted on, because the
@@ -105,8 +107,10 @@
     <h2 id="s4">§4 — A person reads every entry</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="4.00" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      The coordinator reads all of the roster, in pattern-family order, against one
-      checklist:
+      The coordinator reads all of the roster against one checklist, grouped by pattern
+      family as <code>sn-catalog-grouping</code> §2 defines it, so siblings are read side by
+      side. The grouping comes from the family function directly, not from the staged packet
+      order of §5:
     </p>
     <ul>
       <li>the description is true of every binding the identity holds;</li>
@@ -125,7 +129,10 @@
     <p>
       <strong>Done when:</strong> <code>docs/evidence/sn-west-prototype-release/polish-ledger.md</code>
       carries one row per roster name (pass, edited, or withheld with a reason) and no row is
-      open. Every edited row has been re-reviewed to acceptance.
+      open. Every edited row has been re-reviewed to acceptance. A "pass" is not
+      self-certified: a read-only review node re-reads a random sample of 20 pass rows
+      against the same checklist, and any disagreement reopens that row and fails this gate
+      until it is resolved.
     </p>
 
     <h2 id="s5">§5 — The batch arrives grouped the way a physicist reads</h2>
@@ -133,8 +140,13 @@
     <p>
       Domains come from <code>sn-catalog-grouping</code> §3. Within a domain, entries are
       ordered by pattern family, so a reviewer meets the seventeen species of one quantity
-      together and can check them against each other. The catalog ordering module
-      <code>imas_codex/standard_names/catalog_ordering.py</code> applies that ordering.
+      together and can check them against each other. That ordering does not exist yet.
+      <code>order_entries_by_hierarchy</code> in
+      <code>imas_codex/standard_names/catalog_ordering.py</code>, called from the export at
+      <code>imas_codex/standard_names/export.py</code>, sorts a domain topologically over
+      <code>HAS_PARENT</code> and <code>HAS_ERROR</code> edges and knows no pattern family.
+      Add the pattern family from <code>sn-catalog-grouping</code> §2 as the primary key within
+      a domain, and keep the hierarchy order inside each family.
     </p>
     <p>
       <strong>Done when:</strong> no roster name carries a null domain. In the staged
@@ -174,7 +186,13 @@
     <p>
       Carried from <code>catalog-review-surface</code> §4. Before a physicist's edits come
       back, exercise the approval fold-back with one accepted and one refused reviewer edit
-      on a rehearsal branch.
+      on a rehearsal branch. The writer exists and has never run in production. The
+      traceability fields (<code>catalog_pr_number</code>, <code>catalog_merge_commit_sha</code>,
+      <code>catalog_approved_at</code>, <code>catalog_reviewer_actor</code>) are set by
+      <code>imas_codex/standard_names/promote.py</code> through <code>sn approve</code>, and the
+      2026-09-01 census found all of them null across 4,666 rows. This rehearsal is that
+      writer's first real exercise, so confirm first that it is the path a merged catalog
+      pull request reaches.
     </p>
     <p>
       <strong>Done when:</strong> the accepted edit is in the graph and traceable to its

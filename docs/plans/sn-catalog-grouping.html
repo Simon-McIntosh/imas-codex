@@ -84,22 +84,27 @@
     <h2 id="s3">§3 — Domains assigned by the quantity</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="3.00" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Replace "the domain of the first source IDS" with a rule table keyed by physical
-      base, geometric base and operator. It lives beside the conventions registry, at
-      <code>imas_codex/standard_names/conventions/domains.yml</code>. Source IDS is used
-      only to break a tie the table leaves open. Export's
-      <code>pick_primary_domain</code> in <code>imas_codex/standard_names/domain_priority.py</code>
-      reads the stored value and is unchanged. Repair the 207 null domains through the same
-      rule, writing through the ordinary graph-ops path with no hand Cypher.
+      Replace "the domain of the source" with a rule table keyed by physical base,
+      geometric base and operator, at <code>imas_codex/standard_names/domain_rules.yml</code>
+      beside <code>domain_priority.py</code>. Source IDS is used only to break a tie the
+      table leaves open. The domain is assigned in two places today, and the table must be
+      consulted at both. The compose path in <code>imas_codex/standard_names/workers.py</code>
+      injects the DD source item's <code>physics_domain</code> as authoritative ("Inject
+      physics_domain from DD"). <code>_resolve_physics_domains</code> in
+      <code>imas_codex/standard_names/consolidation.py</code> merges the candidates' values.
+      Export's <code>pick_primary_domain</code> reads the stored value and is unchanged.
+      Repair the 207 null domains and the misfiled live names through the same rule,
+      writing through the ordinary graph-ops path with no hand Cypher.
     </p>
     <p>
       <strong>Done when:</strong> zero names in the WEST roster carry a null domain. The
       lead approves the domain for twenty named reference quantities, among them
       <code>electron_temperature</code>, <code>electron_density</code>,
       <code>safety_factor</code>, <code>plasma_current</code> and
-      <code>poloidal_magnetic_flux</code>. The rule reproduces all twenty. The census of
-      domains before and after is recorded, and <code>core_plasma_physics</code> is no longer
-      empty.
+      <code>poloidal_magnetic_flux</code>. The rule reproduces all twenty. A test composing
+      a name through the workers path shows the table's domain, not the source's, and it
+      fails with the table lookup removed. The census of domains before and after is
+      recorded, and <code>core_plasma_physics</code> is no longer empty.
     </p>
 
     <h2 id="s4">§4 — Near-duplicate spellings, adjudicated once</h2>

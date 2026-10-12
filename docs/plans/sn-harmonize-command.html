@@ -20,7 +20,7 @@
   <meta name="plan-owner"     content="Simon McIntosh">
   <meta name="plan-tags"      content="standard-names,catalog-release">
   <meta name="plan-blocks"    content="sn-west-prototype-release">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-house-style#s4&quot;],&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -110,15 +110,20 @@
     <p>
       Names and identities are never touched: this is a documentation-axis operation, so
       every identity, source binding and spend record survives. The previous documentation
-      is snapshotted before reset, as <code>mark_families_for_regen</code> already does, so a
-      family can be put back. Name-level fixes go through <code>sn edit</code>.
+      is snapshotted before reset. <code>sn harmonize --apply</code> is the caller of
+      <code>mark_families_for_regen</code> in <code>imas_codex/standard_names/harmonize.py</code>,
+      adapted to take a pattern family, and that function takes the snapshot. Its only
+      production caller today is the <code>sn run --families</code> handler that §2 deletes,
+      so this command inherits it rather than leaving it unreached. Name-level fixes go
+      through <code>sn edit</code>.
     </p>
     <p>
       <strong>Done when:</strong> on the 17-member boundary-averaged density family, an apply
       leaves zero lint errors, one opening template and one flux-surface-average equation.
       Every member stays accepted on the documentation axis. A second
       <code>--apply</code> over the same scope plans zero calls. An anchor deliberately
-      failed in a test leaves its members untouched.
+      failed in a test leaves its members untouched. A test shows the snapshot exists before
+      the reset, and that the family can be restored from it.
     </p>
 
     <h2 id="s4">§4 — Convergence and cost, measured on a real scope</h2>
@@ -133,7 +138,9 @@
       <strong>Done when:</strong> three families are applied with those figures recorded in
       the plan's evidence. No member's documentation score falls below the acceptance
       threshold. The per-name cost is known well enough to put a stated limit on the WEST
-      run.
+      run. The comparison is proven able to see a regression: a fixture member whose
+      rewritten documentation scores below threshold is reported by name, so an unchanged
+      column passes only because nothing fell.
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
@@ -158,7 +165,7 @@
                data-recommends-skill="/reckon-build sn-harmonize-command §2">
         <h4 class="r-fu-title">Build the surface and delete the two flags it replaces</h4>
         <div class="r-fu-body">
-          <p>§2 can start now on the existing drift metric and pick up the lint when <code>sn-house-style</code> §4 lands. §3 waits on the lint and on pattern families. It writes <code>imas_codex/cli/sn.py</code>, which every review-surface change also writes, so it cannot run beside another node holding that file.</p>
+          <p>§2 and §3 both wait on pattern families (<code>sn-catalog-grouping</code> §2) and the conformance checks (<code>sn-house-style</code> §4). A report over the <code>HAS_PARENT</code> grouping would measure the very grouping this command replaces. It writes <code>imas_codex/cli/sn.py</code>, which every review-surface change also writes, so it cannot run beside another node holding that file.</p>
         </div>
         <pre class="r-fu-prompt">/reckon-build sn-harmonize-command §2</pre>
       </article>
