@@ -35,6 +35,11 @@
     <p>Read-only on the live graph with the 2026-09-01 definitions: 174 chain-cap identities, 102 of them unsourced; of those, 10 have a sourced ancestor at any depth and 92 have none. The split sums to the independently counted total, and the predicates are shown to fire (2,790 sourced names, 5,494 producer edges). Every query is depth-bounded and ran under 0.07 s. The population grew from 72 to 92 since it was recorded, so a rebuild section follows (§22). The recorded queries' result annotations were corrected at integration from <code>--</code>, which Cypher reads as subtraction, to <code>//</code>. Merge <code>81af07164</code>. Independent review 103/120.</p><p>Evidence: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/unsourced-ancestry-census">unsourced-ancestry census</a>.</p>
   </section>
 
+  <section id="s15">
+    <h2>§15 — compose supersede over a dual-bound source reproduces</h2>
+    <p>A fixture source bound to two live identities (the predecessor and the just-written successor) makes the compare-and-set in <code>retarget_standard_name_sources</code> (<code>imas_codex/standard_names/provenance_lifecycle.py</code>) raise an anonymous <code>RuntimeError</code> (<code>bindings=['example_new_name', 'example_old_name']</code>) rather than <code>SourceBindingConflictError</code>, so a failure that needs adjudication is classified as a transient fault and spends a retry. <code>tests/standard_names/test_compose_supersede_dual_bound.py</code> holds it as a strict xfail that turns red when the conflict is raised properly. Gate: 82 passed and 1 xfailed, no added failures. Merge <code>bb1357ff5</code>. Independent review 111/120. Two notes on the record: its "sees a fix" control is asserted in prose rather than shown by a run, and its quoted failure line carries the test's later name; the reproduction itself rests on a recorded run. §23 carries the repair.</p><p>Evidence: <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/compose-supersede-dual-bound">compose supersede over a dual-bound source</a>.</p>
+  </section>
+
 </main>
 </body>
 </html>
