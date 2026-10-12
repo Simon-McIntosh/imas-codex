@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:4412 (enrich_worker calls glossary_term_reaches)",
+    "imas_codex/discovery/signals/parallel.py:5786 (enrich_worker registered in the signal-discovery worker pool)"
+  ],
+  "completed_at": "2026-10-12T20:29:36.564Z",
+  "dispatched_at": "2026-10-12T20:17:22Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html",
+      "line": "96",
+      "severity": "blocking",
+      "text": "blocking: seven CS1 signals (cs1_temsnur12, 13, 14, 211, 212, 221, 222) still read snubber (SNU) in census_after.json, so the done-when clause that no eligible description expands SNU as anything but switching network unit is not met; the residual arises from the member-propagation path (claim_signals_for_enrichment, parallel.py:1055, inside the declared scope) and was not repaired."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-description-corrections.html",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the landing record's term list reads EFC, SNU, BPS, QPC, DR, SNU and HTS, naming SNU twice and omitting FPPCC, which the jt-60sa.yaml diff does add."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit from 78397b48f to a2069d5aa -- e9aac5b4a adds glossary_term_reaches, the glossary terms and the tests, a2069d5aa adds the two evidence fragments; every changed path is inside the declared scope.",
+    "done_when": "the done_when asks that the boundary test passes while the substring matcher fails it, that no eligible description expands SNU as anything but switching network unit, that EFCC carries one expansion, that the LFPPCC references agree with the catalogue or are recorded unresolved, that no term reaches outside its family, and that the before/after census is in the fragment; the head gate (5 passed, EXIT=0), the substring negative control (2 failed, EXIT=1) and the census artifacts (census_before.json/census_after.json, EFC family 16 to 0 wrong and 11 to 0 unexpanded) are recorded, but the SNU clause is unmet at 7 CS1 members still reading snubber.",
+    "goal": "the node goal is to correct the JT-60SA signal descriptions search exposed, through a boundary-respecting glossary with a scoped re-enrichment; the diff adds glossary_term_reaches (imas_codex/discovery/signals/parallel.py:3757), rewires enrich_worker to it (parallel.py:4412), and adds EFC/SNU/BPS/QPC/DR/HTS/FPPCC plus a corrected EFCC to imas_codex/config/facilities/jt-60sa.yaml.",
+    "manifest": "read; it names both shas, five changed paths, the head gate log and the negative control, its census artifacts by path, and the SNU residual under follow-ons.",
+    "write_paths": "read the manifest's six declared paths; all five paths in the diff (imas_codex/discovery/signals/parallel.py, imas_codex/config/facilities/jt-60sa.yaml, tests/discovery/test_signal_glossary.py, and the two evidence fragments) are inside them."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_signal_glossary.py:138 reddens against the substring matcher as the recorded negative control shows, and line 166 guards the enrichment prompt path.",
+    "evidence": "gate_signal_glossary_head.log (5 passed, EXIT=0) and negative_control_substring_matcher.log (2 failed, EXIT=1) are recorded and the census artifacts reproduce the before/after counts, though the headline SNU clause reads 7 rather than 0.",
+    "fit": "glossary_term_reaches (imas_codex/discovery/signals/parallel.py:3757) is a module-level helper matching the surrounding style and reuses the existing re import, though the landing fragment's term list is wrong.",
+    "goal_fidelity": "the glossary and the boundary matcher landed together (imas_codex/discovery/signals/parallel.py:4412) and the EFC/EFCC family is fully corrected 16 to 0, but seven CS1 signals keep a snubber description so the goal's SNU correction is incomplete.",
+    "reuse": "no owner for a term-reach boundary matcher exists in imas_codex/ -- a search for camel and word-boundary matching found only pattern-specific backslash-b regexes and the spelling tokenizer normalize_prose_spelling, so the helper is the first owner.",
+    "scope_discipline": "every path in the diff 78397b48f..a2069d5aa is inside the manifest's six declared write paths."
+  },
+  "limitations": [
+    "The census reads the live JT-60SA graph; the before/after counts were read from the reviewed run's own census_before.json and census_after.json, not re-measured.",
+    "The string casefold() check on refcurEF1 in tests/discovery/test_signal_glossary.py:140 is a self-contained demonstration, not a call to the production matcher; the real guard is line 138, shown to redden by negative_control_substring_matcher.log.",
+    "glossary_term_reaches was not mutated or re-run during the review."
+  ],
+  "node": "review-of-ssfms-description-corrections",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to correct the JT-60SA signal descriptions search exposed, through a boundary-respecting glossary with a scoped re-enrichment; the diff adds glossary_term_reaches (imas_codex/discovery/signals/parallel.py:3757), rewires enrich_worker to it (parallel.py:4412), and adds EFC/SNU/BPS/QPC/DR/HTS/FPPCC plus a corrected EFCC to imas_codex/config/facilities/jt-60sa.yaml.\nVERDICT done_when: the done_when asks that the boundary test passes while the substring matcher fails it, that no eligible description expands SNU as anything but switching network unit, that EFCC carries one expansion, that the LFPPCC references agree with the catalogue or are recorded unresolved, that no term reaches outside its family, and that the before/after census is in the fragment; the head gate (5 passed, EXIT=0), the substring negative control (2 failed, EXIT=1) and the census artifacts (census_before.json/census_after.json, EFC family 16 to 0 wrong and 11 to 0 unexpanded) are recorded, but the SNU clause is unmet at 7 CS1 members still reading snubber.\nVERDICT write_paths: read the manifest's six declared paths; all five paths in the diff (imas_codex/discovery/signals/parallel.py, imas_codex/config/facilities/jt-60sa.yaml, tests/discovery/test_signal_glossary.py, and the two evidence fragments) are inside them.\nVERDICT manifest: read; it names both shas, five changed paths, the head gate log and the negative control, its census artifacts by path, and the SNU residual under follow-ons.\nVERDICT diff: read commit by commit from 78397b48f to a2069d5aa -- e9aac5b4a adds glossary_term_reaches, the glossary terms and the tests, a2069d5aa adds the two evidence fragments; every changed path is inside the declared scope.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:4412 (enrich_worker calls glossary_term_reaches), imas_codex/discovery/signals/parallel.py:5786 (enrich_worker registered in the signal-discovery worker pool)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the glossary and the boundary matcher landed together (imas_codex/discovery/signals/parallel.py:4412) and the EFC/EFCC family is fully corrected 16 to 0, but seven CS1 signals keep a snubber description so the goal's SNU correction is incomplete.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate_signal_glossary_head.log (5 passed, EXIT=0) and negative_control_substring_matcher.log (2 failed, EXIT=1) are recorded and the census artifacts reproduce the before/after counts, though the headline SNU clause reads 7 rather than 0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff 78397b48f..a2069d5aa is inside the manifest's six declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/discovery/test_signal_glossary.py:138 reddens against the substring matcher as the recorded negative control shows, and line 166 guards the enrichment prompt path.\nSCORE fit: 17\nJUSTIFICATION fit: glossary_term_reaches (imas_codex/discovery/signals/parallel.py:3757) is a module-level helper matching the surrounding style and reuses the existing re import, though the landing fragment's term list is wrong.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner for a term-reach boundary matcher exists in imas_codex/ -- a search for camel and word-boundary matching found only pattern-specific backslash-b regexes and the spelling tokenizer normalize_prose_spelling, so the helper is the first owner.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/descriptions.html:96 blocking: seven CS1 signals (cs1_temsnur12, 13, 14, 211, 212, 221, 222) still read snubber (SNU) in census_after.json, so the done-when clause that no eligible description expands SNU as anything but switching network unit is not met; the residual arises from the member-propagation path (claim_signals_for_enrichment, parallel.py:1055, inside the declared scope) and was not repaired.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-description-corrections.html:11 follow-on: the landing record's term list reads EFC, SNU, BPS, QPC, DR, SNU and HTS, naming SNU twice and omitting FPPCC, which the jt-60sa.yaml diff does add.\nreviewed_base_sha: 78397b48fa5fecd168b37c01f1a13ddaab55329d\nreviewed_head_sha: a2069d5aa870cd634beac57e47f565ac5f1ae401\n",
+  "review_run_id": "r-20261012T201711013933-review-of-ssfms-description-corrections",
+  "review_scope": "Independent review of the ssfms-description-corrections node (plan signal-search-finds-the-measured-signal section 10): the boundary-respecting glossary matcher, the JT-60SA glossary terms and the scoped re-enrichment census. Read-only from outside the reviewed worktree: the diff was read from the shared object store, the cited gate and negative-control logs were opened, and the reviewed run's own manifest and census artifacts were read; no test was re-run.",
+  "reviewed_base_sha": "78397b48fa5fecd168b37c01f1a13ddaab55329d",
+  "reviewed_commits": [
+    "e9aac5b4afe1acff7011e1f29b10b423577793fb",
+    "a2069d5aa870cd634beac57e47f565ac5f1ae401"
+  ],
+  "reviewed_head_sha": "a2069d5aa870cd634beac57e47f565ac5f1ae401",
+  "reviewed_run_id": "r-20261012T193722028601-ssfms-description-corrections",
+  "reviewer": "review-of-ssfms-description-corrections",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:28:21.931433+00:00",
+  "total": 109,
+  "verification_logs": []
+}
