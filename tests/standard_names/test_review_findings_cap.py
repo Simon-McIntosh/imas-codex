@@ -26,6 +26,11 @@ ERROR_FINDING = (
     "[error:lint:round_trip_failure] plasma_current: "
     "name does not survive parser round-trip"
 )
+# A distinctive substring of the audit-findings section heading. The heading
+# is enclosed by the template's ``{% if audit_findings %}`` guard, so it is
+# absent from a render with no findings and appears the moment the guard is
+# dropped — which is what the absence test asserts.
+AUDIT_SECTION_HEADING = "Layer 1 Audit Findings"
 
 
 # ---------------------------------------------------------------------------
@@ -50,7 +55,13 @@ def test_audit_finding_text_reaches_rendered_prompt(prompt_name: str) -> None:
 
 
 def test_audit_findings_block_is_absent_when_no_findings() -> None:
-    """The audit-findings section does not appear when the batch carries none."""
+    """The audit-findings section does not appear when the batch carries none.
+
+    The assertion names the section heading, which the template's
+    ``{% if audit_findings %}`` guard encloses: dropping the guard renders the
+    heading even with no findings, so the test reddens on exactly the change it
+    guards. A marker only the test could supply would pass either way.
+    """
     from imas_codex.llm.prompt_loader import render_prompt
 
     rendered = render_prompt(
@@ -61,7 +72,7 @@ def test_audit_findings_block_is_absent_when_no_findings() -> None:
         },
     )
 
-    assert FINDING_MARKER not in rendered
+    assert AUDIT_SECTION_HEADING not in rendered
 
 
 # ---------------------------------------------------------------------------
@@ -91,9 +102,16 @@ async def _run_docs_review(
     monkeypatch,
     *,
     error_lint_findings: dict[str, str],
+    score_totals: dict[str, int] | None = None,
 ) -> list[dict]:
-    """Drive ``_review_single_batch`` for a single docs candidate via a stub LLM."""
+    """Drive ``_review_single_batch`` for a single docs candidate via a stub LLM.
+
+    ``score_totals`` maps a source id to the reviewer's raw total out of 80,
+    defaulting to a full-marks review for both candidates.
+    """
     from imas_codex.standard_names.review import pipeline as pl
+
+    totals = score_totals or {}
 
     def fake_render_prompt(prompt_name: str, context: dict) -> str:
         return "stub"
@@ -101,8 +119,10 @@ async def _run_docs_review(
     async def fake_call_llm_structured(**kwargs):
         response_model = kwargs["response_model"]
         reviews = [
-            _docs_review("plasma_current"),
-            _docs_review("electron_temperature"),
+            _docs_review("plasma_current", totals.get("plasma_current", 80)),
+            _docs_review(
+                "electron_temperature", totals.get("electron_temperature", 80)
+            ),
         ]
         return response_model(reviews=reviews), 0.0, 0
 
@@ -163,3 +183,32 @@ async def test_docs_document_without_error_finding_is_accepted(monkeypatch) -> N
 
     assert by_id["plasma_current"]["reviewer_score"] >= DEFAULT_MIN_SCORE
     assert "audit_cap_applied" not in by_id["plasma_current"]
+
+
+@pytest.mark.asyncio
+async def test_error_finding_is_recorded_on_already_below_acceptance_entry(
+    monkeypatch,
+) -> None:
+    """An entry already below acceptance still records its error finding.
+
+    The reviewer scored this document below the threshold itself, so the cap
+    moves nothing — but the finding stands against the name and the record must
+    name it, whether or not the cap changed the score.
+    """
+    items = await _run_docs_review(
+        monkeypatch,
+        error_lint_findings={"plasma_current": ERROR_FINDING},
+        score_totals={"plasma_current": 40, "electron_temperature": 40},
+    )
+    by_id = {item["id"]: item for item in items}
+
+    below = by_id["plasma_current"]
+    assert below["reviewer_score"] < DEFAULT_MIN_SCORE
+    assert below["audit_cap_finding"] == ERROR_FINDING
+    # The cap did not change a score that was already below acceptance.
+    assert "audit_cap_applied" not in below
+
+    # A twin below acceptance with no error finding records nothing.
+    twin = by_id["electron_temperature"]
+    assert "audit_cap_finding" not in twin
+    assert "audit_cap_applied" not in twin
