@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-retired-successor-conflict">
+<title>Landing record — sib-retired-successor-conflict</title>
+</head>
+<body>
+<main>
+<h1 id="sib-retired-successor-conflict-landing-title">Landing record: the retired-successor row reaches the caller named, and compose withholds it without a retry</h1>
+<p id="sib-retired-successor-conflict-landing-change">
+A source bound to the live predecessor and a successor that has itself been
+retired — one live claim beside a settled one — no longer falls through to the
+anonymous <code>RuntimeError</code> that callers retry. In
+<code>imas_codex/standard_names/provenance_lifecycle.py</code> that preflight row
+is now classified by its own branch and raised as the sibling named type
+<code>SourceRetiredSuccessorConflictError</code>, whose record names the source,
+the live holder with its stage, and the retired holder with its stage. One source
+bound to the live predecessor and a live successor still raises the dual-live
+<code>SourceBindingConflictError</code>; the retired row never reports two live
+identities. The two remaining refusals — the dual-live conflict and this one —
+keep raising <code>RuntimeError</code>-derived types, so existing callers are unaffected.
+</p>
+<p id="sib-retired-successor-conflict-landing-consumer">
+The compose persist boundary consumes it through the same consumer as the
+dual-live conflict: <code>_persist_description_checked_candidates</code> in
+<code>imas_codex/standard_names/workers.py</code> catches both named types and
+routes them to <code>_withhold_binding_conflicted_sources</code>, which leaves the
+<code>source</code> claimed, releases no claim, returns no winner id, and warns with
+the live holder and (where present) the retired holder. No retry attempt is spent.
+</p>
+<p id="sib-retired-successor-conflict-landing-dedup">
+The <code>dd:</code> source-node-id rule is now defined once:
+<code>_candidate_source_node_id</code> in <code>workers.py</code> is the single
+definition, and the release path that previously inlined the same expression now
+delegates to it.
+</p>
+<p id="sib-retired-successor-conflict-landing-measure">
+Gate <code>tests/standard_names/test_source_migration_conflict.py</code>,
+<code>tests/standard_names/test_compose_supersede_dual_bound.py</code>,
+<code>tests/standard_names/test_generate_name_persist.py</code> and every
+<code>tests/</code> file importing <code>provenance_lifecycle</code>: base
+<strong>344 passed, 12 deselected, 0 failed, EXIT=0</strong>; after
+<strong>345 passed, 12 deselected, 0 failed, EXIT=0</strong> — one added test
+(supersede-produced outcome through the persist boundary), zero added failures.
+</p>
+<table id="sib-retired-successor-conflict-landing-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>0ba9048f5965f077dbfb956ababf60098f6daece</code></td></tr>
+<tr><th>New type</th><td><code>SourceRetiredSuccessorConflictError</code> (sibling of <code>SourceBindingConflictError</code>)</td></tr>
+<tr><th>Negative control</th><td>EXIT=1 — reverting the classification (<code>and False</code>) makes both <code>test_retired_successor_is_not_a_dual_bound_conflict</code> and the compose persist test fail</td></tr>
+</tbody>
+</table>
+</main>
+</body>
+</html>

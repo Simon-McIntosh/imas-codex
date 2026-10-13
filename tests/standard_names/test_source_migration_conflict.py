@@ -1,11 +1,15 @@
 """A source already bound to a live identity is an adjudicable conflict.
 
-The migration's compare-and-set distinguishes two refusals. A source that
-already binds a live identity other than the expected predecessor is a state
-an operator must settle, and repeating the migration cannot change it, so it
-is reported as a named conflict carrying the holding identity and its stage.
-Any other ineligible state — a concurrent claim, a stale row, a lost binding —
-is a transient fault and keeps raising the pre-existing fault.
+The migration's compare-and-set distinguishes its refusals by what a retry can
+change. A source that already binds a live identity other than the expected
+predecessor is a state an operator must settle, so it is reported as a named
+conflict carrying the holding identity and its stage. A source bound to the
+live predecessor and a successor that has itself been retired is one live claim
+beside a settled one: neither a retry nor the dual-live branch applies, so it is
+reported under its own named outcome naming the live holder and the retired
+holder with its stage. Any other ineligible state — a concurrent claim, a stale
+row, a lost binding — is a transient fault and keeps raising the pre-existing
+fault.
 """
 
 from __future__ import annotations
@@ -16,6 +20,7 @@ import pytest
 
 from imas_codex.standard_names.provenance_lifecycle import (
     SourceBindingConflictError,
+    SourceRetiredSuccessorConflictError,
     retarget_standard_name_sources,
 )
 
@@ -172,11 +177,13 @@ def test_dual_bound_conflict_names_the_successor_as_the_holder() -> None:
 
 
 def test_retired_successor_is_not_a_dual_bound_conflict() -> None:
-    """A retired identity no longer holds the source.
+    """A retired successor is a named outcome, not a second live claim.
 
-    A source bound to a live predecessor and a retired successor is the
-    ordinary single-predecessor case: the retired name has already been
-    settled, so it is not a second live claim requiring adjudication.
+    A source bound to a live predecessor and a retired successor holds one live
+    identity, so it is not the dual-live conflict. Repeating the migration
+    cannot settle it either, so it reaches the caller as its own named outcome
+    naming the live holder and the retired holder with its stage — never the
+    anonymous transient fault that a retry loop would spend a budget on.
     """
     row = _migration_row(
         [
@@ -187,14 +194,21 @@ def test_retired_successor_is_not_a_dual_bound_conflict() -> None:
     gc = MagicMock()
     gc.query.return_value = [row]
 
-    try:
+    with pytest.raises(SourceRetiredSuccessorConflictError) as raised:
         _retarget(gc, row)
-    except SourceBindingConflictError as exc:
-        pytest.fail(
-            f"a retired successor was classified as a dual-bound conflict: {exc}"
-        )
-    except RuntimeError:
-        pass
+
+    (item,) = raised.value.conflicts
+    assert item.source_id == _SOURCE_ID
+    assert (item.holding_identity, item.holding_stage) == ("old_name", "drafted")
+    assert (item.retired_identity, item.retired_stage) == (
+        "replacement_name",
+        "superseded",
+    )
+    # One live claim beside a settled one, so the two named identities differ
+    # and the row does not take the dual-live conflict branch.
+    assert item.holding_identity != item.retired_identity
+    assert not isinstance(raised.value, SourceBindingConflictError)
+    assert gc.query.call_count == 1
 
 
 def test_single_live_binding_is_not_a_dual_bound_conflict() -> None:

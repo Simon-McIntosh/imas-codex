@@ -913,22 +913,38 @@ def _withhold_binding_conflicted_sources(
     A source held by a live identity outside the migration's predecessor is an
     adjudicable state: recomposing cannot settle it, so releasing the claim to
     retry would spend an attempt on a decision only an operator can make. The
-    conflicted source is therefore left claimed and withheld, its holding
-    identity and stage recorded, and no winner id is returned for it. Every
-    other candidate in the batch persists normally.
+    same holds for a source bound to the live predecessor and a successor that
+    has itself been retired — one live claim beside a settled one. The withheld
+    source is left claimed, its holding identity and stage recorded (and the
+    retired identity where one applies), and no winner id is returned for it.
+    Every other candidate in the batch persists normally.
     """
     conflicted_source_ids = {
         item.source_id for item in getattr(conflict, "conflicts", ())
     }
     for item in getattr(conflict, "conflicts", ()):
-        logger.warning(
-            "Pool %s: source %s bound to live identity %r at stage %r — "
-            "withheld for adjudication, no attempt spent",
-            phase,
-            item.source_id,
-            item.holding_identity,
-            item.holding_stage,
-        )
+        retired_identity = getattr(item, "retired_identity", None)
+        if retired_identity is None:
+            logger.warning(
+                "Pool %s: source %s bound to live identity %r at stage %r — "
+                "withheld for adjudication, no attempt spent",
+                phase,
+                item.source_id,
+                item.holding_identity,
+                item.holding_stage,
+            )
+        else:
+            logger.warning(
+                "Pool %s: source %s bound to live identity %r at stage %r "
+                "alongside retired identity %r at stage %r — withheld for "
+                "adjudication, no attempt spent",
+                phase,
+                item.source_id,
+                item.holding_identity,
+                item.holding_stage,
+                retired_identity,
+                getattr(item, "retired_stage", None),
+            )
 
     remaining = [
         candidate
@@ -1006,11 +1022,7 @@ def _persist_description_checked_candidates(
         claim_token = candidate.get("source_claim_token")
         if not isinstance(source_id, str) or not source_id or not claim_token:
             continue
-        source_node_id = (
-            source_id
-            if source_type == "dd" and source_id.startswith("dd:")
-            else encode_source_path(source_type, source_id)
-        )
+        source_node_id = _candidate_source_node_id(candidate, source_type)
         releases_by_token.setdefault(str(claim_token), set()).add(source_node_id)
 
     released = 0
@@ -1043,6 +1055,7 @@ def _persist_description_checked_candidates(
 
     from imas_codex.standard_names.provenance_lifecycle import (
         SourceBindingConflictError,
+        SourceRetiredSuccessorConflictError,
     )
 
     try:
@@ -1054,7 +1067,10 @@ def _persist_description_checked_candidates(
             run_id=run_id,
             return_winner_ids=True,
         )
-    except SourceBindingConflictError as conflict:
+    except (
+        SourceBindingConflictError,
+        SourceRetiredSuccessorConflictError,
+    ) as conflict:
         return _withhold_binding_conflicted_sources(
             conflict,
             eligible,
