@@ -6,7 +6,7 @@
     "target_description": "Signed poloidal magnetic flux linked by an individual flux loop, defined by the magnetic field threading an oriented surface bounded by that loop.",
     "is_self_link": true,
     "jev_probability": 0.76,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
@@ -15,7 +15,7 @@
     "target_description": "Flux-surface-averaged number density of deuterium-tritium pseudo-species ions at the plasma boundary (separatrix).",
     "is_self_link": true,
     "jev_probability": 0.87,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
@@ -24,7 +24,7 @@
     "target_description": "Flux-surface-averaged number density of deuterium-tritium pseudo-species ions at the plasma boundary (separatrix).",
     "is_self_link": true,
     "jev_probability": 0.87,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "toroidal_plasma_current",
@@ -33,7 +33,7 @@
     "target_description": "Net toroidal electric current carried by the plasma, equal to the integral of the toroidal current density over the poloidal plasma cross-section.",
     "is_self_link": true,
     "jev_probability": 0.89,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "polarization_angle_at_constraint_position",
@@ -42,7 +42,7 @@
     "target_description": "Motional Stark effect polarization angle evaluated at a discrete spatial location designated as a measurement constraint in tokamak equilibrium reconstruction.",
     "is_self_link": true,
     "jev_probability": 0.77,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_beryllium_density_at_plasma_boundary",
@@ -51,7 +51,7 @@
     "target_description": "Flux-surface average of the beryllium-ion number density over the plasma boundary, summed across beryllium ionization states.",
     "is_self_link": true,
     "jev_probability": 0.79,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_carbon_density_at_plasma_boundary",
@@ -60,7 +60,7 @@
     "target_description": "Flux-surface-averaged number density of carbon ions at the plasma boundary (separatrix), summed over all ionization stages from singly ionized C+ through fully stripped C6+.",
     "is_self_link": true,
     "jev_probability": 0.72,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_xenon_density_at_plasma_boundary",
@@ -69,7 +69,7 @@
     "target_description": "Flux-surface-averaged number density of xenon ions at the plasma boundary (last closed flux surface), summed over all ionization stages.",
     "is_self_link": true,
     "jev_probability": 0.81,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_neon_density_at_plasma_boundary",
@@ -78,7 +78,7 @@
     "target_description": "Flux-surface-averaged number density of neon ions at the plasma boundary (separatrix), summed over all ionization stages from Ne+ through fully stripped Ne10+.",
     "is_self_link": true,
     "jev_probability": 0.74,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_helium_4_density_at_plasma_boundary",
@@ -87,7 +87,7 @@
     "target_description": "Flux-surface-averaged number density of helium-4 ions at the plasma boundary (separatrix), summed over all helium-4 charge states (He+ and He2+).",
     "is_self_link": true,
     "jev_probability": 0.78,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_argon_density_at_plasma_boundary",
@@ -96,7 +96,7 @@
     "target_description": "Flux-surface-averaged number density of argon ions at the plasma boundary (separatrix), summed over all ionization stages from Ar+ through fully stripped Ar18+.",
     "is_self_link": true,
     "jev_probability": 0.77,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_deuterium_density_at_plasma_boundary",
@@ -105,7 +105,7 @@
     "target_description": "Flux-surface-averaged deuterium ion number density at the plasma boundary is the boundary flux-surface average of local deuterium ion density, summed over all ionic charge states and excluding neutral deuterium atoms and molecules.",
     "is_self_link": true,
     "jev_probability": 0.66,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
@@ -114,7 +114,7 @@
     "target_description": "Flux-surface-averaged number density of positively charged tungsten ions on the last closed magnetic flux surface, summed over all ionization states.",
     "is_self_link": true,
     "jev_probability": 0.79,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_helium_3_density_at_plasma_boundary",
@@ -123,7 +123,7 @@
     "target_description": "Flux-surface-averaged number density of helium-3 ions at the plasma boundary (separatrix), summed over all charge states.",
     "is_self_link": true,
     "jev_probability": 0.81,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "flux_surface_averaged_lithium_density_at_plasma_boundary",
@@ -132,7 +132,7 @@
     "target_description": "Flux-surface-averaged total number density of lithium ions, summed over all charge states from Li+ through Li3+, evaluated at the plasma boundary (separatrix).",
     "is_self_link": true,
     "jev_probability": 0.76,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "toroidal_flux_surface_averaged_helium_4_velocity_at_plasma_boundary",
@@ -141,7 +141,7 @@
     "target_description": "Flux-surface-averaged toroidal bulk-flow velocity of helium-4 ions at the separatrix, density-weighted over all helium-4 charge states.",
     "is_self_link": true,
     "jev_probability": 0.73,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "poloidal_current_weighted_average_external_magnetic_flux",
@@ -150,7 +150,7 @@
     "target_description": "Current-weighted average external poloidal magnetic flux is the poloidal flux produced by all external circuits, averaged over the plasma poloidal cross-section using the toroidal plasma current density and normalized by the signed plasma current. It excludes flux generated by the plasma current itself.",
     "is_self_link": true,
     "jev_probability": 0.46,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "parallel_flux_surface_averaged_current_density",
@@ -159,7 +159,7 @@
     "target_description": "Flux-surface-averaged wave-driven parallel current density",
     "is_self_link": true,
     "jev_probability": 0.65,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "normalized_toroidal_plasma_beta",
@@ -168,7 +168,7 @@
     "target_description": "Normalized toroidal plasma beta, conventionally denoted \u03b2_N, is the ratio of toroidal plasma beta times plasma minor radius and reference toroidal magnetic field to total plasma current, including the conventional factor 100.",
     "is_self_link": true,
     "jev_probability": 0.66,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "normalized_toroidal_plasma_beta",
@@ -177,7 +177,7 @@
     "target_description": "Normalized toroidal plasma beta, conventionally denoted \u03b2_N, is the ratio of toroidal plasma beta times plasma minor radius and reference toroidal magnetic field to total plasma current, including the conventional factor 100.",
     "is_self_link": true,
     "jev_probability": 0.66,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "normalized_toroidal_plasma_beta",
@@ -186,7 +186,7 @@
     "target_description": "Normalized toroidal plasma beta, conventionally denoted \u03b2_N, is the ratio of toroidal plasma beta times plasma minor radius and reference toroidal magnetic field to total plasma current, including the conventional factor 100.",
     "is_self_link": true,
     "jev_probability": 0.66,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "normalized_toroidal_plasma_beta",
@@ -195,7 +195,7 @@
     "target_description": "Normalized toroidal plasma beta, conventionally denoted \u03b2_N, is the ratio of toroidal plasma beta times plasma minor radius and reference toroidal magnetic field to total plasma current, including the conventional factor 100.",
     "is_self_link": true,
     "jev_probability": 0.63,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "poloidal_angle_of_flux_surface",
@@ -204,7 +204,7 @@
     "target_description": "Pointwise geometric angle locating a position around a magnetic flux-surface cross-section, measured clockwise from its low-field-side midplane.",
     "is_self_link": true,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "ion_charge_state_particle_flux",
@@ -213,7 +213,7 @@
     "target_description": "Full particle flux vector of ions in a specified ionization charge state, giving the directed number flow per unit area per unit time for that charge state resolved independently from all other ionization stages.",
     "is_self_link": true,
     "jev_probability": 0.74,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "toroidal_momentum_convection_velocity",
@@ -222,7 +222,7 @@
     "target_description": "Effective toroidal momentum convection velocity, representing the advective component of toroidal momentum transport.",
     "is_self_link": true,
     "jev_probability": 0.65,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "normalized_momentum_flux_due_to_perturbed_parallel_magnetic_field",
@@ -231,7 +231,7 @@
     "target_description": "Gyro-Bohm-normalized parallel component of the toroidal momentum flux driven by perturbed parallel magnetic-field fluctuations in gyrokinetic turbulence.",
     "is_self_link": true,
     "jev_probability": 0.85,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "parallel_fast_neutral_internal_state_pressure",
@@ -240,7 +240,7 @@
     "target_description": "Field-aligned kinetic pressure contributed by suprathermal neutral particles occupying one specified internal quantum or excitation state.",
     "is_self_link": true,
     "jev_probability": 0.82,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "poloidal_neutral_internal_state_energy_convection_velocity",
@@ -249,7 +249,7 @@
     "target_description": "Poloidal effective velocity for convective transport of the energy density of a specified neutral internal state, directed along increasing poloidal angle \u03b8 in flux coordinates (\u03c1, \u03b8, \u03c6).",
     "is_self_link": true,
     "jev_probability": 0.08,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "power_of_beam_tracing_beam",
@@ -258,7 +258,7 @@
     "target_description": "Power of a beam-tracing beam is the residual electromagnetic wave power still carried by one coherent wave beam at the endpoint of its traced trajectory. It is distinct from initial launch power and from cumulative plasma-absorbed power.",
     "is_self_link": true,
     "jev_probability": 0.77,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "thickness_of_plasma_filament",
@@ -267,7 +267,7 @@
     "target_description": "Full thickness of a rectangular plasma filament cross-section, measured along the in-plane direction normal to the filament's central segment. It is the transverse side length of the rectangle, complementing the tangential length measured along the segment.",
     "is_self_link": true,
     "jev_probability": 0.05,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "toroidal_angle_of_toroidal_field_coil",
@@ -276,7 +276,7 @@
     "target_description": "Toroidal angle coordinate of a toroidal-field-coil conductor cross-section contour point, expressed relative to the cross-section reference point in the right-handed cylindrical (R, \u03c6, Z) frame. It is used with major radius and vertical height to locate the contour point.",
     "is_self_link": true,
     "jev_probability": 0.6,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "current_due_to_non_inductive_current_drive",
@@ -285,7 +285,7 @@
     "target_description": "Net toroidal electric current sustained by non-inductive current-drive mechanisms, excluding the contribution from inductive electric-field drive.",
     "is_self_link": true,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "ion_atomic_number",
@@ -294,7 +294,7 @@
     "target_description": "Nuclear charge number of the ion species, equal to the number of protons in the nucleus, serving as its invariant elemental identifier independent of ionization state.",
     "is_self_link": true,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "neutral_state_temperature",
@@ -303,7 +303,7 @@
     "target_description": "Kinetic temperature of neutral atoms or molecules occupying a specified internal quantum state.",
     "is_self_link": true,
     "jev_probability": 0.72,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "poloidal_neutral_state_convection_velocity",
@@ -312,7 +312,7 @@
     "target_description": "Poloidal component of the effective convection velocity for particle transport of a specified neutral atomic or molecular state. It is the signed advective speed along the poloidal angle in the flux-coordinate system (\u03c1, \u03b8, \u03c6), distinct from species-summed neutral convection and from radial transport.",
     "is_self_link": true,
     "jev_probability": 0.94,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "toroidal_co_passing_fast_current_density",
@@ -321,7 +321,7 @@
     "target_description": "Toroidal component of electric current density carried by co-passing fast charged particles on untrapped guiding-center orbits, excluding electron and thermal-ion return currents.",
     "is_self_link": true,
     "jev_probability": 0.92,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "toroidal_fast_ion_state_torque_density_due_to_collisions",
@@ -330,7 +330,7 @@
     "target_description": "Collisional toroidal torque density transferred to fast ions in a specified charge state by Coulomb collisions with background particles. It is the toroidal angular-momentum source per unit volume, summed over all fast-ion orbit topologies.",
     "is_self_link": true,
     "jev_probability": 0.17,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "time_derivative_of_poloidal_magnetic_flux",
@@ -339,7 +339,7 @@
     "target_description": "Time rate of change of the poloidal magnetic flux at a fixed flux-surface label, governing the resistive evolution of the current density profile via the flux diffusion equation.",
     "is_self_link": true,
     "jev_probability": 0.78,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "radial_derivative_of_elongation_of_flux_surface",
@@ -348,7 +348,7 @@
     "target_description": "Radial rate of change of the flux surface elongation kappa with respect to normalized minor radius, measuring how rapidly the poloidal cross-section aspect ratio varies across nested flux surfaces.",
     "is_self_link": true,
     "jev_probability": 0.43,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "parallel_edge_plasma_momentum_diffusivity",
@@ -357,7 +357,7 @@
     "target_description": "Parallel edge-plasma momentum diffusivity is the scalar kinematic coefficient multiplying the field-aligned gradient term for diffusive transport of total edge-plasma momentum. It applies to ion-fluid momentum density summed over ion species and charge states, excluding electron inertial momentum.",
     "is_self_link": true,
     "jev_probability": 0.87,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "radial_total_momentum_source",
@@ -366,7 +366,7 @@
     "target_description": "Area-normalized radial component of the total momentum source density, summed over all included plasma particle populations and resolved toward increasing major radius in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": true,
     "jev_probability": 0.73,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "normalized_linear_growth_rate_of_gyrokinetic_eigenmode",
@@ -375,7 +375,7 @@
     "target_description": "Dimensionless imaginary part of the complex linear gyrokinetic eigenmode frequency, divided by the positive reference angular frequency, at a specified wavevector perpendicular to the equilibrium magnetic field in the local flux-tube approximation. Positive values represent exponential growth and negative values represent damping.",
     "is_self_link": true,
     "jev_probability": 0.82,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "ion_kinetic_energy_flux_at_wall_due_to_surface_emission",
@@ -384,7 +384,7 @@
     "target_description": "Kinetic energy flux density carried by ions leaving the plasma-facing wall through surface emission processes such as physical sputtering and ion backscattering.",
     "is_self_link": true,
     "jev_probability": 0.75,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "total_particle_count",
@@ -393,7 +393,7 @@
     "target_description": "Total number of particles in the kinetic distribution, obtained by integrating the distribution function over velocity space and the entire plasma volume.",
     "is_self_link": true,
     "jev_probability": 0.73,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "total_electron_deposited_power",
@@ -402,7 +402,7 @@
     "target_description": "Volume-integrated deposited power for the electron population from a specified source or sink. It is the net rate at which that term transfers energy to or from electrons over the plasma volume.",
     "is_self_link": true,
     "jev_probability": 0.55,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "total_electron_deposited_power",
@@ -411,7 +411,7 @@
     "target_description": "Volume-integrated deposited power for the electron population from a specified source or sink. It is the net rate at which that term transfers energy to or from electrons over the plasma volume.",
     "is_self_link": true,
     "jev_probability": 0.72,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "total_co_passing_particle_density",
@@ -420,7 +420,7 @@
     "target_description": "Number density of co-passing particles integrated over all populations \u2014 thermal and suprathermal alike \u2014 where co-passing orbits have guiding-center parallel velocity directed along the plasma current.",
     "is_self_link": true,
     "jev_probability": 0.86,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "toroidal_neutral_momentum_convection_velocity",
@@ -429,7 +429,7 @@
     "target_description": "Toroidal neutral momentum convection velocity is the toroidal projection of the effective velocity that convects aggregate neutral momentum. The toroidal label denotes the velocity component along increasing toroidal angle, not the component of momentum being transported or a particular neutral particle flow.",
     "is_self_link": true,
     "jev_probability": 0.68,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "fast_ion_atomic_number",
@@ -438,7 +438,7 @@
     "target_description": "Nuclear proton count of the fast ion species detected in charge exchange spectroscopy, uniquely identifying the element independently of its ionization state.",
     "is_self_link": true,
     "jev_probability": 0.05,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "breakdown_stray_magnetic_field_magnitude",
@@ -447,7 +447,7 @@
     "target_description": "Breakdown stray magnetic field magnitude is the scalar Euclidean magnitude of the stray magnetic-field vector at the plasma position during plasma initiation. It includes residual field in all spatial directions and carries no directional information.",
     "is_self_link": true,
     "jev_probability": 0.95,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "molecular_neutral_species_flow_at_outlet",
@@ -456,7 +456,7 @@
     "target_description": "Molecular neutral species flow at an outlet is the pressure-volume throughput of one molecular neutral species removed across a pumping outlet. It is defined by the outlet partial pressure of that species and the corresponding effective pumping speed, not by total neutral pressure.",
     "is_self_link": true,
     "jev_probability": 0.82,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "poloidal_perturbed_magnetic_flux_at_measurement_position_due_to_wave_particle_interaction",
@@ -465,7 +465,7 @@
     "target_description": "Poloidal perturbed magnetic flux at a measurement position due to wave-particle interaction is the signed change in the poloidal magnetic flux function evaluated at the effective measurement position relative to the corresponding position obtained without that interaction. It expresses a displacement of the sampled location in poloidal-flux space, not a perturbation of the equilibrium magnetic field.",
     "is_self_link": true,
     "jev_probability": 0.64,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "poloidal_perturbed_magnetic_flux_at_measurement_position_due_to_wave_particle_interaction",
@@ -474,7 +474,7 @@
     "target_description": "Poloidal perturbed magnetic flux at a measurement position due to wave-particle interaction is the signed change in the poloidal magnetic flux function evaluated at the effective measurement position relative to the corresponding position obtained without that interaction. It expresses a displacement of the sampled location in poloidal-flux space, not a perturbation of the equilibrium magnetic field.",
     "is_self_link": true,
     "jev_probability": 0.67,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "ratio_of_volume_averaged_krypton_density_to_volume_averaged_electron_density",
@@ -483,7 +483,7 @@
     "target_description": "Volume-averaged krypton density divided by volume-averaged electron density is the plasma-volume krypton abundance ratio relative to electrons, with krypton number density summed over all charge states.",
     "is_self_link": true,
     "jev_probability": 0.08,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "poloidal_perturbed_suprathermal_electron_angle_at_measurement_position",
@@ -492,7 +492,7 @@
     "target_description": "Poloidal angular offset estimate of the electron cyclotron emission measurement position due to the presence of suprathermal electrons, relative to the thermal-electron emission reference.",
     "is_self_link": true,
     "jev_probability": 0.7,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "total_neutral_particle_flux_at_wall_due_to_surface_emission",
@@ -501,7 +501,7 @@
     "target_description": "Neutral particle flux at the wall due to surface emission, summed over all emitting plasma-facing surfaces, is the total rate at which neutral atoms or molecules leave material surfaces and enter the adjacent plasma-facing region. It captures wall-related neutral production dominated by recycling of incident plasma particles neutralized at the surface and by thermally activated outgassing.",
     "is_self_link": true,
     "jev_probability": 0.6,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "fast_ion_radiance_of_spectral_line_due_to_charge_exchange",
@@ -510,7 +510,7 @@
     "target_description": "Fast-ion charge-exchange spectral-line radiance is photon radiance in a selected transition emitted by charge-exchange products of fast ions, integrated along a viewing path. It is counted per projected area perpendicular to the viewing direction, per solid angle, and per time.",
     "is_self_link": true,
     "jev_probability": 0.92,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "fast_ion_radiance_of_spectral_line_due_to_charge_exchange",
@@ -519,7 +519,7 @@
     "target_description": "Fast-ion charge-exchange spectral-line radiance is photon radiance in a selected transition emitted by charge-exchange products of fast ions, integrated along a viewing path. It is counted per projected area perpendicular to the viewing direction, per solid angle, and per time.",
     "is_self_link": true,
     "jev_probability": 0.76,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "ratio_of_volume_averaged_helium_4_density_to_volume_averaged_electron_density",
@@ -528,7 +528,7 @@
     "target_description": "Helium-4 abundance ratio formed from mean densities inside the last closed flux surface, comparing the charge-state-summed helium-4 ion density with the electron density after each density is volume averaged.",
     "is_self_link": true,
     "jev_probability": 0.78,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "fast_ion_critical_energy",
@@ -537,7 +537,7 @@
     "target_description": "Threshold energy at which Coulomb drag on a fast ion from thermal electrons equals that from thermal ions, determining the partition of fast-ion power between electron and ion heating channels.",
     "is_self_link": true,
     "jev_probability": 0.3,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "fast_ion_critical_energy",
@@ -546,7 +546,7 @@
     "target_description": "Threshold energy at which Coulomb drag on a fast ion from thermal electrons equals that from thermal ions, determining the partition of fast-ion power between electron and ion heating channels.",
     "is_self_link": true,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "toroidal_flux_surface_averaged_metric",
@@ -555,7 +555,7 @@
     "target_description": "The toroidal flux-surface-averaged metric is the surface average of inverse major radius, a geometric coefficient in flux-coordinate transport equations.",
     "is_self_link": true,
     "jev_probability": 0.77,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "toroidal_flux_surface_averaged_metric",
@@ -564,7 +564,7 @@
     "target_description": "The toroidal flux-surface-averaged metric is the surface average of inverse major radius, a geometric coefficient in flux-coordinate transport equations.",
     "is_self_link": true,
     "jev_probability": 0.2,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "toroidal_torque_density_due_to_diamagnetic_drift",
@@ -573,7 +573,7 @@
     "target_description": "Toroidal component of the local angular-momentum source density generated by the pressure-gradient-driven diamagnetic response of the plasma.",
     "is_self_link": true,
     "jev_probability": 0.88,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "cumulative_inside_flux_surface_electron_particle_source_rate",
@@ -582,7 +582,7 @@
     "target_description": "Net electron particle production rate accumulated over the volume enclosed by a specified magnetic flux surface, contributing to the electron density balance.",
     "is_self_link": true,
     "jev_probability": 0.8,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "launched_power_of_ion_cyclotron_heating_antenna",
@@ -591,7 +591,7 @@
     "target_description": "Radio-frequency power launched toward the plasma by an ion-cyclotron heating antenna, equal to forward incident power minus reflected return power.",
     "is_self_link": true,
     "jev_probability": 0.91,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "neutron_emissivity_due_to_fusion",
@@ -600,7 +600,7 @@
     "target_description": "Local volumetric rate of neutron production from all included fusion reactions, giving the spatial distribution of fusion neutron emission per unit volume at each point in the plasma.",
     "is_self_link": true,
     "jev_probability": 0.75,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
@@ -609,7 +609,7 @@
     "target_description": "Flux-surface-averaged number density of positively charged tungsten ions on the last closed magnetic flux surface, summed over all ionization states.",
     "is_self_link": true,
     "jev_probability": 0.78,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "linear_growth_rate_normalized_of_gyrokinetic_eigenmode",
@@ -618,7 +618,7 @@
     "target_description": "Dimensionless imaginary part of the complex linear gyrokinetic eigenmode frequency, divided by the positive reference angular frequency, at a specified wavevector perpendicular to the equilibrium magnetic field in the local flux-tube approximation. Positive values represent exponential growth and negative values represent damping.",
     "is_self_link": true,
     "jev_probability": 0.87,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "poloidal_suprathermal_electron_angle_perturbed_at_measurement_position",
@@ -627,7 +627,7 @@
     "target_description": "Poloidal angular offset estimate of the electron cyclotron emission measurement position due to the presence of suprathermal electrons, relative to the thermal-electron emission reference.",
     "is_self_link": true,
     "jev_probability": 0.81,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
@@ -636,7 +636,7 @@
     "target_description": "Flux-surface-averaged toroidal bulk-flow velocity of helium-4 ions at the separatrix, density-weighted over all helium-4 charge states.",
     "is_self_link": true,
     "jev_probability": 0.83,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "poloidal_suprathermal_electron_angle_perturbed_at_ece_channel_emission_position",
@@ -645,7 +645,7 @@
     "target_description": "Poloidal angular offset estimate of the electron cyclotron emission measurement position due to the presence of suprathermal electrons, relative to the thermal-electron emission reference.",
     "is_self_link": true,
     "jev_probability": 0.88,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "root_mean_square_spectral_width_of_spectrometer_channel",
@@ -654,7 +654,7 @@
     "target_description": "Root-mean-square wavelength spread of a spectrometer channel\u2019s response about its reference vacuum wavelength, representing instrumental broadening for monochromatic input.",
     "is_self_link": true,
     "jev_probability": 0.79,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "net_power_due_to_ion_cyclotron_heating",
@@ -663,7 +663,7 @@
     "target_description": "Net ion-cyclotron radio-frequency power launched into the vacuum vessel by a specified heating launcher before absorption by plasma particles.",
     "is_self_link": true,
     "jev_probability": 0.8,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "thermal_electron_absorbed_wave_power",
@@ -672,7 +672,7 @@
     "target_description": "Total coherent electromagnetic-wave power transferred directly to electron populations, integrated over the plasma volume and partitioned into thermal and fast-electron contributions.",
     "is_self_link": false,
     "jev_probability": 0.66,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "maximum_of_energy_flux_at_divertor_target",
@@ -681,7 +681,7 @@
     "target_description": "Local rate of energy deposition per unit divertor-target area, combining all incident particle and radiative energy-carrying channels.",
     "is_self_link": false,
     "jev_probability": 0.92,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "toroidal_beryllium_velocity_at_pedestal_top",
@@ -690,7 +690,7 @@
     "target_description": "Toroidal beryllium-ion bulk velocity at the magnetic axis, density-weighted over all beryllium ionization states in the right-handed (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.6,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "line_averaged_electron_density",
@@ -699,7 +699,7 @@
     "target_description": "Free-electron number density is the number of unbound electrons per physical volume, with population selection and spatial aggregation defined by each specialization.",
     "is_self_link": false,
     "jev_probability": 0.85,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "weight_of_interferometer_beam",
@@ -708,7 +708,7 @@
     "target_description": "Dimensionless factor controlling the relative contribution of an interferometer beam\u2019s line-integrated electron-density residual to an equilibrium objective function.",
     "is_self_link": false,
     "jev_probability": 0.84,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "magnetic_field_magnitude_at_pedestal_top_low_field_side",
@@ -717,7 +717,7 @@
     "target_description": "Magnitude of the magnetic-field projection onto the poloidal plane, evaluated at the pressure-pedestal top on the low-field side.",
     "is_self_link": false,
     "jev_probability": 0.87,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "initial_plasma_breakdown_time",
@@ -726,7 +726,7 @@
     "target_description": "Elapsed duration of the confined-plasma phase in a single discharge, from plasma breakdown until termination of the confined plasma.",
     "is_self_link": false,
     "jev_probability": 0.77,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "turn_count_of_toroidal_magnetic_field_probe",
@@ -735,7 +735,7 @@
     "target_description": "Effective turn count of a passive loop is the signed number of equivalent windings assigned to a passive conducting loop for electromagnetic coupling. It weights the passive-loop current contribution and may be fractional for equivalent or homogenized loop elements.",
     "is_self_link": false,
     "jev_probability": 0.84,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "voltage_of_toroidal_field_coil",
@@ -744,7 +744,7 @@
     "target_description": "Ohmic resistance of a toroidal-field-coil winding, relating its current to the resistive voltage drop and Joule power dissipation.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "toroidal_perturbed_plasma_velocity",
@@ -753,7 +753,7 @@
     "target_description": "Complex vector eigenfunction of the first-order bulk plasma velocity perturbation in linear MHD stability analysis, encoding the spatial amplitude and phase of oscillatory plasma flow for a specified toroidal Fourier mode.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "neutral_gas_pressure_of_gauge",
@@ -762,7 +762,7 @@
     "target_description": "Kinetic pressure of all neutral particles in a specified internal quantum or excitation state, combining thermal and nonthermal fast-neutral contributions.",
     "is_self_link": false,
     "jev_probability": 0.76,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "line_averaged_xenon_density",
@@ -771,7 +771,7 @@
     "target_description": "Number density of xenon ions at a given point in the plasma, summed over all ionization states from singly ionized through fully stripped xenon, excluding neutral xenon atoms.",
     "is_self_link": false,
     "jev_probability": 0.84,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "accumulated_propane_count",
@@ -780,7 +780,7 @@
     "target_description": "Instantaneous propane (C3H8) injection rate into the plasma vessel, converted from molecules to equivalent electrons using 26 electrons per neutral molecule.",
     "is_self_link": false,
     "jev_probability": 0.86,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "ratio_of_volume_averaged_tungsten_density_to_volume_averaged_electron_density",
@@ -789,7 +789,7 @@
     "target_description": "Number density of free electrons per physical volume averaged over the plasma volume enclosed by the last closed flux surface, giving the global mean free-electron density.",
     "is_self_link": false,
     "jev_probability": 0.96,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "spectral_bremsstrahlung_photon_radiance",
@@ -798,7 +798,7 @@
     "target_description": "Calibrated spectral photon radiance of plasma emission, giving photon rate per projected area, solid angle, and wavelength interval along a viewing direction.",
     "is_self_link": false,
     "jev_probability": 0.9,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "thickness_of_breeder_blanket_layer",
@@ -807,7 +807,7 @@
     "target_description": "Lower thickness of a breeder blanket module is the non-negative geometric separation through the lower cap, measured normal to its exterior boundary and main-body interface.",
     "is_self_link": false,
     "jev_probability": 0.9,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "volume_averaged_electron_temperature",
@@ -816,7 +816,7 @@
     "target_description": "Energy-equivalent measure of the mean random kinetic energy per electron in the bulk electron population, defined by its second velocity moment.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "parallel_normalized_gyrocenter_momentum_flux_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential",
@@ -825,7 +825,7 @@
     "target_description": "Normalized toroidal momentum flux from the perturbed parallel electromagnetic vector potential in gyrokinetic turbulence, restricted to the parallel velocity-space channel. Total denotes aggregation over species and fluctuation contributions within that channel.",
     "is_self_link": false,
     "jev_probability": 0.79,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "deuterium_tritium_density_at_pedestal_top",
@@ -834,7 +834,7 @@
     "target_description": "Number density of the effective deuterium-tritium fuel pseudo-species at the plasma boundary, evaluated as the local, intensive particle count per physical volume on the last closed magnetic flux surface.",
     "is_self_link": false,
     "jev_probability": 0.83,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "launched_power_of_lower_hybrid_antenna",
@@ -843,7 +843,7 @@
     "target_description": "Reflected power of a lower-hybrid antenna is the nonnegative RF power returning from the antenna input reference plane toward the transmission line because of incomplete coupling to the plasma load.",
     "is_self_link": false,
     "jev_probability": 0.87,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "neutral_power_at_divertor_target",
@@ -852,7 +852,7 @@
     "target_description": "Power at a divertor target is the rate at which energy is deposited on one divertor target by a specified physical deposition channel, integrated over the target's wetted strike-zone surface.",
     "is_self_link": false,
     "jev_probability": 0.84,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "radial_ion_state_diffusivity",
@@ -861,7 +861,7 @@
     "target_description": "Parallel ion charge-state diffusivity is the effective Fickian particle diffusivity for a specified ionization state along magnetic-field lines.",
     "is_self_link": false,
     "jev_probability": 0.88,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "poloidal_magnetic_flux_perturbed_at_ece_channel_emission_position_due_to_wave_particle_interaction",
@@ -870,7 +870,7 @@
     "target_description": "Poloidal perturbed magnetic flux at a measurement position due to wave-particle interaction is the signed change in the poloidal magnetic flux function evaluated at the effective measurement position relative to the corresponding position obtained without that interaction. It expresses a displacement of the sampled location in poloidal-flux space, not a perturbation of the equilibrium magnetic field.",
     "is_self_link": false,
     "jev_probability": 0.76,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "lower_triangularity_of_flux_surface",
@@ -879,7 +879,7 @@
     "target_description": "Dimensionless shaping parameter equal to the normalized inward radial displacement of the lower plasma-boundary extremum from the geometric center.",
     "is_self_link": false,
     "jev_probability": 0.57,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "normalized_toroidal_flux_coordinate_at_pedestal_top",
@@ -888,7 +888,7 @@
     "target_description": "Dimensionless poloidal-flux label locating the H-mode edge transport-barrier pedestal between the magnetic axis and the last closed flux surface.",
     "is_self_link": false,
     "jev_probability": 0.84,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "radial_coordinate_of_rogowski_coil",
@@ -897,7 +897,7 @@
     "target_description": "Major-radius coordinate locating a geometric point or reference position by perpendicular distance from the toroidal symmetry axis.",
     "is_self_link": false,
     "jev_probability": 0.89,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "resistance_of_passive_loop",
@@ -906,7 +906,7 @@
     "target_description": "Lumped ohmic opposition to current flow through a discrete passive-conductor element of the vacuum vessel.",
     "is_self_link": false,
     "jev_probability": 0.76,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "radial_perturbed_vacuum_magnetic_field",
@@ -915,7 +915,7 @@
     "target_description": "Real part of the radial perturbed vacuum magnetic field is the in-phase coefficient of the R component in the right-handed cylindrical (R, \u03c6, Z) frame for a complex vacuum magnetic-field perturbation eigenfunction of one toroidal Fourier harmonic.",
     "is_self_link": false,
     "jev_probability": 0.86,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "ratio_of_coolant_mass_to_time",
@@ -924,7 +924,7 @@
     "target_description": "",
     "is_self_link": false,
     "jev_probability": 0.55,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "line_averaged_deuterium_tritium_density",
@@ -933,7 +933,7 @@
     "target_description": "Deuterium-tritium density is the local ion number density of the deuterium-tritium fuel-ion pseudo-species, treating deuterium and tritium as one effective species.",
     "is_self_link": false,
     "jev_probability": 0.86,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "tritium_prefill_count",
@@ -942,7 +942,7 @@
     "target_description": "Deuterium prefill count is the total amount of neutral deuterium introduced before plasma breakdown, expressed as an equivalent-electron count with one count unit per atom.",
     "is_self_link": false,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "kinetic_energy_flux_at_wall_due_to_surface_emission",
@@ -951,7 +951,7 @@
     "target_description": "Kinetic-energy power flux density carried by ions in a specified charge state leaving a plasma-facing surface through sputtering, reflection, or related surface-emission processes.",
     "is_self_link": false,
     "jev_probability": 0.92,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "spectral_etendue_of_soft_xray_detector",
@@ -960,7 +960,7 @@
     "target_description": "Response-equivalent wavelength interval of a spectrometer channel, defined from the full spectral instrument function rather than a Gaussian approximation.",
     "is_self_link": false,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "radial_volumetric_force",
@@ -969,7 +969,7 @@
     "target_description": "Vertical component of the electromagnetic body-force density vector acting on plasma volumes or conducting wall and structural elements, projected onto increasing vertical height Z in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "parallel_neutral_state_energy_convection_velocity",
@@ -978,7 +978,7 @@
     "target_description": "Radial convection velocity for the energy density of a neutral charge state, taken along the major-radius direction R in the right-handed cylindrical (R, \u03c6, Z) frame. It multiplies neutral energy density in the convective part of the radial energy flux.",
     "is_self_link": false,
     "jev_probability": 0.82,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "parallel_normalized_perturbed_vector_potential_amplitude",
@@ -987,7 +987,7 @@
     "target_description": "",
     "is_self_link": false,
     "jev_probability": 0.35,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "coolant_absorbed_power_of_calorimetry_component",
@@ -996,7 +996,7 @@
     "target_description": "Cumulative thermal energy transferred from a calorimetry component to its coolant since pulse start, determined from the coolant enthalpy gain.",
     "is_self_link": false,
     "jev_probability": 0.9,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "ion_charge_state_absorbed_power_of_beam_tracing_beam",
@@ -1005,7 +1005,7 @@
     "target_description": "Absorbed power of a beam-tracing beam is the total electromagnetic wave power transferred from one coherent beam to the plasma along its trajectory.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "xenon_density_at_divertor_target",
@@ -1014,7 +1014,7 @@
     "target_description": "Number density of the oxygen species at the divertor target is the local particle count per volume for oxygen ions at the sheath entrance, summed over all positive ionization states and excluding neutral oxygen.",
     "is_self_link": false,
     "jev_probability": 0.9,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "poloidal_flux_surface_averaged_electron_beta_at_pedestal_top",
@@ -1023,7 +1023,7 @@
     "target_description": "Poloidal electron beta at the pedestal top high-field side is the ratio of electron kinetic pressure at the fitted core-side shoulder of the H-mode edge transport barrier to poloidal magnetic pressure evaluated on the high-field side.",
     "is_self_link": false,
     "jev_probability": 0.41,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "initial_spun_twist_phase_of_fiber_optic_current_sensor",
@@ -1032,7 +1032,7 @@
     "target_description": "Repeat arclength along the sensing-fiber centerline at which the effective birefringent-axis orientation completes one spatial cycle.",
     "is_self_link": false,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "squareness_of_plasma_boundary",
@@ -1041,7 +1041,7 @@
     "target_description": "Inner squareness of the plasma boundary is the Luce shape coefficient for the high-field-side corner pair, referenced to an ellipse defined by boundary size and shaping.",
     "is_self_link": false,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
@@ -1050,7 +1050,7 @@
     "target_description": "Dimensionful toroidal-flux radius labeling the outermost closed magnetic flux surface and setting the boundary value for this radial coordinate.",
     "is_self_link": false,
     "jev_probability": 0.81,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "vertical_coordinate_of_rogowski_coil",
@@ -1059,7 +1059,7 @@
     "target_description": "Vertical Z coordinate of a position point associated with one flux loop in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.77,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "height_of_correction_coil",
@@ -1068,7 +1068,7 @@
     "target_description": "Signed displacement of a correction-coil conductor outline vertex along the local Frenet\u2013Serret binormal, measured from the conductor centerline.",
     "is_self_link": false,
     "jev_probability": 0.83,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "time_derivative_of_rotation_frequency_of_neoclassical_tearing_mode",
@@ -1077,7 +1077,7 @@
     "target_description": "Angular rate at which a neoclassical tearing-mode magnetic island advances or regresses in helical phase on its resonant flux surface.",
     "is_self_link": false,
     "jev_probability": 0.83,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "x_first_measurement_direction_unit_vector_of_strain_gauge",
@@ -1086,7 +1086,7 @@
     "target_description": "Signed Cartesian x coordinate locating the point where a sensor is mechanically attached to a device component.",
     "is_self_link": false,
     "jev_probability": 0.58,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "line_averaged_helium_4_density",
@@ -1095,7 +1095,7 @@
     "target_description": "Volume-averaged number density of helium-4 ions over the confined plasma volume, providing a global measure of fusion-ash concentration in deuterium-tritium plasmas.",
     "is_self_link": false,
     "jev_probability": 0.86,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "methane_carbon_13_source_rate",
@@ -1104,7 +1104,7 @@
     "target_description": "Instantaneous rate of neutral methane-molecule delivery into the plasma vessel by gas injection, counted per molecule rather than as an equivalent-electron or elemental source.",
     "is_self_link": false,
     "jev_probability": 0.84,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "ratio_of_volume_averaged_carbon_density_to_volume_averaged_electron_density",
@@ -1113,7 +1113,7 @@
     "target_description": "Plasma-volume mean of the total number density of elemental carbon, summed over neutral carbon and all ionic charge states through fully stripped C6+.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "radial_coordinate_of_aperture",
@@ -1122,7 +1122,7 @@
     "target_description": "Vertical Z coordinate of the geometric center of an aperture in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.92,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "y_coordinate_of_ferritic_element_centroid",
@@ -1131,7 +1131,7 @@
     "target_description": "Signed Cartesian x coordinate of a ferritic element\u2019s geometric centroid in the right-handed (x, y, z) frame, with z aligned with the vertical Z direction.",
     "is_self_link": false,
     "jev_probability": 0.92,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "radial_flux_limiter_coefficient",
@@ -1140,7 +1140,7 @@
     "target_description": "Flux limiter coefficient is a multiplicative factor, or vector of factors, that scales a collisionless free-streaming bound on a flux density while preserving the direction or sign of each resolved flux component.",
     "is_self_link": false,
     "jev_probability": 0.92,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "perturbed_vector_potential",
@@ -1149,7 +1149,7 @@
     "target_description": "",
     "is_self_link": false,
     "jev_probability": 0.46,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "outer_hard_xray_half_width_at_emissivity_peak",
@@ -1158,7 +1158,7 @@
     "target_description": "Dimensionless inward extent of the hard X-ray emissivity peak from its maximum to the inner half-maximum point in normalized toroidal flux.",
     "is_self_link": false,
     "jev_probability": 0.77,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "vertical_coordinate_of_aperture",
@@ -1167,7 +1167,7 @@
     "target_description": "Signed vertical coordinate of a fiber bundle\u2019s geometric center in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.11,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "neon_density_at_divertor_target",
@@ -1176,7 +1176,7 @@
     "target_description": "Number density of the electron species at the divertor target is the local particle count per volume for free electrons at the sheath entrance immediately upstream of the target-facing plasma boundary.",
     "is_self_link": false,
     "jev_probability": 0.86,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "parallel_ion_charge_state_momentum_diffusion_coefficient",
@@ -1185,7 +1185,7 @@
     "target_description": "Fick's-law proportionality coefficient relating the density-normalized parallel diffusive thermal energy flux of a specified ion charge state to its local temperature gradient.",
     "is_self_link": false,
     "jev_probability": 0.76,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "vertical_coordinate_of_line_of_sight",
@@ -1194,7 +1194,7 @@
     "target_description": "Vertical Z coordinate of the geometric center of an aperture in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.68,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "vertical_coordinate_of_closest_wall_point",
@@ -1203,7 +1203,7 @@
     "target_description": "Signed vertical Z coordinate of points on the plasma-boundary contour in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.62,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "krypton_density_flux_surface_averaged_at_plasma_boundary",
@@ -1212,7 +1212,7 @@
     "target_description": "Number density of krypton ions at the plasma boundary, evaluated as the local, intensive particle count per physical volume on the last closed magnetic flux surface.",
     "is_self_link": false,
     "jev_probability": 0.68,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "radial_coordinate_of_toroidal_magnetic_field_probe",
@@ -1221,7 +1221,7 @@
     "target_description": "Vertical position of the geometric center of a toroidal magnetic-field probe coil, expressed as the signed Z coordinate in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.74,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "vertical_magnetization_of_ferritic_element",
@@ -1230,7 +1230,7 @@
     "target_description": "Signed vertical component of the magnetic-field vector at a ferritic element\u2019s centroid in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.89,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "toroidal_perturbed_plasma_magnetic_field_real_part",
@@ -1239,7 +1239,7 @@
     "target_description": "Imaginary part of the complex toroidal component of the first-order plasma magnetic-field perturbation eigenfunction for a single toroidal Fourier mode in linear MHD stability analysis.",
     "is_self_link": false,
     "jev_probability": 0.94,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "x_first_measurement_direction_unit_vector_of_strain_gauge",
@@ -1248,7 +1248,7 @@
     "target_description": "Signed z-axis component of the unit vector along a strain gage's first measurement direction in the right-handed Cartesian (x, y, z) frame, with z vertical.",
     "is_self_link": false,
     "jev_probability": 0.53,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "line_averaged_hydrogen_density",
@@ -1257,7 +1257,7 @@
     "target_description": "Local number density of hydrogen (protium) ions in the plasma, giving the count of H+ particles per unit volume at a specified spatial position.",
     "is_self_link": false,
     "jev_probability": 0.87,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "x_minor_axis_unit_vector_of_shatter_cone",
@@ -1266,7 +1266,7 @@
     "target_description": "Signed Z component of the minor-axis unit vector defining the orientation of an elliptic shatter cone in the right-handed Cartesian (x, y, z) frame.",
     "is_self_link": false,
     "jev_probability": 0.72,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "boron_density_at_limiter",
@@ -1275,7 +1275,7 @@
     "target_description": "Local number density of a selected charged plasma population evaluated immediately on the plasma-facing side of a limiter surface.",
     "is_self_link": false,
     "jev_probability": 0.71,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "angular_width_of_bragg_crystal",
@@ -1284,7 +1284,7 @@
     "target_description": "Full physical extent of a rectangular Bragg crystal measured along its first local tangential axis, the crystal-local X1 direction.",
     "is_self_link": false,
     "jev_probability": 0.67,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "tritium_breeding_ratio",
@@ -1293,7 +1293,7 @@
     "target_description": "Power quantity associated with a single breeder blanket module, abstracting over incident neutron surface loads, volumetric nuclear energy deposition, plasma radiation, and total thermal output as distinct energy-budget components.",
     "is_self_link": false,
     "jev_probability": 0.92,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "poloidal_neutral_state_energy_flux",
@@ -1302,7 +1302,7 @@
     "target_description": "Poloidal component of the particle flux density of neutral particles in a specified internal state. It is the signed number of those neutrals crossing unit area per unit time along the poloidal direction in a chosen flux-coordinate system (\u03c1, \u03b8, \u03c6).",
     "is_self_link": false,
     "jev_probability": 0.81,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "normalized_perpendicular_momentum_flux_due_to_perturbed_parallel_magnetic_field",
@@ -1311,7 +1311,7 @@
     "target_description": "Gyro-Bohm-normalized parallel component of the toroidal momentum flux driven by perturbed parallel magnetic-field fluctuations in gyrokinetic turbulence.",
     "is_self_link": false,
     "jev_probability": 0.83,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "absorbed_power_due_to_neutral_beam_injection",
@@ -1320,7 +1320,7 @@
     "target_description": "NBI power delivered into the vacuum vessel before shine-through or orbit losses.",
     "is_self_link": false,
     "jev_probability": 0.84,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "electron_power_at_inside_flux_surface",
@@ -1329,7 +1329,7 @@
     "target_description": "Cumulative power associated with a specified plasma heating or energy-transfer channel, integrated over the volume enclosed by a magnetic flux surface.",
     "is_self_link": false,
     "jev_probability": 0.86,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "power_at_divertor_target_due_to_recombination",
@@ -1338,7 +1338,7 @@
     "target_description": "Power deposited on plasma-facing materials by recombination processes, encompassing both plasma-ion recombination and surface recombination of neutral atoms, without restriction to a particular surface location.",
     "is_self_link": false,
     "jev_probability": 0.89,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "fluctuating_saturated_ion_current_density",
@@ -1347,7 +1347,7 @@
     "target_description": "Saturated ion current density is the ion charge flux per collecting area at the ion-saturation limit, when a sufficiently negative bias suppresses electron collection.",
     "is_self_link": false,
     "jev_probability": 0.96,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "total_electron_count",
@@ -1356,7 +1356,7 @@
     "target_description": "Number density of free electrons per physical volume for the complete local population, combining thermal and fast electrons rather than selecting one population component.",
     "is_self_link": false,
     "jev_probability": 0.78,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "magnetic_shear_at_magnetic_axis",
@@ -1365,7 +1365,7 @@
     "target_description": "Dimensionless radial label equal to the square root of toroidal magnetic flux normalized between the magnetic axis and equilibrium boundary.",
     "is_self_link": false,
     "jev_probability": 0.85,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "magnetic_field_at_pedestal_top_low_field_side",
@@ -1374,7 +1374,7 @@
     "target_description": "Local total magnetic-induction vector in the right-handed cylindrical (R, \u03c6, Z) frame, where R is major radius, \u03c6 is toroidal angle, and Z is vertical height; it does not select a source contribution, perturbation state, component, magnitude reduction, or evaluation locus.",
     "is_self_link": false,
     "jev_probability": 0.92,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "vertical_coordinate_of_rogowski_coil",
@@ -1383,7 +1383,7 @@
     "target_description": "Radial coordinate of a Rogowski coil position, equal to the major-radius coordinate of the coil's designated geometric point in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "normalized_saturated_permeability_of_ferritic_element",
@@ -1392,7 +1392,7 @@
     "target_description": "Signed radial component of the effective magnetization vector assigned to a ferritic element in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.86,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "radial_perturbed_plasma_magnetic_field_real_part",
@@ -1401,7 +1401,7 @@
     "target_description": "Radial perturbed plasma magnetic field is the R component of the complex linear-MHD plasma-response perturbation in the right-handed cylindrical (R, \u03c6, Z) frame.",
     "is_self_link": false,
     "jev_probability": 0.85,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "x_direction_unit_vector_of_sensor",
@@ -1410,7 +1410,7 @@
     "target_description": "Signed direction cosine of a sensor\u2019s oriented measurement direction along the z axis in the right-handed Cartesian (x, y, z) frame.",
     "is_self_link": false,
     "jev_probability": 0.89,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "line_averaged_electron_temperature",
@@ -1419,7 +1419,7 @@
     "target_description": "Thermal energy of the bulk electron population expressed as an energy-equivalent temperature, averaged over the confined plasma volume inside the last closed flux surface.",
     "is_self_link": false,
     "jev_probability": 0.89,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "normalized_atomic_count_of_pellet",
@@ -1428,7 +1428,7 @@
     "target_description": "",
     "is_self_link": false,
     "jev_probability": 0.41,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "neutral_internal_state_particle_flux_at_wall_due_to_recombination",
@@ -1437,7 +1437,7 @@
     "target_description": "Number flux density of neutral recombination products in a specified internal quantum state arriving at a plasma-facing wall surface.",
     "is_self_link": false,
     "jev_probability": 0.88,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "second_local_tangential_coordinate_of_diagnostic_aperture",
@@ -1446,7 +1446,7 @@
     "target_description": "Geometric area of the designated diagnostic aperture surface that admits or collects radiation or particles.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "toroidal_angular_width_of_limiter_tile",
@@ -1455,7 +1455,7 @@
     "target_description": "Full angular span of a camera field of view in the toroidal direction of the right-handed cylindrical (R, \u03c6, Z) frame, equal to the non-negative difference between the largest and smallest unwrapped toroidal viewing angles.",
     "is_self_link": false,
     "jev_probability": 0.7,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "density_at_magnetic_axis",
@@ -1464,7 +1464,7 @@
     "target_description": "Particle number density of the electron population evaluated at the magnetic axis is the local electron count per physical volume at that location.",
     "is_self_link": false,
     "jev_probability": 0.94,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "normalized_particle_perturbed_pressure",
@@ -1473,7 +1473,7 @@
     "target_description": "Normalized perpendicular pressure-tensor moment of the perturbed particle distribution for a linear gyrokinetic eigenmode, representing its perpendicular thermal-energy fluctuation relative to a reference pressure.",
     "is_self_link": false,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "deuterium_tritium_density_at_pedestal_top",
@@ -1482,7 +1482,7 @@
     "target_description": "Local number density of a selected plasma population, including free electrons, ionized species, or an effective fuel species, at the core-side shoulder of the H-mode edge pedestal.",
     "is_self_link": false,
     "jev_probability": 0.83,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "area_of_neutral_beam_injector",
@@ -1491,7 +1491,7 @@
     "target_description": "Full clear-opening width of a rectangular collimating aperture measured along its object-local first tangential axis.",
     "is_self_link": false,
     "jev_probability": 0.88,
-    "label": null
+    "label": 0
   },
   {
     "documenting_name": "maximum_power_at_outer_divertor_target",
@@ -1500,7 +1500,7 @@
     "target_description": "",
     "is_self_link": false,
     "jev_probability": 0.5,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "flux_surface_averaged_electron_density_at_plasma_boundary",
@@ -1509,7 +1509,7 @@
     "target_description": "Number density of electrons at the plasma boundary, evaluated as the local, intensive particle count per physical volume on the last closed magnetic flux surface.",
     "is_self_link": false,
     "jev_probability": 0.84,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "refractive_index",
@@ -1518,7 +1518,7 @@
     "target_description": "Projection magnitude of the refractive-index vector onto the plane perpendicular to the local equilibrium magnetic field, equal to the perpendicular wave-vector magnitude normalized by the vacuum wave number.",
     "is_self_link": false,
     "jev_probability": 0.91,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "minimum_over_flux_surface_magnetic_field_magnitude",
@@ -1527,7 +1527,7 @@
     "target_description": "Flux-surface average of the reciprocal square of total magnetic-field strength, a geometric coefficient in neoclassical and flux-surface-averaged transport relations.",
     "is_self_link": false,
     "jev_probability": 0.9,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "toroidal_beta",
@@ -1536,7 +1536,7 @@
     "target_description": "Normalized toroidal beta is a dimensionless whole-plasma equilibrium measure formed from volume-averaged total perpendicular pressure and toroidal magnetic and plasma-current scales.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "turn_count_of_poloidal_magnetic_field_probe",
@@ -1545,7 +1545,7 @@
     "target_description": "Effective turn count of a passive loop is the signed number of equivalent windings assigned to a passive conducting loop for electromagnetic coupling. It weights the passive-loop current contribution and may be fractional for equivalent or homogenized loop elements.",
     "is_self_link": false,
     "jev_probability": 0.9,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "vertical_vacuum_magnetic_vector_potential",
@@ -1554,7 +1554,7 @@
     "target_description": "Gage-dependent vacuum magnetic vector potential generated by external current sources; its curl gives the magnetic induction when plasma-current contributions are excluded.",
     "is_self_link": false,
     "jev_probability": 0.88,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "alfven_frequency_real_part",
@@ -1563,7 +1563,7 @@
     "target_description": "Alfv\u00e9n frequency at a given radial position for a single toroidal mode number is the complex local shear-Alfv\u00e9n continuum angular frequency; its real part gives oscillation and its imaginary part gives growth or damping for the stated time dependence.",
     "is_self_link": false,
     "jev_probability": 0.86,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "temperature_at_sensor_attachment_point",
@@ -1572,7 +1572,7 @@
     "target_description": "Z coordinate of the point where a sensor is mechanically attached to a device component, expressed in the right-handed Cartesian (x, y, z) frame with z vertical.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "helium_3_density",
@@ -1581,7 +1581,7 @@
     "target_description": "Line-averaged helium-3 density is the chord-length average of local ionized helium-3 density along a specified viewing path, excluding neutral atoms.",
     "is_self_link": false,
     "jev_probability": 0.94,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "hydrogen_source_rate_due_to_gas_injection",
@@ -1590,7 +1590,7 @@
     "target_description": "Instantaneous equivalent-electron source rate delivered to the plasma vessel by gas injection systems, where each injected atom contributes Z equivalent electrons per second according to its atomic number.",
     "is_self_link": false,
     "jev_probability": 0.88,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "xenon_density_at_limiter",
@@ -1599,7 +1599,7 @@
     "target_description": "Number density of the xenon species at the divertor target is the local particle count per volume for xenon ions at the sheath entrance immediately upstream of the target-facing plasma boundary.",
     "is_self_link": false,
     "jev_probability": 0.78,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "hard_xray_half_width_at_emissivity_peak",
@@ -1608,7 +1608,7 @@
     "target_description": "Direction-resolved extent from an emissivity maximum to the corresponding half-maximum location, with components describing one-sided widths of the emitting region.",
     "is_self_link": false,
     "jev_probability": 0.87,
-    "label": null
+    "label": 1
   },
   {
     "documenting_name": "incident_neutron_power_of_breeder_blanket_module",
@@ -1617,6 +1617,6 @@
     "target_description": "Dimensionless tritium-production contribution from one breeder-blanket module, normalized by the common incident fusion-neutron count used for the blanket balance.",
     "is_self_link": false,
     "jev_probability": 0.93,
-    "label": null
+    "label": 1
   }
 ]
