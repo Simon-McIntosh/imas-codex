@@ -1,0 +1,81 @@
+{
+  "node": "ssfms-reprocess-bulk-3",
+  "run": "r-20261013T132716851024-ssfms-reprocess-bulk-3",
+  "plan": "signal-search-finds-the-measured-signal",
+  "facility": "jt-60sa",
+  "assigned_categories": ["h060029", "b250062", "c260058", "VV", "SPC", "TF"],
+  "assigned_total_signals": 3588,
+  "reset_command": "imas-codex discover run jt-60sa --only signals --reset-to discovered [--category ...] [--focus ...]",
+  "fence": "every scope this node resets is finished before the node ends; none of its signals at discovered",
+  "scopes_finished": [
+    {
+      "scope": "c260058,VV,SPC,TF",
+      "signals": 320,
+      "reset_log": "logs/scope1-reset.log",
+      "enrich_log": "logs/scope1-enrich.log",
+      "reset_seconds": 41.1,
+      "enrich_seconds": 281.7,
+      "enrich_spend_usd": 0.04,
+      "finish": "described, 0 discovered"
+    },
+    {
+      "scope": "b250062",
+      "signals": 1041,
+      "reset_log": "logs/scope2-reset.log",
+      "enrich_log": "logs/scope2-enrich.log",
+      "reset_seconds": 44.7,
+      "enrich_seconds": 734.4,
+      "enrich_spend_usd": 0.03,
+      "finish": "described, 0 discovered"
+    },
+    {
+      "scope": "h060029 subset (65 whole SignalSource groups, 700 members)",
+      "signals": 700,
+      "focus": "logs/h060029-subset.json",
+      "reset_log": "logs/scope3-reset.log",
+      "enrich_logs": ["logs/scope3-enrich-a.log", "logs/scope3-enrich-b.log", "logs/scope3-enrich-c.log"],
+      "reset_seconds": 39.9,
+      "enrich_seconds": 489.6,
+      "enrich_spend_usd": 0.02,
+      "finish": "described, 0 discovered"
+    },
+    {
+      "scope": "h060029 residue (2 sources the scanner left unclaimed)",
+      "signals": 2,
+      "focus": "logs/stuck.json",
+      "enrich_log": "logs/stuck-enrich.log",
+      "enrich_seconds": 48.2,
+      "enrich_spend_usd": 0.0,
+      "finish": "described, 0 discovered"
+    }
+  ],
+  "scopes_finished_total_signals": 2063,
+  "categories_not_reset_by_this_node": [
+    {
+      "category": "h060029",
+      "signals_not_reset": 1527,
+      "note": "remaining h060029 signals were already described before this node ran; not reset, left untouched"
+    }
+  ],
+  "final_census": {
+    "source": "logs/census-assigned-final.json",
+    "total": 3588,
+    "discovered": 0,
+    "described": 3588,
+    "hash_mismatch": 0,
+    "per_category": {
+      "h060029": {"total": 2227, "discovered": 0, "described": 2227},
+      "b250062": {"total": 1041, "discovered": 0, "described": 1041},
+      "c260058": {"total": 93, "discovered": 0, "described": 93},
+      "VV": {"total": 92, "discovered": 0, "described": 92},
+      "SPC": {"total": 72, "discovered": 0, "described": 72},
+      "TF": {"total": 63, "discovered": 0, "described": 63}
+    }
+  },
+  "spend_usd": 0.09,
+  "spend_ceiling_usd": 6.0,
+  "notes": [
+    "The 2 h060029 residue signals (jt-60sa:general/lcdb_h060029_ane.s001_dname, ..._ane.s002_dname) were unclaimed by the scoped flush; a targeted flush on their exact source ids enriched both, bringing h060029 discovered to 0.",
+    "Descriptions propagate facility-wide to follower signals, so a scoped flush engine count can exceed the reset scope."
+  ]
+}
