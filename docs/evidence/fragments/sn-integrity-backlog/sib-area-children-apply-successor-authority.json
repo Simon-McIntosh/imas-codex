@@ -1,0 +1,144 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "flux-surface-area-derivative-successors",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-superseded-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "supersede_legacy_spelling",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+    "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+          ]
+        },
+        {
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+            "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+          ]
+        }
+      ],
+      "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "identity": {
+        "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "kind": "standard_name",
+        "target_id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+          },
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+          ]
+        },
+        {
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+            "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+          ]
+        }
+      ],
+      "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+      "identity": {
+        "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate=>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "kind": "standard_name",
+        "target_id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+          },
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "2cd40abe54a7f055304e4cb3396a9e8787042a2b207b9d0c05793eeb466a1888"
+  }
+}
