@@ -131,3 +131,15 @@ def test_shared_name_does_not_merge_different_grammar_axes():
     pairs = build_worklist(names)["other"]
     assert len(pairs) == 3
     assert len({pair["overlap"] for pair in pairs}) == 3
+
+
+def test_unconnected_alternatives_in_one_segment_stay_separate():
+    names = [
+        _name("fast_electron_density", "m^-3", [1, 0]),
+        _name("thermal_electron_density", "m^-3", [1, 0]),
+        _name("co_passing_fast_particle_density", "m^-3", [0, 1]),
+        _name("counter_passing_fast_particle_density", "m^-3", [0, 1]),
+    ]
+    pairs = build_worklist(names)["other"]
+    assert len(pairs) == 2
+    assert len({pair["overlap"] for pair in pairs}) == 2

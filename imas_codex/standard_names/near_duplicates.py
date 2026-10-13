@@ -77,14 +77,44 @@ def _group_overlaps(pairs: list[dict[str, Any]]) -> None:
         pair["_context"] = context
         contexts.setdefault(context, []).append(pair)
 
+    cluster_keys: dict[int, str] = {}
+    for context, members in contexts.items():
+        remaining = set(range(len(members)))
+        while remaining:
+            component = {remaining.pop()}
+            names = {
+                name
+                for index in component
+                for name in (members[index]["left"], members[index]["right"])
+            }
+            while True:
+                connected = {
+                    index
+                    for index in remaining
+                    if names & {members[index]["left"], members[index]["right"]}
+                }
+                if not connected:
+                    break
+                component.update(connected)
+                remaining.difference_update(connected)
+                names.update(
+                    name
+                    for index in connected
+                    for name in (members[index]["left"], members[index]["right"])
+                )
+            if len(component) > 1:
+                identities = sorted(
+                    (members[index]["left"], members[index]["right"])
+                    for index in component
+                )
+                key = f"context:{context}:{json.dumps(identities)}"
+                for index in component:
+                    cluster_keys[id(members[index])] = key
+
     groups: dict[str, list[dict[str, Any]]] = {}
     for pair in pairs:
-        context = pair.pop("_context")
-        key = (
-            f"context:{context}"
-            if len(contexts[context]) > 1
-            else f"substitution:{pair['overlap']}"
-        )
+        pair.pop("_context")
+        key = cluster_keys.get(id(pair), f"substitution:{pair['overlap']}")
         groups.setdefault(key, []).append(pair)
     for members in groups.values():
         identities = sorted((pair["left"], pair["right"]) for pair in members)
