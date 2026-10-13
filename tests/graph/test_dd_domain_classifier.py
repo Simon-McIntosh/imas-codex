@@ -23,13 +23,17 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from imas_codex.graph.dd_domain_classifier import (
+    CATEGORY_QUESTION,
     CLASSIFIABLE_CATEGORIES,
     DEFAULT_BATCH_SIZE,
+    DOMAIN_QUESTION,
     INHERIT_CATEGORIES,
     SERVICE_TAG,
     DomainBatchResult,
     DomainClassification,
+    _category_options,
     _count_residual_unclassified,
+    _domain_options,
     _format_batch_user_prompt,
     _ids_filter_clause,
     _ids_filter_params,
@@ -99,6 +103,45 @@ def sample_paths():
             "node_category": "quantity",
         },
     ]
+
+
+def scripted_tree(
+    category: float | None = None,
+    *,
+    category_probability: float = 1.0,
+    domain_probability: float = 0.5,
+):
+    """``decide_batch`` replaced by a scripted two-level tree, with no network.
+
+    The first level answers an ISN category, the second a domain within it, and
+    the two probabilities multiply. The default pair lands below the default
+    threshold, so both tree levels run and the path still reaches the chat
+    classifier a tier-1 test exercises.
+    """
+    category = category or sorted(_category_options())[0]
+    domain = sorted(_domain_options(category))[0]
+    calls: list[dict] = []
+
+    async def _decide(states, questions, **kwargs):
+        calls.append({"states": list(states), "questions": questions})
+        if CATEGORY_QUESTION in questions:
+            answer = {
+                CATEGORY_QUESTION: {
+                    "choice": category,
+                    "probabilities": {category: category_probability},
+                }
+            }
+            return ([(answer, 0.0) for _ in states], 0.0)
+        answer = {
+            DOMAIN_QUESTION: {
+                "choice": domain,
+                "probabilities": {domain: domain_probability},
+            }
+        }
+        return ([(answer, 0.0) for _ in states], 0.0)
+
+    _decide.calls = calls
+    return _decide
 
 
 # ===========================================================================
@@ -310,6 +353,22 @@ class TestFormatBatchUserPrompt:
     def test_includes_units(self, sample_paths):
         text = _format_batch_user_prompt(sample_paths)
         assert "Wb" in text
+
+    def test_includes_documentation_for_every_path(self):
+        """The DD documentation clause reaches the chat classifier's prompt.
+
+        The chat classifier decides every path the tree leaves unsettled, and
+        the prompt advertises this field, so a render that dropped it would
+        judge those paths without the clause the gatherer collected.
+        """
+        paths = [
+            {"id": "a/b", "documentation": "Flux through a surface."},
+            {"id": "a/c", "documentation": "Safety factor of the plasma."},
+        ]
+        text = _format_batch_user_prompt(paths)
+        assert "documentation: Flux through a surface." in text
+        assert "documentation: Safety factor of the plasma." in text
+        assert text.count("documentation:") == 2
 
     def test_includes_parent_path(self, sample_paths):
         text = _format_batch_user_prompt(sample_paths)
@@ -641,28 +700,39 @@ class TestClassifyTier1Llm:
         ]
 
         llm_return = self._make_llm_result(1, "equilibrium")
+        tree = scripted_tree()
 
-        with patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
-            new_callable=AsyncMock,
-            return_value=llm_return,
-        ):
-            with patch(
+        with (
+            patch(
+                "imas_codex.graph.dd_domain_classifier.decide_batch",
+                new=tree,
+            ),
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                return_value=llm_return,
+            ),
+            patch(
                 "imas_codex.llm.prompt_loader.render_prompt",
                 return_value="system-prompt",
-            ):
-                paths = [
-                    {
-                        "id": "equilibrium/time_slice/profiles_1d/psi",
-                        "node_category": "quantity",
-                        "description": "Poloidal flux",
-                        "units": "Wb",
-                    }
-                ]
-                results = await classify_tier1_llm(mock_gc, paths, model="test-model")
+            ),
+        ):
+            paths = [
+                {
+                    "id": "equilibrium/time_slice/profiles_1d/psi",
+                    "node_category": "quantity",
+                    "description": "Poloidal flux",
+                    "units": "Wb",
+                }
+            ]
+            results = await classify_tier1_llm(mock_gc, paths, model="test-model")
 
         assert len(results) >= 1
         assert results[0]["physics_domain"] == "equilibrium"
+        asked = [DOMAIN_QUESTION in call["questions"] for call in tree.calls]
+        assert asked == [False, True], (
+            f"the tier-1 test did not run both tree levels: {asked}"
+        )
 
     @pytest.mark.asyncio
     async def test_invalid_domain_falls_back_to_general(self, mock_gc):
@@ -689,17 +759,23 @@ class TestClassifyTier1Llm:
             ]
         )
 
-        with patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
-            new_callable=AsyncMock,
-            return_value=(bad_result, 0.001, {}),
-        ):
-            with patch(
+        with (
+            patch(
+                "imas_codex.graph.dd_domain_classifier.decide_batch",
+                new=scripted_tree(),
+            ),
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                return_value=(bad_result, 0.001, {}),
+            ),
+            patch(
                 "imas_codex.llm.prompt_loader.render_prompt",
                 return_value="system-prompt",
-            ):
-                paths = [{"id": "eq/ts/psi", "node_category": "quantity"}]
-                results = await classify_tier1_llm(mock_gc, paths, model="test-model")
+            ),
+        ):
+            paths = [{"id": "eq/ts/psi", "node_category": "quantity"}]
+            results = await classify_tier1_llm(mock_gc, paths, model="test-model")
 
         # Should fall back to general for any retry target
         assert any(r["physics_domain"] == "general" for r in results)
@@ -741,16 +817,22 @@ class TestClassifyTier1Llm:
                 return general_result, 0.001, {}
             return retry_result, 0.001, {}
 
-        with patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
-            side_effect=fake_llm,
-        ):
-            with patch(
+        with (
+            patch(
+                "imas_codex.graph.dd_domain_classifier.decide_batch",
+                new=scripted_tree(),
+            ),
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                side_effect=fake_llm,
+            ),
+            patch(
                 "imas_codex.llm.prompt_loader.render_prompt",
                 return_value="system-prompt",
-            ):
-                paths = [{"id": "eq/ts/psi", "node_category": "quantity"}]
-                results = await classify_tier1_llm(mock_gc, paths, model="test-model")
+            ),
+        ):
+            paths = [{"id": "eq/ts/psi", "node_category": "quantity"}]
+            results = await classify_tier1_llm(mock_gc, paths, model="test-model")
 
         # LLM was called at least twice (initial + retry)
         assert call_count["n"] >= 2
@@ -779,22 +861,28 @@ class TestClassifyTier1Llm:
 
         costs: list[float] = []
 
-        with patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
-            new_callable=AsyncMock,
-            return_value=llm_return,
-        ):
-            with patch(
+        with (
+            patch(
+                "imas_codex.graph.dd_domain_classifier.decide_batch",
+                new=scripted_tree(),
+            ),
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                return_value=llm_return,
+            ),
+            patch(
                 "imas_codex.llm.prompt_loader.render_prompt",
                 return_value="system-prompt",
-            ):
-                paths = [{"id": "eq/ts/psi", "node_category": "quantity"}]
-                await classify_tier1_llm(
-                    mock_gc,
-                    paths,
-                    model="test-model",
-                    on_cost=costs.append,
-                )
+            ),
+        ):
+            paths = [{"id": "eq/ts/psi", "node_category": "quantity"}]
+            await classify_tier1_llm(
+                mock_gc,
+                paths,
+                model="test-model",
+                on_cost=costs.append,
+            )
 
         assert len(costs) >= 1
 

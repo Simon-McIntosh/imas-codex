@@ -829,6 +829,7 @@ def _format_batch_user_prompt(batch: list[dict[str, Any]]) -> str:
         parts = [
             f"{i}. path: {p.get('id', p.get('path', '?'))}",
             f"   description: {p.get('description', 'N/A')}",
+            f"   documentation: {p.get('documentation', '')}",
             f"   units: {p.get('units', '')}",
             f"   parent_path: {p.get('parent_path', 'N/A')}",
             f"   parent_description: {p.get('parent_description', 'N/A')}",
