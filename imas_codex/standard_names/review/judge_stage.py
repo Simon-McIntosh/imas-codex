@@ -110,20 +110,18 @@ _CONCEPT_FORMS: dict[str, dict[str, Any]] = {
             "last_closed_flux_surface": (
                 "It describes the plasma boundary as the last closed flux "
                 "surface — the outermost closed magnetic flux surface of the "
-                "confined plasma. It may also give the diverted-configuration "
-                "name for that same surface as a synonym."
+                "confined plasma — and does not call it the term 'separatrix'."
             ),
-            "diverted_name_alone": (
-                "It names the plasma boundary only by the term 'separatrix' — "
-                "the surface bounding the confined plasma in a diverted "
-                "configuration — without describing it as the last closed flux "
-                "surface."
+            "separatrix_equated": (
+                "It calls the plasma boundary the term 'separatrix' — as a "
+                "synonym beside the last closed flux surface, or as the only "
+                "name given for it."
             ),
             "not_described": "It does not say what the plasma boundary is.",
         },
         "verdicts": {
             "last_closed_flux_surface": CANONICAL,
-            "diverted_name_alone": FORBIDDEN,
+            "separatrix_equated": FORBIDDEN,
             "not_described": ABSENT,
         },
     },
