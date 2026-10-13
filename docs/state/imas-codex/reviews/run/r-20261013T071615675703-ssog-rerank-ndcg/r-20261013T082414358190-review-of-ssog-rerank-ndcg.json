@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite gate logs: gate_base.log ends '18 passed' at 616897270 and gate_head.log ends '18 passed' at 508e53403, both EXIT=0 with no FAILED. added_failure_count is 0 and added_failure_ids is empty.",
+  "backend": "clive",
+  "base_log_revision": "6168972705c17a611cc0ee860d314497a5283ab4",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T08:41:42.001Z",
+  "dispatched_at": "2026-10-13T08:24:30Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-ndcg-run.py",
+      "line": "117",
+      "severity": "follow-on",
+      "text": "follow-on: bootstrap_ci draws values[draws] in the array's current order and the driver sorts the rows by diff at line 190 first, so the seed alone does not pin the interval \u2014 an independent implementation following the brief's 'resample item indices with replacement, seed 123' over the sheet's natural item order yields [0.113215, 0.241567] rather than the stored [0.114362, 0.243179], and neither is wrong but the record does not state that the interval is order-sensitive."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-ndcg-run.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the plan-slug token 'ssog' (sn-selection-over-generation) appears in all three filenames against the repository's ban on plan labels in filenames; the brief fixed these exact paths so the node could not rename them."
+    }
+  ],
+  "head_log_revision": "508e534032ea136ac056e92ad307ab029836e4ab",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read against base 616897270; the one commit 508e53403 adds the driver, the results JSON and the fragment HTML (620 insertions, no product source), validate_candidate refuses a non-integer grade or a non-positive rank, and my independent recomputation from the committed sheet reproduces mean_embedding 0.748642, mean_rerank 0.924940, mean_diff 0.176298 and w/t/l 23/2/5.",
+    "done_when": "the done_when (brief.md:58-71) asks the driver to write the results JSON and reproduce on a second run (logs with EXIT=), the fragment to report the figures and name the rubric commit and the excluded items, and tests/discovery/test_evaluation.py to pass at base and head recorded as baseline_suite and after_suite; gate_base.log and gate_head.log each end '18 passed' EXIT=0 and run1/2/3.log each end EXIT=0 with identical numbers.",
+    "goal": "the node goal (brief.md:1-13) is to compute labelled-only nDCG@10 before and after the comparator rerank on the 30-item sheet, and no LLM call; docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-ndcg-run.py:74 scores each item twice with sklearn.metrics.ndcg_score over embedding_rank and rerank_rank, so the goal is met.",
+    "manifest": "read; status complete, commit 508e534032e, changed_paths the three files, baseline_suite and after_suite both completed true with failure_count 0 at revisions 616897270 and 508e534032e, negative_control: none with the reason the write scope holds no test file.",
+    "write_paths": "the brief declares three write paths (brief.md:73-77); git show --stat 508e53403 lists exactly ssog-rerank-ndcg-run.py, ssog-rerank-ndcg-results.json and ssog-rerank-ndcg.html, so the diff sits inside the fence."
+  },
+  "justifications": {
+    "durability": "the write scope includes no test file and the diff adds no assertion, so no test reddens if the driver's scoring regresses; only the three identical run logs evidence reproducibility, which is a determinism check rather than a regression guard.",
+    "evidence": "gate_base.log and gate_head.log each end '18 passed' EXIT=0 at the revisions they name and the driver's own run1/2/3.log each end EXIT=0 with identical numbers, which my independent recomputation from the committed ssog-rerank-label-sheet.json reproduces in full.",
+    "fit": "the driver follows the sibling evidence-script idiom of ssog-rerank-label-sheet-run.py (module docstring, argparse main, SEED and BOUNDARY_FAMILY constants); the three filenames carry the plan-slug token 'ssog' the brief mandated.",
+    "goal_fidelity": "ssog-rerank-ndcg-run.py:74 calls ndcg_score over both ranks and the committed ssog-rerank-ndcg-results.json carries mean_ndcg_embedding 0.748642 and mean_ndcg_rerank 0.924940 over the 30 items, exactly the first figure \u00a74's done-when asks for.",
+    "reuse": "the metric delegates to sklearn.metrics.ndcg_score, matching imas_codex/discovery/base/evaluation.py:8's delegation idiom, and bootstrap_ci (run.py:105) computes a mean-of-per-item-differences interval that evaluation.py bootstrap_interval cannot, because that owner hard-codes roc_auc and refuses a single-class sample, so no owner is forked.",
+    "scope_discipline": "git show --stat 508e53403 lists only the three declared write paths, so no path outside the fence is touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal (brief.md:1-13) is to compute labelled-only nDCG@10 before and after the comparator rerank on the 30-item sheet, and no LLM call; docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-ndcg-run.py:74 scores each item twice with sklearn.metrics.ndcg_score over embedding_rank and rerank_rank, so the goal is met.\nVERDICT done_when: the done_when (brief.md:58-71) asks the driver to write the results JSON and reproduce on a second run (logs with EXIT=), the fragment to report the figures and name the rubric commit and the excluded items, and tests/discovery/test_evaluation.py to pass at base and head recorded as baseline_suite and after_suite; gate_base.log and gate_head.log each end '18 passed' EXIT=0 and run1/2/3.log each end EXIT=0 with identical numbers.\nVERDICT write_paths: the brief declares three write paths (brief.md:73-77); git show --stat 508e53403 lists exactly ssog-rerank-ndcg-run.py, ssog-rerank-ndcg-results.json and ssog-rerank-ndcg.html, so the diff sits inside the fence.\nVERDICT manifest: read; status complete, commit 508e534032e, changed_paths the three files, baseline_suite and after_suite both completed true with failure_count 0 at revisions 616897270 and 508e534032e, negative_control: none with the reason the write scope holds no test file.\nVERDICT diff: read against base 616897270; the one commit 508e53403 adds the driver, the results JSON and the fragment HTML (620 insertions, no product source), validate_candidate refuses a non-integer grade or a non-positive rank, and my independent recomputation from the committed sheet reproduces mean_embedding 0.748642, mean_rerank 0.924940, mean_diff 0.176298 and w/t/l 23/2/5.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: ssog-rerank-ndcg-run.py:74 calls ndcg_score over both ranks and the committed ssog-rerank-ndcg-results.json carries mean_ndcg_embedding 0.748642 and mean_ndcg_rerank 0.924940 over the 30 items, exactly the first figure \u00a74's done-when asks for.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate_base.log and gate_head.log each end '18 passed' EXIT=0 at the revisions they name and the driver's own run1/2/3.log each end EXIT=0 with identical numbers, which my independent recomputation from the committed ssog-rerank-label-sheet.json reproduces in full.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 508e53403 lists only the three declared write paths, so no path outside the fence is touched.\nSCORE durability: 12\nJUSTIFICATION durability: the write scope includes no test file and the diff adds no assertion, so no test reddens if the driver's scoring regresses; only the three identical run logs evidence reproducibility, which is a determinism check rather than a regression guard.\nSCORE fit: 17\nJUSTIFICATION fit: the driver follows the sibling evidence-script idiom of ssog-rerank-label-sheet-run.py (module docstring, argparse main, SEED and BOUNDARY_FAMILY constants); the three filenames carry the plan-slug token 'ssog' the brief mandated.\nSCORE reuse: 17\nJUSTIFICATION reuse: the metric delegates to sklearn.metrics.ndcg_score, matching imas_codex/discovery/base/evaluation.py:8's delegation idiom, and bootstrap_ci (run.py:105) computes a mean-of-per-item-differences interval that evaluation.py bootstrap_interval cannot, because that owner hard-codes roc_auc and refuses a single-class sample, so no owner is forked.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-ndcg-run.py:117 follow-on: bootstrap_ci draws values[draws] in the array's current order and the driver sorts the rows by diff at line 190 first, so the seed alone does not pin the interval \u2014 an independent implementation following the brief's 'resample item indices with replacement, seed 123' over the sheet's natural item order yields [0.113215, 0.241567] rather than the stored [0.114362, 0.243179], and neither is wrong but the record does not state that the interval is order-sensitive.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-ndcg-run.py:1 follow-on: the plan-slug token 'ssog' (sn-selection-over-generation) appears in all three filenames against the repository's ban on plan labels in filenames; the brief fixed these exact paths so the node could not rename them.",
+  "review_run_id": "r-20261013T082414358190-review-of-ssog-rerank-ndcg",
+  "reviewed_base_sha": "6168972705c17a611cc0ee860d314497a5283ab4",
+  "reviewed_head_sha": "508e534032ea136ac056e92ad307ab029836e4ab",
+  "reviewed_run_id": "r-20261013T071615675703-ssog-rerank-ndcg",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T08:37:04Z",
+  "total": 104,
+  "verdict": "SOUND WITH FINDINGS"
+}
