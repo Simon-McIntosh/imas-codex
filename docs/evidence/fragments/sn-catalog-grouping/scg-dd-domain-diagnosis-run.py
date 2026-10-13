@@ -240,7 +240,6 @@ async def main() -> None:
         "snapshot_after": after,
         "scores": scores,
         "rows": rows,
-        "fresh_by_path": fresh,
     }
     RESULTS.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n")
     print("SCORES " + json.dumps(scores, sort_keys=True), flush=True)
