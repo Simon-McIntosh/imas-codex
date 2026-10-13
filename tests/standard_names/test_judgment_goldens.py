@@ -4,14 +4,17 @@ from __future__ import annotations
 
 import re
 from collections import Counter, defaultdict
+from copy import deepcopy
 
 import pytest
 
 from imas_codex.discovery.base.evaluation import load_labelled_fixture
 from imas_codex.standard_names.judgment_goldens import (
     OUTPUT,
+    _finish,
     _row,
     _west_verdicts,
+    assign_group_splits,
     build_documentation_sheet,
     write_sheet,
 )
@@ -85,6 +88,25 @@ def test_rows_naming_one_item_share_canonical_unit() -> None:
     assert any(len(units) > 1 for units in units_by_name.values())
     assert all(len(canonical) == 1 for canonical in canonical_by_name.values())
     assert len({row["canonical_unit"] for row in rows}) < len(rows)
+
+
+def test_finished_rows_use_shared_group_split_rule() -> None:
+    groups = ("alpha", "beta", "gamma", "delta", "alpha")
+    rows = [
+        _row(f"fixture/{index}", 0, "fixture", "fixture", group=group)
+        for index, group in enumerate(groups)
+    ]
+    expected = {
+        "alpha": "calibration",
+        "beta": "calibration",
+        "gamma": "validation",
+        "delta": "validation",
+    }
+    assert assign_group_splits(rows, "copy_group") == expected
+    finished = _finish(deepcopy(rows), _StubGraph([]))
+    assert {row["unit"]: row["split"] for row in finished} == {
+        row["unit"]: expected[row["copy_group"]] for row in rows
+    }
 
 
 def test_name_golden_admits_no_binding_positive() -> None:
