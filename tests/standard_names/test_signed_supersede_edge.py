@@ -202,6 +202,64 @@ def test_supersede_postcondition_refuses_missing_signed_edge() -> None:
         )
 
 
+def _loaded_supersede_authority() -> signed_manifest._Authority:
+    """A one-row supersede authority whose mutation names ``_SUCCESSOR``."""
+    row = signed_manifest._LoadedRow(
+        id=_ROW_ID,
+        identity={"target_id": _PREDECESSOR},
+        participants=({"id": _PREDECESSOR, "kind": "node"},),
+        mutations=(
+            {
+                "kind": "supersede",
+                "participant_id": _PREDECESSOR,
+                "arguments": {"successor_id": _SUCCESSOR},
+            },
+        ),
+        guards=(),
+        orphan_policy="refuse",
+    )
+    return signed_manifest._Authority(
+        data={},
+        operation_id=_OPERATION,
+        rows=(row,),
+        receipt_policy={},
+        file_sha256="",
+        payload_sha256="",
+    )
+
+
+def test_supersede_postcondition_refuses_edge_to_a_different_successor() -> None:
+    """One stamped edge is not enough when it points at the wrong successor.
+
+    The count and receipt clauses are satisfied here — exactly one successor
+    edge carries the minting receipt — so a refusal can only come from the
+    ``successor_ids`` comparison. With that comparison removed the postcondition
+    accepts the edge and this test fails.
+    """
+    authority = _loaded_supersede_authority()
+    manifest_sha256 = "0" * 64
+    minted_receipt_id = _change_id(manifest_sha256, _ROW_ID)
+
+    class _WrongSuccessorEdge:
+        def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+            if "RETURN node.name_stage AS name_stage" in cypher:
+                return [{"name_stage": "superseded", "status": "superseded"}]
+            if "RETURN collect(relationship.receipt_id)" in cypher:
+                return [
+                    {
+                        "receipt_ids": [minted_receipt_id],
+                        "successor_ids": [_STRAY_SUCCESSOR],
+                        "count": 1,
+                    }
+                ]
+            raise AssertionError(f"unexpected postcondition query: {cypher}")
+
+    with pytest.raises(SignedManifestConflict, match="successor edge"):
+        signed_manifest._verify_postconditions(
+            _WrongSuccessorEdge(), authority, [_ROW_ID], manifest_sha256
+        )
+
+
 def _apply(
     client: GraphClient, authority_path: Path, file_sha256: str, payload_sha256: str
 ) -> dict[str, Any]:

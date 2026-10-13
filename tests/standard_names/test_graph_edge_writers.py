@@ -113,7 +113,7 @@ def _write_cyphers(mock_gc: MagicMock, keyword: str) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-class TestG1:
+class TestHasParentEdgeFromOneBatch:
     """Write electron_temperature and maximum_of_electron_temperature in one batch.
 
     ``(maximum_of_electron_temperature)-[:HAS_PARENT {operator:'maximum'}]->(electron_temperature)``
@@ -165,7 +165,7 @@ class TestG1:
 # ---------------------------------------------------------------------------
 
 
-class TestG2:
+class TestHasParentForwardReference:
     """Write child first, admissible parent in a later batch.
 
     After the second batch the edge must still be present (MERGE idempotent
@@ -222,7 +222,7 @@ class TestG2:
 # ---------------------------------------------------------------------------
 
 
-class TestG3:
+class TestHasErrorEdgeDirection:
     """Write upper_uncertainty_of_temperature alone.
 
     ``(temperature)-[:HAS_ERROR {error_type:'upper'}]->(upper_uncertainty_of_temperature)``
@@ -261,7 +261,7 @@ class TestG3:
 # ---------------------------------------------------------------------------
 
 
-class TestG4:
+class TestHasParentBinaryOperatorEdges:
     """Write ratio_of_electron_temperature_to_ion_temperature.
 
     Two HAS_PARENT edges with role a/b — uses qualifier-bearing parents
@@ -305,7 +305,7 @@ class TestG4:
 # ---------------------------------------------------------------------------
 
 
-class TestG5:
+class TestEdgeWritersUseMerge:
     """Write same batch twice → edge Cypher is MERGE-based (idempotent)."""
 
     def test_has_argument_cypher_uses_merge(self) -> None:
@@ -692,7 +692,7 @@ def test_bootstrap_transaction_rolls_back_partial_parent(
 # ---------------------------------------------------------------------------
 
 
-class TestG7:
+class TestHasPredecessorFromDeprecates:
     """Write StandardName with ``deprecates`` field → HAS_PREDECESSOR edge."""
 
     def test_has_predecessor_edge_pipeline(self) -> None:
@@ -733,7 +733,7 @@ class TestG7:
 # ---------------------------------------------------------------------------
 
 
-class TestG8:
+class TestSuccessorEdgeOwnedBySignedSupersede:
     """The generic writer cannot mint a successor edge from its payload."""
 
     def test_successor_payload_does_not_write_signed_edge(self) -> None:
@@ -755,7 +755,7 @@ class TestG8:
 # ---------------------------------------------------------------------------
 
 
-class TestG9:
+class TestInClusterEdgeFromPrimaryCluster:
     """Write StandardName with ``primary_cluster_id`` → IN_CLUSTER edge."""
 
     def test_in_cluster_edge_emitted(self) -> None:
@@ -804,7 +804,7 @@ class TestG9:
 # ---------------------------------------------------------------------------
 
 
-class TestG10:
+class TestHasPhysicsDomainEdge:
     """Write StandardName with ``physics_domain='equilibrium'``
     → HAS_PHYSICS_DOMAIN edge to singleton PhysicsDomain {id:'equilibrium'}.
     """
