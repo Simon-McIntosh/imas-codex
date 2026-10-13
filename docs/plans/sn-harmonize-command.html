@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-house-style#s4&quot;],&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;,&quot;sn-harmonize-command#s5&quot;,&quot;sn-harmonize-command#s6&quot;,&quot;sn-harmonize-command#s7&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="44">
+<meta name="plan-version" content="45">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -209,7 +209,7 @@
     </p>
 
     <h2 id="s5">§5 — The report resolves link targets against the whole graph</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>The §2 report built its link-target lookup from the scoped names only. On the 17-member family, 19 valid references to names outside the family counted as dead links (<a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-convergence-diagnosis.html">diagnosis</a>). A target is dead only when no <code>StandardName</code> anywhere carries it. The lookup in <code>imas_codex/standard_names/review/audits.py</code> reads the graph-wide name set, and the scoped set stays the scope of what is reported. This is a report-surface fix, so it belongs beside §2; no write path can repair a counting defect in the report.</p><p><strong>Done when:</strong> a test with a two-member scope linking to a third name outside it reports no dead link when the graph carries the third name, and one dead link when it does not. The test fails with the graph-wide set ignored, and that red run is recorded as the negative control.</p>
 
     <h2 id="s6">§6 — The opening and the equation are written, then checked</h2>
@@ -338,6 +338,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-score-regression-landed" data-who="reckon-build" data-when="2026-10-13T06:56:00Z">
     <div class="r-comment-body"><p>The score report landed (merge <code>05fceac43</code>, review 110/120): an apply names each member below the 0.85 acceptance threshold and each whose documentation score fell, with both scores. §4 stays open for its measurement on a real scope, which the live apply in §3 will supply. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s4-score-regression">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
+    <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
 </div>
 </section>
 </main>
