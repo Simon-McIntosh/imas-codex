@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;,&quot;s24&quot;:&quot;done&quot;,&quot;s25&quot;:&quot;done&quot;,&quot;s26&quot;:&quot;deferred&quot;,&quot;s27&quot;:&quot;deferred&quot;,&quot;s28&quot;:&quot;implementable&quot;,&quot;s29&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;,&quot;s21&quot;:&quot;implementable&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;implementable&quot;,&quot;s24&quot;:&quot;done&quot;,&quot;s25&quot;:&quot;done&quot;,&quot;s26&quot;:&quot;deferred&quot;,&quot;s27&quot;:&quot;deferred&quot;,&quot;s28&quot;:&quot;implementable&quot;,&quot;s29&quot;:&quot;implementable&quot;}">
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="81">
+<meta name="plan-version" content="82">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -133,7 +133,7 @@
 <p>The restore composer now refuses an archived origin (<code>imas_codex/cli/sn.py</code>, "archive reconstruction origin must be stated at compose time"), where the recorded defect carried it through. No test pins it.</p><p><strong>Done when:</strong> a test composes a restore from an archive carrying <code>origin: catalog_edit</code> and sees the refusal, and fails with the refusal removed.</p>
 
     <h2 id="s10">§10 — The name gate admits a one-word family anchor</h2>
-<section data-reckon="section" data-id="s10" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s10" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>A one-word family anchor cannot clear the name gate (census, §4 grammar-refinement row; no owning reader). The gate is on the <code>sn edit</code> path WEST repairs take.</p><p><strong>Done when:</strong> a one-word anchor that the grammar parses clears the gate in a test, a one-word token the grammar rejects still fails it, and the first test fails with the fix reverted.</p>
 
     <h2 id="s11">§11 — A fold onto an occupied identity keeps the richer prose</h2>
@@ -406,6 +406,9 @@
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261013T005534954997-review-of-sib-name-gate-e2e-821234427bb9" data-who="reckon-build" data-when="2026-10-13T01:08:32.873Z">
     <div class="r-comment-body"><p>review of r-20261013T003907957431-sib-name-gate-e2e stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T003907957431-sib-name-gate-e2e.at-821234427bb90f49edf836fb4d09c8afa8e789a8.json (base 57726eec9523e6e95579518f7c132571526914eb, head 821234427bb90f49edf836fb4d09c8afa8e789a8) — status parsed, six dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 19, durability 17, fit 19, reuse 20; total 111), added_failure_count 0 (0 added failure ids), two follow-on findings</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-close-s10" data-who="reckon-build" data-when="2026-10-13T01:12:00Z">
+    <div class="r-comment-body"><p>§10 closed. Commit <code>07486c695</code> had already fixed the one-word anchor gate a month before the census carried it as open, and all three properties are now pinned end to end. The rejected-token case was added in merge <code>ee063944f</code>; reviews 106 and 111/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s10-gate-e2e">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261013T002423146729-sib-sanctioned-holes-repro" data-who="reckon-build" data-when="2026-10-13T00:49:08.485Z">
     <div class="r-comment-body"><p>report at /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-sanctioned-holes-repro.html (test node: no repository file changed, no commit). The report carries one row per hole — reproduction verdict with throwaway-test EXIT and refusal text, precondition file:line, ordering-accident vs protective classification with the guard-introduction commit, and the proposed smallest repair with the files it would touch.</p></div>

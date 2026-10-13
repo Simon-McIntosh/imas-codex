@@ -110,6 +110,11 @@
     <p>The §6 census carried "a one-word family anchor cannot clear the name gate" as still true. Commit <code>07486c695</code> (2026-09-05) had already fixed it: <code>semantic_gate_name_text</code> in <code>imas_codex/standard_names/workers.py</code> scores a single-token name against its vocabulary definition, and <code>tests/standard_names/test_name_gate_definition_floor.py</code> pins it. A test node mapped the done-when onto the existing tests without changing the repository:</p><ul><li>parsed one-word anchor clears the gate: <code>test_gate_embeds_the_definition_and_clears_the_floor</code>;</li><li>rejected or undefined token still fails: shown only at the substitution boundary, by <code>test_unparseable_name_falls_through_to_the_identifier</code> and <code>test_undefined_token_falls_through_and_fails_closed</code>;</li><li>fails with the fix reverted: with the substitution stubbed to return the name, 8 of 13 fail, EXIT=1.</li></ul><p>Head: 13 passed. Independent review 106/120. The second property's end-to-end test is a follow-on node.</p>
   </section>
 
+  <section id="s10-gate-e2e">
+    <h2>§10 — a rejected or undefined one-word token fails the name gate end to end</h2>
+    <p><code>test_unresolved_one_word_token_fails_the_gate</code> in <code>tests/standard_names/test_name_gate_definition_floor.py</code> takes two tokens, one the strict grammar rejects (<code>quux</code>) and one it parses but the vocabulary leaves undefined (<code>capacitance</code>). It drives each through <code>semantic_gate_name_text</code> and <code>semantic_similarity_check</code>, and shows each keeps its identifier text, scores below the unchanged 0.55 floor and returns its issues. That pins the second property end to end; the first and third were already pinned by commit <code>07486c695</code>. The file passes 15 at head <code>821234427</code> against 13 at base. With the gate text forced to define every token, both new cases fail (EXIT=1). Merge <code>ee063944f</code>; independent review 111/120.</p>
+  </section>
+
 </main>
 </body>
 </html>
