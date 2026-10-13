@@ -18,7 +18,8 @@ RUN = Path(
     "r-20261013T050740598849-scg-near-duplicate-worklist"
 )
 SOURCES = ROOT / "imas_codex/standard_names/manifests/west_production_dd_paths.yaml"
-PROGRESS = RUN / "worklist-progress.json"
+PROGRESS = RUN / "worklist-segment-values-progress.json"
+PREVIOUS = RUN / "worklist-progress.json"
 
 
 def read_names(graph: GraphClient) -> list[dict]:
@@ -76,6 +77,9 @@ async def run() -> None:
         raise RuntimeError("No pairs found despite the positive accepted-name census")
 
     model = get_model("sn-judge")
+    previous_spend = (
+        json.loads(PREVIOUS.read_text())["spent"] if PREVIOUS.exists() else 0.0
+    )
     if PROGRESS.exists():
         progress = json.loads(PROGRESS.read_text())
         if progress["pairs"] != [[pair["left"], pair["right"]] for pair in all_pairs]:
@@ -98,7 +102,11 @@ async def run() -> None:
     while len(judged) < len(all_pairs):
         batch = all_pairs[len(judged) : len(judged) + 10]
         if pilot_cost is not None:
-            projected = spent + (pilot_cost / min(10, len(all_pairs))) * len(batch)
+            projected = (
+                previous_spend
+                + spent
+                + (pilot_cost / min(10, len(all_pairs))) * len(batch)
+            )
             if projected > 1.50:
                 print(
                     f"budget_stop spent={spent:.6f} next_projected={projected:.6f}",
@@ -114,7 +122,7 @@ async def run() -> None:
         spent += cost
         if pilot_cost is None:
             pilot_cost = cost
-            extrapolated = cost / len(batch) * len(all_pairs)
+            extrapolated = previous_spend + cost / len(batch) * len(all_pairs)
             print(
                 f"pilot_pairs={len(batch)} pilot_cost_usd={cost:.6f} extrapolated_usd={extrapolated:.6f}",
                 flush=True,
@@ -129,7 +137,26 @@ async def run() -> None:
                 }
             )
         )
-        if len(judged) == len(batch) and cost / len(batch) * len(all_pairs) > 1.50:
+        if len(judged) == len(batch):
+            changed = [
+                value
+                for item in answer
+                for segment, value in item["segment_judgments"].items()
+                if segment in item["divergent_segments"]
+            ]
+            unchanged = [
+                value
+                for item in answer
+                for segment, value in item["segment_judgments"].items()
+                if segment not in item["divergent_segments"]
+            ]
+            separation = sum(changed) / len(changed) - sum(unchanged) / len(unchanged)
+            print(f"pilot_segment_noul_separation={separation:.3f}", flush=True)
+            if separation < 0.2:
+                raise RuntimeError(
+                    "Segment judgments do not distinguish changed from unchanged grammar values"
+                )
+        if len(judged) == len(batch) and extrapolated > 1.50:
             print("budget_stop after pilot", flush=True)
             raise RuntimeError("Full judgment extrapolates above USD 1.50")
         print(
@@ -167,7 +194,8 @@ async def run() -> None:
         "other_pairs": len(other),
         "overlaps": len({pair["overlap"] for pair in judged}),
         "pilot_cost_usd": pilot_cost,
-        "total_cost_usd": spent,
+        "total_cost_usd": previous_spend + spent,
+        "current_judgment_cost_usd": spent,
         "pairs": other,
     }
     (HERE / "scg-near-duplicate-worklist.json").write_text(
@@ -175,7 +203,8 @@ async def run() -> None:
     )
     (RUN / "west-worklist.json").write_text(json.dumps(west, indent=2) + "\n")
     print(
-        f"complete west={len(west)} other={len(other)} cost_usd={spent:.6f}", flush=True
+        f"complete west={len(west)} other={len(other)} cost_usd={previous_spend + spent:.6f}",
+        flush=True,
     )
 
 

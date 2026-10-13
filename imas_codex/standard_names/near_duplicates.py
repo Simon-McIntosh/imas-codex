@@ -188,9 +188,10 @@ def _questions() -> dict[str, Any]:
         questions[f"differs_{segment}"] = {
             "type": "noul",
             "instructions": (
-                f"Do these names differ in the meaning of their {segment.replace('_', ' ')} "
-                "grammar segment? Answer high for a meaningful difference and low "
-                "for the same meaning in different words."
+                f"Compare only grammar_segments.left.{segment} with "
+                f"grammar_segments.right.{segment}. Answer the probability that "
+                "these two segment values differ. Exact equality means no, even "
+                "when other segments or the full names differ."
             ),
         }
     return questions
@@ -205,6 +206,10 @@ async def judge_worklist(
             "left": {"name": pair["left"], "description": pair["description_left"]},
             "right": {"name": pair["right"], "description": pair["description_right"]},
             "unit": pair["unit"],
+            "grammar_segments": {
+                "left": _grammar_parts(pair["left"]),
+                "right": _grammar_parts(pair["right"]),
+            },
             "divergent_segments": pair["divergent_segments"],
         }
         for pair in pairs

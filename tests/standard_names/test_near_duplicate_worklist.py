@@ -50,6 +50,11 @@ def test_worklist_filters_units_threshold_and_groups_overlaps(monkeypatch):
         assert service == "standard-names"
         assert len(states) == 2
         assert len(questions) == 7
+        assert (
+            states[0]["grammar_segments"]["left"]["subject"]
+            != states[0]["grammar_segments"]["right"]["subject"]
+        )
+        assert "Exact equality means no" in questions["differs_subject"]["instructions"]
         return [
             (
                 {
