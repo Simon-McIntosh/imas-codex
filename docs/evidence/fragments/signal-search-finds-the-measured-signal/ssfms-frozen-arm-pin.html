@@ -1,0 +1,28 @@
+<section id="ssfms-frozen-arm-pin" data-plan="signal-search-finds-the-measured-signal" data-node="ssfms-frozen-arm-pin">
+  <h3>ssfms-frozen-arm-pin — pin the frozen additive-rule arm to its formula</h3>
+  <p id="ssfms-frozen-arm-pin-landing">
+    The product ranking moved to rank fusion, so the old pin that asserted
+    <code>additive_rule</code> equals <code>current_tool</code> was necessarily
+    false and is retired. <code>_additive_rank</code> in
+    <code>tests/llm/test_signal_search_goldens.py</code> now takes the fixed
+    vector ids, their scores and the full-text rows directly and applies
+    0.7&#215;cosine + 0.3&#215;text + 0.1 to a shared hit, the text score alone
+    to a text-only hit, and four-argument
+    <code>_additive_rank(vector_ids, vector_scores, text_rows, k)</code>. The
+    graph fetch moved to <code>_additive_streams</code>, so the
+    <code>additive_rule</code> arm still measures the pre-fusion order.
+    Replaced <code>test_the_frozen_additive_rule_reproduces_the_product_ranking</code>
+    with <code>test_the_frozen_additive_rule_ranks_fixed_streams_by_that_formula</code>,
+    which needs no graph.
+  </p>
+  <p id="ssfms-frozen-arm-pin-measure">
+    Measure: on fixed streams (<code>sig:v1</code> cosine 0.9, <code>sig:v2</code>
+    0.5, <code>sig:v3</code> 0.4; text-only <code>sig:t1</code> score 2.0) the
+    rule orders <code>[sig:t1, sig:v1, sig:v2, sig:v3]</code> and cuts at
+    <code>K</code> — the text-only hit leads, the shared hits follow by
+    combined score, the vector-only tail is cut. The no-graph subset passes
+    (<code>8 passed, 3 deselected, EXIT=0</code>). The declared mutation (the
+    rule changed to the fused order) fails the test
+    (<code>EXIT=1</code>, one failing id).
+  </p>
+</section>
