@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own baseline_suite and after_suite. Baseline gate-base.log revision aae4cf82bf3f2c82ebdfb7677d81b04c4a5e5628: 22 passed EXIT=0, failure_ids []. Head gate-after.log revision db0ce7665ed5448cab88105214ebd6593e179c09: 43 passed EXIT=0, failure_ids []. Neither arm carries a failing id, so the added-failure count is zero.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-name-review-build uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_jev_name_review.py tests/standard_names/test_review_checks.py tests/discovery/test_judgment.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T112336580366-srtj-name-review-build/gate-after.log",
+    "revision": "db0ce7665ed5448cab88105214ebd6593e179c09"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261013T112336580366-srtj-name-review-build/srtj-base-3855454 uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_review_checks.py tests/discovery/test_judgment.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T112336580366-srtj-name-review-build/gate-base.log",
+    "revision": "aae4cf82bf3f2c82ebdfb7677d81b04c4a5e5628"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T12:35:37.596Z",
+  "dispatched_at": "2026-10-13T12:21:04Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-name-review-build.html",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: the fragment is the done_when's named durable record of the live smoke, but it carries only prose and records neither the two names' answers nor the booked cost, so the smoke evidence exists only in the run directory and the landing record cannot reconcile with its own done_when."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "87",
+      "severity": "follow-on",
+      "text": "follow-on: the comment states a Choice check whose options cannot be split is refused at table construction, but no such refusal exists in name_question_table or _question_def, so a taxonomy Choice that authors a defective form first would be mis-decided with no error."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "500",
+      "severity": "follow-on",
+      "text": "follow-on: an audit-decided check is recorded answered True whenever it runs, even when no audit_report was supplied, so an unevaluated audit check reads as evaluated-and-passing; the smoke drove review_names with no audit_report, so its audit checks reported clean on a golden-A name."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "VERDICT call_sites: no production call site reaches jev_review; grep for jev_review and review_names across imas_codex/ returns none, matching the brief that nothing in the pipeline calls it yet.",
+    "diff": "VERDICT diff: read commit by commit against base aae4cf82; db0ce7665 adds jev_review.py and test_jev_name_review.py, 45efcf0b adds the 16-line landing fragment.",
+    "done_when": "VERDICT done_when: the done_when names four stubbed-call behaviours plus a live smoke on two golden-A names recorded in the fragment; tests/standard_names/test_jev_name_review.py covers the four (negative control 10 failed EXIT=1) and the smoke ran at cost_usd 0.0001407, but the fragment does not record the answers or the booked cost the done_when requires.",
+    "goal": "VERDICT goal: the node goal is a name-axis Jev review built as one state builder plus a taxonomy-read question table and a batch entry point, builders nothing calls; imas_codex/standard_names/review/jev_review.py:175 build_name_state, :239 name_question_table and :396 review_names are the delivered pieces.",
+    "manifest": "VERDICT manifest: read; status complete, commits db0ce7665 and 45efcf0b, 43 passed EXIT=0 recorded, with baseline_suite (revision aae4cf82, exit 0, completed true) and after_suite (revision db0ce7665, exit 0, completed true) populated.",
+    "write_paths": "VERDICT write_paths: the manifest declares jev_review.py, test_jev_name_review.py, the srtj fragment and a docs/figures directory; the base..head diff touches exactly the three declared files and nothing else."
+  },
+  "justifications": {
+    "durability": "negative_control.log (10 failed EXIT=1) reddens four guards when removed, but no test covers an audit check with no audit_report supplied.",
+    "evidence": "tests/standard_names/test_jev_name_review.py plus test_audit_decided_check_contributes_its_finding_with_no_question leave the no-report audit branch uncovered; add the smoke refusal.",
+    "fit": "jev_review.py follows the judge_stage.py idiom, but the comment at imas_codex/standard_names/review/jev_review.py:87 describes a table-construction refusal no code implements.",
+    "goal_fidelity": "imas_codex/standard_names/review/jev_review.py:396 review_names returns per-item decisions, per-dimension categories, per-check answers and the booked cost, which is what the node goal states.",
+    "reuse": "the module extends checks.py:246, judgment.py:230 decide_batch and context.py:1074; the dimension scale at jev_review.py:106 has no prior owner in the tree.",
+    "scope_discipline": "the base..head diff touches only the three declared write paths, with no file outside them."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is a name-axis Jev review built as one state builder plus a taxonomy-read question table and a batch entry point, builders nothing calls; imas_codex/standard_names/review/jev_review.py:175 (build_name_state), :239 (name_question_table) and :396 (review_names) are the delivered pieces.\nVERDICT done_when: the done_when names four stubbed-call behaviours plus a live smoke on two golden-A names recorded in the fragment; tests/standard_names/test_jev_name_review.py covers the four (negative control 10 failed EXIT=1) and the smoke ran live at cost_usd 0.0001407, but the fragment docs/evidence/fragments/sn-review-through-jev/srtj-name-review-build.html does not record the answers or the booked cost the done_when requires.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/review/jev_review.py, tests/standard_names/test_jev_name_review.py, the srtj fragment and a docs/figures directory; the base..head diff touches exactly the three declared files and nothing else.\nVERDICT manifest: read; status complete, commits db0ce7665 and 45efcf0b, 43 passed EXIT=0 recorded, with both baseline_suite (revision aae4cf82, exit_status 0, completed true) and after_suite (revision db0ce7665, exit_status 0, completed true) populated.\nVERDICT diff: read commit by commit against the base aae4cf82; db0ce7665 adds jev_review.py (525 lines) and test_jev_name_review.py (403 lines), 45efcf0b adds the 16-line landing fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/jev_review.py:396 review_names returns per-item decisions, per-dimension categories, per-check answers and the booked cost, which is what the node goal states.\nSCORE evidence: 13\nJUSTIFICATION evidence: tests/standard_names/test_jev_name_review.py:154..339 and gate-after.log (43 passed, EXIT=0) measure the done_when's four behaviours, but the fragment at docs/evidence/fragments/sn-review-through-jev/srtj-name-review-build.html records neither the smoke answers nor its cost, both repositories and the brief told me the fragment was their only durable landing record.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the base..head diff (git diff --stat aae4cf82 45efcf0b) touches only the three declared write paths, with no file outside them.\nSCORE durability: 16\nJUSTIFICATION durability: the negative control (negative_control.log, 10 failed EXIT=1) shows the unknown-marking, question-table, decision-derivation and sibling-rerank guards each redden when removed, but no test covers the audit-decided branch with no audit_report supplied.\nSCORE fit: 15\nJUSTIFICATION fit: jev_review.py follows the judge_stage.py idiom (module SERVICE/COST_STEP constants, decide_batch reuse), but the comment at imas_codex/standard_names/review/jev_review.py:87 describes a Choice-defect table and a construction-time refusal that no code implements.\nSCORE reuse: 19\nJUSTIFICATION reuse: the module extends the taxonomy loader (checks.py:246), the decisions owner (judgment.py:230 decide_batch) and the comparator reranker (context.py:1074), and the dimension category scale at jev_review.py:106 has no prior owner in the tree.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-name-review-build.html:1 blocking: the fragment is the done_when's named durable record of the live smoke, but it carries only prose and records neither the two names' answers nor the booked cost, so the smoke evidence exists only in the run directory and the landing record cannot reconcile with its own done_when.\nFINDING imas_codex/standard_names/review/jev_review.py:87 follow-on: the comment states that a Choice check whose options cannot be split is refused at table construction, but no such refusal exists in name_question_table or _question_def, so a taxonomy Choice that authors a defective form first would be mis-decided with no error.\nFINDING imas_codex/standard_names/review/jev_review.py:500 follow-on: an audit-decided check is recorded answered True whenever it runs, even when no audit_report was supplied, so an unevaluated audit check reads as evaluated-and-passing; the smoke drove review_names with no audit_report, so its three audit checks reported clean on a golden-A name, inverting the module's own unknown-is-not-empty principle.",
+  "review_run_id": "r-20261013T122049966348-review-of-srtj-name-review-build-45efcf0bc8e2",
+  "reviewed_base_sha": "aae4cf82bf3f2c82ebdfb7677d81b04c4a5e5628",
+  "reviewed_head_sha": "45efcf0bc8e27341e6cc092506bed9e3745a63c2",
+  "reviewed_run_id": "r-20261013T112336580366-srtj-name-review-build",
+  "scores": {
+    "durability": 16,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T12:33:53Z",
+  "total": 101,
+  "verdict": "SOUND WITH FINDINGS"
+}
