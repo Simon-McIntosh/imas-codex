@@ -2040,7 +2040,7 @@ async def _reranked_nearby_comparators(
     nearby: list[dict],
     *,
     phase: str,
-) -> list[dict]:
+) -> tuple[list[dict], float]:
     """Rerank a compose batch's comparator block and book what it spent.
 
     The rerank is billed by the judge seat, and its price is only known once it
@@ -2052,17 +2052,53 @@ async def _reranked_nearby_comparators(
     The switch is read before the lease is opened, so the off path books
     nothing at all — no reservation, no charge — and a batch run without the
     rerank touches the budget exactly as it did before the switch existed.
+
+    Returns ``(block, cost)``; ``cost`` is what the lease charged, ``0.0`` when
+    the switch is off or no lease could be opened.
     """
     from imas_codex.standard_names.context import comparator_rerank_enabled
 
     if not comparator_rerank_enabled():
-        return nearby
+        return nearby, 0.0
     lease = mgr.reserve(_RERANK_LEASE_FLOOR_USD, phase=phase)
     if lease is None:
         logger.debug("comparator rerank skipped: no reservable lease")
-        return nearby
+        return nearby, 0.0
     ordered, cost, seat = await _rerank_comparators_for_compose(items, nearby)
     _book_rerank_spend(lease, cost, seat=seat, phase=phase)
+    return ordered, cost
+
+
+def _compose_budget_phase(state: StandardNameBuildState) -> str:
+    """The phase a compose batch's spend belongs to."""
+    return getattr(state, "budget_phase_tag", "") or "generate_name"
+
+
+async def _rerank_comparators_for_worker(
+    state: StandardNameBuildState,
+    items: Sequence[dict[str, Any]],
+    nearby: list[dict],
+) -> list[dict]:
+    """Rerank a compose worker batch's block and book the spend it made.
+
+    The same booking as the batch path, through the same helper, so the two
+    cannot drift: a floor lease opened before the call, charged under the seat
+    that billed it, recorded even where neither the lease nor the pool can fund
+    it. The spend also goes to the compose cost the worker reports, which the
+    batch path has no equivalent of.
+
+    A worker running without a budget manager is unleased throughout — the
+    compose call it goes on to make is unleased too — so the rerank still runs
+    and the reported cost is its only record.
+    """
+    if state.budget_manager:
+        ordered, cost = await _reranked_nearby_comparators(
+            state.budget_manager, items, nearby, phase=_compose_budget_phase(state)
+        )
+    else:
+        ordered, cost, _seat = await _rerank_comparators_for_compose(items, nearby)
+    if cost:
+        state.compose_stats.cost += cost
     return ordered
 
 
@@ -3993,11 +4029,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
     ) -> list[dict] | None:
         # Search for nearby existing names with a bounded share per item.
         nearby = await asyncio.to_thread(_collect_nearby_name_comparators, batch.items)
-        nearby, _rerank_cost, _rerank_seat = await _rerank_comparators_for_compose(
-            batch.items, nearby
-        )
-        if _rerank_cost:
-            state.compose_stats.cost += _rerank_cost
+        nearby = await _rerank_comparators_for_worker(state, batch.items, nearby)
 
         # IDS-level context — collect for each IDS present in batch
         ids_names = sorted(
@@ -4109,7 +4141,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 response_model=StandardNameComposeBatch,
                 provider_attempts=1,
             )
-            phase_tag = getattr(state, "budget_phase_tag", "") or "generate_name"
+            phase_tag = _compose_budget_phase(state)
             lease = state.budget_manager.reserve(maximum_exposure, phase=phase_tag)
             if lease is None:
                 return None
@@ -5862,7 +5894,7 @@ async def compose_batch(
     # items, give each item a share, and cap at 30 total.
     group_key = batch[0].get("path", "").split("/")[0] if batch else ""
     nearby = await asyncio.to_thread(_collect_nearby_name_comparators, batch)
-    nearby = await _reranked_nearby_comparators(
+    nearby, _rerank_cost = await _reranked_nearby_comparators(
         mgr, batch, nearby, phase="regen" if regen else "generate_name"
     )
 

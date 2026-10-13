@@ -8,6 +8,9 @@ it, and a rerank that cannot run leaves the embedding order in place.
 
 from __future__ import annotations
 
+import inspect
+from types import SimpleNamespace
+
 import pytest
 
 from imas_codex.discovery.base import judgment
@@ -15,7 +18,9 @@ from imas_codex.standard_names import budget as budget_module
 from imas_codex.standard_names.budget import BudgetManager
 from imas_codex.standard_names.workers import (
     _rerank_comparators_for_compose,
+    _rerank_comparators_for_worker,
     _reranked_nearby_comparators,
+    compose_worker,
 )
 
 _SWITCH = "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS"
@@ -117,8 +122,10 @@ async def test_switch_off_leaves_the_comparator_block_unchanged(monkeypatch) -> 
 
 
 @pytest.mark.asyncio
-async def test_comparator_rerank_merges_item_orders_by_mean_rank(monkeypatch) -> None:
-    """Two items' orders merge by each comparator's mean rank across them."""
+async def test_comparator_rerank_fuses_item_orders_by_reciprocal_rank(
+    monkeypatch,
+) -> None:
+    """Two items' orders fuse by reciprocal rank, ties keeping the retrieval order."""
     monkeypatch.setenv(_SWITCH, "1")
 
     orders = iter(
@@ -155,7 +162,10 @@ async def test_comparator_rerank_merges_item_orders_by_mean_rank(monkeypatch) ->
     ]
     ordered, cost, _seat = await _rerank_comparators_for_compose(items, list(_POOL))
 
-    # third: (0+1)/2 = 0.5; second: (1+0)/2 = 0.5 tie broken by embedding index
+    # Reciprocal rank fusion: third and second each take a first and a second
+    # place across the two orders, so both carry 1/61 + 1/62; first is twice
+    # second with 2/63. The tie breaks by the retrieval order, which ranks
+    # second_name above third_name.
     assert [candidate["id"] for candidate in ordered] == [
         "second_name",
         "third_name",
@@ -197,7 +207,7 @@ async def test_rerank_spend_is_booked_under_the_seat_that_billed_it(
     events = _record_cost_events(monkeypatch)
 
     mgr = BudgetManager(total_budget=0.01)
-    ordered = await _reranked_nearby_comparators(
+    ordered, cost = await _reranked_nearby_comparators(
         mgr, _ITEMS, list(_POOL), phase="generate_name"
     )
 
@@ -206,6 +216,7 @@ async def test_rerank_spend_is_booked_under_the_seat_that_billed_it(
         "second_name",
         "first_name",
     ]
+    assert cost == pytest.approx(0.25)
     assert mgr.spent == pytest.approx(0.25), "the paid charge is recorded"
     assert mgr.phase_spent["generate_name"] == pytest.approx(0.25)
     assert mgr.overspend == pytest.approx(0.24), (
@@ -234,11 +245,12 @@ async def test_a_rerank_without_a_lease_is_skipped_and_costs_nothing(
 
     mgr = BudgetManager(total_budget=0.0)
     pool = list(_POOL)
-    ordered = await _reranked_nearby_comparators(
+    ordered, cost = await _reranked_nearby_comparators(
         mgr, _ITEMS, pool, phase="generate_name"
     )
 
     assert ordered is pool, "the block is the retrieval order"
+    assert cost == 0.0
     assert seen == [], "no lease means no judgement call"
     assert events == [], "nothing was paid, so nothing is charged"
     assert mgr.spent == 0.0
@@ -265,11 +277,12 @@ async def test_the_off_switch_books_nothing_against_the_budget(monkeypatch) -> N
 
     monkeypatch.setattr(mgr, "reserve", counting_reserve)
     pool = list(_POOL)
-    ordered = await _reranked_nearby_comparators(
+    ordered, cost = await _reranked_nearby_comparators(
         mgr, _ITEMS, pool, phase="generate_name"
     )
 
     assert ordered is pool
+    assert cost == 0.0
     assert seen == [], "the switch off must make no judgement call"
     assert events == [], "the switch off must book no charge"
     assert reservations == [], "the switch off must open no lease"
@@ -289,11 +302,12 @@ async def test_a_rerank_that_raises_leaves_the_embedding_order(monkeypatch) -> N
 
     mgr = BudgetManager(total_budget=1.0)
     pool = list(_POOL)
-    ordered = await _reranked_nearby_comparators(
+    ordered, cost = await _reranked_nearby_comparators(
         mgr, _ITEMS, pool, phase="generate_name"
     )
 
     assert ordered is pool
+    assert cost == 0.0
     assert events == [], "a failed call is never charged"
     assert mgr.remaining == pytest.approx(1.0), "the unused lease is released"
 
@@ -316,3 +330,85 @@ async def test_a_rerank_whose_seat_cannot_be_resolved_keeps_the_order(
     assert ordered == pool
     assert cost == 0.0
     assert seat == ""
+
+
+@pytest.mark.asyncio
+async def test_the_worker_path_charges_the_rerank_to_a_lease(monkeypatch) -> None:
+    """A compose worker's rerank is charged to a lease, not only reported.
+
+    The worker books the same way the batch path does: a lease opened before
+    the call, the spend charged under the seat that billed it, and the charge
+    recorded even where the pool cannot fund it. The reported compose cost is
+    telemetry on top of that, never a substitute for it.
+    """
+    from imas_codex.settings import get_model
+
+    monkeypatch.setenv(_SWITCH, "1")
+    _stub_rerank(monkeypatch, ["third_name", "second_name", "first_name"], cost=0.25)
+    events = _record_cost_events(monkeypatch)
+
+    mgr = BudgetManager(total_budget=0.01)
+    state = SimpleNamespace(budget_manager=mgr, compose_stats=SimpleNamespace(cost=0.0))
+
+    ordered = await _rerank_comparators_for_worker(state, _ITEMS, list(_POOL))
+
+    assert [candidate["id"] for candidate in ordered] == [
+        "third_name",
+        "second_name",
+        "first_name",
+    ]
+    assert mgr.spent == pytest.approx(0.25), "the worker path charges a lease"
+    assert mgr.overspend == pytest.approx(0.24), (
+        "the charge is recorded although the lease and the pool cannot fund it"
+    )
+    assert len(events) == 1
+    assert events[0].model == get_model("sn-judge"), (
+        "the worker's charge names the seat that billed the call"
+    )
+    assert state.compose_stats.cost == pytest.approx(0.25), (
+        "the reported compose cost carries the rerank's spend too"
+    )
+
+
+@pytest.mark.asyncio
+async def test_the_worker_path_books_nothing_when_the_switch_is_off(
+    monkeypatch,
+) -> None:
+    """With the switch off the worker's rerank opens no lease and reports no cost."""
+    monkeypatch.delenv(_SWITCH, raising=False)
+    seen = _stub_rerank(monkeypatch, ["third_name", "second_name", "first_name"])
+    events = _record_cost_events(monkeypatch)
+
+    mgr = BudgetManager(total_budget=1.0)
+    reservations: list[float] = []
+    real_reserve = mgr.reserve
+
+    def counting_reserve(amount, **kwargs):
+        reservations.append(amount)
+        return real_reserve(amount, **kwargs)
+
+    monkeypatch.setattr(mgr, "reserve", counting_reserve)
+    state = SimpleNamespace(budget_manager=mgr, compose_stats=SimpleNamespace(cost=0.0))
+    pool = list(_POOL)
+
+    ordered = await _rerank_comparators_for_worker(state, _ITEMS, pool)
+
+    assert ordered is pool
+    assert seen == [], "the switch off must make no judgement call"
+    assert reservations == [], "the switch off must open no lease"
+    assert events == [], "the switch off must book no charge"
+    assert state.compose_stats.cost == 0.0
+
+
+def test_compose_worker_books_through_the_charging_helper() -> None:
+    """The worker body's rerank goes through the helper that books a lease.
+
+    Without this the worker would keep a rerank whose spend reaches only the
+    reported cost, which is the defect the helper removes; a body that stops
+    calling the helper fails here.
+    """
+    source = inspect.getsource(compose_worker)
+    assert "_rerank_comparators_for_worker(" in source
+    assert "_rerank_comparators_for_compose(" not in source, (
+        "the worker body must not reach the unbooked helper directly"
+    )
