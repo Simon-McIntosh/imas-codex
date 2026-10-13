@@ -7,9 +7,16 @@
     through <code>rerank_pool</code> under the <code>sn-judge</code> seat with
     service <code>standard-names</code>: each batch item judges the whole block
     once, the item's description and DD path are the query, and each
-    comparator's name and description are the state. A comparator's final rank
-    is its mean rank across the items, with ties keeping the embedding order, so
-    the merged order is never worse than the retrieval order it replaces.
+    comparator's name and description are the state. The per-item orders are
+    fused by <code>rrf_fuse_in_input_order</code> in
+    <code>imas_codex/search/fusion.py</code> — the repository's rank-fusion
+    owner — with the embedding order as the tie order, so equal-mass
+    comparators keep the retrieval order and the merged order is never worse
+    than the order it replaces. The variant shares <code>rrf_fuse</code>'s
+    mass arithmetic through one accumulation helper rather than restating it,
+    and differs from it only on ties; <code>rrf_fuse</code>'s own behaviour,
+    signature and callers are unchanged. The merge is no longer a second
+    rank-fusion implementation beside the owner.
     <code>rerank_pool</code>'s own failure-order guarantee is pinned by
     <code>test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails</code>
     in <code>tests/discovery/test_judgment.py</code>, so the rerank inherits it
@@ -54,9 +61,9 @@
         <td>827 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
       </tr>
       <tr>
-        <td>head</td><td><code>b0b8693c9</code></td>
-        <td><code>uv run pytest -p no:cacheprovider &lt;same files&gt; tests/standard_names/test_comparator_rerank.py</code></td>
-        <td>835 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
+        <td>head</td><td><code>9258a1ada</code></td>
+        <td><code>uv run pytest -p no:cacheprovider &lt;same files&gt; tests/standard_names/test_comparator_rerank.py tests/search/test_fusion.py</code></td>
+        <td>842 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
       </tr>
     </tbody>
   </table>
@@ -75,5 +82,15 @@
     the DD path turns it red on the query assertion alone
     (<code>EXIT=1</code>); the off-arm test stays green under both, which is what
     pins the switch as the only path to the reorder.
+  </p>
+  <p id="ssog-comparator-rerank-tie">
+    The fused tie order is pinned the same way. In a scratch copy of
+    <code>fusion.py</code> with the variant's tie-break replaced by
+    <code>rrf_fuse</code>'s <code>(-mass, id)</code> order,
+    <code>test_in_input_order_variant_breaks_ties_by_the_supplied_order</code>
+    fails on the order alone (<code>EXIT=1</code>,
+    <code>tie_order_control.log</code>); the same test passes in the worktree,
+    and the two fusions are asserted equal where no pair of candidates ties.
+    <code>tests/search/test_fusion.py</code>'s existing tests pass unchanged.
   </p>
 </section>
