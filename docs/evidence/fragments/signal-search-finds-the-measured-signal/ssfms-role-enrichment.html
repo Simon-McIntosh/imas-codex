@@ -1,0 +1,70 @@
+<section id="ssfms-role-enrichment" data-reckon="fragment">
+  <h2 id="ssfms-role-enrichment-title">Each enriched signal stores its measured role</h2>
+
+  <p id="ssfms-role-enrichment-intro">
+    The role judge accepted a role for a signal but nothing wrote it down, so a
+    searcher could not filter on it and a reset could not clear it. This node
+    gives <code>FacilitySignal</code> a <code>signal_role</code> slot whose range
+    is an enum of the six roles, has signal enrichment judge each signal's role
+    <em>after</em> its description is written and store the accepted role, and
+    adds a sweep that judges enriched signals carrying a description but no role.
+  </p>
+
+  <p id="ssfms-role-enrichment-predicate">
+    The sweep and its census share one predicate — a signal is a candidate when
+    <code>status</code> is <code>enriched</code> or <code>checked</code>, its
+    description is non-empty, and <code>signal_role</code> is null — so the
+    sweep this node runs is exactly the population the census counts, the same
+    property the re-embed sweep and its hash census hold. A judgment that failed,
+    or returned a choice outside the six roles, stores nothing: the signal keeps
+    no role and stays in the sweep's population for a later run. The reset to
+    <code>discovered</code> clears <code>signal_role</code> alongside
+    <code>description</code>, so a reprocessed signal is judged again on its new
+    text.
+  </p>
+
+  <p id="ssfms-role-enrichment-live">
+    The live sweep took the first 20 eligible JT-60SA signals and stored a role on
+    every one: <strong>20/20 written, 0 failed</strong>. Jev response-usage spend
+    was <strong>USD 0.000552</strong>, or USD 0.0000276 per signal. The sample is
+    the eight <code>lcdb_a048717_ate.s003</code> reconstruction-map settings and
+    their twelve companion metadata fields, and every one carries
+    <code>configuration_parameter</code> — the judged role the stored text itself
+    names, so this is the judge reading its own text correctly rather than a
+    collapsed distribution.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Signal ID</th><th>Stored role</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_nexpadd</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_irdm_s</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_irotyp</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_ivdm_s</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_izdm_s</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_jmax</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_mxclin</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_mxrotp</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_ndbmx</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_ndf1</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_ndf3</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_ndfit</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_ndint</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_ndmap</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_ndnel</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_nelknd</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_nelsys</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_nesymx</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_njdb</td><td>configuration_parameter</td></tr>
+      <tr><td>jt-60sa:general/lcdb_a048717_ate.s003_rec_map_type</td><td>configuration_parameter</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-role-enrichment-caveat">
+    This measures that the store writes what the judge accepted on a live run; it
+    does not by itself measure population-wide role accuracy, which the prototype's
+    hand-labelled sample pages separately.
+  </p>
+</section>
