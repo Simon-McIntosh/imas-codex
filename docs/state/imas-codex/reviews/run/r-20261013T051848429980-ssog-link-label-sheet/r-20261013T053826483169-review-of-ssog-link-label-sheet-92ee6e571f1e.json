@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "c3266f36f",
+  "call_site_count": 1,
+  "call_sites": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-link-label-sheet-run.py:91"
+  ],
+  "completed_at": "2026-10-13T05:56:49.621Z",
+  "dispatched_at": "2026-10-13T05:38:43Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/doc_links.py",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: _NAME_LINK_RE is a near-verbatim copy of graph_ops._DOC_LINK_RE (imas_codex/standard_names/graph_ops.py:9545) and the markdown branch of graph_ops._LINK_RE (imas_codex/standard_names/graph_ops.py:505), so the package parses label-and-name-target links in three places that can drift; the addition does not reuse or share the existing reader."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-link-label-sheet-run.py",
+      "line": "120",
+      "severity": "follow-on",
+      "text": "follow-on: _sample recomputes the self-link predicate inline (candidate[\"link\"].target == candidate[\"documenting_name\"]) instead of calling the new find_self_links, and repeats the same rule at line 128 and line 198, so one change carries the rule in four places."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-link-label-sheet.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: 5 of the 180 rows carry an empty target_description (targets coolant_mass, parallel_normalized_perturbed_vector_potential, normalized_perturbed_vector_potential, atomic_count_of_pellet, power_at_outer_divertor_target), verified absent from the graph with a positive control that resolved 5130 StandardName nodes, so Jev judged those rows without the description the Noul names."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T051848429980-ssog-link-label-sheet/base_gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the base gate log's own header names its command as uv run pytest -p no:cacheprovider with a placeholder instead of the file set, so a reader opening the log cannot see which files ran; the manifest's baseline_suite.command carries the literal command, so the record is recoverable."
+    }
+  ],
+  "head_log_revision": "c3266f36f",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read commit by commit against base c3266f36fc06761122dbd99bf377fe8bce5ee493; 3418ad70b adds the detector and its test to doc_links.py and 92ee6e571 adds the 180-row sheet, the run script and the fragment, all five paths inside the declared scope.",
+    "done_when": "the done_when asks for a test that flags a link to the documenting name and passes a neighbour (failing with the check removed), a Jev state carrying the target's description, and a sheet of at least 150 rows including every self-link with its probability; tests/standard_names/test_link_label_judgement.py holds the five tests and imas_codex/standard_names/doc_links.py:123 is the predicate the negative control reddens by removing the target==documenting check.",
+    "goal": "the goal is deterministic self-link detection, Jev's per-link label judgement state, and the coordinator's labelling sheet; the diff adds imas_codex/standard_names/doc_links.py:107-183 (find_name_links, find_self_links, link_label_question, link_judgement_state) and lands the 180-row sheet ssog-link-label-sheet.json.",
+    "manifest": "read; it records the gate command and result (142 passed, exit 0), the base arm at c3266f36f and head arm at 3418ad70b both at failure_count 0, the negative-control log (1 failed, EXIT=1), and the sheet metrics (180 rows, 74 self-links, 19 domains, spend USD 0.0037).",
+    "write_paths": "the declared paths are imas_codex/standard_names/doc_links.py, tests/standard_names/test_link_label_judgement.py and the three ssog-link-label-sheet html, json and run.py files; the diff changes exactly those five files and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_link_label_judgement.py:25 reddens when find_self_links drops its target==documenting_name filter, as negative_control.log records (1 failed, EXIT=1), and the other four assertions compare to literals rather than to the values under test.",
+    "evidence": "the base gate log at revision c3266f36f (137 passed) and the head gate log (142 passed) are recorded complete with failure_count 0 in the manifest, and negative_control.log ends EXIT=1 on a real subcase.",
+    "fit": "doc_links.py:107-183 follows the module's frozen-dataclass and tuple-returning idiom beside find_name_references, and adds no plan, version or author name.",
+    "goal_fidelity": "imas_codex/standard_names/doc_links.py:107-183 lands find_name_links, find_self_links and the Jev question and state the goal names, and ssog-link-label-sheet.json carries the 180 rows it asks for.",
+    "reuse": "the additions extend the doc_links.py owner the design review designated, but doc_links.py:22 re-implements the label-and-target reader graph_ops already owns at graph_ops.py:9545 and graph_ops.py:505.",
+    "scope_discipline": "git diff --name-only c3266f36fc06761122dbd99bf377fe8bce5ee493 92ee6e571f1e0f77aa7d85e709e7cb41e0769617 names exactly the five declared write paths, with no file outside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is deterministic self-link detection, Jev's per-link label judgement state, and the coordinator's labelling sheet; the diff adds imas_codex/standard_names/doc_links.py:107-183 (find_name_links, find_self_links, link_label_question, link_judgement_state) and lands the 180-row sheet ssog-link-label-sheet.json.\nVERDICT done_when: the done_when asks for a test that flags a link to the documenting name and passes a neighbour (failing with the check removed), a Jev state carrying the target's description, and a sheet of at least 150 rows including every self-link with its probability; tests/standard_names/test_link_label_judgement.py holds the five tests and imas_codex/standard_names/doc_links.py:123 is the predicate the negative control reddens by removing the target==documenting check.\nVERDICT write_paths: the declared paths are imas_codex/standard_names/doc_links.py, tests/standard_names/test_link_label_judgement.py and the three ssog-link-label-sheet html, json and run.py files; the diff changes exactly those five files and nothing else.\nVERDICT manifest: read; it records the gate command and result (142 passed, exit 0), the base arm at c3266f36f and head arm at 3418ad70b both at failure_count 0, the negative-control log (1 failed, EXIT=1), and the sheet metrics (180 rows, 74 self-links, 19 domains, spend USD 0.0037).\nVERDICT diff: read commit by commit against base c3266f36fc06761122dbd99bf377fe8bce5ee493; 3418ad70b adds the detector and its test to doc_links.py and 92ee6e571 adds the 180-row sheet, the run script and the fragment, all five paths inside the declared scope.\nCALL_SITES: docs/evidence/fragments/sn-selection-over-generation/ssog-link-label-sheet-run.py:91\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/doc_links.py:107-183 lands find_name_links, find_self_links and the Jev question and state the goal names, and ssog-link-label-sheet.json carries the 180 rows it asks for.\nSCORE evidence: 18\nJUSTIFICATION evidence: the base gate log at revision c3266f36f (137 passed) and the head gate log (142 passed) are recorded complete with failure_count 0 in the manifest, and negative_control.log ends EXIT=1 on a real subcase.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only c3266f36fc06761122dbd99bf377fe8bce5ee493 92ee6e571f1e0f77aa7d85e709e7cb41e0769617 names exactly the five declared write paths, with no file outside them.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_link_label_judgement.py:25 reddens when find_self_links drops its target==documenting_name filter, as negative_control.log records (1 failed, EXIT=1), and the other four assertions compare to literals rather than to the values under test.\nSCORE fit: 19\nJUSTIFICATION fit: doc_links.py:107-183 follows the module's frozen-dataclass and tuple-returning idiom beside find_name_references, and adds no plan, version or author name.\nSCORE reuse: 14\nJUSTIFICATION reuse: the additions extend the doc_links.py owner the design review designated, but doc_links.py:22 re-implements the label-and-target reader graph_ops already owns at graph_ops.py:9545 and graph_ops.py:505.\nFINDING imas_codex/standard_names/doc_links.py:22 follow-on: _NAME_LINK_RE is a near-verbatim copy of graph_ops._DOC_LINK_RE (imas_codex/standard_names/graph_ops.py:9545) and the markdown branch of graph_ops._LINK_RE (imas_codex/standard_names/graph_ops.py:505), so the package parses label-and-name-target links in three places that can drift; the addition does not reuse or share the existing reader.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-link-label-sheet-run.py:120 follow-on: _sample recomputes the self-link predicate inline (candidate[\"link\"].target == candidate[\"documenting_name\"]) instead of calling the new find_self_links, and repeats the same rule at line 128 and line 198, so one change carries the rule in four places.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-link-label-sheet.json:1 follow-on: 5 of the 180 rows carry an empty target_description (targets coolant_mass, parallel_normalized_perturbed_vector_potential, normalized_perturbed_vector_potential, atomic_count_of_pellet, power_at_outer_divertor_target), verified absent from the graph with a positive control that resolved 5130 StandardName nodes, so Jev judged those rows without the description the Noul names.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T051848429980-ssog-link-label-sheet/base_gate.log:1 follow-on: the base gate log's own header names its command as uv run pytest -p no:cacheprovider with a placeholder instead of the file set, so a reader opening the log cannot see which files ran; the manifest's baseline_suite.command carries the literal command, so the record is recoverable.\n",
+  "review_run_id": "r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e",
+  "reviewed_base_sha": "c3266f36fc06761122dbd99bf377fe8bce5ee493",
+  "reviewed_head_sha": "92ee6e571f1e0f77aa7d85e709e7cb41e0769617",
+  "reviewed_run_id": "r-20261013T051848429980-ssog-link-label-sheet",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T05:55:20.608728+00:00",
+  "total": 108
+}
