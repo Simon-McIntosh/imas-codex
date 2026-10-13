@@ -80,6 +80,11 @@
     <p>Run <code>r-20261013T063935739302-shs-registry-worklist</code>, merged at <code>c68d7b9c0</code>. The census <code>docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py</code> reads the 220-name frozen WEST roster (219 parse) against the ISN conventions registry. It finds 139 distinct tokens with no concepts entry and 79 with no notation entry, and 121 of 125 distinct name patterns (69 bases) with no template. Results: <code>shs-registry-worklist-results.json</code>.</p><p>The independent review found no added failures. It scored reuse 5 and durability 8, below the floor of 10, because the census copies ISN's segment-kind set and template filter instead of calling <code>select_conventions</code>. Both are exempted: the census re-run that closes this section must call <code>select_conventions</code>, so the census follows the registry's own selection.</p>
   </section>
 
+  <section id="s3-forbidden-spelling-fixture">
+    <h2>§3 — the density forbidden-spelling fixture matches the registry</h2>
+    <p>Run <code>r-20261013T081321711352-shs-forbidden-spelling-fixture</code>, merged at <code>ef2e88cef</code>. <code>tests/standard_names/test_house_style_checks.py</code> used <code>rho</code> as density's forbidden spelling, but the authored conventions registry allows it, so the test failed on main. The fixture now uses <code>N_s</code>, and a new test pins <code>rho</code> as allowed; restoring <code>rho</code> as forbidden in a scratch registry fails that test. The named gate went from one failure to none. The review scored 18 to 20 on every dimension with no added failures. It noted that the node wrote no landing fragment, so this record carries the account.</p>
+  </section>
+
 </main>
 </body>
 </html>
