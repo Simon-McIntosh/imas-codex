@@ -56,8 +56,12 @@ name clears — there is no privileged accept path:
      cascade is preflighted (round-trip + uniqueness of every descendant
      id) BEFORE the acceptance commits; any conflict refuses the
      acceptance (``name_stage`` stays ``reviewed``) and renames nothing.
-- **docs** — ``apply_edit`` → ``_apply_docs``: ``name_stage='accepted'`` +
-  ``docs_stage in (accepted, exhausted)`` preconditions, then
+- **docs** — ``apply_edit`` → ``_apply_docs``: ``name_stage='accepted'``,
+  and the docs axis must not be held by a docs worker — ``docs_stage`` in
+  ``pending`` / ``accepted`` / ``exhausted`` is admitted, ``drafted``,
+  ``reviewed`` and ``refining`` are refused.  The race protection is the
+  edit's own claim (``docs_stage`` → ``refining`` under a fresh claim
+  token), which excludes every docs-pool writer.  Then
   ``protection.filter_protected`` (catalog-edit docs require
   ``--override-edits``), then ``persist_refined_docs`` → the ``review_docs``
   pool scores the replacement — the same docs gate a pipeline docs
