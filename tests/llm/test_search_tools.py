@@ -728,7 +728,8 @@ class TestFormatSignalsReport:
         result = format_signals_report(signals, [], scores)
 
         assert "tcv:magnetics/ip" in result
-        assert "0.92" in result
+        assert "Rank: 1" in result
+        assert "0.92" not in result
         assert "Plasma current" in result
         assert "magnetics" in result
         assert "Data access" in result

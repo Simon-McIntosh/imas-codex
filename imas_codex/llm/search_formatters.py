@@ -199,7 +199,9 @@ def format_signals_report(
                 for sig in members
                 if sig.get("accessor")
             ]
-            if accessors:
+            # A single-member row prints its own resolved call, so its accessor
+            # is already in the template and the separate list would repeat it.
+            if accessors and len(members) > 1:
                 parts.append("  Accessors: " + "; ".join(accessors))
             paths = sorted(
                 {
@@ -226,8 +228,31 @@ def format_signals_report(
                 parts.append("  Documented in: " + ", ".join(sorted(pages)))
 
             row_access: list[str] = []
+            single_member = len(members) == 1
             for sig in members:
                 for method in _signal_access_methods(sig):
+                    kind = "/".join(
+                        str(value)
+                        for value in (
+                            method.get("access_type"),
+                            method.get("method_type"),
+                        )
+                        if value
+                    )
+                    if single_member:
+                        # Fill the row's own call so no {accessor}-style
+                        # placeholder survives in a single-member row.
+                        parts.append(f"  Data access ({kind or 'unknown'}):")
+                        for line in (
+                            method.get("imports_template"),
+                            method.get("connection_template"),
+                            _interpolate_template(
+                                method.get("access_template") or "", sig
+                            ),
+                        ):
+                            if line:
+                                parts.append(f"    {line}")
+                        continue
                     key = tuple(
                         method.get(field)
                         for field in (

@@ -1,0 +1,5 @@
+<section id="ssfms-result-rows-tests" data-reckon="fragment">
+<h2 id="ssfms-result-rows-tests-title">Tests and the template helper follow the collapsed signal report</h2>
+<p id="ssfms-result-rows-tests-measure">A single-member row in <code>format_signals_report</code> now prints its own access call with placeholders filled through <code>_interpolate_template</code>, so no <code>{accessor}</code> survives in it, while a multi-member row keeps one shared template plus its members' accessors. The single-signal golden asserts the row's fused rank (<code>Rank: 1</code>) instead of the retired <code>0.92</code> fused score. Gate <code>uv run pytest tests/llm/test_search_tools.py tests/llm/test_signal_report_rows.py</code> reports 119 passed, 8 skipped, 0 failed, against one failure at base 97eac4222.</p>
+<p id="ssfms-result-rows-tests-control">Negative control: removing the interpolation makes the new assertion fail (<code>1 failed</code>, exit 1).</p>
+</section>

@@ -59,6 +59,16 @@ def test_equal_name_templates_in_different_categories_remain_separate() -> None:
     assert "Category: CONTROL" in report
 
 
+def test_single_member_row_prints_its_resolved_access_call() -> None:
+    signal = _signal("CS4 Voltage", "DCSV", checked=True)
+
+    report = format_signals_report([signal], [], {})
+
+    assert "Data access (local/edas):" in report
+    assert "data = db.read('DCSV', 'CS4 Voltage')" in report
+    assert "{accessor}" not in report
+
+
 def test_report_keeps_fused_rank_after_a_rerank() -> None:
     signal = _signal("EF2 Booster BPS Voltage", "MMSYS")
 
