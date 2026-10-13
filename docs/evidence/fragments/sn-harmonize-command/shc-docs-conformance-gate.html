@@ -1,0 +1,81 @@
+<section>
+  <h2 id="shc-docs-conformance-gate">Reviewed documentation is accepted only if it conforms to the registry</h2>
+  <p id="shc-docs-conformance-gate-scope">
+    The documentation axis accepted on the review score alone, so an opening
+    that followed none of its selected templates, a forbidden equation variant,
+    and a non-canonical statement of a registered concept's equation all
+    reached acceptance at a score of 1.0. The worker now decides those from the
+    registry before it persists the review. A canonical statement is the
+    converged form and is accepted. Write paths:
+    <code>imas_codex/standard_names/workers.py</code>,
+    <code>imas_codex/standard_names/docs_gates.py</code>,
+    <code>imas_codex/llm/prompts/sn/_conventions.md</code>,
+    <code>tests/standard_names/test_docs_conformance_gate.py</code>.
+  </p>
+
+  <h3 id="shc-docs-conformance-gate-acceptance">One check at the acceptance point</h3>
+  <p id="shc-docs-conformance-gate-acceptance-text">
+    <code>process_review_docs_batch</code> calls
+    <code>conformance_findings</code>, the same function the audit report uses,
+    on the reviewed document before <code>persist_reviewed_docs</code>. A
+    <code>template_opening</code>, <code>forbidden_equation_variant</code>,
+    <code>forbidden_locus_gloss</code> or <code>non_canonical_equation</code>
+    finding clamps the score below the accept threshold, as the link-label
+    demotion does, so the name is refined. The finding text is appended to the
+    review comments and recorded under <code>registry_conformance</code> in the
+    per-dimension comments, which is what the refiner reads. The quorum score
+    is untouched on a conforming document, and a forbidden-symbol finding
+    stays out of the decision. A name the grammar cannot parse selects no
+    registry entry and is accepted on score.
+  </p>
+
+  <h3 id="shc-docs-conformance-gate-canonical">The non-canonical-equation finding</h3>
+  <p id="shc-docs-conformance-gate-canonical-text">
+    <code>docs_gates.py</code> gains <code>NON_CANONICAL_EQUATION</code>,
+    produced beside the forbidden-variant check from the same selected
+    concepts. A display equation is an equation for a concept when it performs
+    the operation named on the left-hand side of the concept's canonical
+    equation. It is then compared with that canonical equation token by token,
+    spacing and sizing commands aside, the declared symbols standing for the
+    quantity's own. A match is the converged statement and is never reported,
+    whatever the entry's <code>restates_equation</code> value. Any other form
+    is a finding, except one a forbidden variant already matches, which is
+    reported once as that variant. All 21 live
+    <code>flux_surface_averaged_*_density_at_plasma_boundary</code> documents
+    write the average in a non-canonical form and each produces the finding;
+    each of the 46 registered concepts' own canonical equation passes the
+    matcher.
+  </p>
+
+  <h3 id="shc-docs-conformance-gate-prompt">The prompt clause</h3>
+  <p id="shc-docs-conformance-gate-prompt-text">
+    For a concept with <code>restates_equation: false</code> the conventions
+    block now reads "name the concept and link to it; an equation you do state
+    for it is the canonical equation above, written exactly that way with only
+    its symbols replaced by the quantity's own". The canonical equation is
+    rendered on the line above. The "unless needed to define this quantity"
+    exception is gone. No <code>restates_equation</code> value was changed.
+  </p>
+
+  <h3 id="shc-docs-conformance-gate-measure">Measure</h3>
+  <ul id="shc-docs-conformance-gate-measure-list">
+    <li>New tests, <code>tests/standard_names/test_docs_conformance_gate.py</code>:
+      14 passed. With the review worker's model and graph calls stubbed at a
+      score of 1.0, an off-template opening, a forbidden line-form equation and
+      two non-canonical statements of the flux-surface average are each
+      persisted below the accept threshold with the finding as the reason; a
+      canonical statement, a conforming document, a name with no selected
+      template and a name the grammar cannot parse are persisted at 1.0.</li>
+    <li>Negative controls, each EXIT=1: acceptance check removed, 5 failed;
+      non-canonical finding removed, 4 failed; canonical form never
+      recognised, 2 failed; "unless needed" restored, 2 failed.</li>
+    <li>Gate over the documentation-axis, <code>test_docs_gates*</code> and
+      conventions-prompt suites: base 4 failed, 1648 passed; head 4 failed,
+      1662 passed. The failure set is identical: the 4 pre-existing
+      <code>test_conventions_prompt_block</code> failures, where
+      <code>argon_temperature</code> is expected to select no convention but
+      the installed grammar gives it a template. 14 added tests, 0 added
+      failures, and <code>test_house_style_checks.py</code> needed no
+      change.</li>
+  </ul>
+</section>
