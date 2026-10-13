@@ -1,0 +1,20 @@
+<!-- A source whose every expansion for one slot fails is that item's failure,
+     recorded end to end by select_segments rather than left to _search_slot alone.
+     Module: imas_codex/standard_names/segment_selection.py.
+     Test: tests/standard_names/test_segment_selection.py. -->
+<section id="ssog-empty-beam-failure" data-reckon="evidence">
+  <h2 id="ssog-empty-beam-failure-heading">An empty beam is recorded as that item's failure</h2>
+
+  <p id="ssog-empty-beam-failure-body">
+    When every expansion for one slot fails, <code>_search_slot</code> yields no path for
+    that slot and <code>select_segments</code> hands the missing slot to the render, which
+    refuses a name with no physical base and records the refusal on that item alone. A test
+    now drives <code>select_segments</code> with the decisions call stubbed so that one
+    source's every call for the physical-base slot returns <code>None</code> while the same
+    source's other slots and a sibling source all answer. The failed item carries the
+    refusal naming <code>physical_base</code> and renders no name; the sibling item renders
+    <code>electron_density</code> with no failure. The selection tests go from 4 to 5
+    passing at head, and the check fails when the hand-off is altered in a scratch copy to
+    drop the missing-slot failure.
+  </p>
+</section>

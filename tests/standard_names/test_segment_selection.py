@@ -268,3 +268,61 @@ def test_a_failed_expansion_narrows_the_beam_and_terminates(
         assert ranked[0] == [], f"{slot} kept a path after every expansion failed"
     # One pass per interior level: the root of each slot, and nothing re-asked.
     assert calls["n"] <= 4
+
+
+# ---------------------------------------------------------------------------
+# The hand-off
+# ---------------------------------------------------------------------------
+
+
+def test_a_slot_with_no_surviving_path_is_that_items_failure(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """An empty beam is that source's failure, and only that source's.
+
+    One slot's calls all fail (``judgment.py`` reports a non-answer as ``None``),
+    so :func:`_search_slot` yields no path for it and the slot is handed to the
+    render missing. A name with no base cannot render, so
+    :func:`select_segments` records the refusal on that item and renders no name
+    for it. A sibling source in the same batch, whose every call answered, is
+    selected and rendered as usual — the failure is the item's, not the run's.
+    """
+    empty = _source("/dd/electron/density")
+    filled = _source("/dd/ion/temperature")
+    chosen = {"physical_base": "density", "subject": "electron"}
+
+    async def fail_one_source_per_slot(states, questions, **kwargs):
+        criteria = questions[QUESTION]["criteria"]
+        results = []
+        for state in states:
+            if (
+                state["slot"] == ss.SLOT_PHYSICAL_BASE
+                and state["source"]["path"] == empty["path"]
+            ):
+                results.append(None)
+                continue
+            want = chosen.get(state["slot"], NONE)
+            if want not in criteria:
+                want = NONE
+            _, probs = _distribution(
+                criteria, {key: (1.0 if key == want else 0.001) for key in criteria}
+            )
+            results.append(({QUESTION: {"choice": want, "probabilities": probs}}, 0.0))
+        return results, 0.0
+
+    monkeypatch.setattr(ss, "decide_batch", fail_one_source_per_slot)
+    run = _run([empty, filled])
+
+    failed_item, rendered_item = run.items
+    # The slot never produced a path, so it is absent from the selections and the
+    # render refuses for the missing base: the item carries the failure, not a name.
+    assert ss.SLOT_PHYSICAL_BASE not in failed_item.slots
+    assert failed_item.name is None
+    assert failed_item.failure is not None
+    assert ss.SLOT_PHYSICAL_BASE in failed_item.failure
+    # Other slots still answered for the failed item; only the empty one is missing.
+    assert ss.SLOT_SUBJECT in failed_item.slots
+    # The sibling source is untouched by the other item's failure.
+    assert rendered_item.failure is None
+    assert rendered_item.name == "electron_density"
+    assert ss.SLOT_PHYSICAL_BASE in rendered_item.slots
