@@ -64,12 +64,13 @@ K = 30
 TOP_K = 10
 CONTROL_SEED = 20261012
 
-# The cutover the golden population is enumerated against: the first run whose
-# signal pipeline reranked enrichment context within its budget. The fixture
-# carries this value as data; the gate below pins it so a fixture that declares
-# an earlier cutover (and so admits signals enriched before the fix) fails
-# rather than silently widening the population.
-CANONICAL_ENRICHED_AT_CUTOVER = "2026-10-11T21:08:54Z"
+# The cutover the golden population is enumerated against: the instant the
+# full-facility reprocess began, so every JT-60SA signal carries a description
+# from the current pipeline and the eligible population is the whole facility.
+# The fixture carries this value as data; the gate below pins it so a fixture
+# that declares an earlier cutover (and so admits signals enriched before the
+# reprocess) fails rather than silently widening the population.
+CANONICAL_ENRICHED_AT_CUTOVER = "2026-10-13T11:53:35Z"
 
 # Set to "1" to select the two Jev rerank arms in the measurement that scores
 # them outside pytest. This suite reads it nowhere, so a pytest run never
@@ -716,17 +717,20 @@ def test_the_filter_drops_a_pre_cutover_candidate_before_the_cut() -> None:
 
 
 @pytest.mark.graph
-def test_a_pre_cutover_signal_is_outside_the_eligible_population() -> None:
-    """The predicate excludes a pre-cutover signal and admits a post-cutover one.
+def test_the_cutover_admits_the_reprocessed_population_and_refuses_earlier() -> None:
+    """The predicate admits signals at or after the reprocess start, refuses earlier.
 
-    Both ids are real jt-60sa signals: the first was enriched in the window
-    before the cutover, the second at it or after, so a filter that keeps the
-    second while dropping the first is reading the same predicate the
-    eligibility gate applies to the labels.
+    The full-facility reprocess re-enriched every jt-60sa signal, so none now
+    sits before the declared cutover: the query that finds a pre-cutover signal
+    returns nothing, every labelled signal lies at or after it, and an id the
+    population does not contain is still dropped by ``filter_eligible`` before
+    the cut, so a candidate from outside the reprocessed population never
+    consumes a ranked slot.
     """
     from imas_codex.graph.client import GraphClient
 
     gc = GraphClient()
+    declared = _as_utc(json_fixture["eligibility"]["enriched_at_cutover"])
     rows = gc.query(
         "MATCH (s:FacilitySignal) "
         "WHERE s.id STARTS WITH $prefix AND s.enriched_at < datetime($cutover) "
@@ -734,15 +738,20 @@ def test_a_pre_cutover_signal_is_outside_the_eligible_population() -> None:
         prefix=json_fixture["eligibility"]["facility"] + ":",
         cutover=json_fixture["eligibility"]["enriched_at_cutover"],
     )
-    assert rows, "no pre-cutover signal found to test the filter against"
-    before = rows[0]["id"]
+    assert not rows, (
+        "the reprocessed population still holds a signal enriched before the "
+        "cutover, so the cutover is not the reprocess start: " + repr(rows[:1])
+    )
+
     after = sorted({sid for q in QUESTIONS for sid in q.relevant})[0]
-
     eligible = eligible_signal_ids(gc)
-
-    assert before not in eligible
     assert after in eligible
-    assert filter_eligible([before, after], eligible) == [after]
+    assert _as_utc(_label_enrichment([after])[after]) >= declared
+
+    # An id outside the population is dropped before the filter cuts.
+    outside = "jt-60sa:not-in-the-reprocessed-population"
+    assert outside not in eligible
+    assert filter_eligible([outside, after], eligible) == [after]
 
 
 # ---------------------------------------------------------------------------
