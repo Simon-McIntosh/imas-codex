@@ -2,7 +2,7 @@
 
 A reset rewrites text a physicist has been asked to review, or has already
 reviewed, so the apply refuses the whole family before the first member is
-marked. Three classes are covered, exactly as the lead ruled:
+marked. Three classes are recommended, and so protected:
 
 * a member of a frozen review roster whose candidate request is open;
 * a name at ``name_stage=approved``;
@@ -17,7 +17,6 @@ beside the run.
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
 import pytest
@@ -199,19 +198,6 @@ def _roster(tmp_path: Any, names: list[str]) -> str:
     return str(tmp_path)
 
 
-def _guard_or_removed(monkeypatch: Any) -> None:
-    """The real recommended-name guard, or the apply with its call removed.
-
-    ``SHC_NO_RECOMMENDED_GUARD`` replaces ``refuse_recommended_members`` with a
-    no-op — the declared negative control: the guard call before the reset is
-    gone, so the refusal test no longer refuses and fails.
-    """
-    if os.environ.get("SHC_NO_RECOMMENDED_GUARD"):
-        from imas_codex.standard_names import harmonize
-
-        monkeypatch.setattr(harmonize, "refuse_recommended_members", lambda *a, **k: {})
-
-
 def _apply(
     graph: _GuardGraph,
     harness: _Harness,
@@ -242,7 +228,6 @@ def test_roster_and_approved_members_refused_without_force(
     """
     from imas_codex.standard_names.protection import RecommendedNameError
 
-    _guard_or_removed(monkeypatch)
     nodes = _family_nodes()
     pipeline = _DocsPipeline(nodes)
     _install_docs_pipeline(monkeypatch, pipeline)
@@ -269,7 +254,6 @@ def test_contested_member_refused_without_force(
     """A name at ``contested`` is refused the same way, with its evidence."""
     from imas_codex.standard_names.protection import RecommendedNameError
 
-    _guard_or_removed(monkeypatch)
     nodes = _family_nodes()
     pipeline = _DocsPipeline(nodes)
     _install_docs_pipeline(monkeypatch, pipeline)
@@ -289,7 +273,6 @@ def test_forced_apply_records_reason_on_the_run(
     monkeypatch: Any, tmp_path: Any
 ) -> None:
     """``--force REASON`` applies and records REASON against the run id."""
-    _guard_or_removed(monkeypatch)
     nodes = _family_nodes()
     pipeline = _DocsPipeline(nodes)
     _install_docs_pipeline(monkeypatch, pipeline)
