@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "97552c2e4d1f6a29592f647aa79ea7b6cda47fc2",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/dd_domain_classifier.py:225",
+    "imas_codex/standard_names/benchmark_roles.py:1484",
+    "imas_codex/standard_names/benchmark_roles.py:1517"
+  ],
+  "completed_at": "2026-10-13T17:38:41.747Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "scg-jev-domain-tree",
+      "recorded_at": "2026-10-13T17:34:44.952381+00:00"
+    },
+    "evidence": {
+      "kind": "folded",
+      "node": "scg-jev-domain-tree",
+      "recorded_at": "2026-10-13T17:34:43.835920+00:00"
+    },
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "scg-jev-domain-tree",
+      "recorded_at": "2026-10-13T17:34:42.785936+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T17:21:03Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/dd_domain_classifier.py",
+      "line": "1080",
+      "severity": "blocking",
+      "text": "blocking: the two-level tree reads the decision answer at the wrong level, so in production it decides nothing and every path falls to chat. decide_batch returns results[i] = (answers, cost) where answers is keyed by question name (imas_codex/discovery/base/judgment.py:262-266; _validate_decisions_answers at imas_codex/discovery/base/llm.py:3343 does answers.get(name)). The tree instead does `answer = result[0]` then `answer.get(\"choice\")` (:1080) and `_ranked_probabilities(answer)` (:1058 -> :958 `answer.get(\"probabilities\")`), reading those keys at the top level when they live under answers[CATEGORY_QUESTION] / answers[DOMAIN_QUESTION]. The retired flat classifier this node was told to port kept the unwrap (git show e0390840:imas_codex/graph/dd_domain_classifier.py:737-738 `answers.get(DOMAIN_QUESTION)`) and every current consumer does too (imas_codex/ids/candidates.py:383 answers[\"ids_routing\"].get(\"probabilities\")). Without it _ranked_probabilities returns [] so _beamed_categories returns [] and no second-level question is ever asked; every decision stays None and _route_below_threshold sends every path to chat. The 416-line tree is inert in production while the stubbed tests stay green."
+    },
+    {
+      "file": "tests/graph/test_dd_domain_classifier_jev.py",
+      "line": "115",
+      "severity": "blocking",
+      "text": "blocking: the ScriptedDecisions stub returns a flattened `({\"choice\": ..., \"probabilities\": ...}, cost)` per state, a shape decide_batch never returns; the owner returns `({question_name: {\"choice\": ..., \"probabilities\": ...}}, cost)`. Every added assertion is therefore satisfied by the stub's own shape rather than by the code's read of the real contract, so all 17 tests pass with the production read broken (see the finding at imas_codex/graph/dd_domain_classifier.py:1080). A stub that encodes the owner's documented shape would redden the suite on the current code."
+    },
+    {
+      "file": "tests/graph/test_dd_domain_classifier_jev.py",
+      "line": "260",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when asks that both option levels fail when the vocabulary gains a domain, but only the category level carries a recorded red run (negative_control_frozen_categories.log, EXIT=1 on test_category_options_follow_the_vocabulary_not_a_frozen_list). The second-level guard test_domain_options_are_exactly_that_categorys_domains_with_their_guidance (tests/graph/test_dd_domain_classifier_jev.py:260) has no recorded negative control."
+    }
+  ],
+  "head_log_revision": "62b4f009c49512fcd97c5fbfa761ff096851bddf",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site reference(s)",
+    "diff": "read commit 62b4f009c against base 97552c2e4; six files, all in scope, with a body.",
+    "done_when": "the done_when names the gate files; head_gate.log records 189 passed 1 failed (138 passed, 0 added failures) against base 121 passed EXIT=0, but the gate is stubbed and does not reach the production read.",
+    "goal": "the node goal is a two-level Jev category-then-domain choice over the physics-domain guidance, with chat below a threshold; decide_domain_tree builds it but reads no answer at runtime.",
+    "manifest": "read; status complete, gate results recorded with logs, one negative control with EXIT=1.",
+    "write_paths": "the diff changes six of the seven declared files and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_dd_domain_classifier_jev.py:115 supplies both sides of every added assertion through the stub's return shape, so the suite stays green with the tree's answer read broken.",
+    "evidence": "the gate is entirely stubbed and the findings[1] stub at tests/graph/test_dd_domain_classifier_jev.py:115 fabricates a shape decide_batch never returns, so the recorded 17-green measures the stub, not the production read.",
+    "fit": "the runner follows the module's existing _classify_batch pattern at imas_codex/graph/dd_domain_classifier.py:746 and adds no forbidden name.",
+    "goal_fidelity": "imas_codex/graph/dd_domain_classifier.py:1052-1054 builds the tree's questions but reads no answer, so at runtime it decides no path and every path falls to chat.",
+    "reuse": "decide_domain_tree wraps the module's owner at imas_codex/discovery/base/judgment.py:230 rather than forking it; no owner exists for a two-level tree.",
+    "scope_discipline": "every path in git diff 97552c2e4..62b4f009c is inside the seven declared write paths in brief.md."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 97552c2e4d1f6a29592f647aa79ea7b6cda47fc2\nreviewed_head_sha: 62b4f009c49512fcd97c5fbfa761ff096851bddf\nVERDICT goal: the node goal is a two-level Jev category-then-domain choice over the physics-domain guidance, with the chat classifier below a confidence threshold; imas_codex/graph/dd_domain_classifier.py:1005 decide_domain_tree and :1149 _classify_batch_tree build both levels and the fallback, but at runtime the tree reads no answer (see the finding at :1080), so at runtime it decides no path.\nVERDICT done_when: the done_when names tests/graph/test_dd_domain_classifier.py, test_domain_classifier_prompt.py, test_physics_domain_guidance.py, the new test file and the settings seat tests, run at base and head by delta; head_gate.log records 189 passed 1 failed (four graph files 138 passed EXIT=0) against base_graph_gate.log 121 passed EXIT=0, added_failure_count 0, but the gate is stubbed and does not reach the tree's production read.\nVERDICT write_paths: the declared scope in brief.md is seven files; git diff 97552c2e4..62b4f009c changes six of them \u2014 tests/graph/test_domain_classifier_prompt.py was in scope but is untouched \u2014 and nothing outside them.\nVERDICT manifest: read at runs/r-20261013T160612001893-scg-jev-domain-tree/manifest.md (this attempt's, mtime 17:19:42Z, after the run's 16:29:54Z launch); status complete, the gate results are recorded with their logs, and one negative control carries EXIT=1.\nVERDICT diff: read commit 62b4f009c against base 97552c2e4; six files changed, all inside the declared scope, and the commit carries a body.\nCALL_SITES: imas_codex/graph/dd_domain_classifier.py:225, imas_codex/standard_names/benchmark_roles.py:1484, imas_codex/standard_names/benchmark_roles.py:1517\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: imas_codex/graph/dd_domain_classifier.py:1052-1054 builds the tree's questions but reads no answer, so at runtime it decides no path and every path falls to chat.\nSCORE evidence: 8\nJUSTIFICATION evidence: the gate is entirely stubbed and the stub at tests/graph/test_dd_domain_classifier_jev.py:115 fabricates a shape decide_batch never returns, so the recorded 17-green measures the stub, not the production read.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 97552c2e4..62b4f009c is inside the seven declared write paths in brief.md.\nSCORE durability: 6\nJUSTIFICATION durability: tests/graph/test_dd_domain_classifier_jev.py:115 supplies both sides of every added assertion through the stub's return shape, so the suite stays green with the tree's answer read broken.\nSCORE fit: 18\nJUSTIFICATION fit: the runner follows the module's existing _classify_batch pattern at imas_codex/graph/dd_domain_classifier.py:746 and adds no forbidden name.\nSCORE reuse: 18\nJUSTIFICATION reuse: decide_domain_tree wraps the repository's decisions owner at imas_codex/discovery/base/judgment.py:230 rather than forking it; no owner exists for a two-level tree.\nFINDING imas_codex/graph/dd_domain_classifier.py:1080 blocking: the two-level tree reads the decision answer at the wrong level, so in production it decides nothing and every path falls to chat. decide_batch returns results[i] = (answers, cost) where answers is keyed by question name (imas_codex/discovery/base/judgment.py:262-266; _validate_decisions_answers at imas_codex/discovery/base/llm.py:3343 does answers.get(name)). The tree instead does `answer = result[0]` then `answer.get(\"choice\")` (:1080) and `_ranked_probabilities(answer)` (:1058 -> :958 `answer.get(\"probabilities\")`), reading those keys at the top level when they live under answers[CATEGORY_QUESTION] / answers[DOMAIN_QUESTION]. The retired flat classifier this node was told to port kept the unwrap (git show e0390840:imas_codex/graph/dd_domain_classifier.py:737-738 `answers.get(DOMAIN_QUESTION)`) and every current consumer does too (imas_codex/ids/candidates.py:383 answers[\"ids_routing\"].get(\"probabilities\")). Without it _ranked_probabilities returns [] so _beamed_categories returns [] and no second-level question is ever asked; every decision stays None and _route_below_threshold sends every path to chat. The 416-line tree is inert in production while the stubbed tests stay green.\nFINDING tests/graph/test_dd_domain_classifier_jev.py:115 blocking: the ScriptedDecisions stub returns a flattened `({\"choice\": ..., \"probabilities\": ...}, cost)` per state, a shape decide_batch never returns; the owner returns `({question_name: {\"choice\": ..., \"probabilities\": ...}}, cost)`. Every added assertion is therefore satisfied by the stub's own shape rather than by the code's read of the real contract, so all 17 tests pass with the production read broken (see the finding at imas_codex/graph/dd_domain_classifier.py:1080). A stub that encodes the owner's documented shape would redden the suite on the current code.\nFINDING tests/graph/test_dd_domain_classifier_jev.py:260 follow-on: the done_when asks that both option levels fail when the vocabulary gains a domain, but only the category level carries a recorded red run (negative_control_frozen_categories.log, EXIT=1 on test_category_options_follow_the_vocabulary_not_a_frozen_list). The second-level guard test_domain_options_are_exactly_that_categorys_domains_with_their_guidance (tests/graph/test_dd_domain_classifier_jev.py:260) has no recorded negative control.\n",
+  "review_run_id": "r-20261013T172050677295-review-of-scg-jev-domain-tree-62b4f009c495",
+  "reviewed_base_sha": "97552c2e4d1f6a29592f647aa79ea7b6cda47fc2",
+  "reviewed_head_sha": "62b4f009c49512fcd97c5fbfa761ff096851bddf",
+  "reviewed_run_id": "r-20261013T162934905861-scg-jev-domain-tree",
+  "scores": {
+    "durability": 6,
+    "evidence": 8,
+    "fit": 18,
+    "goal_fidelity": 9,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T17:39:42.209592+00:00",
+  "total": 78,
+  "verdict": "MUST-FIX"
+}
