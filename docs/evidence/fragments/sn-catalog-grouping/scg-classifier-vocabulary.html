@@ -1,0 +1,131 @@
+<section id="scg-classifier-vocabulary">
+  <h2>Rendering the DD classifier vocabulary from the PhysicsDomain enum</h2>
+  <p>
+    The DD domain classifier prompt
+    (<code>imas_codex/llm/prompts/imas/domain_classifier.md</code>) offered a
+    hand-typed vocabulary table listing 21 of the 32 installed
+    <code>PhysicsDomain</code> values. It omitted
+    <code>core_plasma_physics</code> and ten others, so the classifier could
+    never return them, and its worked example tied electron temperature under
+    <code>core_profiles/profiles_1d/electrons</code> to <code>transport</code>.
+    The table is now rendered from the enum itself, so it cannot fall behind:
+    the frontmatter declares <code>schema_needs: [physics_domains]</code>, and
+    the body iterates <code>physics_domains</code> delivered by
+    <code>_provide_physics_domains</code> in
+    <code>imas_codex/llm/prompt_loader.py</code>. The heuristics now state the
+    core-profile rule in terms of what a quantity <em>is</em>: a kinetic profile
+    of the core plasma belongs to <code>core_plasma_physics</code>, while a
+    flux, diffusivity or confinement time belongs to <code>transport</code>. The
+    IDS name stays an informational, not a decisive, signal.
+  </p>
+  <table>
+    <thead><tr><th>Surface</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td>Vocabulary in the prompt</td><td>21 of 32 domains</td><td>All 32 enum values, rendered from the provider</td></tr>
+      <tr><td>Core-profile worked example</td><td><code>temperature</code> under <code>core_profiles</code> &rarr; <code>transport</code></td><td><code>core_plasma_physics</code>; <code>transport</code> only for flux, diffusivity or confinement time</td></tr>
+      <tr><td>Test holding the table to the enum</td><td>none</td><td><code>tests/graph/test_domain_classifier_prompt.py</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>The provider supplies values only, not scope text.</strong>
+    <code>_provide_physics_domains</code> reads a LinkML schema at
+    <code>imas_codex/definitions/physics/domains.yaml</code> for per-domain
+    descriptions and categories, but that file does not exist, so the function
+    takes its fallback branch and returns every domain with an empty
+    <code>description</code> and the category <code>uncategorized</code>. The
+    rendered table is therefore a bare bullet list of values with no scope
+    sentence beside any of them. The canonical scope descriptions do exist
+    downstream, in <code>PHYSICS_DOMAIN_DESCRIPTIONS</code> in the installed
+    imas-standard-names grammar package, but the codex provider does not read
+    them. This fragment records that gap rather than adding a second source of
+    descriptions to the prompt, per the node brief; a follow-on should either
+    ship the schema file or have the provider source the descriptions from the
+    grammar package so one vocabulary carries its own scope text.
+  </p>
+  <p>
+    Two tests hold the change. One renders the prompt and requires every
+    <code>PhysicsDomain</code> value to appear. The other injects a sentinel
+    domain into the provider and requires it to render, so the vocabulary tracks
+    the provider rather than a frozen table. Both fail against the hand-typed
+    table: restoring that table makes the rendering test report the missing
+    domains and exit non-zero (receipt
+    <code>negative-control.log</code>, <code>EXIT=1</code>).
+  </p>
+  <table>
+    <thead><tr><th>Labels</th><th>Stored DD source set</th><th>Fresh DD source set</th><th>Derived name domain</th><th>Live DD coverage</th></tr></thead>
+    <tbody>
+      <tr><td>20 lead</td><td>11/20 (55%)</td><td>14/20 (70%)</td><td>7/20 (35%)</td><td>20/20</td></tr>
+      <tr><td>150 coordinator</td><td>63/150 (42%)</td><td>97/150 (64.7%)</td><td>94/150 (62.7%)</td><td>128/150</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th>Measure</th><th>Old vocabulary</th><th>Rendered vocabulary</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td>Lead fresh source set</td><td>11/20 (55%)</td><td>14/20 (70%)</td><td>+15 points</td></tr>
+      <tr><td>Lead derived name domain</td><td>1/20 (5%)</td><td>7/20 (35%)</td><td>+30 points</td></tr>
+      <tr><td>Coordinator fresh source set</td><td>67/150 (44.7%)</td><td>97/150 (64.7%)</td><td>+20 points</td></tr>
+      <tr><td>Coordinator derived name domain</td><td>67/150 (44.7%)</td><td>94/150 (62.7%)</td><td>+18 points</td></tr>
+    </tbody>
+  </table>
+  <figure>
+    <img src="/imas-codex/figures/sn-catalog-grouping/scg-classifier-vocabulary/label-accuracy.svg" alt="Label accuracy before and after rendering the classifier vocabulary from the PhysicsDomain enum">
+    <figcaption>
+      Labelled-name accuracy for the 20 lead and 150 coordinator names, old
+      hand-typed vocabulary against the enum-rendered one, on the same 856 live
+      source paths. The source-set measures ask whether the labelled domain
+      occurs among a name's fresh source domains; the derived measure requires
+      <code>pick_primary_domain</code> to select it. Stored values are unchanged
+      between runs because neither run writes to the graph.
+    </figcaption>
+  </figure>
+  <p>
+    The stored figures are unchanged because this run writes nothing to the
+    graph; they are the same DD build values the diagnosis measured. The
+    improvement is largest exactly where the old table had no vocabulary to
+    return: the fresh classifier now reaches 29 distinct domains across the 856
+    source paths, against the 21 the old table named. Paths whose fresh domain
+    differs from the stored value number 476 of 856. The largest confusions the
+    old prompt produced are gone: <code>fueling</code> &rarr;
+    <code>plant_systems</code>, <code>spectroscopy</code> &rarr;
+    <code>radiation_measurement_diagnostics</code> and
+    <code>core_plasma_physics</code> &rarr; <code>transport</code> no longer
+    lead the miss list.
+  </p>
+  <p>
+    The remaining coordinator misses are concentrated where they are
+    structural rather than lexical. The top fresh confusions are
+    <code>magnetohydrodynamics</code> &rarr; no live source (5),
+    <code>gyrokinetics</code> &rarr; no live source (4),
+    <code>radiation_measurement_diagnostics</code> &rarr;
+    <code>spectroscopy</code> (3), <code>equilibrium</code> &rarr;
+    <code>magnetic_field_systems</code> (3), <code>current_drive</code> &rarr;
+    no live source (2), <code>auxiliary_heating</code> &rarr;
+    <code>current_drive</code> (2), <code>edge_plasma_physics</code> &rarr;
+    <code>spectroscopy</code> (2) and <code>plasma_wall_interactions</code>
+    &rarr; no live source (2). The 22 labelled names with no live DD source
+    through the <code>StandardName &larr;PRODUCED_NAME&minus;
+    StandardNameSource &minus;FROM_DD_PATH&rarr; IMASNode</code> route count as
+    misses against their labels and bound the achievable coordinator score.
+  </p>
+  <p>
+    Both runs follow each labelled name's live source links and classify in
+    memory without a graph write. The source and name property fingerprint was
+    <code>aecb5deed110b245cfc08a69925840378b631924081f84cf4e42169278367e0d</code>
+    before and after every run, identical to the value the diagnosis measured;
+    the 170 name properties, 856 source-path domain properties, their
+    distributions and the maximum classification timestamp are unchanged. The
+    fresh run spent USD 2.662405 of the authorised USD 2.80 ceiling against the
+    diagnosis's USD 2.048175 on the old prompt; the rendered prompt is about 25
+    percent longer and the classifier routes the wider vocabulary through more
+    reasoning per path. The cached replay reproduced every per-name row, score
+    and the spend value byte for byte
+    (<code>RESULT_SHA256=2f62afdfc395c5a604c95e511ed8ae3a0cf2d61dd1d089fd492b10fe7cdc0a3e</code>
+    on both). The
+    <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-classifier-vocabulary-results.json">result rows</a>
+    carry each source path's stored and fresh domains, the derived name domain,
+    all three cohort scores and the graph snapshots, with the prompt hash
+    <code>0c0fdbab7d489853</code>. The run receipts are
+    <code>measure-fresh-complete.log</code> and <code>measure-replay.log</code>
+    in this run's record, both ending in <code>EXIT=0</code>.
+  </p>
+</section>
