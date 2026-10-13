@@ -1,0 +1,185 @@
+<section>
+  <h2 id="shc-convergence-diagnosis">Why the boundary density family did not converge</h2>
+  <p>
+    This is a read-only diagnosis of the 17 live
+    <code>flux_surface_averaged_*_density_at_plasma_boundary</code> names after
+    forced run <code>a45824e1-795f-46fb-b4a7-8e242edc4063</code>. The
+    earlier <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s3-live-apply">apply record</a>
+    measured 17 distinct openings, 17 distinct equation forms, 16 opening
+    findings, 19 reported dead links, and 17 documentation acceptances. The
+    three <a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-convergence-diagnosis-prompts.md">rendered prompts</a>
+    and the bounded graph reads below distinguish absent instructions from
+    instructions that the acceptance path did not enforce.
+  </p>
+
+  <h3 id="shc-convergence-prompts">The template, equation, and accepted anchor reached the prompt</h3>
+  <p>
+    <code>workers.py:9774-9801</code> builds the generation context with
+    <code>conventions_context_for</code> and renders
+    <code>sn/generate_docs_user</code>. <code>workers.py:9598-9602</code> adds
+    <code>fetch_sibling_family</code>. The template includes
+    <code>sn/_conventions.md</code> and its accepted-anchor documentation block.
+    Rebuilding that context without a model call for electron, neon, and
+    nitrogen produced prompts of 27,452, 29,432, and 29,444 characters.
+    Each contains the selected opening <code>Number density of {subject}</code>,
+    the canonical flux-surface-average equation
+    <code>\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|</code>,
+    and 1,438 characters of accepted xenon-anchor documentation. The live
+    sibling builder returned 12 siblings and xenon as anchor for each prompt.
+    The complete renders and marked passages are in the companion file;
+    <code>prompt-render.log</code> in this run records all three presence checks.
+  </p>
+  <p>
+    This reconstructs the current graph state, not the historical request
+    bytes: the pre-reset claim fields and apply-time review examples were not
+    preserved. During the member batch, the accepted electron anchor was
+    available after its anchor batch; <code>context.py:799-950</code> selects
+    an accepted sibling from the live family and excludes the current member.
+    The registry entry carries the equation but has
+    <code>restates_equation=False</code>, so the prompt says to name the concept
+    and not restate that equation unless needed. The template carries a
+    literal <code>{subject}</code> placeholder; no deterministic substitution
+    writes its opening into the documentation.
+  </p>
+
+  <h3 id="shc-convergence-acceptance">Acceptance does not consume the report's opening finding</h3>
+  <p>
+    A read-only <code>run_house_style_checks</code> over the 17 family rows
+    returned 16 <code>template_opening</code> findings, all with
+    <code>severity=warning</code>; the 17th, nitrogen, matches the template.
+    The reproduction log reads <code>members=17 house_style_findings=16
+    severities={'warning': 16}</code>; for neon it reports
+    <code>template_opening: documentation opens as 'The flux-surface-averaged
+    neon density is the average of the'</code>. The finding is made by
+    <code>docs_gates.py:628-680</code> and labelled warning by
+    <code>review/audits.py:673-707</code>. The separate review pipeline only
+    collects error-severity lint for its score cap
+    (<code>review/pipeline.py:1817-1833,1963-1999</code>), so these warnings
+    cannot cap acceptance even there.
+  </p>
+  <p>
+    The forced apply uses the pool documentation axis:
+    <code>workers.py:10377-10500</code> prepares a docs review with conventions
+    and neighbours, without the report's lint findings;
+    <code>workers.py:10593-10670</code> passes the quorum score to
+    <code>persist_reviewed_docs</code>. At <code>graph_ops.py:17764-17830</code>
+    that function accepts a score at or above <code>DEFAULT_MIN_SCORE=0.85</code>
+    after quorum checks and a link-label mismatch check. It does not call
+    <code>run_house_style_checks</code>. The live read has all 17
+    <code>docs_stage=accepted</code>, including the 16 warning-bearing members.
+    The harmonize layer at <code>harmonize.py:1075-1090</code> stamps only when
+    the campaign is not halted; the recorded neon banned-prose halt explains
+    the zero stamps. It does not turn opening lint into an acceptance gate.
+  </p>
+
+  <h3 id="shc-convergence-anchor">The anchor ranks current accepted scores, so a partial run moves it</h3>
+  <p>
+    <code>families.py:479-539</code> selects an accepted real parent first, then
+    the accepted member with maximum
+    <code>(reviewer_score_docs, id)</code>; the id is the tie break.
+    <code>harmonize.py:783-793</code> reselects on each plan. The relevant
+    snapshots and reads are:
+  </p>
+  <table>
+    <thead><tr><th>Read</th><th>Score and stage evidence</th><th>Selection</th></tr></thead>
+    <tbody>
+      <tr><td>Initial report</td><td>Iron's pre-reset <code>DocsRevision #rev-2</code> stores score 0.96875; electron's later pre-reset revision stores 0.925 and xenon's stores 0.91875.</td><td>Iron</td></tr>
+      <tr><td>After interrupted first force</td><td><code>measure-mid.json</code> records 16 accepted and one drafted member. Iron's next revision has a null score after reset, leaving electron's 0.925 above xenon's 0.91875.</td><td>Electron</td></tr>
+      <tr><td>After completed force</td><td>All 17 are accepted. Xenon scores 1.0, tied with many members; its id sorts last among the top-score members.</td><td>Xenon</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The historical values come from a 17-id indexed read of
+    <code>StandardName</code> and linked <code>DocsRevision</code> nodes
+    (<code>anchor-history.log</code>); the middle stage comes from the prior
+    run's <code>measure-mid.json</code>. The first forced attempt was interrupted
+    after resetting iron, before it completed review, as its apply log records.
+    Thus the change from iron to electron is a partial-run state change, and
+    xenon is a score-tie consequence after regeneration. The observed reason
+    for no stamp is the neon halt, not proof that changing anchors by itself
+    prevented convergence.
+  </p>
+
+  <h3 id="shc-convergence-links">The nineteen reported dead targets all exist outside this family</h3>
+  <p>
+    <code>review/audits.py:405-445</code> builds its target lookup only from
+    the <em>names argument</em>. <code>harmonize.py:551-570</code> hands it this
+    17-member scope, so a valid cross-family reference is reported as
+    <code>dead_link</code>. A positive control read found all 17 members; an
+    indexed lookup <code>MATCH (n:StandardName) WHERE n.id IN $ids RETURN
+    n.id, n.name_stage LIMIT 100</code> found <strong>19 of 19 distinct
+    targets</strong>, all <code>name_stage=accepted</code>. None is a
+    hallucinated id, a renamed-away id, or a name absent from the graph.
+    Each is simply outside the 17-member report input.
+  </p>
+  <table>
+    <thead><tr><th>Source member</th><th>Reported target</th><th>Change</th><th>Graph classification</th></tr></thead>
+    <tbody>
+      <tr><td>argon</td><td><code>line_averaged_argon_density</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>beryllium</td><td><code>beryllium_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>carbon</td><td><code>carbon_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>deuterium</td><td><code>deuterium_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>electron</td><td><code>electron_density_at_plasma_boundary</code></td><td>retained</td><td>accepted, outside family</td></tr>
+      <tr><td>helium_3</td><td><code>helium_3_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>helium_4</td><td><code>helium_4_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>hydrogen</td><td><code>hydrogen_density_at_plasma_boundary</code></td><td>retained</td><td>accepted, outside family</td></tr>
+      <tr><td>ion</td><td><code>ion_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>iron</td><td><code>iron_density_at_plasma_boundary</code></td><td>retained</td><td>accepted, outside family</td></tr>
+      <tr><td>lithium</td><td><code>lithium_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>lithium</td><td><code>volume_averaged_lithium_density</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>neon</td><td><code>neon_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>nitrogen</td><td><code>nitrogen_density_at_plasma_boundary</code></td><td>retained</td><td>accepted, outside family</td></tr>
+      <tr><td>oxygen</td><td><code>oxygen_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>oxygen</td><td><code>oxygen_density</code></td><td>added</td><td>accepted, outside family</td></tr>
+      <tr><td>total_ion</td><td><code>total_ion_density_at_plasma_boundary</code></td><td>retained</td><td>accepted, outside family</td></tr>
+      <tr><td>tritium</td><td><code>tritium_density_at_plasma_boundary</code></td><td>retained</td><td>accepted, outside family</td></tr>
+      <tr><td>xenon</td><td><code>xenon_density_at_plasma_boundary</code></td><td>added</td><td>accepted, outside family</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Comparing each member's latest pre-apply <code>DocsRevision.documentation</code>
+    with its current structured <code>links</code> yields 9 old and 19 current
+    out-of-family references: 13 added and three removed, a net rise of ten.
+    Carbon replaced <code>carbon_density</code>, ion replaced
+    <code>density_at_plasma_boundary</code>, and oxygen replaced
+    <code>volume_averaged_oxygen_density</code>; these are changed references,
+    not evidence that those nodes were renamed. The read and per-member delta
+    are logged in <code>link-history.log</code>, and the positive target lookup
+    in <code>link-targets.log</code>.
+  </p>
+
+  <h3 id="shc-convergence-recommendations">Smallest deterministic route to one converged apply</h3>
+  <ol>
+    <li><strong>Enforce the written opening and equation at the docs boundary.</strong>
+      Instantiate the selected density template with the member's subject and
+      place the canonical flux-surface-average equation in one fixed form;
+      reject or refine a generated document if either required passage is
+      changed before acceptance. The current warning leaves 16/17 mismatches
+      accepted, while <code>restates_equation=False</code> leaves all 17 forms
+      free. A refusal alone prevents a false acceptance but cannot guarantee a
+      one-pass result; deterministic insertion plus validation supplies it.</li>
+    <li><strong>Resolve link targets against the graph-wide name index in the
+      report.</strong> The observed 19 targets are all valid. This removes a
+      false convergence obstacle without deleting useful cross-family links.
+      Write-time target validation would catch genuine inventions, but cannot
+      repair this scoped-report counting defect.</li>
+    <li><strong>Pin the chosen anchor for a run and its continuation.</strong>
+      Score ranking is legitimate for an initial choice, but resetting that
+      member makes a replan select another. Persisting the run's choice would
+      make recovery reproducible; it would not by itself fix openings,
+      equations, or the neon halt.</li>
+    <li><strong>Add graph-wide link validation at write only if a real missing
+      target reproduces.</strong> None of the 19 reported targets is missing,
+      so this ranks last for this family.</li>
+  </ol>
+  <p>
+    The before and after read-only fingerprints covered 17 non-empty documents
+    and the fields <code>id</code>, <code>description</code>,
+    <code>documentation</code>, <code>docs_stage</code>,
+    <code>reviewer_score_docs</code>, <code>links</code>, and
+    <code>link_status</code>. Both SHA-256 digests are
+    <code>7576cb20df5239b98540723a60847e58fc107b5a7c0edc66456768612117d6f1</code>.
+    No model was invoked and node LLM spend is USD 0.00. The harmonize gate
+    passed 60 tests at base and head; no product source or test changed.
+  </p>
+</section>
