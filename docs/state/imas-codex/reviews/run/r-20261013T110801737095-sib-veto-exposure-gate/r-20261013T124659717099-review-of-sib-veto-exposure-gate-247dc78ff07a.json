@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_contained_in_main",
+    "tests/standard_names/test_sn_approve_tag.py::TestApprovalCliTag::test_existing_rc_tag_does_not_block_approval"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T13:01:41.743Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-13T12:47:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html",
+      "line": "69",
+      "severity": "follow-on",
+      "text": "follow-on: the isnc_repo fixture citation \"test_review_release.py:33\" (copied from the prior review) points inside the _git helper; at the reviewed head the fixture decorator is at test_review_release.py:37 and the def at :38, so the pointer a reader follows lands five lines above the fixture it names -- though the claim that all four tests use it is itself true."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "follow-on: the prior review's second finding remains live and unaddressed -- \"Every one of those files was collected and run by both arms\" is still inaccurate for a repo whose default addopts deselect 330 items (both logs record \"330 deselected\"), so graph-marked files listed here did not run; the delta repaired only the base-arm cause, not this claim."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against its base f3ba02074; the delta is one commit, 247dc78ff, one file +26/-6, replacing the base-arm \"absent .git\" attribution with a timing-dependent one and appending a \"Failures at the base and not the head\" section and base-refire.log to the logs list.",
+    "done_when": "the done_when asks for base and head logs each ending in a pytest totals line and EXIT=; base.log ends \"27 failed, 7804 passed, 9 skipped, 330 deselected ... EXIT=1\" and head.log \"25 failed, 7811 passed, 8 skipped, 330 deselected ... EXIT=1\", both named in the manifest test_logs; the delta does not alter this.",
+    "goal": "the source node's goal is a measurement of what the now-raising parent-admission probe exposes; the reviewed delta 247dc78ff touches only docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html and preserves the fragment's answer (sib-veto-exposure-gate.html:9-16, \"Answer: no\").",
+    "manifest": "read; status complete, commits f3ba02074 and 247dc78ff, negative_control_log the bare \"none: ...\" form, baseline_suite completed:true (27) and after_suite completed:true (25), added_failure_count 2.",
+    "write_paths": "the manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html plus a docs/figures/sn-integrity-backlog/sib-veto-exposure-gate directory; git diff --stat f3ba02074 247dc78ff lists only that one fragment, inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the delta adds no test or assertion, so nothing reddens if the fragment's reattributed counts or serial-re-fire claims drift from base.log and base-refire.log.",
+    "evidence": "sib-veto-exposure-gate.html:70-74 cites base.log, whose tracebacks for all four base-only ids (base.log:877,901,1073,1097) read \"Failed: Timeout (>30.0s) from pytest-timeout\", and :77-85 cites base-refire.log, whose own totals line reads \"1 failed, 2 passed\" with the failure inside yaml compose_node.",
+    "fit": "the repair follows the surrounding section idiom of the fragment (sib-veto-exposure-gate.html:38,64,87) and introduces no plan, sprint or ticket label.",
+    "goal_fidelity": "sib-veto-exposure-gate.html:66-85 now attributes the four base-only failures to a load-induced pytest-timeout grounded in base.log and confirmed by base-refire.log, correcting the archive-.git misattribution the prior review raised.",
+    "reuse": "the delta adds no function, class or module, so it forks no existing capability.",
+    "scope_discipline": "git diff --stat f3ba02074 247dc78ff names exactly docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html, the single declared write path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is a measurement of what the now-raising parent-admission probe exposes; the reviewed delta 247dc78ff touches only docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html and preserves the fragment's answer (sib-veto-exposure-gate.html:9-16, \"Answer: no\").\nVERDICT done_when: the done_when asks for base and head logs each ending in a pytest totals line and EXIT=; base.log ends \"27 failed, 7804 passed, 9 skipped, 330 deselected ... EXIT=1\" and head.log \"25 failed, 7811 passed, 8 skipped, 330 deselected ... EXIT=1\", both named in the manifest test_logs; the delta does not alter this.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html plus a docs/figures/sn-integrity-backlog/sib-veto-exposure-gate directory; git diff --stat f3ba02074 247dc78ff lists only that one fragment, inside the declared scope.\nVERDICT manifest: read; status complete, commits f3ba02074 and 247dc78ff, negative_control_log the bare \"none: ...\" form, baseline_suite completed:true (27) and after_suite completed:true (25), added_failure_count 2.\nVERDICT diff: read commit by commit against its base f3ba02074; the delta is one commit, 247dc78ff, one file +26/-6, replacing the base-arm \"absent .git\" attribution with a timing-dependent one and appending a \"Failures at the base and not the head\" section and base-refire.log to the logs list.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: sib-veto-exposure-gate.html:66-85 now attributes the four base-only failures to a load-induced pytest-timeout grounded in base.log and confirmed by base-refire.log, correcting the archive-.git misattribution the prior review raised.\nSCORE evidence: 19\nJUSTIFICATION evidence: sib-veto-exposure-gate.html:70-74 cites base.log, whose tracebacks for all four base-only ids (base.log:877,901,1073,1097) read \"Failed: Timeout (>30.0s) from pytest-timeout\", and :77-85 cites base-refire.log, whose own totals line reads \"1 failed, 2 passed\" with the failure inside yaml compose_node.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat f3ba02074 247dc78ff names exactly docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html, the single declared write path.\nSCORE durability: 6\nJUSTIFICATION durability: the delta adds no test or assertion, so nothing reddens if the fragment's reattributed counts or serial-re-fire claims drift from base.log and base-refire.log.\nSCORE fit: 19\nJUSTIFICATION fit: the repair follows the surrounding section idiom of the fragment (sib-veto-exposure-gate.html:38,64,87) and introduces no plan, sprint or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no function, class or module, so it forks no existing capability.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html:69 follow-on: the isnc_repo fixture citation \"test_review_release.py:33\" (copied from the prior review) points inside the _git helper; at the reviewed head the fixture decorator is at test_review_release.py:37 and the def at :38, so the pointer a reader follows lands five lines above the fixture it names -- though the claim that all four tests use it is itself true.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html:96 follow-on: the prior review's second finding remains live and unaddressed -- \"Every one of those files was collected and run by both arms\" is still inaccurate for a repo whose default addopts deselect 330 items (both logs record \"330 deselected\"), so graph-marked files listed here did not run; the delta repaired only the base-arm cause, not this claim.\n",
+  "review_run_id": "r-20261013T124659717099-review-of-sib-veto-exposure-gate-247dc78ff07a",
+  "reviewed_base_sha": "f3ba020740967623f1990c78cf50f3d56536d54a",
+  "reviewed_head_sha": "247dc78ff07ac5c2a7bf0dea8b3eb075b4134d93",
+  "reviewed_run_id": "r-20261013T110801737095-sib-veto-exposure-gate",
+  "scores": {
+    "durability": 6,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T12:54:09.539423+00:00",
+  "total": 103
+}
