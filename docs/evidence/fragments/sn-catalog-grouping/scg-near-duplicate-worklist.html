@@ -1,0 +1,50 @@
+<section id="scg-near-duplicate-worklist">
+  <h2 id="scg-near-duplicate-worklist-title">Near-duplicate worklist for coordinator rulings</h2>
+  <p id="scg-near-duplicate-worklist-scope">
+    The live accepted and approved graph held 2,528 names with units and
+    embeddings; 230 were reached from the 342-source WEST manifest. Using the
+    current embeddings after the constant-vector repair (a 2,528-name census
+    found zero identical-vector clusters), the audit-backed
+    comparison found 8 same-unit pairs at cosine ≥ 0.95 with a WEST member,
+    in 6 overlaps. The remaining corpus has 207 pairs. Together they form
+    107 overlaps. Jev scored the WEST pairs as 1 related and 7 distinct;
+    the other pairs as 13 same, 67 related and 127 distinct. Each row below
+    is one pair; a shared overlap identifier
+    keeps alternatives for one coordinator ruling. Jev's Score orders reading,
+    and applies no ruling.
+  </p>
+
+  <table id="scg-near-duplicate-worklist-west-pairs">
+    <thead><tr><th>Pair and unit</th><th>Cosine</th><th>Jev Score verdict; P(same)</th><th>Parsed divergence; Jev Noul</th><th>Overlap</th></tr></thead>
+    <tbody>
+      <tr id="scg-near-duplicate-worklist-pair-cold-neutral"><td><code>cold_neutral_temperature</code> / <code>neutral_temperature</code> [eV]</td><td>0.962864</td><td>Related; needs ruling; 0.03</td><td>Subject: cold neutral / neutral; 0.98</td><td><code>overlap-296b9d67a4a5</code></td></tr>
+      <tr id="scg-near-duplicate-worklist-pair-flux-locus"><td><code>poloidal_magnetic_flux_at_magnetic_axis</code> / <code>poloidal_magnetic_flux_at_plasma_boundary</code> [Wb]</td><td>0.963558</td><td>Distinct quantities; 0.02</td><td>Locus: magnetic axis / plasma boundary; 0.95</td><td><code>overlap-369bf09317c8</code></td></tr>
+      <tr id="scg-near-duplicate-worklist-pair-triangularity-boundary"><td><code>triangularity_of_plasma_boundary</code> / <code>upper_triangularity_of_plasma_boundary</code> [1]</td><td>0.996850</td><td>Distinct quantities; 0.00</td><td>Subject: absent / upper; 0.98</td><td><code>overlap-370569d04611</code></td></tr>
+      <tr id="scg-near-duplicate-worklist-pair-coil-size"><td><code>height_of_poloidal_field_coil</code> / <code>width_of_poloidal_field_coil</code> [m]</td><td>0.956807</td><td>Distinct quantities; 0.00</td><td>Physical base: height / width; 0.97</td><td><code>overlap-5d4912cfc4d8</code></td></tr>
+      <tr id="scg-near-duplicate-worklist-pair-flux-surface-triangularity"><td><code>lower_triangularity_of_flux_surface</code> / <code>upper_triangularity_of_flux_surface</code> [1]</td><td>0.976936</td><td>Distinct quantities; 0.00</td><td>Subject: lower / upper; 0.97</td><td><code>overlap-7f2595983ef6</code></td></tr>
+      <tr id="scg-near-duplicate-worklist-pair-fast-thermal"><td><code>fast_electron_density</code> / <code>thermal_electron_density</code> [m^-3]</td><td>0.954497</td><td>Distinct quantities; 0.00</td><td>Subject: fast electron / thermal electron; 0.98</td><td><code>overlap-ff9acc486ea4</code></td></tr>
+      <tr id="scg-near-duplicate-worklist-pair-fast-total"><td><code>fast_electron_density</code> / <code>total_electron_density</code> [m^-3]</td><td>0.960775</td><td>Distinct quantities; 0.00</td><td>Subject: fast electron / total electron; 0.98</td><td><code>overlap-ff9acc486ea4</code></td></tr>
+      <tr id="scg-near-duplicate-worklist-pair-thermal-total"><td><code>thermal_electron_density</code> / <code>total_electron_density</code> [m^-3]</td><td>0.953949</td><td>Distinct quantities; 0.00</td><td>Subject: thermal electron / total electron; 0.98</td><td><code>overlap-ff9acc486ea4</code></td></tr>
+    </tbody>
+  </table>
+
+  <p id="scg-near-duplicate-worklist-linked-pair">
+    The magnetic-axis / plasma-boundary locus overlap also contains the
+    non-WEST pair <code>toroidal_carbon_velocity_at_magnetic_axis</code> /
+    <code>toroidal_carbon_velocity_at_plasma_boundary</code> [m.s^-1], cosine
+    0.953422, Jev distinct quantities, locus Noul 0.95. It shares
+    <code>overlap-369bf09317c8</code>, so that ruling covers both pairs.
+  </p>
+
+  <p id="scg-near-duplicate-worklist-measure">
+    The corrected ten-pair pilot cost $0.000428. The call layer reported
+    $0.009592 for all 215 corrected judgments and $0.016569 total including
+    the earlier instrument check, below the $1.50 ceiling. Across 215 pairs,
+    239 parsed differing segments averaged Noul 0.974; 1,051 unchanged
+    segments averaged 0.028. The first instrument check had averaged 0.792
+    and 0.741 respectively, so its segment judgments were replaced. The
+    <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-worklist.json">rest-of-corpus worklist</a>
+    carries each pair's unit, cosine, verdict, all six segment Nouls,
+    parsed differences and overlap identifier.
+  </p>
+</section>

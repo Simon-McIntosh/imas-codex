@@ -1239,15 +1239,50 @@ def provenance_verb_check(
 def synonym_check(
     candidate: dict[str, Any],
     existing_sns_in_domain: list[dict[str, Any]],
+    *,
+    same_unit_only: bool = True,
+    threshold: float = 0.92,
+    inclusive: bool = False,
 ) -> list[str]:
-    """Flag near-duplicate names with cosine similarity > 0.92.
+    """Flag near-duplicate names above the requested cosine threshold.
 
     Compares the candidate's description embedding against precomputed
-    embeddings of existing SNs in the same domain with the same unit.
+    embeddings of existing SNs. Defaults retain the audit's strict >0.92,
+    same-unit comparison.
     """
     issues: list[str] = []
+    for existing, cosine in _synonym_matches(
+        candidate,
+        existing_sns_in_domain,
+        same_unit_only=same_unit_only,
+        threshold=threshold,
+        inclusive=inclusive,
+    ):
+        name = existing.get("name") or existing.get("id") or ""
+        units = (
+            f"same unit={candidate.get('unit')}"
+            if same_unit_only
+            else f"candidate unit={candidate.get('unit')}, existing unit={existing.get('unit')}"
+        )
+        issues.append(
+            f"audit:synonym_check: cosine={cosine:.3f} with existing "
+            f"'{name}' ({units})"
+        )
+    return issues
+
+
+def _synonym_matches(
+    candidate: dict[str, Any],
+    existing_sns_in_domain: list[dict[str, Any]],
+    *,
+    same_unit_only: bool = True,
+    threshold: float = 0.92,
+    inclusive: bool = False,
+) -> list[tuple[dict[str, Any], float]]:
+    """Return the audit's matching names and unrounded cosine values."""
+    matches: list[tuple[dict[str, Any], float]] = []
     if not existing_sns_in_domain:
-        return issues
+        return matches
 
     cand_name = candidate.get("id") or candidate.get("standard_name") or ""
     # User invariant: do NOT coerce missing units to "1"; treat them as
@@ -1258,12 +1293,12 @@ def synonym_check(
     # Get candidate embedding
     cand_embedding = candidate.get("description_embedding")
     if cand_embedding is None:
-        return issues
+        return matches
 
     cand_vec = np.array(cand_embedding, dtype=np.float32)
     cand_norm = np.linalg.norm(cand_vec)
     if cand_norm == 0:
-        return issues
+        return matches
 
     for existing in existing_sns_in_domain:
         ex_name = existing.get("name") or existing.get("id") or ""
@@ -1273,9 +1308,9 @@ def synonym_check(
         # Skip the comparison if either side has no stored unit — we
         # cannot meaningfully assert duplicate-by-unit when the truth is
         # unknown, and fabricating "1" hides the gap.
-        if cand_unit is None or ex_unit is None:
-            continue
-        if ex_unit != cand_unit:
+        if same_unit_only and (
+            cand_unit is None or ex_unit is None or ex_unit != cand_unit
+        ):
             continue
         ex_embedding = existing.get("description_embedding")
         if ex_embedding is None:
@@ -1287,13 +1322,10 @@ def synonym_check(
             continue
 
         cosine = float(np.dot(cand_vec, ex_vec) / (cand_norm * ex_norm))
-        if cosine > 0.92:
-            issues.append(
-                f"audit:synonym_check: cosine={cosine:.3f} with existing "
-                f"'{ex_name}' (same unit={cand_unit})"
-            )
+        if cosine > threshold or (inclusive and cosine >= threshold):
+            matches.append((existing, cosine))
 
-    return issues
+    return matches
 
 
 def placeholder_check(candidate: dict[str, Any]) -> list[str]:
