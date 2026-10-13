@@ -1,0 +1,95 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-comparator-rerank uv run --no-sync pytest -p no:cacheprovider tests/llm/test_prompt_coordinate_guidance.py tests/llm/test_prompt_rendering.py tests/standard_names/test_anti_patterns_yaml.py tests/standard_names/test_benchmark.py tests/standard_names/test_comparator_budget_share.py tests/standard_names/test_compose_anti_patterns.py tests/standard_names/test_compose_guards.py tests/standard_names/test_compose_names_context.py tests/standard_names/test_compose_operator_registry.py tests/standard_names/test_compose_prompt_examples_round_trip.py tests/standard_names/test_conventions_parse_guard.py tests/standard_names/test_conventions_prompt_block.py tests/standard_names/test_conventions_wiring.py tests/standard_names/test_dd_gap_automated_writers.py tests/standard_names/test_docs_context_injection.py tests/standard_names/test_enrich_parents.py tests/standard_names/test_grammar_contract.py tests/standard_names/test_grammar_vocabulary_drift.py tests/standard_names/test_judge_stage.py tests/standard_names/test_ordered_operator_prompt_contract.py tests/standard_names/test_pattern_families.py tests/standard_names/test_pool_batch_processors.py tests/standard_names/test_pool_compose_retry.py tests/standard_names/test_prompt_completeness.py tests/standard_names/test_prompt_units_cocos_crossrefs.py tests/standard_names/test_prompt_vocab_injection.py tests/standard_names/test_quality_levers.py tests/standard_names/test_refine_prompts.py tests/standard_names/test_refine_scope_continuity.py tests/standard_names/test_review_comparator_budget.py tests/standard_names/test_review_name_only.py tests/standard_names/test_review_neighbours.py tests/standard_names/test_review_quorum_pool.py tests/standard_names/test_self_refine.py tests/standard_names/test_source_compose_hint.py tests/standard_names/test_vocab_consumers_see_operators.py  tests/discovery/test_judgment.py tests/standard_names/test_comparator_rerank.py tests/search/test_fusion.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005036802056-ssog-comparator-rerank/head_gate_r3.log",
+    "revision": "bb2508c70"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261013T005036802056-ssog-comparator-rerank/ssog-base uv run --no-sync pytest -p no:cacheprovider tests/llm/test_prompt_coordinate_guidance.py tests/llm/test_prompt_rendering.py tests/standard_names/test_anti_patterns_yaml.py tests/standard_names/test_benchmark.py tests/standard_names/test_comparator_budget_share.py tests/standard_names/test_compose_anti_patterns.py tests/standard_names/test_compose_guards.py tests/standard_names/test_compose_names_context.py tests/standard_names/test_compose_operator_registry.py tests/standard_names/test_compose_prompt_examples_round_trip.py tests/standard_names/test_conventions_parse_guard.py tests/standard_names/test_conventions_prompt_block.py tests/standard_names/test_conventions_wiring.py tests/standard_names/test_dd_gap_automated_writers.py tests/standard_names/test_docs_context_injection.py tests/standard_names/test_enrich_parents.py tests/standard_names/test_grammar_contract.py tests/standard_names/test_grammar_vocabulary_drift.py tests/standard_names/test_judge_stage.py tests/standard_names/test_ordered_operator_prompt_contract.py tests/standard_names/test_pattern_families.py tests/standard_names/test_pool_batch_processors.py tests/standard_names/test_pool_compose_retry.py tests/standard_names/test_prompt_completeness.py tests/standard_names/test_prompt_units_cocos_crossrefs.py tests/standard_names/test_prompt_vocab_injection.py tests/standard_names/test_quality_levers.py tests/standard_names/test_refine_prompts.py tests/standard_names/test_refine_scope_continuity.py tests/standard_names/test_review_comparator_budget.py tests/standard_names/test_review_name_only.py tests/standard_names/test_review_neighbours.py tests/standard_names/test_review_quorum_pool.py tests/standard_names/test_self_refine.py tests/standard_names/test_source_compose_hint.py tests/standard_names/test_vocab_consumers_see_operators.py  tests/discovery/test_judgment.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005036802056-ssog-comparator-rerank/baseline_suite.log",
+    "revision": "c98a0d42dc8195dd60c9c145340703409c87b2ec"
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:4032",
+    "imas_codex/standard_names/workers.py:5897"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T00:50:53Z",
+  "findings": [
+    {
+      "file": "imas_codex/search/fusion.py",
+      "line": 22,
+      "severity": "follow-on",
+      "summary": "the diff modifies imas_codex/search/fusion.py and tests/search/test_fusion.py, which the node's brief did not declare as write paths, so a reader comparing the diff against the brief sees two files outside the dispatched scope."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-comparator-rerank.html",
+      "line": 1,
+      "severity": "follow-on",
+      "summary": "the manifest's negative_control.log names test_comparator_rerank_merges_item_orders_by_mean_rank, a test that no longer exists after the fuses-by-reciprocal-rank rename, so the red log's second failing id does not correspond to the head revision."
+    },
+    {
+      "file": "imas_codex/standard_names/context.py",
+      "line": 1167,
+      "severity": "follow-on",
+      "summary": "rerank_name_comparators returns a non-empty seat whenever model resolves even if no judgement call was made (every item's query empty), contradicting its docstring's \"empty when no call was made\"; harmless because the caller charges only when cost > 0, but the contract is unpinned by any test."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the rerank sits behind _reranked_nearby_comparators and _rerank_comparators_for_worker, reached by two production compose sites: imas_codex/standard_names/workers.py:4032 (compose_worker) and imas_codex/standard_names/workers.py:5897 (compose_batch).",
+    "diff": "read all ten commits c98a0d42..400416975 commit by commit; six files changed (fusion.py +51/-9, context.py +165, workers.py +142, test_fusion.py +33, test_comparator_rerank.py +414, the 114-line fragment), with the final commit 400416975 docs-only.",
+    "done_when": "the done_when asks for a stubbed-decision reorder test that fails with the call removed, the off path byte-identical, a named citation of rerank_pool's failure-order test, and base/after suites with no added failure; tests/standard_names/test_comparator_rerank.py:73/110 supply the two arms, negative_control.log shows the reorder test red with the call removed (EXIT=1), the fragment cites test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails at docs/evidence/fragments/sn-selection-over-generation/ssog-comparator-rerank.html:21, and the manifest records baseline_suite and after_suite with revision, exit_status and completed true.",
+    "goal": "the node goal is to rerank the compose prompt's nearby-name comparator block through rerank_pool behind a single default-off switch; imas_codex/standard_names/context.py:1074 adds rerank_name_comparators and imas_codex/standard_names/workers.py:1997 _rerank_comparators_for_compose, both reached only when comparator_rerank_enabled() (context.py:1037) is true, which reads IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS and defaults off.",
+    "manifest": "read; it states the head gate (head_gate_r3.log, 845 passed/1 skipped/0 failed, EXIT=0 at bb2508c70) against the base arm (baseline_suite.log, 827 passed/1 skipped/0 failed, EXIT=0) and lists the negative controls.",
+    "write_paths": "the brief declared four paths (context.py, workers.py, tests/standard_names/test_comparator_rerank.py, the fragment), but the diff also modifies imas_codex/search/fusion.py and tests/search/test_fusion.py, which the node's own manifest declares as write paths but the brief does not."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_comparator_rerank.py:76 supplies a fixed order through a stubbed rerank_pool and asserts the returned order against a literal, so reverting the rerank call reddens it (negative_control.log, EXIT=1), while test_compose_worker_books_through_the_charging_helper at line 403 is a source-string check rather than a behavioural one.",
+    "evidence": "the after arm head_gate_r3.log records 845 passed/1 skipped/EXIT=0 at the code head bb2508c70 against baseline_suite.log's 827/1/EXIT=0, and the reorder assertion at tests/standard_names/test_comparator_rerank.py:80 is shown red by negative_control.log, though the base arm ran a shorter file list than the head arm.",
+    "fit": "workers.py:1997 repeats the sibling rerank callers' try/except (imas_codex/llm/search_tools.py:222, imas_codex/discovery/signals/parallel.py:206) with the same ranking-is-not-a-gate comment, and no plan, sprint or ticket label appears in the new names.",
+    "goal_fidelity": "imas_codex/standard_names/context.py:1074 reranks the comparator block per item through rerank_pool under the sn-judge seat and fuses the item orders, and both compose sites (workers.py:4032, :5897) gate it on the default-off switch, though the function returns a 3-tuple (ordered, cost, seat) where the two the brief asked for.",
+    "reuse": "fusion.py:41 adds rrf_fuse_in_input_order beside its owner and extracts _rrf_mass so the two share arithmetic, rerank_pool is reused rather than re-implemented, and the spend is booked through BudgetManager.reserve/charge_event, so nothing the repository owns is forked.",
+    "scope_discipline": "the diff reaches imas_codex/search/fusion.py and tests/search/test_fusion.py, which the brief's declared write scope omits (the manifest declares them), the reuse repair a prior review defect required."
+  },
+  "node": "review-of-ssog-comparator-rerank-4004169754f8",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to rerank the compose prompt's nearby-name comparator block through rerank_pool behind a single default-off switch; imas_codex/standard_names/context.py:1074 adds rerank_name_comparators and imas_codex/standard_names/workers.py:1997 _rerank_comparators_for_compose, both reached only when comparator_rerank_enabled() (context.py:1037) is true, which reads IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS and defaults off.\nVERDICT done_when: the done_when asks for a stubbed-decision reorder test that fails with the call removed, the off path byte-identical, a named citation of rerank_pool's failure-order test, and base/after suites with no added failure; tests/standard_names/test_comparator_rerank.py:73/110 supply the two arms, negative_control.log shows the reorder test red with the call removed (EXIT=1), the fragment cites test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails at docs/evidence/fragments/sn-selection-over-generation/ssog-comparator-rerank.html:21, and the manifest records baseline_suite and after_suite with revision, exit_status and completed true.\nVERDICT write_paths: the brief declared four paths (context.py, workers.py, tests/standard_names/test_comparator_rerank.py, the fragment), but the diff also modifies imas_codex/search/fusion.py and tests/search/test_fusion.py, which the node's own manifest declares as write paths but the brief does not.\nVERDICT manifest: read; it states the head gate (head_gate_r3.log, 845 passed/1 skipped/0 failed, EXIT=0 at bb2508c70) against the base arm (baseline_suite.log, 827 passed/1 skipped/0 failed, EXIT=0) and lists the negative controls.\nVERDICT diff: read all ten commits c98a0d42..400416975 commit by commit; six files changed (fusion.py +51/-9, context.py +165, workers.py +142, test_fusion.py +33, test_comparator_rerank.py +414, the 114-line fragment), with the final commit 400416975 docs-only.\nCALL_SITES: imas_codex/standard_names/workers.py:4032, imas_codex/standard_names/workers.py:5897\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/context.py:1074 reranks the comparator block per item through rerank_pool under the sn-judge seat and fuses the item orders, and both compose sites (workers.py:4032, :5897) gate it on the default-off switch, though the function returns a 3-tuple (ordered, cost, seat) where the brief asked for two.\nSCORE evidence: 18\nJUSTIFICATION evidence: the after arm head_gate_r3.log records 845 passed/1 skipped/EXIT=0 at the code head bb2508c70 against baseline_suite.log's 827/1/EXIT=0, and the reorder assertion at tests/standard_names/test_comparator_rerank.py:80 is shown red by negative_control.log, though the base arm ran a shorter file list than the head arm.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: the diff reaches imas_codex/search/fusion.py and tests/search/test_fusion.py, which the brief's declared write scope omits (the manifest declares them), the reuse repair a prior review defect required.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_comparator_rerank.py:76 supplies a fixed order through a stubbed rerank_pool and asserts the returned order against a literal, so reverting the rerank call reddens it (negative_control.log, EXIT=1), while test_compose_worker_books_through_the_charging_helper at line 403 is a source-string check rather than a behavioural one.\nSCORE fit: 18\nJUSTIFICATION fit: workers.py:1997 repeats the sibling rerank callers' try/except (imas_codex/llm/search_tools.py:222, imas_codex/discovery/signals/parallel.py:206) with the same ranking-is-not-a-gate comment, and no plan, sprint or ticket label appears in the new names.\nSCORE reuse: 19\nJUSTIFICATION reuse: fusion.py:41 adds rrf_fuse_in_input_order beside its owner and extracts _rrf_mass so the two share arithmetic, rerank_pool is reused rather than re-implemented, and the spend is booked through BudgetManager.reserve/charge_event, so nothing the repository owns is forked.\nFINDING imas_codex/search/fusion.py:22 follow-on: the diff modifies imas_codex/search/fusion.py and tests/search/test_fusion.py, which the node's brief did not declare as write paths, so a reader comparing the diff against the brief sees two files outside the dispatched scope.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-comparator-rerank.html:1 follow-on: the manifest's negative_control.log names test_component_rerank_merges_item_orders_by_mean_rank, a test that no longer exists after the fuses-by-reciprocal-rank rename, so the red log's second failing id does not correspond to the head revision.\nFINDING imas_codex/standard_names/context.py:1167 follow-on: rerank_name_comparators returns a non-empty seat whenever model resolves even if no judgement call was made (every item's query empty), contradicting its docstring's \"empty when no call was made\"; harmless because the caller charges only when cost > 0, but the contract is unpinned by any test.\n",
+  "review_run_id": "legacy-d840d6d7b17a",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "c98a0d42dc8195dd60c9c145340703409c87b2ec",
+  "reviewed_head_sha": "4004169754f84920d627a761aa5adede08e4a342",
+  "reviewed_run_id": "r-20261013T005036802056-ssog-comparator-rerank",
+  "reviewer_run_id": "r-20261013T030618031392-review-of-ssog-comparator-rerank-4004169754f8",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005036802056-ssog-comparator-rerank/baseline_suite.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005036802056-ssog-comparator-rerank/head_gate_r3.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005036802056-ssog-comparator-rerank/negative_control.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005036802056-ssog-comparator-rerank/worker_path_control.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T03:13:26.367824+00:00",
+  "total": 108
+}
