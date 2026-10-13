@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T13:57:12.040Z",
+  "dispatched_at": "2026-10-13T13:47:36Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:23",
+      "id": "wiring-1",
+      "reason": "an orchestrator reading the declared wiring would not know \u00a73 must wait for \u00a75/\u00a76/\u00a77, and would either dispatch \u00a73 early or review its done-when as unmet while the repairs are still open.",
+      "text": "`plan-section-depends-on` gives `s3` only `sn-house-style#s4` and `sn-catalog-grouping#s2`, yet \u00a73's done-when (line 182) reads \"after \u00a75, \u00a76 and \u00a77 have landed, an apply over the 17-member ... family converges\", so \u00a73 depends on three sections the relationship map does not name",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:217",
+      "id": "reasoning-1",
+      "reason": "the guard as specified admits exactly the restates_equation=False restatement it is meant to stop, and the done-when's \"carries none\" is discharged by insertion alone, so no test can show the false branch is enforced; the validation needs an explicit \"must carry no display equation where restates_equation is false\" arm.",
+      "text": "\u00a76's validation refines a document only when its display equation \"is not that concept's canonical form or ... matches one of its `forbidden_variants`\", so a document that carries the canonical flux-surface-average equation passes validation even though \u00a76's own insertion rule (\"where it is false ... the documentation names the concept and links to it\") and its done-when (\"for the flux-surface average it carries none\") both require that no equation be present",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b264804d5f72ddbadfc2d46f50c58494f9360e6ff3d47b641681666b2349d55f",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 41,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T134718885195-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "15c8c0d323d9e058ea7d0a8d083f8f47f7b910d7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the diagnosis fragment and every cited code anchor resolve (`review/audits.py:405 run_link_integrity`, `workers.py` docs-review call site, `harmonize.py` scope run id, `llm/prompts/sn/_conventions.md`, ISN `conventions/concepts.yml` with `restates_equation`/`forbidden_variants`).",
+    "done_when": "pass \u2014 \u00a75, \u00a76 and \u00a77 each name a negative control that fails with the mechanism removed (graph-wide lookup ignored; each \u00a76 test with its mechanism removed; the \u00a77 reuse test with the pin removed).",
+    "evidence_paths": "pass \u2014 the sections write to the run's own record and the established `docs/evidence/fragments/sn-harmonize-command/` surface, none to a scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 the new section prose carries no plan labels, ticket numbers or changelog prose into code or symbol names.",
+    "reasoning": "a finding \u2014 \u00a76's stated validation cannot enforce the branch its own insertion rule and done-when require for `restates_equation: false` concepts.",
+    "single_goal": "pass \u2014 each changed section carries one repair (report link resolution, opening/equation insertion+validation, anchor pinning).",
+    "wiring": "a finding \u2014 \u00a73's done-when gates on \u00a75, \u00a76 and \u00a77 landing, but `plan-section-depends-on` in the `_document` block declares no such relationship for `s3`."
+  },
+  "section_digests": {
+    "_document": "f03e43f8133be459f20b0e2a15e6dc93d29bb91f6b35b13a260b1a9a22de7b43",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s2": "767a2fe2b092486b6f4c5277a919edca224cd3a5f242f4bf747c1657bda4d5af",
+    "s3": "dcc5b839b6cdc2ae74c3f31bac64fc8a83c4f6d6374507df926a986a3ae40cf9",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa",
+    "s5": "ebb66a7ebb10c4aad132f61567b089ce315607a670a86403166cdf201a496bbf",
+    "s6": "23569c71c6dd62bbafbd5da20885b6c0a88426a81b26377b5bf54325c70686f8",
+    "s7": "2eed016a7c36b87fbd866c3a21ae396d57071d75eebb6222595db5e505dd8701"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T13:59:43.593563+00:00"
+}
