@@ -1,0 +1,52 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-13T11:05:31.472Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-13T10:43:56Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": "6739",
+      "severity": "follow-on",
+      "text": "follow-on: the superseded veto at the signed lifecycleless-stub admission site has no test -- no case drives a superseded candidate through _apply_lifecycleless_stub_reconcile, so reverting the superseded_ids branch at line 6743 leaves the suite green, and that branch is the guard that keeps the retired parent out of the signed path."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the ordinary edge writer reaches the veto through imas_codex/standard_names/graph_ops.py:3184 (_filter_admissible_parents), called by _write_standard_name_edges, which is reached from imas_codex/standard_names/graph_ops.py:3543 (rederive_structural_edges) and :5912 and from imas_codex/standard_names/signed_manifest.py:369 (_apply_structural_edge_reconcile); the other changed site is reached from imas_codex/standard_names/signed_manifest.py:7623 (_apply_lifecycleless_stub_reconcile).",
+    "diff": "read commit by commit against base 27a2b429; the four commits add the helper and the two admission vetoes, then close the fail-open probe path, then record the outcome in the fragment -- 5 files, +191/-8, all inside the declared scope.",
+    "done_when": "the done-when asks that tests/standard_names/test_superseded_parent_veto.py show a superseded target dropped by _filter_admissible_parents even when legacy-protected, with a non-superseded admission unchanged, failing once against base; that the reconcile release be shown on a fake graph if established; and that the gate run the new test plus every test file referencing the three admission symbols plus tests/graph/test_cypher_property_check.py; head-gate-committed.log runs exactly those eleven files at 06e0451f (152 passed, EXIT=0) against a base arm of 148 passed, and base-negative.log shows the two core assertions red at base.",
+    "goal": "the goal is that a superseded StandardName is never admitted as a derived parent; imas_codex/standard_names/graph_ops.py:2883 vetoes it in _admit before the legacy protection at :2886, and imas_codex/standard_names/signed_manifest.py:6742 gives the signed lifecycleless-stub admission the same verdict.",
+    "manifest": "read; status complete; commits e160cb29, 9da59130, bb794c34 and 06e0451f in the detached worktree, not merged; tests records 152 passed, 13 deselected, EXIT=0 at 06e0451f against a base companion of 148 passed; negative_control_log base-negative.log with EXIT=1 and two failing ids; baseline_suite and after_suite both exit_status 0 with empty failure_ids.",
+    "write_paths": "the manifest's changed_paths name imas_codex/standard_names/parents.py, imas_codex/standard_names/graph_ops.py, imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_superseded_parent_veto.py and docs/evidence/fragments/sn-integrity-backlog/sib-superseded-parent-veto.html; git diff --stat against 27a2b42 lists exactly those five and no path outside the grant."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_superseded_parent_veto.py:63 and :89 both redden when the veto is removed (base-negative.log), and :74 reddens if the probe re-swallows, so the primary guard is a real fails-if-reverted assertion; the gap is imas_codex/standard_names/signed_manifest.py:6743, where no test drives a superseded candidate and the branch can be reverted green.",
+    "evidence": "head-gate-committed.log:1 names revision 06e0451f and the summary line records 152 passed with EXIT=0, against base-gate.log:1's 148 passed at 27a2b42 -- zero added failures to judge by delta -- and base-negative.log carries the bare EXIT=1 with two failing ids the head arm passes.",
+    "fit": "imas_codex/standard_names/parents.py:71 names the helper for what it does, the edited docstring at imas_codex/standard_names/graph_ops.py:2694 states the mechanism, and the function-local import added in signed_manifest.py:6730 matches that module's existing idiom with no plan label in any symbol.",
+    "goal_fidelity": "the veto holds at both named admission sites -- imas_codex/standard_names/graph_ops.py:2883 before the legacy branch at :2886, and imas_codex/standard_names/signed_manifest.py:6742 before is_admissible_parent_name -- and the reconcile-release question the brief raised is answered at tests/standard_names/test_superseded_parent_veto.py:78.",
+    "reuse": "no owner for a bulk superseded-set lookup exists -- parents.py had only inline predicates and a capability search over imas_codex/standard_names and imas_codex/graph for a name_stage helper found none -- so imas_codex/standard_names/parents.py:71 is the first owner, and the reconcile it feeds extends _write_standard_name_edges rather than forking it.",
+    "scope_discipline": "git diff --stat against 27a2b429 lists exactly the five declared paths, but imas_codex/standard_names/graph_ops.py:2776 changes the defensive topology-probe handler from warning-and-admit-all to raising, a production behaviour change beyond the brief's named edit even though it is documented at docs/evidence/fragments/sn-integrity-backlog/sib-superseded-parent-veto.html:15."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a StandardName whose name_stage is superseded is never admitted as a derived parent; the veto sits before the legacy protection at imas_codex/standard_names/graph_ops.py:2883 and at imas_codex/standard_names/signed_manifest.py:6742.\nVERDICT done_when: the done-when names tests/standard_names/test_superseded_parent_veto.py plus every test file that references the three admission symbols and tests/graph/test_cypher_property_check.py; the head gate log runs exactly those eleven files at the reviewed head with 152 passed, EXIT=0.\nVERDICT write_paths: the brief and the manifest declare five paths (parents.py, graph_ops.py, signed_manifest.py, the new test file, the evidence fragment); git diff --stat against the base lists exactly those five.\nVERDICT manifest: read; status complete, four commits ending 06e0451f, tests record 152 passed at head against 148 at base, and negative_control_log base-negative.log shows EXIT=1 with two failing ids.\nVERDICT diff: read commit by commit against base 27a2b42; 191 insertions and 8 deletions across the five declared files, nothing outside them.\nCALL_SITES: imas_codex/standard_names/graph_ops.py:3184, imas_codex/standard_names/graph_ops.py:3543, imas_codex/standard_names/graph_ops.py:5912, imas_codex/standard_names/signed_manifest.py:369, imas_codex/standard_names/signed_manifest.py:7623\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the veto is applied before the legacy protection at imas_codex/standard_names/graph_ops.py:2883 and at imas_codex/standard_names/signed_manifest.py:6742, and the reconcile-release behaviour is established by tests/standard_names/test_superseded_parent_veto.py:78.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-gate-committed.log:1 names revision 06e0451f and its summary line records 152 passed with EXIT=0 against base-gate.log:1's 148 passed, and base-negative.log records the red arm EXIT=1.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: git diff --stat against 27a2b42 lists only the five declared paths, though imas_codex/standard_names/graph_ops.py:2776 also turns the defensive topology-probe handler from admit-all into a re-raise, a behavioural change the brief did not name.\nSCORE durability: 16\nJUSTIFICATION durability: the veto and the reconcile release are pinned by assertions that redden at base (tests/standard_names/test_superseded_parent_veto.py:63 and :89), but no test drives a superseded candidate through imas_codex/standard_names/signed_manifest.py:6743.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/parents.py:71 names the helper by what it does and the edited docstring at imas_codex/standard_names/graph_ops.py:2694 describes the mechanism, with no plan label in any added symbol.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over imas_codex/standard_names and imas_codex/graph for a bulk superseded-set lookup found no owner -- every other site inlines a name_stage predicate -- so imas_codex/standard_names/parents.py:71 is the first.\nFINDING imas_codex/standard_names/signed_manifest.py:6739 follow-on: the superseded veto at the signed lifecycleless-stub admission site has no test -- no case drives a superseded candidate through _apply_lifecycleless_stub_reconcile, so reverting the superseded_ids branch at line 6743 leaves the suite green.\n",
+  "review_run_id": "r-20261013T104330612553-review-of-sib-superseded-parent-veto-06e0451f2894",
+  "reviewed_base_sha": "27a2b429977f11ffbee0c787ac5c99d720193f24",
+  "reviewed_head_sha": "06e0451f28948e5f0e3306f637224a7e8110df46",
+  "reviewed_run_id": "r-20261013T102015041128-sib-superseded-parent-veto",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T11:00:34.985196+00:00",
+  "total": 109
+}
