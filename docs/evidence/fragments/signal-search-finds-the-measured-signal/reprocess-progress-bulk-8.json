@@ -23,7 +23,8 @@
       "final_census": {"total": 1029, "discovered": 0, "described": 1029, "with_role": 1029, "embedded": 1029, "hash_mismatch": 0},
       "log_post_reset": "scratch/census-scopeA-postreset.json",
       "log_enrich": "scratch/scopeA-enrich.log",
-      "log_final_census": "scratch/census-scopeA-final.json"
+      "log_final_census": "scratch/final-census.json",
+      "log_final_census_note": "The scope's final census is the node-wide scratch/final-census.json, whose CryoCTB, b240064 and CryoIL rows read 0 discovered / 1029 described / 1029 roled after enrichment and the role backfill. scratch/census-scopeA-final.json is an earlier snapshot taken before the role backfill and is not the final census; census-scopeA-postreset.json is the pre-enrichment read."
     },
     {
       "scope": "scopeB",
@@ -36,7 +37,8 @@
       "log_post_reset": "scratch/census-scopeB-postreset.json",
       "log_enrich": "scratch/scopeB-enrich.log",
       "log_enrich_2": "scratch/scopeB-enrich2.log",
-      "log_final_census": "scratch/census-scopeB-final.json"
+      "log_final_census": "scratch/final-census.json",
+      "log_final_census_note": "The scope's final census is the node-wide scratch/final-census.json, whose a048717 row reads 0 discovered / 1598 described / 1598 roled after both enrichment passes and the role backfill. scratch/census-scopeB-final.json is a mid-drain snapshot taken before scopeB-enrich2 (43 discovered / 1555 described) and is not the final census; census-scopeB-postreset.json is the pre-enrichment read."
     }
   ],
   "role_backfill": {
@@ -55,6 +57,7 @@
     "discovered_left": 0,
     "roles_missing": 0
   },
+  "final_census_log": "scratch/final-census.json",
   "facility_embedding_census": {
     "n": 15111,
     "mismatch": 367,

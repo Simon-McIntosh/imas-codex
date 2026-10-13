@@ -61,6 +61,19 @@
     account for them.
   </p>
 
+  <p id="ssfms-reprocess-bulk-8-final-census">
+    The authoritative final census is <code>scratch/final-census.json</code>,
+    taken after both enrichment passes and the role backfill: every one of the
+    four categories reads 0 discovered, and 2627 signals in total are
+    described and roled. <code>scratch/census-scopeA-postreset.json</code> and
+    <code>scratch/census-scopeB-postreset.json</code> are the pre-enrichment
+    reads. The per-scope snapshots <code>census-scopeA-final.json</code> and
+    <code>census-scopeB-final.json</code> were taken before the role backfill
+    (and, for scope B, before its second enrichment pass), so they report
+    discovered and described but not the final role counts, and are not cited
+    as the final census.
+  </p>
+
   <figure id="ssfms-reprocess-bulk-8-figure">
     <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-8/assigned-category-coverage.svg"
          alt="Horizontal bars, one per assigned JT-60SA category, showing the signal count reprocessed this node, each annotated 0 discovered and with its role count">
