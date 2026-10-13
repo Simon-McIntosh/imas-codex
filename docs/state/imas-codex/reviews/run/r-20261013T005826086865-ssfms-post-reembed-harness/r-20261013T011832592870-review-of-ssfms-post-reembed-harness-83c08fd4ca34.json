@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's gate_before.log (base 9f53972b2) and table_run_1.log (head 93b083114); the run is implement-role so its manifest carries no baseline_suite/after_suite fields",
+  "backend": "deepseek-v4.1-flash",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T01:27:03.984Z",
+  "dispatched_at": "2026-10-13T01:18:49Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "717",
+      "severity": "follow-on",
+      "text": "follow-on: the four-arm test asserts only table[arm] > control, so the done_when's quantitative criterion (current_tool within 0.012 of 0.7920) is printed but never asserted and a future regression in current_tool's ranking reddens nothing; the criterion is judged by hand."
+    },
+    {
+      "file": "tests/llm/fixtures/signal_search_questions.json",
+      "line": "1892",
+      "severity": "follow-on",
+      "text": "follow-on: the psc_cref3snu label the done_when names explicitly is in no arm's top 10 on the settled graph, so removing it leaves the table passing (negative_control_declared.log EXIT=0); that label carries no guard and its grade is assertion-free."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base 9f53972b2; four commits (d60431215, 93b083114, bc6c63d78, 83c08fd4c) add 29 fixture labels and 95 lines of evidence HTML across two fragments, with no product source or test code changed.",
+    "done_when": "the done_when asks that every eligible candidate any arm places in a top 10 carries a grade, that the table test run twice scores every arm, and that current_tool's mean nDCG@10 sits no lower than 0.012 below 0.7920; the gate log table_run_1.log/table_run_2.log (rev 93b083114) prints all five arms and passes, but the 0.012 clause is not asserted by any test and its figure (0.7773 vs 0.7920 = -0.0147) is unmet, which the manifest names as a blocker the coordinator then accepted (status-repair.json).",
+    "goal": "the node goal is to label the candidates the re-embed lifted into the golden arms' top 10 and score the harness on the re-embedded graph; the landed diff adds exactly 29 such labels to tests/llm/fixtures/signal_search_questions.json (1,675 to 1,704, 0 removed) and records the four-arm table, so the goal is met.",
+    "manifest": "read; it states status complete (as-delivered blocked, coordinator-repaired with a reason in status-repair.json), names the gate command and its 1-passed-both-runs result, and lists the four gate logs; it carries no baseline_suite/after_suite (an implement-role node), so added failures were derived from gate_before.log and table_run_1.log.",
+    "write_paths": "the manifest declares three paths (the fixture and two evidence fragments), the diff touches exactly those three, and the granted figures directory is unused, which the done-when permits since it names the fragment rather than a figure."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_signal_search_goldens.py:216 require_labelled reddens when a placed label is removed, as negative_control.log shows (EXIT=1), but the explicitly required psc_cref3snu label is in no top 10 so removing it leaves the table passing (negative_control_declared.log EXIT=0).",
+    "evidence": "table_run_1.log and table_run_2.log (rev 93b083114) record every arm's nDCG with 1 passed EXIT=0, but the done_when's 0.012-spread clause is unmet (0.7773 vs 0.7920) and is printed at tests/llm/test_signal_search_goldens.py:713 rather than asserted at :717.",
+    "fit": "the two fragments keep the module's element-id prefix and the fixture keeps the existing relevant-map shape, with no plan labels or ticket identifiers in source.",
+    "goal_fidelity": "tests/llm/fixtures/signal_search_questions.json gains the 29 lifted candidates and reembed-harness.html records the four-arm table, which is what the goal names.",
+    "reuse": "the diff adds no function, class or module; it extends the existing owner tests/llm/fixtures/signal_search_questions.json, which a repository search found is read only by tests/llm/test_signal_search_goldens.py.",
+    "scope_discipline": "git diff --name-only 9f53972b2..83c08fd4c names only the fixture and the two granted fragments, all inside the declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to label the candidates the re-embed lifted into the golden arms' top 10 and score the harness on the re-embedded graph; the landed diff adds exactly 29 such labels to tests/llm/fixtures/signal_search_questions.json (1,675 to 1,704, 0 removed) and records the four-arm table, so the goal is met.\nVERDICT done_when: the done_when asks that every eligible candidate any arm places in a top 10 carries a grade, that the table test run twice scores every arm, and that current_tool's mean nDCG@10 sits no lower than 0.012 below 0.7920; the gate log table_run_1.log/table_run_2.log (rev 93b083114) prints all five arms and passes, but the 0.012 clause is not asserted by any test and its figure (0.7773 vs 0.7920 = -0.0147) is unmet, which the manifest names as a blocker the coordinator then accepted (status-repair.json).\nVERDICT write_paths: the manifest declares three paths (the fixture and two evidence fragments), the diff touches exactly those three, and the granted figures directory is unused, which the done-when permits since it names the fragment rather than a figure.\nVERDICT manifest: read; it states status complete (as-delivered blocked, coordinator-repaired with a reason in status-repair.json), names the gate command and its 1-passed-both-runs result, and lists the four gate logs; it carries no baseline_suite/after_suite (an implement-role node), so added failures were derived from gate_before.log and table_run_1.log.\nVERDICT diff: read commit by commit against base 9f53972b2; four commits (d60431215, 93b083114, bc6c63d78, 83c08fd4c) add 29 fixture labels and 95 lines of evidence HTML across two fragments, with no product source or test code changed.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/llm/fixtures/signal_search_questions.json gains the 29 lifted candidates and reembed-harness.html records the four-arm table, which is what the goal names.\nSCORE evidence: 14\nJUSTIFICATION evidence: table_run_1.log and table_run_2.log (rev 93b083114) record every arm's nDCG with 1 passed EXIT=0, but the done_when's 0.012-spread clause is unmet (0.7773 vs 0.7920) and is printed at tests/llm/test_signal_search_goldens.py:713 rather than asserted at :717.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-only 9f53972b2..83c08fd4c names only the fixture and the two granted fragments, all inside the declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/llm/test_signal_search_goldens.py:216 require_labelled reddens when a placed label is removed, as negative_control.log shows (EXIT=1), but the explicitly required psc_cref3snu label is in no top 10 so removing it leaves the table passing (negative_control_declared.log EXIT=0).\nSCORE fit: 18\nJUSTIFICATION fit: the two fragments keep the module's element-id prefix and the fixture keeps the existing relevant-map shape, with no plan labels or ticket identifiers in source.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module; it extends the existing owner tests/llm/fixtures/signal_search_questions.json, which a repository search found is read only by tests/llm/test_signal_search_goldens.py.\nFINDING tests/llm/test_signal_search_goldens.py:717 follow-on: the four-arm test asserts only table[arm] > control, so the done_when's quantitative criterion (current_tool within 0.012 of 0.7920) is printed but never asserted and a future regression in current_tool's ranking reddens nothing; the criterion is judged by hand.\nFINDING tests/llm/fixtures/signal_search_questions.json:1892 follow-on: the psc_cref3snu label the done_when names explicitly is in no arm's top 10 on the settled graph, so removing it leaves the table passing (negative_control_declared.log EXIT=0); that label carries no guard and its grade is assertion-free.\n",
+  "review_run_id": "r-20261013T011832592870-review-of-ssfms-post-reembed-harness-83c08fd4ca34",
+  "reviewed_base_sha": "9f53972b2fc5fc2426d56713fd8ac35deae700d0",
+  "reviewed_commits": [
+    "83c08fd4c"
+  ],
+  "reviewed_head_sha": "83c08fd4ca342a2bf200aff42e6984cf4eb24d0d",
+  "reviewed_run_id": "r-20261013T005826086865-ssfms-post-reembed-harness",
+  "reviewer_run_id": "r-20261013T011832592870-review-of-ssfms-post-reembed-harness-83c08fd4ca34",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:25:29.799258+00:00",
+  "total": 105
+}

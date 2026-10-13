@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf">
 </head>
@@ -606,6 +606,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261013T005826086865-ssfms-post-reembed-harness" data-who="reckon-build" data-when="2026-10-13T01:17:03.463Z">
     <div class="r-comment-body"><p>Graded 29 candidates the re-embedded vectors lift into top tens (fixture 1,675 to 1,704 labels); the four-arm table scores every arm twice back to back (current_tool 0.7773 = rrf, vector_only 0.6858, additive_rule 0.5863, control 0.4527) but current_tool is 0.0147 below the pre-re-embed 0.7920, 0.0027 past the 0.012 spread.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261013T011832592870-review-of-ssfms-post-reembed-harness-83c08fd4ca34" data-who="reckon-build" data-when="2026-10-13T01:27:03.984Z">
+    <div class="r-comment-body"><p>Review of r-20261013T005826086865-ssfms-post-reembed-harness stored as a parsed six-dimension record (total 105: goal_fidelity 19, evidence 14, scope_discipline 19, durability 15, fit 18, reuse 20), reading base 9f53972b2 and head 83c08fd4c, added_failure_count 0, two follow-on findings (the four-arm test never asserts the done_when&#x27;s 0.012-spread clause; the explicitly required psc_cref3snu label is unguarded because no arm places it in a top 10).</p></div>
 </div>
 </section>
 </main>
