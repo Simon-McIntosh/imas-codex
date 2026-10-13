@@ -6,6 +6,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-13T12:42:16.930Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "ssfms-reprocess-bulk-1",
+      "recorded_at": "2026-10-13T12:45:54.593484+00:00"
+    }
+  },
   "dispatched_at": "2026-10-13T12:21:51Z",
   "findings": [
     {
