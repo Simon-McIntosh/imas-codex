@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "57726eec9",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8630 (process_review_name_batch builds the review gate's name-side text with semantic_gate_name_text and feeds it to semantic_similarity_check)",
+    "imas_codex/standard_names/loop.py:799 (dispatch of process_review_name_batch on the review_name pool)",
+    "imas_codex/standard_names/audits.py:3737 (semantic_similarity_check is the audit boundary the substitution feeds)"
+  ],
+  "completed_at": "2026-10-13T01:08:32.873Z",
+  "dispatched_at": "2026-10-13T00:55:46Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-name-gate-e2e.html",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the landing record places the head result at the base revision \u2014 \"Head: 15 passed (was 13) at revision 57726eec9\" attaches the 15-passed head run to 57726eec9, which is the base that passed 13, while the head is 821234427; a reader comparing the record against the promoted commit sees a revision pairing that is wrong."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003907957431-sib-name-gate-e2e/manifest.md",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's tests: field claims the command that actually ran but states a \"uv run --project ... pytest\" invocation, while the stored gate log's own header records \"/home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest\", so the manifest and the artifact it cites do not name the same command."
+    }
+  ],
+  "head_log_revision": "821234427",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against base 57726eec9; the single commit 821234427 adds 48 lines to tests/standard_names/test_name_gate_definition_floor.py (a module constant and one parametrised test) and 27 lines for docs/evidence/fragments/sn-integrity-backlog/sib-name-gate-e2e.html, changing no production code.",
+    "done_when": "the done_when asks for a head pass, a mutation failure with EXIT recorded, and base/after suites with revision, exit_status and completed:true; the reviewed run's head_arm.log records \"15 passed, 1 warning in 6.78s\" at revision 821234427 with EXIT=0, negative_control.log records \"5 failed, 10 passed in 9.60s\" with EXIT=1 and both new ids listed FAILED, and baseline_suite.log records \"13 passed in 7.84s\" EXIT=0, so the gate asserts the stated measure.",
+    "goal": "the goal is one parametrised test driving an unparseable one-word name and a parseable-but-undefined token through semantic_gate_name_text and then semantic_similarity_check so each scores below the unchanged floor and returns its issues; tests/standard_names/test_name_gate_definition_floor.py:176 does exactly that for quux and capacitance, and my own probe confirmed quux raises ParseError from imas_standard_names.grammar.parser.parse while capacitance parses to base token capacitance absent from the definitions map, so both fall-through branches the brief names are exercised.",
+    "manifest": "read; manifest.md records status complete, commit 821234427, changed_paths matching the diff, the gate command with 15 passed EXIT=0, baseline_suite/after_suite both completed:true with zero failures, and measurement_module/measurement_cwd for the scratch negative-control arm; one defect \u2014 its tests: line names a \"uv run --project ...\" command while the stored head_arm.log header records the resolved interpreter invocation, so the manifest's stated command is not the one the log captured (finding below).",
+    "write_paths": "the manifest declares orientation_write_paths = tests/standard_names/test_name_gate_definition_floor.py and docs/evidence/fragments/sn-integrity-backlog/sib-name-gate-e2e.html (the docs/figures entry was unused), and commit 821234427 touches exactly those two files (+48 and +27), so every landed path is inside the declared scope."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows both new ids redden at tests/standard_names/test_name_gate_definition_floor.py:189 when semantic_gate_name_text is mutated to define every token, so the equality assertion is a real guard, but the sim-below-floor assertion at line 213 would not redden on that mutation because the stand-in at line 202 maps any unknown text to the token's own vector.",
+    "evidence": "head_arm.log records \"15 passed, 1 warning in 6.78s\" EXIT=0 at revision 821234427 and negative_control.log records \"5 failed, 10 passed in 9.60s\" EXIT=1 with both new ids red, so the recorded gate measures the done-when.",
+    "fit": "the added test mirrors the file's own idiom at tests/standard_names/test_name_gate_definition_floor.py:145-152 (inline fake_embed, monkeypatch of embed_descriptions_batch) and names behaviour rather than a plan label, so no repository naming rule is broken.",
+    "goal_fidelity": "tests/standard_names/test_name_gate_definition_floor.py:176 drives both tokens the brief names through semantic_gate_name_text and semantic_similarity_check and asserts the floor outcome at lines 213-214, which is the deliverable the goal states.",
+    "reuse": "the diff adds no production definition \u2014 it drives the existing imas_codex/standard_names/workers.py:8360 semantic_gate_name_text and imas_codex/standard_names/audits.py:3737 semantic_similarity_check, and my search of tests/ found only file-local embedder stand-ins (tests/standard_names/test_desc_name_similarity.py:27), so no shared owner is forked.",
+    "scope_discipline": "commit 821234427 changes only tests/standard_names/test_name_gate_definition_floor.py and docs/evidence/fragments/sn-integrity-backlog/sib-name-gate-e2e.html, both declared, and nothing outside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 57726eec9523e6e95579518f7c132571526914eb\nreviewed_head_sha: 821234427bb90f49edf836fb4d09c8afa8e789a8\nVERDICT goal: the goal is one parametrised test driving an unparseable one-word name and a parseable-but-undefined token through semantic_gate_name_text and then semantic_similarity_check so each scores below the unchanged floor and returns its issues; tests/standard_names/test_name_gate_definition_floor.py:176 does exactly that for quux and capacitance, and my own probe confirmed quux raises ParseError from imas_standard_names.grammar.parser.parse while capacitance parses to base token capacitance absent from the definitions map, so both fall-through branches the brief names are exercised.\nVERDICT done_when: the done_when asks for a head pass, a mutation failure with EXIT recorded, and base/after suites with revision, exit_status and completed:true; the reviewed run's head_arm.log records \"15 passed, 1 warning in 6.78s\" at revision 821234427 with EXIT=0, negative_control.log records \"5 failed, 10 passed in 9.60s\" with EXIT=1 and both new ids listed FAILED, and baseline_suite.log records \"13 passed in 7.84s\" EXIT=0, so the gate asserts the stated measure.\nVERDICT write_paths: the manifest declares orientation_write_paths = tests/standard_names/test_name_gate_definition_floor.py and docs/evidence/fragments/sn-integrity-backlog/sib-name-gate-e2e.html (the docs/figures entry was unused), and commit 821234427 touches exactly those two files (+48 and +27), so every landed path is inside the declared scope.\nVERDICT manifest: read; manifest.md records status complete, commit 821234427, changed_paths matching the diff, the gate command with 15 passed EXIT=0, baseline_suite/after_suite both completed:true with zero failures, and measurement_module/measurement_cwd for the scratch negative-control arm; one defect \u2014 its tests: line names a \"uv run --project ...\" command while the stored head_arm.log header records the resolved interpreter invocation, so the manifest's stated command is not the one the log captured (finding below).\nVERDICT diff: read commit by commit against base 57726eec9; the single commit 821234427 adds 48 lines to tests/standard_names/test_name_gate_definition_floor.py (a module constant and one parametrised test) and 27 lines for docs/evidence/fragments/sn-integrity-backlog/sib-name-gate-e2e.html, changing no production code.\nCALL_SITES: imas_codex/standard_names/workers.py:8630 (process_review_name_batch builds the review gate's name-side text with semantic_gate_name_text and feeds it to semantic_similarity_check), imas_codex/standard_names/loop.py:799 (dispatch of process_review_name_batch on the review_name pool), imas_codex/standard_names/audits.py:3737 (semantic_similarity_check is the audit boundary the substitution feeds)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/test_name_gate_definition_floor.py:176 drives both tokens the brief names through semantic_gate_name_text and semantic_similarity_check and asserts the floor outcome at lines 213-214, which is the deliverable the goal states.\nSCORE evidence: 18\nJUSTIFICATION evidence: head_arm.log records \"15 passed, 1 warning in 6.78s\" EXIT=0 at revision 821234427 and negative_control.log records \"5 failed, 10 passed in 9.60s\" EXIT=1 with both new ids red, so the recorded gate measures the done-when.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: commit 821234427 changes only tests/standard_names/test_name_gate_definition_floor.py and docs/evidence/fragments/sn-integrity-backlog/sib-name-gate-e2e.html, both declared, and nothing outside them.\nSCORE durability: 17\nJUSTIFICATION durability: negative_control.log shows both new ids redden at tests/standard_names/test_name_gate_definition_floor.py:189 when semantic_gate_name_text is mutated to define every token, so the equality assertion is a real guard, but the sim-below-floor assertion at line 213 would not redden on that mutation because the stand-in at line 202 maps any unknown text to the token's own vector.\nSCORE fit: 19\nJUSTIFICATION fit: the added test mirrors the file's own idiom at tests/standard_names/test_name_gate_definition_floor.py:145-152 (inline fake_embed, monkeypatch of embed_descriptions_batch) and names behaviour rather than a plan label, so no repository naming rule is broken.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no production definition \u2014 it drives the existing imas_codex/standard_names/workers.py:8360 semantic_gate_name_text and imas_codex/standard_names/audits.py:3737 semantic_similarity_check, and my search of tests/ found only file-local embedder stand-ins (tests/standard_names/test_desc_name_similarity.py:27), so no shared owner is forked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-name-gate-e2e.html:21 follow-on: the landing record places the head result at the base revision \u2014 \"Head: 15 passed (was 13) at revision 57726eec9\" attaches the 15-passed head run to 57726eec9, which is the base that passed 13, while the head is 821234427; a reader comparing the record against the promoted commit sees a revision pairing that is wrong.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003907957431-sib-name-gate-e2e/manifest.md:14 follow-on: the manifest's tests: field claims the command that actually ran but states a \"uv run --project ... pytest\" invocation, while the stored gate log's own header records \"/home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest\", so the manifest and the artifact it cites do not name the same command.\n",
+  "review_run_id": "r-20261013T005534954997-review-of-sib-name-gate-e2e-821234427bb9",
+  "reviewed_base_sha": "57726eec9523e6e95579518f7c132571526914eb",
+  "reviewed_head_sha": "821234427bb90f49edf836fb4d09c8afa8e789a8",
+  "reviewed_run_id": "r-20261013T003907957431-sib-name-gate-e2e",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:10:22.852295+00:00",
+  "total": 111
+}

@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="80">
+<meta name="plan-version" content="81">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -403,6 +403,9 @@
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261013T003907957431-sib-name-gate-e2e" data-who="reckon-build" data-when="2026-10-13T00:53:46.306Z">
     <div class="r-comment-body"><p>Added test_unresolved_one_word_token_fails_the_gate; a strict-parse reject (quux) and a parseable but undefined token (capacitance) each keep their identifier text, score below the unchanged 0.55 floor, and return issues through semantic_similarity_check; head arm 15 passed (was 13) and forcing the gate text to define every token fails both new ids (5 failed, EXIT=1).</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261013T005534954997-review-of-sib-name-gate-e2e-821234427bb9" data-who="reckon-build" data-when="2026-10-13T01:08:32.873Z">
+    <div class="r-comment-body"><p>review of r-20261013T003907957431-sib-name-gate-e2e stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T003907957431-sib-name-gate-e2e.at-821234427bb90f49edf836fb4d09c8afa8e789a8.json (base 57726eec9523e6e95579518f7c132571526914eb, head 821234427bb90f49edf836fb4d09c8afa8e789a8) — status parsed, six dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 19, durability 17, fit 19, reuse 20; total 111), added_failure_count 0 (0 added failure ids), two follow-on findings</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261013T002423146729-sib-sanctioned-holes-repro" data-who="reckon-build" data-when="2026-10-13T00:49:08.485Z">
     <div class="r-comment-body"><p>report at /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-sanctioned-holes-repro.html (test node: no repository file changed, no commit). The report carries one row per hole — reproduction verdict with throwaway-test EXIT and refusal text, precondition file:line, ordering-accident vs protective classification with the guard-introduction commit, and the proposed smallest repair with the files it would touch.</p></div>
