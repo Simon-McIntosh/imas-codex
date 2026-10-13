@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from gate-base.log and gate-head.log: both arms report 4 passed, EXIT=0, and no FAILED id, so the run added none; the manifest's own baseline_suite/after_suite are now parseable single-line JSON naming the same two logs.",
+  "backend": "clive",
+  "base_log_revision": "f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T04:36:43.872Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "a measurement node's driver lives beside its evidence as a script, not an importable module, and adds no product test by brief; the segment-selection module it measures is pinned by tests/standard_names/test_segment_selection.py, and the composer-handling defect is corrected and re-derived in this run",
+      "recorded_at": "2026-10-13T04:36:26.390488+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T04:28:55Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py",
+      "line": "318",
+      "severity": "blocking",
+      "text": "blocking: the fragment caption at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:46 and the driver comment at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:459-460 both state that a composer spelling which does not parse \"matches no slot\" and is \"counted as per-slot mismatches\", but a missing prediction is forwarded as {s: None} and benchmark_roles.exact_match_accuracy at imas_codex/standard_names/benchmark_roles.py:270 counts None == None as correct, so a non-parsing composer is credited for every slot whose gold token is empty; re-derived from the committed results the composer column is process 0.885/component 0.776/subject 0.540 but with a None prediction counted as a miss it is 0.029/0.092/0.132, so the reported composer per-slot figures are inflated by empty-slot coincidences and the caption's stated handling is false."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py",
+      "line": "410",
+      "severity": "follow-on",
+      "text": "follow-on: the cross-check AUC is computed from agreement_with_composer, and for golden A rows composer equals the target (the fixture is composer output), so the \"composer-against-Jev disagreement\" AUC is Jev's own slot-agreement with gold; the fragment flags the circularity for exact-name match at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:88-95 but not for the AUC at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:141-149, which is the number the cross-check rule reads."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T015404779919-ssog-segment-selection-measure/gate-base.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the base-arm header names the revision, tree and command but omits the absolute module __file__ and the resolved working directory a scratch-tree measurement is required to record, so the base arm's provenance is not fully checkable from its own log."
+    }
+  ],
+  "head_log_revision": "5144e92215d9eb9f22a1d1d7aa83395518307381",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7 to 5144e92215d9eb9f22a1d1d7aa83395518307381; ccf88e706 adds the driver, artifact, fragment and SVG, 1a0ecaf62 trims the artifact and fixes the resume guard, 4c5a68477 changes the composer denominator, e2aef682f states provenance and adds --figure-only, and 5144e922 reports both family cohorts, all inside the declared write paths.",
+    "done_when": "the source done_when asks for those figures plus one data-ink SVG and baseline_suite/after_suite at tests/standard_names/test_segment_selection.py; the manifest records both arms green (exit 0, 4 passed) in gate-base.log and gate-head.log, but that suite exercises the unchanged selection module and never the driver the node wrote, so it cannot redden on this change.",
+    "goal": "the node goal is to measure Jev's closed-vocabulary segment selection against the composer on golden A and the human-edit targets and report the figures with a rule-derived recommendation; docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:26-160 reports every named figure, the item counts, the quoted plan rule and the verdict \"neither\", so the deliverable is present.",
+    "manifest": "read; it states complete, names five commits, both gate logs and both revisions, and its baseline_suite/after_suite are now single-line JSON objects the reader can parse, but the composer per-slot column it reports is not the value its own code computes (see the blocking finding).",
+    "write_paths": "the manifest declares the fragment, driver, results JSON and the figure directory; git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..5144e92215d9eb9f22a1d1d7aa83395518307381 touches exactly those four files (measure.html, measure-run.py, measure-results.json, per-slot-accuracy.svg) and no product file."
+  },
+  "justifications": {
+    "durability": "the node adds no test and its only controls survive as /tmp scripts, so nothing reddens if the driver's composer handling at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:318-322 regresses, which is how the blocking defect below reached head.",
+    "evidence": "the gate named in the source done_when is tests/standard_names/test_segment_selection.py, which is green at both arms but tests the unchanged selection module, not the driver; and one figure it reports (docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:47-56 composer column) does not equal what docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:318 computes.",
+    "fit": "the driver's helpers at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:299-407 are mechanism-named with no plan or gate label, though the composer comment at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:459-461 states a behaviour the code does not implement.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:47-154 carries every figure and the rule-quoted verdict, though the composer comparator column at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:47-56 is inflated by the None-to-None matches described in the finding.",
+    "reuse": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:310-322 delegates the slot comparison to exact_match_accuracy at imas_codex/standard_names/benchmark_roles.py:259, and paired_auc, bootstrap_interval and cost_latency_summary are imported from imas_codex/discovery/base/evaluation.py, so no owned capability is forked.",
+    "scope_discipline": "git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..5144e92215d9eb9f22a1d1d7aa83395518307381 touches only the four declared write paths and no product file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to measure Jev's closed-vocabulary segment selection against the composer on golden A and the human-edit targets and report the figures with a rule-derived recommendation; docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:26-160 reports every named figure, the item counts, the quoted plan rule and the verdict \"neither\", so the deliverable is present.\nVERDICT done_when: the source done_when asks for those figures plus one data-ink SVG and baseline_suite/after_suite at tests/standard_names/test_segment_selection.py; the manifest records both arms green (exit 0, 4 passed) in gate-base.log and gate-head.log, but that suite exercises the unchanged selection module and never the driver the node wrote, so it cannot redden on this change.\nVERDICT write_paths: the manifest declares the fragment, driver, results JSON and the figure directory; git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..5144e92215d9eb9f22a1d1d7aa83395518307381 touches exactly those four files (measure.html, measure-run.py, measure-results.json, per-slot-accuracy.svg) and no product file.\nVERDICT manifest: read; it states complete, names five commits, both gate logs and both revisions, and its baseline_suite/after_suite are now single-line JSON objects the reader can parse, but the composer per-slot column it reports is not the value its own code computes (see the blocking finding).\nVERDICT diff: read commit by commit from f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7 to 5144e92215d9eb9f22a1d1d7aa83395518307381; ccf88e706 adds the driver, artifact, fragment and SVG, 1a0ecaf62 trims the artifact and fixes the resume guard, 4c5a68477 changes the composer denominator, e2aef682f states provenance and adds --figure-only, and 5144e922 reports both family cohorts, all inside the declared write paths.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:47-154 carries every figure and the rule-quoted verdict, though the composer comparator column at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:47-56 is inflated by the None-to-None matches described in the finding.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate named in the source done_when is tests/standard_names/test_segment_selection.py, which is green at both arms but tests the unchanged selection module, not the driver; and one figure it reports (docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:47-56 composer column) does not equal what docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:318 computes.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..5144e92215d9eb9f22a1d1d7aa83395518307381 touches only the four declared write paths and no product file.\nSCORE durability: 7\nJUSTIFICATION durability: the node adds no test and its only controls survive as /tmp scripts, so nothing reddens if the driver's composer handling at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:318-322 regresses, which is how the blocking defect below reached head.\nSCORE fit: 18\nJUSTIFICATION fit: the driver's helpers at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:299-407 are mechanism-named with no plan or gate label, though the composer comment at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:459-461 states a behaviour the code does not implement.\nSCORE reuse: 18\nJUSTIFICATION reuse: docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:310-322 delegates the slot comparison to exact_match_accuracy at imas_codex/standard_names/benchmark_roles.py:259, and paired_auc, bootstrap_interval and cost_latency_summary are imported from imas_codex/discovery/base/evaluation.py, so no owned capability is forked.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:318 blocking: the fragment caption at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:46 and the driver comment at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:459-460 both state that a composer spelling which does not parse \"matches no slot\" and is \"counted as per-slot mismatches\", but a missing prediction is forwarded as {s: None} and benchmark_roles.exact_match_accuracy at imas_codex/standard_names/benchmark_roles.py:270 counts None == None as correct, so a non-parsing composer is credited for every slot whose gold token is empty; re-derived from the committed results the composer column is process 0.885/component 0.776/subject 0.540 but with a None prediction counted as a miss it is 0.029/0.092/0.132, so the reported composer per-slot figures are inflated by empty-slot coincidences and the caption's stated handling is false.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:410 follow-on: the cross-check AUC is computed from agreement_with_composer, and for golden A rows composer equals the target (the fixture is composer output), so the \"composer-against-Jev disagreement\" AUC is Jev's own slot-agreement with gold; the fragment flags the circularity for exact-name match at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:88-95 but not for the AUC at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:141-149, which is the number the cross-check rule reads.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T015404779919-ssog-segment-selection-measure/gate-base.log:1 follow-on: the base-arm header names the revision, tree and command but omits the absolute module __file__ and the resolved working directory a scratch-tree measurement is required to record, so the base arm's provenance is not fully checkable from its own log.\n",
+  "review_run_id": "r-20261013T042833290503-review-of-ssog-segment-selection-measure-5144e92215d9",
+  "reviewed_base_sha": "f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7",
+  "reviewed_head_sha": "5144e92215d9eb9f22a1d1d7aa83395518307381",
+  "reviewed_run_id": "r-20261013T015404779919-ssog-segment-selection-measure",
+  "scores": {
+    "durability": 7,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T04:34:50.903066+00:00",
+  "total": 92,
+  "verdict": "DEFECTIVE"
+}
