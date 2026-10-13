@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="96">
+<meta name="plan-version" content="97">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -457,6 +457,9 @@
 </div>
 <div class="r-comment" data-section="s29" data-id="c-run-r-20261013T014729066371-review-of-sib-maintenance-test-asserts-3055f17da457" data-who="reckon-build" data-when="2026-10-13T01:57:50.970Z">
     <div class="r-comment-body"><p>Reviewed r-20261013T003700617029-sib-maintenance-test-asserts (plan imas-codex:sn-integrity-backlog §29, node sib-maintenance-test-asserts, base 57726eec9523e6e95579518f7c132571526914eb, head 3055f17da45729d040fc853f9190d28f7380d125). Verdict SOUND WITH FINDINGS, total 115/120 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 20, reuse 17). The rewrite does what §29 asked: the two assert_not_called() lines that ran against _run_sn_cmd (which never calls the startup steps) now drive the real `sn run` command, so they observe sn_run's guard at imas_codex/cli/sn.py:2467, and the four scratch-copy mutations each redden the assertion they name (EXIT=1) while base and head gate arms both read 525 passed. One follow-on finding: the startup-step assertions now duplicate tests/standard_names/test_scoped_global_maintenance.py:492-493, which already owns that coverage; this file's distinct value is the _run_sn_cmd-to-run_sn_pools forwarding. No blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s28" data-id="c-run-r-20261013T022632873709-review-of-sib-export-chain-bound-3c43c98a00dc" data-who="reckon-build" data-when="2026-10-13T02:34:52.903Z">
+    <div class="r-comment-body"><p>review-of-sib-export-chain-bound-3c43c98a00dc: independent review of r-20261013T003633699354-sib-export-chain-bound (base 57726eec9, head 3c43c98a0) stored to both review paths; six dimensions scored goal_fidelity 20, evidence 16, scope_discipline 20, durability 14, fit 19, reuse 20 (total 109); three follow-on findings (unguarded query half, base-stamped gate-log headers, duplicated after_suite id), none blocking; added_failure_count 2 derived from the reviewed run&#x27;s own baseline_suite/after_suite arm logs.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

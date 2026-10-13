@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/standard_names/test_review_release.py::test_review_release_dry_run_no_push_no_pr",
+    "tests/standard_names/test_review_release.py::test_review_release_refuses_branch_with_unique_commits"
+  ],
+  "backend": "local",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/export.py:3019 run_export -> _fetch_waived_source_chain_identities",
+    "imas_codex/standard_names/catalog_release.py:2288 run_export",
+    "imas_codex/cli/sn.py:4461 and imas_codex/cli/sn.py:4610 run_export"
+  ],
+  "completed_at": "2026-10-13T02:34:52.903Z",
+  "dispatched_at": "2026-10-13T02:26:50Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_export_waiver_intermediates.py",
+      "line": "115",
+      "severity": "follow-on",
+      "text": "follow-on: _ChainGraphClient.query re-implements the graph's bound-detection predicate (len(chain) > bound + 1, reporting chain[bound]) rather than exercising the Cypher, so no test reddens if the production query's boundary detection is reverted or altered - the query half of the fix (the EXISTS((member)-[:HAS_SUCCESSOR]->()) combined with the depth = _WAIVED_CHAIN_DEPTH_BOUND arm) has no regression guard, only the one-off EXPLAIN/property check the manifest cites. The Python refusal path it does exercise is guarded (negative control below)."
+    },
+    {
+      "file": "logs/head_waiver.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the focused-gate logs' first line stamps REV=57726eec9, the BASE revision, while each ran head code 3c43c98a0 (head_waiver.log contains the head-only test test_the_cut_reads_a_chain_reaching_exactly_the_bound_without_refusing; negative_control.log ran the bound-removed head code; cypher_property_check.log passed the new query), so the header does not name the revision the gate ran and a reader reconciling it against the manifest's head revision meets a mismatch."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003633699354-sib-export-chain-bound/manifest.md",
+      "line": "after_suite",
+      "severity": "follow-on",
+      "text": "follow-on: the recorded after_suite failure_ids lists 21 ids including a duplicate (test_review_release_scopes_dd_caveats_to_batch_names appears twice) while its failure_count field is 20, whereas the arm log logs/export_after.log carries exactly 20 FAILED lines; the archived id list should be the arm's 20 ids."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/export.py:3019 run_export calls the changed function before any staging output exists; run_export is reached from imas_codex/standard_names/catalog_release.py:2288 and imas_codex/cli/sn.py:4461 and :4610.",
+    "diff": "read commit by commit against base 57726eec9; the single commit 3c43c98a0 adds _WAIVED_CHAIN_DEPTH_BOUND and _refuse_waiver_chain_beyond_bound, rewrites the successor-chain query to detect the bound in-query, adds two tests plus the mock's bound mirroring, and writes the evidence fragment; no production module outside export.py is touched.",
+    "done_when": "the four done_when items resolve: tests/standard_names/test_export_waiver_intermediates.py adds test_the_cut_refuses_a_waived_source_whose_chain_exceeds_the_bound (over-long fixture) and test_the_cut_reads_a_chain_reaching_exactly_the_bound_without_refusing (within-bound as today); the first fails DID NOT RAISE with the bound check removed (logs/negative_control.log EXIT=1); the modified Cypher was run through tests/graph/test_cypher_property_check.py 4 passed EXIT=0 (logs/cypher_property_check.log) and an EXPLAIN against the live graph; the export set shows no added failure (base 19 failed/432 passed, head 20 failed/437 passed, every failure a 30s pytest-timeout in the untouched tests/standard_names/test_review_release.py).",
+    "goal": "the goal is that the export waiver refusal refuses at its traversal bound instead of returning a truncated successor-chain identity set; imas_codex/standard_names/export.py:2822 _fetch_waived_source_chain_identities now carries length(trail) AS depth and a CASE marking the member at the maximum depth that still has an outgoing HAS_SUCCESSOR, and imas_codex/standard_names/export.py:2878 raises through _refuse_waiver_chain_beyond_bound (export.py:2796) naming the source path and the identity at the bound, through the same WaivedSourceDeclarationError path the sibling refusal uses.",
+    "manifest": "read; it records status complete, commit 3c43c98a0, the gate command, baseline_suite and after_suite with revision/exit_status/completed and failure ids, negative_control_log logs/negative_control.log, and follow_ons naming the unbounded sibling reader; every cited log exists on disk and reconciles with the claim except the three record defects in the findings (a base-stamped header on head-code logs, and one duplicated id in after_suite.failure_ids).",
+    "write_paths": "declared write paths are imas_codex/standard_names/export.py, tests/standard_names/test_export_waiver_intermediates.py and docs/evidence/fragments/sn-integrity-backlog/sib-export-chain-bound.html; git diff --stat 57726eec9..3c43c98a0 changes exactly those three (65/94/6 lines), all inside the fence and nothing outside it."
+  },
+  "justifications": {
+    "durability": "the negative control reinstates the regression (bound check replaced by if False) and test_the_cut_refuses_a_waived_source_whose_chain_exceeds_the_bound reddens DID NOT RAISE (logs/negative_control.log EXIT=1), so the refusal branch is guarded; the query half is not, because _ChainGraphClient.query at tests/standard_names/test_export_waiver_intermediates.py:115 supplies boundary_identities from its own mirror of the Cypher predicate, so a reverted EXISTS/depth arm in the production query would leave every test green.",
+    "evidence": "the gate measures the done_when and the result is recorded in named on-disk logs (logs/head_waiver.log 6 passed EXIT=0, logs/negative_control.log EXIT=1 DID NOT RAISE, logs/cypher_property_check.log 4 passed EXIT=0, logs/export_base_arm.log 19 failed/432 passed, logs/export_after.log 20 failed/437 passed), but the manifest's primary cited head log carries a base revision in its first line and the live reduced-cap demonstration is claimed with no log path, so the record is short of the revision-tagged standard.",
+    "fit": "imas_codex/standard_names/export.py:2796 mirrors the shape of the sibling refusal helper _refuse_waiver_that_reached_a_name at export.py:2759 (sorted(set(...)), rendered repr join, same exception class), and the added names _WAIVED_CHAIN_DEPTH_BOUND and _refuse_waiver_chain_beyond_bound carry no plan or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/export.py:2846-2878 detects the boundary in the same query (depth = _WAIVED_CHAIN_DEPTH_BOUND plus EXISTS((member)-[:HAS_SUCCESSOR]->())) and raises via export.py:2796, naming the source path and the identity at the bound exactly as the goal states, rather than returning a truncated set.",
+    "reuse": "the new function extends the existing refusal capability rather than forking it, raising the same WaivedSourceDeclarationError the sibling refusal at imas_codex/standard_names/export.py:2759 raises; no other owner of bounded successor-chain reading exists in the module, and the unbounded sibling reader in imas_codex/standard_names/graph_ops.py is correctly left as a follow-on.",
+    "scope_discipline": "git diff --stat 57726eec9..3c43c98a0 touches exactly the three declared source paths (export.py, the test file, the fragment html) and nothing else; the declared docs/figures directory is unused, no generated file is staged, and the out-of-scope graph_ops.py sibling reader is left untouched, named only under follow_ons."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261013T003633699354-sib-export-chain-bound (imas-codex, plan sn-integrity-backlog section 28), base 57726eec9523e6e95579518f7c132571526914eb, head 3c43c98a00dcf4bf737dbb41909c857337e5c04c.\nVERDICT goal: the goal is that the export waiver refusal refuses at its traversal bound instead of returning a truncated successor-chain identity set; imas_codex/standard_names/export.py:2846 carries length(trail) AS depth and a CASE marking the member at the maximum depth that still has an outgoing HAS_SUCCESSOR, and export.py:2878 raises through _refuse_waiver_chain_beyond_bound (export.py:2796) naming the source path and the identity at the bound, through the same WaivedSourceDeclarationError path the sibling refusal uses.\nVERDICT done_when: the four items resolve - tests/standard_names/test_export_waiver_intermediates.py adds an over-long and a within-bound test; the first fails DID NOT RAISE with the bound check removed (logs/negative_control.log EXIT=1); the Cypher passed tests/graph/test_cypher_property_check.py 4 passed EXIT=0 (logs/cypher_property_check.log) and an EXPLAIN against the live graph; the export set adds no failure (base 19/432, head 20/437, every failure a 30s pytest-timeout in the untouched tests/standard_names/test_review_release.py).\nVERDICT write_paths: declared paths are imas_codex/standard_names/export.py, tests/standard_names/test_export_waiver_intermediates.py and docs/evidence/fragments/sn-integrity-backlog/sib-export-chain-bound.html; git diff --stat 57726eec9..3c43c98a0 changes exactly those three (65/94/6), all inside the fence.\nVERDICT manifest: read; status complete, commit 3c43c98a0, gate command, baseline_suite/after_suite with revision/exit_status/completed/ids, negative_control_log, and follow_ons; every cited log exists and reconciles except the three record defects in the findings.\nVERDICT diff: read commit by commit against base 57726eec9; 3c43c98a0 adds the bound constant and the refusal helper, detects the bound in-query, adds two tests and the mock's bound mirroring, and writes the fragment; no production module outside export.py is touched.\nCALL_SITES: imas_codex/standard_names/export.py:3019 run_export -> _fetch_waived_source_chain_identities, imas_codex/standard_names/catalog_release.py:2288 run_export, imas_codex/cli/sn.py:4461 and imas_codex/cli/sn.py:4610 run_export\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/export.py:2846-2878 detects the boundary in the same query and raises via export.py:2796 naming the source and the identity at the same bound, exactly as the goal states.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate measures the done_when and is recorded in named logs (head_waiver.log 6 passed, negative_control.log EXIT=1, cypher_property_check.log 4 passed, export_base_arm.log 19 failed, export_after.log 20 failed), but the manifest's primary head log carries the base revision in its first line and the reduced-cap live demonstration is claimed with no log path.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 57726eec9..3c43c98a0 touches exactly the three declared paths and nothing else, no generated file is staged, and the out-of-scope graph_ops.py reader is left untouched.\nSCORE durability: 14\nJUSTIFICATION durability: the negative control reddens the over-long test DID NOT RAISE (logs/negative_control.log EXIT=1), so the refusal branch is guarded, but _ChainGraphClient.query at tests/standard_names/test_export_waiver_intermediates.py:115 mirrors the Cypher predicate itself, so a reverted EXISTS/depth arm in the production query would leave every test green.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/export.py:2796 mirrors the sibling helper _refuse_waiver_that_reached_a_name at export.py:2759 and its names carry no plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the new function extends the existing refusal capability (raising the same WaivedSourceDeclarationError as export.py:2759) rather than forking it, and no other owner of bounded successor-chain reading exists in the module.\nFINDING tests/standard_names/test_export_waiver_intermediates.py:115 follow-on: _ChainGraphClient.query re-implements the graph's bound-detection predicate rather than exercising the Cypher, so no test reddens if the production query's boundary detection is reverted - the query half of the fix has no regression guard.\nFINDING logs/head_waiver.log:1 follow-on: the focused-gate logs' first line stamps REV=57726eec9 (base) while each ran head code 3c43c98a0, so the header does not name the revision the gate ran.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003633699354-sib-export-chain-bound/manifest.md:after_suite follow-on: the recorded after_suite failure_ids lists 21 ids with a duplicate while failure_count and the arm log carry 20.",
+  "review_run_id": "r-20261013T022632873709-review-of-sib-export-chain-bound-3c43c98a00dc",
+  "reviewed_base_sha": "57726eec9523e6e95579518f7c132571526914eb",
+  "reviewed_head_sha": "3c43c98a00dcf4bf737dbb41909c857337e5c04c",
+  "reviewed_run_id": "r-20261013T003633699354-sib-export-chain-bound",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T02:34:00+00:00",
+  "total": 109
+}
