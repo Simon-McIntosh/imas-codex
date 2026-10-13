@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="116">
+<meta name="plan-version" content="117">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -398,6 +398,9 @@
 <div class="r-comment" data-section="s21" data-id="c-run-r-20261013T110801737095-sib-veto-exposure-gate" data-who="reckon-build" data-when="2026-10-13T12:45:05.173Z">
     <div class="r-comment-body"><p>sib-veto-exposure-gate — measured the superseded-parent veto guard change at base 27a2b4299 (27 failed / 7804 passed) and head 06e0451f2 (25 failed / 7811 passed); closing the fail-open topology probe adds 2 failures, both unrelated pytest-timeout (&gt;30s) on git subprocesses in the release path (one passes on a serial re-run), and no caller of the probe sits outside tests/standard_names/</p></div>
 </div>
+<div class="r-comment" data-section="s21" data-id="c-s21-veto-landed" data-who="reckon-build" data-when="2026-10-13T13:40:00Z">
+    <div class="r-comment-body"><p>The superseded-parent veto landed (merges <code>2ffae8e6b</code>, <code>d6a079886</code>). The lead ruled on <code>area_of_flux_surface</code> on 2026-10-13: <em>each area is named specifically; <code>area_of_flux_surface</code> is too generic to stand as a name or a parent</em>. So it stays superseded and loses its children before its successor edge is signed. The next node releases all three child edges through the signed structural reconcile:</p><ul><li><code>surface_area_of_flux_surface</code>, the closed toroidal surface area, which then has no generic parent;</li><li>the two superseded <code>derivative_of_area_of_flux_surface_…</code> names, which also get signed successor edges to their accepted, specifically named replacements <code>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_…</code>.</li></ul><p>Then <code>sib-scalar-only-backfill</code> re-applies its signed authority for the third row. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s21-superseded-parent-veto">evidence</a></p></div>
+</div>
 <div class="r-comment" data-section="s25" data-id="c-close-s25" data-who="reckon-build" data-when="2026-10-12T22:16:00Z">
     <div class="r-comment-body"><p>§25 landed: the fifteen export and catalog tests were stale fixtures missing producer topology, repaired in fixtures only; the eight files pass 60 of 60 (merge <code>f15f55e47</code>); review 108/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s25">evidence</a></p></div>
 </div>
@@ -523,6 +526,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261013T115426412931-sib-restore-apply" data-who="reckon-build" data-when="2026-10-13T12:07:04Z">
     <div class="r-comment-body"><p>Signed restore applied power_due_to_fusion and plasma_energy with 0 refusals; exact reads show both pipeline-origin names, derived PRODUCED_NAME sources, 8/16 reviews, 2/3 docs revisions; target orphans 0 and 44 restore tests pass.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-s8-restore-two" data-who="reckon-build" data-when="2026-10-13T13:40:00Z">
+    <div class="r-comment-body"><p>Two of three identities are restored (merge <code>12f0f3c04</code>). The lead ruled on etendue on 2026-10-13: <em>restore <code>etendue_of_spectrometer_channel</code> as superseded</em>, with a successor edge to <code>etendue_of_soft_xray_detector</code>. That is what the deliberate rename should have left. It keeps the USD 0.844849 of archived reviews and docs (19 cost rows) on a node, and only the corrected spelling stays live. The new signed authority omits the DD producer edge, which belongs to the successor, and the old spectral child; everything else follows the existing restore path. §8 closes when that lands. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s8-restore-apply">evidence</a></p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
