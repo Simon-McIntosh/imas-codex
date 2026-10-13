@@ -24,7 +24,24 @@
   "plan_slug": "signal-search-finds-the-measured-signal",
   "plan_version": 40,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-13T00:19:25.416291+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-13T00:19:25.416291+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/signal-search-finds-the-measured-signal/r-20261013T001118058133-plan-review-of-signal-search-finds-the-measured-signal.json",
   "review_run_id": "r-20261013T001118058133-plan-review-of-signal-search-finds-the-measured-signal",
   "reviewed_blob_sha": "b01546817eda736670a330aa7f1d9cb900445ec9",
   "rubric": "content",
