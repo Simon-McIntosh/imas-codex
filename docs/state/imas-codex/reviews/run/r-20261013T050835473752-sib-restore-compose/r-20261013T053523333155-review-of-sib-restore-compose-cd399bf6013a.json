@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from restore-tests-base.log and restore-tests-head.log: both arms report 44 passed, EXIT=0, and no FAILED id, so the run added none; the manifest's own baseline_suite and after_suite name the same two logs.",
+  "backend": "clive",
+  "base_log_revision": "f2b0a0109ddf6682fbc3ff97930a618e7d35494c",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T05:41:46.883Z",
+  "dispatched_at": "2026-10-13T05:35:34Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "follow-on: the etendue row states \"The preview guard would refuse the DD counterpart because its live scalar/status differ from the signed archive\" and \"Rekeying that child alone would still leave the DD conflict and duplicate the corrected name\", but the manifest records that no preview ran (\"No sn restore apply, preview, or graph write ran\"), so the guard's refusal is inferred from the counterpart reads rather than demonstrated and a reader can take a forward claim for a measured result."
+    }
+  ],
+  "head_log_revision": "cd399bf6013af8c6c6b460eb2e685e48bfa9d1ee",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none; the landed change is a docs evidence fragment and no runtime module in the repository reads docs/evidence/fragments/, so there is no production call site to name.",
+    "diff": "read commit by commit from base f2b0a0109ddf6682fbc3ff97930a618e7d35494c to head cd399bf6013af8c6c6b460eb2e685e48bfa9d1ee; the single new file is a reckon evidence fragment whose table cites compose-output.txt signatures (c6fdeb8a.., cb66d358.., efa8fc0f..) that match authority-verification.json payload_sha256 and whose cost rows (9/$0.477672, 8/$0.372074, 19/$0.844849) match live-state.json.",
+    "done_when": "the source done_when (brief.md:40-44) asks the fragment to hold one row per identity covering archive location, live-graph state, proposed origin with evidence, compose output, and what would make an apply refuse, to name which are ready and which need a ruling, and to record baseline_suite and after_suite as the restore tests at head unchanged; the 3-row table (lines 19-25) and boundary paragraph (line 26) satisfy the first two, and restore-tests-base.log:26 and restore-tests-head.log:24 record the four restore files 44 passed EXIT=0 at both revisions, but that suite exercises the unchanged adapter and cannot redden on the fragment.",
+    "goal": "the reviewed node goal (brief.md:7-10) is to find each absent identity's archived record, compose its signed restore authority, and propose its origin with evidence, applying nothing; docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html:18-26 carries one row per identity with archive closure, live provenance, signed compose result and apply readiness, and the diff changes no product source.",
+    "manifest": "read; it states status complete, one commit cd399bf6013af8c6c6b460eb2e685e48bfa9d1ee, changed_paths the one fragment, parseable baseline_suite and after_suite JSON with failure_count 0 and completed:true at both arms, retry_failures none, and follow_ons naming the two preview-ready identities and the etendue ruling.",
+    "write_paths": "the manifest declares only docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html; git show --stat cd399bf6013af8c6c6b460eb2e685e48bfa9d1ee against the base f2b0a0109 touches exactly that one file (29 added lines) and no other path, so the diff sits inside the fence."
+  },
+  "justifications": {
+    "durability": "the node commits no test and its write scope excludes one, so nothing in the tree reddens if the adapter's compose signature or a cited figure drifts from the fragment's claims at docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html:18-26.",
+    "evidence": "restore-tests-head.log:24 records \"44 passed\" at cd399bf6 and the four restore files match the base arm, but the suite runs the unchanged restore adapter and so confirms nothing broke rather than measuring this change; the compose digests and cost rows in docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html:19-23 I re-checked against authority-verification.json and live-state.json do hold.",
+    "fit": "the fragment follows the reckon evidence-fragment idiom (reckon-type meta plus h1/h2/p ids) as its neighbour docs/evidence/fragments/sn-integrity-backlog/compose-supersede-dual-bound.html, and its body prose names mechanisms with no plan, gate or ticket label.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html:18-26 renders one row per identity carrying the archive closure, live provenance, signed compose output and apply readiness the goal names, and no product source changed in the diff.",
+    "reuse": "the diff adds no code and forks no capability; docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html carries only evidence prose, so there is no owner to extend or duplicate.",
+    "scope_discipline": "git show --stat cd399bf6 lists only docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html, the sole declared write path, and no other file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node goal (brief.md:7-10) is to find each of the three absent identities' archived record, compose its signed restore authority, and propose its origin with evidence, applying nothing; the committed fragment docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html:18-26 carries one row per identity with archive closure, live provenance, the signed compose result and apply readiness, and the diff changes no product source.\nVERDICT done_when: the source done_when (brief.md:40-44) asks the fragment to hold one row per identity covering archive location, live-graph state, proposed origin with evidence, compose output, and what would make an apply refuse, to name which identities are ready and which need a ruling, and to record baseline_suite and after_suite as the restore tests at head unchanged; the 3-row table (lines 19-25) and the boundary paragraph (line 26) satisfy the first two, and restore-tests-base.log:26 and restore-tests-head.log:24 record the four restore test files 44 passed EXIT=0 at f2b0a010 and cd399bf6, but that suite exercises the unchanged adapter and cannot redden on a docs fragment.\nVERDICT write_paths: the manifest declares only docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html; git show --stat cd399bf6013af8c6c6b460eb2e685e48bfa9d1ee against the base f2b0a0109 touches exactly that one file (29 added lines) and no other path, so the diff sits inside the fence.\nVERDICT manifest: read; it states status complete, one commit cd399bf6013af8c6c6b460eb2e685e48bfa9d1ee, changed_paths the one fragment, parseable baseline_suite and after_suite JSON with failure_count 0 and completed:true at both arms, retry_failures none, and follow_ons naming the two preview-ready identities and the etendue ruling.\nVERDICT diff: read commit by commit from base f2b0a0109ddf6682fbc3ff97930a618e7d35494c to head cd399bf6013af8c6c6b460eb2e685e48bfa9d1ee; the single new file is a reckon evidence fragment whose table cites the compose-output.txt signatures (c6fdeb8a.., cb66d358.., efa8fc0f..) that match authority-verification.json payload_sha256 and whose cost rows (9/$0.477672, 8/$0.372074, 19/$0.844849) match live-state.json.\nCALL_SITES: none\n\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html:18-26 renders one row per identity carrying the archive closure, live provenance, signed compose output and apply readiness the goal names, and no product source changed in the diff.\nSCORE evidence: 15\nJUSTIFICATION evidence: restore-tests-head.log:24 records \"44 passed\" at cd399bf6 and the four restore files match the base arm, but the suite runs the unchanged restore adapter and so confirms nothing broke rather than measuring this change; the compose digests and cost rows I re-checked against authority-verification.json and live-state.json do hold.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat cd399bf6 lists only docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html, the sole declared write path.\nSCORE durability: 9\nJUSTIFICATION durability: the node commits no test and its write scope excludes one, so nothing in the tree reddens if the adapter's compose signature or a cited figure drifts from the fragment's claims.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the reckon evidence-fragment idiom (reckon-type meta plus h1/h2/p ids) as its neighbour docs/evidence/fragments/sn-integrity-backlog/compose-supersede-dual-bound.html, and its prose names mechanisms with no plan, gate or ticket label in the body.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no code and forks no capability, so there is nothing to compare against an existing owner.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-compose.html:23 follow-on: the etendue row states \"The preview guard would refuse the DD counterpart because its live scalar/status differ from the signed archive\" and \"Rekeying that child alone would still leave the DD conflict and duplicate the corrected name\", but the manifest records that no preview ran (\"No sn restore apply, preview, or graph write ran\"), so the guard's refusal is inferred from the counterpart reads rather than demonstrated and a reader can take a forward claim for a measured result.\n",
+  "review_run_id": "r-20261013T053523333155-review-of-sib-restore-compose-cd399bf6013a",
+  "reviewed_base_sha": "f2b0a0109ddf6682fbc3ff97930a618e7d35494c",
+  "reviewed_head_sha": "cd399bf6013af8c6c6b460eb2e685e48bfa9d1ee",
+  "reviewed_run_id": "r-20261013T050835473752-sib-restore-compose",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T05:40:00Z",
+  "total": 101,
+  "verdict": "SOUND WITH FINDINGS"
+}
