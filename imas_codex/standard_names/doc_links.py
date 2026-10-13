@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable, Collection
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
 
 ReferenceSyntax = Literal["bare_bracket", "inline_name"]
 KnownNameResolver = Callable[[tuple[str, ...]], Collection[str]]
@@ -19,6 +19,7 @@ _CODE_RE = re.compile(r"```.*?```|`[^`\n]+`", re.DOTALL)
 _MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]]*\]\([^)]+\)")
 _BARE_BRACKET_RE = re.compile(r"(?<![!\\A-Za-z0-9_])\[([a-z][a-z0-9_]+)\](?!\()")
 _INLINE_NAME_RE = re.compile(r"(?<![A-Za-z0-9_])name:([a-z][a-z0-9_]+)\b")
+_NAME_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(name:([a-z][a-z0-9_]+)\)")
 
 
 @dataclass(frozen=True)
@@ -87,3 +88,97 @@ def find_name_references(
 
     references.extend(bare_candidates)
     return tuple(sorted(references, key=lambda reference: reference.start))
+
+
+@dataclass(frozen=True)
+class NameLink:
+    """One documentation link whose target names a standard name.
+
+    ``label`` is the visible link text and ``target`` is the identity in the
+    link's ``name:`` target, without the ``name:`` prefix.
+    """
+
+    label: str
+    target: str
+    start: int
+    end: int
+
+
+def find_name_links(text: str) -> tuple[NameLink, ...]:
+    """Return every Markdown link whose target names a standard name.
+
+    A link to a standard name is written ``[label](name:identity)``; images and
+    links to any other target (a URL, an anchor) are not name links. The
+    reference parser reads the *targets* of these links as name references, so
+    this returns the label-and-target pairs the reference parser deliberately
+    discards.
+    """
+
+    return tuple(
+        NameLink(match.group(1), match.group(2), *match.span())
+        for match in _NAME_LINK_RE.finditer(text)
+    )
+
+
+def find_self_links(text: str, documenting_name: str) -> tuple[NameLink, ...]:
+    """Return the name links in *text* whose target is *documenting_name* itself.
+
+    A name's documentation that links ``name:`` back to the documenting name
+    points at itself where it should point at a neighbour, so this is the
+    deterministic half of link-label analysis.
+    """
+
+    return tuple(
+        link for link in find_name_links(text) if link.target == documenting_name
+    )
+
+
+LINK_LABEL_QUESTION_NAME = "label_describes_target"
+
+
+def link_label_question() -> dict[str, Any]:
+    """The one Noul asked of one documentation link: does the label fit the target.
+
+    The question is shared by every link in a run, so it is built once and the
+    per-link values ride in the state (:func:`link_judgement_state`).
+    """
+
+    return {
+        LINK_LABEL_QUESTION_NAME: {
+            "type": "noul",
+            "instructions": (
+                "The state describes one link inside a standard name's "
+                "documentation. `link_text` is the link's visible text, "
+                "`documenting_name` is the name whose documentation holds the "
+                "link, `target_name` is the standard name the link points to, "
+                "and `target_description` is that target's own description. "
+                "Does the link text describe the target's description?"
+            ),
+            "criteria": {
+                "true": (
+                    "The link text names the quantity or concept the target's "
+                    "description describes."
+                ),
+                "false": (
+                    "The link text names a different quantity than the target "
+                    "describes, including the documenting name's own quantity."
+                ),
+            },
+        }
+    }
+
+
+def link_judgement_state(
+    link: NameLink,
+    *,
+    documenting_name: str,
+    target_description: str,
+) -> dict[str, Any]:
+    """The judgement context for one link: its text, target, and the target's description."""
+
+    return {
+        "documenting_name": documenting_name,
+        "link_text": link.label,
+        "target_name": link.target,
+        "target_description": target_description,
+    }
