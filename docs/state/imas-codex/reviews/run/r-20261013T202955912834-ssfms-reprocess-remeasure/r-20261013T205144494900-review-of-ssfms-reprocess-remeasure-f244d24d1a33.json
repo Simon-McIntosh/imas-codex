@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "backend": "clive",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/llm/server.py:2464",
+    "imas_codex/llm/search_tools.py:351"
+  ],
+  "completed_at": "2026-10-13T21:09:55.776Z",
+  "dispatched_at": "2026-10-13T20:51:58Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "781",
+      "severity": "blocking",
+      "text": "blocking: test_a_full_server_reranks_signals asserts server_module._rerank_signals is True, which the landed change at imas_codex/llm/server.py:1894 fails (server_mode_gate.log records 1 failed, 2 passed, EXIT=1); the landed change leaves the repository's llm test module red at the merged head and no plan node owns the repair, so the expectation must be flipped to False before this change lands."
+    },
+    {
+      "file": "imas_codex/llm/server.py",
+      "line": "183",
+      "severity": "follow-on",
+      "text": "follow-on: the module-level comment above _rerank_signals still states on for a full or DD-path server that may spend a judgement, contradicting the unconditional _rerank_signals = False at :1894; the comment-only head commit f244d24d edited nearby tool comments but left this one wrong, so a reader reconstructs the old ship rule from it."
+    },
+    {
+      "file": "imas_codex/llm/server.py",
+      "line": "1894",
+      "severity": "follow-on",
+      "text": "follow-on: the ship-off decision rests on a pool-60 p95 of 5.022 s against a 5 s limit, a 0.022 s margin on one wall-clock measurement on a shared node (the two arms' p95 differ by 0.5 ms, 5.0218 against 5.0223); the rule as written is applied correctly, but the decision is fragile to node load and a re-measurement could invert it."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit from f746278c4: c5f4bc3bd replaces the mode-following signal flag with _rerank_signals = False and its comment at server.py:1894; bee82d5bd adds the 109-line evidence fragment; f244d24d is a server.py comment-only cleanup of registered-tool numbering carrying 8 insertions and 10 deletions that the goal does not imply though the path is declared.",
+    "done_when": "the done_when names python -m tests.llm.measure_search_rankings 3 --section signal over the 2,914-label fixture with cutover 0.2026-10-13T11:53:35Z, per-pass and mean nDCG@10 and grade-3 precision@5 for fusion and both arms, the role-aware worst pass, per-question wins and losses, p95 at pool 60, the section 7 figures beside them, the branch taken, no unlabelled-candidate refusal, the census counts all zero and Jev spend under USD 1; measure_signal.log:1 names revision f746278c4 and the command and carries EXIT=0 with 66 rows per arm, the fragment table reproduces those means (role 0.9220 / fusion 0.8473, g3p5 0.8939 / 0.8091, worst 0.9194, p95 5.022), census.log:2 records the five zeros beside a 15,111 positive control, and the arms' jev_usd 0.084568 + 0.093017 reconciles to 0.177585, so the gate the worker ran asserts the measure.",
+    "goal": "the node goal is to re-record section 7's three-pass rerank measurement over the reprocessed JT-60SA population against section 7's ship rule; docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure.html records fusion 0.8473 and both rerank arms at p95 5.022 s over three passes, states the ship rule fails on latency, and imas_codex/llm/server.py:1894 sets _rerank_signals = False, which is the ship-off branch the goal names.",
+    "manifest": "read at runs/r-20261013T202955912834-ssfms-reprocess-remeasure/manifest.md; status complete, commits c5f4bc3bd, bee82d5bd and f244d24d, changed_paths and test_logs recorded, tests: the focused server-mode gate ran 1 failed and 2 passed at EXIT=1 and the manifest names the stale expectation under follow_ons; baseline_suite and after_suite are both empty, so the run recorded no gate pair to derive an added-failure delta from.",
+    "write_paths": "the brief declares imas_codex/llm/server.py, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure.html and the directory docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure; git diff --stat f746278c4 f244d24d changes exactly server.py and the fragment, 120 insertions and 17 deletions, and nothing else, so every landed path is inside the grant and the declared figures directory is unused."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_search_tools.py:781 asserts server_module._rerank_signals is True and is red at the reviewed head, so flipping the flag back on would turn it green: no test reddens on a regression of the new False and the only test touching the flag guards the opposite direction.",
+    "evidence": "measure_signal.log carries the complete JSON at revision f746278c4 with EXIT=0 and 66 rows per arm and its means reconcile to the fragment table, but the reviewed manifest's baseline_suite and after_suite are both empty and census.log:1 ran at c5f4bc3bd rather than the measurement revision, so no suite delta exists and the census sits one commit from the run.",
+    "fit": "the two commits carry conventional subjects with bodies and no plan identifiers, but the module comment above the flag at imas_codex/llm/server.py:183-188 still says it is on for a full or DD-path server, contradicting the assignment at :1894 that the same change made.",
+    "goal_fidelity": "imas_codex/llm/server.py:1894 sets _rerank_signals = False and the fragment's branch paragraph records the latency failure beside the three passes it satisfies, which is the goal's ship-off branch.",
+    "reuse": "the change adds no definition: imas_codex/llm/search_tools.py:248 rerank_candidates remains the shared rerank owner the signal search routes through and the flag mirrors the existing _rerank_dd_paths switch, so nothing is forked.",
+    "scope_discipline": "git diff --stat f746278c4 f244d24d lists only the two declared files, but f244d24d spends a whole commit on registered-tool comment numbering the goal does not imply and the declared figures directory carries no figure."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: f746278c4fe1e4458f4f55a6e2ca69c6f028699a\nreviewed_head_sha: f244d24d1a33c962101f32da2524cec8c9193604\nVERDICT goal: the node goal is to re-record section 7's three-pass rerank measurement over the reprocessed JT-60SA population against section 7's ship rule; docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure.html records fusion 0.8473 and both rerank arms at p95 5.022 s over three passes, states the ship rule fails on latency, and imas_codex/llm/server.py:1894 sets _rerank_signals = False, which is the ship-off branch the goal names.\nVERDICT done_when: the done_when names python -m tests.llm.measure_search_rankings 3 --section signal over the 2,914-label fixture with cutover 0.2026-10-13T11:53:35Z, per-pass and mean nDCG@10 and grade-3 precision@5 for fusion and both arms, the role-aware worst pass, per-question wins and losses, p95 at pool 60, the section 7 figures beside them, the branch taken, no unlabelled-candidate refusal, the census counts all zero and Jev spend under USD 1; measure_signal.log:1 names revision f746278c4 and the command and carries EXIT=0 with 66 rows per arm, the fragment table reproduces those means (role 0.9220 / fusion 0.8473, g3p5 0.8939 / 0.8091, worst 0.9194, p95 5.022), census.log:2 records the five zeros beside a 15,111 positive control, and the arms' jev_usd 0.084568 + 0.093017 reconciles to 0.177585, so the gate the worker ran asserts the measure.\nVERDICT write_paths: the brief declares imas_codex/llm/server.py, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure.html and the directory docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure; git diff --stat f746278c4 f244d24d changes exactly server.py and the fragment, 120 insertions and 17 deletions, and nothing else, so every landed path is inside the grant and the declared figures directory is unused.\nVERDICT manifest: read at runs/r-20261013T202955912834-ssfms-reprocess-remeasure/manifest.md; status complete, commits c5f4bc3bd, bee82d5bd and f244d24d, changed_paths and test_logs recorded, tests: the focused server-mode gate ran 1 failed and 2 passed at EXIT=1 and the manifest names the stale expectation under follow_ons; baseline_suite and after_suite are both empty, so the run recorded no gate pair to derive an added-failure delta from.\nVERDICT diff: read commit by commit from f746278c4: c5f4bc3bd replaces the mode-following signal flag with _rerank_signals = False and its comment at server.py:1894; bee82d5bd adds the 109-line evidence fragment; f244d24d is a server.py comment-only cleanup of registered-tool numbering carrying 8 insertions and 10 deletions that the goal does not imply though the path is declared.\nCALL_SITES: imas_codex/llm/server.py:2464, imas_codex/llm/search_tools.py:351\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/llm/server.py:1894 sets _rerank_signals = False and the fragment's branch paragraph records the latency failure beside the three passes it satisfies, which is the goal's ship-off branch.\nSCORE evidence: 17\nJUSTIFICATION evidence: measure_signal.log carries the complete JSON at revision f746278c4 with EXIT=0 and 66 rows per arm and its means reconcile to the fragment table, but the reviewed manifest's baseline_suite and after_suite are both empty and census.log:1 ran at c5f4bc3bd rather than the measurement revision, so no suite delta exists and the census sits one commit from the run.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: git diff --stat f746278c4 f244d24d lists only the two declared files, but f244d24d spends a whole commit on registered-tool comment numbering the goal does not imply and the declared figures directory carries no figure.\nSCORE durability: 6\nJUSTIFICATION durability: tests/llm/test_search_tools.py:781 asserts server_module._rerank_signals is True and is red at the reviewed head, so flipping the flag back on would turn it green: no test reddens on a regression of the new False and the only test touching the flag guards the opposite direction.\nSCORE fit: 13\nJUSTIFICATION fit: the two commits carry conventional subjects with bodies and no plan identifiers, but the module comment above the flag at imas_codex/llm/server.py:183-188 still says it is on for a full or DD-path server, contradicting the assignment at :1894 that the same change made.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition: imas_codex/llm/search_tools.py:248 rerank_candidates remains the shared rerank owner the signal search routes through and the flag mirrors the existing _rerank_dd_paths switch, so nothing is forked.\nFINDING tests/llm/test_search_tools.py:781 blocking: test_a_full_server_reranks_signals asserts server_module._rerank_signals is True, which the landed change at imas_codex/llm/server.py:1894 fails (server_mode_gate.log records 1 failed, 2 passed, EXIT=1); the landed change leaves the repository's llm test module red at the merged head and no plan node owns the repair, so the expectation must be flipped to False before this change lands.\nFINDING imas_codex/llm/server.py:183 follow-on: the module-level comment above _rerank_signals still states on for a full or DD-path server that may spend a judgement, contradicting the unconditional _rerank_signals = False at :1894; the comment-only head commit f244d24d edited nearby tool comments but left this one wrong, so a reader reconstructs the old ship rule from it.\nFINDING imas_codex/llm/server.py:1894 follow-on: the ship-off decision rests on a pool-60 p95 of 5.022 s against a 5 s limit, a 0.022 s margin on one wall-clock measurement on a shared node (the two arms' p95 differ by 0.5 ms, 5.0218 against 5.0223); the rule as written is applied correctly, but the decision is fragile to node load and a re-measurement could invert it.\n",
+  "review_run_id": "r-20261013T205144494900-review-of-ssfms-reprocess-remeasure-f244d24d1a33",
+  "reviewed_base_sha": "f746278c4fe1e4458f4f55a6e2ca69c6f028699a",
+  "reviewed_head_sha": "f244d24d1a33c962101f32da2524cec8c9193604",
+  "reviewed_run_id": "r-20261013T202955912834-ssfms-reprocess-remeasure",
+  "rubric": "code",
+  "scores": {
+    "durability": 6,
+    "evidence": 17,
+    "fit": 13,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T21:05:44.132928+00:00",
+  "total": 91
+}
