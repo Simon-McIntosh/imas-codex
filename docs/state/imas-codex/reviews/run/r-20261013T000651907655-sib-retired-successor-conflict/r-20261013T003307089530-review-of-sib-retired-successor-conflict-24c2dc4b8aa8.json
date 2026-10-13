@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:979 _persist_description_checked_candidates (the compose persist boundary, dispatched at workers.py:6596)",
+    "imas_codex/standard_names/graph_ops.py:19847 supersede_prior_source_names._apply (the compose supersede path the new type flows through)",
+    "imas_codex/standard_names/graph_ops.py:19267, graph_ops.py:20180, graph_ops.py:23371 (other retarget_standard_name_sources callers)",
+    "imas_codex/standard_names/edit.py:1916 (the sanctioned rename retarget path)"
+  ],
+  "completed_at": "2026-10-13T00:45:14.824Z",
+  "dispatched_at": "2026-10-13T00:33:17Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_source_migration_conflict.py",
+      "line": "153",
+      "severity": "follow-on",
+      "text": "follow-on: the transient-fault assertion asserts only `not isinstance(raised.value, SourceBindingConflictError)`, so now that a second RuntimeError-derived named type exists a transient row (concurrent-claim, stale, no-binding, scalar-mismatch) misclassified into SourceRetiredSuccessorConflictError would still pass; the same shape stands at :232, and neither assertion names the new sibling type it must exclude."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retired-successor-conflict.html",
+      "line": "36",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when asked for the `rg -n 'startswith(\"dd:\")' imas_codex/standard_names/workers.py` output before and after to be placed in the fragment, but the fragment states the rule is defined once without including that command output; I verified the claim myself (a single occurrence at workers.py:974), so the fact holds and only the artefact is thin."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T000651907655-sib-retired-successor-conflict/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite/after_suite record the gate `command` as three files, but the base_gate.log and after_gate.log `# cmd:` header lines name twenty-three, so the recorded command is not the literal command that ran; and measurement_module/measurement_cwd are omitted even though the base arm's header shows module.__file__ and cwd under /tmp/reckon-crew-scratch, which the manifest contract requires for a scratch-tree base arm."
+    },
+    {
+      "file": "imas_codex/standard_names/provenance_lifecycle.py",
+      "line": "109",
+      "severity": "follow-on",
+      "text": "follow-on: SourceRetiredSuccessorConflictError.__init__ duplicates the body of SourceBindingConflictError.__init__ at :88 almost verbatim, differing only in the message string; a shared base would carry the conflicts-tuple and detail-join plumbing once, though the brief permitted a sibling type and the duplication is small."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call sites",
+    "diff": "read commit by commit (one commit 24c2dc4b8) against base 0ba9048f5; five files change, +311/-47: the new sibling error type and its classification branch, the consumer catching both named types plus the dd: delegation, two test files and the evidence fragment, all inside the declared scope.",
+    "done_when": "the done_when asks a test naming source, live holder and retired holder, a compose persist test showing the source withheld with no attempt spent, both failing with the fix reverted, and the dd: rule appearing once; test_source_migration_conflict.py:177 asserts all three identities, test_compose_supersede_dual_bound.py:245 drives the persist boundary with the supersede-produced outcome and asserts no winner and no release, negative_control.log records 2 failed EXIT=1 with both named tests, and workers.py:974 is the single dd: rule, so the gate asserts the stated measure.",
+    "goal": "the node goal is to make the live-predecessor retired-successor binding row a named outcome that compose withholds without spending an attempt; the landed change adds the sibling type SourceRetiredSuccessorConflictError at imas_codex/standard_names/provenance_lifecycle.py:98, classifies the row at :733, and workers.py:1072 catches the new type at the compose persist boundary, so the goal is delivered.",
+    "manifest": "read; manifest.md records status complete, the single head sha, tests base 344 passed 0 failed EXIT=0 and after 345 passed 0 failed EXIT=0, and negative_control EXIT=1, but it omits measurement_module/measurement_cwd though the base arm ran in a scratch tree, and its baseline_suite/after_suite command field names three files where the gate log names twenty-three.",
+    "write_paths": "the manifest declares provenance_lifecycle.py, workers.py, both test files and the evidence fragment; the diff 0ba9048f5..24c2dc4b8 touches exactly those five paths, all inside the declaration (the declared figures directory is unused)."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_compose_supersede_dual_bound.py:245 and test_source_migration_conflict.py:177 both fail when the classification branch is reverted, as negative_control.log shows, but test_source_migration_conflict.py:153 excludes only SourceBindingConflictError so it would not catch a transient row misclassified into the new sibling type.",
+    "evidence": "negative_control.log records '2 failed ... EXIT=1' with both named tests and after_gate.log records '345 passed ... EXIT=0', but manifest.md baseline_suite.command names three files against the gate log's twenty-three and omits measurement_module/measurement_cwd.",
+    "fit": "SourceRetiredSuccessorConflictError at provenance_lifecycle.py:98 is a sibling of SourceBindingConflictError at :76, follows the same RuntimeError-derived idiom, and introduces no plan or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/provenance_lifecycle.py:733 classifies the live-predecessor retired-successor row into its own branch and :98 defines the named type it raises, which is the named outcome the goal names.",
+    "reuse": "the consumer _withhold_binding_conflicted_sources at workers.py:900 is extended to accept both named types rather than duplicated, and the SourceBindingConflict record type is reused, though the constructor at provenance_lifecycle.py:109 repeats the body of :88.",
+    "scope_discipline": "every path in the diff 0ba9048f5..24c2dc4b8 (provenance_lifecycle.py, workers.py, the two test files, the fragment) is inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make the live-predecessor retired-successor binding row a named outcome that compose withholds without spending an attempt; the landed change adds the sibling type SourceRetiredSuccessorConflictError at imas_codex/standard_names/provenance_lifecycle.py:98, classifies the row at :733, and workers.py:1072 catches the new type at the compose persist boundary, so the goal is delivered.\nVERDICT done_when: the done_when asks a test naming source, live holder and retired holder, a compose persist test showing the source withheld with no attempt spent, both failing with the fix reverted, and the dd: rule appearing once; test_source_migration_conflict.py:177 asserts all three identities, test_compose_supersede_dual_bound.py:245 drives the persist boundary with the supersede-produced outcome and asserts no winner and no release, negative_control.log records 2 failed EXIT=1 with both named tests, and workers.py:974 is the single dd: rule, so the gate asserts the stated measure.\nVERDICT write_paths: the manifest declares provenance_lifecycle.py, workers.py, both test files and the evidence fragment; the diff 0ba9048f5..24c2dc4b8 touches exactly those five paths, all inside the declaration (the declared figures directory is unused).\nVERDICT manifest: read; manifest.md records status complete, the single head sha, tests base 344 passed 0 failed EXIT=0 and after 345 passed 0 failed EXIT=0, and negative_control EXIT=1, but it omits measurement_module/measurement_cwd though the base arm ran in a scratch tree, and its baseline_suite/after_suite command field names three files where the gate log names twenty-three.\nVERDICT diff: read commit by commit (one commit 24c2dc4b8) against base 0ba9048f5; five files change, +311/-47: the new sibling error type and its classification branch, the consumer catching both named types plus the dd: delegation, two test files and the evidence fragment, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/workers.py:979 _persist_description_checked_candidates (the compose persist boundary, dispatched at workers.py:6596), imas_codex/standard_names/graph_ops.py:19847 supersede_prior_source_names._apply (the compose supersede path the new type flows through), imas_codex/standard_names/graph_ops.py:19267, graph_ops.py:20180, graph_ops.py:23371 (other retarget_standard_name_sources callers), imas_codex/standard_names/edit.py:1916 (the sanctioned rename retarget path)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/provenance_lifecycle.py:733 classifies the live-predecessor retired-successor row into its own branch and :98 defines the named type it raises, which is the named outcome the goal names.\nSCORE evidence: 16\nJUSTIFICATION evidence: negative_control.log records '2 failed ... EXIT=1' with both named tests and after_gate.log records '345 passed ... EXIT=0', but manifest.md baseline_suite.command names three files against the gate log's twenty-three and omits measurement_module/measurement_cwd.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff 0ba9048f5..24c2dc4b8 (provenance_lifecycle.py, workers.py, the two test files, the fragment) is inside the manifest's declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_compose_supersede_dual_bound.py:245 and test_source_migration_conflict.py:177 both fail when the classification branch is reverted, as negative_control.log shows, but test_source_migration_conflict.py:153 excludes only SourceBindingConflictError so it would not catch a transient row misclassified into the new sibling type.\nSCORE fit: 19\nJUSTIFICATION fit: SourceRetiredSuccessorConflictError at provenance_lifecycle.py:98 is a sibling of SourceBindingConflictError at :76, follows the same RuntimeError-derived idiom, and introduces no plan or ticket label.\nSCORE reuse: 18\nJUSTIFICATION reuse: the consumer _withhold_binding_conflicted_sources at workers.py:900 is extended to accept both named types rather than duplicated, and the SourceBindingConflict record type is reused, though the constructor at provenance_lifecycle.py:109 repeats the body of :88.\nFINDING tests/standard_names/test_source_migration_conflict.py:153 follow-on: the transient-fault assertion asserts only `not isinstance(raised.value, SourceBindingConflictError)`, so now that a second RuntimeError-derived named type exists a transient row (concurrent-claim, stale, no-binding, scalar-mismatch) misclassified into SourceRetiredSuccessorConflictError would still pass; the same shape stands at :232, and neither assertion names the new sibling type it must exclude.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retired-successor-conflict.html:36 follow-on: the done_when asked for the `rg -n 'startswith(\"dd:\")' imas_codex/standard_names/workers.py` output before and after to be placed in the fragment, but the fragment states the rule is defined once without including that command output; I verified the claim myself (a single occurrence at workers.py:974), so the fact holds and only the artefact is thin.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T000651907655-sib-retired-successor-conflict/manifest.md:15 follow-on: baseline_suite/after_suite record the gate `command` as three files, but the base_gate.log and after_gate.log `# cmd:` header lines name twenty-three, so the recorded command is not the literal command that ran; and measurement_module/measurement_cwd are omitted even though the base arm's header shows module.__file__ and cwd under /tmp/reckon-crew-scratch, which the manifest contract requires for a scratch-tree base arm.\nFINDING imas_codex/standard_names/provenance_lifecycle.py:109 follow-on: SourceRetiredSuccessorConflictError.__init__ duplicates the body of SourceBindingConflictError.__init__ at :88 almost verbatim, differing only in the message string; a shared base would carry the conflicts-tuple and detail-join plumbing once, though the brief permitted a sibling type and the duplication is small.\n",
+  "review_run_id": "r-20261013T003307089530-review-of-sib-retired-successor-conflict-24c2dc4b8aa8",
+  "reviewed_base_sha": "0ba9048f5965f077dbfb956ababf60098f6daece",
+  "reviewed_head_sha": "24c2dc4b8aa8eced0e7e38989011c4bd341d009e",
+  "reviewed_run_id": "r-20261013T000651907655-sib-retired-successor-conflict",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:44:02.441909+00:00",
+  "total": 109
+}
