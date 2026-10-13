@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate fields: its after_suite (cocos-validator-repair.log, rev c088c1fe) records 55 passed, EXIT=0, 0 failures, so no failure was added; its baseline_suite field is empty, so reckon's reader reports the count as unmeasured rather than zero. The added set is empty either way because the head arm carries no failure.",
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/llm/server.py:1374 (validate_cocos LLM tool calls validate_cocos_from_data and forwards result.calculated_cocos into its dict at :1386)"
+  ],
+  "completed_at": "2026-10-13T04:02:01.314Z",
+  "dispatched_at": "2026-10-13T03:48:43Z",
+  "findings": [
+    {
+      "file": "imas_codex/cocos/calculator.py",
+      "line": "522",
+      "severity": "follow-on",
+      "text": "follow-on: the except ValueError also swallows determine_cocos's invalid-input guard at imas_codex/cocos/calculator.py:319-321 (\"Finite nonzero plasma-current and field references are required\"), so a caller passing ip=0 or b0=0 now receives a ValidationResult whose inconsistencies mix an input-validity message with physics inconsistencies and no test covers that path; narrow the catch or add a case for zero current/field."
+    }
+  ],
+  "head_log_revision": "c088c1febcbb107b3a8b8ad553000a7b45d0bcaa",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read commit by commit against 5b040644; c088c1fe widens ValidationResult.calculated_cocos to int|None at imas_codex/cocos/calculator.py:453, moves determine_cocos into a try/except ValueError inside validate_cocos_from_data appending the message to inconsistencies, and adds two validator regression tests.",
+    "done_when": "the node's done_when is that pytest tests/cocos passes with tests in tests/cocos/test_cocos_survivors.py showing the named behaviours; the gained commit's after_suite names cocos-validator-repair.log at c088c1fe with 55 passed, EXIT=0, and the two added tests exercise the two indeterminate cases the rebuild may raise for.",
+    "goal": "the source node's goal is COCOS survivor scoring in imas_codex/cocos/calculator.py with determine_cocos rebuilt on it plus a dd_cocos_class resolver in cocos/transforms.py; those landed in the earlier commits, and the gained commit c088c1fe repairs the validator the rebuild broke, making validate_cocos_from_data at imas_codex/cocos/calculator.py:513-524 report an indeterminate convention as an inconsistency instead of raising.",
+    "manifest": "read; its after_suite names cocos-validator-repair.log (c088c1fe, 55 passed, EXIT=0) and its negative_control_log names negative-control-graph-head.log, but its baseline_suite field is still empty so no baseline arm is recorded and the added-failure count is unmeasured.",
+    "write_paths": "the manifest declares imas_codex/cocos/calculator.py, imas_codex/cocos/transforms.py, imas_codex/cocos/__init__.py and tests/cocos/test_cocos_survivors.py; the gained diff 5b040644..c088c1fe touches only imas_codex/cocos/calculator.py and tests/cocos/test_cocos_survivors.py, both inside them."
+  },
+  "justifications": {
+    "durability": "tests/cocos/test_cocos_survivors.py:75-105 assert calculated_cocos is None, confidence == 0.0 and is_consistent is False against independent literals, and reversing the calculator.py diff reddens both tests in validator-negative-control-bounded.log.",
+    "evidence": "cocos-validator-repair.log records 55 passed, EXIT=0 at c088c1fe and validator-negative-control-bounded.log is red at EXIT=1 with both new tests failing, but the reviewed manifest's baseline_suite is empty so the added-failure count is unmeasured.",
+    "fit": "the change follows the module's frozen-dataclass idiom at imas_codex/cocos/calculator.py:438-455, widening one field annotation in place and adding no new symbol or forbidden name.",
+    "goal_fidelity": "imas_codex/cocos/calculator.py:513-524 catches the ValueError determine_cocos raises on indeterminate observations and reports it through the existing inconsistencies list, so the validator now returns the ValidationResult its docstring at :487 promises rather than raising.",
+    "reuse": "the change extends validate_cocos_from_data and ValidationResult, the existing owners of the COCOS-validation capability, reusing the existing inconsistencies list at imas_codex/cocos/calculator.py:519-524 rather than forking a new result type.",
+    "scope_discipline": "git diff 5b040644..c088c1fe touches only imas_codex/cocos/calculator.py and tests/cocos/test_cocos_survivors.py, both within the declared write paths listed in the manifest."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 5b040644d5dbed8877d0e6f5908ed9e65035e441\nreviewed_head_sha: c088c1febcbb107b3a8b8ad553000a7b45d0bcaa\nVERDICT goal: the source node's goal is COCOS survivor scoring in imas_codex/cocos/calculator.py with determine_cocos rebuilt on it plus a dd_cocos_class resolver in cocos/transforms.py; those landed in the earlier commits, and the gained commit c088c1fe repairs the validator the rebuild broke, making validate_cocos_from_data at imas_codex/cocos/calculator.py:513-524 report an indeterminate convention as an inconsistency instead of raising.\nVERDICT done_when: the node's done_when is that pytest tests/cocos passes with tests in tests/cocos/test_cocos_survivors.py showing the named behaviours; the gained commit's after_suite names cocos-validator-repair.log at c088c1fe with 55 passed, EXIT=0, and the two added tests exercise the two indeterminate cases the rebuild may raise for.\nVERDICT write_paths: the manifest declares imas_codex/cocos/calculator.py, imas_codex/cocos/transforms.py, imas_codex/cocos/__init__.py and tests/cocos/test_cocos_survivors.py; the gained diff 5b040644..c088c1fe touches only imas_codex/cocos/calculator.py and tests/cocos/test_cocos_survivors.py, both inside them.\nVERDICT manifest: read; its after_suite names cocos-validator-repair.log (c088c1fe, 55 passed, EXIT=0) and its negative_control_log names negative-control-graph-head.log, but its baseline_suite field is still empty so no baseline arm is recorded and the added-failure count is unmeasured.\nVERDICT diff: read commit by commit against 5b040644; c088c1fe widens ValidationResult.calculated_cocos to int|None at imas_codex/cocos/calculator.py:453, moves determine_cocos into a try/except ValueError inside validate_cocos_from_data appending the message to inconsistencies, and adds two validator regression tests.\nCALL_SITES: imas_codex/llm/server.py:1374 (validate_cocos LLM tool calls validate_cocos_from_data and forwards result.calculated_cocos into its dict at :1386)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/cocos/calculator.py:513-524 catches the ValueError determine_cocos raises on indeterminate observations and reports it through the existing inconsistencies list, so the validator now returns the ValidationResult its docstring at :487 promises rather than raising.\nSCORE evidence: 19\nJUSTIFICATION evidence: cocos-validator-repair.log records 55 passed, EXIT=0 at c088c1fe and validator-negative-control-bounded.log is red at EXIT=1 with both new tests failing, but the reviewed manifest's baseline_suite is empty so the added-failure count is unmeasured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 5b040644..c088c1fe touches only imas_codex/cocos/calculator.py and tests/cocos/test_cocos_survivors.py, both within the declared write paths listed in the manifest.\nSCORE durability: 19\nJUSTIFICATION durability: tests/cocos/test_cocos_survivors.py:75-105 assert calculated_cocos is None, confidence == 0.0 and is_consistent is False against independent literals, and reversing the calculator.py diff reddens both tests in validator-negative-control-bounded.log.\nSCORE fit: 19\nJUSTIFICATION fit: the change follows the module's frozen-dataclass idiom at imas_codex/cocos/calculator.py:438-455, widening one field annotation in place and adding no new symbol or forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends validate_cocos_from_data and ValidationResult, the existing owners of the COCOS-validation capability, reusing the existing inconsistencies list at imas_codex/cocos/calculator.py:519-524 rather than forking a new result type.\nFINDING imas_codex/cocos/calculator.py:522 follow-on: the except ValueError also swallows determine_cocos's invalid-input guard at imas_codex/cocos/calculator.py:319-321 (\"Finite nonzero plasma-current and field references are required\"), so a caller passing ip=0 or b0=0 now receives a ValidationResult whose inconsistencies mix an input-validity message with physics inconsistencies and no test covers that path; narrow the catch or add a case for zero current/field.",
+  "review_run_id": "r-20261013T034819633929-review-of-cocos-determination-core-c088c1febcbb",
+  "reviewed_base_sha": "5b040644d5dbed8877d0e6f5908ed9e65035e441",
+  "reviewed_head_sha": "c088c1febcbb107b3a8b8ad553000a7b45d0bcaa",
+  "reviewed_run_id": "r-20261009T015811146619-cocos-determination-core",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T03:59:57.758868+00:00",
+  "total": 116,
+  "verdict": "SOUND WITH FINDINGS"
+}
