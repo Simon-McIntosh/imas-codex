@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run records no baseline_suite and no after_suite gate; its manifest's test_logs names one head gate, gate_head.log (129 passed, 8 skipped, 0 failed, EXIT=0), which reports zero failing tests, so there is no pre-change arm to subtract and added_failure_count is 0 with no added ids.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/llm/server.py:2397 (search_signals MCP tool)",
+    "imas_codex/llm/server.py:2482 (search_docs MCP tool)",
+    "imas_codex/llm/server.py:2534 (search_code MCP tool)",
+    "imas_codex/graph/domain_queries.py:26 (find_signals)",
+    "imas_codex/ids/slot_context.py:59 (build_slot_context)"
+  ],
+  "completed_at": "2026-10-12T23:59:34.287Z",
+  "dispatched_at": "2026-10-12T23:44:16Z",
+  "findings": [
+    {
+      "file": "imas_codex/llm/search_tools.py",
+      "line": "266",
+      "severity": "follow-on",
+      "text": "follow-on: the fused mass is returned as the scores map and rendered by format_signals_report (imas_codex/llm/search_formatters.py:121) as \"(score: {:.2f})\", so the per-signal number shown to the user is now the reciprocal-rank mass (about 1/61 = 0.02) rather than a cosine or BM25 magnitude; nearly every match displays as 0.02, so the displayed score no longer conveys similarity, a user-facing change the plan did not call out."
+    },
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "227",
+      "severity": "follow-on",
+      "text": "follow-on: \"assert scores[\\\"tcv:magnetics/cc\\\"] == pytest.approx(scores[\\\"tcv:magnetics/ip\\\"])\" compares two outputs of the code under test to each other rather than to an independent value (it replaced the concrete \"== approx(13.0)\"), so it holds for any implementation that keeps a text rank-1 and a vector rank-1 at equal mass; the load-bearing guard in that test is the id order asserted on :224."
+    },
+    {
+      "file": "imas_codex/llm/search_tools.py",
+      "line": "698",
+      "severity": "follow-on",
+      "text": "follow-on: _text_search_signals requests k*2 rows, so SIGNAL_TEXT_POOL=50 yields a 100-candidate full-text stream; the done_when's \"50-candidate full-text pool\" and the constant name understate the stream the fusion actually consumes (the vector pool is 100 as claimed, search_tools.py:75)."
+    },
+    {
+      "file": "tests/search/test_fusion.py",
+      "line": "37",
+      "severity": "follow-on",
+      "text": "follow-on: _additive_rank re-implements the retired blend score*0.7 + text*0.3 + 0.1 as a test-local frozen oracle; it forks no live production owner (that rule was removed from search_tools.py), but it is a textual copy the promotion clone detector may flag, matching the same-pattern note raised on the sibling review of ssfms-pooled-labels."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit 58bf125c4 against base 631206b82; one commit, nine files, +290/-172, all inside the declared write scope.",
+    "done_when": "seven claims are each checkable in the diff: fusion.py owns rrf_fuse/RRF_K and the callers import them (search_tools.py:31, slot_context.py:24, standard_names/search.py:26); _rank_signals fuses SIGNAL_VECTOR_POOL=100 against SIGNAL_TEXT_POOL=50 before cutting at k (search_tools.py:75,76,264); _search_code fuses chunk vector, chunk text with its reference hits and code-example vector (:1657-1659); signal_vector_search_block (domain_queries.py:116) is the single owner of the facility-prefiltered query; tests/search/test_fusion.py:57 shows a rank-1 vector hit outranking a rank-5 text hit and :97 asserts the additive order; :109 asserts no facility identifier in the fusion or ranking code; the gate log gate_head.log records 129 passed, 8 skipped, 0 failed, EXIT=0.",
+    "goal": "the node's goal is to replace the additive score blend at the four tool sites with one shared reciprocal rank fusion; imas_codex/search/fusion.py:15 declares RRF_K and :18 rrf_fuse, imas_codex/standard_names/search.py:26 and imas_codex/llm/search_tools.py:31 import them, and all four named sites \u2014 _rank_signals (search_tools.py:264), _search_docs (:916), _search_code (:1659) and _hybrid_ids (slot_context.py:65) \u2014 now fuse by rank.",
+    "manifest": "read; status complete, the gate command and gate_head.log recorded, negative_control_log named as a bare path, and no blockers.",
+    "write_paths": "the manifest declares eleven write paths; git diff 631206b823c7888c7074811b00c685675b854ad3..58bf125c4f8d2852b6124b6fd3582e5fcdc5d600 touches nine files, every one inside them."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows tests/search/test_fusion.py::test_rank_one_vector_outranks_rank_five_text red with EXIT=1 once the additive rule is reinstated, so :88/:89 redden if the fusion regresses; the weaker link is the symmetric assertion at tests/llm/test_search_tools.py:227.",
+    "evidence": "the gate log gate_head.log records 129 passed / 8 skipped / 0 failed / EXIT=0 at the node revision, and every done_when claim is independently visible in the diff (owner module fusion.py, pools at search_tools.py:75-76, three-stream fuse at :1659, one query owner domain_queries.py:116, unit tests test_fusion.py:57/109).",
+    "fit": "the new search/fusion.py follows the surrounding idiom (module docstring and __all__ at :1-12) and no added name carries a plan, gate or facility label; the only copy is the test-local _additive_rank at tests/search/test_fusion.py:37.",
+    "goal_fidelity": "imas_codex/search/fusion.py:18 defines the one rrf_fuse and :15 the one RRF_K, and each of the four sites the goal names calls it (_rank_signals search_tools.py:264, _search_docs :916, _search_code :1659, _hybrid_ids slot_context.py:65), so the additive blend is replaced everywhere the goal states.",
+    "reuse": "fusion.py is the owner to which the plan moved the definition and every caller imports it (search_tools.py:31), and signal_vector_search_block (domain_queries.py:116) wraps the existing build_vector_search owner rather than re-issuing the query, so no live capability is forked.",
+    "scope_discipline": "the nine paths in git diff 631206b82..58bf125c4 all sit inside the eleven declared write paths, and no unlisted runtime file such as imas_codex/llm/server.py was touched."
+  },
+  "node": "review-of-ssfms-fusion",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to replace the additive score blend at the four tool sites with one shared reciprocal rank fusion; imas_codex/search/fusion.py:15 declares RRF_K and :18 rrf_fuse, imas_codex/standard_names/search.py:26 and imas_codex/llm/search_tools.py:31 import them, and all four named sites \u2014 _rank_signals (search_tools.py:264), _search_docs (:916), _search_code (:1659) and _hybrid_ids (slot_context.py:65) \u2014 now fuse by rank.\nVERDICT done_when: seven claims are each checkable in the diff: fusion.py owns rrf_fuse/RRF_K and the callers import them (search_tools.py:31, slot_context.py:24, standard_names/search.py:26); _rank_signals fuses SIGNAL_VECTOR_POOL=100 against SIGNAL_TEXT_POOL=50 before cutting at k (search_tools.py:75,76,264); _search_code fuses chunk vector, chunk text with its reference hits and code-example vector (:1657-1659); signal_vector_search_block (domain_queries.py:116) is the single owner of the facility-prefiltered query; tests/search/test_fusion.py:57 shows a rank-1 vector hit outranking a rank-5 text hit and :97 asserts the additive order; :109 asserts no facility identifier in the fusion or ranking code; the gate log gate_head.log records 129 passed, 8 skipped, 0 failed, EXIT=0.\nVERDICT write_paths: the manifest declares eleven write paths; git diff 631206b823c7888c7074811b00c685675b854ad3..58bf125c4f8d2852b6124b6fd3582e5fcdc5d600 touches nine files, every one inside them.\nVERDICT manifest: read; status complete, the gate command and gate_head.log recorded, negative_control_log named as a bare path, and no blockers.\nVERDICT diff: read commit 58bf125c4 against base 631206b82; one commit, nine files, +290/-172, all inside the declared write scope.\nCALL_SITES: imas_codex/llm/server.py:2397 (search_signals MCP tool), imas_codex/llm/server.py:2482 (search_docs MCP tool), imas_codex/llm/server.py:2534 (search_code MCP tool), imas_codex/graph/domain_queries.py:26 (find_signals), imas_codex/ids/slot_context.py:59 (build_slot_context)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/search/fusion.py:18 defines the one rrf_fuse and :15 the one RRF_K, and each of the four sites the goal names calls it (_rank_signals search_tools.py:264, _search_docs :916, _search_code :1659, _hybrid_ids slot_context.py:65), so the additive blend is replaced everywhere the goal states.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate log gate_head.log records 129 passed / 8 skipped / 0 failed / EXIT=0 at the node revision, and every done_when claim is independently visible in the diff (owner module fusion.py, pools at search_tools.py:75-76, three-stream fuse at :1659, one query owner domain_queries.py:116, unit tests test_fusion.py:57/109).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the nine paths in git diff 631206b82..58bf125c4 all sit inside the eleven declared write paths, and no unlisted runtime file such as imas_codex/llm/server.py was touched.\nSCORE durability: 18\nJUSTIFICATION durability: negative_control.log shows tests/search/test_fusion.py::test_rank_one_vector_outranks_rank_five_text red with EXIT=1 once the additive rule is reinstated, so :88/:89 redden if the fusion regresses; the weaker link is the symmetric assertion at tests/llm/test_search_tools.py:227.\nSCORE fit: 18\nJUSTIFICATION fit: the new search/fusion.py follows the surrounding idiom (module docstring and __all__ at :1-12) and no added name carries a plan, gate or facility label; the only copy is the test-local _additive_rank at tests/search/test_fusion.py:37.\nSCORE reuse: 18\nJUSTIFICATION reuse: fusion.py is the owner to which the plan moved the definition and every caller imports it (search_tools.py:31), and signal_vector_search_block (domain_queries.py:116) wraps the existing build_vector_search owner rather than re-issuing the query, so no live capability is forked.\nFINDING imas_codex/llm/search_tools.py:266 follow-on: the fused mass is returned as the scores map and rendered by format_signals_report (imas_codex/llm/search_formatters.py:121) as \"(score: {:.2f})\", so the per-signal number shown to the user is now the reciprocal-rank mass (about 1/61 = 0.02) rather than a cosine or BM25 magnitude; nearly every match displays as 0.02, so the displayed score no longer conveys similarity, a user-facing change the plan did not call out.\nFINDING tests/llm/test_search_tools.py:227 follow-on: \"assert scores[\\\"tcv:magnetics/cc\\\"] == pytest.approx(scores[\\\"tcv:magnetics/ip\\\"])\" compares two outputs of the code under test to each other rather than to an independent value (it replaced the concrete \"== approx(13.0)\"), so it holds for any implementation that keeps a text rank-1 and a vector rank-1 at equal mass; the load-bearing guard in that test is the id order asserted on :224.\nFINDING imas_codex/llm/search_tools.py:698 follow-on: _text_search_signals requests k*2 rows, so SIGNAL_TEXT_POOL=50 yields a 100-candidate full-text stream; the done_when's \"50-candidate full-text pool\" and the constant name understate the stream the fusion actually consumes (the vector pool is 100 as claimed, search_tools.py:75).\nFINDING tests/search/test_fusion.py:37 follow-on: _additive_rank re-implements the retired blend score*0.7 + text*0.3 + 0.1 as a test-local frozen oracle; it forks no live production owner (that rule was removed from search_tools.py), but it is a textual copy the promotion clone detector may flag, matching the same-pattern note raised on the sibling review of ssfms-pooled-labels.\n",
+  "review_run_id": "r-20261012T234404083119-review-of-ssfms-fusion",
+  "reviewed_base_sha": "631206b823c7888c7074811b00c685675b854ad3",
+  "reviewed_head_sha": "58bf125c4f8d2852b6124b6fd3582e5fcdc5d600",
+  "reviewed_run_id": "r-20261012T232246516505-ssfms-fusion",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/0ba4e093-6897-47fa-b875-003d44d07ddf/ssfms-fusion",
+  "reviewer_run_id": "r-20261012T234404083119-review-of-ssfms-fusion",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T232246516505-ssfms-fusion/gate_head.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T23:54:47.021664+00:00",
+  "total": 110
+}
