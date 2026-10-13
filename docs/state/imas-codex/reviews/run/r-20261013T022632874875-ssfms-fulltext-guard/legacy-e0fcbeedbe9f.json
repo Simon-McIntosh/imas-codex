@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "uv run --no-sync pytest tests/graph/test_signal_fulltext_fields.py tests/llm/test_search_tools.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T022632874875-ssfms-fulltext-guard/gate.log",
+    "note": "head/after arm taken from the reviewed run's own gate.log; summary line 107 passed, 8 skipped, EXIT=0. The reviewed run records no baseline arm, so added_failure_count is zero because the after arm carries zero failures, not from a base-minus-head delta.",
+    "revision": "3c41db53d21d813e79d3ef1e8e71465aa302448c"
+  },
+  "baseline_suite": null,
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/llm/search_tools.py:262",
+    "imas_codex/llm/search_tools.py:929",
+    "imas_codex/ids/slot_context.py:200"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T02:26:52Z",
+  "findings": [
+    {
+      "file": "tests/graph/test_signal_fulltext_fields.py",
+      "line": 37,
+      "severity": "follow-on",
+      "summary": "_facility_signal_fulltext duplicates the 'index_name:prop1,prop2' parse owned by imas_codex/graph/schema.py:330 (GraphSchema.fulltext_indexes) rather than extending it; the owner takes an optional GraphSchema(schemas_dir/facility.yaml) which the test package already builds at tests/graph/test_schema_context.py:38."
+    },
+    {
+      "file": "tests/graph/test_signal_fulltext_fields.py",
+      "line": 47,
+      "severity": "follow-on",
+      "summary": "the guard reads the schema annotation only, while the runtime consumer imas_codex/graph/client.py:62 EXPECTED_FULLTEXT_INDEXES is fed from the generated schema_context_data.FULLTEXT_INDEXES, so a regeneration that dropped a field would not redden this test; the manifest discloses this."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the docstring change sits on _text_search_signals, reached by three production call sites: imas_codex/llm/search_tools.py:262 and :929 and imas_codex/ids/slot_context.py:200.",
+    "diff": "one landed revision e2639df98 against 3c41db53 changes exactly three paths inside the declared scope: the new 50-line test, a docstring-only edit to imas_codex/llm/search_tools.py (+6/-3), and the 21-line fragment.",
+    "done_when": "the done_when asks for a no-graph test reading the facility_signal_text definition from the schema asserting the seven fields, a docstring naming them, and tests/llm/test_search_tools.py plus the new test passing; gate.log records that command at 3c41db53 with 107 passed, 8 skipped, exit 0.",
+    "goal": "the node goal is to guard the widened signal full-text index definition with a test and align the _text_search_signals docstring; the test at tests/graph/test_signal_fulltext_fields.py:45 and the docstring at imas_codex/llm/search_tools.py:684 both landed.",
+    "manifest": "read; status complete, single landed revision e2639df98, landing line present, gate and negative-control logs named, and evidence_inputs disclose the schema-annotation-only coverage.",
+    "write_paths": "the source declared the test, search_tools.py, the fragment and an unused docs/figures dir; the diff touches the first three and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_signal_fulltext_fields.py:50 compares a hardcoded REQUIRED_PROPERTIES tuple against the schema's own annotation, and negative-control.log shows the test reddens (missing keywords, EXIT=1) when keywords is dropped while it passes at head.",
+    "evidence": "gate.log carries the revision, tree and summary line 107 passed, 8 skipped, EXIT=0, and negative-control.log shows the declared mutation reddening the new test id, but the reviewed run records no baseline arm so the plan's no-lower-than-the-dispatched-revision condition is not evidenced here.",
+    "fit": "tests/graph/test_signal_fulltext_fields.py follows the repo's yaml.safe_load schema-introspection idiom and carries no plan, sprint or ticket label, though it sits in tests/graph/ whose package docstring claims every test there needs Neo4j.",
+    "goal_fidelity": "the landed docstring at imas_codex/llm/search_tools.py:684 names the same seven fields the schema annotates at imas_codex/schemas/facility.yaml:2570 and its CONTAINS fallback over name, description and node_path matches the query at lines 713-716.",
+    "reuse": "tests/graph/test_signal_fulltext_fields.py:37 _facility_signal_fulltext re-implements the annotation parse already owned by imas_codex/graph/schema.py:330 GraphSchema.fulltext_indexes, which the test package itself constructs at tests/graph/test_schema_context.py:38.",
+    "scope_discipline": "every path in the diff, tests/graph/test_signal_fulltext_fields.py, imas_codex/llm/search_tools.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-fulltext-guard.html, is inside the declared write paths, and the unused figures dir carries no file."
+  },
+  "node": "review-of-ssfms-fulltext-guard-e2639df98438",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to guard the widened signal full-text index definition with a test and align the _text_search_signals docstring; tests/graph/test_signal_fulltext_fields.py:45 asserts the seven fields and the landed docstring at imas_codex/llm/search_tools.py:684 names them, both present in the diff.\nVERDICT done_when: the done_when asks for a no-graph test reading the facility_signal_text definition from the schema asserting name, description, node_path, keywords, aliases, unit and source_description, a docstring naming those fields, and tests/llm/test_search_tools.py plus the new test passing; gate.log records that exact command at revision 3c41db53 with 107 passed, 8 skipped, exit 0.\nVERDICT write_paths: the source declared tests/graph/test_signal_fulltext_fields.py, imas_codex/llm/search_tools.py, the fragment docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-fulltext-guard.html and an unused docs/figures dir; the diff touches the first three and nothing else.\nVERDICT manifest: read; status complete, single landed revision e2639df98, landing line present, gate and negative-control logs named, and its evidence_inputs disclose that the guard reads the schema annotation rather than the generated artifact.\nVERDICT diff: read revision by revision against 3c41db53; the single landed revision e2639df98 changes exactly three paths, the new 50-line test, a docstring-only edit to search_tools.py, and a 21-line fragment, all inside the declared scope.\nCALL_SITES: imas_codex/llm/search_tools.py:262, imas_codex/llm/search_tools.py:929, imas_codex/ids/slot_context.py:200\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the landed docstring at imas_codex/llm/search_tools.py:684 names the same seven fields the schema annotates at imas_codex/schemas/facility.yaml:2570 and its CONTAINS fallback over name, description and node_path matches the query at lines 713-716.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate.log carries the revision, tree and summary line 107 passed, 8 skipped, EXIT=0, and negative-control.log shows the declared mutation reddening the new test id, but the reviewed run records no baseline arm so the plan's no-lower-than-the-dispatched-revision condition is not evidenced here.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff, tests/graph/test_signal_fulltext_fields.py, imas_codex/llm/search_tools.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-fulltext-guard.html, is inside the declared write paths, and the unused figures dir carries no file.\nSCORE durability: 19\nJUSTIFICATION durability: tests/graph/test_signal_fulltext_fields.py:50 compares a hardcoded REQUIRED_PROPERTIES tuple against the schema's own annotation, and negative-control.log shows the test reddens (missing [keywords], EXIT=1) when keywords is dropped while it passes at head.\nSCORE fit: 18\nJUSTIFICATION fit: the test follows the repo's yaml.safe_load schema-introspection idiom and carries no plan, sprint or ticket label, though it sits in tests/graph/ whose package docstring claims every test there needs Neo4j.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/graph/test_signal_fulltext_fields.py:37 _facility_signal_fulltext re-implements the annotation parse already owned by imas_codex/graph/schema.py:330 GraphSchema.fulltext_indexes, which the test package itself constructs at tests/graph/test_schema_context.py:38.\nFINDING tests/graph/test_signal_fulltext_fields.py:37 follow-on: _facility_signal_fulltext duplicates the index_name:prop1,prop2 parse owned by imas_codex/graph/schema.py:330 (GraphSchema.fulltext_indexes) rather than extending it; the owner takes an optional GraphSchema(schemas_dir/facility.yaml) which the test package already builds at tests/graph/test_schema_context.py:38.\nFINDING tests/graph/test_signal_fulltext_fields.py:47 follow-on: the guard reads the schema annotation only, while the runtime consumer imas_codex/graph/client.py:62 EXPECTED_FULLTEXT_INDEXES is fed from the generated schema_context_data.FULLTEXT_INDEXES, so a regeneration that dropped a field would not redden this test; the manifest discloses this.",
+  "review_run_id": "legacy-e0fcbeedbe9f",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "3c41db53d21d813e79d3ef1e8e71465aa302448c",
+  "reviewed_head_sha": "e2639df98438394a5323221835d1e93b7a5a7dcf",
+  "reviewed_run_id": "r-20261013T022632874875-ssfms-fulltext-guard",
+  "reviewer_run_id": "r-20261013T023618153382-review-of-ssfms-fulltext-guard-e2639df98438",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T022632874875-ssfms-fulltext-guard/gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T022632874875-ssfms-fulltext-guard/negative-control.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T02:42:00.000000+00:00",
+  "total": 99
+}
