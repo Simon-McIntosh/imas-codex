@@ -1,0 +1,30 @@
+<!-- Landing record for the stratified JT-60SA reprocess sample.
+     The full record — commands, cost records, the grouped members'
+     before/after descriptions and the facility projection — is the sibling
+     fragment reprocess.html. Machine-readable sample and results:
+     reprocess-sample-ids.json. Logs: the run directory
+     ~/.config/reckon/crew/runs/r-20261013T113938701940-ssfms-reprocess-sample. -->
+<section id="ssfms-reprocess-sample-landing" data-reckon="evidence">
+  <h2 id="ssfms-reprocess-sample-landing-heading">A stratified 202-signal JT-60SA sample, reprocessed end to end</h2>
+
+  <p id="ssfms-reprocess-sample-landing-prose">
+    A 202-signal sample stratified by source category across all five JT-60SA
+    scanners was reset once to <code>discovered</code> and re-enriched through
+    the current pipeline, without a reset. All 202 signals came back at
+    <code>enriched</code> with a description, an embedding whose text hash
+    matches its own description, and a signal role — none left behind. The run's
+    own cost record reads $0.17 for 1106 signals reprocessed, so the facility's
+    15,111 signals project to $2.32 of Jev spend and about 1.7 hours on that
+    basis, or $12.72 and 9.4 hours taken over the sample signals alone. Total
+    spend for the node was $0.1709.
+  </p>
+
+  <p id="ssfms-reprocess-sample-landing-grouped">
+    The 17 grouped members in the sample — those whose source carries more than
+    one member — show the before and after side by side: a template that named
+    coil 01 sensor 01 for every member of a 144-member strain-gauge group became
+    a description naming that member's own channel, and the same for a
+    361-member daily-neutron-yield group. The evidence, the census and its
+    negative control are in <code>reprocess.html</code>.
+  </p>
+</section>
