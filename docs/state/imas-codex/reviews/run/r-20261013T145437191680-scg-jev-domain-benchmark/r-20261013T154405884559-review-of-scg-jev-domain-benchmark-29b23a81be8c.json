@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. The reviewed manifest records no baseline_suite/after_suite blocks. Its gate log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T145437191680-scg-jev-domain-benchmark/gate-head.log runs at revision 501203c640b038388bdaf3745d2ae1c0769335ef, states 'source identical to base e03908400', and ends '112 passed' EXIT=0 over tests/graph/test_dd_domain_classifier.py and tests/graph/test_dd_domain_classifier_jev.py. git diff --stat e03908400..29b23a81b changes no source or test path, so the base arm is the identical tree and the added failure count is 0.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/graph/test_dd_domain_classifier.py tests/graph/test_dd_domain_classifier_jev.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T145437191680-scg-jev-domain-benchmark/gate-head.log",
+    "revision": "501203c640b038388bdaf3745d2ae1c0769335ef"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/graph/test_dd_domain_classifier.py tests/graph/test_dd_domain_classifier_jev.py",
+    "completed": false,
+    "exit_status": null,
+    "failure_ids": [],
+    "log_path": null,
+    "revision": "e0390840075adec57a8e5ca2b2152769992b6b4c"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T16:08:35.593Z",
+  "dispatched_at": "2026-10-13T15:44:25Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T145437191680-scg-jev-domain-benchmark/manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "the done_when asks for the gate run at base and head by delta, but no base-arm log exists; the manifest asserts the base arm is the identical tree, which holds because no source or test path changes between e03908400 and 29b23a81b, yet a reader who looks for two logs finds one."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "VERDICT diff: three commits read commit by commit \u2014 501203c64 adds run.py and results.json, 1675c3fa1 adds the code-side SVG figure, 29b23a81b rewrites the fragment; every changed path is inside the declared scope and no source or test path changes.",
+    "done_when": "VERDICT done_when: the done_when names the results JSON and the fragment reporting verdict, accuracy, spend, confusion, disagreements and probability bands, one SVG figure, a no-paid-call reproduction with EXIT=, and the two test files run by delta; all four named artefacts are present at 29b23a81b and the reproduction is recorded in final-pass-a.log and final-pass-b.log, each EXIT=0 and byte-identical to the committed scg-jev-domain-benchmark-results.json.",
+    "goal": "VERDICT goal: the node goal is to measure the typed-Choice (Jev) domain classifier against the recorded chat classifier under a fixed adoption rule; the landed driver docs/evidence/fragments/sn-catalog-grouping/scg-jev-domain-benchmark-run.py exists to produce that measurement and the fragment scg-jev-domain-benchmark.html records it, and scg-jev-domain-benchmark-results.json carries verdict.adopt=false with accuracy 0.56 and spend 0.050595.",
+    "manifest": "VERDICT manifest: read; it reports status complete, verdict DO NOT ADOPT, 112 passed EXIT=0 on tests/graph/test_dd_domain_classifier.py plus tests/graph/test_dd_domain_classifier_jev.py, and names gate-head.log.",
+    "write_paths": "VERDICT write_paths: the declared scope is the fragment html, run.py, results json and the figure directory; git diff --stat e03908400..29b23a81b lists exactly those four paths and nothing else in the tree changes."
+  },
+  "justifications": {
+    "durability": "the node adds no source and no test, so no pytest test fails if the measurement regresses; the nearest guard is the driver's own positive controls and the byte-identical rescore in final-pass-b.log.",
+    "evidence": "the fragment scg-jev-domain-benchmark.html reconciles line by line with the record, and final-pass-a.log and final-pass-b.log both end EXIT=0 with sha256 20f13064647b59cd4a981967d0fb3fe4ce286c3117c87aa9c0c1b3a5af563f67 equal to the committed results file.",
+    "fit": "scg-jev-domain-benchmark-run.py follows the evidence-fragment idiom of the baseline it extends (scg-classifier-vocabulary-run.py) and introduces no plan or gate label in any symbol or comment.",
+    "goal_fidelity": "scg-jev-domain-benchmark-results.json carries verdict.adopt=false with accuracy 0.56 and spend 0.050595, the deliverable the goal names.",
+    "reuse": "the driver extends the sibling evidence driver scg-classifier-vocabulary-run.py (its SOURCE_QUERY is byte-identical) rather than forking a repository-owned capability; a search of imas_codex/ for a shared domain-benchmark harness found none.",
+    "scope_discipline": "git diff --stat e03908400..29b23a81b lists only the fragment, the driver, the results json and the figure, all four declared."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to measure the typed-Choice (Jev) domain classifier against the recorded chat classifier under a fixed adoption rule; the landed driver docs/evidence/fragments/sn-catalog-grouping/scg-jev-domain-benchmark-run.py exists to produce that measurement and the fragment scg-jev-domain-benchmark.html records it, and scg-jev-domain-benchmark-results.json carries verdict.adopt=false with accuracy 0.56 and spend 0.050595.\nVERDICT done_when: the done_when names the results JSON and the fragment reporting verdict, accuracy, spend, confusion, disagreements and probability bands, one SVG figure, a no-paid-call reproduction with EXIT=, and the two test files run by delta; all four named artefacts are present at 29b23a81b and the reproduction is recorded in final-pass-a.log and final-pass-b.log, each EXIT=0 and byte-identical to the committed scg-jev-domain-benchmark-results.json.\nVERDICT write_paths: the declared scope is the fragment html, run.py, results json and the figure directory; git diff --stat e03908400..29b23a81b lists exactly those four paths and nothing else in the tree changes.\nVERDICT manifest: read; it reports status complete, verdict DO NOT ADOPT, 112 passed EXIT=0 on tests/graph/test_dd_domain_classifier.py plus tests/graph/test_dd_domain_classifier_jev.py, and names gate-head.log.\nVERDICT diff: three commits read commit by commit \u2014 501203c64 adds run.py and results.json, 1675c3fa1 adds the code-side SVG figure, 29b23a81b rewrites the fragment; every changed path is inside the declared scope and no source or test path changes.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scg-jev-domain-benchmark-results.json carries verdict.adopt=false with accuracy 0.56 and spend 0.050595, the deliverable the goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: the fragment scg-jev-domain-benchmark.html reconciles line by line with the record, and final-pass-a.log and final-pass-b.log both end EXIT=0 with sha256 20f13064647b59cd4a981967d0fb3fe4ce286c3117c87aa9c0c1b3a5af563f67 equal to the committed results file.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat e03908400..29b23a81b lists only the fragment, the driver, the results json and the figure, all four declared.\nSCORE durability: 15\nJUSTIFICATION durability: the node adds no source and no test, so no pytest test fails if the measurement regresses; the nearest guard is the driver's own positive controls and the byte-identical rescore in final-pass-b.log.\nSCORE fit: 19\nJUSTIFICATION fit: scg-jev-domain-benchmark-run.py follows the evidence-fragment idiom of the baseline it extends (scg-classifier-vocabulary-run.py) and introduces no plan or gate label in any symbol or comment.\nSCORE reuse: 18\nJUSTIFICATION reuse: the driver extends the sibling evidence driver scg-classifier-vocabulary-run.py (its SOURCE_QUERY is byte-identical) rather than forking a repository-owned capability; a search of imas_codex/ for a shared domain-benchmark harness found none.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T145437191680-scg-jev-domain-benchmark/manifest.md:11 follow-on: the done_when asks for the gate run at base and head by delta, but no base-arm log exists; the manifest asserts the base arm is the identical tree, which holds because no source or test path changes between e03908400 and 29b23a81b, yet a reader who looks for two logs finds one.\n",
+  "review_run_id": "r-20261013T154405884559-review-of-scg-jev-domain-benchmark-29b23a81be8c",
+  "reviewed_base_sha": "e0390840075adec57a8e5ca2b2152769992b6b4c",
+  "reviewed_head_sha": "29b23a81be8cc0a9e009bc99e1d2cc182c02bef9",
+  "reviewed_run_id": "r-20261013T145437191680-scg-jev-domain-benchmark",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T15:58:00Z",
+  "total": 110,
+  "verdict": "SOUND WITH FINDINGS"
+}
