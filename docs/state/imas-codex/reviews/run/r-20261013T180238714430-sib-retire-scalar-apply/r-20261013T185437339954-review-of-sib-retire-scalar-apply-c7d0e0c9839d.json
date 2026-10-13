@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs. The reviewed manifest stores baseline_suite and after_suite as null and declares negative_control none, because the node changes no product code or test file: its gate is the live-graph operational sequence recorded in baseline-less logs (before-read.log, preview.log, apply.log, readback.log, replay.log), each ending EXIT=0 with no FAILED test lines. There is no pytest baseline or head arm to compare, so added_failure_count=0 with no added failure ids.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T19:12:58.338Z",
+  "dispatched_at": "2026-10-13T18:55:00Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html",
+      "line": 27,
+      "severity": "follow-on",
+      "text": "the fragment records a 21-name cohort but never states that plan section 16's census figure is 18 (and its done-when asks a dry run reporting 18 properties), so a reader of the durable fragment alone cannot see that the cohort grew by three or that this record supersedes the plan figure; the discrepancy is stated only in the run manifest's evidence_inputs, not in the artefact a later reader opens."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html",
+      "line": 64,
+      "severity": "follow-on",
+      "text": "the replay paragraph cites replay.log but does not mention that the plain dry run inside that log computes a different manifest digest (463d7ec0...) from the recording apply digest (9824d632...); the fragment explains only that a digest is a function of bytes and reason, so a reader comparing the two digest lines in replay.log meets an unexplained second hash."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read c7d0e0c98 against its base 4f898fef9; one file added, docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html, 74 lines, and nothing else.",
+    "done_when": "the done_when asks the fragment to record the before read, the preview, the apply with digest and receipt count, the readback of 0 properties and 21 relations, and the replay, each citing its log; the fragment cites before-read.log, preview.log, apply.log, readback.log and replay.log and records 21/0, digest 9824d632 with 21 receipts, 0 properties/21 relations, and already_applied.",
+    "goal": "the node goal is to apply the committed signed successor-property removal through apply_signed_manifest and record it; sib-retire-scalar-apply.html:14-70 records the before read, the unchanged preview, the apply with digest and receipt count, the readback and the replay exactly.",
+    "manifest": "read fully; status complete, commits c7d0e0c98, changed_paths match the diff, and tests record the five live-graph steps each ending EXIT=0 with baseline_suite and after_suite null because the node is docs-only.",
+    "write_paths": "the reviewed manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html and a figures dir; the diff's single file is the first, so every landed path is inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the diff adds no test and cannot: docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html is a record of an operational graph apply, so reverting it reddens nothing; the closest control is the idempotent replay (replay.log already_applied, changed 0), which is an operational log, not a repo test.",
+    "evidence": "the five logs under runs/r-20261013T180238714430-sib-retire-scalar-apply/ end EXIT=0 and record before 21/0, preview 21 admitted/0 refused at digest 9824d632, apply changed 21 receipt_rows 21, readback 0 properties/21 relations, replay already_applied; the digest is independently cross-verified against the retirement fragment sib-retire-successor-scalar.html:106.",
+    "fit": "the fragment repeats the sibling evidence-fragment idiom (meta reckon-type/plan-slug/node-id at sib-retire-scalar-apply.html:4-6 and id-anchored h1/h2 headings), matching sib-retire-successor-scalar.html:1-11, and introduces no forbidden name.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html:14-70 records the applied signed removal (before read, preview, apply receipt, readback, replay), which is the node goal's sole deliverable.",
+    "reuse": "the node adds no code: it applies the committed authority through the existing owner imas_codex/standard_names/signed_manifest.py (apply_signed_manifest) and writes a new evidence record; a search over the repository for an existing owner of 'signed-manifest apply record' found only that writer and the sibling fragment, so no capability is forked.",
+    "scope_discipline": "the commit c7d0e0c98 adds exactly one file, docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html, which is the first entry of the reviewed manifest's orientation_write_paths and carries nothing the goal does not imply."
+  },
+  "node": "review-of-sib-retire-scalar-apply-c7d0e0c9839d",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to apply the committed signed successor-property removal through apply_signed_manifest and record it; the landed fragment docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html:14-70 records the before read, unchanged preview, apply digest and receipt count, readback and replay.\nVERDICT done_when: the done_when asks the fragment to record the before read, preview, apply with digest and receipt count, readback of 0 properties and 21 relations, and replay, each citing its log; the fragment cites before-read.log, preview.log, apply.log, readback.log and replay.log with 21/0, digest 9824d632 and 21 receipts, 0/21, already_applied.\nVERDICT write_paths: the reviewed manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html; the diff's one file is that path, so every landed path is inside scope.\nVERDICT manifest: read fully; status complete, commits c7d0e0c98, changed_paths match the diff, tests record five live-graph steps each EXIT=0 with baseline_suite and after_suite null.\nVERDICT diff: read c7d0e0c98 against base 4f898fef9; one file added, docs/evidence/fragments/sn-integrity-backlog/sib-retire-scalar-apply.html, 74 lines, nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 10\nSCORE fit: 18\nSCORE reuse: 20\n",
+  "review_run_id": "r-20261013T185437339954-review-of-sib-retire-scalar-apply-c7d0e0c9839d",
+  "reviewed_base_sha": "4f898fef90dfbe9d706d50ad1285631d573bf06c",
+  "reviewed_head_sha": "c7d0e0c9839de711b67036ccda41a97487df4eab",
+  "reviewed_run_id": "r-20261013T180238714430-sib-retire-scalar-apply",
+  "reviewer_run_id": "r-20261013T185437339954-review-of-sib-retire-scalar-apply-c7d0e0c9839d",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185437339954-review-of-sib-retire-scalar-apply-c7d0e0c9839d/manifest.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180238714430-sib-retire-scalar-apply/before-read.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180238714430-sib-retire-scalar-apply/preview.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180238714430-sib-retire-scalar-apply/apply.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180238714430-sib-retire-scalar-apply/readback.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180238714430-sib-retire-scalar-apply/replay.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T19:10:19Z",
+  "total": 104
+}
