@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T00:17:09.471Z",
+  "dispatched_at": "2026-10-13T00:11:31Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-search-finds-the-measured-signal.html:209",
+      "id": "reasoning-1",
+      "reason": "a node sizing arms from \u00a74's stated 50, or \"fixing\" the doubling as a defect, would measure or change an unequal pool the plan says is equal.",
+      "text": "\u00a74 says signal search over-fetches \"100 vector and 50 full-text candidates before fusing\", but `_text_search_signals` issues its query with `LIMIT $limit` set to `k * 2` (imas_codex/llm/search_tools.py:707) and `_rank_signals` passes `SIGNAL_TEXT_POOL = 50`, so the full-text stream carries up to 100 rows, not 50; the harness at tests/llm/test_signal_search_goldens.py:57 has the same doubling, and the plan's own comment `c-20261013T0012-s4-fusion` already records \"the full-text pool is 100, not 50, in product and harness alike\". The section therefore states a pool size its own landed node contradicts, and its second (measurement) node inherits the wrong figure",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/signal-search-finds-the-measured-signal.html:123",
+      "id": "reasoning-2",
+      "reason": "the number grew as enrichment continued past cutover and neither figure is used as a threshold anywhere; it is a stale count, not a mechanism a node acts on.",
+      "text": "\u00a73 states the eligibility predicate \"holds today for 14,190 JT-60SA signals\", while the \u00a75 embed-text decision and the evidence fragment `embeddings.html` use 14,312 as the count the fixture's predicate admits, so the same population is given two sizes in the document",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "1ec222c3f7c96a0a22346c6ab63616648bcc42f193b1f1c249dbe87065358092",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 40,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T001118058133-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "b01546817eda736670a330aa7f1d9cb900445ec9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the \u00a74 code anchors resolve (_rank_signals at search_tools.py:243, _search_docs at :852, _search_code at :1591, _hybrid_ids at slot_context.py:59, imas_codex/search/fusion.py present), and the two extensionless plan hrefs resolve as <path>.html under the house convention.",
+    "done_when": "pass \u2014 each node names a measurable done-when carrying a control: the seeded-permutation control in \u00a73, the old-rule unit test in \u00a74, the current-writer test in \u00a75, the old-index query in \u00a76, the unfiltered query in \u00a78, and fusion-alone in \u00a77.",
+    "evidence_paths": "pass \u2014 landed sections write under docs/evidence/fragments/signal-search-finds-the-measured-signal/ (goldens.html, fusion.html, embeddings.html, descriptions.html all present); \u00a77's rerank.html is named for a section not yet landed.",
+    "naming": "pass \u2014 SSFMS_JEV_ARMS is gone from source, and the harness carries no plan, section or ticket label.",
+    "reasoning": "a finding \u2014 \u00a74's stated signal over-fetch (50 full-text) contradicts both the landed code and the plan's own comment on \u00a74, which record the full-text pool as 100.",
+    "single_goal": "pass \u2014 each node names one deliverable; \u00a77's second node is one product change (state builder, role-aware question and routing behind the switch).",
+    "wiring": "pass \u2014 the followup names the inter-section build order and gate g-ssfms-1 resolves to \u00a711, the section it gates."
+  },
+  "section_digests": {
+    "_document": "6696124ebd584b8301282dba9ed1faa4ea8816e65a64a881eaaa5dc88d764ffe",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "1533ed956bc1105d3a28eea6cace5d094f539bc91b4ff32e0ee2de78682938e9",
+    "s4": "188bb41592bd1c5edac35672b88404769cb673da2fddfa3191d068f0effabd67",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "62129c4513b7e17583d1210b2596dd537cdefdbbd8fddb81f175d1e6358fd0bf",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:19:02.525612+00:00"
+}
