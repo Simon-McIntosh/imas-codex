@@ -9636,6 +9636,106 @@ def _nearby_names_for_docs_gen(gc: Any, items: list[dict]) -> list[dict]:
     return nearby
 
 
+def _instantiated_documentation_opening(
+    name: str, templates: tuple[Any, ...]
+) -> str | None:
+    """Fill a selected opening only when its name segments supply every field."""
+    from imas_standard_names.grammar.parser import ParseError, parse
+    from imas_standard_names.grammar.vocab_loaders import load_subjects
+
+    from imas_codex.standard_names.docs_gates import _template_opening_pattern
+
+    try:
+        ir = parse(name, strict=True).ir
+    except ParseError:
+        return None
+    subject_tokens = [q.token for q in ir.qualifiers if q.token in load_subjects()]
+    fields: dict[str, str] = {}
+    if len(subject_tokens) == 1:
+        fields["subject"] = subject_tokens[0].replace("_", " ")
+    if ir.locus is not None:
+        fields["locus"] = (
+            f"{ir.locus.relation.value} {ir.locus.token.replace('_', ' ')}"
+        )
+    for template in templates:
+        opening = template.documentation.strip()
+        placeholders = set(_re.findall(r"\{([^{}]+)\}", opening))
+        if opening and placeholders <= fields.keys():
+            for placeholder in placeholders:
+                opening = opening.replace(f"{{{placeholder}}}", fields[placeholder])
+            pattern = _template_opening_pattern(template.documentation)
+            if (
+                not _re.search(r"\{[^{}]+\}", opening)
+                and pattern is not None
+                and pattern.fullmatch(opening)
+            ):
+                return opening
+    return None
+
+
+def _documentation_with_registry_form(
+    name: str, documentation: str, conventions: dict[str, Any] | None
+) -> str:
+    """Write the selected opening and canonical forms before persistence."""
+    from imas_standard_names.grammar.terms import AppliedConventions
+
+    from imas_codex.standard_names.docs_gates import (
+        _DISPLAY_MATH_RE,
+        HouseStyleFindingClass,
+        _is_canonical_equation,
+        _opening_line,
+        house_style_findings,
+    )
+
+    written = normalize_prose_spelling(documentation)
+    if not conventions:
+        return written
+    applied = AppliedConventions.model_validate(conventions)
+    opening = _instantiated_documentation_opening(name, applied.templates)
+    if opening is not None:
+        lines = written.splitlines()
+        model_opening = _opening_line(written)
+        first = next(
+            (i for i, line in enumerate(lines) if line.strip() == model_opening), None
+        )
+        if first is None:
+            written = opening
+        else:
+            lines[first] = opening
+            written = "\n".join(lines)
+
+    concepts = {f"concept:{concept.token}": concept for concept in applied.concepts}
+    for match in reversed(list(_DISPLAY_MATH_RE.finditer(written))):
+        findings = house_style_findings(applied, documentation=f"$${match.group(1)}$$")
+        concept = next(
+            (
+                concepts[finding.registry_entry]
+                for finding in findings
+                if finding.registry_entry in concepts
+                and finding.finding_class
+                in {
+                    HouseStyleFindingClass.NON_CANONICAL_EQUATION,
+                    HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT,
+                }
+            ),
+            None,
+        )
+        if concept is not None:
+            written = (
+                written[: match.start()]
+                + f"$${concept.equation}$$"
+                + written[match.end() :]
+            )
+
+    for concept in applied.concepts:
+        if concept.restates_equation and not any(
+            _is_canonical_equation(concept, match.group(1))
+            for match in _DISPLAY_MATH_RE.finditer(written)
+        ):
+            written = f"{written.rstrip()}\n\n$${concept.equation}$$"
+    return written
+
+
 async def process_generate_docs_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -9850,7 +9950,9 @@ async def process_generate_docs_batch(
                 sn_id=sn_id,
                 claim_token=claim_token,
                 description=normalize_description_text(result_obj.description),
-                documentation=normalize_prose_spelling(result_obj.documentation),
+                documentation=_documentation_with_registry_form(
+                    sn_id, result_obj.documentation, prompt_context["conventions"]
+                ),
                 model=model,
                 run_id=mgr.run_id,
             )
@@ -11054,7 +11156,9 @@ async def process_refine_docs_batch(
                 sn_id=sn_id,
                 claim_token=claim_token,
                 description=normalize_description_text(result_obj.description),
-                documentation=normalize_prose_spelling(result_obj.documentation),
+                documentation=_documentation_with_registry_form(
+                    sn_id, result_obj.documentation, prompt_context["conventions"]
+                ),
                 model=model,
                 current_description=item.get("description") or "",
                 current_documentation=item.get("documentation") or "",

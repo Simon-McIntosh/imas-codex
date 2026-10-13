@@ -1,0 +1,39 @@
+<section>
+  <h2 id="shc-docs-opening-insertion">Documentation writes use the selected opening and registry equation</h2>
+  <p id="shc-docs-opening-insertion-mechanism">
+    The generation and refinement writers call one formatter before persistence.
+    It uses <code>conventions_context_for</code> and <code>AppliedConventions</code>
+    for selected templates and concepts, <code>_template_opening_pattern</code>
+    and <code>_opening_line</code> for the opening, and
+    <code>_DISPLAY_MATH_RE</code>, <code>house_style_findings</code>, and
+    <code>_is_canonical_equation</code> from <code>docs_gates.py</code> for
+    display equations. It substitutes a parsed subject or locus only when every
+    template placeholder can be filled. The existing non-canonical and forbidden
+    equation findings identify displays to replace with the selected concept's
+    canonical equation. Concepts marked <code>restates_equation</code> gain their
+    canonical equation when none is present; optional concepts gain none.
+  </p>
+  <p id="shc-docs-opening-insertion-writes">
+    <code>process_generate_docs_batch</code> passes the formatted text to
+    <code>persist_generated_docs</code>;
+    <code>process_refine_docs_batch</code> passes it to
+    <code>persist_refined_docs</code>. Registry content was read unchanged.
+  </p>
+  <p id="shc-docs-opening-insertion-measure">
+    In <code>tests/standard_names/test_docs_opening_insertion.py</code>, model and
+    graph effects are stubbed. Without insertion at the committed head, the
+    generated opening assertion received “A model-written opening about argon.”
+    where it expected “Number density of argon”; that run recorded 6 failed,
+    5 passed, <code>EXIT=1</code>. Bypassing the missing-placeholder,
+    untemplated-name and optional-equation safeguards made the other 5 tests
+    fail, with 6 passing and <code>EXIT=1</code>. At the final source revision
+    all 11 tests pass,
+    including both write sites, required restatement, optional-equation rewrite,
+    unfillable placeholders, and untemplated names. The documentation-axis gate
+    changed from 4 failed, 672 passed and 3 setup errors at base to 4 failed,
+    683 passed and the same 3 setup errors at head. The seven failing/error
+    test ids are identical, so this node adds zero failures. The setup errors
+    are existing <code>git init</code> exit 97 failures in
+    <code>test_sn_approve.py</code>.
+  </p>
+</section>
