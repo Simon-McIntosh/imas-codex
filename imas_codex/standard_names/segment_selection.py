@@ -448,8 +448,12 @@ async def _search_slot(
     root reaches the same depth, ranking by the product is ranking by the
     geometric mean, and the reported score is that geometric mean.
 
-    A source that fails an expansion keeps the paths it already holds, so a
-    single failed call narrows the beam rather than discarding the slot.
+    A failed expansion contributes no child. A source that still holds a leaf
+    path keeps it; a source left with nothing but interior nodes narrows to an
+    empty beam and yields no path for the slot, which the caller records as the
+    failure it is. The walk therefore always terminates: no node is re-queued,
+    so a decisions owner that reports failure for every call costs one pass and
+    never re-asks the same Choice.
     """
     # frontier[i] = list of (node, probability product, route)
     frontier: list[list[tuple[_Node, float, tuple[str, ...]]]] = [
@@ -509,8 +513,12 @@ async def _search_slot(
         for index, paths in enumerate(frontier):
             kept = [path for path in paths if path[0].is_leaf]
             kept.extend(grown[index])
-            if not kept:
-                kept = list(paths)  # every expansion failed: hold what we had
+            # An interior node whose every expansion failed contributes no
+            # child, and a source with nothing but interior nodes then has no
+            # path left. Re-queuing those nodes would re-ask the same Choice on
+            # every pass without ever narrowing, so the beam narrows to empty:
+            # the source carries no selection for this slot, and the caller
+            # records the missing slot as the failure it is.
             kept.sort(key=lambda item: (-item[1], item[0].key))
             next_frontier.append(kept[:BEAM])
         frontier = next_frontier

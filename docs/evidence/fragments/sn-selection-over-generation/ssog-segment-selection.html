@@ -44,7 +44,11 @@
     locus registry by <code>type</code> (entity / position / region / geometry). The tree is
     built from structure the vocabulary carries; nothing here authors a taxonomy over an
     unpartitioned enum. A path is scored by the geometric mean of its per-level choice
-    probabilities, and a beam of three keeps the best paths at each level.
+    probabilities, and a beam of three keeps the best paths at each level. A failed
+    expansion — a call the decisions owner reports as an answer it could not produce —
+    contributes no child, so a source left with nothing but interior nodes narrows to an
+    empty beam and yields no path for that slot rather than re-asking the same Choice on
+    every pass; the walk always terminates and the missing slot is recorded as a failure.
   </p>
 
   <h3 id="ssog-segment-selection-smoke-heading">Live smoke — two DD sources</h3>

@@ -226,3 +226,45 @@ def test_beam_keeps_the_three_best_paths_by_geometric_mean(
     # geometry, the third path; without pruning the ranking changes.
     # The beam pruned geometry at level 1, so its tokens were never asked about.
     assert "geometry" not in asked_partitions
+
+
+def test_a_failed_expansion_narrows_the_beam_and_terminates(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Every call reported as a failure costs one pass, never a re-ask.
+
+    ``judgment.py`` reports a call that did not produce an answer as ``None``.
+    The walk must treat that as a node contributing no child: a source that has
+    no leaf yet then holds an empty beam, so it yields no path for the slot and
+    the caller records the missing slot as a failure. A walk that re-queued the
+    interior node would ask the same Choice again and again; the counter below
+    trips on that rather than letting the call hang.
+    """
+    calls = {"n": 0}
+
+    async def always_fails(states, questions, **kwargs):
+        calls["n"] += 1
+        if calls["n"] > 20:  # pragma: no cover - the defect's signature
+            raise AssertionError("the walk re-asked a Choice without narrowing")
+        return [None for _ in states], 0.0
+
+    monkeypatch.setattr(ss, "decide_batch", always_fails)
+
+    import asyncio
+
+    for slot in (ss.SLOT_PHYSICAL_BASE, ss.SLOT_LOCUS):
+        tree = ss.build_slot_tree(slot)
+        ranked = asyncio.run(
+            ss._search_slot(
+                tree,
+                [_source()],
+                model="test-model",
+                cost=None,
+                spent=[],
+                concurrency=1,
+                budget_seconds=None,
+            )
+        )
+        assert ranked[0] == [], f"{slot} kept a path after every expansion failed"
+    # One pass per interior level: the root of each slot, and nothing re-asked.
+    assert calls["n"] <= 4
