@@ -64,14 +64,10 @@ def _snapshot(rows: list[dict]) -> dict:
         "name_count": len(names),
         "path_count": len(paths),
         "name_domain_distribution": dict(
-            sorted(
-                Counter(v[0] for v in names.values()).items(), key=lambda x: str(x[0])
-            )
+            sorted(Counter(v[0] or "<none>" for v in names.values()).items())
         ),
         "path_domain_distribution": dict(
-            sorted(
-                Counter(v[0] for v in paths.values()).items(), key=lambda x: str(x[0])
-            )
+            sorted(Counter(v[0] or "<none>" for v in paths.values()).items())
         ),
         "domain_classified_at_max": max(
             (v[3] or "" for v in paths.values()), default=""
