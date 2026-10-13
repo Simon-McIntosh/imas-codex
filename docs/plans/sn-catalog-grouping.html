@@ -25,7 +25,7 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="58ad9b1a4e61408b2da7c9e8232bcb6bccb21c1f,38f0a7336ce3b86ab37ebf5cb353a00363c32274,5c666533b9b786ec14259e85d0a6eb42cae1125c,17f084e2d28d7145d9288c8a5a542d03a7519f4a,aea797386d61d8b3703afbad957f4ff707ea9fab">
 </head>
@@ -101,56 +101,81 @@
       replaces.
     </p>
 
-    <h2 id="s3">§3 — Domains assigned by the quantity</h2>
+    <h2 id="s3">§3 — Domains from the DD graph, derived one way, kept consistent</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Replace "the domain of the source" with an assignment made from the quantity. Two
-      mechanisms are built and measured, and the better one is adopted:
-    </p>
-    <ul>
-      <li><strong>A rule table</strong> keyed by physical base, geometric base and operator,
-        at <code>imas_codex/standard_names/domain_rules.yml</code> beside
-        <code>domain_priority.py</code>. It is transparent, but it must be authored for every
-        base.</li>
-      <li><strong>A Jev Choice</strong> over the ISN <code>PhysicsDomain</code> values, with
-        their descriptions as the options. It is asked over the name, its grammar segments,
-        unit and description, and needs no table. It must pass the deployment rule of
-        <code>sn-judgment-evaluation</code> §7.</li>
-    </ul>
-    <p>
-      The incumbent is the third arm in the comparison: the domain inherited from the source,
-      which a <code>gpt-5.5</code> classifier in
-      <code>imas_codex/graph/dd_domain_classifier.py</code> assigned to the DD path. Source IDS
-      only breaks a tie the winner leaves open. The domain is assigned in two places today. The
-      compose path in <code>imas_codex/standard_names/workers.py</code> injects the DD source
-      item's <code>physics_domain</code> as authoritative ("Inject physics_domain from DD"), and
-      <code>_resolve_physics_domains</code> in <code>imas_codex/standard_names/consolidation.py</code>
-      merges the values of a duplicate group into the primary. That resolver is reached only for
-      groups of two or more: a name composed once is appended to the approved list directly. The
-      one point every approved candidate passes is the loop in <code>consolidate_candidates</code>
-      that builds the approved list, singletons and merged groups alike. The adopted mechanism
-      sets the primary there, once per approved candidate, and
-      <code>_resolve_physics_domains</code> keeps only the merge of a group's
-      <code>source_domains</code>. The compose injection keeps the DD value only as the
-      <code>source_domains</code> provenance and the tie-breaker. If a compose path reaches persistence without passing
-      consolidation, it is routed through it rather than given a second consult site. The rule
-      table's loader lives in <code>imas_codex/standard_names/domain_priority.py</code>, which
-      already owns domain ranking and coercion, not in a new module.
-      Export's <code>pick_primary_domain</code> reads the stored value and is unchanged.
-      Repair the 207 null domains and the misfiled live names through the same rule,
-      writing through the ordinary graph-ops path with no hand Cypher.
+      <strong>Lead ruling, 2026-10-13.</strong> A standard name's physics domain comes from the
+      DD graph. No standard-name classifier is built, neither a Jev Choice nor a rule table: both
+      would duplicate the classification the DD graph already owns. The two prototype arms were
+      built and then retired unmerged (worktree heads <code>6a72a98fe</code> and
+      <code>198040e1e</code>). The work is to make the DD classification right, derive every name's
+      domain from it by one rule, and make the graph consistent.
     </p>
     <p>
-      <strong>Done when:</strong> zero names in the WEST roster carry a null domain. The
-      lead approves the domain for twenty named reference quantities, among them
-      <code>electron_temperature</code>, <code>electron_density</code>,
-      <code>safety_factor</code>, <code>plasma_current</code> and
-      <code>poloidal_magnetic_flux</code>. A further 150 names are coordinator-labelled and
-      split into calibration and validation halves. The rule table, the Jev Choice and the
-      incumbent each report accuracy and macro-F1 on the twenty and on the validation half, and
-      the adopted mechanism reproduces all twenty. A test composing a name through the workers
-      path shows the adopted domain, not the source's, and it fails with the lookup removed. The census of domains before and after is
-      recorded, and <code>core_plasma_physics</code> is no longer empty.
+      <strong>What the graph holds.</strong> Measured on 2026-10-13 over the 2,675 live names
+      (accepted, reviewed, drafted or pending):
+    </p>
+    <table>
+      <thead><tr><th>Check</th><th>Live names</th></tr></thead>
+      <tbody>
+        <tr><td>No <code>physics_domain</code></td><td>212</td></tr>
+        <tr><td>No <code>HAS_PHYSICS_DOMAIN</code> edge</td><td>984</td></tr>
+        <tr><td>More than one <code>HAS_PHYSICS_DOMAIN</code> edge</td><td>123</td></tr>
+        <tr><td>Edge names a different domain from the scalar</td><td>150</td></tr>
+        <tr><td>Domain is none of its DD sources' domains</td><td>560</td></tr>
+        <tr><td><code>source_domains</code> differs from its DD sources' domains</td><td>1,147</td></tr>
+      </tbody>
+    </table>
+    <p>
+      A name reaches its DD sources through
+      <code>StandardName &larr;PRODUCED_NAME&minus; StandardNameSource &minus;FROM_DD_PATH&rarr; IMASNode</code>;
+      2,198 live names have at least one. Every source node carries a domain, but the per-path
+      classification is degenerate. 61,337 of the 61,366 DD nodes carry exactly their IDS's
+      domain, and so do 12,030 of the 12,038 paths the classifier in
+      <code>imas_codex/graph/dd_domain_classifier.py</code> labelled with an LLM (gpt-5.4, last run
+      2026-07-22). Electron density in <code>core_profiles</code> therefore reads
+      <code>transport</code>, and every <code>summary</code> quantity reads <code>general</code>.
+      The names then drifted from even those values: most of the 560 carry a more specific domain
+      than a <code>general</code> summary source. Several rules write a name's domain today:
+      compose copies the source's, consolidation promotes by rank, a derived parent takes its
+      children's most frequent domain, and further sites in
+      <code>imas_codex/standard_names/graph_ops.py</code> coalesce or copy whatever value is to hand.
+    </p>
+    <p><strong>The design.</strong></p>
+    <ol>
+      <li><strong>One source of truth.</strong> <code>IMASNode.physics_domain</code>, written only
+        by the DD classifier (its three tiers and
+        <code>imas_codex/definitions/physics/path_domain_overrides.json</code>). Find why its
+        output echoes the IDS domain and fix the classifier, not its consumers. Measure it on the
+        DD sources of the 170 labelled names in
+        <code>docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet.json</code>
+        (the twenty the lead approved and the 150 the coordinator labelled) before and after the
+        fix. Then re-classify the DD paths that are standard-name sources, recording
+        <code>domain_source</code>.</li>
+      <li><strong>One derivation.</strong> A name's <code>source_domains</code> is exactly the set
+        of its current DD sources' domains, and its <code>physics_domain</code> is the one domain
+        a single function selects from that set. A name with no DD source, a derived parent,
+        takes its domain from its children by the same function. The function lives with the
+        domain owner (<code>domain_ranking.py</code> and <code>domain_priority.py</code>).
+        Compose, consolidation and every graph-ops writer call it; none computes its own. The
+        scalar and the <code>HAS_PHYSICS_DOMAIN</code> edge are written together, by one writer,
+        so they cannot disagree.</li>
+      <li><strong>A consistency audit</strong> in the standard-name audits. For every live name
+        it checks that the domain is set, equals the derivation's result, is mirrored by exactly
+        one <code>HAS_PHYSICS_DOMAIN</code> edge, and that <code>source_domains</code> equals its
+        sources' set. Its counts are the instrument for the repair.</li>
+      <li><strong>Repair through the derivation</strong>, as an ordinary graph-ops operation with
+        no hand Cypher. It runs after the DD re-classification, so the names inherit the
+        corrected domains.</li>
+    </ol>
+    <p>
+      <strong>Done when:</strong> the DD classifier, measured on the DD sources of the labelled
+      names, reproduces all twenty lead-approved domains and reports its accuracy on the 150.
+      The standard-name DD source paths are re-classified with <code>domain_source</code>
+      recorded. Every writer of a name's domain goes through the one derivation, shown by a test
+      that fails when a writer computes its own. The consistency audit reports zero on every check
+      over the live names, against the census above, and <code>core_plasma_physics</code> is no
+      longer empty. No standard-name-level domain classifier exists in the code.
     </p>
 
     <h2 id="s4">§4 — Near-duplicate spellings, adjudicated once</h2>
@@ -285,6 +310,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s3-domain-label-sheet-landed" data-who="reckon-build" data-when="2026-10-13T08:22:00Z">
     <div class="r-comment-body"><p>The blind domain label sheet landed (merge <code>c983077f6</code>, review 92/120): 20 reference names for the lead and 150 sampled names split by pattern family, with the incumbent domains in a separate file. The rule-table and Jev Choice arms are delivered and in review. §3 stays open for the labels, the three-arm measurement and the wiring. <a href="/imas-codex/evidence/archive/sn-catalog-grouping-landed.html#s3-domain-label-sheet">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s3-lead-ruling-dd-graph-domains" data-who="reckon-build" data-when="2026-10-13T08:45:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-10-13: a name's physics domain comes from the DD graph, and no standard-name domain classifier is built. The Jev Choice arm (<code>r-20261013T073449438517</code>, head <code>6a72a98fe</code>) and the rule-table arm (<code>r-20261013T073314747479</code>, head <code>198040e1e</code>) were discarded unmerged; their worktrees are kept as the only copies. The section is redesigned around the DD classifier as the single source, one derivation for every writer, a consistency audit and a repair. The graph census that motivates it is in the section. The coordinator's 150 labels and the lead's 20 approvals on the label sheet stay as the measurement of the DD classification.</p></div>
 </div>
 </section>
 </main>
