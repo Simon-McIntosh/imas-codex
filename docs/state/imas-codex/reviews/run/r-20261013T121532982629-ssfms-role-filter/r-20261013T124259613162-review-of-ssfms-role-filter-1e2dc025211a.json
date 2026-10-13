@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/llm/server.py:2413",
+    "imas_codex/ids/slot_context.py:195",
+    "imas_codex/llm/search_tools.py:1083"
+  ],
+  "completed_at": "2026-10-13T12:53:47.981Z",
+  "dispatched_at": "2026-10-13T12:43:14Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "844",
+      "severity": "follow-on",
+      "text": "follow-on: test_state_carries_the_stored_role_when_present asserts state[\"candidate\"][\"role\"] == \"measured\" against the same literal \"measured\" the test passed in at line 840, so the two sides move together and the assertion holds whatever role value _signal_rerank_state writes, provided it writes the input through; it guards the key's presence, not that the stored role is carried from the candidate rather than fabricated, and a nearby independent check (line 849, role absent when the signal carries none) is what gives the pair any discriminating power."
+    },
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "568",
+      "severity": "follow-on",
+      "text": "follow-on: in test_role_search_narrows_the_vector_and_fulltext_streams the loop assertion params[\"role\"] == \"measured\" (line 568) compares the bound parameter against the same role the test passed to _rank_signals, so it is not independent of the value under test; the companion assertion in the same loop that \"signal_role = $role\" appears in the query text is the independent half and the one that would redden on a dropped predicate, so this line adds little beyond a KeyError check."
+    },
+    {
+      "file": "tests/llm/test_signal_report_rows.py",
+      "line": "92",
+      "severity": "follow-on",
+      "text": "follow-on: test_row_shows_the_stored_role_when_present asserts \"Role: measured\" in report against the same role=\"measured\" it handed the fixture, so it round-trips the input rather than checking the formatter derives the role from the row's signal_role; the discriminating coverage is the sibling test at line 111, which supplies two distinct roles and asserts both appear, and that is where the regression guard actually rests."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "production reach: the search_signals MCP tool at imas_codex/llm/server.py:2413 declares role= and forwards it to _search_signals at :2462; imas_codex/ids/slot_context.py:195 calls _vector_search_signals positionally with the new role defaulting to None, and imas_codex/llm/search_tools.py:1083 calls _text_search_signals with the role defaulted off, both unaffected because role is keyword-defaulted; no test file counted.",
+    "diff": "read commit by commit over 6b4fcb5bb71717e304b87ff5f8d6cae97b64ad2e..1e2dc025211a84647099a9cf8647cb633fecc790; the single commit 1e2dc0252 changes six files \u2014 server.py, search_tools.py, domain_queries.py, the two llm test files and the new evidence fragment \u2014 adding role= to both query streams, the refusal, the rerank-state role and the covering tests, all inside the declared scope.",
+    "done_when": "the done-when names tests/llm/test_search_tools.py and tests/llm/test_signal_report_rows.py passing with the graph mocked; gate-head.log records 130 passed, 8 skipped, EXIT=0 at revision 6b4fcb5bb and negative-control.log records the declared mutation reddening the filter test at EXIT=1.",
+    "goal": "the goal is to let search_signals filter on a signal's stored role; imas_codex/llm/server.py:2413 adds role= to the tool, imas_codex/llm/search_tools.py:388 refuses an out-of-set role, and the predicate is carried into both query streams, so the goal is met.",
+    "manifest": "read; status complete, commit 1e2dc0252, gate 130 passed 8 skipped EXIT=0, negative_control_log negative-control.log, with the report-row item declared as pre-existing rendering that this node covered with tests rather than reimplemented.",
+    "write_paths": "the manifest declares eight write paths; git diff 6b4fcb5bb..1e2dc0252 changes six files (server.py, search_tools.py, domain_queries.py, tests/llm/test_search_tools.py, tests/llm/test_signal_report_rows.py, ssfms-role-filter.html), every one inside the fence, while the declared search_formatters.py needed no change."
+  },
+  "justifications": {
+    "durability": "the declared mutation \u2014 dropping the signal_role clause from signal_vector_search_block \u2014 reddens tests/llm/test_search_tools.py:550 (jt-60sa:ps/refip leaks into a role=measured result), so the filtered-search assertion is a genuine guard; the refusal and rerank-state assertions rest partly on literals the tests themselves pass in (lines 568, 844, 92), so the durability of the text-stream and rerank clauses is weaker than the vector clause the negative control covers.",
+    "evidence": "gate-head.log:1 names the revision and command and records 130 passed, 8 skipped, EXIT=0, and negative-control.log:30 shows tests/llm/test_search_tools.py:550 reddening under the declared mutation; no baseline or after suite arm is recorded (both null on the reviewed run), and the filter is exercised only against a mocked graph, a caveat the fragment states at ssfms-role-filter.html:66.",
+    "fit": "imas_codex/llm/search_tools.py:98 derives SIGNAL_ROLES from the SignalRole enum and :388 follows the module's early-return refusal idiom, and the added names signal_role, SIGNAL_ROLES and _signal_rerank_state carry no plan, version or ticket label.",
+    "goal_fidelity": "imas_codex/llm/search_tools.py:388 refuses a role outside SIGNAL_ROLES and the predicate reaches both the vector block (domain_queries.py:147) and the full-text branches (search_tools.py:825), so the filter is wired end to end; the report-row half of the deliverable is pre-existing rendering at search_formatters.py:186 that this node covered with tests rather than wrote.",
+    "reuse": "the predicate is added to the existing owner signal_vector_search_block at imas_codex/graph/domain_queries.py:147 and the text clause reuses the same $role binding, while :98 reuses the SignalRole enum at imas_codex/graph/models.py:2338 rather than re-listing the six roles, so no capability is forked.",
+    "scope_discipline": "git diff 6b4fcb5bb..1e2dc0252 lists imas_codex/llm/server.py, imas_codex/llm/search_tools.py, imas_codex/graph/domain_queries.py, tests/llm/test_search_tools.py, tests/llm/test_signal_report_rows.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-filter.html, each inside the manifest's eight declared write paths, with no change to the out-of-scope surfaces."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to let search_signals filter on a signal's stored role; imas_codex/llm/server.py:2413 adds role= to the tool, imas_codex/llm/search_tools.py:388 refuses an out-of-set role, and the predicate is carried into both query streams, so the goal is met.\nVERDICT done_when: the done-when names tests/llm/test_search_tools.py and tests/llm/test_signal_report_rows.py passing with the graph mocked; gate-head.log records 130 passed, 8 skipped, EXIT=0 at revision 6b4fcb5bb and negative-control.log records the declared mutation reddening the filter test at EXIT=1.\nVERDICT write_paths: the manifest declares eight write paths; git diff 6b4fcb5bb..1e2dc0252 changes six files (server.py, search_tools.py, domain_queries.py, tests/llm/test_search_tools.py, tests/llm/test_signal_report_rows.py, ssfms-role-filter.html), every one inside the done scope, while the declared search_formatters.py needed no change.\nVERDICT manifest: read; status complete, commit 1e2dc0252, gate 130 passed 8 skipped EXIT=0, negative_control_log negative-control.log, with the report-row item declared as pre-existing rendering that this node covered with tests rather than reimplemented.\nVERDICT diff: read commit by commit over 6b4fcb5bb71717e304b87ff5f8d6cae97b64ad2e..1e2dc025211a84647099a9cf8647cb633fecc790; the single commit 1e2dc0252 changes six files \u2014 server.py, search_tools.py, domain_queries.py, the two llm test files and the new evidence fragment \u2014 adding role= to both query streams, the refusal, the rerank-state role and the covering tests, all inside the declared scope.\nCALL_SITES: imas_codex/llm/server.py:2413, imas_codex/ids/slot_context.py:195, imas_codex/llm/search_tools.py:1083\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/llm/search_tools.py:388 refuses a role outside SIGNAL_ROLES and the predicate reaches both the vector block (domain_queries.py:147) and the full-text branches (search_tools.py:825), so the filter is wired end to end; the report-row half of the deliverable is pre-existing rendering at search_formatters.py:186 that this node covered with tests rather than wrote.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-head.log:1 names the revision and command and records 130 passed, 8 skipped, EXIT=0, and negative-control.log:30 shows tests/llm/test_search_tools.py:550 reddening under the declared mutation; no baseline or after suite arm is recorded (both null on the reviewed run), and the filter is exercised only against a mocked graph, a caveat the fragment states at ssfms-role-filter.html:66.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 6b4fcb5bb..1e2dc0252 lists imas_codex/llm/server.py, imas_codex/llm/search_tools.py, imas_codex/graph/domain_queries.py, tests/llm/test_search_tools.py, tests/llm/test_signal_report_rows.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-filter.html, each inside the manifest's eight declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: the declared mutation reddens tests/llm/test_search_tools.py:550 so the filtered-search assertion is a genuine guard; the refusal and rerank-state assertions rest partly on literals the tests themselves pass in (lines 568, 844, 92), so coverage of the text-stream and rerank clauses is weaker than the vector clause.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/llm/search_tools.py:98 derives SIGNAL_ROLES from the SignalRole enum and :388 follows the module's early-return refusal idiom, and the added names carry no plan, version or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the predicate is added to the existing owner signal_vector_search_block at imas_codex/graph/domain_queries.py:147 and the text clause reuses the same $role binding, while :98 reuses the SignalRole enum at imas_codex/graph/models.py:2338 rather than re-listing the six roles, so no capability is forked.\nFINDING tests/llm/test_search_tools.py:844 follow-on: test_state_carries_the_stored_role_when_present asserts state[\"candidate\"][\"role\"] == \"measured\" against the same literal it passed in at line 840, so the two sides move together and it guards presence, not that the stored role is carried from the candidate.\nFINDING tests/llm/test_search_tools.py:568 follow-on: params[\"role\"] == \"measured\" compares the bound parameter against the same role the test passed to _rank_signals; the independent half is the companion query-text assertion in the same loop.\nFINDING tests/llm/test_signal_report_rows.py:92 follow-on: \"Role: measured\" in report round-trips the role=\"measured\" the fixture was handed; the discriminating coverage is the sibling test at line 111 with two distinct roles.\n",
+  "review_run_id": "r-20261013T124259613162-review-of-ssfms-role-filter-1e2dc025211a",
+  "reviewed_base_sha": "6b4fcb5bb71717e304b87ff5f8d6cae97b64ad2e",
+  "reviewed_head_sha": "1e2dc025211a84647099a9cf8647cb633fecc790",
+  "reviewed_run_id": "r-20261013T121532982629-ssfms-role-filter",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T12:56:08.154640+00:00",
+  "total": 111
+}
