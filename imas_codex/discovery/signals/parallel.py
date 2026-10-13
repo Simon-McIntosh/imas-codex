@@ -1533,11 +1533,6 @@ _DESCRIPTION_WRITER_KEYS = frozenset(
 )
 
 
-def _default_embed_text(item: dict[str, Any]) -> str:
-    """Derive the text to embed for one item from its description."""
-    return item.get("description") or ""
-
-
 def write_signal_descriptions(
     items: list[dict[str, Any]],
     *,
@@ -1557,10 +1552,11 @@ def write_signal_descriptions(
     Because the vector is written with the text, a description rewrite can no
     longer leave a stale embedding behind.
 
-    ``embed_text`` derives the text to embed for one item. It defaults to the
-    item's ``description`` and is a parameter so the composition decision — the
-    description alone, or a composed ``name — description (unit)`` — is made in
-    one place and can change without editing a call site.
+    ``embed_text`` derives the text to embed for one item; it defaults to
+    :func:`signal_embed_text`, the single derivation the re-embed sweep and the
+    census also use. A caller overrides it only to embed a text other than the
+    signal's own, so the composition decision lives in one place and a change
+    to it moves the writer, the sweep and the census together.
 
     Any key on an item other than those the writer owns is written to the node
     as well, so a caller that also updates ``name`` or ``enrichment_source``
@@ -1590,7 +1586,7 @@ def write_signal_descriptions(
     if not items:
         return 0
 
-    derive = embed_text or _default_embed_text
+    derive = embed_text or signal_embed_text
     payload: list[dict[str, Any]] = []
     for item in items:
         props = dict(item)
@@ -1753,10 +1749,13 @@ _SIGNAL_EMBED_ROW_CHUNK = 2000
 def signal_embed_text(row: dict[str, Any]) -> str:
     """The text a signal's embedding encodes: its description alone.
 
-    Decision ``embed-text`` measured the description alone against a composed
-    name, description and unit on the golden harness and kept the description,
-    so this is the one place the choice is expressed for the sweep and census.
-    A signal with no description has an empty embed text.
+    This is the single derivation of a signal's embed text. The description
+    writer takes it as its default ``embed_text``, the re-embed sweep writes
+    through that writer, and the census's hash predicate recomputes it to
+    decide a stored vector is stale — so all three agree on what text a stored
+    vector should describe. A composed name/description/unit text scored lower
+    on the golden harness, so the description alone is what is kept here. A
+    signal with no description has an empty embed text.
     """
     return row.get("description") or ""
 
@@ -1852,7 +1851,9 @@ def reembed_stale_signal_descriptions(
         ]
         written = 0
         for chunk in _chunks(items, batch_size):
-            written += write_signal_descriptions(chunk, gc=client)
+            written += write_signal_descriptions(
+                chunk, gc=client, embed_text=signal_embed_text
+            )
         return {
             "population": len(rows),
             "mismatches": len(mismatches),
