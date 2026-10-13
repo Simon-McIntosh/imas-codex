@@ -1,0 +1,120 @@
+<!-- Labelling of the reciprocal-rank-fusion arm's top-60 pool on all 22 golden
+     questions, so either rerank arm can be scored over that pool whatever order
+     it chooses.
+     Check script: ~/.config/reckon/crew/runs/r-20261013T031644409930-ssfms-rerank-pool-labels/check_pool_labels.py
+     Logs (same run dir): rerank-pool-labels-check.log (post-label check, exit 0),
+     rerank-pool-labels-negative-control.log (check over a scratch copy with one
+     top-60 label removed, exit 1),
+     rerank-pool-labels-negative-control-harness.log (golden four-arm table over
+     the same mutated copy, exit 0 — it guards only the top-10),
+     rerank-pool-labels-default-tests.log (8 passed),
+     rerank-pool-labels-graph-tests.log (3 passed).
+     Fixture: tests/llm/fixtures/signal_search_questions.json, 464 labels added. -->
+<section id="ssfms-rerank-pool-labels" data-reckon="evidence">
+  <h2 id="ssfms-rerank-pool-labels-heading">Labelling the RRF top-60 pool on every golden question</h2>
+
+  <p id="ssfms-rerank-pool-labels-intro">
+    The golden harness scores four ranking arms over 22 graded questions. The
+    <code>rrf</code> arm fuses a 100-candidate vector pool with a 50-candidate
+    full-text pool, keeps the eligible candidates in that fused order, and hands
+    the first 60 to a rerank stage. A later rerank arm is scored on whatever
+    order it chooses over that pool, so every one of the 60 must carry a grade
+    0-3 before either arm can be scored, since a candidate with no label makes
+    the arm refuse rather than score. The harness's own gate inspects only an
+    arm's top-10, so the pool was previously unguarded past rank 10 — the
+    surface this node exists to close.
+  </p>
+
+  <p id="ssfms-rerank-pool-labels-scope">
+    The pool is recomputed live, not cached: vector search over the production
+    description embedding, full-text search over the same descriptions, both
+    fused by reciprocal rank fusion, filtered to the eligible population
+    (facility <code>jt-60sa</code>, enriched at or after the
+    <code>2026-10-11T21:08:54Z</code> cutover; 14,312 signals) and cut at 60.
+    Across the 22 questions that is 1,320 pool slots holding 464 candidates
+    that carried no label — 396 distinct signals, some appearing in more than
+    one question's pool.
+  </p>
+
+  <h3 id="ssfms-rerank-pool-labels-method-heading">How each grade was chosen</h3>
+  <p id="ssfms-rerank-pool-labels-method-prose">
+    Every candidate was read from its signal id, name, unit, source and
+    description against the question's declared intent, under the fixture's
+    grading rule: a grade-3 signal measures the queried quantity itself; a
+    grade-2 signal is a commanded, reference or setpoint value of it, or the
+    same quantity measured at an adjacent point; a grade-1 signal is related
+    hardware — a status flag, a configuration value, or a neighbouring
+    measurement on the same circuit; a grade-0 signal was read and judged
+    irrelevant. The rule is stated once in the fixture description and is what
+    the earlier pooled labels already used, so this node adds to one label set
+    rather than introducing a second convention.
+  </p>
+
+  <h3 id="ssfms-rerank-pool-labels-check-heading">The check, and its negative control</h3>
+  <p id="ssfms-rerank-pool-labels-check-prose">
+    <code>check_pool_labels.py</code> recomputes each question's RRF top-60 pool
+    live and asserts that every pool member carries a grade in the fixture's
+    <code>relevant</code> map. Run after the last label it exits 0, reporting 60
+    pool members and 0 unlabelled for all 22 questions. Its negative control
+    removes one label from a scratch copy of the fixture — a pool member at
+    index 45 of <code>plasma-current-total</code> that is in the RRF top-60 but
+    outside the harness's top-10 gate — and the check then exits 1, naming
+    <code>plasma-current-total::jt-60sa:general/psc_1625_a003</code>. The golden
+    harness's own four-arm table run over the same mutated copy passes, which is
+    the point: the gap this check closes is invisible to the top-10 guard.
+  </p>
+
+  <table id="ssfms-rerank-pool-labels-negative-control-table">
+    <caption>Negative control on a scratch copy of the fixture</caption>
+    <tr><th>step</th><th>result</th></tr>
+    <tr><td>check on the labelled fixture</td><td>exit 0 — 22 questions, 60 pool members each, 0 unlabelled</td></tr>
+    <tr><td>remove one top-60 label (<code>psc_1625_a003</code>, pool index 45)</td><td>check exit 1 — names <code>plasma-current-total::jt-60sa:general/psc_1625_a003</code></td></tr>
+    <tr><td>golden harness four-arm table over the same mutated copy</td><td>exit 0 — passed (guards top-10 only)</td></tr>
+  </table>
+
+  <h3 id="ssfms-rerank-pool-labels-grades-heading">What was added, per question</h3>
+  <p id="ssfms-rerank-pool-labels-grades-prose">
+    Added labels per question, split by grade. Two questions
+    (<code>soft-x-ray-emission</code>, <code>hydrogen-isotope-partial-pressure</code>)
+    had no unlabelled candidate in their pool: those pools were already fully
+    labelled before this node.
+  </p>
+  <table id="ssfms-rerank-pool-labels-grades-table">
+    <caption>Labels added by this node, per question and grade</caption>
+    <tr><th>question</th><th>added</th><th>grade 3</th><th>grade 2</th><th>grade 1</th><th>grade 0</th></tr>
+    <tr><td><code>plasma-current-total</code></td><td>31</td><td>0</td><td>5</td><td>16</td><td>10</td></tr>
+    <tr><td><code>plasma-stored-energy-magnetic</code></td><td>15</td><td>0</td><td>1</td><td>13</td><td>1</td></tr>
+    <tr><td><code>magnetic-fluctuation-toroidal-mode-one</code></td><td>35</td><td>0</td><td>8</td><td>4</td><td>23</td></tr>
+    <tr><td><code>soft-x-ray-emission</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td><code>divertor-tile-surface-temperature</code></td><td>8</td><td>3</td><td>1</td><td>0</td><td>4</td></tr>
+    <tr><td><code>first-wall-surface-temperature</code></td><td>25</td><td>2</td><td>12</td><td>0</td><td>11</td></tr>
+    <tr><td><code>vacuum-vessel-port-temperature</code></td><td>26</td><td>0</td><td>26</td><td>0</td><td>0</td></tr>
+    <tr><td><code>cryostat-vacuum-pressure</code></td><td>29</td><td>1</td><td>21</td><td>1</td><td>6</td></tr>
+    <tr><td><code>hydrogen-isotope-partial-pressure</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td><code>nitrogen-seeding-flow-into-vessel</code></td><td>34</td><td>0</td><td>2</td><td>7</td><td>25</td></tr>
+    <tr><td><code>deuterium-fuelling-flow-into-vessel</code></td><td>20</td><td>0</td><td>0</td><td>0</td><td>20</td></tr>
+    <tr><td><code>booster-power-supply-output-voltage</code></td><td>20</td><td>0</td><td>8</td><td>8</td><td>4</td></tr>
+    <tr><td><code>measured-voltage-across-the-superconducting-poloidal-field-coils</code></td><td>22</td><td>0</td><td>18</td><td>2</td><td>2</td></tr>
+    <tr><td><code>poloidal-field-coil-current-measurement</code></td><td>29</td><td>1</td><td>2</td><td>20</td><td>6</td></tr>
+    <tr><td><code>power-supply-dc-output-voltage-for-the-coil-converters</code></td><td>22</td><td>5</td><td>8</td><td>8</td><td>1</td></tr>
+    <tr><td><code>temperature-of-the-high-temperature-superconductor-current-leads</code></td><td>4</td><td>0</td><td>0</td><td>3</td><td>1</td></tr>
+    <tr><td><code>quench-detection-voltage-of-the-superconducting-coils</code></td><td>28</td><td>11</td><td>0</td><td>17</td><td>0</td></tr>
+    <tr><td><code>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</code></td><td>15</td><td>7</td><td>1</td><td>7</td><td>0</td></tr>
+    <tr><td><code>toroidal-field-coil-current</code></td><td>36</td><td>0</td><td>9</td><td>25</td><td>2</td></tr>
+    <tr><td><code>toroidal-field-coil-voltage</code></td><td>22</td><td>0</td><td>3</td><td>17</td><td>2</td></tr>
+    <tr><td><code>switching-network-unit-terminal-voltage</code></td><td>14</td><td>0</td><td>0</td><td>11</td><td>3</td></tr>
+    <tr><td><code>quench-protection-circuit-dump-resistor-voltage</code></td><td>29</td><td>0</td><td>18</td><td>9</td><td>2</td></tr>
+    <tr><td><strong>total</strong></td><td><strong>464</strong></td><td><strong>30</strong></td><td><strong>143</strong></td><td><strong>168</strong></td><td><strong>123</strong></td></tr>
+  </table>
+
+  <h3 id="ssfms-rerank-pool-labels-tests-heading">Tests run</h3>
+  <p id="ssfms-rerank-pool-labels-tests-prose">
+    The fixture's own harness was run over the labelled fixture: 8 non-graph
+    tests pass (<code>test_fixture_holds_draft_and_held_out_questions</code>,
+    <code>test_every_question_is_phrased_without_facility_or_source_vocabulary</code>,
+    the metric, control, refusal and filter tests) and 3 graph tests pass, among
+    them <code>test_every_labelled_signal_is_eligible</code> — which confirms
+    every added label lies inside the eligible population — and
+    <code>test_four_arm_table_matches_the_control_below_every_arm</code>.
+  </p>
+
