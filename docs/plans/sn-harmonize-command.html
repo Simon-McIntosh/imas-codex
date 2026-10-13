@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -341,6 +341,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261013T141738768278-shc-report-graph-links" data-who="reckon-build" data-when="2026-10-13T14:31:53.640Z">
+    <div class="r-comment-body"><p>shc-report-graph-links — run_link_integrity takes a known_ids set for the dead-link test and report_family_rows supplies the graph-wide StandardName id set, so an out-of-scope but valid link is no longer dead; gate 72 passed (68 base), zero added failures.</p></div>
 </div>
 </section>
 </main>
