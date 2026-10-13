@@ -19,7 +19,7 @@ import hashlib
 import json
 import logging
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -953,21 +953,37 @@ def tree_state(path: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _ranked_probabilities(answer: dict[str, Any] | None) -> list[tuple[str, float]]:
-    """One answer's probability distribution, highest first, ties by label."""
+def _answer_for(result: Any, question: str) -> Mapping[str, Any] | None:
+    """One state's answer to *question*, or ``None`` when the state went unscored.
+
+    ``decide_batch`` returns each state's answers keyed by question name, so the
+    mapping carrying ``choice`` and ``probabilities`` is reached through that
+    name rather than being the answers mapping itself.
+    """
+    if not result:
+        return None
+    answers = result[0]
+    if not isinstance(answers, Mapping):
+        return None
+    answer = answers.get(question)
+    return answer if isinstance(answer, Mapping) else None
+
+
+def _ranked_probabilities(answer: Mapping[str, Any] | None) -> list[tuple[str, float]]:
+    """One question's probability distribution, highest first, ties by label."""
     probabilities = (answer or {}).get("probabilities") or {}
     ranked = [(str(label), float(value)) for label, value in probabilities.items()]
     return sorted(ranked, key=lambda item: (-item[1], item[0]))
 
 
-def _beamed_categories(answer: dict[str, Any] | None) -> list[str]:
-    """The categories to ask the domain question in, given a first-level answer.
+def _beamed_categories(result: Any) -> list[str]:
+    """The categories to ask the domain question in, given a first-level result.
 
     The top category always, plus the runner-up when its probability lies within
     :data:`CATEGORY_BEAM_MARGIN` of the top — the second-level question is cheap
     relative to committing to a category the first level was unsure of.
     """
-    ranked = _ranked_probabilities(answer)
+    ranked = _ranked_probabilities(_answer_for(result, CATEGORY_QUESTION))
     if not ranked:
         return []
     chosen = [ranked[0][0]]
@@ -1049,8 +1065,7 @@ async def decide_domain_tree(
     # call carries only the domains that category actually contains.
     candidates: dict[str, list[int]] = {}
     for index, result in enumerate(first_level):
-        answer = result[0] if result else None
-        for category in _beamed_categories(answer):
+        for category in _beamed_categories(result):
             candidates.setdefault(category, []).append(index)
 
     best: list[dict[str, Any] | None] = [None] * len(paths)
@@ -1074,7 +1089,7 @@ async def decide_domain_tree(
         total_cost += domain_cost
 
         for index, result in zip(indices, results, strict=True):
-            answer = result[0] if result else None
+            answer = _answer_for(result, DOMAIN_QUESTION)
             if not answer:
                 continue
             domain = answer.get("choice")
@@ -1088,7 +1103,7 @@ async def decide_domain_tree(
             probabilities = answer.get("probabilities") or {}
             category_probability = 0.0
             for label, value in _ranked_probabilities(
-                first_level[index][0] if first_level[index] else None
+                _answer_for(first_level[index], CATEGORY_QUESTION)
             ):
                 if label == category:
                     category_probability = value

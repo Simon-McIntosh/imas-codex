@@ -114,7 +114,12 @@ class ScriptedDecisions:
                 )
                 results.append(
                     (
-                        {"choice": choice, "probabilities": probabilities},
+                        {
+                            CATEGORY_QUESTION: {
+                                "choice": choice,
+                                "probabilities": probabilities,
+                            }
+                        },
                         self.cost_per_state,
                     )
                 )
@@ -136,7 +141,12 @@ class ScriptedDecisions:
                 )
                 results.append(
                     (
-                        {"choice": choice, "probabilities": probabilities},
+                        {
+                            DOMAIN_QUESTION: {
+                                "choice": choice,
+                                "probabilities": probabilities,
+                            }
+                        },
                         self.cost_per_state,
                     )
                 )
@@ -637,4 +647,32 @@ async def test_classify_tier1_llm_reports_both_classifiers_costs() -> None:
 
     assert spent[0] == pytest.approx(0.01 + 0.02), (
         f"the run did not book the tree's cost and the chat call's: {spent}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_decision_is_read_from_under_its_question_name() -> None:
+    """An answer left at the top level is not read as a decision.
+
+    The endpoint returns each state's answers keyed by question name, so the
+    mapping carrying ``choice`` and ``probabilities`` is reached through that
+    name. A runner that returns those keys at the top level leaves every path
+    undecided, which is what routes it to chat, rather than deciding from a
+    level the contract does not put them at.
+    """
+    category = sorted(_category_options())[0]
+    domain = sorted(_domain_options(category))[0]
+
+    async def flat(states, questions, **kwargs):
+        choice = category if CATEGORY_QUESTION in questions else domain
+        return (
+            [({"choice": choice, "probabilities": {choice: 0.9}}, 0.005) for _ in states],
+            0.005 * len(states),
+        )
+
+    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=flat):
+        decisions, _cost = await decide_domain_tree([gathered()], model="tree-model")
+
+    assert decisions == [None], (
+        f"the tree read the answer from a level the contract does not use: {decisions}"
     )
