@@ -57,11 +57,12 @@ hierarchical-classification method the plan fixes.
 Rendering, and refusal
 ----------------------
 The chosen tokens build a :class:`StandardNameIR`, which
-:func:`imas_standard_names.grammar.render.compose` renders. The rendered name is
-then checked with :func:`imas_standard_names.grammar.parse` at ``strict=True`` —
-ISN's authoritative validity oracle. A name the grammar refuses is recorded as a
-failure for that source and never repaired: a repaired string would be a name
-the model did not choose.
+:func:`imas_codex.standard_names.grammar_adapter.compose_canonical_ir` renders and
+proves — it composes, canonicalises and requires the parse to preserve the
+semantic IR. That adapter is the one module that decides what the grammar
+accepts, so the refusal rule is stated once there rather than re-derived here. A
+name the grammar refuses is recorded as a failure for that source and never
+repaired: a repaired string would be a name the model did not choose.
 
 This module writes no graph state and nothing in the pipeline calls it yet.
 """
@@ -74,6 +75,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from imas_codex.discovery.base.judgment import decide_batch
+from imas_codex.standard_names.grammar_adapter import compose_canonical_ir
 from imas_codex.standard_names.segments import (
     OPERATOR_SEGMENT,
     grammar_tokens_by_segment,
@@ -656,12 +658,12 @@ def render_name(chosen: Mapping[str, str | None]) -> str:
 
     Two refusals are possible and both are the grammar's, not this module's:
     the IR cannot be built (a slot holds a token with no place in the IR), or
-    ISN's strict parser rejects the rendered name. Neither is repaired — the
-    caller records the failure for that source.
+    :func:`~imas_codex.standard_names.grammar_adapter.compose_canonical_ir`
+    refuses the IR it is handed. That adapter is the one place that composes an
+    IR and proves the rendered name canonical and IR-preserving, so this module
+    does not re-implement the compose-then-parse pair beside it. Neither refusal
+    is repaired — the caller records the failure for that source.
     """
-    from imas_standard_names.grammar import parse
-    from imas_standard_names.grammar.render import compose
-
     try:
         ir = _build_ir(chosen)
     except SegmentRefusal:
@@ -669,14 +671,9 @@ def render_name(chosen: Mapping[str, str | None]) -> str:
     except Exception as exc:  # noqa: BLE001 - a refusal is data
         raise SegmentRefusal(f"the IR refused the chosen tokens: {exc}") from exc
     try:
-        name = compose(ir)
+        return compose_canonical_ir(ir)
     except Exception as exc:  # noqa: BLE001 - a refusal is data
-        raise SegmentRefusal(f"compose refused the IR: {exc}") from exc
-    try:
-        parse(name, strict=True)
-    except Exception as exc:  # noqa: BLE001 - a refusal is data
-        raise SegmentRefusal(f"grammar refused {name!r}: {exc}") from exc
-    return name
+        raise SegmentRefusal(f"the grammar refused the IR: {exc}") from exc
 
 
 # ---------------------------------------------------------------------------
