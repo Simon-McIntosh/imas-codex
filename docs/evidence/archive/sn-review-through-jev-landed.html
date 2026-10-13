@@ -25,6 +25,11 @@
     <p><code>imas_codex/llm/prompts/sn/review_checks.yaml</code> holds 56 checks: 36 Noul, 4 Choice and 16 decided by an <code>AuditReport</code> finding class, 19 of them retrieval-flagged, over the name axis (grammar, semantic, convention, completeness) and the docs axis (description quality, documentation quality, completeness, physics accuracy). <code>imas_codex/standard_names/review/checks.py</code> loads and validates them; every check's evidence fields lie within the 65 review-state fields derived from <code>review/pipeline.py</code>, and a planted unknown field turns the test red. All 136 distinct human <code>StandardNameChange.reason</code> strings map to a check. Gate: 9 passed; negative control 1 failed. Merge <code>604c1b2d0</code>. Independent review 109/120. Follow-ons carried to the next node: the audit-class test asserts only what the loader already enforces, and <code>duplicate_component</code> is not a finding type any audit emits.</p><p>Worker record: <a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-check-taxonomy">srtj-check-taxonomy</a>.</p>
   </section>
 
+  <section id="s3-name-review-build">
+    <h2>§3 — the name review as one state builder and a taxonomy-read question table</h2>
+    <p><code>imas_codex/standard_names/review/jev_review.py</code> builds the name-axis Jev review. Nothing calls it yet. It has one state builder and one question table, both read from the §2 check taxonomy:</p><ul><li>each check is one Noul or Choice;</li><li>checks the audit already decides add findings and ask no question;</li><li>each dimension's decision is derived in code from its checks;</li><li>sibling reranking keeps the embedding order when the judgment fails.</li></ul><p>21 new tests pass, and the gate is 43 passed. The negative control fails 10 tests. A live smoke over two golden-A names cost USD 0.00014 (merge <code>91e755e4a</code>; review 105/120, sound with findings).</p><p>Three follow-ons go into the next node that edits the module:</p><ul><li>An audit-decided check is recorded as answered even when the audit never ran, which reads an absent check as a pass.</li><li>The comment claims that a Choice whose options the rule cannot split is refused at table construction, but nothing enforces it.</li><li>A comment cites a plan deliverable.</li></ul>
+  </section>
+
 </main>
 </body>
 </html>
