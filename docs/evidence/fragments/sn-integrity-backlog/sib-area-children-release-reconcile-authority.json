@@ -1,0 +1,204 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "flux-surface-area-structural-release",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-structural-child-release",
+    "link_participant_kind": "standard_name",
+    "operation": "release_structural_standard_name_children",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+    "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+    "surface_area_of_flux_surface"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": []
+        }
+      ],
+      "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "identity": {
+        "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "kind": "standard_name",
+        "target_id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "new_end_id": null,
+            "old_end_id": "area_of_flux_surface",
+            "properties": {
+              "operator": "derivative_with_respect_to_poloidal_magnetic_flux_coordinate",
+              "operator_kind": "unary_prefix"
+            },
+            "relationship_type": "HAS_PARENT",
+            "start_id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+          },
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate:release-parent-edge",
+          "kind": "recompute_projection",
+          "order": 0,
+          "participant_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1977768"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "area_of_flux_surface",
+          "kind": "node"
+        },
+        {
+          "graph_label": "HAS_PARENT",
+          "id": "5:64c142ee-5782-46f9-a287-8df126a67943:1977768",
+          "kind": "relationship"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": []
+        }
+      ],
+      "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+      "identity": {
+        "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "kind": "standard_name",
+        "target_id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "new_end_id": null,
+            "old_end_id": "area_of_flux_surface",
+            "properties": {
+              "operator": "derivative_with_respect_to_toroidal_flux_coordinate",
+              "operator_kind": "unary_prefix"
+            },
+            "relationship_type": "HAS_PARENT",
+            "start_id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+          },
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate:release-parent-edge",
+          "kind": "recompute_projection",
+          "order": 0,
+          "participant_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1721139"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "area_of_flux_surface",
+          "kind": "node"
+        },
+        {
+          "graph_label": "HAS_PARENT",
+          "id": "5:64c142ee-5782-46f9-a287-8df126a67943:1721139",
+          "kind": "relationship"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "surface_area_of_flux_surface:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": []
+        }
+      ],
+      "id": "surface_area_of_flux_surface",
+      "identity": {
+        "id": "surface_area_of_flux_surface",
+        "kind": "standard_name",
+        "target_id": "surface_area_of_flux_surface"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "new_end_id": null,
+            "old_end_id": "area_of_flux_surface",
+            "properties": {
+              "operator": "surface",
+              "operator_kind": "qualifier"
+            },
+            "relationship_type": "HAS_PARENT",
+            "start_id": "surface_area_of_flux_surface"
+          },
+          "id": "surface_area_of_flux_surface:release-parent-edge",
+          "kind": "recompute_projection",
+          "order": 0,
+          "participant_id": "5:64c142ee-5782-46f9-a287-8df126a67943:1788588"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "surface_area_of_flux_surface",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "area_of_flux_surface",
+          "kind": "node"
+        },
+        {
+          "graph_label": "HAS_PARENT",
+          "id": "5:64c142ee-5782-46f9-a287-8df126a67943:1788588",
+          "kind": "relationship"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "0071d20bd96c2e0227f1ca4e61928f5bbcd244732e28edd8113cdc0d8be4169e"
+  }
+}
