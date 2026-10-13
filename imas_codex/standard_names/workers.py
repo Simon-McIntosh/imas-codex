@@ -2048,7 +2048,15 @@ async def _reranked_nearby_comparators(
     through the lease already held. A pool that cannot fund even a floor lease
     runs the batch without a rerank, in the embedding order the block already
     has: nothing is charged for a call that was not made.
+
+    The switch is read before the lease is opened, so the off path books
+    nothing at all — no reservation, no charge — and a batch run without the
+    rerank touches the budget exactly as it did before the switch existed.
     """
+    from imas_codex.standard_names.context import comparator_rerank_enabled
+
+    if not comparator_rerank_enabled():
+        return nearby
     lease = mgr.reserve(_RERANK_LEASE_FLOOR_USD, phase=phase)
     if lease is None:
         logger.debug("comparator rerank skipped: no reservable lease")

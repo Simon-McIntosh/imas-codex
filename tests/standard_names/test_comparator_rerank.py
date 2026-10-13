@@ -245,6 +245,38 @@ async def test_a_rerank_without_a_lease_is_skipped_and_costs_nothing(
 
 
 @pytest.mark.asyncio
+async def test_the_off_switch_books_nothing_against_the_budget(monkeypatch) -> None:
+    """With the switch off the block is reranked by nobody and reserves nothing.
+
+    A batch run without the rerank must touch the budget exactly as it did
+    before the switch existed, so the off path never opens a lease.
+    """
+    monkeypatch.delenv(_SWITCH, raising=False)
+    seen = _stub_rerank(monkeypatch, ["third_name", "second_name", "first_name"])
+    events = _record_cost_events(monkeypatch)
+
+    mgr = BudgetManager(total_budget=1.0)
+    reservations: list[float] = []
+    real_reserve = mgr.reserve
+
+    def counting_reserve(amount, **kwargs):
+        reservations.append(amount)
+        return real_reserve(amount, **kwargs)
+
+    monkeypatch.setattr(mgr, "reserve", counting_reserve)
+    pool = list(_POOL)
+    ordered = await _reranked_nearby_comparators(
+        mgr, _ITEMS, pool, phase="generate_name"
+    )
+
+    assert ordered is pool
+    assert seen == [], "the switch off must make no judgement call"
+    assert events == [], "the switch off must book no charge"
+    assert reservations == [], "the switch off must open no lease"
+    assert mgr.spent == 0.0
+
+
+@pytest.mark.asyncio
 async def test_a_rerank_that_raises_leaves_the_embedding_order(monkeypatch) -> None:
     """A failing rerank is not a gate: the block keeps the embedding order."""
     monkeypatch.setenv(_SWITCH, "1")
