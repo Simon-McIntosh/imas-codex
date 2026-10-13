@@ -6101,16 +6101,27 @@ def sn_harmonize(
                 # The same guard the apply runs, over the same targets, so the
                 # dry run reports the refusals the apply would raise.
                 refusals = preview_recommended_refusals(gc, plans)
+                # Without --force a single refused family refuses the whole
+                # apply: refuse_recommended_members raises before the first
+                # batch, so no family runs. Report that whole-apply refusal
+                # rather than the per-family calls the apply would never place.
+                refusing = [
+                    plan
+                    for plan, held in zip(plans, refusals, strict=True)
+                    if held and plan["decision"] == "apply"
+                ]
+                whole_apply_refused = bool(refusing) and force_reason is None
                 total_calls = 0
                 for plan, held in zip(plans, refusals, strict=True):
                     decision = plan["decision"]
                     calls = plan["planned_calls"]
                     if held and decision == "apply":
                         if force_reason is None:
-                            decision = "refused"
-                            calls = 0
+                            decision, calls = "refused", 0
                         else:
                             decision = "forced"
+                    elif whole_apply_refused and decision == "apply":
+                        decision, calls = "apply (blocked by refusal)", 0
                     total_calls += calls
                     console.print(
                         f"family {plan['physical_base']}  "
@@ -6120,11 +6131,21 @@ def sn_harmonize(
                     )
                     for member, evidence in sorted(held.items()):
                         console.print(f"    {decision} {member} ({evidence})")
-                console.print(
-                    f"[green]Dry run[/green]: {len(plans)} family(ies), "
-                    f"{total_calls} planned call(s), estimated cost "
-                    f"${total_calls * ESTIMATED_DOC_CALL_COST_USD:.2f}. Wrote nothing."
-                )
+                if whole_apply_refused:
+                    names = ", ".join(sorted(p["physical_base"] for p in refusing))
+                    console.print(
+                        f"[red]Dry run[/red]: the apply is refused without "
+                        f"--force ({len(plans)} family(ies)); refusing "
+                        f"famil(ies): {names}. 0 planned call(s), estimated "
+                        f"cost $0.00. Wrote nothing."
+                    )
+                else:
+                    console.print(
+                        f"[green]Dry run[/green]: {len(plans)} family(ies), "
+                        f"{total_calls} planned call(s), estimated cost "
+                        f"${total_calls * ESTIMATED_DOC_CALL_COST_USD:.2f}. "
+                        f"Wrote nothing."
+                    )
                 return
 
             _harmonize_drain = _docs_drain_factory(quiet=False)

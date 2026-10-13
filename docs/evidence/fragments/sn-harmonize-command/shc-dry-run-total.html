@@ -1,0 +1,29 @@
+<section>
+  <h2 id="shc-dry-run-total">A dry run reports that one refusal stops the whole apply</h2>
+  <p id="shc-dry-run-total-scope">
+    <code>sn harmonize --apply --dry-run</code> over several families reported
+    <code>decision=apply</code> and totalled the calls of families it would
+    never reach: without <code>--force</code> the real apply raises
+    <code>RecommendedNameError</code> before the first batch, so no family
+    runs. The dry run now reports the whole-apply refusal — zero planned calls,
+    zero estimated cost, the refusing family named and every other
+    <code>apply</code> family printed <code>decision=apply (blocked by
+    refusal)</code>; with <code>--force</code> the per-family behaviour is
+    unchanged. Write paths: <code>imas_codex/cli/sn.py</code>,
+    <code>tests/standard_names/test_harmonize_apply.py</code>.
+  </p>
+  <h3 id="shc-dry-run-total-measure">Measure</h3>
+  <ul id="shc-dry-run-total-measure-list">
+    <li>Two-family fixture, one member at <code>name_stage=approved</code>:
+      without <code>--force</code> the summary reads <code>0 planned call(s),
+      estimated cost $0.00</code> and names the refusing family, the other
+      family reads <code>decision=apply (blocked by refusal)</code>, nothing is
+      written; with <code>--force</code> both families count (<code>4 planned
+      call(s)</code>).</li>
+    <li>Gate over the harmonize and protection suites: base 68 passed (0
+      failures) → head 70 passed (0 failures); 2 added tests, 0 added
+      failures.</li>
+    <li>Negative control: removing the whole-apply rule makes the two-family
+      test fail (EXIT=1).</li>
+  </ul>
+</section>
