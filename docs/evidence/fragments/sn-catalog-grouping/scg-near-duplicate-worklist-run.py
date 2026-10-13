@@ -78,7 +78,7 @@ async def run() -> None:
     model = get_model("sn-judge")
     if PROGRESS.exists():
         progress = json.loads(PROGRESS.read_text())
-        if progress["pairs"] != [(pair["left"], pair["right"]) for pair in all_pairs]:
+        if progress["pairs"] != [[pair["left"], pair["right"]] for pair in all_pairs]:
             raise RuntimeError(
                 "Live pair set changed since the last judgment checkpoint"
             )
