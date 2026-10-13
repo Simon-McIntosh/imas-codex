@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest carries baseline_suite (revision 57726eec9523e6e95579518f7c132571526914eb, exit_status 0, completed true, failure_count 0, failure_ids []) and after_suite (revision 3bfdaae700840dc34aa646ca5b3443da89d2a310, exit_status 0, completed true, failure_count 0, failure_ids []), so added_failure_ids = [] and added_failure_count = 0; both logs are readable (baseline_gate.log 68 passed, after_gate.log 70 passed).",
+  "backend": "local",
+  "base_log_revision": "57726eec9523e6e95579518f7c132571526914eb",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:5909 sn.command(\"harmonize\") -> sn_harmonize"
+  ],
+  "completed_at": "2026-10-13T01:07:08.863Z",
+  "dispatched_at": "2026-10-13T00:55:38Z",
+  "findings": [
+    {
+      "file": "docs/figures/sn-harmonize-command/shc-dry-run-total",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "the manifest's orientation_write_paths declares this figure directory but no file is present at the reviewed head (git ls-tree 3bfdaae shows only shc-command-surface/report-surface.svg), and the section done-when requires no figure, so it is an unused declared path rather than a missing deliverable."
+    }
+  ],
+  "head_log_revision": "3bfdaae700840dc34aa646ca5b3443da89d2a310",
+  "item_verdicts": {
+    "call_sites": "the CLI command registration imas_codex/cli/sn.py:5909 sn.command(\"harmonize\") is the only production path reaching the branch; no in-process caller of sn_harmonize exists.",
+    "diff": "read commit by commit; sn.py adds the whole_apply_refused branch and the refused summary, the test file adds the two-family fixture and the two tests, and the fragment records the measure; scope is exactly the goal.",
+    "done_when": "tests/standard_names/test_harmonize_apply.py adds test_dry_run_reports_the_apply_refused over the two-family fixture _TWO_FAMILIES asserting 0 planned calls, $0.00 cost, the blocked sibling and graph.writes()==[]/pipeline.revisions=={}, and test_dry_run_counts_both_families_under_force asserting 4 planned calls with --force; the manifest records base 68 passed / head 70 passed, 0 added failures, and a negative-control log at EXIT=1.",
+    "goal": "the goal is that a dry run reports the whole-apply refusal. imas_codex/cli/sn.py:6105 derives whole_apply_refused from preview_recommended_refusals and, at sn.py:6134, prints zero planned calls, zero cost and the refusing family names while every other apply family is labelled 'apply (blocked by refusal)'; this matches apply_families, which refuses the whole apply before the first batch (harmonize.py:976).",
+    "manifest": "read; status complete, one commit 3bfdaae7, negative_control_log logs/negative_control_whole_apply.log (1 failed EXIT=1), baseline_suite and after_suite both present with revision, exit_status 0 and completed true.",
+    "write_paths": "the manifest declares imas_codex/cli/sn.py, imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_apply.py and the fragment docs/evidence/fragments/sn-harmonize-command/shc-dry-run-total.html plus a figures dir; git diff 57726ee..3bfdaae touches exactly sn.py, the test file and the fragment, all inside the declared set."
+  },
+  "justifications": {
+    "durability": "removing the whole-apply rule reddens test_dry_run_reports_the_whole_apply_refused (1 failed, EXIT=1), and every added assertion reads CLI output or fixture write-records rather than a value the test itself passed in.",
+    "evidence": "the manifest's baseline_suite (57726ee, 68 passed, EXIT=0) and after_suite (3bfdaae7, 70 passed, EXIT=0) are recorded with revisions, and the negative-control log logs/negative_control_whole_apply.log ends 'EXIT=1' with test_dry_run_reports_the_whole_apply_refused the sole FAILED id.",
+    "fit": "the added names whole_apply_refused and 'blocked by refusal' state the mechanism with no plan or stage label, in the style of the surrounding dry-run branch at imas_codex/cli/sn.py:6103.",
+    "goal_fidelity": "imas_codex/cli/sn.py:6134 prints the refusing family names and '0 planned call(s) ... $0.00' without --force and leaves the per-family path unchanged with it, which is the whole-apply refusal harmonize.py:976 documents.",
+    "reuse": "the branch derives its boolean and per-family refusals from the existing preview_recommended_refusals owner (harmonize.py:842) rather than a second protection query; a search for an existing 'whole apply refused' helper found only the semantic comment at harmonize.py:976 and no owner to fork.",
+    "scope_discipline": "git diff --stat 57726ee..3bfdaae is 3 files (sn.py, test_harmonize_apply.py, the fragment), every one inside orientation_write_paths, with no dependency or unrelated-file change."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that a dry run reports the whole-apply refusal; imas_codex/cli/sn.py:6105 derives whole_apply_refused from preview_recommended_refusals and sn.py:6134 prints zero calls, zero cost and the refusing family name while the other apply family reads 'decision=apply (blocked by refusal)', and harmonize.py:976 confirms the real apply refuses before the first batch.\nVERDICT done_when: tests/standard_names/test_harmonize_apply.py adds test_dry_run_reports_the_whole_apply_refused (0 planned calls, $0.00, blocked sibling, graph.writes()==[], pipeline.revisions=={}) and test_dry_run_counts_both_families_under_force (4 planned calls); the manifest records base 68 passed / head 70 passed with 0 added failures and a negative control at EXIT=1.\nVERDICT write_paths: the manifest declares sn.py, harmonize.py, test_harmonize_apply.py, the fragment and a figures dir; git diff 57726ee..3bfdaae touches sn.py, test_harmonize_apply.py and the fragment, all inside the declared set.\nVERDICT manifest: read; status complete, one commit 3bfdaae7, negative_control_log logs/negative_control_whole_apply.log (1 failed EXIT=1), baseline_suite and after_suite both present with revision, exit_status and completed true.\nVERDICT diff: read commit by commit; sn.py adds the whole_apply_refused branch and the refused summary, the test file adds the two-family fixture and two tests, the fragment records the measure; nothing outside the goal.\nCALL_SITES: imas_codex/cli/sn.py:5909 sn.command(\"harmonize\") -> sn_harmonize\nreviewed_base_sha: 57726eec9523e6e95579518f7c132571526914eb\nreviewed_head_sha: 3bfdaae700840dc34aa646ca5b3443da89d2a310\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/cli/sn.py:6134 prints the refusing family names and '0 planned call(s) ... $0.00' without --force and leaves the per-family path unchanged with it, exactly the whole-apply refusal harmonize.py:976 documents.\nSCORE evidence: 19\nJUSTIFICATION evidence: the manifest's baseline_suite (57726ee, 68 passed, EXIT=0) and after_suite (3bfdaae7, 70 passed, EXIT=0) are recorded with revisions and the negative control ends EXIT=1 with the single FAILED id.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 57726ee..3bfdaae is 3 files, each inside orientation_write_paths, with no dependency or unrelated-file change.\nSCORE durability: 19\nJUSTIFICATION durability: removing the whole-apply rule reddens test_dry_run_reports_the_whole_apply_refused (1 failed, EXIT=1) and the added assertions read CLI output or fixture write-records, not a value the test itself passed in.\nSCORE fit: 18\nJUSTIFICATION fit: whole_apply_refused and 'blocked by refusal' state the mechanism with no plan or stage label, matching the dry-run branch style at imas_codex/cli/sn.py:6103.\nSCORE reuse: 19\nJUSTIFICATION reuse: the branch reuses preview_recommended_refusals (harmonize.py:842) rather than a second protection query, and a repo search found no existing whole-apply-refusal owner to fork.\nFINDING docs/figures/sn-harmonize-command/shc-dry-run-total:0 follow-on: the manifest declares this figure directory but no file is present at the reviewed head and the section done-when requires no figure, so it is an unused declared path rather than a missing deliverable.",
+  "review_run_id": "r-20261013T005526341879-review-of-shc-dry-run-total-3bfdaae70084",
+  "reviewed_base_sha": "57726eec9523e6e95579518f7c132571526914eb",
+  "reviewed_head_sha": "3bfdaae700840dc34aa646ca5b3443da89d2a310",
+  "reviewed_run_id": "r-20261013T003826602899-shc-dry-run-total",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:10:00+00:00",
+  "total": 114,
+  "verdict": "SOUND"
+}
