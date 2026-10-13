@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-restore-apply">
+<title>Signed restoration of reviewed Standard Names</title>
+</head>
+<body>
+<main>
+<h1 id="sib-restore-apply-title">Signed restore evidence</h1>
+<p id="sib-restore-apply-baseline">At revision <code>75a4bde76c7b0043b28d9b0794401a4fe2c3f1b0</code>, the four named restore test files passed 44 tests (EXIT=0; <code>restore-baseline.log</code>). Both signed authority file hashes matched the dispatch values. Before apply, exact-id reads found both targets absent and <code>etendue_of_soft_xray_detector</code> present with <code>origin=pipeline</code>. The requested <code>power_due_to_radiation</code> control was absent; a bounded prefix read also found no matching id, so the corrected etendue identity served as the live positive control. The queried graph URI was <code>bolt://98dci4-gpu-0002:7687</code>.</p>
+<p id="sib-restore-apply-negative-control">A single preview of the etendue authority, without <code>--apply</code>, refused the missing archived spectral counterpart and the differing live DD counterpart. The intentional correction to <code>etendue_of_soft_xray_detector</code> was left intact.</p>
+<h3 id="sib-restore-apply-etendue-negative-control">Etendue Negative Control</h3>
+<pre>refused: nodes 1 admitted 0 refused 2
+  refused etendue_of_spectrometer_channel: archived counterpart is neither live nor included: spectral_etendue_of_spectrometer_channel
+  refused etendue_of_spectrometer_channel: existing counterpart differs from signed reconstruction state
+manifest_sha256 34bb54be6096a1225bdc23ae14e70e46696ce7cca1f1b1d993a398747d97915f
+Usage: imas-codex sn restore apply [OPTIONS] AUTHORITY
+Try &#x27;imas-codex sn restore apply --help&#x27; for help.
+
+Error: the archive reconstruction withheld an identity it could not reinstate exactly
+
+EXIT=2
+</pre>
+<section id="sib-restore-apply-fusion">
+<h2 id="sib-restore-apply-fusion-title">power_due_to_fusion</h2>
+<p id="sib-restore-apply-fusion-authority">Authority SHA-256 <code>e5c525c97c8badb91621219864c782fa27a254f1390af96531235c13dbab0e2a</code>. Transactional preview: <code>would_apply</code>, admitted 1, refused 0. Preview digest: <code>942aae991aa6c4aa67528191a6eb74fd56d8b2912ab0f1d9d6e9bce587b9fc8d</code>. Apply with that digest: <code>applied</code>, admitted 1, refused 0. The preview emitted no parity lines; the applied receipt below enumerates every parity role.</p>
+<p id="sib-restore-apply-fusion-read">Bounded post-apply read: <code>{"id":"power_due_to_fusion","origin":"pipeline","sources":[{"id":"derived:power_due_to_fusion","produced_sn_id":"power_due_to_fusion"}],"reviews":8,"docs_revisions":2}</code>. The source has the <code>PRODUCED_NAME</code> edge to this identity.</p>
+<h3 id="sib-restore-apply-fusion-preview">Fusion Preview</h3>
+<pre>would_apply: nodes 1 admitted 1 refused 0
+manifest_sha256 942aae991aa6c4aa67528191a6eb74fd56d8b2912ab0f1d9d6e9bce587b9fc8d
+re-run with --apply --manifest-sha256 942aae991aa6c4aa67528191a6eb74fd56d8b2912ab0f1d9d6e9bce587b9fc8d to commit
+
+EXIT=0
+</pre>
+<h3 id="sib-restore-apply-fusion-apply-parity">Fusion Apply Parity</h3>
+<pre>applied: nodes 1 admitted 1 refused 0
+  parity power_due_to_fusion DOCS_REVISION_OF: expected 2 source archive_census observed 2
+  parity power_due_to_fusion ENTAILED_FROM_CHILD: expected unestablished source neither observed 0
+  parity power_due_to_fusion EVIDENCED_BY: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_AGGREGATION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_COCOS: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_COMPONENT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_COORDINATE: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_DEVICE: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_DOCS_REVIEW_ADMISSION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_ERROR: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_GEOMETRIC_BASE: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_INTERNAL_CHANGE: expected 1 source archive_census observed 1
+  parity power_due_to_fusion HAS_LOCUS: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_ORBIT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PARENT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PHYSICAL_BASE: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PHYSICS_DOMAIN: expected 1 source archive_census observed 1
+  parity power_due_to_fusion HAS_POPULATION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_POSITION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PREDECESSOR: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PROCESS: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_REGION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_REVIEW: expected 8 source archive_census observed 8
+  parity power_due_to_fusion HAS_SEGMENT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_STANDARD_NAME: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_STRUCTURAL_AUTHORITY: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_SUBJECT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_SUCCESSOR: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_TRANSFORMATION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_UNIT: expected 1 source archive_census observed 1
+  parity power_due_to_fusion IN_CLUSTER: expected unestablished source neither observed 0
+  parity power_due_to_fusion MAGNITUDE_OF: expected unestablished source neither observed 0
+  parity power_due_to_fusion PRODUCED_NAME: expected 1 source archive_census observed 1
+  parity power_due_to_fusion REFERENCES: expected unestablished source neither observed 0
+  parity power_due_to_fusion REFINED_FROM: expected unestablished source neither observed 0
+manifest_sha256 942aae991aa6c4aa67528191a6eb74fd56d8b2912ab0f1d9d6e9bce587b9fc8d
+
+EXIT=0
+</pre>
+</section>
+<section id="sib-restore-apply-plasma">
+<h2 id="sib-restore-apply-plasma-title">plasma_energy</h2>
+<p id="sib-restore-apply-plasma-authority">Authority SHA-256 <code>d1c94ceed47c5b20ec3fd090c4dc1b2dafcd3be09c5037dc40bf5e52e336ee13</code>. Transactional preview: <code>would_apply</code>, admitted 1, refused 0. Preview digest: <code>7578482b20780709578bad6cbc495ccf1355ef9c2aa81961905b69c35cd37b40</code>. Apply with that digest: <code>applied</code>, admitted 1, refused 0. The preview emitted no parity lines; the applied receipt below enumerates every parity role.</p>
+<p id="sib-restore-apply-plasma-read">Bounded post-apply read: <code>{"id":"plasma_energy","origin":"pipeline","sources":[{"id":"derived:plasma_energy","produced_sn_id":"plasma_energy"}],"reviews":16,"docs_revisions":3}</code>. The source has the <code>PRODUCED_NAME</code> edge to this identity.</p>
+<h3 id="sib-restore-apply-plasma-preview">Plasma Preview</h3>
+<pre>would_apply: nodes 1 admitted 1 refused 0
+manifest_sha256 7578482b20780709578bad6cbc495ccf1355ef9c2aa81961905b69c35cd37b40
+re-run with --apply --manifest-sha256 7578482b20780709578bad6cbc495ccf1355ef9c2aa81961905b69c35cd37b40 to commit
+
+EXIT=0
+</pre>
+<h3 id="sib-restore-apply-plasma-apply-parity">Plasma Apply Parity</h3>
+<pre>applied: nodes 1 admitted 1 refused 0
+  parity plasma_energy DOCS_REVISION_OF: expected 3 source archive_census observed 3
+  parity plasma_energy ENTAILED_FROM_CHILD: expected unestablished source neither observed 0
+  parity plasma_energy EVIDENCED_BY: expected unestablished source neither observed 0
+  parity plasma_energy HAS_AGGREGATION: expected unestablished source neither observed 0
+  parity plasma_energy HAS_COCOS: expected unestablished source neither observed 0
+  parity plasma_energy HAS_COMPONENT: expected unestablished source neither observed 0
+  parity plasma_energy HAS_COORDINATE: expected unestablished source neither observed 0
+  parity plasma_energy HAS_DEVICE: expected unestablished source neither observed 0
+  parity plasma_energy HAS_DOCS_REVIEW_ADMISSION: expected unestablished source neither observed 0
+  parity plasma_energy HAS_ERROR: expected unestablished source neither observed 0
+  parity plasma_energy HAS_GEOMETRIC_BASE: expected unestablished source neither observed 0
+  parity plasma_energy HAS_INTERNAL_CHANGE: expected 1 source archive_census observed 1
+  parity plasma_energy HAS_LOCUS: expected unestablished source neither observed 0
+  parity plasma_energy HAS_ORBIT: expected unestablished source neither observed 0
+  parity plasma_energy HAS_PARENT: expected 1 source archive_census observed 1
+  parity plasma_energy HAS_PHYSICAL_BASE: expected unestablished source neither observed 0
+  parity plasma_energy HAS_PHYSICS_DOMAIN: expected 1 source archive_census observed 1
+  parity plasma_energy HAS_POPULATION: expected unestablished source neither observed 0
+  parity plasma_energy HAS_POSITION: expected unestablished source neither observed 0
+  parity plasma_energy HAS_PREDECESSOR: expected unestablished source neither observed 0
+  parity plasma_energy HAS_PROCESS: expected unestablished source neither observed 0
+  parity plasma_energy HAS_REGION: expected unestablished source neither observed 0
+  parity plasma_energy HAS_REVIEW: expected 16 source archive_census observed 16
+  parity plasma_energy HAS_SEGMENT: expected unestablished source neither observed 0
+  parity plasma_energy HAS_STANDARD_NAME: expected unestablished source neither observed 0
+  parity plasma_energy HAS_STRUCTURAL_AUTHORITY: expected 1 source archive_census observed 1
+  parity plasma_energy HAS_SUBJECT: expected unestablished source neither observed 0
+  parity plasma_energy HAS_SUCCESSOR: expected unestablished source neither observed 0
+  parity plasma_energy HAS_TRANSFORMATION: expected unestablished source neither observed 0
+  parity plasma_energy HAS_UNIT: expected 1 source archive_census observed 1
+  parity plasma_energy IN_CLUSTER: expected unestablished source neither observed 0
+  parity plasma_energy MAGNITUDE_OF: expected unestablished source neither observed 0
+  parity plasma_energy PRODUCED_NAME: expected 1 source archive_census observed 1
+  parity plasma_energy REFERENCES: expected unestablished source neither observed 0
+  parity plasma_energy REFINED_FROM: expected unestablished source neither observed 0
+manifest_sha256 7578482b20780709578bad6cbc495ccf1355ef9c2aa81961905b69c35cd37b40
+
+EXIT=0
+</pre>
+</section>
+<section id="sib-restore-apply-verification">
+<h2 id="sib-restore-apply-verification-title">Graph verification</h2>
+<p id="sib-restore-apply-orphan-result">The read-only <code>find_provenance_orphans</code> returned 21 rows, none of them <code>power_due_to_fusion</code> or <code>plasma_energy</code>. The full reader output and exact-id post-apply row set follow. The corrected etendue identity remains live with its DD source.</p>
+<h3 id="sib-restore-apply-graph-postapply">Graph Postapply</h3>
+<pre>revision=e7b90fe761563733f01b5c04296fb69c2bc78da5 tree=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-restore-apply command=exact-id post-apply provenance read and find_provenance_orphans
+POST_APPLY [{&quot;docs_revisions&quot;: 0, &quot;id&quot;: &quot;etendue_of_soft_xray_detector&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;reviews&quot;: 5, &quot;sources&quot;: [{&quot;id&quot;: &quot;dd:soft_x_rays/channel/etendue&quot;, &quot;produced_sn_id&quot;: &quot;etendue_of_soft_xray_detector&quot;}]}, {&quot;docs_revisions&quot;: 3, &quot;id&quot;: &quot;plasma_energy&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;reviews&quot;: 16, &quot;sources&quot;: [{&quot;id&quot;: &quot;derived:plasma_energy&quot;, &quot;produced_sn_id&quot;: &quot;plasma_energy&quot;}]}, {&quot;docs_revisions&quot;: 2, &quot;id&quot;: &quot;power_due_to_fusion&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;reviews&quot;: 8, &quot;sources&quot;: [{&quot;id&quot;: &quot;derived:power_due_to_fusion&quot;, &quot;produced_sn_id&quot;: &quot;power_due_to_fusion&quot;}]}]
+ORPHANS [{&quot;name_stage&quot;: &quot;accepted&quot;, &quot;origin&quot;: &quot;derived&quot;, &quot;sn_id&quot;: &quot;beta&quot;}, {&quot;name_stage&quot;: &quot;reviewed&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface&quot;}, {&quot;name_stage&quot;: &quot;accepted&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;coolant_absorbed_energy_accumulated_of_plasma_facing_component&quot;}, {&quot;name_stage&quot;: &quot;reviewed&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;count_normalized_at_detector_pixel&quot;}, {&quot;name_stage&quot;: &quot;reviewed&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;curvature_inverse_of_arc_of_circle_center&quot;}, {&quot;name_stage&quot;: &quot;accepted&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;equilibrium_weight_of_interferometer_beam&quot;}, {&quot;name_stage&quot;: &quot;accepted&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;flux_surface_averaged_parallel_electric_field_at_separatrix&quot;}, {&quot;name_stage&quot;: &quot;accepted&quot;, &quot;origin&quot;: &quot;derived&quot;, &quot;sn_id&quot;: &quot;ion_pressure&quot;}, {&quot;name_stage&quot;: &quot;pending&quot;, &quot;origin&quot;: null, &quot;sn_id&quot;: &quot;line_averaged_neon_density&quot;}, {&quot;name_stage&quot;: &quot;accepted&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;neutron_flux_due_to_fusion&quot;}, {&quot;name_stage&quot;: &quot;accepted&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive&quot;}, {&quot;name_stage&quot;: &quot;pending&quot;, &quot;origin&quot;: null, &quot;sn_id&quot;: &quot;poloidal_ion_state_momentum_diffusion_coefficient&quot;}, {&quot;name_stage&quot;: &quot;pending&quot;, &quot;origin&quot;: null, &quot;sn_id&quot;: &quot;radial_coordinate_of_reflector&quot;}, {&quot;name_stage&quot;: &quot;pending&quot;, &quot;origin&quot;: null, &quot;sn_id&quot;: &quot;radius_of_soft_xray_detector&quot;}, {&quot;name_stage&quot;: &quot;pending&quot;, &quot;origin&quot;: null, &quot;sn_id&quot;: &quot;ratio_of_diamagnetic_vorticity_to_major_radius&quot;}, {&quot;name_stage&quot;: &quot;accepted&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;root_mean_square_spectral_width_of_spectrometer_channel&quot;}, {&quot;name_stage&quot;: &quot;pending&quot;, &quot;origin&quot;: null, &quot;sn_id&quot;: &quot;toroidal_coordinate_of_spectrometer&quot;}, {&quot;name_stage&quot;: &quot;pending&quot;, &quot;origin&quot;: null, &quot;sn_id&quot;: &quot;toroidal_tritium_velocity&quot;}, {&quot;name_stage&quot;: &quot;accepted&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;toroidal_wave_vector_normalized_of_beam_tracing_beam&quot;}, {&quot;name_stage&quot;: &quot;pending&quot;, &quot;origin&quot;: null, &quot;sn_id&quot;: &quot;vertical_coordinate_of_reflector&quot;}, {&quot;name_stage&quot;: &quot;drafted&quot;, &quot;origin&quot;: &quot;pipeline&quot;, &quot;sn_id&quot;: &quot;volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions&quot;}]
+TARGET_ORPHANS []
+EXIT=0
+</pre>
+</section>
+</main>
+</body>
+</html>
