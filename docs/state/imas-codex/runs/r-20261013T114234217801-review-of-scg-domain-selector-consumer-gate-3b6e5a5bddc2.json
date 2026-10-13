@@ -293,6 +293,43 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "9ee830b35c3ab422be7cb8f2dd0e3ed7d5778b2e",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 19424,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261013T114234217801-review-of-scg-domain-selector-consumer-gate-3b6e5a5bddc2",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 19424,
+        "path": "/tmp/reckon-crew-scratch/r-20261013T114234217801-review-of-scg-domain-selector-consumer-gate-3b6e5a5bddc2"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-scg-domain-selector-consumer-gate-3b6e5a5bddc2",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
