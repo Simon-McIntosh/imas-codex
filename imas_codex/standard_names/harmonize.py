@@ -28,6 +28,7 @@ from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 from imas_codex.standard_names.families import (
     DOCS_STAGE_ACCEPTED,
     _pattern_family_rows_query as _pattern_family_rows_query,
+    existing_name_ids,
     fetch_pattern_families,
     fetch_pattern_family,
     select_anchor,
@@ -522,15 +523,16 @@ def _domain_scoped_finding(name_id: str) -> str | None:
 
 #: Dead-link resolution reads the whole catalog, not the scope under report:
 #: a target is dead only when no ``StandardName`` anywhere carries it. The
-#: report's scope stays the scope of what is reported. Bounded, because the
-#: read names its row set (every live name id).
-_NAME_IDS_QUERY = "MATCH (sn:StandardName) RETURN sn.id AS id LIMIT 200000"
-
-
-def _known_name_ids(gc: Any) -> set[str]:
+#: read is owned by ``graph_ops.get_existing_standard_names``; a caller holding
+#: an open client reads through it, and with no client the owner opens its own.
+#: Bounded either way, because the read names its row set (every name id).
+def known_name_ids(gc: Any | None) -> set[str]:
     """Every ``StandardName`` id the graph holds, for dead-link resolution."""
-    rows = gc.query(_NAME_IDS_QUERY) or []
-    return {row["id"] for row in rows if row.get("id")}
+    if gc is not None:
+        return existing_name_ids(gc)
+    from imas_codex.standard_names.graph_ops import get_existing_standard_names
+
+    return get_existing_standard_names()
 
 
 def report_family_rows(
@@ -570,7 +572,7 @@ def report_family_rows(
     # A link target is dead only when the graph holds no such name. The scoped
     # members alone are the report's subject, not the test for deadness: many
     # valid references point outside a family.
-    known_ids = _known_name_ids(gc) if gc is not None else None
+    known_ids = known_name_ids(gc)
 
     by_name: dict[str, dict[str, int]] = {}
     # (domain, class) → count, one entry per domain-scoped finding.
@@ -759,20 +761,68 @@ def stamp_harmonized(
 #: call is placed.
 ESTIMATED_DOC_CALL_COST_USD = 0.05
 
+#: The member property a started apply stamps with the anchor it chose. It
+#: rides the family's own run state — the same member nodes carry ``run_id``
+#: and ``harmonized_group_signature`` — so a replan interrupted mid-run reuses
+#: the recorded anchor instead of re-ranking a reset member's null score.
+_FAMILY_ANCHOR_PROPERTY = "harmonized_anchor"
+
+
+def pinned_family_anchor(
+    members: list[dict[str, Any]], *, force: bool = False
+) -> str | None:
+    """The anchor a prior apply recorded for this family, or ``None``.
+
+    One ``harmonized_anchor`` shared by the members is the family's recorded
+    choice. A family whose members disagree, or carry none, has no pin and
+    selects normally — as does every family under *force*, which starts a
+    fresh choice.
+    """
+    if force:
+        return None
+    recorded = {
+        m.get(_FAMILY_ANCHOR_PROPERTY)
+        for m in members
+        if m.get(_FAMILY_ANCHOR_PROPERTY)
+    }
+    return next(iter(recorded)) if len(recorded) == 1 else None
+
+
+def _record_family_anchor(gc: Any, member_ids: list[str], anchor_id: str) -> None:
+    """Stamp the chosen anchor on the family's members as an apply starts."""
+    gc.query(
+        f"UNWIND $ids AS sid MATCH (sn:StandardName {{id: sid}}) "
+        f"SET sn.{_FAMILY_ANCHOR_PROPERTY} = $anchor",
+        ids=list(member_ids),
+        anchor=anchor_id,
+    )
+
+
+def _clear_family_anchor(gc: Any, member_ids: list[str]) -> None:
+    """Release the pinned anchor once the family is stamped harmonized."""
+    gc.query(
+        f"UNWIND $ids AS sid MATCH (sn:StandardName {{id: sid}}) "
+        f"REMOVE sn.{_FAMILY_ANCHOR_PROPERTY}",
+        ids=list(member_ids),
+    )
+
 
 def plan_family_applies(
     gc: Any | None = None,
     *,
     seeds: list[str] | None = None,
     min_size: int = 1,
+    force: bool = False,
 ) -> list[dict[str, Any]]:
     """Read-only plan of the anchor-gated applies over the families in scope.
 
-    One plan per pattern family: its anchor (``select_anchor``), its members,
-    and the batch sequence an apply would run — the anchor alone, then the
-    other members. A family whose members already carry the current
-    ``harmonized_group_signature`` is ``harmonized`` and plans no batch; a
-    family with no selectable anchor is ``deferred``. Writes nothing.
+    One plan per pattern family: its anchor, its members, and the batch
+    sequence an apply would run — the anchor alone, then the other members.
+    The anchor is the family's recorded choice when an earlier apply started
+    one and the family is not yet stamped harmonized; otherwise it is
+    ``select_anchor``'s live ranking. A family whose members already carry the
+    current ``harmonized_group_signature`` is ``harmonized`` and plans no
+    batch; a family with no selectable anchor is ``deferred``. Writes nothing.
     """
     from imas_codex.standard_names.campaign import anchor_gated_batches
 
@@ -793,6 +843,14 @@ def plan_family_applies(
             if m.get("harmonized_group_signature") is not None
         }
         anchor = select_anchor(None, None, None, members)
+        # A family not yet stamped harmonized reuses the anchor its run
+        # recorded, even after that member's reset left it mid-pipeline and
+        # another accepted member outscores it. A stamped family, or a forced
+        # apply, selects normally.
+        if not (member_ids and stored == {signature}):
+            pinned = pinned_family_anchor(members, force=force)
+            if pinned is not None and pinned in member_ids:
+                anchor = pinned
         if member_ids and stored == {signature}:
             decision, batches = "harmonized", []
         elif anchor is None:
@@ -894,7 +952,7 @@ def _stamp_applied_family(gc: Any, anchor_id: str) -> bool:
     member_ids = sorted(m.get("id") for m in members if m.get("id"))
     if not member_ids:
         return False
-    return bool(
+    stamped = bool(
         stamp_harmonized_families(
             [
                 {
@@ -905,6 +963,11 @@ def _stamp_applied_family(gc: Any, anchor_id: str) -> bool:
             ]
         )
     )
+    # The family is now harmonized, so the anchor that carried its run has done
+    # its work: release it and let the next apply select normally.
+    if stamped:
+        _clear_family_anchor(gc, member_ids)
+    return stamped
 
 
 def apply_guard_targets(plans: list[dict[str, Any]]) -> list[str]:
@@ -1052,7 +1115,12 @@ def apply_families(
     plans = (
         plan
         if plan is not None
-        else plan_family_applies(resolved_gc, seeds=seeds, min_size=min_size)
+        else plan_family_applies(
+            resolved_gc,
+            seeds=seeds,
+            min_size=min_size,
+            force=force is not None,
+        )
     )
     spec = CampaignSpec(raw="harmonize-pattern-family")
     kwargs = dict(runner_kwargs or {})
@@ -1082,6 +1150,10 @@ def apply_families(
             if fam_plan["decision"] != "apply":
                 applied.append({**fam_plan, "applied": False, "stamped": False})
                 continue
+            # Anchor the family before its first batch resets anything: the
+            # recorded anchor is what a replan mid-run reuses, so it must
+            # precede the run rather than follow it. Released on the stamp.
+            _record_family_anchor(resolved_gc, fam_plan["members"], fam_plan["anchor"])
             runner = (
                 runner_factory(spec)
                 if runner_factory is not None

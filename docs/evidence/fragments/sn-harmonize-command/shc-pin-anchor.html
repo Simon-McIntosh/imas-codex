@@ -1,0 +1,69 @@
+<section>
+  <h2 id="shc-pin-anchor">The anchor a run chose is kept until its family is stamped</h2>
+  <p>
+    A family's apply resets its anchor first, so an interrupted run leaves that
+    anchor mid-pipeline with a null documentation score. A plan re-derived in
+    that window would rank the members afresh and pick a different member,
+    discarding the one the run already started on. The anchor is now recorded
+    on the family's own run state and reused until the family is stamped
+    harmonized.
+  </p>
+
+  <h3 id="shc-pin-where">Where it is recorded</h3>
+  <p>
+    The anchor rides the member nodes that already carry the family's run state
+    — the same nodes stamped with <code>run_id</code> by
+    <code>reset_standard_name_docs</code> and with
+    <code>harmonized_group_signature</code> by
+    <code>stamp_harmonized_families</code>. No second store is introduced.
+    <code>harmonize.py</code> adds two helpers over that property:
+  </p>
+  <ul>
+    <li>
+      <code>_record_family_anchor(gc, member_ids, anchor_id)</code> sets
+      <code>sn.harmonized_anchor</code> on every member. It is called from
+      <code>apply_families</code> for each family marked <code>apply</code>
+      <em>before</em> that family's first batch is drained, so the recorded
+      anchor precedes any reset the run performs.
+    </li>
+    <li>
+      <code>pinned_family_anchor(members, force=False)</code> reads it back. The
+      family read carries the column: <code>_family_member_collect</code> in
+      <code>families.py</code> now selects <code>m.harmonized_anchor</code>
+      alongside <code>harmonized_group_signature</code>.
+    </li>
+  </ul>
+
+  <h3 id="shc-pin-reuse">When it is reused, and when it is released</h3>
+  <p>
+    <code>plan_family_applies</code> selects its anchor with
+    <code>select_anchor</code>, then, for any family not already carrying the
+    current <code>harmonized_group_signature</code>, replaces that choice with
+    the recorded anchor when one exists and is still a live member. So a family
+    mid-run keeps the anchor the run started on even when a second member is
+    accepted and outscores it.
+  </p>
+  <p>
+    The anchor is released in the same step that stamps the family:
+    <code>_stamp_applied_family</code> calls
+    <code>_clear_family_anchor(gc, member_ids)</code> once
+    <code>stamp_harmonized_families</code> reports success, removing the
+    property. A later apply over that family therefore selects normally. A
+    forced apply does the same — <code>apply_families</code> passes
+    <code>force=True</code> to its own <code>plan_family_applies</code> when a
+    force reason is given, and <code>pinned_family_anchor</code> returns
+    <code>None</code> under force, so a fresh choice is made.
+  </p>
+
+  <h3 id="shc-pin-report">The report's name-id read follows the same owner</h3>
+  <p>
+    The dead-link test resolves a link target against every name the graph
+    holds, not against the scoped members alone. <code>harmonize.py</code> no
+    longer defines its own name-id query: <code>known_name_ids(gc)</code> reads
+    through <code>families.existing_name_ids</code> when a client is in hand,
+    and with no client it calls the owner directly —
+    <code>graph_ops.get_existing_standard_names()</code>. Neither path falls
+    back to the scope, so a report invoked without a client still counts an
+    out-of-scope link to a name the graph holds as live.
+  </p>
+</section>
