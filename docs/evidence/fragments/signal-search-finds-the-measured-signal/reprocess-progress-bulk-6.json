@@ -1,0 +1,78 @@
+{
+  "facility": "jt-60sa",
+  "node": "ssfms-reprocess-bulk-6",
+  "pipeline": "imas-codex discover run jt-60sa --only signals [--reset-to discovered] [--flush]",
+  "reprocess_start": "2026-10-13T11:53:35Z",
+  "node_launched": "2026-10-13T14:31:18Z",
+  "reset_cutoff": "2026-10-13T15:11:18Z",
+  "assigned_categories": [
+    "CryoIL", "a042181", "MDAC", "DHC", "UDDB", "ECH", "CryoTS", "CryoMCIL",
+    "FAME", "CryoDist", "CryoCT", "OIS", "PSSCfst", "MMSYS", "CAM", "VVGS", "TC"
+  ],
+  "assigned_signals": 2151,
+  "scopes": [
+    {
+      "scope": "chunk2",
+      "categories": ["TC", "VVGS", "CAM", "OIS", "PSSCfst", "MMSYS", "CryoDist", "CryoCT"],
+      "signals": 367,
+      "post_reset_census": {"total": 367, "discovered": 367, "described": 0, "roles": 0, "emb": 0, "hash_mismatch": 0},
+      "passes": [
+        {"log": "scratch/c1-enrich.log", "engine_enriched": 286, "spend_usd": 0.05, "seconds": 324.2,
+         "note": "first reset of TC,VVGS,CAM; re-reset afterward so its signals were re-enriched in this scope"},
+        {"log": "scratch/c2-passA.log", "engine_enriched": 518, "spend_usd": 0.09, "seconds": 501.8},
+        {"log": "scratch/c23-passB.log", "engine_enriched": 49, "spend_usd": 0.007, "seconds": 322.7,
+         "note": "shared pass with chunk3; engine and spend split by remaining-signal proportion (45/430)"}
+      ],
+      "final_census": {"total": 367, "discovered": 0, "described": 367, "with_role": 225, "emb": 367, "hash_mismatch": 0},
+      "log_post_reset": "scratch/census-c2-postreset.json",
+      "log_final_census": "scratch/census-c2-passB.json"
+    },
+    {
+      "scope": "chunk3",
+      "categories": ["ECH", "CryoTS", "CryoMCIL"],
+      "signals": 385,
+      "post_reset_census": {"total": 385, "discovered": 385, "described": 0, "roles": 0, "emb": 0, "hash_mismatch": 0},
+      "passes": [
+        {"log": "scratch/c23-passB.log", "engine_enriched": 421, "spend_usd": 0.063, "seconds": 322.7,
+         "note": "shared pass with chunk2; split by remaining-signal proportion (385/430)"}
+      ],
+      "final_census": {"total": 385, "discovered": 0, "described": 385, "with_role": 250, "emb": 385, "hash_mismatch": 0},
+      "log_post_reset": "scratch/census-c3-postreset.json",
+      "log_final_census": "scratch/census-c3-passB.json"
+    },
+    {
+      "scope": "chunk4",
+      "categories": ["MDAC", "DHC", "FAME"],
+      "signals": 646,
+      "post_reset_census": {"total": 646, "discovered": 646, "described": 0, "roles": 0, "emb": 0, "hash_mismatch": 0},
+      "passes": [
+        {"log": "scratch/c4-passC.log", "engine_enriched": 1741, "spend_usd": 0.05, "seconds": 714.5},
+        {"log": "scratch/c4-passD.log", "engine_enriched": 136, "spend_usd": 0.03, "seconds": 159.2}
+      ],
+      "final_census": {"total": 646, "discovered": 0, "described": 646, "with_role": 502, "emb": 646, "hash_mismatch": 0},
+      "log_post_reset": "scratch/census-c4-postreset.json",
+      "log_final_census": "scratch/census-c4-final.json"
+    }
+  ],
+  "not_yet_reset": [
+    {"category": "CryoIL", "total": 286, "need": 282},
+    {"category": "a042181", "total": 278, "need": 274},
+    {"category": "UDDB", "total": 189, "need": 186}
+  ],
+  "totals": {
+    "scopes_finished": 3,
+    "categories_reset": 14,
+    "signals_finished": 1398,
+    "engine_enriched": 3151,
+    "spend_usd": 0.29,
+    "hash_mismatch": 0,
+    "discovered_left": 0,
+    "categories_not_reset": 3,
+    "signals_not_reset": 753
+  },
+  "facility_embedding_census": {"n": 15111, "mismatch": 13, "differing": 13,
+    "note": "13 facility-wide mismatches fall outside this node's scopes (0 within); concurrent peer bulk nodes were enriching at the same instant"},
+  "spend_ceiling_usd": 6.0,
+  "rate": "chunk2 367 signals in 501.8s (38.5/min measured on pass A); the -t 8 passes cap each drain so no single foreground run exceeds the tool ceiling",
+  "logs_dir": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143100044312-ssfms-reprocess-bulk-6/scratch"
+}
