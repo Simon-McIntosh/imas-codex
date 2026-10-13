@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="107">
+<meta name="plan-version" content="108">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -469,6 +469,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-tombstone" data-who="lead" data-when="2026-10-13T08:10:00Z">
     <div class="r-comment-body"><p><strong>Ruling (2026-10-13):</strong> renaming onto a dead tombstone's spelling stays refused. The refusal becomes stage-aware and names the routes: rename the tombstone itself to bring it back (the route the sn-edit skill documents, which works), or return it to draft with a signed transition and fold the other name into it. Resurrecting the tombstone in place was rejected, because its recorded spend and reviews would become attached to different content.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261013T061750419687-sib-tombstone-refusal" data-who="reckon-build" data-when="2026-10-13T06:44:14.423Z">
+    <div class="r-comment-body"><p>sib-tombstone-refusal — the rename collision refusal is stage-aware and names the two sanctioned routes for a dead tombstone; edit gate 414 passed EXIT=0 -&gt; 418 passed EXIT=0, zero added failures; negative control EXIT=1.</p></div>
 </div>
 <div class="r-comment" data-section="s29" data-id="c-run-r-20261013T003700617029-sib-maintenance-test-asserts" data-who="reckon-build" data-when="2026-10-13T01:01:18.610Z">
     <div class="r-comment-body"><p>Reworked tests/standard_names/test_edit_scope_skips_maintenance.py to drive the real `sn run` command via CliRunner so both startup-step assertions observe sn_run's skip guard; each of the four named behaviours is shown to redden its assertion under a scratch-copy mutation (EXIT=1 each) and the 36-file sn-run gate adds no failure against base (525 passed both arms).</p></div>
