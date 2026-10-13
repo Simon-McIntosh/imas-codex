@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "f37b72b67f6f2659d0c9320d382307865f8089d7",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/llm/server.py:2457 (search_signals tool passing rerank=_rerank_signals into _search_signals)",
+    "imas_codex/llm/search_tools.py:421 (_search_signals calling rerank_candidates)"
+  ],
+  "completed_at": "2026-10-13T03:56:39.460Z",
+  "dispatched_at": "2026-10-13T03:42:53Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "536",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when's \"fused pool of 60\" clause has no assertion \u2014 the switch-on test mocks the enrichment to a two-candidate pool, so a regression from `pool = max(k, RERANK_POOL)` to `pool = k` would pass the gate unnoticed."
+    }
+  ],
+  "head_log_revision": "0807206ea13ea58e006c87df90c13d674ccef377",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against f37b72b67; one commit 0807206ea touches five files, all inside the declared scope, adding the off-by-default switch, the signal state builder, the parameterized rerank_candidates, and the tests.",
+    "done_when": "the done_when names a fused pool of 60 reranked through a signal state builder and tests in tests/llm/test_search_tools.py, and the manifest records that run of both test files at 119 passed, 8 skipped, 3 deselected, EXIT=0.",
+    "goal": "the node goal is to route signal search through the shared Jev rerank behind a switch left off, and imas_codex/llm/search_tools.py:420 reranks the fused pool through rerank_candidates with _signal_rerank_state and _ROLE_RERANK_QUESTION while imas_codex/llm/server.py:1893 sets _rerank_signals off in every mode.",
+    "manifest": "read; it states the gate ran tests/llm/test_search_tools.py and tests/llm/test_signal_search_goldens.py to 119 passed 8 skipped 3 deselected EXIT=0, names gate_llm_signal_tests.log, the baseline 114 passed, and the negative_control.log.",
+    "write_paths": "read the manifest's declared paths, and every path the diff touches (imas_codex/llm/search_tools.py, imas_codex/llm/server.py, tests/llm/test_search_tools.py, tests/llm/test_signal_search_goldens.py, the fragment) is inside them."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_search_tools.py:583 reddens when the wiring reverts state_for to _rerank_state and tests/llm/test_search_tools.py:556 reddens if the `if rerank` guard is dropped, but the pool-size clause carries no failing assertion.",
+    "evidence": "the gate ran tests/llm/test_search_tools.py and tests/llm/test_signal_search_goldens.py to 119 passed EXIT=0 per gate_llm_signal_tests.log, but no assertion covers the done_when's pool-of-60 clause.",
+    "fit": "_ROLE_RERANK_QUESTION and _signal_rerank_state sit beside _RERANK_QUESTION and _rerank_state in imas_codex/llm/search_tools.py:108-209 and introduce no name the repository naming rules forbid.",
+    "goal_fidelity": "imas_codex/llm/search_tools.py:420 reranks the fused pool with _signal_rerank_state and _ROLE_RERANK_QUESTION and the switch is off in every server mode at imas_codex/llm/server.py:1893, so the goal is met.",
+    "reuse": "the change extends the existing rerank owner rerank_candidates (imas_codex/llm/search_tools.py:235) by parameterizing state_for and question, whose pool mechanics stay in imas_codex/discovery/base/judgment.py:350 rather than forking a second rerank.",
+    "scope_discipline": "every path in the diff (search_tools.py, server.py, tests/llm/test_search_tools.py, tests/llm/test_signal_search_goldens.py, the fragment) is inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to route signal search through the shared Jev rerank behind a switch left off, and imas_codex/llm/search_tools.py:420 reranks the fused pool through rerank_candidates with _signal_rerank_state and _ROLE_RERANK_QUESTION while imas_codex/llm/server.py:1893 sets _rerank_signals off in every mode.\nVERDICT done_when: the done_when names a fused pool of 60 reranked through a signal state builder and tests in tests/llm/test_search_tools.py, and the manifest records that run of both test files at 119 passed, 8 skipped, 3 deselected, EXIT=0.\nVERDICT write_paths: read the manifest's declared paths, and every path the diff touches (imas_codex/llm/search_tools.py, imas_codex/llm/server.py, tests/llm/test_search_tools.py, tests/llm/test_signal_search_goldens.py, the fragment) is inside them.\nVERDICT manifest: read; it states the gate ran tests/llm/test_search_tools.py and tests/llm/test_signal_search_goldens.py to 119 passed 8 skipped 3 deselected EXIT=0, names gate_llm_signal_tests.log, the baseline 114 passed, and the negative_control.log.\nVERDICT diff: read commit by commit against f37b72b67; one commit 0807206ea touches five files, all inside the declared scope, adding the off-by-default switch, the signal state builder, the parameterized rerank_candidates, and the tests.\nCALL_SITES: imas_codex/llm/server.py:2457 (search_signals tool passing rerank=_rerank_signals into _search_signals), imas_codex/llm/search_tools.py:421 (_search_signals calling rerank_candidates)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/llm/search_tools.py:420 reranks the fused pool with _signal_rerank_state and _ROLE_RERANK_QUESTION and the switch is off in every server mode at imas_codex/llm/server.py:1893, so the goal is met.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate ran tests/llm/test_search_tools.py and tests/llm/test_signal_search_goldens.py to 119 passed EXIT=0 per gate_llm_signal_tests.log, but no assertion covers the done_when's pool-of-60 clause.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (search_tools.py, server.py, tests/llm/test_search_tools.py, tests/llm/test_signal_search_goldens.py, the fragment) is inside the declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: tests/llm/test_search_tools.py:583 reddens when the wiring reverts state_for to _rerank_state and tests/llm/test_search_tools.py:556 reddens if the `if rerank` guard is dropped, but the pool-size clause carries no failing assertion.\nSCORE fit: 19\nJUSTIFICATION fit: _ROLE_RERANK_QUESTION and _signal_rerank_state sit beside _RERANK_QUESTION and _rerank_state in imas_codex/llm/search_tools.py:108-209 and introduce no name the repository naming rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing rerank owner rerank_candidates (imas_codex/llm/search_tools.py:235) by parameterizing state_for and question, whose pool mechanics stay in imas_codex/discovery/base/judgment.py:350 rather than forking a second rerank.\nFINDING tests/llm/test_search_tools.py:536 follow-on: the done_when's \"fused pool of 60\" clause has no assertion \u2014 the switch-on test mocks the enrichment to a two-candidate pool, so a regression from `pool = max(k, RERANK_POOL)` to `pool = k` would pass the gate unnoticed.",
+  "review_run_id": "r-20261013T034222829883-review-of-ssfms-rerank-product-0807206ea13e",
+  "reviewed_base_sha": "f37b72b67f6f2659d0c9320d382307865f8089d7",
+  "reviewed_head_sha": "0807206ea13ea58e006c87df90c13d674ccef377",
+  "reviewed_run_id": "r-20261013T031720286299-ssfms-rerank-product",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T03:52:54.789767+00:00",
+  "total": 110
+}
