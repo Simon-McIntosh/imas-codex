@@ -1,0 +1,49 @@
+<section id="ssog-vocabulary-definitions-owner" data-reckon="evidence">
+  <h2 id="ssog-vocabulary-definitions-owner-heading">One owner for vocabulary definitions</h2>
+
+  <p id="ssog-vocabulary-definitions-owner-change">
+    <code>imas_codex/standard_names/vocabulary_definitions.py</code> now owns the
+    token-to-definition map. It omits tokens with no nonblank definition and
+    includes locus definitions when requested. Segment selection requests loci;
+    the review gate uses the base-and-carrier map. The previous workers lookup
+    remains an import alias for its existing tests, while its production caller
+    and segment selection both reach the new owner. When the owner has no entry,
+    <code>option_text</code> already falls through to the concept registry,
+    registered aliases, then the token's own words.
+  </p>
+
+  <p id="ssog-vocabulary-definitions-owner-source-check">
+    A repository-wide <code>rg -n 'load_physical_bases' imas_codex</code> found
+    three references: the definition read in
+    <code>standard_names/vocabulary_definitions.py:26</code>, and the import and
+    alias read in <code>standard_names/segment_selection.py:278,287</code>.
+    The workers module has no loader read, and the remaining selection read
+    builds aliases rather than definitions.
+  </p>
+
+  <p id="ssog-vocabulary-definitions-owner-test-repairs">
+    The selection fixture now restores monkeypatches before clearing the tree
+    cache. The base-offers-none mutation previously reported 2 failed, 10
+    passed and 12 teardown errors, including
+    <code>AttributeError: 'function' object has no attribute 'cache_clear'</code>.
+    With the repair it reports 2 failed, 10 passed, no teardown errors and
+    <code>EXIT=1</code>. The leaf description assertion now compares the
+    offered text with the owner's definition where one exists. A formatter
+    returning a plausible but wrong meaning makes that test fail
+    (<code>EXIT=1</code>).
+  </p>
+
+  <p id="ssog-vocabulary-definitions-owner-gate">
+    The base gate over the selection and name-gate test files completed with
+    27 passed, <code>EXIT=0</code>. The committed-head gate added the four
+    owner tests and completed with 31 passed, <code>EXIT=0</code>: zero added
+    failures. The new tests cover omission of undefined tokens, optional loci,
+    and sentinel maps observed by each caller. Under an in-memory owner stub
+    and caller bypass stubs, all four fail, <code>EXIT=1</code>; the normal
+    head arm passes all four. Logs are in the worker run directory under
+    <code>baseline-gate.log</code>, <code>head-gate.log</code>,
+    <code>mutation-before-fix.log</code>, <code>mutation-after-fix.log</code>,
+    <code>negative-control.log</code> and
+    <code>option-meaning-negative-control.log</code>.
+  </p>
+</section>
