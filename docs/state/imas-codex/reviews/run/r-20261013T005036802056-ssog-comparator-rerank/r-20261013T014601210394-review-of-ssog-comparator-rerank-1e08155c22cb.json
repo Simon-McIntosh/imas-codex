@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "0 added failures: baseline_suite (c98a0d42) 827 passed/0 failed, after_suite (64f272886) 830 passed/0 failed",
+  "base_log_revision": "c98a0d42dc8195dd60c9c145340703409c87b2ec",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:3917",
+    "imas_codex/standard_names/workers.py:5786"
+  ],
+  "completed_at": "2026-10-13T01:58:04.863Z",
+  "dispatched_at": "2026-10-13T01:46:16Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/context.py",
+      "line": "1149",
+      "severity": "follow-on",
+      "text": "follow-on: the per-item mean-rank merge is a second rank-fusion implementation beside the repository's owner rrf_fuse at imas_codex/search/fusion.py:19, which it neither extends nor cites; the two fusion definitions now drift independently. The owner's (-mass, id) tie-break cannot supply the embedding-order tie-break this change requires, but that is a reason to extend the owner (an order-preserving variant) rather than fork the capability."
+    },
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": "5795",
+      "severity": "follow-on",
+      "text": "follow-on: the LLMCostEvent stamps the rerank's spend with model=model, the compose model (compose_model or get_model(\"sn-compose\")), while the rerank was billed under the sn-judge seat, so the cost row attributes the spend to the wrong model; and mgr.reserve runs only after the spend has already happened, so when it returns None under an exhausted budget the charge is silently dropped."
+    },
+    {
+      "file": "imas_codex/standard_names/context.py",
+      "line": "1120",
+      "severity": "follow-on",
+      "text": "follow-on: rerank_name_comparators relies on rerank_pool's internal guard and omits the caller-side try/except both sibling callers use (imas_codex/llm/search_tools.py:214, imas_codex/discovery/signals/parallel.py:192); a raise from get_model(\"sn-judge\") or from a state_for builder would abort the compose batch instead of returning the embedding order, though the default-off switch limits the exposure."
+    }
+  ],
+  "head_log_revision": "1e08155c22cb6e11318fa96d961c25bbf223a2da",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against c98a0d42; 4a1e53c1 adds rerank_name_comparators and the two call sites, 64f272886 adds the three tests, 1e08155c22cb adds the fragment \u2014 all inside the declared write paths, with no path outside the scope.",
+    "done_when": "the done_when names the compose/context files by an rg, tests/discovery/test_judgment.py, and a test that fails with the call removed; the manifest records the gate at 827 passed (base c98a0d42) to 830 passed (head 64f272886) with EXIT=0, and negative_control.log shows the switch-on reorder test red (2 failed, EXIT=1), which is the measure the done_when asserts.",
+    "goal": "the goal is a default-off switch that reranks the compose nearby-name comparator block through rerank_pool per item under the sn-judge seat with service standard-names; imas_codex/standard_names/context.py:1074 (rerank_name_comparators) builds the query from the item's description and DD path and the state from each comparator's name and description, and imas_codex/standard_names/workers.py:3917 and workers.py:5786 call it through _rerank_comparators_for_compose from both compose paths.",
+    "manifest": "read; it records baseline_suite and after_suite each with revision, exit_status and completed:true, names test_logs and negative_control_log, and every named log resolves on disk with a final EXIT= line (head_gate.log 830 passed, EXIT=0).",
+    "write_paths": "the manifest declares imas_codex/standard_names/context.py, imas_codex/standard_names/workers.py, tests/standard_names/test_comparator_rerank.py and the fragment; git diff --stat against c98a0d42 lists exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_comparator_rerank.py:63 pins the judged state text against an independent literal and its reorder assertion reddens when the rerank call is removed (negative_control.log, EXIT=1), so the guard names a condition it fails on.",
+    "evidence": "head_gate.log:1 names the revision and the exact rg-derived file list the done_when names, and the done_when's revert test; its 830 passed/EXIT=0 summary is recorded in the manifest's after_suite.",
+    "fit": "imas_codex/standard_names/context.py:1061 builds the same {\"query\",\"candidate\":{\"locator\",\"text\"}} state as the sibling callers at imas_codex/llm/search_tools.py:147 and imas_codex/discovery/signals/parallel.py:130, and names follow the _COMPARATOR_RERANK_ idiom with no plan labels.",
+    "goal_fidelity": "imas_codex/standard_names/context.py:1074 reranks the per-item comparator pool through rerank_pool under the sn-judge seat, and workers.py:3917/5786 reach it behind the default-off comparator_rerank_enabled() switch, matching the stated deliverable.",
+    "reuse": "the mean-rank merge at imas_codex/standard_names/context.py:1149 re-implements rank fusion the repository already owns at imas_codex/search/fusion.py:rrf_fuse without calling or extending it.",
+    "scope_discipline": "git diff --stat c98a0d42..1e08155c22cb lists only context.py, workers.py, tests/standard_names/test_comparator_rerank.py and the fragment, every one inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a default-off switch that reranks the compose nearby-name comparator block through rerank_pool per item under the sn-judge seat with service standard-names; imas_codex/standard_names/context.py:1074 (rerank_name_comparators) builds the query from the item's description and DD path and the state from each comparator's name and description, and imas_codex/standard_names/workers.py:3917 and workers.py:5786 call it through _rerank_comparators_for_compose from both compose paths.\nVERDICT done_when: the done_when names the compose/context files by an rg, tests/discovery/test_judgment.py, and a test that fails with the call removed; the manifest records the gate at 827 passed (base c98a0d42) to 830 passed (head 64f272886) with EXIT=0, and negative_control.log shows the switch-on reorder test red (2 failed, EXIT=1), which is the measure the done_when asserts.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/context.py, imas_codex/standard_names/workers.py, tests/standard_names/test_comparator_rerank.py and the fragment; git diff --stat against c98a0d42 lists exactly those four paths and nothing else.\nVERDICT manifest: read; it records baseline_suite and after_suite each with revision, exit_status and completed:true, names test_logs and negative_control_log, and every named log resolves on disk with a final EXIT= line (head_gate.log 830 passed, EXIT=0).\nVERDICT diff: read commit by commit against c98a0d42; 4a1e53c1 adds rerank_name_comparators and the two call sites, 64f272886 adds the three tests, 1e08155c22cb adds the fragment \u2014 all inside the declared write paths, with no path outside the scope.\nCALL_SITES: imas_codex/standard_names/workers.py:3917, imas_codex/standard_names/workers.py:5786\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/context.py:1074 reranks the per-item comparator pool through rerank_pool under the sn-judge seat, and workers.py:3917/5786 reach it behind the default-off comparator_rerank_enabled() switch, matching the stated deliverable.\nSCORE evidence: 18\nJUSTIFICATION evidence: head_gate.log:1 names the revision and the exact rg-derived file list the done_when names, and the done_when's revert test; its 830 passed/EXIT=0 summary is recorded in the manifest's after_suite.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat c98a0d42..1e08155c22cb lists only context.py, workers.py, tests/standard_names/test_comparator_rerank.py and the fragment, every one inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_comparator_rerank.py:63 pins the judged state text against an independent literal and its reorder assertion reddens when the rerank call is removed (negative_control.log, EXIT=1), so the guard names a condition it fails on.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/context.py:1061 builds the same {\"query\",\"candidate\":{\"locator\",\"text\"}} state as the sibling callers at imas_codex/llm/search_tools.py:147 and imas_codex/discovery/signals/parallel.py:130, and names follow the _COMPARATOR_RERANK_ idiom with no plan labels.\nSCORE reuse: 5\nJUSTIFICATION reuse: the mean-rank merge at imas_codex/standard_names/context.py:1149 re-implements rank fusion the repository already owns at imas_codex/search/fusion.py:rrf_fuse without calling or extending it.\nFINDING imas_codex/standard_names/context.py:1149 follow-on: the per-item mean-rank merge is a second rank-fusion implementation beside the repository's owner rrf_fuse at imas_codex/search/fusion.py:19, which it neither extends nor cites; the two fusion definitions now drift independently. The owner's (-mass, id) tie-break cannot supply the embedding-order tie-break this change requires, but that is a reason to extend the owner (an order-preserving variant) rather than fork the capability.\nFINDING imas_codex/standard_names/workers.py:5795 follow-on: the LLMCostEvent stamps the rerank's spend with model=model, the compose model (compose_model or get_model(\"sn-compose\")), while the rerank was billed under the sn-judge seat, so the cost row attributes the spend to the wrong model; and mgr.reserve runs only after the spend has already happened, so when it returns None under an exhausted budget the charge is silently dropped.\nFINDING imas_codex/standard_names/context.py:1120 follow-on: rerank_name_comparators relies on rerank_pool's internal guard and omits the caller-side try/except both sibling callers use (imas_codex/llm/search_tools.py:214, imas_codex/discovery/signals/parallel.py:192); a raise from get_model(\"sn-judge\") or from a state_for builder would abort the compose batch instead of returning the embedding order, though the default-off switch limits the exposure.",
+  "review_run_id": "r-20261013T014601210394-review-of-ssog-comparator-rerank-1e08155c22cb",
+  "reviewed_base_sha": "c98a0d42dc8195dd60c9c145340703409c87b2ec",
+  "reviewed_head_sha": "1e08155c22cb6e11318fa96d961c25bbf223a2da",
+  "reviewed_run_id": "r-20261013T005036802056-ssog-comparator-rerank",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:56:21.375570+00:00",
+  "total": 98
+}
