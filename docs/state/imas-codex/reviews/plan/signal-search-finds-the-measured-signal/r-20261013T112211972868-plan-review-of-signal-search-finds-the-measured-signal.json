@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T11:36:53.155Z",
+  "dispatched_at": "2026-10-13T11:22:35Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:494",
+      "id": "reasoning-1",
+      "reason": "the plan must either order \u00a712's sample node after \u00a78's enrichment node or state that the sample's signals are re-enriched to carry the role and that its projection covers the role seat, otherwise the cost guard is measured against the wrong pipeline and \u00a78's coverage claim is unmet.",
+      "text": "\u00a712's \"cost limit of 1.5 times the sample's projection for the whole facility\" is measured by the sample node on whatever enrichment does at that time, while the followup (line 533) only requires \u00a78's role-storing enrichment node to land \"before \u00a712's bulk node\"; \u00a712's sample node is ordered only after \u00a79 (already done), so it can run first, and then its per-signal Jev spend excludes \u00a78's per-signal role Choice while the bulk run's includes it, so the 1.5\u00d7 limit guards against an understated projection \u2014 and the sample's ~200 signals are re-enriched before \u00a78's role write exists, so \u00a78's \"every eligible signal carries signal_role\" would fail on them",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "20ad228c8b605e4a6af8c15caffeafb851955a55965d0be62c91a43aa8af3fee",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 90,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T112211972868-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "bafdd2510bb4a8fba9722248922d174249708068",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a712's cited fixes resolve in the tree (`93bfb7e9d` = fix(discovery): give the enrichment context rerank time to finish, committed 2026-10-11T21:08:21Z; `0a8d3ed85` = fix(discovery): individualize catalogue-scanned members from their own text), its run form `--only signals --reset-to discovered` is a valid option pair, and its evidence fragment is a declared (not-yet-written) deliverable.",
+    "done_when": "pass \u2014 \u00a712's done-when (line 495) is section-level and now names its owning node (\"The third node owns this section's done-when\"), and it declares a two-point negative control (the count of signals enriched before 21:16:46Z, non-zero at the sample node and zero at the third), which is the kind of measure a run that reset nothing would fail.",
+    "evidence_paths": "pass \u2014 \u00a712's spend, wall time and before/after tables land in `docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html`, a durable repository path beside the plan's other fragments, not a scratch or node-local directory.",
+    "naming": "pass \u2014 \u00a712's text uses section references only in the plan document, and introduces no plan label, ticket number or version tag into a symbol, filename or comment.",
+    "reasoning": "a finding \u2014 \u00a712's cost guard and \u00a78's role-coverage done-when both hinge on where \u00a78's role-storing enrichment lands relative to \u00a712's sample node, and the plan orders it only before the bulk node.",
+    "single_goal": "pass \u2014 each of \u00a712's three nodes names one deliverable (sample reprocess and its measurements; the rest in chunks; the re-measurement node).",
+    "wiring": "pass \u2014 \u00a712's sequencing is carried by the followup `f-ssfms-001` (line 533), which now names \u00a712's three nodes and places \u00a78's enrichment node before \u00a712's bulk node; no relationship points at a missing node."
+  },
+  "section_digests": {
+    "_document": "dc2b117778d83663fb3d818a298ab05e0bcf4fb9b21af1f3bcf3f3037609cb1b",
+    "s1": "e58a341feafcdbbe4c2e547cf50a1fb5e759d1c331f09b8777ce5142efc9daed",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s12": "1c1485ae929488067976b2e2f5563b7985d159b18458d1a8261cc3d111e39745",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "5a77efb737bcf64e7fd5b30aaa71ed3ff5a27b6c8e7b4d33023f03292a98fb15",
+    "s4": "31e1b80d34ee0473acbbff8894edb94dee236159b67ee202ce8891143f015e9a",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "39767f9634d04e6e5c76f3c5e95c921e3a6afe69d9984f4209b5aa22cb591834",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "37a1002a450850d41b5c609a5a3ea2a4591ba2f6fb3e3bc91d6cfee5d3cd82ee"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T11:38:10.198111+00:00"
+}
