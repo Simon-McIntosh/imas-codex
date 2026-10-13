@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "clive",
+  "base_log_revision": "97552c2e4d1f6a29592f647aa79ea7b6cda47fc2",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/graph/dd_workers.py:716",
+    "imas_codex/graph/dd_domain_classifier.py:165",
+    "imas_codex/graph/dd_domain_classifier.py:987",
+    "imas_codex/standard_names/benchmark_roles.py:1517"
+  ],
+  "completed_at": "2026-10-13T19:57:18.509Z",
+  "dispatched_at": "2026-10-13T19:25:13Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T160612001893-scg-jev-domain-tree/manifest.md",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "follow-on: the head gate result is recorded under the mistyped key after_sl_suite while the after_suite key is absent and baseline_suite is prose, so a promotion check reading the reviewed run's JSON arms reads the after-arm as unreadable although head_gate.log holds it."
+    },
+    {
+      "file": "tests/graph/test_dd_domain_classifier.py",
+      "line": "108",
+      "severity": "follow-on",
+      "text": "follow-on: scripted_tree and the tier-1 decide_batch stubs land in a file the node's declared write scope does not list, so the node wrote outside its fence; the manifest records the dispatch as authorising it by name, so it is a declared scope extension rather than a silent one."
+    }
+  ],
+  "head_log_revision": "630ed8ced7c43379f3b9bcfbfa2acaf642d0b515",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commits 3fe14e03a and 630ed8ced against 62b4f009c; five files, 243 insertions and 60 deletions, each commit carrying a conventional subject and a body, and every added assertion names a condition under which the test fails.",
+    "done_when": "the done_when names tests/graph/test_dd_domain_classifier.py, test_domain_classifier_prompt.py, test_physics_domain_guidance.py, the new test file and the settings seat tests, run at base and head by delta; base_gate.log records 172 passed, 1 failed, EXIT=1 and head_gate.log records 193 passed, 1 failed, EXIT=1, giving added_failure_count 0 against the same pre-existing failure tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping.",
+    "goal": "the source node's goal is a two-level Jev Choice that picks a category and then a domain with the chat classifier below a confidence threshold, with the DD path, the LLM description and the DD documentation reaching every decision; in the window read, imas_codex/graph/dd_domain_classifier.py:957 _answer_for reads each state's answer under its question name (used at :987, :1093, :1107) and :832 _format_batch_user_prompt emits the `documentation:` clause, so the inert-tree defect and the dropped-documentation defect the prior reviews named are both closed.",
+    "manifest": "read at runs/r-20261013T160612001893-scg-jev-domain-tree/manifest.md and lifted from the reviewed run's classification.json; status complete, three negative-control logs each EXIT=1, but the head arm sits under a mistyped after_sl_suite key while after_suite is absent, so a JSON reader of the record sees the after-arm as unreadable (see the finding).",
+    "write_paths": "the declared scope in brief.md is seven files plus one figure directory; git diff 62b4f009c..630ed8ced changes five files, four inside the declared scope and tests/graph/test_dd_domain_classifier.py outside it, which the reviewed run's manifest records as authorised by the dispatch that asked for the tier-1 stubs."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_dd_domain_classifier_jev.py:654 reddens when _answer_for is reverted to the flat result[0] read and tests/graph/test_dd_domain_classifier.py:371 reddens when the documentation render at imas_codex/graph/dd_domain_classifier.py:832 is dropped, both measured as red runs.",
+    "evidence": "head_gate.log records 193 passed, 1 failed, EXIT=1 against base_gate.log 172 passed, 1 failed, EXIT=1, so added_failure_count is 0, though the reviewed record carries the head arm as a mistyped key rather than in after_suite.",
+    "fit": "_answer_for at imas_codex/graph/dd_domain_classifier.py:957 follows the module's own helper idiom and introduces no name the repository naming rules forbid.",
+    "goal_fidelity": "imas_codex/graph/dd_domain_classifier.py:957 _answer_for replaces the flat read that made decide_domain_tree inert and :832 emits the documentation clause the chat path was dropping, so both requirements the goal states are met in the window read.",
+    "reuse": "the answer unwrap has no repository owner; a capability search over imas_codex found only inline answers.get(name) reads (imas_codex/discovery/base/llm.py:3359, imas_codex/discovery/code/scorer.py:331, imas_codex/discovery/signals/role.py:59) and decide_domain_tree wraps the decisions owner at imas_codex/discovery/base/judgment.py:230.",
+    "scope_discipline": "git diff 62b4f009c..630ed8ced changes four files inside the brief's declared scope and adds tests/graph/test_dd_domain_classifier.py:108 scripted_tree outside it, authorised by the dispatch and declared in the manifest."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Reviewed head: 630ed8ced7c43379f3b9bcfbfa2acaf642d0b515\nreviewed_base_sha: 62b4f009c49512fcd97c5fbfa761ff096851bddf\nreviewed_head_sha: 630ed8ced7c43379f3b9bcfbfa2acaf642d0b515\nVERDICT goal: the source node's goal is a two-level Jev Choice that picks a category and then a domain with the chat classifier below a confidence threshold, with the DD path, the LLM description and the DD documentation reaching every decision; in the window read, imas_codex/graph/dd_domain_classifier.py:957 _answer_for reads each state's answer under its question name (used at :987, :1093, :1107) and :832 _format_batch_user_prompt emits the `documentation:` clause, so the inert-tree defect and the dropped-documentation defect the prior reviews named are both closed.\nVERDICT done_when: the done_when names tests/graph/test_dd_domain_classifier.py, test_domain_classifier_prompt.py, test_physics_domain_guidance.py, the new test file and the settings seat tests, run at base and head by delta; base_gate.log records 172 passed, 1 failed, EXIT=1 and head_gate.log records 193 passed, 1 failed, EXIT=1, giving added_failure_count 0 against the same pre-existing failure tests/core/test_settings.py::TestMapRunModelSeat::test_map_run_model_check_names_ids_mapping.\nVERDICT write_paths: the declared scope in brief.md is seven files plus one figure directory; git diff 62b4f009c..630ed8ced changes five files, four inside the declared scope and tests/graph/test_dd_domain_classifier.py outside it, which the reviewed run's manifest records as authorised by the dispatch that asked for the tier-1 stubs.\nVERDICT manifest: read at runs/r-20261013T160612001893-scg-jev-domain-tree/manifest.md and lifted from the reviewed run's classification.json; status complete, three negative-control logs each EXIT=1, but the head arm sits under a mistyped after_sl_suite key while after_suite is absent, so a JSON reader of the record sees the after-arm as unreadable (see the finding).\nVERDICT diff: read commits 3fe14e03a and 630ed8ced against 62b4f009c; five files, 243 insertions and 60 deletions, each commit carrying a conventional subject and a body, and every added assertion names a condition under which the test fails.\nCALL_SITES: imas_codex/graph/dd_workers.py:716, imas_codex/graph/dd_domain_classifier.py:165, imas_codex/graph/dd_domain_classifier.py:987, imas_codex/standard_names/benchmark_roles.py:1517\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/graph/dd_domain_classifier.py:957 _answer_for replaces the flat read that made decide_domain_tree inert and :832 emits the documentation clause the chat path was dropping, so both requirements the goal states are met in the window read.\nSCORE evidence: 16\nJUSTIFICATION evidence: head_gate.log records 193 passed, 1 failed, EXIT=1 against base_gate.log 172 passed, 1 failed, EXIT=1, so added_failure_count is 0, though the reviewed record carries the head arm as a mistyped key rather than in after_suite.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: git diff 62b4f009c..630ed8ced changes four files inside the brief's declared scope and adds tests/graph/test_dd_domain_classifier.py:108 scripted_tree outside it, authorised by the dispatch and declared in the manifest.\nSCORE durability: 18\nJUSTIFICATION durability: tests/graph/test_dd_domain_classifier_jev.py:654 reddens when _answer_for is reverted to the flat result[0] read and tests/graph/test_dd_domain_classifier.py:371 reddens when the documentation render at imas_codex/graph/dd_domain_classifier.py:832 is dropped, both measured as red runs.\nSCORE fit: 19\nJUSTIFICATION fit: _answer_for at imas_codex/graph/dd_domain_classifier.py:957 follows the module's own helper idiom and introduces no name the repository naming rules forbid.\nSCORE reuse: 19\nJUSTIFICATION reuse: the answer unwrap has no repository owner; a capability search over imas_codex found only inline answers.get(name) reads (imas_codex/discovery/base/llm.py:3359, imas_codex/discovery/code/scorer.py:331, imas_codex/discovery/signals/role.py:59) and decide_domain_tree wraps the decisions owner at imas_codex/discovery/base/judgment.py:230.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T160612001893-scg-jev-domain-tree/manifest.md:26 follow-on: the head gate result is recorded under the mistyped key after_sl_suite while the after_suite key is absent and baseline_suite is prose, so a promotion check reading the reviewed run's JSON arms reads the after-arm as unreadable although head_gate.log holds it.\nFINDING tests/graph/test_dd_domain_classifier.py:108 follow-on: scripted_tree and the tier-1 decide_batch stubs land in a file the node's declared write scope does not list, so the node wrote outside its fence; the manifest records the dispatch as authorising it by name, so it is a declared scope extension rather than a silent one.\n",
+  "review_run_id": "r-20261013T192459345032-review-of-scg-jev-domain-tree-630ed8ced7c4",
+  "reviewed_base_sha": "62b4f009c49512fcd97c5fbfa761ff096851bddf",
+  "reviewed_head_sha": "630ed8ced7c43379f3b9bcfbfa2acaf642d0b515",
+  "reviewed_run_id": "r-20261013T162934905861-scg-jev-domain-tree",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T19:50:25.829060+00:00",
+  "total": 106,
+  "verdict": "PASS"
+}
