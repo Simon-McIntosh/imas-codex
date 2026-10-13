@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Both arms of the reviewed run are readable and record their own summaries. baseline_suite: revision aa25ca574e960cca4767187efadb83e7eb56970c, exit_status 0, completed true, failure_count 0, failure_ids [] (base-arm.log: '414 passed, 10 deselected, 1 warning in 40.19s, EXIT=0'). after_suite: revision e366c405724d60b2ccc433cf3d664f919b51b417, exit_status 0, completed true, failure_count 0, failure_ids [] (after-arm.log: '418 passed, 10 deselected, 1 warning in 47.06s, EXIT=0'). The four-test delta is the four new tests in tests/standard_names/test_edit_engine.py; zero added failures against the reviewed run's own baseline.",
+  "base_log_revision": "aa25ca574e960cca4767187efadb83e7eb56970c",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/sn.py:7015",
+    "imas_codex/llm/sn_tools.py:918",
+    "imas_codex/standard_names/promote.py:1248",
+    "imas_codex/standard_names/review_triage.py:346"
+  ],
+  "completed_at": "2026-10-13T11:20:13.079Z",
+  "dispatched_at": "2026-10-13T11:08:41Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/edit.py",
+      "line": "3167",
+      "severity": "follow-on",
+      "text": "follow-on: the collision Cypher was edited to read the occupant's stage and an EXISTS successor subquery (edit.py:3167-3173) but the reviewed run records no execution of tests/graph/test_cypher_property_check.py, which the node brief mandates for any Cypher add or edit. An independent re-run here is green (4 passed, EXIT=0), so the query is schema-valid and the omission is evidential rather than a correctness defect."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-tombstone-refusal.html",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: the landing fragment ends without a trailing newline (git reports '\\ No newline at end of file'), a minor text-file hygiene defect with no effect on the recorded evidence."
+    }
+  ],
+  "head_log_revision": "e366c405724d60b2ccc433cf3d664f919b51b417",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s) that reach _apply_rename through apply_edit",
+    "diff": "reviewed commit by commit against its base aa25ca5; 4a282ef70 makes the collision refusal stage-aware, corrects the docs-gate comment to the refused set the code applies and adds the sn-edit skill sentence, e366c4057 restores the count(sn) AS n column so zero-count FakeGraph sentinels still read as no collision, and a9cb3eb61 adds the landing fragment \u2014 four files, all inside the declared paths.",
+    "done_when": "the done_when names three behaviours plus a negative-control log with EXIT=; tests/standard_names/test_edit_engine.py:1039 (dead tombstone names both routes), :1065 (live occupant keeps the plain message) and :1103 (tombstone renamed onto a free spelling proceeds) provide them, and the reviewed run records base-arm.log (aa25ca5, 414 passed EXIT=0) and after-arm.log (e366c4057, 418 passed EXIT=0).",
+    "goal": "the reviewed node's goal is to make the rename collision refusal stage-aware so renaming onto a successor-less superseded tombstone is refused with a message naming the two sanctioned routes; imas_codex/standard_names/edit.py:3176-3191 implements that branch and edit.py:3192-3198 keeps the bare id-uniqueness message for a live occupant or one carrying a successor.",
+    "manifest": "read at the reviewed run directory; status complete, commits 4a282ef70/e366c4057/a9cb3eb61, changed_paths the four declared files, negative_control_log named with a note, baseline_suite and after_suite both recorded with revision, exit_status and completed true, blockers none.",
+    "write_paths": "the reviewed manifest declares imas_codex/standard_names/edit.py, tests/standard_names/test_edit_engine.py, .claude/skills/sn-edit/SKILL.md and docs/evidence/fragments/sn-integrity-backlog/sib-tombstone-refusal.html; the diff aa25ca5..a9cb3eb touches only those four."
+  },
+  "justifications": {
+    "durability": "the negative control (stage-aware branch removed) reddens tests/standard_names/test_edit_engine.py:1039 with EXIT=1 while the live-occupant and successor-carrying tests stay green, with a deduction because the stage detection is exercised only through the FakeGraph stub at tests/standard_names/test_edit_engine.py:232, so a regression in the real EXISTS successor subquery would not redden any test.",
+    "evidence": "base-arm.log records 414 passed EXIT=0 at aa25ca5, after-arm.log 418 passed EXIT=0 at e366c4057 and negative-control-stage-branch-removed.log EXIT=1, all readable; deduction for the mandated tests/graph/test_cypher_property_check.py run being absent from the record.",
+    "fit": "the new comment at imas_codex/standard_names/edit.py:3160-3165 and the four tests follow the file's idiom and the commits are conventional with bodies and no attribution or plan label.",
+    "goal_fidelity": "imas_codex/standard_names/edit.py:3176 branches on occupant_stage == 'superseded' and not occupant_has_successor, naming both routes exactly as the lead ruling requires, with edit.py:3192 keeping the prior message otherwise.",
+    "reuse": "the change adds no definition and extends the existing collision query at imas_codex/standard_names/edit.py:3167 in place; a capability search over imas_codex/standard_names found no callable successor-existence owner (edit.py:134 expresses the same incoming REFINED_FROM edge inline), so nothing forks an owned capability.",
+    "scope_discipline": "every path in aa25ca5..a9cb3eb (imas_codex/standard_names/edit.py, tests/standard_names/test_edit_engine.py, .claude/skills/sn-edit/SKILL.md and the fragment) is inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to make the rename collision refusal stage-aware so renaming onto a successor-less superseded tombstone is refused with a message naming the two sanctioned routes; imas_codex/standard_names/edit.py:3176-3191 implements that branch and edit.py:3192-3198 keeps the bare id-uniqueness message otherwise.\nVERDICT done_when: the done_when names three behaviours plus a negative-control log with EXIT=; tests/standard_names/test_edit_engine.py:1039 (dead tombstone names both routes), :1065 (live occupant keeps the plain message) and :1103 (tombstone renamed onto a free spelling proceeds) provide them, and the reviewed run records base-arm.log (aa25ca5, 414 passed EXIT=0) and after-arm.log (e366c4057, 418 passed EXIT=0).\nVERDICT write_paths: the reviewed manifest declares imas_codex/standard_names/edit.py, tests/standard_names/test_edit_engine.py, .claude/skills/sn-edit/SKILL.md and docs/evidence/fragments/sn-integrity-backlog/sib-tombstone-refusal.html; the diff aa25ca5..a9cb3eb touches only those four.\nVERDICT manifest: read at the reviewed run directory; status complete, commits 4a282ef70/e366c4057/a9cb3eb61, changed_paths the four declared files, negative_control_log named with a note, baseline_suite and after_suite both recorded with revision, exit_status and completed true, blockers none.\nVERDICT diff: reviewed commit by commit against its base aa25ca5; 4a282ef70 makes the collision refusal stage-aware and corrects the docs-gate comment and skill sentence, e366c4057 restores the count(sn) AS n column for the zero-count FakeGraph sentinels, and a9cb3eb61 adds the landing fragment.\nCALL_SITES: imas_codex/cli/sn.py:7015, imas_codex/llm/sn_tools.py:918, imas_codex/standard_names/promote.py:1248, imas_codex/standard_names/review_triage.py:346\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/edit.py:3176 branches on occupant_stage == 'superseded' and not occupant_has_successor, naming both routes exactly as the lead ruling requires, with edit.py:3192 keeping the prior message otherwise.\nSCORE evidence: 18\nJUSTIFICATION evidence: base-arm.log records 414 passed EXIT=0 at aa25ca5, after-arm.log 418 passed EXIT=0 at e366c4057 and negative-control-stage-branch-removed.log EXIT=1, all readable; deduction for the mandated tests/graph/test_cypher_property_check.py run being absent from the record.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in aa25ca5..a9cb3eb (imas_codex/standard_names/edit.py, tests/standard_names/test_edit_engine.py, .claude/skills/sn-edit/SKILL.md and the fragment) is inside the manifest's declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: the negative control (stage-aware branch removed) reddens tests/standard_names/test_edit_engine.py:1039 with EXIT=1 while the live-occupant and successor-carrying tests stay green, with a deduction because the stage detection is exercised only through the FakeGraph stub at tests/standard_names/test_edit_engine.py:232.\nSCORE fit: 19\nJUSTIFICATION fit: the new comment at imas_codex/standard_names/edit.py:3160-3165 and the four tests follow the file's idiom and the commits are conventional with bodies and no attribution or plan label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change adds no definition and extends the existing collision query at imas_codex/standard_names/edit.py:3167 in place; a capability search over imas_codex/standard_names found no callable successor-existence owner (edit.py:134 expresses the same incoming REFINED_FROM edge inline).\nFINDING imas_codex/standard_names/edit.py:3167 follow-on: the collision Cypher was edited to read the occupant's stage and an EXISTS successor subquery but the reviewed run records no execution of tests/graph/test_cypher_property_check.py, which the node brief mandates for any Cypher add or edit; an independent re-run here is green (4 passed, EXIT=0), so the query is schema-valid and the omission is evidential.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-tombstone-refusal.html:10 follow-on: the landing fragment ends without a trailing newline.\nVERDICT: SOUND WITH FINDINGS",
+  "review_run_id": "r-20261013T110823133373-review-of-sib-tombstone-refusal-a9cb3eb617dd",
+  "reviewed_base": "aa25ca574e960cca4767187efadb83e7eb56970c",
+  "reviewed_base_sha": "aa25ca574e960cca4767187efadb83e7eb56970c",
+  "reviewed_commit": "a9cb3eb617dd6d09969c3f6db5dcb01bcdc1729a",
+  "reviewed_head_sha": "a9cb3eb617dd6d09969c3f6db5dcb01bcdc1729a",
+  "reviewed_run_id": "r-20261013T061750419687-sib-tombstone-refusal",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T11:20:00+00:00",
+  "total": 114
+}
