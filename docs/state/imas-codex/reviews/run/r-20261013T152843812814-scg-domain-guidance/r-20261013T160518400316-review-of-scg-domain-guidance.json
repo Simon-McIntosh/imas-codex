@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "cd061230285427cf7b66db1ba3ff9066c2f1f4d3",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/llm/prompt_loader.py:1002",
+    "imas_codex/llm/prompt_loader.py:915",
+    "imas_codex/llm/server.py:2323"
+  ],
+  "completed_at": "2026-10-13T16:04:51.343Z",
+  "dispatched_at": "2026-10-13T15:29:04Z",
+  "findings": [
+    {
+      "file": "imas_codex/definitions/physics/__init__.py",
+      "line": "49",
+      "severity": "follow-on",
+      "text": "follow-on: load_isn_physics_domains builds a path from imas_standard_names.__file__ and re-extracts description/category/ids, duplicating imas_standard_names/grammar_codegen/physics_domain_spec.py PhysicsDomainSpec.load() (same file, via importlib.resources) and re-deriving the vocab directory grammar.vocab_loaders owns, while imas_codex/standard_names/vocabulary_definitions.py:15 already delegates to ISN's vocab_loaders."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T152843812814-scg-domain-guidance/manifest.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when asks that each of the five added tests fail with its mechanism removed, but the manifest records one negative control (test_domain_keys_are_exactly_the_enum_values), so four added guards carry no recorded red run."
+    }
+  ],
+  "head_log_revision": "89121e7a866a5759df50a44de450ae7a2fb030d1",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read all four commits (6df823c9e, 89121e7a8, 28732d21f, 97552c2e4) against base cd0612302; every hunk is inside the declared scope and each commit carries a body.",
+    "done_when": "the done_when names five checks (domain keys equal the PhysicsDomain values, category keys equal ISN's categories, every domain has non-empty scope/includes/excludes, every excludes neighbour a domain value, the provider returns the guidance) plus a base/head gate by delta and a landing fragment; tests/graph/test_physics_domain_guidance.py carries all five, head-gate.log records 121 passed EXIT=0 against base-gate.log 116 passed EXIT=0, and the fragment is committed.",
+    "goal": "the node goal is to persist generated classification guidance for every physics domain as YAML in imas-codex and serve it through the prompt provider; imas_codex/definitions/physics/domains.yaml carries scope/includes/excludes for all 32 PhysicsDomain values and scope for all 10 ISN categories, and imas_codex/llm/prompt_loader.py:618 returns it.",
+    "manifest": "read; it reports status complete, the three-file gate command at 121 passed, base 116 passed, one negative control with EXIT=1, and names the three logs.",
+    "write_paths": "the declared scope is six files plus a figures path; git diff --stat cd0612302..97552c2e4 lists exactly the five declared files (domains.yaml, definitions/physics/__init__.py, prompt_loader.py, the test file, definitions/README.md) plus the fragment, with the figures path unused."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_physics_domain_guidance.py:28 fails when a domain is deleted from domains.yaml (negative-control.log EXIT=1), but four of the five added guards carry no recorded red run.",
+    "evidence": "head-gate.log (121 passed EXIT=0) and base-gate.log (116 passed EXIT=0) record the delta the done_when names, but the manifest records a red run for only one of five added tests.",
+    "fit": "imas_codex/definitions/physics/__init__.py:26 follows the lru_cache-plus-safe-fallback idiom of imas_codex/standard_names/vocabulary_definitions.py:8 and names nothing by a plan label.",
+    "goal_fidelity": "imas_codex/definitions/physics/domains.yaml carries scope/includes/excludes for all 32 PhysicsDomain values and scope for all 10 categories, which the goal entry specifies.",
+    "reuse": "imas_codex/definitions/physics/__init__.py:49 re-reads ISN's physics_domains.yml by hand rather than extending the read imas_standard_names already owns.",
+    "scope_discipline": "git diff --stat cd0612302..97552c2e4 lists only the five declared files and the fragment, nothing else in the tree changes."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: cd061230285427cf7b66db1ba3ff9066c2f1f4d3\nreviewed_head_sha: 97552c2e4d1f6a29592f647aa79ea7b6cda47fc2\nVERDICT goal: the node goal is to persist generated classification guidance for every physics domain as YAML in imas-codex and serve it through the prompt provider; imas_codex/definitions/physics/domains.yaml carries scope/includes/excludes for all 32 PhysicsDomain values and scope for all 10 ISN categories, and imas_codex/llm/prompt_loader.py:618 returns it.\nVERDICT done_when: the done_when names five checks (domain keys equal the PhysicsDomain values, category keys equal ISN's categories, every domain has non-empty scope/includes/excludes, every excludes neighbour a domain value, the provider returns the guidance) plus a base/head gate by delta and a landing fragment; tests/graph/test_physics_domain_guidance.py carries all five, head-gate.log records 121 passed EXIT=0 against base-gate.log 116 passed EXIT=0, and the fragment is committed.\nVERDICT write_paths: the declared scope is six files plus a figures path; git diff --stat cd0612302..97552c2e4 lists exactly the five declared files (domains.yaml, definitions/physics/__init__.py, prompt_loader.py, the test file, definitions/README.md) plus the fragment, with the figures path unused.\nVERDICT manifest: read; it reports status complete, the three-file gate command at 121 passed, base 116 passed, one negative control with EXIT=1, and names the three logs.\nVERDICT diff: read all four commits (6df823c9e, 89121e7a8, 28732d21f, 97552c2e4) against base cd0612302; every hunk is inside the declared scope and each commit carries a body.\nCALL_SITES: imas_codex/llm/prompt_loader.py:1002, imas_codex/llm/prompt_loader.py:915, imas_codex/llm/server.py:2323\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/definitions/physics/domains.yaml carries scope/includes/excludes for all 32 PhysicsDomain values and scope for all 10 categories, which the goal entry specifies.\nSCORE evidence: 15\nJUSTIFICATION evidence: head-gate.log (121 passed EXIT=0) and base-gate.log (116 passed EXIT=0) record the delta the done_when names, but the manifest records a red run for only one of five added tests.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat cd0612302..97552c2e4 lists only the five declared files and the fragment, nothing else in the tree changes.\nSCORE durability: 15\nJUSTIFICATION durability: tests/graph/test_physics_domain_guidance.py:28 fails when a domain is deleted from domains.yaml (negative-control.log EXIT=1), but four of the five added guards carry no recorded red run.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/definitions/physics/__init__.py:26 follows the lru_cache-plus-safe-fallback idiom of imas_codex/standard_names/vocabulary_definitions.py:8 and names nothing by a plan label.\nSCORE reuse: 13\nJUSTIFICATION reuse: imas_codex/definitions/physics/__init__.py:49 re-reads ISN's physics_domains.yml by hand rather than extending the read imas_standard_names already owns.\nFINDING imas_codex/definitions/physics/__init__.py:49 follow-on: load_isn_physics_domains builds a path from imas_standard_names.__file__ and re-extracts description/category/ids, duplicating imas_standard_names/grammar_codegen/physics_domain_spec.py PhysicsDomainSpec.load() (same file, via importlib.resources) and re-deriving the vocab directory grammar.vocab_loaders owns, while imas_codex/standard_names/vocabulary_definitions.py:15 already delegates to ISN's vocab_loaders.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T152843812814-scg-domain-guidance/manifest.md:16 follow-on: the done_when asks that each of the five added tests fail with its mechanism removed, but the manifest records one negative control (test_domain_keys_are_exactly_the_enum_values), so four added guards carry no recorded red run.\n",
+  "review_run_id": "r-20261013T160518400316-review-of-scg-domain-guidance",
+  "reviewed_base_sha": "cd061230285427cf7b66db1ba3ff9066c2f1f4d3",
+  "reviewed_head_sha": "97552c2e4d1f6a29592f647aa79ea7b6cda47fc2",
+  "reviewed_run_id": "r-20261013T152843812814-scg-domain-guidance",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T16:33:12.882998+00:00",
+  "total": 97,
+  "verdict": "SOUND WITH FINDINGS"
+}
