@@ -40,6 +40,11 @@
     <p>Run <code>r-20261013T094806368999-scg-dd-build-keeps-classification</code>, merged at <code>7de23c9c4</code>. The path upsert in <code>_batch_create_path_nodes</code> (<code>imas_codex/graph/build_dd.py</code>) now writes the IDS default domain only where <code>domain_source</code> is null. A classified path keeps its <code>physics_domain</code> and its classification metadata through a rebuild. This removes the cause of the 2026-07-22 loss of 12,011 classifications.</p><p><code>tests/graph/test_dd_path_domain_upsert.py</code> drives the real upsert through a recording client, and it fails against the old statement. The statement passes <code>EXPLAIN</code> against the live graph. The gate was 277 passed at base and 278 at head, with no added failures. The review scored every dimension 17 or above, with no findings. Audit note: <code>mark_paths_enriched</code> in <code>imas_codex/graph/dd_graph_ops.py</code> still coalesces a supplied domain over the stored one, but no current caller supplies one.</p>
   </section>
 
+  <section id="s3-domain-sheet-split-reuse">
+    <h2>§3 — the domain label sheet shares the goldens split rule</h2>
+    <p>The domain label sheet's driver had its own copy of the calibration/validation split. It now calls the rule factored into <code>imas_codex/standard_names/judgment_goldens.py</code>, so one rule decides both goldens and this sheet. The rebuilt sheet is byte-identical to the one labelled (138,108 bytes, zero changed row splits), so the 170 lead labels stand. Golden fixture tests: 16 passed at base, 17 at head (one added). Reviewed head <code>0bfecdca2d0b</code>, merged as <code>8dc0d30c4</code>. Review: reuse 20, scope 20, goal fidelity 19, fit 19, evidence 19, durability 17; its one follow-on (use the <code>evaluation.py</code> CALIBRATION/VALIDATION constants instead of literal strings) folds into the next node that edits <code>judgment_goldens.py</code>. <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-domain-sheet-split-reuse.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>
