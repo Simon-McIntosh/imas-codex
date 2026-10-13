@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf">
 </head>
@@ -484,14 +484,14 @@
       </p>
     <p class="r-dec-rat">Recommended: store it at enrichment, after §8&#x27;s 300-signal prototype records agreement and cost. One judgment per signal serves search, rerank and mapping, and the role becomes a facet anyone can query.</p>
     </div>
-<div class="r-dec" data-key="embed-text" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="embed-text" data-choice="description-only" data-by="reckon-build (measured)" data-when="2026-10-13T00:10:57+00:00">
     <p class="r-dec-q">What text does a signal&#x27;s embedding encode?</p>
     <p class="r-dec-ctx">Today it encodes the description alone. A composed text, name followed by description and unit, gives the vector the identifier and unit a searcher often types. §5 measures both on the harness before choosing; no recommendation precedes that measurement.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="description-only">The description alone</button>
+      <button class="r-opt chosen" data-value="description-only">The description alone</button>
       <button class="r-opt" data-value="name-description-unit">Name, description and unit composed</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Settled by §5&#x27;s measurement, as the plan specifies: over the 14,312 eligible JT-60SA signals embedded in memory, the description alone beats the composed name, description and unit on both arms and every metric (RRF mean nDCG@10 0.776 against 0.762, vector only 0.689 against 0.664, RRF grade-3 precision@5 0.682 against 0.664). Evidence: docs/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html.</p>
     </div>
 </section>
 
@@ -559,11 +559,17 @@
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261012T234404083119-review-of-ssfms-fusion" data-who="reckon-build" data-when="2026-10-12T23:59:34.287Z">
     <div class="r-comment-body"><p>docs/plans/signal-search-finds-the-measured-signal.html#section-4</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-20261013T0012-s4-fusion" data-who="reckon-build" data-when="2026-10-13T00:12:00Z">
+    <div class="r-comment-body"><p>First of two nodes landed (merged in <code>cd8b059b0</code>): <code>imas_codex/search/fusion.py</code> owns <code>rrf_fuse</code> and <code>RRF_K</code>; signal, docs and code search and the slot context fuse by rank, and the standard-name search imports the moved definition. <code>signal_vector_search_block</code> in <code>imas_codex/graph/domain_queries.py</code> owns the facility signal vector query. A rank-1 vector hit now outranks a rank-5 text hit, and the additive rule fails that test. Review 110/120, zero added failures. Carried: <code>_text_search_signals</code> requests twice its argument, so the full-text pool is 100, not 50, in product and harness alike; and displayed scores are now fused masses near 0.02, which §9's readable results should replace.</p></div>
+</div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261012T235358686278-review-of-ssfms-description-writer" data-who="reckon-build" data-when="2026-10-13T00:08:30.079Z">
     <div class="r-comment-body"><p>docs/state/imas-codex — the review lands as a comment on the plan section signal-search-finds-the-measured-signal §5 via the stored record at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261012T232339331806-ssfms-description-writer.json</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261012T232321937332-ssfms-embed-text-measure" data-who="reckon-build" data-when="2026-10-12T23:53:28.281Z">
     <div class="r-comment-body"><p>§5 embed-text measured on the golden set — description-only beats name+description+unit on both arms and all metrics (RRF mean nDCG@10 0.7761 vs 0.7620, vector-only 0.6890 vs 0.6641, RRF grade-3 precision@5 0.6818 vs 0.6636); 124 labels added across 18 of 22 questions so every question scores on both arms under both texts; no stored vector written (FacilitySignal census digest unchanged), evidence in docs/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261013T0012-s5-measure" data-who="reckon-build" data-when="2026-10-13T00:12:00Z">
+    <div class="r-comment-body"><p>First of three nodes landed (merged in <code>5ab2c75db</code>): decision <code>embed-text</code> is locked on the description alone, which beats the composed text on both arms and every metric. The in-memory description-only run reproduced §3's stored-vector vector arm to within 0.004. 124 labels joined the fixture (1,675 in all); no stored vector changed. <a href="/imas-codex/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html">evidence</a></p></div>
 </div>
 </section>
 </main>
