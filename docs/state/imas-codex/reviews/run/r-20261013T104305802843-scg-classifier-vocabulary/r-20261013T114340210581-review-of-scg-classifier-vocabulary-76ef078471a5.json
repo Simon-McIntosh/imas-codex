@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/graph/dd_domain_classifier.py:726",
+    "imas_codex/graph/dd_workers.py:716"
+  ],
+  "completed_at": "2026-10-13T11:59:13.438Z",
+  "dispatched_at": "2026-10-13T11:43:54Z",
+  "findings": [
+    {
+      "file": "imas_codex/llm/prompts/imas/domain_classifier.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the rendered vocabulary names each domain but supplies no scope text, because _provide_physics_domains (imas_codex/llm/prompt_loader.py:576) falls back to an empty description when imas_codex/definitions/physics/domains.yaml is absent, which it is; the classifier prompt therefore carries less per-domain guidance than the hand-typed 21-row table it replaces. The node reported this in the fragment (scg-classifier-vocabulary.html:30) and as a follow-on rather than adding a second source of descriptions, as its brief directed; the fix belongs to the provider."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-classifier-vocabulary.html",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "follow-on: the \"Derived name domain\" row (7/20 and 94/150) is computed through pick_primary_domain, whose cluster-weighted index is empty because the graph holds no Cluster nodes and which therefore falls back to alphabetical order, so that headline improvement is not attributable to the vocabulary change alone. The fragment notes the dependency at :77 and the manifest records it as a follow-on, but the row reads as a classifier result."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T104305802843-scg-classifier-vocabulary/logs/head-gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's head gate log names no revision on its first line (base-gate.log carries '# rev 80499548...', head-gate.log does not), so this review cites the head arm by sha256 digest rather than by path to satisfy the manifest audit; the head run is otherwise identified by head-new-test.log and the manifest commits, but the missing header is a capture defect in that run's record."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "production reach is the DD classifier: imas_codex/graph/dd_domain_classifier.py:726 renders the prompt inside classify_tier1_llm, and imas_codex/graph/dd_workers.py:716 drives the classifier from the DD build worker; the node's own test file is not a production call site.",
+    "diff": "read commit by commit over 804995489b124507991711d67047b5e94fc14246..76ef078471a5590a6f4f3eb7ae0b2a8c3e7f4b91; four commits, six files, all inside the declared scope.",
+    "done_when": "the done_when names tests/graph/test_domain_classifier_prompt.py, a base-failing demonstration, a logged measurement and a cache replay; the manifest records 2 passed and logs negative-control.log, measure-fresh-complete.log and measure-replay.log.",
+    "goal": "the node goal is to render the DD domain classifier vocabulary from the PhysicsDomain enum and correct the core-profile worked example; imas_codex/llm/prompts/imas/domain_classifier.md:14 renders the table from the physics_domains provider and :24 states the core-plasma rule.",
+    "manifest": "read; it states status complete, the gate result tests/graph/test_domain_classifier_prompt.py 2 passed, spend USD 2.662405 against the USD 2.80 ceiling, and one negative_control_log path.",
+    "write_paths": "read the manifest's orientation_write_paths (six paths); every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_domain_classifier_prompt.py:18 and :37 are independent of the value under test (the enum and a monkeypatched provider on one side, the rendered prompt on the other) and both redden against the base prompt per negative-control.log, so reverting the enum-rendered vocabulary fails them.",
+    "evidence": "base-gate.log and head-gate.log record 4 and 4 failures with identical ids (added delta 0) over 1593 and 1595 selected, negative-control.log shows both new tests red at base, and scg-classifier-vocabulary-results.json carries spend_usd 2.662405 with snapshot_before and snapshot_after property_digest identical.",
+    "fit": "imas_codex/llm/prompts/imas/domain_classifier.md:14-15 renders domain.value and domain.description exactly as imas_codex/llm/prompts/shared/schema/physics-domains.md:5-6, and no added symbol, file or comment carries a plan or ticket label.",
+    "goal_fidelity": "imas_codex/llm/prompts/imas/domain_classifier.md:14 renders the vocabulary from the physics_domains provider instead of a hand-typed table and :24 corrects the core-profile example to core_plasma_physics, which is the node goal.",
+    "reuse": "the change declares schema_needs physics_domains and renders from the existing _provide_physics_domains provider (imas_codex/llm/prompt_loader.py:576) instead of adding a second vocabulary source; a search of imas_codex/llm/prompts found that schema-need idiom already owned there, which this prompt extends.",
+    "scope_discipline": "git diff 804995489b124507991711d67047b5e94fc14246..76ef078471a5590a6f4f3eb7ae0b2a8c3e7f4b91 lists exactly six paths, each inside the manifest's orientation_write_paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to render the DD domain classifier vocabulary from the PhysicsDomain enum, and imas_codex/llm/prompts/imas/domain_classifier.md:14 does that by iterating the physics_domains provider.\nVERDICT done_when: the done_when names tests/graph/test_domain_classifier_prompt.py with a base-failing demonstration and a logged measurement, all of which the manifest records.\nVERDICT write_paths: read the manifest's orientation_write_paths (six paths); every path in the diff is inside them.\nVERDICT manifest: read; it states complete, the gate result 2 passed, and spend USD 2.662405 of the USD 2.80 ceiling.\nVERDICT diff: read commit by commit over 80499548..76ef07847; four commits, six files, all inside scope.\nCALL_SITES: imas_codex/graph/dd_domain_classifier.py:726, imas_codex/graph/dd_workers.py:716\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/llm/prompts/imas/domain_classifier.md:14 renders the vocabulary from the provider and :24 corrects the core-profile example, the stated goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: base-gate.log and head-gate.log show 4 vs 4 failures with identical ids (delta 0), negative-control.log shows both new tests red at base, and the results JSON names spend_usd 2.662405.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 80499548..76ef07847 is inside the manifest's orientation_write_paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/graph/test_domain_classifier_prompt.py:18 and :37 are independent of the value under test and both redden against the base prompt per negative-control.log.\nSCORE fit: 19\nJUSTIFICATION fit: domain_classifier.md:14-15 matches the shared/schema/physics-domains.md:5-6 render idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the prompt extends the existing _provide_physics_domains owner (imas_codex/llm/prompt_loader.py:576) rather than adding a second vocabulary source.\nFINDING imas_codex/llm/prompts/imas/domain_classifier.md:15 follow-on: the rendered table carries no scope text because the provider returns empty descriptions, less guidance than the hand-typed table it replaces.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-classifier-vocabulary.html:65 follow-on: the derived-name-domain metric runs through pick_primary_domain's alphabetical fallback, so it is not attributable to the vocabulary alone.\n",
+  "review_run_id": "r-20261013T114340210581-review-of-scg-classifier-vocabulary-76ef078471a5",
+  "reviewed_base_sha": "804995489b124507991711d67047b5e94fc14246",
+  "reviewed_head_sha": "76ef078471a5590a6f4f3eb7ae0b2a8c3e7f4b91",
+  "reviewed_run_id": "r-20261013T104305802843-scg-classifier-vocabulary",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T12:01:24.724085+00:00",
+  "total": 113
+}
