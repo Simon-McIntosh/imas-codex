@@ -489,15 +489,19 @@ def build_signal_scope_case(alias: str = "s") -> str:
 def build_enrich_claimable_predicate(alias: str = "s") -> str:
     """Render the enrich-claimability predicate for FacilitySignal rows.
 
-    Enrichment only runs on standalone signals and SignalSource representatives.
-    Non-representative members inherit enrichment via propagation and must not be
-    counted as runnable work in completion checks or progress stats.
+    Members inherit an enriched representative's result through propagation.
+    If the representative is underspecified, its members need direct enrichment
+    from their own text, so they remain runnable after a reset.
     """
 
     return f"""
         NOT EXISTS {{
             MATCH ({alias})-[:MEMBER_OF]->(sg:SignalSource)
             WHERE sg.representative_id <> {alias}.id
+              AND NOT EXISTS {{
+                  MATCH (rep:FacilitySignal {{id: sg.representative_id}})
+                  WHERE rep.status = 'underspecified'
+              }}
         }}
     """.strip()
 
@@ -1141,19 +1145,14 @@ def claim_signals_for_enrichment(
                                     AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
                   AND __CATEGORY_PREDICATE__
                   __FOCUS_PREDICATE__
-                  AND NOT EXISTS {
-                    MATCH (s)-[:MEMBER_OF]->(sg:SignalSource)
-                    WHERE sg.representative_id <> s.id
-                  }
+                  AND __ENRICH_CLAIMABLE__
                   AND (s.claimed_at IS NULL
                        OR s.claimed_at < datetime() - duration($cutoff))
                 WITH s ORDER BY rand() LIMIT $batch_size
                 SET s.claimed_at = datetime(), s.claim_token = $token
-                """.replace(
-                    "__CATEGORY_PREDICATE__", build_category_predicate("s")
-                ).replace(
-                    "__FOCUS_PREDICATE__", build_focus_predicate("s", focus_items)
-                ),
+                """.replace("__CATEGORY_PREDICATE__", build_category_predicate("s"))
+                .replace("__FOCUS_PREDICATE__", build_focus_predicate("s", focus_items))
+                .replace("__ENRICH_CLAIMABLE__", build_enrich_claimable_predicate("s")),
                 facility=facility,
                 discovered=FacilitySignalStatus.discovered.value,
                 underspecified=FacilitySignalStatus.underspecified.value,
@@ -5449,6 +5448,8 @@ async def individualize_source_descriptions(
             """
             MATCH (sg:SignalSource {facility_id: $facility, status: 'enriched'})
             WHERE sg.members_described IS NULL OR sg.members_described = false
+            MATCH (rep:FacilitySignal {id: sg.representative_id})
+            WHERE rep.status IN ['enriched', 'checked']
             OPTIONAL MATCH (m:FacilitySignal)-[:MEMBER_OF]->(sg)
             WITH sg, collect({id: m.id, accessor: m.accessor}) AS members
             WHERE size(members) > 1
