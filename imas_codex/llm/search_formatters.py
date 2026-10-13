@@ -9,6 +9,7 @@ render all results they receive without artificial truncation.
 from __future__ import annotations
 
 import hashlib
+import re
 from collections.abc import Iterable
 from typing import Any
 
@@ -88,24 +89,60 @@ def _stringify_cluster_labels(values: Any) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
+def _signal_category(sig: dict[str, Any]) -> str:
+    """Use the source path's parent as the category when it is available."""
+    source_path = sig.get("data_source_path") or ""
+    category, separator, _ = source_path.rpartition("/")
+    return category if separator else (sig.get("data_source_name") or "unknown")
+
+
+def _member_name(names: list[str]) -> str:
+    """Compact one varying numeric position without implying extra members."""
+    if len(names) == 1:
+        return names[0]
+    pieces = [re.split(r"(\d+)", name) for name in names]
+    if all(len(part) == 3 for part in pieces) and all(
+        part[0] == pieces[0][0] and part[2] == pieces[0][2] for part in pieces
+    ):
+        numbers = sorted(
+            {part[1] for part in pieces}, key=lambda value: (int(value), value)
+        )
+        return f"{pieces[0][0]}{{{','.join(numbers)}}}{pieces[0][2]}"
+    return ", ".join(names)
+
+
+def _signal_access_methods(sig: dict[str, Any]) -> list[dict[str, Any]]:
+    methods = [
+        method
+        for method in sig.get("access_methods") or []
+        if isinstance(method, dict) and method.get("access_template")
+    ]
+    if not methods and sig.get("access_template"):
+        methods = [
+            {
+                "access_template": sig["access_template"],
+                "access_type": sig.get("access_type"),
+                "imports_template": sig.get("imports_template"),
+                "connection_template": sig.get("connection_template"),
+                "imas_path": sig.get("imas_path"),
+                "imas_docs": sig.get("imas_docs"),
+                "imas_unit": sig.get("imas_unit"),
+            }
+        ]
+    return methods
+
+
 def format_signals_report(
     signals: list[dict[str, Any]],
     data_nodes: list[dict[str, Any]],
     scores: dict[str, float],
+    *,
+    ranks: dict[str, int] | None = None,
 ) -> str:
-    """Format signal search results into a readable report.
+    """Group signal families within source categories and render access once.
 
-    Handles deduplicated access methods (collected into arrays by
-    ``_enrich_signals``), interpolates template placeholders with
-    actual signal properties, and filters noisy data nodes.
-
-    Args:
-        signals: Enriched signal records with ``access_methods`` arrays.
-        data_nodes: Data node results from vector search.
-        scores: Map of signal ID → similarity score.
-
-    Returns:
-        Formatted text report.
+    ``scores`` remains in the signature for existing callers; fused mass is not
+    useful in a report. ``ranks`` preserves fused order if the caller reranks.
     """
     if not signals and not data_nodes:
         return "No signals found."
@@ -113,164 +150,114 @@ def format_signals_report(
     parts: list[str] = []
 
     if signals:
-        parts.append(f"## Signals ({len(signals)} matches)\n")
-
+        groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
         for sig in signals:
-            sid = sig.get("id", "?")
-            score = scores.get(sid)
-            score_str = f" (score: {score:.2f})" if score is not None else ""
-            parts.append(f"### {sid}{score_str}")
+            name_template = re.sub(r"\d+", "", sig.get("name") or sig.get("id") or "?")
+            groups.setdefault((_signal_category(sig), name_template), []).append(sig)
+        parts.append(f"## Signals ({len(signals)} matches; {len(groups)} rows)\n")
 
-            desc = sig.get("description") or ""
-            if desc:
-                parts.append(f"  {desc}")
-
-            # Metadata line
-            meta_parts: list[str] = []
-            diag = sig.get("diagnostic_name")
-            if diag:
-                cat = sig.get("diagnostic_category")
-                meta_parts.append(f"Diagnostic: {diag}" + (f" ({cat})" if cat else ""))
-            domain = sig.get("physics_domain")
-            if domain:
-                meta_parts.append(f"Domain: {domain}")
-            unit = sig.get("unit")
-            unit_symbol = sig.get("unit_symbol")
-            if unit:
-                unit_str = unit
-                if unit_symbol and unit_symbol != unit:
-                    unit_str = f"{unit} ({unit_symbol})"
-                meta_parts.append(f"Unit: {unit_str}")
-            elif unit_symbol:
-                meta_parts.append(f"Unit: {unit_symbol}")
-            sign_conv = sig.get("sign_convention")
-            if sign_conv:
-                meta_parts.append(f"Sign: {sign_conv}")
-            cocos = sig.get("cocos")
-            if cocos is not None:
-                meta_parts.append(f"COCOS: {cocos}")
-            checked = sig.get("checked")
-            shot = sig.get("example_shot")
-            if checked and shot:
-                meta_parts.append(f"Checked: shot {shot}")
-            if meta_parts:
-                parts.append("  " + " | ".join(meta_parts))
-
-            # Extended metadata
-            keywords = sig.get("keywords")
-            if keywords:
-                kw_str = ", ".join(keywords) if isinstance(keywords, list) else keywords
-                parts.append(f"  Keywords: {kw_str}")
-            aliases = sig.get("aliases")
-            if aliases:
-                al_str = ", ".join(aliases) if isinstance(aliases, list) else aliases
-                parts.append(f"  Aliases: {al_str}")
-            analysis_code = sig.get("analysis_code")
-            if analysis_code:
-                parts.append(f"  Analysis code: {analysis_code}")
-
-            # Signal source context
-            sg_key = sig.get("signal_source_key")
-            if sg_key:
-                sg_desc = sig.get("signal_source_description") or ""
-                sg_count = sig.get("signal_source_member_count")
-                sg_line = f"  Signal source: {sg_key}"
-                if sg_count:
-                    sg_line += f" ({sg_count} members)"
-                if sg_desc:
-                    sg_line += f" — {sg_desc}"
-                parts.append(sg_line)
-
-            # Wiki cross-references
-            wiki = sig.get("wiki_mentions")
-            if wiki:
-                wiki = [w for w in wiki if w]
-                if wiki:
-                    parts.append(f"  Wiki refs: {', '.join(wiki)}")
-
-            # Dynamic handbook pages that list this signal in their catalogue.
-            pages = sig.get("documented_pages") or []
-            cites = []
-            seen_pages: set[str] = set()
-            for page in pages:
-                if not isinstance(page, dict) or not page.get("title"):
-                    continue
-                pid = page.get("id") or page["title"]
-                if pid in seen_pages:
-                    continue
-                seen_pages.add(pid)
-                label = f'"{page["title"]}"'
-                if page.get("id"):
-                    label += f" ({page['id']})"
-                cites.append(label)
-            if cites:
-                parts.append(f"  Documented in: {', '.join(cites)}")
-
-            # Data access section — handles multiple access methods
-            access_methods = sig.get("access_methods") or []
-            # Filter out empty/null access methods from OPTIONAL MATCH
-            access_methods = [
-                am
-                for am in access_methods
-                if isinstance(am, dict) and am.get("access_template")
+        order = ranks or {
+            sig.get("id", "?"): index for index, sig in enumerate(signals, 1)
+        }
+        access: dict[tuple[Any, ...], str] = {}
+        for (category, _), members in groups.items():
+            names = [sig.get("name") or sig.get("id") or "?" for sig in members]
+            title = _member_name(names)
+            member_word = "member" if len(members) == 1 else "members"
+            parts.append(f"### {title} ({len(members)} {member_word})")
+            units = sorted(
+                {
+                    sig.get("unit") or sig.get("unit_symbol") or "unknown"
+                    for sig in members
+                }
+            )
+            classes = sorted(
+                {str(sig.get("data_class") or "unknown") for sig in members}
+            )
+            checked = sum(bool(sig.get("checked")) for sig in members)
+            status = f"{checked} checked, {len(members) - checked} unchecked"
+            meta = [
+                f"Rank: {min(order.get(sig.get('id', '?'), len(signals) + 1) for sig in members)}",
+                f"Category: {category}",
+                f"Unit: {', '.join(units)}",
+                f"Data class: {', '.join(classes)}",
+                f"Check status: {status}",
             ]
+            roles = sorted(
+                {str(sig["signal_role"]) for sig in members if sig.get("signal_role")}
+            )
+            if roles:
+                meta.append(f"Role: {', '.join(roles)}")
+            parts.append("  " + " | ".join(meta))
+            if len(members) == 1 and members[0].get("description"):
+                parts.append(f"  {members[0]['description']}")
+            parts.append(
+                "  Members: " + ", ".join(str(sig.get("id", "?")) for sig in members)
+            )
+            accessors = [
+                f"{sig.get('name') or sig.get('id')}: {sig['accessor']}"
+                for sig in members
+                if sig.get("accessor")
+            ]
+            if accessors:
+                parts.append("  Accessors: " + "; ".join(accessors))
+            paths = sorted(
+                {
+                    method["imas_path"]
+                    for sig in members
+                    for method in _signal_access_methods(sig)
+                    if method.get("imas_path")
+                }
+            )
+            if paths:
+                parts.append("  **IMAS mapping**: " + ", ".join(paths))
+            tree_paths = sorted(
+                {str(sig["tree_path"]) for sig in members if sig.get("tree_path")}
+            )
+            if tree_paths:
+                parts.append("  **Data node**: " + ", ".join(tree_paths))
+            pages = {
+                f'"{page["title"]}"' + (f" ({page['id']})" if page.get("id") else "")
+                for sig in members
+                for page in sig.get("documented_pages") or []
+                if isinstance(page, dict) and page.get("title")
+            }
+            if pages:
+                parts.append("  Documented in: " + ", ".join(sorted(pages)))
 
-            # Also support legacy single-access format for backward compat
-            if not access_methods and sig.get("access_template"):
-                access_methods = [
-                    {
-                        "access_template": sig["access_template"],
-                        "access_type": sig.get("access_type"),
-                        "imports_template": sig.get("imports_template"),
-                        "connection_template": sig.get("connection_template"),
-                        "imas_path": sig.get("imas_path"),
-                        "imas_docs": sig.get("imas_docs"),
-                        "imas_unit": sig.get("imas_unit"),
-                    }
-                ]
+            row_access: list[str] = []
+            for sig in members:
+                for method in _signal_access_methods(sig):
+                    key = tuple(
+                        method.get(field)
+                        for field in (
+                            "access_type",
+                            "method_type",
+                            "imports_template",
+                            "connection_template",
+                            "access_template",
+                        )
+                    )
+                    if key not in access:
+                        access[key] = f"template {len(access) + 1}"
+                    if access[key] not in row_access:
+                        row_access.append(access[key])
+            if row_access:
+                parts.append("  Data access: " + ", ".join(row_access))
+            parts.append("")
 
-            if access_methods:
-                for am in access_methods:
-                    access_type = am.get("access_type") or "unknown"
-                    method_type = am.get("method_type")
-                    template = am.get("access_template") or ""
-
-                    # Interpolate template placeholders with signal properties
-                    template = _interpolate_template(template, sig)
-
-                    label = access_type
-                    if method_type:
-                        label = f"{access_type}/{method_type}"
-                    parts.append(f"\n  **Data access** ({label}):")
-                    imports = am.get("imports_template")
-                    if imports:
-                        parts.append(f"    {imports}")
-                    connection = am.get("connection_template")
-                    if connection:
-                        parts.append(f"    {connection}")
-                    parts.append(f"    {template}")
-
-                    # IMAS mapping from this access method
-                    imas_path = am.get("imas_path")
-                    if imas_path:
-                        parts.append(f"\n  **IMAS mapping**: {imas_path}")
-                        imas_docs = am.get("imas_docs")
-                        if imas_docs:
-                            parts.append(f'    "{imas_docs}"')
-                        imas_unit = am.get("imas_unit")
-                        if imas_unit:
-                            parts.append(f"    Unit: {imas_unit}")
-
-            # Data node section
-            tree_path = sig.get("tree_path")
-            data_source_name = sig.get("data_source_name")
-            if tree_path:
-                parts.append(
-                    f"\n  **Data node**: {tree_path}"
-                    + (f" (source: {data_source_name})" if data_source_name else "")
+        if access:
+            parts.append("## Data access templates")
+            for key, label in access.items():
+                access_type, method_type, imports, connection, template = key
+                kind = "/".join(
+                    str(value) for value in (access_type, method_type) if value
                 )
-
-            parts.append("")  # blank line between signals
+                parts.append(f"**Data access {label}** ({kind or 'unknown'}):")
+                for line in (imports, connection, template):
+                    if line:
+                        parts.append(f"  {line}")
+                parts.append("")
 
     if data_nodes:
         # Filter out noisy STATIC data nodes and low-score results

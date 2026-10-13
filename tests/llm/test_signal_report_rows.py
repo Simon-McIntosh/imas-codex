@@ -57,3 +57,11 @@ def test_equal_name_templates_in_different_categories_remain_separate() -> None:
     assert report.count("### ") == 2
     assert "Category: MMSYS" in report
     assert "Category: CONTROL" in report
+
+
+def test_report_keeps_fused_rank_after_a_rerank() -> None:
+    signal = _signal("EF2 Booster BPS Voltage", "MMSYS")
+
+    report = format_signals_report([signal], [], {}, ranks={signal["id"]: 7})
+
+    assert "Rank: 7" in report
