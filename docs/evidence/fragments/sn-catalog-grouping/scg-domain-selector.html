@@ -1,0 +1,54 @@
+<section id="scg-domain-selector-rule">
+  <h3>Declared domain selector</h3>
+  <p><code>select_primary_domain</code> selects the lowest rank in the declared
+  32-domain table from the distinct supplied domains. The table keeps
+  <code>general</code> last. Empty input returns <code>None</code>; an unknown
+  value raises with its name. The rule does not read the graph and is unchanged
+  by source order, duplicate entries, or a name's stored primary domain.</p>
+  <p><code>pick_primary_domain</code> and <code>domain_key</code> now call the
+  selector, carrying catalog import, export, and pure review grouping with
+  them. Consolidation's <code>_resolve_physics_domains</code> also calls it and
+  retains the sorted distinct source-domain union. The graph writer in
+  <code>graph_ops.py</code> still calls the compatibility
+  <code>maybe_promote_domain</code> adapter; its set-based rewrite belongs to
+  the graph-writer node. The cluster-weighted index was removed.</p>
+  <p>The old cluster-index assertions in
+  <code>test_priority_high_outranks_medium</code>,
+  <code>test_graph_unreachable_returns_empty_index</code>,
+  <code>test_cache_query_is_one_shot</code>,
+  <code>test_tied_importance_breaks_alphabetical</code>, and
+  <code>TestGraphPriorityWins.test_graph_index_overrides_fallback</code> were
+  replaced by declared-order, graph-isolation, and vocabulary-coverage tests.
+  The alphabetical assertions in
+  <code>test_unranked_domain_falls_back_to_alphabetical</code>,
+  <code>test_empty_graph_falls_back_to_alphabetical</code>, and
+  <code>test_domain_key_list_unranked_alphabetical_fallback</code> were replaced
+  by the table selection and unknown-value refusal. The empty-list assertion
+  <code>test_pick_primary_empty_list_raises</code> now follows the selector's
+  <code>None</code> result. <code>test_domain_key_list_picks_priority</code>
+  now asserts the declared table. The old unknown-rank cases in
+  <code>TestDomainRank</code> and
+  <code>TestMaybePromoteDomain.test_promotion</code> now require refusal.</p>
+</section>
+<section id="scg-domain-selector-live-measure">
+  <h3>Current graph impact</h3>
+  <p>One read-only, ID-ordered query bounded to 3,000 live StandardName rows
+  returned 2,675 names, confirming the expected live cohort was visible.
+  Of these, 2,437 carried nonempty current <code>source_domains</code> and
+  all 2,437 used known domain values. Applying the declared selector to those
+  stored lists would change the current primary domain on 7 names (0.29%);
+  2,430 would keep it. The remaining 238 have no stored source-domain list to
+  select from. This measures the stored lists, which the plan's DD-source
+  census says still need repair; it does not project the result after that
+  repair.</p>
+  <table>
+    <thead><tr><th>Name</th><th>Stored primary</th><th>Selected from stored sources</th></tr></thead>
+    <tbody>
+      <tr><td>neon_density</td><td>general</td><td>transport</td></tr>
+      <tr><td>particle_energy</td><td>turbulence</td><td>transport</td></tr>
+      <tr><td>vector_potential</td><td>edge_plasma_physics</td><td>magnetohydrodynamics</td></tr>
+    </tbody>
+  </table>
+  <p>The full bounded query receipt is retained in the run's
+  <code>live-domain-measure.log</code>.</p>
+</section>
