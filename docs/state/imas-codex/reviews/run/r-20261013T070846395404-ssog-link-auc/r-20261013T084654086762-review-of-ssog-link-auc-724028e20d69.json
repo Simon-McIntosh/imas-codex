@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T09:02:01.144Z",
+  "dispatched_at": "2026-10-13T08:47:19Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc-run.py",
+      "line": "233",
+      "severity": "follow-on",
+      "text": "follow-on: _render_disagreement_into's docstring says the prose \"is checked against every row the paragraph quotes, and a row that fails the check is named in findings rather than written\", but the body only checks that the fragment exists and carries the markers, so the per-row check the docstring promises is never performed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc-run.py",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "follow-on: the module docstring names the plan node id \"ssog-link-auc\", which the repository naming rule bans in source and comments; the sibling ssog-link-label-sheet-run.py carries the same pattern, so it is a sprint-wide habit rather than new to this node."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T070846395404-ssog-link-auc/run1.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log's revision header reads 3cd8fce, but the JSON its run produced (byte-identical to the other run's and to the committed results) carries disagreement_prose, a key only the 724028e2 driver emits; the true post-fix run that wrote the committed file is run3.log, which the manifest's test_logs does not name."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site found; ssog-link-auc-run.py is a standalone evidence driver, nothing under imas_codex/ imports it and a repo-wide grep for its name returns only the worktree path baked into the generated model files, so CALL_SITES is none.",
+    "diff": "read both commits against base 61689727: 3cd8fce creates the driver, its results JSON and the fragment HTML (567 insertions), and 724028e2 renders the disagreement prose from the results rows and splices it into the fragment between markers, replacing a hand-written paragraph whose rows two independent reviews found mis-paired; the settled change imports roc_auc and bootstrap_interval from imas_codex.discovery.base.evaluation and changes nothing under imas_codex/.",
+    "done_when": "the done-when asks for two logged driver runs reproducing the same numbers, a fragment reporting the figures in prose and one table, and tests/discovery/test_evaluation.py passing at base and head; test_evaluation_at_base.log and test_evaluation_after.log both read \"18 passed ... EXIT=0\", run1.log and run2.log read the same figures at EXIT=0 over a byte-identical JSON, and I re-ran the driver at 724028e2 into a $TMPDIR scratch tree whose results JSON and spliced fragment are byte-identical to run1.json (md5 a2ea3e835b8429b9471ff7ee1e3eb140) and to the committed fragment.",
+    "goal": "the node goal is to measure how well Jev's link judgment separates good name links from bad; docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc-run.py:252 measure() reports Jev's rank AUC with a copy-grouped interval over the all/non-self/self populations, the deterministic 1-is_self_link baseline, the paired difference, per-population counts and both disagreement lists, writing ssog-link-auc-results.json.",
+    "manifest": "read; status complete; commits 3cd8fce and 724028e2; changed_paths names the three fragment files; the tests line records the pytest gate at \"18 passed ... EXIT=0\"; baseline_suite and after_suite both completed:true with failure_count 0; blockers and follow_ons empty; test_logs names run1.log, run2.log and the two pytest logs, all present on disk.",
+    "write_paths": "the brief declares three fragment artefacts under docs/evidence/fragments/sn-selection-over-generation/; git diff --name-only 6168972705c17a611cc0ee860d314497a5283ab4..724028e20d6986a97fa9b6fc23db9693364bfa42 lists exactly ssog-link-auc-run.py, ssog-link-auc-results.json and ssog-link-auc.html, all inside them."
+  },
+  "justifications": {
+    "durability": "no test guards ssog-link-auc-run.py, so reverting the population split at :258 or the disagreement sort at :176 would redden nothing, and the shuffled control's contains_0_5 flag at :156 is computed and printed but never asserted.",
+    "evidence": "I re-ran ssog-link-auc-run.py at 724028e2 in a $TMPDIR scratch tree; its output was byte-identical to run1.json (md5 a2ea3e83) and to the committed fragment, and I independently recomputed 0.7567/0.7593/0.6594/0.7993 from the sheet with sklearn, though run1.log:1 and run2.log:1 declare revision 3cd8fce while the JSON they are cited for carries disagreement_prose, a key only the 724028e2 driver emits.",
+    "fit": "ssog-link-auc-run.py follows the module-docstring, argparse and main-guard idiom of the sibling ssog-link-label-sheet-run.py:1 and both commits carry a conventional subject and a body, though run.py:3 and the fragment comment at :2 name the plan node id.",
+    "goal_fidelity": "ssog-link-auc-run.py:258-281 measure() reports jev.all AUC 0.7567 over 116 positives and 64 negatives, the baseline 0.7993, the paired difference -0.0426 and the shuffled control 0.4881, and the fragment carries the same six rows in its table at :55-60.",
+    "reuse": "ssog-link-auc-run.py:29 imports roc_auc and bootstrap_interval from imas_codex.discovery.base.evaluation (the sole owner, confirmed by grep) and calls them at :84, :102 and :122, adding no second AUC or resampler; no owner exists for the population split, the disagreement ranking or the marker splice.",
+    "scope_discipline": "git diff --name-only 61689727..724028e2 is exactly the three declared fragment paths and both commits are additive, touching nothing outside docs/evidence/fragments/sn-selection-over-generation/."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to measure how well Jev's link judgment separates good name links from bad; docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc-run.py:252 measure() reports Jev's rank AUC with a copy-grouped interval over the all/non-self/self populations, the deterministic 1-is_self_link baseline, the paired difference, per-population counts and both disagreement lists, writing ssog-link-auc-results.json.\nVERDICT done_when: the done-when asks for two logged driver runs reproducing the same numbers, a fragment reporting the figures in prose and one table, and tests/discovery/test_evaluation.py passing at base and head; test_evaluation_at_base.log and test_evaluation_after.log both read \"18 passed ... EXIT=0\", run1.log and run2.log read the same figures at EXIT=0 over a byte-identical JSON, and I re-ran the driver at 724028e2 into a $TMPDIR scratch tree whose results JSON and spliced fragment are byte-identical to run1.json (md5 a2ea3e835b8429b9471ff7ee1e3eb140) and to the committed fragment.\nVERDICT write_paths: the brief declares three fragment artefacts under docs/evidence/fragments/sn-selection-over-generation/; git diff --name-only 6168972705c17a611cc0ee860d314497a5283ab4..724028e20d6986a97fa9b6fc23db9693364bfa42 lists exactly ssog-link-auc-run.py, ssog-link-auc-results.json and ssog-link-auc.html, all inside them.\nVERDICT manifest: read; status complete; commits 3cd8fce and 724028e2; changed_paths names the three files; the tests line records the pytest gate at \"18 passed ... EXIT=0\"; baseline_suite and after_suite both completed:true with failure_count 0; blockers and follow_ons empty; test_logs names run1.log, run2.log and both pytest logs, all present on disk.\nVERDICT diff: read both commits against base 61689727; commit 3cd8fce creates the driver, results JSON and fragment (567 insertions), and 724028e2 renders the disagreement prose from the results rows and splices it into the fragment between markers, replacing a hand-written paragraph whose rows two independent reviews found mis-paired; the settled change imports roc_auc and bootstrap_interval from imas_codex.discovery.base.evaluation and changes nothing under imas_codex/.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: ssog-link-auc-run.py:258-281 measure() reports jev.all AUC 0.7567 over 116 positives and 64 negatives, the baseline 0.7993, the paired difference -0.0426 and the shuffled control 0.4881, and the fragment carries the same six rows in its table at :55-60.\nSCORE evidence: 18\nJUSTIFICATION evidence: I re-ran ssog-link-auc-run.py at 724028e2 in a $TMPDIR scratch tree; its output was byte-identical to run1.json (md5 a2ea3e83) and to the committed fragment, and I independently recomputed 0.7567/0.7593/0.6594/0.7993 from the sheet with sklearn, though run1.log:1 and run2.log:1 declare revision 3cd8fce while the JSON they are cited for carries disagreement_prose, a key only the 724028e2 driver emits.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 61689727..724028e2 is exactly the three declared fragment paths and both commits are additive, touching nothing outside docs/evidence/fragments/sn-selection-over-generation/.\nSCORE durability: 6\nJUSTIFICATION durability: no test guards ssog-link-auc-run.py, so reverting the population split at :258 or the disagreement sort at :176 would redden nothing, and the shuffled control's contains_0_5 flag at :156 is computed and printed but never asserted.\nSCORE fit: 17\nJUSTIFICATION fit: ssog-link-auc-run.py follows the module-docstring, argparse and main-guard idiom of the sibling ssog-link-label-sheet-run.py:1 and both commits carry a conventional subject and a body, though run.py:3 and the fragment comment at :2 name the plan node id.\nSCORE reuse: 20\nJUSTIFICATION reuse: ssog-link-auc-run.py:29 imports roc_auc and bootstrap_interval from imas_codex.discovery.base.evaluation (the sole owner, confirmed by grep) and calls them at :84, :102 and :122, adding no second AUC or resampler; no owner exists for the population split, the disagreement ranking or the marker splice.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc-run.py:233 follow-on: _render_disagreement_into's docstring says the prose \"is checked against every row the paragraph quotes, and a row that fails the check is named in findings rather than written\", but the body only checks that the fragment exists and carries the markers, so the per-row check the docstring promises is never performed.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc-run.py:3 follow-on: the module docstring names the plan node id \"ssog-link-auc\", which the repository naming rule bans in source and comments; the sibling ssog-link-label-sheet-run.py carries the same pattern, so it is a sprint-wide habit rather than new to this node.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T070846395404-ssog-link-auc/run1.log:1 follow-on: the log's revision header reads 3cd8fce, but the JSON its run produced (byte-identical to the other run's and to the committed results) carries disagreement_prose, a key only the 724028e2 driver emits; the true post-fix run that wrote the committed file is run3.log, which the manifest's test_logs does not name.\n",
+  "review_run_id": "r-20261013T084654086762-review-of-ssog-link-auc-724028e20d69",
+  "reviewed_base_sha": "6168972705c17a611cc0ee860d314497a5283ab4",
+  "reviewed_head_sha": "724028e20d6986a97fa9b6fc23db9693364bfa42",
+  "reviewed_run_id": "r-20261013T070846395404-ssog-link-auc",
+  "scores": {
+    "durability": 6,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T09:03:06.985261+00:00",
+  "total": 101
+}
