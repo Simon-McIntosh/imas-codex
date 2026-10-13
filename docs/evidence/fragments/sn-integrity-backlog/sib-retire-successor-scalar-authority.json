@@ -1,0 +1,975 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "retire-successor-property",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-retired-successor-property",
+    "link_participant_kind": "standard_name",
+    "operation": "retire_successor_property",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "area_of_flux_surface",
+    "argon_density_at_plasma_boundary",
+    "cross_section_of_flux_surface",
+    "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+    "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+    "etendue_of_spectrometer_channel",
+    "flux_due_to_thermal_fusion",
+    "flux_surface_averaged_carbon_density",
+    "flux_surface_averaged_deuterium_tritium_density",
+    "flux_surface_averaged_iron_density",
+    "flux_surface_averaged_magnetic_shear",
+    "lithium_density",
+    "lower_energy",
+    "ratio_of_hydrogen_density_to_total_hydrogenic_density",
+    "toroidal_beryllium_velocity_at_plasma_boundary",
+    "toroidal_flux_surface_averaged_deuterium_tritium_velocity",
+    "toroidal_lithium_velocity_at_plasma_boundary",
+    "toroidal_tritium_velocity_at_plasma_boundary",
+    "tungsten_density_at_plasma_boundary",
+    "x_direction_unit_vector_of_sensor",
+    "z_direction_unit_vector_of_sensor"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "area_of_flux_surface:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "area_of_flux_surface"
+          ]
+        }
+      ],
+      "id": "area_of_flux_surface",
+      "identity": {
+        "id": "area_of_flux_surface",
+        "kind": "standard_name",
+        "target_id": "area_of_flux_surface"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "area_of_flux_surface:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "area_of_flux_surface"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "area_of_flux_surface",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "argon_density_at_plasma_boundary:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "argon_density_at_plasma_boundary"
+          ]
+        }
+      ],
+      "id": "argon_density_at_plasma_boundary",
+      "identity": {
+        "id": "argon_density_at_plasma_boundary",
+        "kind": "standard_name",
+        "target_id": "argon_density_at_plasma_boundary"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "argon_density_at_plasma_boundary:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "argon_density_at_plasma_boundary"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "argon_density_at_plasma_boundary",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "cross_section_of_flux_surface:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "cross_section_of_flux_surface"
+          ]
+        }
+      ],
+      "id": "cross_section_of_flux_surface",
+      "identity": {
+        "id": "cross_section_of_flux_surface",
+        "kind": "standard_name",
+        "target_id": "cross_section_of_flux_surface"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "cross_section_of_flux_surface:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "cross_section_of_flux_surface"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "cross_section_of_flux_surface",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+          ]
+        }
+      ],
+      "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "identity": {
+        "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "kind": "standard_name",
+        "target_id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+          ]
+        }
+      ],
+      "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+      "identity": {
+        "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "kind": "standard_name",
+        "target_id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "etendue_of_spectrometer_channel:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "etendue_of_spectrometer_channel"
+          ]
+        }
+      ],
+      "id": "etendue_of_spectrometer_channel",
+      "identity": {
+        "id": "etendue_of_spectrometer_channel",
+        "kind": "standard_name",
+        "target_id": "etendue_of_spectrometer_channel"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "etendue_of_spectrometer_channel:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "etendue_of_spectrometer_channel"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "etendue_of_spectrometer_channel",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "flux_due_to_thermal_fusion:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "flux_due_to_thermal_fusion"
+          ]
+        }
+      ],
+      "id": "flux_due_to_thermal_fusion",
+      "identity": {
+        "id": "flux_due_to_thermal_fusion",
+        "kind": "standard_name",
+        "target_id": "flux_due_to_thermal_fusion"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "flux_due_to_thermal_fusion:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "flux_due_to_thermal_fusion"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "flux_due_to_thermal_fusion",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "flux_surface_averaged_carbon_density:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "flux_surface_averaged_carbon_density"
+          ]
+        }
+      ],
+      "id": "flux_surface_averaged_carbon_density",
+      "identity": {
+        "id": "flux_surface_averaged_carbon_density",
+        "kind": "standard_name",
+        "target_id": "flux_surface_averaged_carbon_density"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "flux_surface_averaged_carbon_density:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "flux_surface_averaged_carbon_density"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_averaged_carbon_density",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "flux_surface_averaged_deuterium_tritium_density:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "flux_surface_averaged_deuterium_tritium_density"
+          ]
+        }
+      ],
+      "id": "flux_surface_averaged_deuterium_tritium_density",
+      "identity": {
+        "id": "flux_surface_averaged_deuterium_tritium_density",
+        "kind": "standard_name",
+        "target_id": "flux_surface_averaged_deuterium_tritium_density"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "flux_surface_averaged_deuterium_tritium_density:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "flux_surface_averaged_deuterium_tritium_density"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_averaged_deuterium_tritium_density",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "flux_surface_averaged_iron_density:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "flux_surface_averaged_iron_density"
+          ]
+        }
+      ],
+      "id": "flux_surface_averaged_iron_density",
+      "identity": {
+        "id": "flux_surface_averaged_iron_density",
+        "kind": "standard_name",
+        "target_id": "flux_surface_averaged_iron_density"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "flux_surface_averaged_iron_density:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "flux_surface_averaged_iron_density"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_averaged_iron_density",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "flux_surface_averaged_magnetic_shear:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "flux_surface_averaged_magnetic_shear"
+          ]
+        }
+      ],
+      "id": "flux_surface_averaged_magnetic_shear",
+      "identity": {
+        "id": "flux_surface_averaged_magnetic_shear",
+        "kind": "standard_name",
+        "target_id": "flux_surface_averaged_magnetic_shear"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "flux_surface_averaged_magnetic_shear:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "flux_surface_averaged_magnetic_shear"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_averaged_magnetic_shear",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "lithium_density:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "lithium_density"
+          ]
+        }
+      ],
+      "id": "lithium_density",
+      "identity": {
+        "id": "lithium_density",
+        "kind": "standard_name",
+        "target_id": "lithium_density"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "lithium_density:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "lithium_density"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "lithium_density",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "lower_energy:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "lower_energy"
+          ]
+        }
+      ],
+      "id": "lower_energy",
+      "identity": {
+        "id": "lower_energy",
+        "kind": "standard_name",
+        "target_id": "lower_energy"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "lower_energy:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "lower_energy"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "lower_energy",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "ratio_of_hydrogen_density_to_total_hydrogenic_density:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "ratio_of_hydrogen_density_to_total_hydrogenic_density"
+          ]
+        }
+      ],
+      "id": "ratio_of_hydrogen_density_to_total_hydrogenic_density",
+      "identity": {
+        "id": "ratio_of_hydrogen_density_to_total_hydrogenic_density",
+        "kind": "standard_name",
+        "target_id": "ratio_of_hydrogen_density_to_total_hydrogenic_density"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "ratio_of_hydrogen_density_to_total_hydrogenic_density:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "ratio_of_hydrogen_density_to_total_hydrogenic_density"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "ratio_of_hydrogen_density_to_total_hydrogenic_density",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "toroidal_beryllium_velocity_at_plasma_boundary:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "toroidal_beryllium_velocity_at_plasma_boundary"
+          ]
+        }
+      ],
+      "id": "toroidal_beryllium_velocity_at_plasma_boundary",
+      "identity": {
+        "id": "toroidal_beryllium_velocity_at_plasma_boundary",
+        "kind": "standard_name",
+        "target_id": "toroidal_beryllium_velocity_at_plasma_boundary"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "toroidal_beryllium_velocity_at_plasma_boundary:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "toroidal_beryllium_velocity_at_plasma_boundary"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "toroidal_beryllium_velocity_at_plasma_boundary",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "toroidal_flux_surface_averaged_deuterium_tritium_velocity:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "toroidal_flux_surface_averaged_deuterium_tritium_velocity"
+          ]
+        }
+      ],
+      "id": "toroidal_flux_surface_averaged_deuterium_tritium_velocity",
+      "identity": {
+        "id": "toroidal_flux_surface_averaged_deuterium_tritium_velocity",
+        "kind": "standard_name",
+        "target_id": "toroidal_flux_surface_averaged_deuterium_tritium_velocity"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "toroidal_flux_surface_averaged_deuterium_tritium_velocity:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "toroidal_flux_surface_averaged_deuterium_tritium_velocity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "toroidal_flux_surface_averaged_deuterium_tritium_velocity",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "toroidal_lithium_velocity_at_plasma_boundary:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "toroidal_lithium_velocity_at_plasma_boundary"
+          ]
+        }
+      ],
+      "id": "toroidal_lithium_velocity_at_plasma_boundary",
+      "identity": {
+        "id": "toroidal_lithium_velocity_at_plasma_boundary",
+        "kind": "standard_name",
+        "target_id": "toroidal_lithium_velocity_at_plasma_boundary"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "toroidal_lithium_velocity_at_plasma_boundary:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "toroidal_lithium_velocity_at_plasma_boundary"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "toroidal_lithium_velocity_at_plasma_boundary",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "toroidal_tritium_velocity_at_plasma_boundary:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "toroidal_tritium_velocity_at_plasma_boundary"
+          ]
+        }
+      ],
+      "id": "toroidal_tritium_velocity_at_plasma_boundary",
+      "identity": {
+        "id": "toroidal_tritium_velocity_at_plasma_boundary",
+        "kind": "standard_name",
+        "target_id": "toroidal_tritium_velocity_at_plasma_boundary"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "toroidal_tritium_velocity_at_plasma_boundary:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "toroidal_tritium_velocity_at_plasma_boundary"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "toroidal_tritium_velocity_at_plasma_boundary",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "tungsten_density_at_plasma_boundary:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "tungsten_density_at_plasma_boundary"
+          ]
+        }
+      ],
+      "id": "tungsten_density_at_plasma_boundary",
+      "identity": {
+        "id": "tungsten_density_at_plasma_boundary",
+        "kind": "standard_name",
+        "target_id": "tungsten_density_at_plasma_boundary"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "tungsten_density_at_plasma_boundary:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "tungsten_density_at_plasma_boundary"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "tungsten_density_at_plasma_boundary",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "x_direction_unit_vector_of_sensor:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "x_direction_unit_vector_of_sensor"
+          ]
+        }
+      ],
+      "id": "x_direction_unit_vector_of_sensor",
+      "identity": {
+        "id": "x_direction_unit_vector_of_sensor",
+        "kind": "standard_name",
+        "target_id": "x_direction_unit_vector_of_sensor"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "x_direction_unit_vector_of_sensor:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "x_direction_unit_vector_of_sensor"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "x_direction_unit_vector_of_sensor",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "z_direction_unit_vector_of_sensor:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "z_direction_unit_vector_of_sensor"
+          ]
+        }
+      ],
+      "id": "z_direction_unit_vector_of_sensor",
+      "identity": {
+        "id": "z_direction_unit_vector_of_sensor",
+        "kind": "standard_name",
+        "target_id": "z_direction_unit_vector_of_sensor"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "superseded_by": null
+            }
+          },
+          "id": "z_direction_unit_vector_of_sensor:clear-successor-property",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "z_direction_unit_vector_of_sensor"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "z_direction_unit_vector_of_sensor",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "ca6818003082fe95805f8451044c9c4e9ba32a2017b8454bc2278d983ed74750"
+  }
+}
