@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's gate logs: baseline_suite.log (base c98a0d42d, 827 passed/1 skipped, EXIT=0) and after_suite.log (head 4a1e53c1c; truncated at its last test line with no summary or EXIT, its 830 passed/1 skipped/EXIT=0 head result corroborated by the run transcript) \u2014 0 failures at base vs 0 at head, so 0 added.",
+  "backend": "deepseek-v4.1-flash",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:compose_worker",
+    "imas_codex/standard_names/workers.py:compose_batch"
+  ],
+  "completed_at": "2026-10-13T01:30:27.987Z",
+  "dispatched_at": "2026-10-13T01:21:54Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005036802056-ssog-comparator-rerank/after_suite.log",
+      "line": "54",
+      "severity": "follow-on",
+      "text": "follow-on: the named head-arm receipt is truncated mid-run with no pytest summary line and no EXIT line, so the manifest's after_suite.completed:true is not supported by the log it names; the head result survives only in the run transcript."
+    },
+    {
+      "file": "tests/standard_names/test_comparator_rerank.py",
+      "line": "70",
+      "severity": "follow-on",
+      "text": "follow-on: assert seen checks only that a call happened, never the query's content, so _comparator_rerank_query/_comparator_rerank_state (context.py:1052,1061) are uncovered and a regression sending the wrong query would still pass."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-comparator-rerank.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment carries only a two-arm table and no figure although the write scope granted docs/figures/sn-selection-over-generation/ssog-comparator-rerank, so the granted-figure default is unmet."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two production call sites examined: imas_codex/standard_names/workers.py:3917 (compose_worker) and imas_codex/standard_names/workers.py:5786 (compose_batch), both async bodies that call _rerank_comparators_for_compose after _collect_nearby_name_comparators.",
+    "diff": "read commit by commit against base c98a0d42d; one commit 4a1e53c1c adds the rerank helper in context.py, the switch-gated caller and two call sites in workers.py, the new test file and the fragment, 394 lines, all inside the declared scope.",
+    "done_when": "the stubbed switch-on reorder and switch-off identity tests exist (head_new_test.log 3 passed EXIT=0) and the reorder test reddens with the call removed (negative_control.log EXIT=1), the fragment cites the existing failure-order test by name, and baseline_suite/after_suite are recorded \u2014 but the after_suite.log named as the head receipt is truncated with no summary or EXIT line.",
+    "goal": "the node goal is to rerank the compose prompt's comparator block behind a default-off switch; context.py:1074 adds the per-item rerank through rerank_pool and workers.py:1969 gates it, so the goal is met.",
+    "manifest": "read; status complete, the gate command, base/head suite JSON with revision/exit_status/completed, four gate logs, and a follow_on about the compose_batch lease booking all present.",
+    "write_paths": "four declared paths; the diff's four files are exactly those, and the granted figures directory is unused."
+  },
+  "justifications": {
+    "durability": "the switch-on reorder test at tests/standard_names/test_comparator_rerank.py:57 reddens when the call is removed (negative_control.log EXIT=1) and the switch-off identity at :82 pins the disabled path, but context.py:1052/1061 are covered by no assertion.",
+    "evidence": "negative_control.log (EXIT=1) and head_new_test.log (3 passed, EXIT=0) are complete, but after_suite.log ends at line 54 with no summary or EXIT= so its completed:true rests on the run transcript.",
+    "fit": "imas_codex/standard_names/context.py:1074 follows the two existing rerank_pool callers' shape and carries no plan or ticket labels.",
+    "goal_fidelity": "imas_codex/standard_names/context.py:1074 returns the reordered block and cost and both compose sites call it through workers.py:1969.",
+    "reuse": "rerank_name_comparators composes imas_codex/discovery/base/judgment.py:350 rather than re-implementing it, and no existing mean-rank merge owner was found.",
+    "scope_discipline": "git show --stat 4a1e53c1c names only the four declared paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to rerank the compose prompt's comparator block behind a default-off switch; the landed change adds rerank_name_comparators (imas_codex/standard_names/context.py:1074) and the switch-gated _rerank_comparators_for_compose (imas_codex/standard_names/workers.py:1969), called from both compose sites, so the goal is met.\nVERDICT done_when: the done_when asks (a) a stubbed test where switch-on reorders by score and switch-off is identical, (b) that reorder test red with the call removed (log with EXIT=), (c) the fragment cites the existing failure-order test, and (d) baseline_suite/after_suite recorded with revision/exit_status/completed; (a)-(c) hold \u2014 negative_control.log EXIT=1 (2 failed, 1 passed) and head_new_test.log 3 passed EXIT=0 \u2014 but after_suite.log is truncated with no summary or EXIT line, so its completed:true rests on the run transcript rather than the log it names.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/context.py, imas_codex/standard_names/workers.py, tests/standard_names/test_comparator_rerank.py and the fragment (plus a granted figures dir); the diff's four files are exactly those four, and no figure was written.\nVERDICT manifest: read; status complete, records the gate command, the base and head suite JSON and four gate logs, with a follow_on for the compose_batch lease booking.\nVERDICT diff: one commit 4a1e53c1c against base c98a0d42d adds 394 lines \u2014 the rerank helper in context.py, the switch-gated caller and two call sites in workers.py, the new test file and the fragment \u2014 all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/workers.py:compose_worker (line 3917), imas_codex/standard_names/workers.py:compose_batch (line 5786)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: rerank_name_comparators at imas_codex/standard_names/context.py:1074 returns the reordered block and its cost, and both compose sites reach it through imas_codex/standard_names/workers.py:1969 as the goal states.\nSCORE evidence: 14\nJUSTIFICATION evidence: negative_control.log (EXIT=1) and head_new_test.log (3 passed, EXIT=0) are complete, but the named after_suite.log ends at its last test line (line 54) with no summary or EXIT=, so the after_suite.completed:true it records is corroborated only by the run transcript.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat 4a1e53c1c names only context.py, workers.py, tests/standard_names/test_comparator_rerank.py and the fragment, all within the manifest's declared write paths and carrying nothing the goal does not imply.\nSCORE durability: 16\nJUSTIFICATION durability: the switch-on reorder test (tests/standard_names/test_comparator_rerank.py:57) reddens when the call is removed (negative_control.log EXIT=1) and the switch-off identity at :82 pins the disabled path, but the query and state builders at context.py:1052 and :1061 are named by no assertion.\nSCORE fit: 18\nJUSTIFICATION fit: the helper follows the shape of the two existing rerank_pool callers at imas_codex/discovery/signals/parallel.py:190 and imas_codex/llm/search_tools.py:211 (own question dict, local import), with a mechanism-named env var and no plan or ticket labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: rerank_name_comparators composes judgment.rerank_pool (imas_codex/discovery/base/judgment.py:350) rather than re-implementing it, and a repository search found no existing mean-rank merge owner, so the batch merge is the first.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005036802056-ssog-comparator-rerank/after_suite.log:54 follow-on: the named head-arm receipt is truncated mid-run with no pytest summary line and no EXIT=, so after_suite.completed:true in the manifest is not supported by the log it names; the 830-passed/EXIT=0 head result is only corroborated by the run's session transcript.\nFINDING tests/standard_names/test_comparator_rerank.py:70 follow-on: assert seen checks only that a call happened, never the query's content, so _comparator_rerank_query and _comparator_rerank_state (context.py:1052,1061) are uncovered and a regression that sent the wrong query would still pass every test.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-comparator-rerank.html:1 follow-on: the fragment carries only a two-arm table and no figure although the write scope granted docs/figures/sn-selection-over-generation/ssog-comparator-rerank, so the granted-figure default is unmet for this record.\n",
+  "review_run_id": "r-20261013T012137597192-review-of-ssog-comparator-rerank-4a1e53c1c23b",
+  "reviewed_base_sha": "c98a0d42dc8195dd60c9c145340703409c87b2ec",
+  "reviewed_commits": [
+    "4a1e53c1c"
+  ],
+  "reviewed_head_sha": "4a1e53c1c23bccf1b58c945851a47411bb92f16a",
+  "reviewed_run_id": "r-20261013T005036802056-ssog-comparator-rerank",
+  "reviewer_run_id": "r-20261013T012137597192-review-of-ssog-comparator-rerank-4a1e53c1c23b",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:30:00+00:00",
+  "total": 106
+}
