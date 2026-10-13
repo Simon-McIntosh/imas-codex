@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -401,11 +401,14 @@
 <div class="r-comment" data-section="s10" data-id="c-s10-existing-gate" data-who="reckon-build" data-when="2026-10-13T00:41:00Z">
     <div class="r-comment-body"><p>§10 is met by existing work: commit <code>07486c695</code>, 2026-09-05, predates the census that carried the row as open. Two of its three properties are pinned end to end; review 106/120. The rejected-token property is shown only at the substitution boundary, so an end-to-end test is in flight before §10 closes. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s10-existing-gate">evidence</a></p></div>
 </div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261013T003907957431-sib-name-gate-e2e" data-who="reckon-build" data-when="2026-10-13T00:53:46.306Z">
+    <div class="r-comment-body"><p>Added test_unresolved_one_word_token_fails_the_gate; a strict-parse reject (quux) and a parseable but undefined token (capacitance) each keep their identifier text, score below the unchanged 0.55 floor, and return issues through semantic_similarity_check; head arm 15 passed (was 13) and forcing the gate text to define every token fails both new ids (5 failed, EXIT=1).</p></div>
+</div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261013T002423146729-sib-sanctioned-holes-repro" data-who="reckon-build" data-when="2026-10-13T00:49:08.485Z">
     <div class="r-comment-body"><p>report at /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-sanctioned-holes-repro.html (test node: no repository file changed, no commit). The report carries one row per hole — reproduction verdict with throwaway-test EXIT and refusal text, precondition file:line, ordering-accident vs protective classification with the guard-introduction commit, and the proposed smallest repair with the files it would touch.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261013T005110809374-review-of-sib-sanctioned-holes-repro-7e804e328494" data-who="reckon-build" data-when="2026-10-13T01:04:33.176Z">
-    <div class="r-comment-body"><p>review record with verdict &quot;SOUND WITH FINDINGS&quot;, six dimension scores (goal_fidelity 19, evidence 17, scope_discipline 20, durability 9, fit 18, reuse 19, total 102) and two follow-on findings, stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T002423146729-sib-sanctioned-holes-repro.json with an identical revision-pinned twin at the .at-7e804e32849469ebcd3627dab5f1c02e5e7ec7f7 path.</p></div>
+    <div class="r-comment-body"><p>review record with verdict "SOUND WITH FINDINGS", six dimension scores (goal_fidelity 19, evidence 17, scope_discipline 20, durability 9, fit 18, reuse 19, total 102) and two follow-on findings, stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T002423146729-sib-sanctioned-holes-repro.json with an identical revision-pinned twin at the .at-7e804e32849469ebcd3627dab5f1c02e5e7ec7f7 path.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
