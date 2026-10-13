@@ -1,0 +1,116 @@
+<!-- Landing record for the coordinator's golden B labels.
+     Golden: docs/evidence/fragments/sn-judgment-evaluation/golden-documentation-acceptable.json (400 rows).
+     Labels: golden-documentation-acceptable-labels.jsonl (488 rows: the 400-row sheet and 88 reserve rows).
+     Rubric: golden-documentation-acceptable-rubric.md.
+     Rebalance: golden-documentation-acceptable-rebalance.py --write reproduces the golden byte for byte.
+     Figure: /imas-codex/figures/sn-judgment-evaluation/golden-b-first-failing-check.svg,
+     drawn by golden-documentation-acceptable-figure.py. -->
+<section id="sje-docs-labels" data-reckon="evidence">
+  <h2 id="sje-docs-labels-heading">Golden B: 400 documentation labels, inside the balance bounds</h2>
+
+  <p id="sje-docs-labels-intro">
+    The coordinator read every row of the blind sheet against its DD source paths and the
+    conventions registry entries the name selects, and labelled it acceptable only when all six
+    rubric checks pass: <code>subject</code>, <code>physics</code>, <code>scope</code>,
+    <code>house_style</code>, <code>links</code> and <code>complete</code>, in that order. A
+    not-acceptable row records the first check it fails and a note. The rubric is
+    <code>golden-documentation-acceptable-rubric.md</code>; its template check is the catalog's
+    own <code>template_opening</code> rule, applied to the first non-empty line.
+  </p>
+
+  <table id="sje-docs-labels-table">
+    <caption>Golden B after rebalancing. The lead-overlap rows are untouched.</caption>
+    <thead>
+      <tr><th>Measure</th><th>Figure</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Sheet rows labelled as drawn</td><td>400, of which 118 acceptable (29.5%)</td></tr>
+      <tr><td>Reserve rows labelled</td><td>88 (draw ranks 401&ndash;488), of which 28 acceptable</td></tr>
+      <tr><td>Golden rows</td><td>400, of which 146 acceptable (36.5%)</td></tr>
+      <tr><td>Acceptable by split</td><td>validation 74 of 184, calibration 72 of 216</td></tr>
+      <tr><td>Lead-overlap rows</td><td>50, all kept; the coordinator labelled 18 of them acceptable</td></tr>
+      <tr><td>Swap matching</td><td>17 by pattern family, 10 by physics domain, 1 unmatched</td></tr>
+    </tbody>
+  </table>
+
+  <p id="sje-docs-labels-rebalance">
+    <strong>Why the sheet was rebalanced, and how.</strong> As drawn, the sheet's acceptable
+    share was 29.5%, below the plan's 35% floor. The reserve exists for this. The coordinator
+    labelled reserve rows in draw order until 28 acceptable ones were found, then swapped each
+    in for one not-acceptable sheet row. The removed row is the latest-drawn not-acceptable
+    sheet row of the same pattern family, falling back to the same physics domain and then to
+    any. No lead-overlap row was removed. Each swapped-in row carries
+    <code>replaces_draw_rank</code>. The rebalancing selects on the label, so the golden's
+    prevalence is not the catalog's: as drawn, about 30% of accepted documentation passes the
+    rubric. Prevalence-dependent figures measured on this golden (accuracy, precision) must be
+    read against 36.5%, not 30%.
+  </p>
+
+  <figure id="sje-docs-labels-figure">
+    <img src="/imas-codex/figures/sn-judgment-evaluation/golden-b-first-failing-check.svg"
+         alt="Horizontal bars of the first failing check over the 254 not-acceptable rows: house style 138, links 66, complete 3, subject 23, physics 14, scope 10.">
+    <figcaption>
+      First failing check over the 254 not-acceptable golden rows. Blue checks are
+      deterministic, decidable by a lint over the text, the registry and the graph: 207 rows
+      (81.5%). Orange checks need the DD source or physics read: 47 rows (18.5%). Of the 138
+      house-style failures, 80 miss the selected template's opening and 74 use a symbol that
+      conflicts with the registry (some do both). 105 not-acceptable rows carry an unresolved
+      bracketed link, whatever check fails first.
+    </figcaption>
+  </figure>
+
+  <p id="sje-docs-labels-reading">
+    <strong>What the labels say about the catalog.</strong> Four in five rejections are
+    mechanical: a missed template opening, a symbol other than the registry's, or a bracketed
+    reference that leads nowhere. A gate that runs the existing <code>template_opening</code>
+    lint, a symbol check against the registry notation, and link resolution at write time would
+    have refused them before review. The semantic fifth is where a judge earns its cost: a
+    name bound to a DD path that measures something else (a detector outline under an aperture
+    name, a pellet centre-of-mass velocity under a fragment name, a squared field intensity
+    under a magnitude), a false statement (a safety-factor relation off by 2&pi;, a vacuum
+    vector potential with no plasma contribution), or a general name narrowed to one
+    diagnostic.
+  </p>
+
+  <h3 id="sje-docs-labels-registry">Registry defects the labelling exposed</h3>
+  <p id="sje-docs-labels-registry-intro">
+    Some house-style failures are the registry's fault rather than the writer's. The labels
+    follow the rubric and fail the row, but the repair belongs in the registry:
+  </p>
+  <ul id="sje-docs-labels-registry-list">
+    <li><strong><code>radial</code> means the major-radius direction</strong>, but it is applied
+      to flux-coordinate transport names (<code>radial_electron_energy_diffusion_coefficient</code>,
+      <code>radial_ion_momentum_diffusivity</code>). Their text is right for the source and wrong
+      for the registry. Earlier rows that followed the registry into the major-radius reading
+      failed <code>subject</code> instead.</li>
+    <li><strong><code>flux</code> is &Gamma;, a particle flux</strong>, but energy-flux names in
+      W&nbsp;m<sup>&minus;2</sup> select it (<code>maximum_of_back_surface_neutron_flux</code>,
+      <code>flux_at_limiter</code>, <code>energy_flux_at_divertor_target</code>). Writers use
+      q, correctly, and fail.</li>
+    <li><strong><code>radius</code> is R</strong>, which collides with the major radius in every
+      minor-radius, aperture and filament equation; writers use r or a and fail.</li>
+    <li><strong><code>ellipticity</code> is e</strong>, which collides with the electron
+      subscript.</li>
+    <li><strong>The template lint has no word boundary.</strong> <code>{modifiers} count</code>
+      becomes <code>.+ count</code>, which passes "a common counting convention"; a
+      hyphenated "current-density" fails <code>{component} current density {locus}</code>.</li>
+  </ul>
+
+  <h3 id="sje-docs-labels-units">Unit defects</h3>
+  <p id="sje-docs-labels-units-text">
+    Three rows fail <code>physics</code> because the documented quantity's dimensions disagree
+    with the unit the name carries: neutron-detector direction cosines in m
+    (<code>y_direction_unit_vector_of_neutron_detector</code>,
+    <code>z_direction_unit_vector_of_neutron_detector</code>) and an unnormalized potential
+    amplitude with unit 1 (<code>perturbed_electrostatic_potential_amplitude</code>). A fourth,
+    <code>vertical_magnetization_of_ferritic_element</code> in A&nbsp;m<sup>&minus;2</sup>, is
+    bound to a magnetic moment, A&nbsp;m<sup>2</sup>, and documents a magnetization,
+    A&nbsp;m<sup>&minus;1</sup>.
+  </p>
+
+  <p id="sje-docs-labels-remaining">
+    <strong>What remains for §5.</strong> The lead labels the 50 overlap rows blind to these
+    labels; Cohen's kappa and the adjudicated disagreements are recorded beside this record.
+    Golden D needs at least 40 lead-ruled synonym pairs from the pre-screened candidate pool.
+  </p>
+</section>
