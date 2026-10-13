@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T03:43:14.676Z",
+  "dispatched_at": "2026-10-13T03:33:00Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:342",
+      "id": "reasoning-1",
+      "reason": "the node must also vendor the docs and code question and label data, or scope the port's claim to what it actually makes reproducible, or the port does not supply the reproducibility it is justified by.",
+      "text": "\u00a77 says the third node ports the \u00a74 and \u00a75 scripts into a repo module \"so its figures reproduce from a checkout\", yet \u00a74's measurement (line 222) reads its questions and labels from `~/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/{queries,labels}.json`, outside the repository, so a ported script still cannot reproduce \u00a74's figure from a checkout",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:344",
+      "id": "reasoning-2",
+      "reason": "node 3 still lands the module's command in the fragment; it adds a recipe where \u00a74 has none rather than appending beside one, so the work is unchanged.",
+      "text": "\u00a77 says \"each of those fragments gains the module's command beside its original recipe\", but \u00a74's landed fragment `docs/evidence/fragments/signal-search-finds-the-measured-signal/fusion.html` carries only three log paths (line 97) and no reproduction recipe or script for the command to sit beside",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "8bbe808642c03798f9a329938b255700ed856fe49140230d864069b14c7c3ca9",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 65,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T033235189977-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "b8f4f002152584fed684e614dd9470e9d2321948",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `rerank_candidates` (imas_codex/llm/search_tools.py:179), `_RERANK_QUESTION` (:92), `_rerank_dd_paths = not (self.read_only or self.dd_only)` (imas_codex/llm/server.py:1882), the discovery-relevance seat on the facility-discovery service (`_RERANK_SERVICE`, settings.py:182), `RERANK_POOL = 60` and `budget_seconds=5.0` (tests/llm/test_signal_search_goldens.py:58,383) all resolve; the two hrefs to discovery-judgments-through-jev resolve as `<path>.html`.",
+    "done_when": "pass \u2014 \u00a77's done-when names fusion alone as the role-aware rerank's comparator, scores each rerank arm over three passes on mean nDCG@10 and grade-3 precision@5 with a worst-pass floor and p95 \u2264 5 s, and writes its evidence to `rerank.html`; this change did not alter the done-when, and its earlier findings were answered.",
+    "evidence_paths": "pass \u2014 `docs/evidence/fragments/signal-search-finds-the-measured-signal/rerank.html` is the durable rerank path and the ported module is in-repo; the input-data gap that weakens the port's reproducibility claim is raised under reasoning.",
+    "naming": "pass \u2014 \u00a77's changed prose carries no plan labels, stage names, ticket numbers or version tags, and the harness's opt-in variable is `SIGNAL_SEARCH_JEV_ARMS`, not a plan tag.",
+    "reasoning": "a finding \u2014 \u00a77 justifies the script port as making figures \"reproduce from a checkout\", but \u00a74's measurement reads its questions and labels from outside the repository, so porting the script alone does not deliver that.",
+    "single_goal": "pass \u2014 \u00a77 is three nodes: labelling (node 1), the product change (node 2), measure-and-decide (node 3); the port is a step in node 3's measurement module, which the prior review declined to split.",
+    "wiring": "pass \u2014 \u00a77 declares no depends-on/informs and consumes only landed inputs (\u00a73's fixture, \u00a74's and \u00a75's scripts), the sole gate `g-ssfms-1` is correctly scoped to \u00a711, and \u00a77's conditional switch is not mis-declared as a gate."
+  },
+  "section_digests": {
+    "_document": "6696124ebd584b8301282dba9ed1faa4ea8816e65a64a881eaaa5dc88d764ffe",
+    "s1": "e58a341feafcdbbe4c2e547cf50a1fb5e759d1c331f09b8777ce5142efc9daed",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "5a77efb737bcf64e7fd5b30aaa71ed3ff5a27b6c8e7b4d33023f03292a98fb15",
+    "s4": "31e1b80d34ee0473acbbff8894edb94dee236159b67ee202ce8891143f015e9a",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "b34acb3da58a16aaa02bc7348520692f48fc0f11d334fd40fe9b36eb7c91fd9b",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "37a1002a450850d41b5c609a5a3ea2a4591ba2f6fb3e3bc91d6cfee5d3cd82ee"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T04:35:46.569345+00:00"
+}
