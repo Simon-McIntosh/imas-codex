@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's own gate logs record both arms green: logs/baseline-edit-suite.log and logs/after-edit-suite.log each read '412 passed, 10 deselected, 1 warning', EXIT=0 at 7e804e32849469ebcd3627dab5f1c02e5e7ec7f7 (completed: true). The node changes no repository file, so the after arm is the same suite at the same revision; delta of zero by construction, no added failure ids.",
+  "backend": "local",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T01:04:33.176Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "sib-docs-edit-pending",
+      "recorded_at": "2026-10-13T01:04:35.347473+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T00:51:22Z",
+  "findings": [
+    {
+      "file": "/tmp/sib-holes-scratch/tests/standard_names/test_sanctioned_holes_throwaway.py",
+      "line": "139",
+      "severity": "follow-on",
+      "text": "follow-on: the hole-2 partial-state assertion compares row['status'] against the 'superseded' the fixture itself supplied, and the _RescoreFake mutates only name_stage, so the assertion holds whatever the real transition does \u2014 it could not redden if the real SET clause ever cleared status. The report's conclusion is instead established by reading the guarded transition's SET clause (graph_ops.py:24518-24540 writes no status field), which the assertion does not exercise. The conclusion stands; the assertion is not an independent guard."
+    },
+    {
+      "file": "/tmp/sib-holes-scratch/tests/standard_names/test_sanctioned_holes_throwaway.py",
+      "line": "95",
+      "severity": "follow-on",
+      "text": "follow-on: _RescoreFake.query re-implements stage_name_for_rescore's eligibility WHERE (name_stage IN ['exhausted','reviewed']) verbatim, so the hole-2 stage-guard arm would not redden if the real Cypher guard changed; the precondition's location is established only by the report's file:line reading of graph_ops.py:24513, not by the arm. Permitted by the brief's mocking instruction, recorded here because it bounds what the arm proves."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "the node's commit diff against its base 7e804e32849469ebcd3627dab5f1c02e5e7ec7f7 is empty (commits: [], changed_paths: [], worktree head equals base) \u2014 a test/attestation node \u2014 so the landed artefact is the out-of-repro report, which I read in full.",
+    "done_when": "the done_when asks per hole for reproduction (EXIT + refusal text), precondition file:line, ordering-versus-protective with the reason, and a proposed repair with the files it touches, plus baseline_suite/after_suite being the edit tests at head with revision/exit_status/completed:true; the report supplies all four per hole, logs/holes-repro.log (6 failed, 2 passed, EXIT=1) corroborates the refusal texts verbatim, and both gate logs read '412 passed, 10 deselected, 1 warning' EXIT=0 at 7e804e32.",
+    "goal": "the node goal is to classify each of the three sanctioned-surface holes by reproduction, precondition location and what it protects; /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-sanctioned-holes-repro.html:48-178 gives one table row per hole carrying exactly those fields, and :195-197 carries the fourth (already-closed) hole as context.",
+    "manifest": "read the reviewed run's manifest (status complete); it records commits: [], changed_paths: [], tests naming the 27-file edit gate green at both arms plus the throwaway reproduction at 6 failed/2 passed EXIT=1, negative_control_log logs/holes-repro.log, and three follow-ons naming the unimplemented repairs.",
+    "write_paths": "the node's declared write scope is the single report path; the manifest records commits: [] and changed_paths: [], the worktree head equals its base (7e804e32), no repository file changed, and the only other write is the throwaway reproduction test under /tmp/sib-holes-scratch, which the brief permitted as a scratch copy outside the worktree."
+  },
+  "justifications": {
+    "durability": "the node adds no committed test \u2014 its reproduction instrument /tmp/sib-holes-scratch/tests/standard_names/test_sanctioned_holes_throwaway.py is unversioned and dies with /tmp, and its hole-2 status assertion (line 139) holds by construction of the _RescoreFake \u2014 so no durable check reddens if the classification or a proposed repair regresses.",
+    "evidence": "logs/holes-repro.log records the refusal texts identical to the report's citations and I confirmed each cited guard at its line \u2014 edit.py:3159/3168 (collision, no stage filter), edit.py:3473/3479 (docs_stage), graph_ops.py:24513 WHERE with :24556 refusal text, pools.py:502 terminal_statuses, export.py:508 status<>'superseded' \u2014 so the measures the done_when names are recorded, not merely claimed.",
+    "fit": "reports/imas-codex/sib-sanctioned-holes-repro.html follows the evidence-fragment prose-and-table idiom of its siblings and introduces no code symbol or plan label beyond the coordinator-assigned filename.",
+    "goal_fidelity": "reports/imas-codex/sib-sanctioned-holes-repro.html:48-178 gives one table row per hole with reproduction verdict, precondition file:line, ordering-versus-protective verdict and a proposed repair, and honestly reports that hole 2's recorded shape changed rather than reproducing the recorded text.",
+    "reuse": "the throwaway test reuses the repository's own FakeGraph from tests/standard_names/test_edit_engine.py:88 (its // EDIT_CHECK_COLLISION arm at :233 returns the true occupant count) and drives the real apply_edit and stage_name_for_rescore, adding only a throwaway _RescoreFake that forks no in-repo capability.",
+    "scope_discipline": "the manifest's changed_paths and commits are empty and the report is the only in-scope artefact, so nothing was written inside the repository and the scratch test stayed in the permitted /tmp tree and was not staged."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to classify each of the three sanctioned-surface holes by reproduction, precondition location and what it protects; the report /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-sanctioned-holes-repro.html:48-178 carries one table row per hole giving exactly those fields and the fourth-hole context at :195-197.\nVERDICT done_when: the done_when asks, per hole, for a reproduction verdict with the throwaway test's EXIT and refusal text, the precondition file:line, ordering-versus-protective with the reason, and a proposed repair with the files it touches, plus baseline_suite/after_suite being the edit tests at head with revision/exit_status/completed:true; the report supplies every field, and logs/holes-repro.log (6 failed, 2 passed, EXIT=1) corroborates the refusal texts verbatim while logs/baseline-edit-suite.log and logs/after-edit-suite.log both read \"412 passed, 10 deselected, 1 warning\" EXIT=0 at revision 7e804e32849469ebcd3627dab5f1c02e5e7ec7f7.\nVERDICT write_paths: the node's declared write paths are the single report path; the manifest records changed_paths: [] and commits: [], no repository file was written, and the only other write is the throwaway reproduction test under /tmp/sib-holes-scratch, which the brief explicitly permitted as a scratch copy outside the worktree.\nVERDICT manifest: read the reviewed run's manifest (status complete); it records commits: [] and changed_paths: [], tests naming the 27-file edit gate green at both arms with a throwaway reproduction at 6 failed/2 passed EXIT=1, negative_control_log logs/holes-repro.log, and follow_ons naming the three unimplemented repairs.\nVERDICT diff: the node's commit diff against its base 7e804e32849469ebcd3627dab5f1c02e5e7ec7f7 is empty (commits: [], changed_paths: [], worktree head equals base), because this is a test/attestation node; its landed artefact is the out-of-repro report, which I read in full.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: reports/imas-codex/sib-sanctioned-holes-repro.html:48-178 gives one row per hole with reproduction verdict, precondition file:line, ordering-versus-protective verdict and a proposed repair, and honestly reports that hole 2's recorded shape changed.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/holes-repro.log records the refusal texts identical to the report's citations and I confirmed each cited guard at its line \u2014 edit.py:3159/3168 (collision, no stage filter), edit.py:3473/3479 (docs_stage), graph_ops.py:24513 WHERE with :24556 refusal text, pools.py:502 terminal_statuses, export.py:508 status<>'superseded'.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the manifest's changed_paths and commits are empty and the report is the only in-scope artefact, so nothing was written inside the repository.\nSCORE durability: 9\nJUSTIFICATION durability: the node adds no committed test \u2014 its reproduction instrument /tmp/sib-holes-scratch/tests/standard_names/test_sanctioned_holes_throwaway.py is unversioned and dies with /tmp, and its hole-2 status assertion (line 139) holds by construction of the _RescoreFake \u2014 so no durable check reddens if the classification or a proposed repair regresses.\nSCORE fit: 18\nJUSTIFICATION fit: the report follows the evidence-fragment prose-and-table idiom of its siblings and introduces no code symbol or plan label beyond the coordinator-assigned filename.\nSCORE reuse: 19\nJUSTIFICATION reuse: the throwaway test reuses the repository's own FakeGraph from tests/standard_names/test_edit_engine.py:88 and drives the real apply_edit and stage_name_for_rescore, adding only a throwaway _RescoreFake that forks no in-repo capability.\nFINDING /tmp/sib-holes-scratch/tests/standard_names/test_sanctioned_holes_throwaway.py:139 follow-on: the hole-2 partial-state assertion compares row['status'] against the 'superseded' the fixture itself passed in, and the _RescoreFake mutates only name_stage, so the assertion holds whatever the real transition does and cannot redden if the real SET clause ever cleared status; the report's conclusion is instead established by reading the guarded transition's SET clause (graph_ops.py:24518-24540 names no status write), which the assertion does not exercise.\nFINDING /tmp/sib-holes-scratch/tests/standard_names/test_sanctioned_holes_throwaway.py:95 follow-on: _RescoreFake.query re-implements stage_name_for_rescore's eligibility WHERE (name_stage IN ['exhausted','reviewed']) verbatim, so the hole-2 stage-guard arm would not redden if the real Cypher guard changed; the precondition's location is established only by the report's file:line reading of graph_ops.py:24513, not by the arm.\n",
+  "review_run_id": "r-20261013T005110809374-review-of-sib-sanctioned-holes-repro-7e804e328494",
+  "reviewed_base_sha": "7e804e32849469ebcd3627dab5f1c02e5e7ec7f7",
+  "reviewed_head_sha": "7e804e32849469ebcd3627dab5f1c02e5e7ec7f7",
+  "reviewed_run_id": "r-20261013T002423146729-sib-sanctioned-holes-repro",
+  "scores": {
+    "durability": 9,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:06:09.678125+00:00",
+  "total": 102,
+  "verdict": "SOUND WITH FINDINGS"
+}
