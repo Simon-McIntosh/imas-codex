@@ -1,0 +1,69 @@
+<!-- Bulk reprocess of assigned JT-60SA signal categories through the current
+     pipeline. All four assigned categories finished: a048717 (1598), CryoCTB
+     (379), b240064 (364), CryoIL (286) = 2627 signals.
+     Machine-readable record: reprocess-progress-bulk-8.json beside this
+     fragment. Census and run logs under
+     ~/.config/reckon/crew/runs/r-20261013T155400265115-ssfms-reprocess-bulk-8
+     (scratch/). Figure drawn from the census result at run time from
+     scratch/final-census.json. -->
+<section id="ssfms-reprocess-bulk-8" data-reckon="evidence">
+  <h2 id="ssfms-reprocess-bulk-8-heading">Reprocessing assigned JT-60SA categories (bulk node 8)</h2>
+
+  <p id="ssfms-reprocess-bulk-8-outcome">
+    Four assigned categories were reset to <code>discovered</code> and driven to
+    completion within the node: <strong>a048717</strong> (1598 signals),
+    <strong>CryoCTB</strong> (379), <strong>b240064</strong> (364) and
+    <strong>CryoIL</strong> (286), <strong>2627 signals</strong> in total. Each
+    finished with none left at <code>discovered</code>, every signal described,
+    every description's <code>embedded_text_hash</code> matching a hash
+    recomputed from its own text (0 mismatches, confirmed by
+    <code>census_signal_embeddings(facility='jt-60sa')</code> and by a census
+    scoped to the four categories), and a <code>signal_role</code> after
+    <code>backfill_signal_roles</code>. Engine spend across the run's own role
+    store records was <strong>$0.07</strong> against the $6 ceiling — the
+    enrichment seat is a local model, so its own spend record is $0.00.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-8-method">
+    The node split its work into two scopes so a reset never outran what the
+    remainder of the hour could finish. Scope A carried the three smaller
+    categories (1029 signals); the smallest real scope measured the rate first,
+    at roughly 200 signals per minute, and scope B then reset the largest
+    category a048717 (1598). No scope was reset after 16:34Z (40 minutes into
+    the node, launched 15:54Z); the last reset ran at 16:11Z.
+  </p>
+
+  <table id="ssfms-reprocess-bulk-8-scopes-table">
+    <caption>Each scope: reset size, enrichment cost record, and final census (jt-60sa, reprocess start 2026-10-13T11:53:35Z)</caption>
+    <tr><th>scope</th><th>categories</th><th>signals</th><th>role-store spend</th><th>discovered</th><th>described</th><th>hash mismatch</th><th>roles missing</th></tr>
+    <tr><td>A</td><td>CryoCTB, b240064, CryoIL</td><td>1029</td><td>$0.0094</td><td>0</td><td>1029</td><td>0</td><td>0</td></tr>
+    <tr><td>B</td><td>a048717</td><td>1598</td><td>$0.0151</td><td>0</td><td>1598</td><td>0</td><td>0</td></tr>
+    <tr><td><strong>total</strong></td><td><strong>4</strong></td><td><strong>2627</strong></td><td><strong>$0.07</strong></td><td><strong>0</strong></td><td><strong>2627</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+  </table>
+
+  <p id="ssfms-reprocess-bulk-8-negative-control">
+    The reset is the step that could have silently done nothing, so each scope
+    carries one. Its post-reset census, taken immediately after the reset and
+    before enrichment, found every signal in scope at <code>discovered</code>
+    with <code>described=0</code> — the complement of the control, so a census
+    that had found them still described would have meant the reset never ran.
+    Scope A read 1029 discovered / 0 described; scope B read 1598 / 0. Both are
+    captured under the run directory as
+    <code>census-scopeA-postreset.json</code> and
+    <code>census-scopeB-postreset.json</code>.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-8-remaining">
+    No assigned category remains unreset for a continue node. The facility-wide
+    embedding census reports 367 differing mismatches, all outside this node's
+    four categories (0 within scope); two categories a peer node holds at
+    <code>discovered</code> (a042181, UDDB) and concurrent peer enrichment
+    account for them.
+  </p>
+
+  <figure id="ssfms-reprocess-bulk-8-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-8/assigned-category-coverage.svg"
+         alt="Horizontal bars, one per assigned JT-60SA category, showing the signal count reprocessed this node, each annotated 0 discovered and with its role count">
+    <figcaption>The four assigned categories, all reprocessed by this node: 2627 signals, 0 left at discovered, 0 embedding-hash mismatch. a048717 is the largest at 1598 signals.</figcaption>
+  </figure>
+</section>
