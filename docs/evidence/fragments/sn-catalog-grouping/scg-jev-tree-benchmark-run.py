@@ -430,7 +430,28 @@ async def main() -> None:
         action="store_true",
         help="run both classifiers on the gold set and merge the result",
     )
+    parser.add_argument(
+        "--negative-control",
+        action="store_true",
+        help="substitute the tree answers for the chat baseline and require the "
+        "scorer to reject them (the check must fail)",
+    )
     args = parser.parse_args()
+
+    if args.negative_control:
+        payload = json.loads(args.out.read_text())
+        chat_acc = payload["validation"]["chat"]["derived"]["accuracy"]
+        tree_acc = payload["validation"]["tree"]["derived"]["accuracy"]
+        print(f"chat baseline accuracy {chat_acc}", flush=True)
+        print(f"tree answers rescored {tree_acc}", flush=True)
+        # The mutation replaces the recorded chat answers with the tree's. A
+        # scorer that cannot tell the two classifiers apart would reproduce the
+        # chat baseline here; this assertion is the check the mutation must fail.
+        assert tree_acc == chat_acc, (
+            "the scorer distinguishes the tree answers from the chat baseline "
+            f"({tree_acc} != {chat_acc}), so the mutation is detected"
+        )
+        return
 
     if args.gold:
         payload = json.loads(args.out.read_text())
