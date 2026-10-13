@@ -1,0 +1,75 @@
+{
+  "facility": "jt-60sa",
+  "node": "ssfms-reprocess-bulk-8",
+  "pipeline": "imas-codex discover run jt-60sa --only signals [--flush] --category <scope>; reset via discovery.base.reset.SIGNAL_RESET_SPECS['discovered']",
+  "reprocess_start": "2026-10-13T11:53:35Z",
+  "node_launched": "2026-10-13T15:54:35Z",
+  "reset_cutoff": "2026-10-13T16:34:35Z",
+  "assigned_categories": ["a048717", "CryoCTB", "b240064", "CryoIL"],
+  "assigned_category_totals": {
+    "a048717": 1598,
+    "CryoCTB": 379,
+    "b240064": 364,
+    "CryoIL": 286
+  },
+  "measured_rate_signals_per_minute": 200,
+  "scopes": [
+    {
+      "scope": "scopeA",
+      "categories": ["CryoCTB", "b240064", "CryoIL"],
+      "signals": 1029,
+      "post_reset_census": {"total": 1029, "discovered": 1029, "described": 0, "with_role": 0, "embedded": 0},
+      "enrichment": {"signals": 1029, "spend_usd": 0.0094, "seconds": 590},
+      "final_census": {"total": 1029, "discovered": 0, "described": 1029, "with_role": 1029, "embedded": 1029, "hash_mismatch": 0},
+      "log_post_reset": "scratch/census-scopeA-postreset.json",
+      "log_enrich": "scratch/scopeA-enrich.log",
+      "log_final_census": "scratch/final-census.json",
+      "log_final_census_note": "The scope's final census is the node-wide scratch/final-census.json, whose CryoCTB, b240064 and CryoIL rows read 0 discovered / 1029 described / 1029 roled after enrichment and the role backfill. scratch/census-scopeA-final.json is an earlier snapshot taken before the role backfill and is not the final census; census-scopeA-postreset.json is the pre-enrichment read."
+    },
+    {
+      "scope": "scopeB",
+      "categories": ["a048717"],
+      "signals": 1598,
+      "post_reset_census": {"total": 1598, "discovered": 1598, "described": 0, "with_role": 0, "embedded": 0},
+      "enrichment": {"signals": 1598, "spend_usd": 0.0151, "seconds": 1164,
+        "note": "two foreground passes: scopeB-enrich (1555 signals, cut by the background wall-clock limit with 43 left at discovered) then scopeB-enrich2 (the remaining 43)"},
+      "final_census": {"total": 1598, "discovered": 0, "described": 1598, "with_role": 1598, "embedded": 1598, "spend_usd": 0.0151, "hash_mismatch": 0},
+      "log_post_reset": "scratch/census-scopeB-postreset.json",
+      "log_enrich": "scratch/scopeB-enrich.log",
+      "log_enrich_2": "scratch/scopeB-enrich2.log",
+      "log_final_census": "scratch/final-census.json",
+      "log_final_census_note": "The scope's final census is the node-wide scratch/final-census.json, whose a048717 row reads 0 discovered / 1598 described / 1598 roled after both enrichment passes and the role backfill. scratch/census-scopeB-final.json is a mid-drain snapshot taken before scopeB-enrich2 (43 discovered / 1555 described) and is not the final census; census-scopeB-postreset.json is the pre-enrichment read."
+    }
+  ],
+  "role_backfill": {
+    "categories": ["a048717", "CryoCTB", "b240064", "CryoIL"],
+    "stored": 1734,
+    "spend_usd": 0.0451,
+    "logs": ["scratch/rolebackfill-scopeA.log", "scratch/rolebackfill-all.log"]
+  },
+  "assigned_categories_not_yet_reset": [],
+  "totals": {
+    "scopes_finished": 2,
+    "categories_finished": 4,
+    "signals_finished": 2627,
+    "spend_usd": 0.07,
+    "hash_mismatch": 0,
+    "discovered_left": 0,
+    "roles_missing": 0
+  },
+  "final_census_log": "scratch/final-census.json",
+  "facility_embedding_census": {
+    "n": 15111,
+    "mismatch": 367,
+    "missing_hash": 0,
+    "differing": 367,
+    "note": "the facility-wide mismatches lie outside this node's four categories (0 within scope); a042181 and UDDB are held at discovered by a peer bulk node, and concurrent peer nodes were enriching at the same instant"
+  },
+  "facility_role_census": {
+    "n": 15111,
+    "missing": 6763,
+    "note": "the remaining role-less signals lie in categories not assigned to this node; the facility-wide role sweep belongs to the node that resets the remaining categories"
+  },
+  "spend_ceiling_usd": 6.0,
+  "logs_dir": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T155400265115-ssfms-reprocess-bulk-8/scratch"
+}
