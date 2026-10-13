@@ -68,6 +68,13 @@
       "finding": "duplicate_owner-3",
       "reason": "",
       "when": "2026-10-13T00:31:13.042442+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-3",
+      "reason": "",
+      "when": "2026-10-13T00:31:20.112626+00:00"
     }
   ],
   "responses": {
@@ -87,7 +94,7 @@
       "action": "acted",
       "by": "",
       "reason": "",
-      "when": "2026-10-13T00:31:13.042442+00:00"
+      "when": "2026-10-13T00:31:20.112626+00:00"
     },
     "thin_wrapper-1": {
       "action": "declined",
