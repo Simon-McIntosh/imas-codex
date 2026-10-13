@@ -1,0 +1,27 @@
+<section id="ssfms-embed-census-facility" data-plan="signal-search-finds-the-measured-signal" data-node="ssfms-embed-census-facility">
+  <h3>ssfms-embed-census-facility — make the embedding census read one facility with valid Cypher</h3>
+  <p id="ssfms-embed-census-facility-landing">
+    <code>fetch_signal_embed_state</code> in
+    <code>imas_codex/discovery/signals/parallel.py</code> concatenated its
+    facility <code>WHERE</code> clause directly onto the <code>RETURN</code>
+    keyword, rendering <code>... = $facilityRETURN ...</code> with no separator
+    whenever a facility was named. The server rejects that statement, so
+    <code>census_signal_embeddings(facility='jt-60sa')</code> could not run at
+    all; the unscoped read was unaffected because its clause is empty. One
+    space inserted after the clause makes the facility-scoped query valid. The
+    measure below is the whole facility's embedding census, which the universe
+    read already exercised, so this node's change is the facility scope alone.
+  </p>
+  <p id="ssfms-embed-census-facility-measure">
+    Measure: <code>census_signal_embeddings(facility='jt-60sa')</code> runs
+    against the live graph and reads a population of <code>n=15111</code>
+    (graph-marked test passes, <code>EXIT=0</code>).
+    <code>tests/discovery/test_signal_embedding_sweep.py</code> at head:
+    <code>7 passed</code> with <code>-m 'graph or not graph'</code>,
+    <code>EXIT=0</code>. The declared mutation — the space before
+    <code>RETURN</code> removed again — fails
+    <code>test_facility_scoped_state_query_separates_joining_clauses_from_return</code>
+    (<code>EXIT=1</code>, one failing id, the query rendered as
+    <code>$facilityRETURN</code>).
+  </p>
+</section>
