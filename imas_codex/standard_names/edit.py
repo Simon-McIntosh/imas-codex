@@ -3166,13 +3166,15 @@ def _apply_rename(
         """
         // EDIT_CHECK_COLLISION
         MATCH (sn:StandardName {id: $id})
-        RETURN sn.name_stage AS occupant_stage,
-               EXISTS { (succ:StandardName)-[:REFINED_FROM]->(sn) }
-                 AS occupant_has_successor
+        RETURN count(sn) AS n,
+               head(collect(sn.name_stage)) AS occupant_stage,
+               head(collect(
+                 EXISTS { (succ:StandardName)-[:REFINED_FROM]->(sn) }
+               )) AS occupant_has_successor
         """,
         id=new_name,
     )
-    if coll:
+    if coll and coll[0].get("n"):
         if coll[0].get("occupant_stage") == "superseded" and not coll[0].get(
             "occupant_has_successor"
         ):

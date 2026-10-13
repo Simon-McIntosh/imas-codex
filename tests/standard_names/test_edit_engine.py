@@ -233,9 +233,10 @@ class FakeGraph:
         if "// EDIT_CHECK_COLLISION" in cypher:
             sn_id = params["id"]
             if sn_id not in self.nodes:
-                return []
+                return [{"n": 0, "occupant_stage": None, "occupant_has_successor": False}]
             return [
                 {
+                    "n": 1,
                     "occupant_stage": self.nodes[sn_id].get("name_stage"),
                     "occupant_has_successor": self.has_successor(sn_id),
                 }
