@@ -1,0 +1,83 @@
+<section id="ssfms-post-reembed-harness-section" data-reckon="fragment">
+  <h2 id="ssfms-post-reembed-harness-section-title">§5 — the golden harness on the re-embedded graph</h2>
+
+  <p id="ssfms-post-reembed-harness-section-what">
+    After every <code>jt-60sa</code> signal's stored vector was re-embedded, the four-arm table on §3's harness
+    refused to score: the new vectors place candidates in an arm's top 10 that the fixture does not label. All
+    29 such candidates are read against their question's <code>intent</code> and graded into
+    <code>tests/llm/fixtures/signal_search_questions.json</code> (1,675 labels become 1,704). The table test then
+    scores every arm, in two runs back to back at <code>93b083114</code>.
+  </p>
+
+  <table id="ssfms-post-reembed-harness-section-table">
+    <caption>Mean nDCG@10 over the 22 questions on the re-embedded graph; two runs back to back, identical to every printed digit</caption>
+    <thead>
+      <tr><th>Arm</th><th>run 1</th><th>run 2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>current_tool (fused)</td><td><strong>0.7773</strong></td><td><strong>0.7773</strong></td></tr>
+      <tr><td>rrf</td><td>0.7773</td><td>0.7773</td></tr>
+      <tr><td>vector_only</td><td>0.6858</td><td>0.6858</td></tr>
+      <tr><td>additive_rule (frozen)</td><td>0.5863</td><td>0.5863</td></tr>
+      <tr><td>random_control</td><td>0.4527</td><td>0.4527</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-post-reembed-harness-section-reading">
+    <strong>The fused product arm is 0.0147 lower than the 0.7920 measured before the re-embed.</strong> That is
+    0.0027 beyond the 0.012 run-to-run spread §3 records, so the "no lower beyond the spread" criterion is
+    <strong>not met</strong>. The cause is the graph and not the labels: scoring the same current_tool rankings
+    against the fixture as it stood before this node gives the same 0.7773, because none of the 29 new labels
+    sits in current_tool's or rrf's top 10. The re-embedded graph's RRF score also lands on §5's in-memory
+    description-only measurement (0.7773 stored against 0.7761 in memory), where §3's stale stored vectors
+    scored 0.7963 against that same in-memory 0.7761. This reads as the stale vectors having been favoured by
+    labels pooled from their own top tens, and the fresh vectors scoring what a fresh embedding scores; it is a
+    reading of those numbers, not a separate measurement.
+  </p>
+
+  <table id="ssfms-post-reembed-harness-section-labels">
+    <caption>Labelling log: 29 candidates graded, by question (grade 3 measured, 2 reference or adjacent, 1 related hardware, 0 different quantity)</caption>
+    <thead>
+      <tr><th>Question</th><th>Candidates (grade)</th><th>Placed by</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>magnetic-fluctuation-toroidal-mode-one</td><td>dcsv_pprwmc2fb, dcsv_ppefcc8ff, dcsv_pprwmc6ff, dcsv_ppefcc2ff (0): feedback and feed-forward amplitudes of the RWM and error-field coils, not a measured n=1 fluctuation</td><td>additive_rule</td></tr>
+      <tr><td>divertor-tile-surface-temperature</td><td>cam_irmp06roi9, cam_irmp06roi5 (3): IR region-of-interest temperature; dcsv_pptgttemp (2): divertor target temperature reference</td><td>additive_rule</td></tr>
+      <tr><td>nitrogen-seeding-flow-into-vessel</td><td>n2gas_teminleta (1): inlet temperature of the same line</td><td>additive_rule</td></tr>
+      <tr><td>deuterium-fuelling-flow-into-vessel</td><td>n2gas_flwinletd (0): nitrogen flow</td><td>additive_rule</td></tr>
+      <tr><td>measured-voltage-across-the-superconducting-poloidal-field-coils</td><td>psrc_calbr4, psrc_calbr3, psrc_calbr2 (0): poloidal field probes; dcsv_ppef2vol (1): EF2 voltage reference</td><td>additive_rule, vector_only</td></tr>
+      <tr><td>temperature-of-the-high-temperature-superconductor-current-leads</td><td>cryohrs_ctsh735, 715, 745, 725, 183 (1): heater high-temperature switch status; cryoil_m1e6nhq (1): HTS lead quench signal</td><td>additive_rule, vector_only</td></tr>
+      <tr><td>toroidal-field-coil-current</td><td>mdac_oef3cur (1): measured current of an equilibrium field coil, graded as its siblings mdac_oef1cur, 2, 4</td><td>additive_rule</td></tr>
+      <tr><td>quench-protection-circuit-dump-resistor-voltage</td><td>cryoctb_m1e4nhv, m2e6phv, mt08nfv, mt02nfv, mt14nfv (1): quench-detection voltages, graded as the sibling cryoctb voltages already are</td><td>additive_rule</td></tr>
+      <tr><td>poloidal-field-coil-current-measurement</td><td>psc_cefcc1cr (1): error-field coil current command</td><td>vector_only</td></tr>
+      <tr><td>toroidal-field-coil-voltage</td><td>psc_cefcc10cr (0): error-field coil current command</td><td>vector_only</td></tr>
+      <tr><td>switching-network-unit-terminal-voltage</td><td>psc_cefcc18cr (1), as its siblings psc_cefcc10cr and 12cr; psc_cref3snu (1): switching network unit resistance, not terminal voltage</td><td>vector_only; psc_cref3snu: see below</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-post-reembed-harness-section-hashseed">
+    The frozen additive arm sorts a set by score, so candidates tied on score reach its top 10 in an order that
+    changes with the process hash seed. A first labelling pass left the table test passing at one seed and
+    refusing at the next (<code>cryoctb_mt14nfv</code>, then <code>psrc_calbr2</code>, then
+    <code>cryoctb_mt02nfv</code>); those three were labelled after enumerating 24 seeds, and 64 further seeds
+    (100 to 163) then surfaced no unlabelled candidate in any of the four arms. Only additive_rule varies; the
+    other three arms were identical at every seed. Making the arm deterministic is a change to the test module
+    outside this node's scope (follow-on).
+  </p>
+
+  <p id="ssfms-post-reembed-harness-section-cref3snu">
+    <code>jt-60sa:general/psc_cref3snu</code> is labelled, but on the settled graph it is in no arm's top 10: it
+    ranks 53 in the vector stream, 18 in the full-text stream and 12 after fusion on
+    switching-network-unit-terminal-voltage, three runs in a row. The census node saw it in current_tool's top
+    10 minutes after its sweep finished, when the vector index may still have been settling.
+  </p>
+
+  <p id="ssfms-post-reembed-harness-section-control">
+    <strong>Negative control.</strong> Removing the psc_cref3snu label, as declared, leaves the table test
+    <em>passing</em> (<code>negative_control_declared.log</code>, EXIT=0), because that candidate is not in a top 10
+    now. The same mutation on a new label an arm does place, psc_cefcc18cr (vector_only's top 10 on the same
+    question), makes the test refuse: <em>arm 'vector_only' on question
+    'switching-network-unit-terminal-voltage' top 10 holds 1 unlabelled candidate(s):
+    jt-60sa:general/psc_cefcc18cr</em>, 1 failed, EXIT=1 (<code>negative_control.log</code>).
+  </p>
+</section>
