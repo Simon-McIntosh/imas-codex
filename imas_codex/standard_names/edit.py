@@ -56,8 +56,12 @@ name clears — there is no privileged accept path:
      cascade is preflighted (round-trip + uniqueness of every descendant
      id) BEFORE the acceptance commits; any conflict refuses the
      acceptance (``name_stage`` stays ``reviewed``) and renames nothing.
-- **docs** — ``apply_edit`` → ``_apply_docs``: ``name_stage='accepted'`` +
-  ``docs_stage in (accepted, exhausted)`` preconditions, then
+- **docs** — ``apply_edit`` → ``_apply_docs``: ``name_stage='accepted'``,
+  and the docs axis must not be held by a docs worker — ``docs_stage`` in
+  ``pending`` / ``accepted`` / ``exhausted`` is admitted, ``drafted``,
+  ``reviewed`` and ``refining`` are refused.  The race protection is the
+  edit's own claim (``docs_stage`` → ``refining`` under a fresh claim
+  token), which excludes every docs-pool writer.  Then
   ``protection.filter_protected`` (catalog-edit docs require
   ``--override-edits``), then ``persist_refined_docs`` → the ``review_docs``
   pool scores the replacement — the same docs gate a pipeline docs
@@ -3464,20 +3468,25 @@ def _apply_docs(
             "accepted name (name_stage='accepted')",
         )
 
-    # Docs-edit claim precondition (parity with the docs pipeline's own
-    # eligibility): documentation may only be re-opened once the docs axis
-    # has settled — accepted (published) or exhausted (refine cap reached).
-    # A name still drafting/refining/pending docs is mid-flight; steering it
-    # would race the docs pool.
+    # Docs-edit claim precondition: the write below is the protection, not
+    # this test — it moves docs_stage to 'refining' under a fresh
+    # claim_token, the compare-and-set that excludes every docs-pool writer.
+    # So this gate only has to refuse the stages a pool worker may be
+    # holding: 'drafted' (a generate_docs claim) and 'refining' (a
+    # review_docs claim). 'pending' is the un-started state — an identity
+    # carrying no documentation yet, which is exactly what a docs edit
+    # seeds — and 'accepted'/'exhausted' are the settled states. All three
+    # are admitted.
     docs_stage = target_row.get("docs_stage")
-    if docs_stage not in ("accepted", "exhausted"):
+    if docs_stage not in ("pending", "accepted", "exhausted"):
         return _blocked(
             target,
             "docs",
             "docs",
             scope,
             f"target docs_stage={docs_stage!r} — docs edits require the docs "
-            "axis to have settled (docs_stage in accepted/exhausted)",
+            "axis to be un-started or settled (docs_stage in "
+            "pending/accepted/exhausted)",
         )
 
     # Catalog-edit protection: `documentation` is a catalog-authoritative

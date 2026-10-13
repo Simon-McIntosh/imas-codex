@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-docs-edit-pending">
+<title>A docs edit seeds documentation onto an un-started docs axis</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-docs-edit-pending-title">A docs edit seeds documentation onto an un-started docs axis</h1>
+
+<p id="sib-docs-edit-pending-summary">
+<code>apply_edit</code> in docs mode refused any target whose
+<code>docs_stage</code> was not <code>accepted</code> or
+<code>exhausted</code>, so an accepted identity whose docs axis had never
+started (<code>docs_stage='pending'</code>, no documentation) could not have
+documentation seeded:
+<code>REFUSED: target docs_stage='pending' — docs edits require the docs axis to have settled (docs_stage in accepted/exhausted)</code>.
+The race protection is not the stage test but the edit path's own
+compare-and-set, which moves <code>docs_stage</code> to <code>refining</code>
+under a fresh <code>claim_token</code> and so excludes any docs-pool writer.
+<code>pending</code> is the un-started state and races nothing that claim does
+not already exclude.
+</p>
+
+<p id="sib-docs-edit-pending-change">
+The precondition now admits <code>pending</code>: the stage set is
+<code>{pending, accepted, exhausted}</code>. The claim and its
+compare-and-set, the <code>name_stage='accepted'</code> requirement, and the
+refusal of <code>drafted</code> and <code>refining</code> (stages a docs worker
+may hold) are unchanged. The comment now states the rule as the claim rather
+than as a settled-stage list.
+</p>
+
+<h2 id="sib-docs-edit-pending-evidence">Evidence</h2>
+<table id="sib-docs-edit-pending-evidence-table">
+<tbody>
+<tr><th>Base revision</th><td><code>c98a0d42dc8195dd60c9c145340703409c87b2ec</code></td></tr>
+<tr><th>Base gate</th><td>412 passed, exit 0 (<code>base.log</code>)</td></tr>
+<tr><th>After gate</th><td>414 passed, exit 0, zero added failures (<code>after.log</code>)</td></tr>
+<tr><th>Gate command</th><td>the 27 test files matched by <code>rg -l "standard_names.edit|from imas_codex.standard_names import edit" tests/</code></td></tr>
+<tr><th>New tests</th><td><code>TestDocsMode::test_docs_edit_seeds_documentation_when_docs_stage_pending</code>, <code>TestDocsMode::test_docs_edit_refuses_while_docs_stage_refining</code></td></tr>
+<tr><th>Negative control</th><td>settled-only stage set restored → the pending test fails, <code>EXIT=1</code> (<code>negative-control.log</code>)</td></tr>
+</tbody>
+</table>
+
+<p id="sib-docs-edit-pending-seed-test">
+The seeding test drives <code>apply_edit</code> against
+<code>standard_names.edit</code> at <code>name_stage='accepted'</code>,
+<code>docs_stage='pending'</code>, <code>documentation=None</code>. It proceeds
+(<code>blocked is None</code>, <code>applied is True</code>,
+<code>entry='review_docs'</code>) and takes the claim: <code>docs_stage</code>
+leaves <code>pending</code> for <code>drafted</code> and the persisted revision
+advances <code>docs_chain_length</code> from 0 to 1.
+</p>
+
+<p id="sib-docs-edit-pending-refuse-test">
+The refusal test drives the same call at <code>docs_stage='refining'</code>
+and shows it is blocked with <code>refining</code> named, nothing applied, and
+the in-flight documentation untouched.
+</p>
+
+</main>
+</body>
+</html>

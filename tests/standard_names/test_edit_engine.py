@@ -1574,6 +1574,59 @@ class TestDocsMode:
         assert plan.blocked is not None
         assert "accepted" in plan.blocked
 
+    def test_docs_edit_seeds_documentation_when_docs_stage_pending(self) -> None:
+        """An accepted identity whose docs axis never started carries no
+        documentation, and a docs edit is how it gets some. The un-started
+        state races nothing the edit path's own claim does not already
+        exclude, so it is admitted and the claim is taken."""
+        fake = FakeGraph()
+        fake.add_node(
+            "electron_temperature",
+            name_stage="accepted",
+            docs_stage="pending",
+            description="electron temperature",
+            documentation=None,
+        )
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="electron_temperature",
+                docs="seed documentation",
+                reason="identity carries no documentation",
+                gc=fake,
+            )
+        assert plan.blocked is None
+        assert plan.applied is True
+        assert plan.entry == "review_docs"
+        node = fake.nodes["electron_temperature"]
+        assert node["documentation"] == "seed documentation"
+        # The claim was taken: docs_stage left 'pending' and the persisted
+        # revision advanced the docs chain.
+        assert node["docs_stage"] == "drafted"
+        assert node["docs_chain_length"] == 1
+        assert fake.docs_revisions == ["electron_temperature#rev-0"]
+
+    def test_docs_edit_refuses_while_docs_stage_refining(self) -> None:
+        """A docs worker holds the claim at 'refining'; the edit must refuse
+        rather than race it."""
+        fake = FakeGraph()
+        fake.add_node(
+            "electron_temperature",
+            name_stage="accepted",
+            docs_stage="refining",
+            documentation="in-flight docs",
+        )
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="electron_temperature",
+                docs="new docs",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "refining" in plan.blocked
+        assert plan.applied is False
+        assert fake.nodes["electron_temperature"]["documentation"] == "in-flight docs"
+
     def test_docs_dry_run_zero_writes(self) -> None:
         fake = FakeGraph()
         fake.add_node(
