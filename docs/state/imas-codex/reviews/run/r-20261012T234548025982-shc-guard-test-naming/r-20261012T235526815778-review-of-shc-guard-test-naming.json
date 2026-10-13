@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "354b2c345738809dad4145f121460b833f7240f2",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T00:06:15.382Z",
+  "dispatched_at": "2026-10-12T23:55:38Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T234548025982-shc-guard-test-naming/negative-control.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the log header names the base revision 354b2c3 and does not record that the test file was also worktree-edited at run time, so the red arm's provenance reads as the base revision rather than the reviewed head 8639966; the finding does not block, because the removed helper was a no-op when its env var was unset and the arm still measures the head test file."
+    }
+  ],
+  "head_log_revision": "8639966d9f27323a03384ad0fe2934f06dea4564",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none \u2014 the landed change is confined to tests/standard_names/test_harmonize_guard.py and an evidence fragment; no runtime code imports a test module, so no production call site reaches the change.",
+    "diff": "read the reviewed head against base 354b2c3; one change, two files, +5/-18 \u2014 the test file loses the `SHC_NO_RECOMMENDED_GUARD` seam, `_guard_or_removed`, `import os` and its three calls, its docstring restates the three classes by mechanism, and a 4-line evidence fragment is added.",
+    "done_when": "the done_when measures `rg -n \"SHC_|lead ruled\"` over the file returning nothing plus the file's tests passing and its negative control still failing with the guard removed; after-gate.log records 5 passed/EXIT=0 at 8639966, negative-control.log records 4 failed/1 passed/EXIT=1, and baseline_suite/after_suite both record 0 failures.",
+    "goal": "the node's goal is a naming cleanup of the harmonize guard test \u2014 remove the plan-labelled env-var seam and the \"lead ruled\" attribution; tests/standard_names/test_harmonize_guard.py at head carries neither `SHC_` nor `lead ruled` (rg exit 1), and the seam helper `_guard_or_removed` and `import os` are gone.",
+    "manifest": "read; it states the five tests, base 5 passed / after 5 passed, the negative-control procedure and its log paths, and baseline_suite/after_suite JSON with revision, command, exit_status, completed and empty failure_ids.",
+    "write_paths": "the manifest declares tests/standard_names/test_harmonize_guard.py and docs/evidence/fragments/sn-harmonize-command/shc-guard-test-naming.html (plus an unused docs/figures path); the diff touches exactly the first two and nothing else."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion, so the naming change is unguarded by any test; the file's refusal tests remain effective (negative-control.log reds test_roster_and_approved_members_refused_without_force once refuse_recommended_members is stubbed), but the negative control is now reproducible only by editing production source, since the seam was removed without an in-test replacement (tests/standard_names/test_harmonize_guard.py:13-14).",
+    "evidence": "after-gate.log records \"5 passed ... EXIT=0\" at 8639966 and negative-control.log records \"4 failed, 1 passed ... EXIT=1\", both named in the manifest beside the done-when's rg measure.",
+    "fit": "the module docstring at tests/standard_names/test_harmonize_guard.py:4-16 states the three classes and the negative-control mechanism without a person or ruling, matching the module's prose idiom, and no forbidden label remains in the file.",
+    "goal_fidelity": "tests/standard_names/test_harmonize_guard.py:1-17 restates the three protected classes as the mechanism itself and the plan-labelled seam is gone, so the naming cleanup the brief specified is what landed.",
+    "reuse": "the diff defines nothing new \u2014 it deletes `_guard_or_removed` (tests/standard_names/test_harmonize_guard.py:202 at base) \u2014 so it duplicates no capability, and no repository owner of a recommended-name refusal test exists for it to extend.",
+    "scope_discipline": "the diff touches only tests/standard_names/test_harmonize_guard.py and docs/evidence/fragments/sn-harmonize-command/shc-guard-test-naming.html, both declared write paths."
+  },
+  "node": "review-of-shc-guard-test-naming",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a naming cleanup of the harmonize guard test \u2014 remove the plan-labelled env-var seam and the \"lead ruled\" attribution; tests/standard_names/test_harmonize_guard.py at head carries neither `SHC_` nor `lead ruled` (rg exit 1), and the seam helper `_guard_or_removed` and `import os` are gone.\nVERDICT done_when: the done_when measures `rg -n \"SHC_|lead ruled\"` over the file returning nothing plus the file's tests passing and its negative control still failing with the guard removed; after-gate.log records 5 passed/EXIT=0 at 8639966, negative-control.log records 4 failed/1 passed/EXIT=1, and baseline_suite/after_suite both record 0 failures.\nVERDICT write_paths: the manifest declares tests/standard_names/test_harmonize_guard.py and docs/evidence/fragments/sn-harmonize-command/shc-guard-test-naming.html (plus an unused docs/figures path); git diff 354b2c3..8639966 touches exactly the first two and nothing else.\nVERDICT manifest: read; it states the five tests, base 5 passed / after 5 passed, the negative-control procedure and its log paths, and baseline_suite/after_suite JSON with revision, command, exit_status, completed and empty failure_ids.\nVERDICT diff: read the reviewed head against base 354b2c3; one change, two files, +5/-18 \u2014 the test file loses the `SHC_NO_RECOMMENDED_GUARD` seam, `_guard_or_removed`, `import os` and its three calls, its docstring restates the three classes by mechanism, and a 4-line evidence fragment is added.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_harmonize_guard.py:1-17 restates the three protected classes as the mechanism itself and the plan-labelled seam is gone, so the naming cleanup the brief specified is what landed.\nSCORE evidence: 18\nJUSTIFICATION evidence: after-gate.log records \"5 passed ... EXIT=0\" at 8639966 and negative-control.log records \"4 failed, 1 passed ... EXIT=1\", both named in the manifest beside the done-when's rg measure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 354b2c3..8639966 touches only tests/standard_names/test_harmonize_guard.py and docs/evidence/fragments/sn-harmonize-command/shc-guard-test-naming.html, both declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: the diff adds no assertion, so the naming change is unguarded by any test; the file's refusal tests remain effective (negative-control.log reds test_roster_and_approved_members_refused_without_force once refuse_recommended_members is stubbed), but the negative control is now reproducible only by editing production source, since the seam was removed without an in-test replacement (tests/standard_names/test_harmonize_guard.py:13-14).\nSCORE fit: 19\nJUSTIFICATION fit: the module docstring at tests/standard_names/test_harmonize_guard.py:4-16 states the three classes and the negative-control mechanism without a person or ruling, matching the module's prose idiom, and no forbidden label remains in the file.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff defines nothing new \u2014 it deletes `_guard_or_removed` (tests/standard_names/test_harmonize_guard.py:202 at base) \u2014 so it duplicates no capability, and no repository owner of a recommended-name refusal test exists for it to extend.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T234548025982-shc-guard-test-naming/negative-control.log:2 follow-on: the log header names the base revision 354b2c3 and does not record that the test file was also worktree-edited at run time, so the red arm's provenance reads as the base revision rather than the reviewed head 8639966; the behaviour is equivalent because the removed helper was a no-op when its env var was unset, so the arm still measures the head test file.",
+  "review_run_id": "r-20261012T235526815778-review-of-shc-guard-test-naming",
+  "reviewed_base_sha": "354b2c345738809dad4145f121460b833f7240f2",
+  "reviewed_head_sha": "8639966d9f27323a03384ad0fe2934f06dea4564",
+  "reviewed_run_id": "r-20261012T234548025982-shc-guard-test-naming",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-guard-test-naming",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:03:07+00:00",
+  "total": 100
+}
