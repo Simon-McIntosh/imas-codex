@@ -54,6 +54,13 @@
       "finding": "done_when-1",
       "reason": "",
       "when": "2026-10-13T13:45:47.695710+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "",
+      "when": "2026-10-13T13:45:51.713218+00:00"
     }
   ],
   "responses": {
@@ -68,6 +75,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-13T13:45:43.516245+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-13T13:45:51.713218+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-harmonize-command/r-20261013T120344690580-plan-review-of-sn-harmonize-command.json",
