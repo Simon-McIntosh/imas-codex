@@ -862,10 +862,19 @@ def get_extraction_candidates_signals(
 # =============================================================================
 
 
-def get_existing_standard_names() -> set[str]:
-    """Return the set of existing StandardName node IDs for deduplication."""
-    with GraphClient() as gc:
+def get_existing_standard_names(gc: Any | None = None) -> set[str]:
+    """Return the set of existing StandardName node IDs for deduplication.
+
+    This is the single definition of the graph-wide all-name read: callers that
+    would otherwise restate ``MATCH (sn:StandardName) RETURN sn.id AS id`` read
+    it here instead. A caller already holding an open client passes it as *gc*
+    so the read rides that session; with none, one is opened for this read.
+    """
+    if gc is not None:
         results = gc.query("MATCH (sn:StandardName) RETURN sn.id AS id")
+        return {r["id"] for r in results}
+    with GraphClient() as own:
+        results = own.query("MATCH (sn:StandardName) RETURN sn.id AS id")
         return {r["id"] for r in results}
 
 

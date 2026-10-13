@@ -659,6 +659,7 @@ def _family_member_collect() -> str:
         docs_stage: m.docs_stage,
         reviewer_score_docs: m.reviewer_score_docs,
         harmonized_group_signature: m.harmonized_group_signature,
+        harmonized_anchor: m.harmonized_anchor,
         unit: m.unit,
         cocos_transformation_type: m.cocos_transformation_type,
         physics_domain: m.physics_domain,
