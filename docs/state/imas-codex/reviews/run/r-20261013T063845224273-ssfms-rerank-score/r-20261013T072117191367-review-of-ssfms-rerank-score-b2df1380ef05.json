@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's own manifest left baseline_suite and after_suite empty, so no count could be derived from its recorded gate logs; this review measured both arms itself in scratch trees at the reviewed base (38e5dc355) and head (b2df1380e), 122 passed vs 126 passed, 0 failing test ids in each, so added_failure_count 0 is a measurement this review took rather than a value the reviewed run recorded",
+  "base_log_revision": "38e5dc355c6e9f7ae522264fac3a6ffa5dfbaf91",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/llm/server.py:2463 (signal_search passing rerank=_rerank_signals)",
+    "imas_codex/llm/search_tools.py:334 (_search_signals rerank parameter)",
+    "imas_codex/llm/search_tools.py:421 (rerank_candidates call in _search_signals)",
+    "imas_codex/llm/search_tools.py:235 (rerank_candidates)"
+  ],
+  "completed_at": "2026-10-13T07:45:06.071Z",
+  "dispatched_at": "2026-10-13T07:21:30Z",
+  "findings": [
+    {
+      "file": "imas_codex/llm/search_tools.py",
+      "line": "418",
+      "severity": "follow-on",
+      "text": "the landed change turns the signal rerank switch on for a full server, but the comment at this line still reads 'The switch is off, so this runs only once its arms are scored', so it now misdescribes runtime behaviour; the file is outside this node's declared write paths, so the node could not refresh it."
+    },
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "660",
+      "severity": "follow-on",
+      "text": "test_a_read_only_server_does_not_rerank_signals (line 660) and test_a_dd_only_server_does_not_rerank_signals (line 665) assert the same False value the pre-change code already produced, so they cannot fail on a regression of the landed change; the switch's durability rests solely on test_a_full_server_reranks_signals (line 653)."
+    }
+  ],
+  "head_log_revision": "b2df1380ef05f1bed83d160fc7be74ae2bc1cc36",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit over 38e5dc355..b2df1380e; a single commit, seven paths, all inside the declared write paths.",
+    "done_when": "every clause is measured and recorded: gate_llm.log 126 passed, 8 skipped, 3 deselected, EXIT=0; rerank.html carries the arms table, per-question wins 16 / losses 2 / ties 4, per-pass figures and p95 4.722 s; signal_measure_3pass.log reconciles each figure (means 0.9128/0.9045/0.7949, worst pass 0.9100, p95 4.722, spend USD 0.177618); negative_control.log reddens the mode guard and tiebreak_control.log the tie-break guard.",
+    "goal": "the node goal is to set the signal rerank switch by section 7's ship rule from a three-pass measurement of both rerank arms against fusion alone, and imas_codex/llm/server.py:1898 sets _rerank_signals = not (self.read_only or self.dd_only) from the measured figures, so the goal is met.",
+    "manifest": "read; it states status complete, one commit [b2df1380e], tests 'gate_llm.log: 126 passed, 8 skipped, 3 deselected, EXIT=0', names negative_control.log and tiebreak_control.log, and leaves baseline_suite and after_suite empty.",
+    "write_paths": "read the manifest's seven declared paths and every path the diff touches (imas_codex/llm/server.py, tests/llm/measure_search_rankings.py, tests/llm/test_search_tools.py, tests/llm/test_signal_search_goldens.py, the two fragments and the figure) is inside them."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_search_tools.py:653 fails when the switch is reverted to False (negative_control.log proves it) and tests/llm/test_signal_search_goldens.py:838 fails when the tie-break is reverted to a score-only sort (tiebreak_control.log proves it), but tests/llm/test_search_tools.py:660,665 assert only the pre-change off direction and the measurement-module change is unguarded by the suite.",
+    "evidence": "the gate is recorded (gate_llm.log 126 passed EXIT=0), the mode guard is shown to fire (negative_control.log 1 failed EXIT=1), and the measurement log reconciles with rerank.html to the digit, but the ship-rule figures rest on a nondeterministic Jev judge disclosed as such and the added-failure count is unmeasured by the reviewed run's own manifest.",
+    "fit": "the additions follow the surrounding style and carry no plan label, version suffix or ticket reference, and imas_codex/llm/server.py:1898 mirrors _rerank_dd_paths; only the now-stale comment at imas_codex/llm/search_tools.py:418, in a file outside this node's scope, is left misdescribing the switch.",
+    "goal_fidelity": "imas_codex/llm/server.py:1898 flips _rerank_signals to follow the server mode from the measured three-pass figures recorded in docs/evidence/fragments/signal-search-finds-the-measured-signal/rerank.html, so the switch is set exactly as section 7's ship rule states.",
+    "reuse": "the switch extends the existing _rerank_dd_paths idiom, and the new helpers (_p95, _per_question_mean, compare_role_to_fusion, _label_count at tests/llm/measure_search_rankings.py:189,197,73,67) have no owner: a search over tests/llm/ and imas_codex/llm/ for a percentile or per-question-mean helper found none, and imas_codex/discovery/base/evaluation.py:197 computes a bootstrap interval, not a latency summary.",
+    "scope_discipline": "every path in the 38e5dc355..b2df1380e diff is inside the seven declared write paths, and the figure sits under the declared docs/figures/signal-search-finds-the-measured-signal/ssfms-rerank-score directory."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to set the signal rerank switch by section 7's ship rule from a three-pass measurement of both rerank arms against fusion alone; imas_codex/llm/server.py:1898 sets _rerank_signals = not (self.read_only or self.dd_only) from the measured figures, so the goal is met.\nVERDICT done_when: the done_when's clauses are measured and recorded - gate_llm.log 126 passed, 8 skipped, 3 deselected, EXIT=0; rerank.html carries the arms table, per-question wins 16 / losses 2, per-pass figures and p95 4.722 s; signal_measure_3pass.log reconciles every figure; negative_control.log reddens the mode guard and tiebreak_control.log the tie-break guard.\nVERDICT write_paths: read the manifest's seven declared paths and every path the diff touches (imas_codex/llm/server.py, tests/llm/measure_search_rankings.py, tests/llm/test_search_tools.py, tests/llm/test_signal_search_goldens.py, rerank.html, ssfms-rerank-score.html, the figure dir) is inside them.\nVERDICT manifest: read; it states status complete, one commit [b2df1380e], tests 'gate_llm.log: 126 passed, 8 skipped, 3 deselected, EXIT=0', names the negative-control logs, and leaves baseline_suite and after_suite empty.\nVERDICT diff: read commit by commit over 38e5dc355..b2df1380e; a single commit, seven paths, all inside the declared scope.\nCALL_SITES: imas_codex/llm/server.py:2463 (signal_search passing rerank=_rerank_signals), imas_codex/llm/search_tools.py:334 (_search_signals rerank parameter), imas_codex/llm/search_tools.py:421 (rerank_candidates call in _search_signals), imas_codex/llm/search_tools.py:235 (rerank_candidates)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/llm/server.py:1898 flips _rerank_signals to follow the server mode from the measured three-pass figures recorded in docs/evidence/fragments/signal-search-finds-the-measured-signal/rerank.html, so the switch is set exactly as section 7's ship rule states.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is recorded (gate_llm.log 126 passed EXIT=0), the mode guard is shown to fire (negative_control.log 1 failed EXIT=1), and the measurement log reconciles with rerank.html to the digit, but the ship-rule figures rest on a nondeterministic Jev judge disclosed as such and the added-failure count is unmeasured by the reviewed run's own manifest.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the 38e5dc355..b2df1380e diff is inside the seven declared write paths, and the figure sits under the declared docs/figures/signal-search-finds-the-measured-signal/ssfms-rerank-score directory.\nSCORE durability: 17\nJUSTIFICATION durability: tests/llm/test_search_tools.py:653 fails when the switch is reverted to False (negative_control.log proves it) and tests/llm/test_signal_search_goldens.py:838 fails when the tie-break is reverted to a score-only sort (tiebreak_control.log proves it), but tests/llm/test_search_tools.py:660,665 assert only the pre-change off direction and the measurement-module change is unguarded by the suite.\nSCORE fit: 18\nJUSTIFICATION fit: the additions follow the surrounding style and carry no plan label, version suffix or ticket reference, and imas_codex/llm/server.py:1898 mirrors _rerank_dd_paths; only the now-stale comment at imas_codex/llm/search_tools.py:418, in a file outside this node's scope, is left misdescribing the switch.\nSCORE reuse: 19\nJUSTIFICATION reuse: the switch extends the existing _rerank_dd_paths idiom, and the new helpers (_p95, _per_question_mean, compare_role_to_fusion, _label_count at tests/llm/measure_search_rankings.py:189,197,73,67) have no owner: a search over tests/llm/ and imas_codex/llm/ for a percentile or per-question-mean helper found none, and imas_codex/discovery/base/evaluation.py:197 computes a bootstrap interval, not a latency summary.\nFINDING imas_codex/llm/search_tools.py:418 follow-on: the landed change turns the signal rerank switch on for a full server, but the comment at this line still reads 'The switch is off, so this runs only once its arms are scored', so it now misdescribes runtime behaviour; the file is outside this node's declared write paths, so the node could not refresh it.\nFINDING tests/llm/test_search_tools.py:660 follow-on: test_a_read_only_server_does_not_rerank_signals (line 660) and test_a_dd_only_server_does_not_rerank_signals (line 665) assert the same False value the pre-change code already produced, so they cannot fail on a regression of the landed change; the switch's durability rests solely on test_a_full_server_reranks_signals (line 653).\n",
+  "review_run_id": "r-20261013T072117191367-review-of-ssfms-rerank-score-b2df1380ef05",
+  "reviewed_base_sha": "38e5dc355c6e9f7ae522264fac3a6ffa5dfbaf91",
+  "reviewed_head_sha": "b2df1380ef05f1bed83d160fc7be74ae2bc1cc36",
+  "reviewed_run_id": "r-20261013T063845224273-ssfms-rerank-score",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T07:37:47.526840+00:00",
+  "total": 111
+}

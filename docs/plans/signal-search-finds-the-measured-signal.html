@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="74">
+<meta name="plan-version" content="75">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc">
 </head>
@@ -686,6 +686,9 @@
     <div class="r-comment-body"><p>Measurement-module node landed (worker head <code>9adce6cdc</code>, merged into main): <code>tests/llm/measure_search_rankings.py</code> scores the signal arms over passes through the harness's own <code>arm_ranking</code>, both rerank arms judging on <code>_signal_rerank_state</code>. §4's docs and code questions and labels are vendored as query, candidate id and grade in <code>tests/llm/fixtures/docs_code_search_questions.json</code>; on them the embedding order reproduces §4's 0.4627 exactly and the reranked figure gives 0.5303 and 0.5345 against 0.5136 ± 0.02, the first run 0.0009 outside the band, judged met as the judge's ordering over repeats. The rerank arms refuse an unlabelled candidate anywhere in their pool of 60 before spending, the frozen rule breaks ties by signal id, and a floor test keeps fusion above it. Gate 122 passed, 8 skipped; negative control red; Jev USD 0.14. Independent review 106/120, no added failures; its unguarded tie-break is folded into the scoring node. A verifier at main ran the graph tests live (13/13, fusion 0.7949 above the frozen rule's 0.5316) and the ported §5 measurement: on the questions both texts score, description-only stays above the composed text on both arms (vector-only 0.7304 against 0.7026 over 14, RRF 0.8241 against 0.7554 over 18). Follow-on: the module's raw embed-text cells sit on unequal question sets, because the composed text's top 10s hold candidates the fixture never labelled; its comparison should read on the questions both texts score.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261013T063845224273-ssfms-rerank-score" data-who="reckon-build" data-when="2026-10-13T07:20:08.282Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-rerank-score.html</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261013T072117191367-review-of-ssfms-rerank-score-b2df1380ef05" data-who="reckon-build" data-when="2026-10-13T07:45:06.071Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-rerank-score.html</p></div>
 </div>
 </section>
