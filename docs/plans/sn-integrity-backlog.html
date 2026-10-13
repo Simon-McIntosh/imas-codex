@@ -17,11 +17,11 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;,&quot;s21&quot;:&quot;done&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;done&quot;,&quot;s24&quot;:&quot;done&quot;,&quot;s25&quot;:&quot;done&quot;,&quot;s26&quot;:&quot;deferred&quot;,&quot;s27&quot;:&quot;deferred&quot;,&quot;s28&quot;:&quot;done&quot;,&quot;s29&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s15&quot;:&quot;done&quot;,&quot;s16&quot;:&quot;implementable&quot;,&quot;s17&quot;:&quot;deferred&quot;,&quot;s18&quot;:&quot;done&quot;,&quot;s19&quot;:&quot;done&quot;,&quot;s20&quot;:&quot;done&quot;,&quot;s21&quot;:&quot;done&quot;,&quot;s22&quot;:&quot;deferred&quot;,&quot;s23&quot;:&quot;done&quot;,&quot;s24&quot;:&quot;done&quot;,&quot;s25&quot;:&quot;done&quot;,&quot;s26&quot;:&quot;deferred&quot;,&quot;s27&quot;:&quot;deferred&quot;,&quot;s28&quot;:&quot;done&quot;,&quot;s29&quot;:&quot;done&quot;}">
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="126">
+<meta name="plan-version" content="127">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -125,7 +125,7 @@
 <p>Three of the four holes recorded in <code>f-sli-the-sanctioned-surface-has-four-holes</code> remain (census, §2 lifecycle row): a rename that collides with a superseded row, <code>sn rescore</code> leaving <code>status='superseded'</code>, and <code>sn edit --docs</code> refusing while <code>docs_stage='pending'</code>. The fourth, unscoped global maintenance, is closed by <code>--skip-global-maintenance</code>. WEST repairs go through <code>sn edit</code>, so this is on the release path. Paths: <code>imas_codex/cli/sn.py</code>, <code>imas_codex/standard_names/edit.py</code>.</p><p><strong>Done when:</strong> one test per hole drives the sanctioned command against a fixture identity in that exact state and shows it proceeds, and each test fails with its fix reverted.</p>
 
     <h2 id="s8">§8 — The restore remainder</h2>
-<section data-reckon="section" data-id="s8" data-effort-hours="10.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s8" data-effort-hours="10.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
 <p><code>power_due_to_fusion</code>, <code>plasma_energy</code> and <code>etendue_of_spectrometer_channel</code> read absent on the live graph (census, §2 restore row), while the pedestal-top family is rebuilt. Restore them through the restore adapter with a per-identity origin judgement, never by hand. Paid identities fall under the deletion-protection guard in <code>imas_codex/standard_names/protection.py</code>.</p><p><strong>Done when:</strong> the three identities read present with their sources and an origin stated at compose time, the restore parity tests pass, and <code>find_provenance_orphans</code> reports none of them.</p>
 
     <h2 id="s9">§9 — Restore never re-arms the origin that caused a deletion</h2>
@@ -556,6 +556,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-s8-restore-two" data-who="reckon-build" data-when="2026-10-13T13:40:00Z">
     <div class="r-comment-body"><p>Two of three identities are restored (merge <code>12f0f3c04</code>). The lead ruled on etendue on 2026-10-13: <em>restore <code>etendue_of_spectrometer_channel</code> as superseded</em>, with a successor edge to <code>etendue_of_soft_xray_detector</code>. That is what the deliberate rename should have left. It keeps the USD 0.844849 of archived reviews and docs (19 cost rows) on a node, and only the corrected spelling stays live. The new signed authority omits the DD producer edge, which belongs to the successor, and the old spectral child; everything else follows the existing restore path. §8 closes when that lands. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s8-restore-apply">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-10-13T17:30:00Z">
+    <div class="r-comment-body"><p>§8 closed. <code>power_due_to_fusion</code> and <code>plasma_energy</code> were restored from the archive (merge <code>12f0f3c04</code>). Per the lead's ruling, <code>etendue_of_spectrometer_channel</code> is back as superseded, with a signed successor edge to <code>etendue_of_soft_xray_detector</code> and its paid reviews and docs revisions kept (head <code>ce9b9e1c8</code>, review 112/120). <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s8-etendue-superseded">evidence</a></p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
