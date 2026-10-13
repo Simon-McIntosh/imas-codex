@@ -1,0 +1,2620 @@
+{
+  "description": "Hand-reviewed stratified JT-60SA signal-role labels frozen before the first paid role judgment. Candidate search used role words only to find records; each name and description was reviewed and ambiguous candidates were relabelled or replaced.",
+  "eligibility": {
+    "facility": "jt-60sa",
+    "enriched_at_cutover": "2026-10-11T21:08:54Z"
+  },
+  "labelled_at": "2026-10-13T09:00:25.431211+00:00",
+  "roles": [
+    "configuration_parameter",
+    "derived_or_computed",
+    "commanded",
+    "status_or_flag",
+    "measured",
+    "reference_or_setpoint"
+  ],
+  "signals": [
+    {
+      "id": "jt-60sa:equilibrium/eqdb_selene_nsr",
+      "name": "SELENE NSR Radial Grid Points NSR",
+      "description": "Number of radial grid points (NSR) NSR in the geometry definition of the SELENE MHD equilibrium reconstruction, specifying the radial discretization used for the Grad-Shafranov solve.",
+      "unit": null,
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:equilibrium/eqdb_selene_nsz",
+      "name": "SELENE NSZ Vertical Grid Points NSZ",
+      "description": "Number of grid points in the Z direction (NSZ) NSZ for the SELENE MHD equilibrium reconstruction, a grid dimension parameter of the Grad-Shafranov equilibrium calculation.",
+      "unit": null,
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:equilibrium/eqdb_selene_psi",
+      "name": "SELENE Poloidal Flux PSI PSI",
+      "description": "Poloidal magnetic flux distribution (PSI) PSI computed by the SELENE MHD equilibrium code solving the Grad-Shafranov equation, representing the flux function whose contours define the nested magnetic flux surfaces.",
+      "unit": null,
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:equilibrium/eqdb_topics_nsr",
+      "name": "SELENE NSR Radial Grid Points NSR",
+      "description": "Number of radial grid points (NSR) NSR in the geometry definition of the SELENE MHD equilibrium reconstruction, specifying the radial discretization used for the Grad-Shafranov solve.",
+      "unit": null,
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:equilibrium/eqdb_topics_nsz",
+      "name": "SELENE NSZ Vertical Grid Points NSZ",
+      "description": "Number of grid points in the Z direction (NSZ) NSZ for the SELENE MHD equilibrium reconstruction, a grid dimension parameter of the Grad-Shafranov equilibrium calculation.",
+      "unit": null,
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:equilibrium/eqdb_topics_psi",
+      "name": "SELENE Poloidal Flux PSI PSI",
+      "description": "Poloidal magnetic flux distribution (PSI) PSI computed by the SELENE MHD equilibrium code solving the Grad-Shafranov equation, representing the flux function whose contours define the nested magnetic flux surfaces.",
+      "unit": null,
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_m1wctfst",
+      "name": "WCS Cooling Tower Fan Start Command",
+      "description": "Start command signal for the WCS (Water Cooling System) cooling tower fan. This is a plant system control parameter indicating whether the cooling tower fan is commanded to start, part of the cryogenic and cooling infrastructure monitoring.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_m1wctho",
+      "name": "WCS Cooling Tower Heater ON Signal",
+      "description": "Digital status signal indicating the ON state of the WCS (Water Cooling System) cooling tower heater. This is a plant/cryogenic system monitoring signal rather than a plasma measurement.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_m1wcthst",
+      "name": "WCS Cooling Tower Heater Start Command",
+      "description": "Control command parameter indicating the start of the WCS (water cooling system) cooling tower heater. Part of the cryogenic and cooling plant monitoring for the JT-60SA tokamak.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_m2wctfst",
+      "name": "WCS Cooling Tower Fan Start Command (2)",
+      "description": "Start command status for the water cooling system (WCS) cooling tower fan, channel 2. This is a cryogenic plant control parameter indicating whether the cooling tower fan is commanded on/off, part of the cryogenic and cooling infrastructure supporting the superconducting magnet system.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_m2wctho",
+      "name": "WCS Cooling Tower Heater ON Signal (2)",
+      "description": "Digital status signal indicating the ON state of the water cooling system (WCS) cooling tower heater number 2. This is a plant system monitoring parameter recorded for the cryogenic and cooling infrastructure rather than a plasma measurement.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_m2wctps",
+      "name": "WCS Cooling Tower Pump Start Command (2)",
+      "description": "Command signal indicating the start of the WCS (water cooling system) cooling tower pump number 2. This is a plant system control parameter rather than a plasma measurement.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_m3wctfo",
+      "name": "WCS Cooling Tower Fan ON Signal (3)",
+      "description": "Digital status signal indicating whether the water cooling system (WCS) cooling tower fan number 3 is running. This is a plant system monitoring signal, not a plasma measurement.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_m3wctfst",
+      "name": "WCS Cooling Tower Fan Start Command (3)",
+      "description": "Start command signal for the water cooling system (WCS) cooling tower fan number 3. This is a plant system control parameter rather than a plasma measurement.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_m4wcthst",
+      "name": "WCS Cooling Tower Heater Start Command",
+      "description": "Command signal indicating the start of the water cooling system (WCS) cooling tower heater. This is a plant/cryogenic system control parameter rather than a plasma measurement.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_mcctcps",
+      "name": "CH Cooling Tower Circulation Pump Start Command",
+      "description": "Start command signal for the cryogenic cooling tower circulation pump (mCCTCPS) in the JT-60SA cryogenic system. This is a plant control parameter indicating whether the cooling tower circulation pump is commanded on, part of the cryoplant infrastructure supporting superconducting magnet operation.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_mccthps",
+      "name": "CH Cooling Tower HEX Pump Start Command",
+      "description": "Start command signal for the CH (Cold Helium) cooling tower heat exchanger pump. This plant system parameter controls the operation of the cryogenic cooling loop heat exchanger pump in the JT-60SA cryogenic system.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_mcctwpf",
+      "name": "CH Cooling Tower Water Pump Fault",
+      "description": "Fault signal for the CH cooling tower water pump in the JT-60SA cryogenic plant. It indicates a fault condition of the cooling water pump serving the cryogenic system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoct_mwctfs",
+      "name": "WCS Cooling Tower Fault Signal",
+      "description": "Fault status signal from the water cooling system (WCS) cooling tower. Indicates a fault condition in the cryogenic/water cooling plant that supports the tokamak's superconducting magnet and heating systems.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m1c1phv",
+      "name": "CS 01P HTS Quench Voltage",
+      "description": "Quench detection voltage for the high-temperature superconducting (HTS) current lead/segment of the CS 01P coil in the JT-60SA cryogenic system. Monitors voltage across the HTS conductor to detect the onset of a quench (loss of superconductivity).",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m1t01hv",
+      "name": "CryoCTB HTS Quench Voltage (1) 01",
+      "description": "Quench detection voltage for the high-temperature superconducting (HTS) section of the TF 01P HTS quench voltage(1) coil, monitoring the voltage across the HTS conductor to detect quench onset.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m1t07hv",
+      "name": "CryoCTB HTS Quench Voltage (1) 07",
+      "description": "Quench detection voltage for the high-temperature superconducting (HTS) section of the TF 07P HTS quench voltage(1) coil, monitoring the voltage across the HTS conductor to detect quench onset.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m1t13hv",
+      "name": "CryoCTB HTS Quench Voltage (1) 13",
+      "description": "Quench detection voltage for the high-temperature superconducting (HTS) section of the TF 13P HTS quench voltage(1) coil, monitoring the voltage across the HTS conductor to detect quench onset.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m1t14hv",
+      "name": "CryoCTB HTS Quench Voltage (1) 14",
+      "description": "Quench detection voltage for the high-temperature superconducting (HTS) section of the TF 14N HTS quench voltage(1) coil, monitoring the voltage across the HTS conductor to detect quench onset.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m2e4nhv",
+      "name": "EF 04N HTS Quench Voltage (2)",
+      "description": "Quench detection voltage across the high-temperature superconducting current leads for equilibrium field coil 04N, monitoring for loss of superconductivity.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m2t08hv",
+      "name": "CryoCTB HTS Quench Voltage (2) 08",
+      "description": "Quench detection voltage signal (channel 2) for the TF 08N HTS quench voltage(2) high-temperature superconducting coil, monitoring voltage across the HTS winding to detect quench onset.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_me06nfv",
+      "name": "CryoCTB EF Feeder Quench Voltage 06",
+      "description": "Quench detection voltage measured across the feeder of the EF 06N feeder quench voltage equilibrium field coil, indicating a resistive transition in the superconducting conductor.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_ces201",
+      "name": "CryoHRS Emergency Stop ES201 Status",
+      "description": "Status of emergency stop button ES201 (Emergency Stop Button - Power Cabinet) of the CryoHRS cryogenic helium refrigeration system, a plant interlock/status parameter.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cesd121",
+      "name": "CryoHRS Emergency Stop ESD121 Status",
+      "description": "Status signal for emergency stop device ESD121 (Emergency Stop Button ACB11 LV Cubicle 1) of the CryoHRS cryogenic helium refrigeration system, indicating whether the emergency stop has been activated for machine protection and operational safety.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cesd122",
+      "name": "CryoHRS Emergency Stop ESD122 Status",
+      "description": "Status signal for emergency stop device ESD122 (Emergency Stop Button ACB12 LV Cubicle 1) of the CryoHRS cryogenic helium refrigeration system, indicating whether the emergency stop has been activated for machine protection and operational safety.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cfsl614b",
+      "name": "CryoHRS Flow Switch FSL614B Status",
+      "description": "Status of water flow switch FSL614B (C151B Helium Compressor Water Flow switch) in the CryoHRS cryogenic helium refrigeration system, indicating whether cooling water flow to the compressor is present.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_chs111b",
+      "name": "CryoHRS Start/Stop Status 111",
+      "description": "Start/stop status signal for Pump C111B start/stop in the JT-60SA cryogenic high-pressure return system (CryoHRS), indicating the operational state of the pump or compressor.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_csc121a",
+      "name": "Compressor 121 Setpoint Speed",
+      "description": "Setpoint speed of Compressor C121A Setpoint speed in the CryoHRS cryogenic helium refrigeration system, expressed as a percentage of nominal speed.",
+      "unit": "%",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_ctsh111a",
+      "name": "Thermal Switch 111",
+      "description": "Status/measurement of Thermal Switch C111A in the JT-60SA cryogenic HRS (heat rejection system).",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cxa141",
+      "name": "CryoHRS Alarm/Fault Status 141",
+      "description": "Alarm or fault status signal for ACB21 fault LV Cubicle 2 in the cryogenic helium refrigerator system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cyl120",
+      "name": "CryoHRS Plant Status cYL120",
+      "description": "Plant monitoring signal ACB10 On LV Cubicle 1 from the JT-60SA CryoHRS cryogenic system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cyl121",
+      "name": "CryoHRS Plant Status cYL121",
+      "description": "Plant monitoring signal ACB11 On LV Cubicle 1 from the JT-60SA CryoHRS cryogenic system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cyl141",
+      "name": "CryoHRS Plant Status cYL141",
+      "description": "Plant monitoring signal ACB21 On LV Cubicle 2 from the JT-60SA CryoHRS cryogenic system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cyl480",
+      "name": "CryoHRS Plant Status cYL480",
+      "description": "Plant monitoring signal Blower Running from the JT-60SA CryoHRS cryogenic system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cyl900",
+      "name": "CryoHRS Plant Status cYL900",
+      "description": "Plant monitoring signal UPS Compressor building Running from the JT-60SA CryoHRS cryogenic system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_czsl112a",
+      "name": "CryoHRS Limit Switch Close cZSL112A",
+      "description": "Limit switch status indicating the closed position of cryogenic valve (Limit Switch close XV112A) in the CryoHRS cryogenic helium refrigeration system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_mc3rgfn",
+      "name": "CryoHRS CP Regeneration Finished Flag",
+      "description": "Parameter signal from the JT-60SA CryoHRS (cryogenic cold header / helium refrigeration system) category indicating that cold-box CP (cold pump/compressor) regeneration has finished. It is a status/flag parameter of the cryogenic plant rather than a plasma measurement.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_mjtpldr",
+      "name": "Plasma Disruption Flag",
+      "description": "Parameter flag indicating whether a plasma disruption occurred during the discharge. Used by the control and cryogenic systems to record disruption events for machine protection and post-discharge analysis.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoil_m1c01qs",
+      "name": "CS Coil 01 Quench Detection Switch",
+      "description": "Quench detection switch status for central solenoid coil 01 (CS 01 quench detection switch(1)) of the JT-60SA superconducting magnet system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoil_m2e4nhq",
+      "name": "EF 04N HTS Quench Signal (2)",
+      "description": "Quench detection signal for the EF 04N (equilibrium field) coil, which uses high-temperature superconductor (HTS) technology. Monitors the coil for a quench event where the superconductor transitions to normal resistive state, part of the cryogenic instrumentation and interlock system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoil_m2e6nhqs",
+      "name": "EF 06N HTS Quench Detection Switch (2)",
+      "description": "Status of the quench detection switch for the EF 06N high-temperature superconducting coil in the JT-60SA cryogenic/interlock system. It indicates whether a quench condition has been detected in the HTS conductor. This is a machine protection/interlock signal rather than a plasma measurement.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoil_m2t06qs",
+      "name": "TF 06 Quench Detection Switch Status",
+      "description": "Status/parameter of the quench detection switch for the TF coil pair 06 in the JT-60SA cryogenic system. Quench detection switches monitor the superconducting toroidal field coils for the onset of a normal-conducting (quench) transition. TF 06-07 quench detection switch(2)",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoil_m2t10qs",
+      "name": "TF 10 Quench Detection Switch Status",
+      "description": "Status/parameter of the quench detection switch for the TF coil pair 10 in the JT-60SA cryogenic system. Quench detection switches monitor the superconducting toroidal field coils for the onset of a normal-conducting (quench) transition. TF 10-11 quench detection switch(2)",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoil_me04nfq",
+      "name": "EF 04N Feeder Quench Signal",
+      "description": "Quench detection signal for the EF 04N coil feeder, part of the superconducting magnet protection system. Monitors for the onset of a quench (loss of superconductivity) in the poloidal field coil feeder circuit. EF 04N feeder quench signal",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoil_milj220",
+      "name": "CryoIL Interlock Signal mILJ220",
+      "description": "Cryogenic interlock status signal mILJ220 in the CryoIL subsystem. EF HTS/Feeder quench signal",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoil_milj235",
+      "name": "CryoIL Interlock Signal mILJ235",
+      "description": "Cryogenic interlock status signal mILJ235 in the CryoIL subsystem. EF Feeder mass flow LL",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoil_milj270",
+      "name": "CryoIL Interlock Signal mILJ270",
+      "description": "Cryogenic interlock status signal mILJ270 in the CryoIL subsystem. TF mass flow H",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoil_milj275",
+      "name": "CryoIL Interlock Signal mILJ275",
+      "description": "Cryogenic interlock status signal mILJ275 in the CryoIL subsystem. TF Feeder massflow L",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryoil_milj300",
+      "name": "CryoIL Interlock Signal mILJ300",
+      "description": "Cryogenic interlock status signal mILJ300 in the CryoIL subsystem. TF HTS LOFA",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoil_milj460",
+      "name": "CryoIL Interlock Signal mILJ460",
+      "description": "Cryogenic interlock status signal mILJ460 in the CryoIL subsystem. EF HTS LOFA",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": [
+        {
+          "term": "HTS",
+          "meaning": "high-temperature superconductor"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/cryoil_mt13fqs",
+      "name": "TF 13 Feeder Quench Detection Switch Status",
+      "description": "Status parameter of the quench detection switch for the TF 13 feeder of the toroidal field coil system. Indicates the state of the quench protection circuit monitoring the superconducting feeder. TF 13P feeder quench detection switch",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryomag_m1t10cv",
+      "name": "TF Coil Quench Voltage 10",
+      "description": "Quench detection voltage measured across a toroidal field coil. TF 10-11 quench voltage(1). This cryogenic magnet parameter monitors for the onset of a superconducting-to-normal transition (quench) in the TF coil winding pack, with units of volts.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryomag_m2e01cv",
+      "name": "EF Coil Quench Voltage 01",
+      "description": "Quench detection voltage for an equilibrium field (EF) coil. EF 01 coil quench voltage(2). Monitors for the onset of a superconducting-to-normal transition in the coil winding.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryomag_m2t10cv",
+      "name": "TF Coil Quench Voltage 10",
+      "description": "Quench detection voltage signal for a toroidal field coil, measured in volts. TF 10-11 quench voltage(2). It monitors the coil for resistive voltage development indicative of a superconducting quench.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryomag_m2t14cv",
+      "name": "TF Coil Quench Voltage 14",
+      "description": "Quench detection voltage signal for a toroidal field coil, measured in volts. TF 14-15 quench voltage(2). It monitors the coil for resistive voltage development indicative of a superconducting quench.",
+      "unit": "V",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryomcil_milj520",
+      "name": "TF Magnet Quench/Fast Discharge Interlock 520",
+      "description": "Status/interlock signal 520 related to quench or fast discharge protection of the toroidal field magnet system: Loss of CRYO FOR TF CURRENT Ramp-up.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryomcil_milj550",
+      "name": "TF Magnet Quench/Fast Discharge Interlock 550",
+      "description": "Status/interlock signal 550 related to quench or fast discharge protection of the toroidal field magnet system: Loop 3 fault.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryomcil_milj560",
+      "name": "TF Magnet Quench/Fast Discharge Interlock 560",
+      "description": "Status/interlock signal 560 related to quench or fast discharge protection of the toroidal field magnet system: ACB vacuum trip.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/cryomcil_milj600",
+      "name": "TF Magnet Quench/Fast Discharge Interlock 600",
+      "description": "Status/interlock signal 600 related to quench or fast discharge protection of the toroidal field magnet system: Poor vacuum in transfer line.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppconfig",
+      "name": "Configuration Pattern",
+      "description": "Configuration pattern identifier used by the plasma control system to select the discharge configuration. This non-waveform payload encodes the reference configuration settings applied for the shot.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppctrgas2",
+      "name": "Gas Injection Group 2 Control Method Reference",
+      "description": "Reference value specifying the control method number for gas injection group 2. This is a configuration/setting parameter that selects how the gas fuelling system for group 2 is controlled during a discharge.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppef3cur",
+      "name": "EF3 Coil Current Reference",
+      "description": "Reference waveform for the current in the EF3 equilibrium field coil, in kA. This non-waveform payload defines the programmed current that the EF3 coil power supply should follow to shape the poloidal field during the discharge.",
+      "unit": "KA",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppef4vol",
+      "name": "EF4 Coil Voltage Reference",
+      "description": "Reference voltage waveform for the EF4 equilibrium field coil power supply, in kilovolts. This is a programmed reference setting used by the plasma control system to drive the EF4 coil voltage during a discharge, contributing to plasma position and shape control.",
+      "unit": "KV",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppefcc15vl",
+      "name": "EFCC 15 Reference Voltage",
+      "description": "Reference voltage setting for error field correction coil (EFCC) 15, one of the in-vessel coils mounted on the stabilizing plate used to apply non-axisymmetric fields to correct intrinsic error fields and mitigate locked modes. Reference of EFCC15 Voltage",
+      "unit": "KV",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "EFCC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate; not an equilibrium field coil and not a converter"
+        },
+        {
+          "term": "EFC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate (the catalogue spells the abbreviation EFCC); not an equilibrium field coil and not a converter"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppefcc2cr",
+      "name": "EFCC2 Coil Current Reference",
+      "description": "Reference (programmed) current for error field correction coil 2 (EFCC2), an in-vessel coil on the stabilizing plate of JT-60SA, in kA. Error field correction coils are used to compensate intrinsic error fields and control resistive wall modes, not for equilibrium shaping.",
+      "unit": "KA",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "EFCC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate; not an equilibrium field coil and not a converter"
+        },
+        {
+          "term": "EFC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate (the catalogue spells the abbreviation EFCC); not an equilibrium field coil and not a converter"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppellipti1",
+      "name": "ECH Unit 1 Ellipticity Reference",
+      "description": "Reference ellipticity (polarization) setting for ECH (electron cyclotron heating) unit 1, in degrees. This parameter defines the wave polarization ellipticity for the gyrotron launcher of unit 1.",
+      "unit": "degree",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_pppldp",
+      "name": "Plasma Pressure Gradient Reference",
+      "description": "Reference value for the plasma pressure gradient used in control. This non-waveform payload specifies the target pressure gradient in Pa/m for the discharge control scheme.",
+      "unit": "Pa/m",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppplpres",
+      "name": "Reference Plasma Pressure",
+      "description": "Reference value of the plasma pressure, in pascals. Non-waveform payload representing the requested or computed plasma pressure used in equilibrium and performance assessment.",
+      "unit": "Pa",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_pppolang4",
+      "name": "ECH Launcher Unit 4 Poloidal Angle Reference",
+      "description": "Reference poloidal angle (in degrees) of the Electron Cyclotron Heating (ECH) launcher unit 4. This non-waveform payload defines the target poloidal steering angle for the ECH launcher, determining the deposition location for heating and current drive.",
+      "unit": "degree",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_pprwmc1vl",
+      "name": "RWMC1 Voltage Reference",
+      "description": "Reference (command) voltage for resistive wall mode control coil 1, an in-vessel coil on the stabilizing plate. RWMC coils apply feedback-controlled non-axisymmetric fields to stabilize resistive wall modes and maintain high-beta operation.",
+      "unit": "KV",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/dcsv_tmagred",
+      "name": "Toroidal Magnet Field Re-setting Start Time (day)",
+      "description": "Day component of the timestamp marking the start of the toroidal field magnet re-setting procedure. This is an operational/machine parameter rather than a plasma measurement.",
+      "unit": "day",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_tmagrema",
+      "name": "Toroidal Magnet Field Re-setting Start Time (month)",
+      "description": "Month component of the timestamp marking the start of the toroidal field magnet re-setting procedure. This is an operational/machine parameter rather than a plasma measurement.",
+      "unit": "month",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_tmagremi",
+      "name": "Toroidal Magnet Field Re-setting Start Time",
+      "description": "Timestamp marking the start of the toroidal field magnet re-setting procedure, recorded in minutes. This operational parameter tracks the TF coil system preparation for a discharge.",
+      "unit": "minute",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_tmagres",
+      "name": "Toroidal Magnet Field Re-setting Start Time",
+      "description": "Time at which the toroidal field magnet re-setting (re-energization/preparation) sequence starts. This is an operational timing parameter for the TF coil system, used to track the machine's magnet preparation schedule rather than a plasma measurement.",
+      "unit": "sec",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_tmagret",
+      "name": "Toroidal Magnet Field Re-setting Start Time",
+      "description": "Wall-clock time at which the toroidal field magnet begins its re-setting (ramp) procedure, recorded in hours. An operational timestamp for the superconducting TF coil system.",
+      "unit": "hour",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dcsv_tmagrey",
+      "name": "Toroidal Magnet Field Re-setting Start Time",
+      "description": "Timestamp marking the start of the toroidal field magnet re-setting procedure, stored as a single-point value in the DCSV discharge condition data class. It is an operational timing parameter for the TF magnet system rather than a plasma measurement.",
+      "unit": "year",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comech5",
+      "name": "ECH Group 5 Control Method Command",
+      "description": "Command signal specifying the control method number for electron cyclotron heating (ECH) group 5. It configures how the ECH group 5 is operated during a discharge.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comech7",
+      "name": "ECH Group 7 Control Method Command",
+      "description": "Command signal indicating the control method number for ECH (electron cyclotron heating) group 7. This time-series signal carries the selected control mode used to control the ECH gyrotron group during a discharge.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comech8",
+      "name": "ECH Group 8 Control Method Command",
+      "description": "Command signal specifying the control method number for electron cyclotron heating (ECH) group 8. This is a control/actuator command used by the discharge control system to configure ECH operation.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comech9",
+      "name": "ECH Group 9 Control Method Command",
+      "description": "Command signal indicating the control method number for electron cyclotron heating (ECH) group 9. This is a control/configuration parameter, not a plasma measurement.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comgas2",
+      "name": "Gas Injection Group 2 Control Method Command",
+      "description": "Command signal specifying the control method number for gas injection group 2. This is a discharge control parameter that selects the feedback/feedforward control mode used to regulate gas fuelling for group 2.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comgas3",
+      "name": "Gas Injection Group 3 Control Method Command",
+      "description": "Command signal specifying the control method number for gas injection group 3. It selects the control mode used by the gas fuelling system for that injection group during a discharge.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comnbi4",
+      "name": "NBI Group 4 Control Method Command",
+      "description": "Command signal specifying the control method number for neutral beam injection group 4. This is an operational control parameter for the NBI heating system, indicating which control mode or modulation scheme is applied to that beam group during a discharge.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comnumech5",
+      "name": "ECH Group 5 Number of Units Command",
+      "description": "Command signal specifying the number of units to operate for ECH group 5. This time-series signal controls how many electron cyclotron heating units in group 5 are active.",
+      "unit": "Unit",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comnumech8",
+      "name": "ECH Group 8 Number of Units Command",
+      "description": "Command signal specifying the number of electron cyclotron heating (ECH) units to be operated in group 8. This control parameter determines how many gyrotron units are active for ECH power injection.",
+      "unit": "Unit",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comnumnbi3",
+      "name": "NBI Group 3 Number of Units Command",
+      "description": "Command signal specifying the number of NBI units to be operated in NBI group 3. This is a control/actuator command used to set the requested number of neutral beam injector units for that group during a discharge.",
+      "unit": "Unit",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_comnumnbi7",
+      "name": "NBI Group 7 Number of Units Command",
+      "description": "Command signal specifying the number of NBI units to be used in Neutral Beam Injection group 7. Part of the discharge control (DHC) system for NBI heating power control.",
+      "unit": "Unit",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_echu2in",
+      "name": "ECH #2 Injection Command",
+      "description": "Injection command signal for electron cyclotron heating unit #2. This time-series signal indicates when the ECH system is commanded to inject gyrotron power into the plasma for heating and current drive.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_echu3in",
+      "name": "ECH #3 Injection Command",
+      "description": "Injection command signal for electron cyclotron heating (ECH) unit number 3. This is a control signal for the ECH system, indicating when injection is requested.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_echu4in",
+      "name": "ECH #4 Injection Command",
+      "description": "Injection command signal for electron cyclotron heating (ECH) unit #4. Time-series command indicating the requested ECH power/injection state during a discharge.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_echu8in",
+      "name": "ECH #8 Injection Command",
+      "description": "Injection command signal for Electron Cyclotron Heating unit #8. Indicates the requested on/off or power command for the ECH gyrotron system during a discharge.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_echu9in",
+      "name": "ECH #9 Injection Command",
+      "description": "Injection command signal for Electron Cyclotron Heating (ECH) unit #9 on JT-60SA. Time-series command indicating when and at what level the ECH #9 gyrotron is requested to inject power. Used for heating and current drive control.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_gasp10llv",
+      "name": "Gas P-10 Lower Valve Injection Speed Command",
+      "description": "Command voltage controlling the injection speed of the P-10 lower gas valve. Used for plasma fuelling and density control via gas puffing.",
+      "unit": "V",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_gasp10lv",
+      "name": "Gas Valve P-10 Lower Injection Speed Command",
+      "description": "Command voltage controlling the injection speed of the P-10 lower gas valve used for plasma fuelling/gas puffing. The voltage sets the valve opening and thus the gas flow rate into the vessel. Part of the gas injection control system.",
+      "unit": "V",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_gasp6llv",
+      "name": "Gas Valve P-6 Local Injection Speed Command",
+      "description": "Command voltage controlling the gas injection speed of the P-6 local gas valve. This time-series signal drives the piezo or fast valve used for plasma fuelling and density control, with the voltage proportional to the requested gas flow rate.",
+      "unit": "V",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_nbiu10in",
+      "name": "NBIu10 Injection Command",
+      "description": "Time series of the injection command signal for neutral beam injector #10. Injection Command (NBI #10(T)). Indicates when the NBI unit is requested to inject during the discharge.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_nbiu14in",
+      "name": "NBIu14 Injection Command",
+      "description": "Time series of the injection command signal for neutral beam injector #14. Injection Command (NBI #14(P)). Indicates when the NBI unit is requested to inject during the discharge.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_nbiu7in",
+      "name": "NBI #7(T) Injection Command",
+      "description": "Injection command signal for neutral beam injector #7 (tangential). Controls the timing and duration of the NBI pulse for plasma heating and current drive.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_nbiu9in",
+      "name": "NBI #9 Injection Command (DHC)",
+      "description": "Injection command signal for neutral beam injector #9 (tangential). This time-series signal controls the NBI heating system, indicating when the beam is commanded to inject into the plasma.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_refech4",
+      "name": "ECH Group 4 Control Method Reference",
+      "description": "Reference signal for the control method of electron cyclotron heating (ECH) group 4. This time-series signal defines the control mode or reference waveform used by the plasma control system to operate the ECH group 4 launcher. Part of the discharge control system.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_refgas4",
+      "name": "Reference Gas Injection Group 4 Control Method",
+      "description": "Reference value for the control method number of gas injection group 4 in the JT-60SA discharge control system. Selects or references the gas fuelling control mode used during a discharge.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_refgas5",
+      "name": "Reference Control Method No. (Gas Injection Group 5)",
+      "description": "Reference control method number for gas injection group 5, a time-series control parameter from the DHC discharge control category. It selects the gas fuelling control scheme applied during the discharge.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_refgas7",
+      "name": "Gas Injection Group 7 Control Method Reference",
+      "description": "Reference signal indicating the control method used for gas injection group 7. This is part of the discharge control system managing plasma fuelling via gas puffing.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_refgas8",
+      "name": "Gas Injection Group 8 Control Method Reference",
+      "description": "Reference signal indicating the control method number for gas injection group 8. Part of the DHC gas fueling control system, selecting the control algorithm or mode for the gas injection group 12 valve.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_refgasi5",
+      "name": "Gas Group 5 Injection Speed Reference",
+      "description": "Reference value for the injection speed of Gas Group 5 in the JT-60SA gas injection system. Measured in Pa*m3/s, this parameter specifies the commanded gas fuelling rate for one of the gas injection groups used for plasma density control and fuelling.",
+      "unit": "Pa*m3/s",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_refnbi4",
+      "name": "NBI Group 4 Control Method Reference",
+      "description": "Reference signal for the control method of NBI group 4, part of the JT-60SA discharge control system. Indicates which control scheme is applied to the fourth neutral beam injection group during a discharge.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/dhc_refnumech8",
+      "name": "ECH Group 8 Number of Units Reference",
+      "description": "Reference signal giving the number of units (gyrotrons) requested/active for Electron Cyclotron Heating group 8 in JT-60SA. Used by the discharge control system to set the ECH power level for that group.",
+      "unit": "Unit",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/ech_powu9set",
+      "name": "ECH Unit 9 Injection Power Setpoint",
+      "description": "Setpoint value for the injected microwave power of Electron Cyclotron Heating (ECH) unit 9, in megawatts. This is the requested/target power level commanded to the gyrotron system.",
+      "unit": "MW",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/fame_apave",
+      "name": "Mean Small Radius (FAME)",
+      "description": "Mean small radius of the plasma boundary computed by the FAME equilibrium reconstruction system. FAME performs real-time MHD equilibrium calculations every 10 ms during a discharge, and this parameter characterizes the plasma size.",
+      "unit": "m",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/fame_beta",
+      "name": "Toroidal Beta (FAME)",
+      "description": "Toroidal beta value computed by the FAME fast equilibrium analysis system. FAME performs automatic equilibrium reconstruction every 10 ms during a discharge and outputs equilibrium parameters as time series.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/fame_qaxis",
+      "name": "Safety Factor at Magnetic Axis (FAME)",
+      "description": "Safety factor q evaluated at the magnetic axis, produced by the FAME equilibrium reconstruction system. FAME performs automatic MHD equilibrium calculations every 10 ms during a discharge, and this time series provides the on-axis q value characterizing the central magnetic field line pitch.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/fame_raxis",
+      "name": "Magnetic Axis R Coordinate (FAME)",
+      "description": "Major radius coordinate of the magnetic axis computed by the FAME equilibrium reconstruction system. FAME performs automatic MHD equilibrium calculations every 10 ms during a discharge, and this time-series provides the axis R position.",
+      "unit": "m",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/fame_rmaj",
+      "name": "Major Radius (FAME)",
+      "description": "Plasma major radius computed by the FAME equilibrium analysis system, which performs automatic MHD equilibrium reconstruction every 10 ms during a discharge. Time-series of the plasma geometric major radius in meters.",
+      "unit": "m",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/fame_volum90",
+      "name": "FAME VOLUM90 Plasma Volume",
+      "description": "Plasma volume enclosed within the 90% poloidal flux surface, computed from the equilibrium reconstruction. Plasma volume inside the 90% poloidal fluxes. Characterizes the core plasma volume for confinement and stability analyses.",
+      "unit": "m3",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/fame_volum95",
+      "name": "FAME VOLUM95 Plasma Volume",
+      "description": "Plasma volume enclosed within the 95% poloidal flux surface, computed from the equilibrium reconstruction. Plasma volume inside the 95% poloidal fluxes. Characterizes the core plasma volume for confinement and stability analyses.",
+      "unit": "m3",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/fame_volum98",
+      "name": "FAME VOLUM98 Plasma Volume",
+      "description": "Plasma volume enclosed within the 98% poloidal flux surface, computed from the equilibrium reconstruction. Plasma volume inside the 98% poloidal fluxes. Characterizes the core plasma volume for confinement and stability analyses.",
+      "unit": "m3",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/fame_zpla",
+      "name": "FAME Plasma Z Small Radius",
+      "description": "Small radius of the plasma in the Z (vertical) direction, computed by the FAME equilibrium analysis system. FAME performs automatic MHD equilibrium calculations every 10 ms during a discharge and stores equilibrium parameters as time series.",
+      "unit": "m",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a042181_ate.s002_expadd_err_flg",
+      "name": "ATE Experimental Data Addition Error Flag 75000/002/042181",
+      "description": "Error flag for the experimental data addition step in the ATe (electron temperature) analysis slice ate.s75000/002/042181. Indicates whether an error occurred while appending experimental data to the analysis output, used for quality control of the analysis workflow.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a042181_ate.s003_pid_tab_kind",
+      "name": "PID Table Kind Metadata ate.s75000/003/042181 (a-series)",
+      "description": "Control/configuration metadata parameter (PID_TAB_KIND) associated with the electron temperature profile dataset ate.s75000/003/042181 in the LCDB profile database. It is a data-management quantity rather than a physical measurement.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ane.s001_rec_map_setting_nesymx",
+      "name": "ANE Reconstruction Map Setting NESYMX",
+      "description": "Configuration parameter (REC_MAP_SETTING_NESYMX) from the ANE electron density profile analysis dataset. It is a reconstruction/mapping bookkeeping setting controlling the symmetry or grid size used when mapping the fitted density profile, rather than a direct plasma measurement.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ane.s002_rec_map_setting_jmax",
+      "name": "ANE Reconstruction Map Setting JMAX",
+      "description": "Configuration parameter (JMAX) of the reconstruction map used by the ANE electron density analysis dataset. It defines the number of radial or spatial grid points used when mapping the fitted density profile onto a common mesh, controlling the analysis output rather than representing a plasma measurement.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s001_fit_ref_eqshot",
+      "name": "ATE Electron Temperature Fit Reference Equilibrium Shot 101013/001/048717",
+      "description": "Reference equilibrium shot number used when fitting the electron temperature profile in ATE analysis slice s101013/001/048717, linking the fitted profile to the equilibrium reconstruction shot used for mapping temperature data onto flux coordinates.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s003_fit_ref_eqdb",
+      "name": "ATE Electron Temperature Fit Reference Equilibrium DB 101013/003/048717",
+      "description": "Reference pointer identifying the equilibrium database entry used when fitting the electron temperature profile in ATE analysis slice s101013/003/048717, linking the fit to the equilibrium reconstruction providing flux-surface geometry for mapping.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s003_fit_ref_eqshot",
+      "name": "ATE Electron Temperature Fit Reference Equilibrium Shot 101013/003/048717",
+      "description": "Reference equilibrium shot number used when fitting the electron temperature profile in ATE analysis slice s101013/003/048717, linking the fitted profile to the equilibrium reconstruction shot used for mapping temperature data onto flux coordinates.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s003_rec_map_setting_ndf1",
+      "name": "ATE Reconstruction Map Setting NDF1 101013/003/048717",
+      "description": "Mapping or reconstruction setting (NDF1) used when processing electron temperature profile data for ATE dataset member 101013/003/048717. This is metadata controlling how the temperature analysis data is mapped and stored.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s004_dname",
+      "name": "ATE Dataset Name 80296/004",
+      "description": "Metadata string field holding the dataset name for the ate.s80296/004 electron temperature dataset produced by the TOPICS/ADAM analysis chain.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s004_zexpdata",
+      "name": "Measured Electron Temperature Profile (ate.s75000/004/048717)",
+      "description": "Measured electron temperature profile values (ZEXPDATA) from the ATE analysis dataset ate.s75000/004/048717, storing the experimental Te profile used as input or comparison.",
+      "unit": "",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s005_eqdb",
+      "name": "ATE Equilibrium Reference 75000/005/048717",
+      "description": "Reference linking the ATE electron temperature profile dataset slice ate.s75000/005/048717 to the corresponding equilibrium reconstruction (EQDB) used in the analysis. Provides the magnetic flux surface geometry needed to map the temperature profile onto flux coordinates.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s005_expadd_err_flg",
+      "name": "ATE Experimental Data Addition Error Flag 75000/005/048717",
+      "description": "Error flag for the experimental data addition step in the ATe (electron temperature) analysis slice ate.s75000/005/048717. Indicates whether an error occurred while appending experimental data to the analysis output, used for quality control of the analysis workflow.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s005_rec_map_setting_nelknd",
+      "name": "ATE Reconstruction Map Setting NELKND 75000/005/048717",
+      "description": "Reconstruction/mapping setting that records the number of electron temperature knots (NELKND) used when generating the electron temperature profile for the ate dataset, member 75000/005/048717. This is configuration metadata for the Te profile fitting procedure.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s005_shotex",
+      "name": "ate.s75000/005/048717 Shot Reference",
+      "description": "Reference to the experimental shot data (SHOTEX) associated with the electron temperature analysis dataset ate.s75000/005/048717 in the JT-60SA analysis database.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o013_bka_jfrp",
+      "name": "OFMC Beam-Driven Current (JFRP)",
+      "description": "NBI beam-driven current density parallel to the magnetic field lines (JFRP) from the OFMC fast-ion/beam analysis. Computed by the OFMC module, this profile represents the current driven by neutral beam injection along the field direction, a key quantity for current drive studies.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o013_bka_mdr",
+      "name": "OFMC MDR Data",
+      "description": "Data from the OFMC (Orbit Following Monte Carlo) fast-ion analysis, stored in the MDR record. OFMC computes fast-ion and NBI-related distributions such as fast ion density, particle source, momentum source, and beam-driven current profiles.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o013_fidn",
+      "name": "OFMC Fast Ion Density FIDN 013",
+      "description": "Fast ion density distribution from the OFMC orbit-following Monte Carlo analysis, dataset ofmc.o013. FIDN represents the density of NBI-generated fast ions as a function of minor radius and time.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o013_pk",
+      "name": "OFMC Quantity PK (o013)",
+      "description": "Quantity PK from the OFMC orbit-following Monte Carlo NBI heating analysis code, output series o013.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b240064_ate.s001_pid_tab_kind",
+      "name": "PID Table Kind Metadata ate.s101173/001/240064 (b-series)",
+      "description": "Identifier for the PID (profile ID) table kind used in the ate.s101173/001/240064 electron temperature analysis. This metadata field selects which profile table configuration is applied during the analysis.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b240064_ate.s004_iyexperr",
+      "name": "ATE Electron Temperature Profile Uncertainty Flag 101173/004/240064",
+      "description": "Flag governing how experimental uncertainties are treated in the ATE electron temperature profile analysis for dataset member 101173/004/240064. Controls error handling for the fitted temperature profile dataset.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ane.s001_crmin",
+      "name": "ANE CRMIN Configuration Parameter 101173/001/250062",
+      "description": "Configuration parameter CRMIN from the electron density (ane) analysis dataset, defining the minimum radius or grid boundary for the density reconstruction.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ane.s001_expadd_err_flg",
+      "name": "ANE Additional Error Flag (Shot 101173/001/250062)",
+      "description": "Error flag metadata field for the electron density profile dataset (ane) of shot 101173/001/250062. Indicates whether additional experimental error data is present or valid for the profile.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ane.s001_fit_ref_eqshot",
+      "name": "ANE Fit Reference Equilibrium Shot (Shot 101173/001/250062)",
+      "description": "Reference equilibrium shot identifier used by the ane electron density analysis dataset of shot 101173/001/250062. Specifies which equilibrium reconstruction shot is used as the reference for the density profile fitting.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s003_pid_tab_kind",
+      "name": "PID Table Kind Metadata ate.s75000/003/250062 (b-series)",
+      "description": "Identifier for the PID (profile ID) table kind used in the ate.s75000/003/250062 electron temperature analysis. This metadata field selects which profile table configuration is applied during the analysis.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s005_iyexperr",
+      "name": "ATE Electron Temperature Profile Uncertainty Flag 75000/005/250062",
+      "description": "Flag governing how experimental uncertainties are treated in the ATE electron temperature profile analysis for dataset member 75000/005/250062. Controls error handling for the fitted temperature profile dataset.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s007_rec_map_setting_ndbmx",
+      "name": "ATE Reconstruction Map Setting NDBMX 75000/007/250062",
+      "description": "Maximum number of data points or grid size (NDBMX) used in the reconstruction mapping for the electron temperature profile dataset member 75000/007/250062. This is a numerical setting controlling the spatial resolution of the profile reconstruction.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s009_exdb",
+      "name": "ATE EXDB Metadata 75000/009/250062",
+      "description": "EXDB metadata field for analysis slice ate.s75000/009/250062 of the ate electron temperature analysis dataset. Contains experimental database bookkeeping data associated with the electron temperature profile analysis.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s009_rec_map_setting_ndfit",
+      "name": "ATE Reconstruction Map Setting NDFIT 75000/009/250062",
+      "description": "Number of fit points (NDFIT) used for the reconstruction mapping in the electron temperature analysis dataset member 75000/009/250062. This setting parameter controls the spatial resolution of the profile fitting used when mapping measured electron temperature data onto flux surfaces.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ane.s002_ifitbnd",
+      "name": "ANE Fit Boundary Flag (Shot 75000/002/260008)",
+      "description": "Configuration/control flag defining the fitting range boundary used in the electron density profile analysis (ANE dataset) for shot 75000/002/260008. It specifies which radial indices are included in the profile fit.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ate.s002_expadd_err_flg",
+      "name": "ATE Experimental Data Addition Error Flag 75000/002/260008",
+      "description": "Error flag field for analysis slice ate.s75000/002/260008 of the LCDB electron temperature analysis dataset. This data quality attribute indicates whether an error occurred during the analysis.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ate.s002_rec_map_setting_mxrotp",
+      "name": "ATE Reconstruction Map Setting MXROTP 75000/002/260008",
+      "description": "Configuration parameter defining the reconstruction mapping settings (MXROTP) used in the electron temperature profile analysis for ATE dataset member 75000/002/260008. It controls the mapping of the reconstructed temperature profile.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o001_tks",
+      "name": "OFMC Thermal Conductivity Profile o80729/001",
+      "description": "Thermal conductivity profile (TKS) computed by the OFMC code, dataset member o80729/001, describing plasma heat transport for energy confinement analysis.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o001_wb",
+      "name": "OFMC Fast Ion Energy WB 80729/001",
+      "description": "Fast ion energy from the OFMC analysis series, stored with the WB label, for output instance 80729/001. Likely the total energy of fast ions from NBI heating.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o003_pk",
+      "name": "OFMC Beam Power PK (o80296/003)",
+      "description": "Beam power quantity PK from the OFMC NBI heating analysis, representing the power deposited or associated with neutral beam injection, output series o80296/003.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o004_pi",
+      "name": "OFMC Fast-Ion Quantity PI (o80296/004)",
+      "description": "Fast-ion pressure or power related quantity PI from the OFMC orbit-following Monte Carlo analysis output, output series o80296/004.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o005_mer",
+      "name": "OFMC o80296/005 MER",
+      "description": "Electron momentum source distribution (MER) from the OFMC NBI heating analysis code for output group o80296/005, representing momentum transferred to electrons by the neutral beam as part of the fast-ion slowing-down analysis.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o007_jbt",
+      "name": "OFMC Beam-Driven Toroidal Current Density JBT (b-series output 80296/007)",
+      "description": "Toroidal component of the NBI beam-driven current density JBT computed by the OFMC code, from b-series output channel 80296/007.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o008_imp_power_sol1",
+      "name": "OFMC Impurity Power SOL (Run 39689/008)",
+      "description": "Impurity-related power deposited at the scrape-off layer (SOL1) computed by OFMC fast-ion/impurity analysis run 39689/008, representing the power carried by impurity species to the SOL region.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o008_nbt",
+      "name": "OFMC NBT Beam-Thermal Neutron Rate o80296/008",
+      "description": "Beam-thermal neutron production rate NBT computed by the OFMC NBI analysis code for output group o80296/008, part of the EDASDB b-series analysis database. Arises from fusion reactions between beam-injected fast ions and thermal bulk ions, providing a measure of the fast-ion population and its interaction with the thermal plasma.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o009_mes",
+      "name": "OFMC Electron Heat Momentum Source MES o80296/009",
+      "description": "Bulk electron total heat momentum source MES computed by the OFMC NBI heating analysis code, output instance o80296/009. The MES label corresponds to the electron momentum source term arising from NBI heating; OFMC models beam ion slowing-down and the resulting momentum and heat deposition profiles.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o009_mi",
+      "name": "OFMC Ion Momentum Source MI o80296/009",
+      "description": "Ion momentum source distribution MI from the OFMC orbit-following Monte Carlo fast ion analysis, output instance o80296/009. Represents the momentum transferred to ions by NBI fast particles, used in transport and current drive studies.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o010_e_heat_momentum_sol",
+      "name": "OFMC Electron Heat Momentum SOL o39689/010",
+      "description": "Electron heat and momentum source profile from the OFMC (Orbit Following Monte Carlo) analysis for output instance o39689/010, evaluated at the separatrix (SOL). Describes the deposition of heating power and momentum to electrons from neutral beam injection, used in transport modeling.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o012_npnbi",
+      "name": "OFMC NPNBI Beam Particle Source o63632/012",
+      "description": "Output quantity NPNBI from the OFMC NBI analysis code, output group o63632/012, part of the EDASDB b-series analysis database. OFMC computes NBI fast-ion and beam-driven current profiles; NPNBI denotes a beam-related density or particle quantity.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o013_mes",
+      "name": "OFMC Electron Heat Momentum Source MES o63632/013",
+      "description": "Bulk electron total heat momentum source MES computed by the OFMC NBI heating analysis code, output instance o63632/013. The MES label corresponds to the electron momentum source term arising from NBI heating; OFMC models beam ion slowing-down and the resulting momentum and heat deposition profiles.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o014_cx_loss_power_ratio",
+      "name": "OFMC Fast-Ion Charge-Exchange Loss Power Ratio o63632/014",
+      "description": "Ratio of power lost by fast ions through charge-exchange processes, computed by the OFMC fast-ion analysis code for output instance o63632/014. Characterizes a key fast-ion loss channel in NBI-heated plasmas.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o014_th_th_d_t_neutron",
+      "name": "OFMC Thermal-Thermal D-T Neutron Rate (ofmc.o63632/014)",
+      "description": "Neutron production rate from thermal-thermal deuterium-tritium fusion reactions, computed by the OFMC NBI analysis code for dataset ofmc.o63632/014. Used to estimate the fusion neutron yield from the thermal plasma component.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o014_th_th_d_t_neutron_sol",
+      "name": "OFMC Thermal-Thermal D-T Neutron Rate in SOL (ofmc.o63632/014)",
+      "description": "Neutron production rate for thermal-thermal deuterium-tritium (D-T) reactions at the scrape-off layer, computed by the OFMC analysis code for dataset ofmc.o63632/014. Represents the neutron yield contribution from thermal D-T fusion in the SOL region.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o014_thermalized_ion_sol",
+      "name": "OFMC Thermalized Ion SOL Source (ofmc.o63632/014)",
+      "description": "Source term of thermalized ions in the scrape-off layer (SOL) computed by the OFMC orbit-following Monte Carlo code for dataset ofmc.o63632/014. Represents fast ions that have slowed down and thermalized, contributing to the SOL ion population.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o016_shine_through_power_ratio",
+      "name": "OFMC Shine-Through Power Ratio b63632/016",
+      "description": "Ratio of neutral beam power that passes through the plasma without being absorbed (shine-through) to the total injected NBI power, computed by the OFMC neutral-beam analysis code, a key indicator of beam absorption efficiency and plasma density.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_prad.s011_rec_abel_setting_abeltype",
+      "name": "Abel Inversion Setting AbelType",
+      "description": "Configuration parameter specifying the Abel inversion type used in the radiated power (prad) analysis. The Abel inversion reconstructs the local emissivity profile from line-integrated bolometer measurements. This setting selects the mathematical method or regularization used for the inversion.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_zeff.s005_fit_ref_eqshot",
+      "name": "Zeff Analysis Fit Reference Equilibrium Shot 41698/005",
+      "description": "Reference equilibrium shot identifier used in the Zeff effective charge fitting analysis dataset zeff.s41698/005. Links the Zeff analysis to the specific equilibrium reconstruction used as input.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_c260058_ate.s001_rec_map_setting_mxclin",
+      "name": "Reconstruction Map Setting (MXCLIN) for ATE",
+      "description": "Setting parameter for the equilibrium reconstruction map, specifically the MXCLIN parameter. This likely defines the maximum number of iterations or a convergence criterion for the equilibrium solver.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o001_prpl",
+      "name": "OFMC Fast-Ion Profile PRPL (h-series) 39689/001",
+      "description": "Output quantity PRPL from the OFMC orbit-following Monte Carlo analysis, dataset ofmc.o39689/001. OFMC computes fast ion distributions and beam-driven effects; PRPL is a profile quantity related to the fast ion population produced by NBI.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o003_mirs",
+      "name": "OFMC Ion Momentum Source MIRS o80296/003",
+      "description": "Ion momentum source term MIRS from the OFMC NBI heating analysis, output instance o80296/003. MIRS represents the momentum input to the ion population from neutral beam injection, computed via orbit-following Monte Carlo modeling of fast ion slowing-down.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o006_nrho",
+      "name": "OFMC NRHO Radial Grid Points o80296/006",
+      "description": "Metadata parameter NRHO specifying the number of radial (rho) grid points used in the OFMC analysis output group o80296/006, part of the EDASDB h-series analysis database. This is a grid dimension descriptor rather than a physical measurement.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o007_ion_power1",
+      "name": "OFMC Ion Heating Power (h-series, channel 007)",
+      "description": "Ion heating power from OFMC NBI heating analysis output for channel 007, representing the power deposited to the ion species by neutral beam injection.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o008_beam_number",
+      "name": "OFMC Beam Number 008",
+      "description": "Beam number identifier for the OFMC NBI heating analysis data set ofmc.o008. Metadata field specifying which neutral beam the associated data refers to.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o008_pt",
+      "name": "OFMC Total Power PT (h-series) 80296/008",
+      "description": "Total power quantity PT from the OFMC fast-ion/beam analysis code, dataset ofmc.o80296/008. PT represents the total injected or absorbed power used in the orbit-following calculation of fast particle behavior.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o010_e_jxb_torque_density",
+      "name": "OFMC Electron JxB Torque Density o010",
+      "description": "Electron JxB torque density computed by the OFMC analysis code for dataset ofmc.o010, representing the torque per unit volume exerted on the electron fluid by the JxB force from NBI-driven currents, contributing to toroidal momentum balance and plasma rotation studies.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o010_imp_torque1",
+      "name": "OFMC Impurity Torque (Run 010)",
+      "description": "Impurity JxB torque from OFMC NBI heating analysis run 010, representing the torque exerted on impurity ions by the JxB force resulting from neutral beam injection, computed via orbit-following Monte Carlo modeling.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o010_ion_power_density1",
+      "name": "OFMC Ion Power Density (h-series, channel 010)",
+      "description": "Ion power density profile from the OFMC NBI analysis for channel 010, representing the power deposited into ions by neutral beam injection as a function of radial position.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o010_ntt",
+      "name": "OFMC Thermal-Thermal Neutron Rate NTT 80296/010",
+      "description": "Thermal-thermal reaction neutron production rate (NTT) computed by the OFMC fast particle/NBI analysis code for output instance 80296/010. OFMC calculates the slowing down of fast ions and the resulting neutron emission from thermal-thermal fusion reactions.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o012_imp_power_sol1",
+      "name": "OFMC Impurity Power SOL (Run 012)",
+      "description": "Power deposited by impurity ions into the scrape-off layer (SOL) computed by OFMC run 012, important for understanding divertor heat loads and impurity transport in the SOL.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o012_th_th_d_t_neutron_density",
+      "name": "OFMC Thermal-Thermal D-T Neutron Density (ofmc.o012)",
+      "description": "Density of neutrons produced by thermal-thermal deuterium-tritium fusion reactions, computed by the OFMC analysis code for dataset ofmc.o012. Used to estimate the neutron production rate from the thermal plasma population.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s002_expadd_err_flg",
+      "name": "Radiated Power Additional Error Flag",
+      "description": "Error flag indicating additional error conditions in the radiated power analysis (prad.s002). Used for data quality assessment of the bolometric radiated power calculation.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s002_fit_ref_eqdb",
+      "name": "Radiated Power Fit Reference Equilibrium DB",
+      "description": "Reference to the equilibrium database used for fitting the radiated power profile in the prad.s002 analysis dataset. This metadata links the bolometric radiated power analysis to a specific equilibrium reconstruction.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/mdac_magatpl5",
+      "name": "Magnetic Probe AT-PL5 (P09)",
+      "description": "Magnetic field measurement from probe AT-PL5 (position P09), in tesla, used for plasma control. This time series provides local magnetic field data feeding the real-time control system.",
+      "unit": "T",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/mdac_magflxlp7",
+      "name": "Flux Loop 7 (Absolute Reference)",
+      "description": "Absolute magnetic flux measured by flux loop 7, in webers. This loop serves as the reference for all other differential flux loop measurements in the MDAC system.",
+      "unit": "Wb",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/mdac_statusp10_2",
+      "name": "NFM P10 Detector Status 2",
+      "description": "Status voltage of the NFM P10 detector channel 2, in volts. Indicates the operational state of the neutron flux monitor detector channel.",
+      "unit": "V",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/ois_oisrs03c",
+      "name": "OIS Radial Displacement Sensor 03",
+      "description": "Time-series measurement of radial displacement from OIS radial sensor 03, sampled at 10 kHz. RADIAL_SENSOR_OIS_03_(10_KHZ)",
+      "unit": "mm",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/ois_oisrs09c",
+      "name": "OIS Radial Displacement Sensor 09",
+      "description": "Time-series measurement of radial displacement from OIS radial sensor 09, sampled at 10 kHz. RADIAL_SENSOR_OIS_09_(10_KHZ)",
+      "unit": "mm",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/ois_oisrs10a",
+      "name": "OIS Radial Sensor 10 (1 Hz)",
+      "description": "Radial displacement sensor reading from the OIS (optical/instrumentation) system, sensor 10 (RADIAL_SENSOR_OIS_10_(1_HZ)), sampled at 1 Hz, reported in millimeters. Used for monitoring machine component positions or clearances.",
+      "unit": "mm",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/prb_telplowp09",
+      "name": "Lower Divertor Probe P09 Electron Temperature",
+      "description": "Electron temperature measured at lower divertor probe P09, in electron volts, characterising divertor plasma conditions relevant for heat and particle fluxes at the target. Electron temperature at lower divertor P09",
+      "unit": "eV",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/prb_telplowp15",
+      "name": "Lower Divertor Probe P15 Electron Temperature",
+      "description": "Electron temperature measured at lower divertor probe P15, in electron volts, characterising divertor plasma conditions relevant for heat and particle fluxes at the target. Electron temperature at lower divertor P15",
+      "unit": "eV",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_calbz2",
+      "name": "P1 Poloidal Magnetic Field (BZ1) Calibration",
+      "description": "Calibration signal for the P1 poloidal magnetic field measurement (BZ1). This is a calibration parameter for the magnetic diagnostic system.",
+      "unit": "T",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_caldlin",
+      "name": "Lower Divertor In-side Calibration",
+      "description": "Calibration distance for the lower divertor inner-side (Dl-in) geometry. Used in the plasma shape control system to define the reference position of the lower inner divertor target. Time-series geometry/calibration parameter.",
+      "unit": "m",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_caldltu",
+      "name": "Upper Plasma Triangularity Calibration",
+      "description": "Calibration value for the upper plasma triangularity (deltau) used by the plasma control system. Triangularity is a shape parameter describing the poloidal cross-section of the plasma.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_calduout",
+      "name": "Upper Divertor Outboard Calibration",
+      "description": "Calibration signal for the upper divertor outboard (Du-out) measurement. Provides the calibration reference for divertor-related diagnostics measuring the outboard upper divertor region.",
+      "unit": "m",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_calfp1",
+      "name": "P1 Poloidal Flux Calibration (FP1)",
+      "description": "Calibrated poloidal flux measurement for the P1 flux loop associated with the fast plasma position control coil (FPPCC). This signal provides the magnetic flux used for plasma position feedback control, expressed in Webers.",
+      "unit": "Wb",
+      "hand_label": "measured",
+      "glossary": [
+        {
+          "term": "FPPCC",
+          "meaning": "fast plasma position control coil: the in-vessel coil driven for fast vertical position control of the plasma"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_calfp4",
+      "name": "P4 Poloidal Flux Calibration (FP4)",
+      "description": "Calibration value (in Wb) for the P4 poloidal flux measurement associated with the fast plasma position control coil (FPPCC). This is a control system calibration parameter for the poloidal flux sensor used in plasma position feedback.",
+      "unit": "Wb",
+      "hand_label": "configuration_parameter",
+      "glossary": [
+        {
+          "term": "FPPCC",
+          "meaning": "fast plasma position control coil: the in-vessel coil driven for fast vertical position control of the plasma"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_calfp7",
+      "name": "FP7 Poloidal Flux Calibration",
+      "description": "Calibrated poloidal flux measurement for flux loop FP7, used in the fast plasma position control system. Provides the magnetic flux signal needed for real-time plasma position feedback.",
+      "unit": "Wb",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_calkave",
+      "name": "Plasma Elongation (kappa_ave) Calculated",
+      "description": "Calculated average plasma elongation (kappa) from the plasma control system. This equilibrium parameter describes the vertical stretching of the plasma cross-section and is used for real-time shape control.",
+      "unit": "",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_calrp0",
+      "name": "Plasma Horizontal Position (Rp0) Calibration",
+      "description": "Calibration reference for the plasma horizontal position Rp0 used by the plasma control system. Provides the reference major-radius position for feedback control of the plasma column.",
+      "unit": "m",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_ccs1vol",
+      "name": "CS1 Voltage Command",
+      "description": "Commanded voltage for the CS1 (Central Solenoid 1) coil, in kV. This time-series signal is the reference voltage waveform issued by the plasma control system to the CS1 power supply, used for plasma current ramp-up and shape control.",
+      "unit": "kV",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_ccs3cur",
+      "name": "CS3 Current Command",
+      "description": "Commanded current for central solenoid coil CS3, in kA, issued by the plasma control system. This is a reference waveform used to drive the CS3 power supply for plasma current ramp-up and equilibrium control.",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_ccs4cur",
+      "name": "CS4 Current Command",
+      "description": "Command signal for the current in Central Solenoid coil 4 (CS4), in kA. This is a plasma control setpoint used to drive the poloidal field coil system for plasma shaping and current ramp control.",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_cef4cur",
+      "name": "EF4 Coil Current Command",
+      "description": "Commanded current for the EF4 equilibrium field coil, expressed in kA. This time-series signal is the reference waveform generated by the plasma control system for the poloidal field coil power supply.",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_cefcc1vl",
+      "name": "EFCC1 Voltage Command",
+      "description": "Command voltage for error field correction coil 1 (EFCC1), one of the in-vessel coils on the stabilizing plate used to correct error fields. This is a power-supply command signal from the PSC (power supply control) system.",
+      "unit": "kV",
+      "hand_label": "commanded",
+      "glossary": [
+        {
+          "term": "EFCC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate; not an equilibrium field coil and not a converter"
+        },
+        {
+          "term": "EFC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate (the catalogue spells the abbreviation EFCC); not an equilibrium field coil and not a converter"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_cefcc7cr",
+      "name": "EFCC7 Current Command",
+      "description": "Commanded current (in kA) for error field correction coil 7 (EFCC7), an in-vessel coil on the stabilizing plate. Used to apply error field correction for MHD stability control.",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": [
+        {
+          "term": "EFCC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate; not an equilibrium field coil and not a converter"
+        },
+        {
+          "term": "EFC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate (the catalogue spells the abbreviation EFCC); not an equilibrium field coil and not a converter"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_cefcc9cr",
+      "name": "EFCC9 Current Command",
+      "description": "Command waveform for the current in error field correction coil 9 (EFCC9), in kA. EFCC coils are in-vessel coils on the stabilizing plate used to apply non-axisymmetric fields for error field correction and MHD mode control.",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": [
+        {
+          "term": "EFCC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate; not an equilibrium field coil and not a converter"
+        },
+        {
+          "term": "EFC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate (the catalogue spells the abbreviation EFCC); not an equilibrium field coil and not a converter"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_crwmc10cr",
+      "name": "RWMC10 Current Command",
+      "description": "Commanded current for resistive wall mode control coil RWMC10, an in-vessel coil on the stabilizing plate driving feedback control of resistive wall modes. Command of RWMC10 Current",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_crwmc14cr",
+      "name": "RWMC14 Current Command",
+      "description": "Commanded current for resistive wall mode control coil RWMC14, an in-vessel coil on the stabilizing plate driving feedback control of resistive wall modes. Command of RWMC14 Current",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_crwmc16cr",
+      "name": "RWMC16 Current Command",
+      "description": "Commanded current for resistive wall mode control coil RWMC16, an in-vessel coil on the stabilizing plate driving feedback control of resistive wall modes. Command of RWMC16 Current",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_crwmc17cr",
+      "name": "RWMC17 Current Command",
+      "description": "Commanded current for resistive wall mode control coil RWMC17, an in-vessel coil on the stabilizing plate driving feedback control of resistive wall modes. Command of RWMC17 Current",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_crwmc18cr",
+      "name": "RWMC18 Current Command",
+      "description": "Commanded current for resistive wall mode control coil RWMC18, an in-vessel coil on the stabilizing plate driving feedback control of resistive wall modes. Command of RWMC18 Current",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_crwmc1vl",
+      "name": "RWMC1 Voltage Command",
+      "description": "Command voltage for the resistive wall mode control (RWMC) coil number 1, one of the in-vessel coils on the stabilizing plate. This signal is the reference/command waveform sent to the RWMC power supply for active MHD mode control.",
+      "unit": "kV",
+      "hand_label": "commanded",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_ctfcur",
+      "name": "TF Coil Current Command",
+      "description": "Command signal for the toroidal field (TF) coil current in JT-60SA, measured in kA. This sets the toroidal magnetic field strength for the discharge and is a key machine operation parameter for the superconducting TF magnet system.",
+      "unit": "kA",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_curef3",
+      "name": "EF3 Coil Current Reference",
+      "description": "Reference (demand) current waveform for equilibrium field coil EF3, generated by the plasma control system. This time-series signal drives the EF3 power supply to shape the poloidal field during a discharge, with units of kA.",
+      "unit": "kA",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_curefcc4",
+      "name": "EFCC4 Reference Current",
+      "description": "Reference current for error field correction coil 4 (EFCC4), an in-vessel coil mounted on the stabilizing plate. This current is used to apply corrective magnetic fields to reduce error fields that can cause locked modes and degrade plasma performance.",
+      "unit": "kA",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "EFCC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate; not an equilibrium field coil and not a converter"
+        },
+        {
+          "term": "EFC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate (the catalogue spells the abbreviation EFCC); not an equilibrium field coil and not a converter"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_currwmc11",
+      "name": "RWMC11 Current Reference",
+      "description": "Reference current waveform for resistive wall mode control coil RWMC11, an in-vessel coil on the stabilizing plate used for active control of resistive wall modes. Reference of RWMC11 Current",
+      "unit": "kA",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_currwmc16",
+      "name": "RWMC16 Current Reference",
+      "description": "Reference current waveform for resistive wall mode control coil RWMC16, an in-vessel coil on the stabilizing plate used for active control of resistive wall modes. Reference of RWMC16 Current",
+      "unit": "kA",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_currwmc5",
+      "name": "RWMC5 Coil Current Reference",
+      "description": "Reference (demand) current for resistive wall mode control coil 5 (RWMC5), one of the in-vessel coils on the stabilizing plate. Used for active control of resistive wall modes and error field correction.",
+      "unit": "kA",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_refnref",
+      "name": "Number of Reference Points",
+      "description": "Number of reference points (refNref) used by the JT-60SA plasma control system, defining the count of control reference locations for the discharge. A control-system configuration quantity rather than a plasma measurement.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_refp4mode",
+      "name": "P4 Control Mode Reference",
+      "description": "Reference signal defining the control mode for the P4 (poloidal field coil) control loop. This time-series parameter selects or specifies the operating mode of the P4 coil current control during a discharge.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_refzp2",
+      "name": "P2 Reference Vertical Position (ZP2)",
+      "description": "Reference vertical position (ZP2) for control point P2, expressed in meters. This time-series signal provides the target vertical coordinate used by the plasma position control system.",
+      "unit": "m",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_upfppccur",
+      "name": "Upper FPPC Coil Current Reference",
+      "description": "Reference current (in kA) for the upper Fast Plasma Position Control (FPPC) coil. This is the commanded waveform used by the plasma control system to drive the upper FPPC coil for fast vertical position control. It is a control reference signal, not a measured coil current.",
+      "unit": "kA",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_upfppcvol",
+      "name": "Upper FPPC Coil Voltage Reference",
+      "description": "Reference voltage for the upper Fast Plasma Position Control (FPPC) coil. This time series provides the programmed voltage waveform used by the plasma control system to drive the upper FPPC coil for vertical position stabilization.",
+      "unit": "kV",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_volef3",
+      "name": "EF3 Voltage Reference",
+      "description": "Reference voltage command for equilibrium field (EF) coil 3. Part of the plasma position/shape control system driving the PF coil power supplies.",
+      "unit": "kV",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psc_volrwmc15",
+      "name": "RWMC15 Voltage Reference",
+      "description": "Reference voltage command for resistive wall mode control coil RWMC15, an in-vessel coil on the stabilizing plate, driving the coil current used to actively stabilize resistive wall modes. Reference of RWMC15 Voltage",
+      "unit": "kV",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psc_volrwmc9",
+      "name": "RWMC9 Reference Voltage",
+      "description": "Reference voltage for the resistive wall mode control (RWMC) coil number 9, in kV. The RWMC coils are in-vessel coils on the stabilizing plate used to actively control resistive wall modes and other MHD instabilities. This signal provides the commanded reference voltage for the coil power supply.",
+      "unit": "kV",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "RWMC",
+          "meaning": "resistive wall mode control coil, one of the in-vessel coils on the stabilizing plate"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psrc_1626_a101",
+      "name": "TCCS Setting Tag",
+      "description": "Setting tag for the TCCS (Tokamak Control and Coil System) configuration, identifying the control parameter set used for the discharge. A scalar administrative identifier.",
+      "unit": "-",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_abnormfl19",
+      "name": "Flux Loop 19 Abnormality Flag",
+      "description": "Abnormality flag for flux loop 19, indicating a fault or abnormal condition in the measurement. Flux Loop (19)  Abnorm.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_abnormfl7",
+      "name": "Flux Loop 7 Abnormality Flag",
+      "description": "Abnormality indicator for flux loop 7 in the JT-60SA plasma control system. This time-series signal flags anomalous behavior of the flux loop measurement, such as signal saturation, drift, or fault, allowing the control system to exclude or compensate for the faulty sensor during real-time equilibrium control.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_abnormmp12",
+      "name": "Magnetic Probe TC12 Abnormality Flag",
+      "description": "Abnormality/fault flag for magnetic probe TC12, indicating an out-of-range or failed reading in the plasma control magnetic diagnostic chain. Magnetic Probe TC(12) Abnorm.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_abnormmp5",
+      "name": "Magnetic Probe TC(5) Abnormality",
+      "description": "Abnormality indicator for magnetic probe TC(5), flagging anomalous or faulty readings from the probe. Time series used for diagnostic health monitoring.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_calgapl",
+      "name": "Lower Outer Gap (Gl) - Calculated",
+      "description": "Calculated lower outer gap between the plasma boundary and the outboard wall/limiter, in metres. This time series is computed by the control system to regulate the lower outboard gap during the discharge.",
+      "unit": "m",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_caliteddy",
+      "name": "Total Eddy Current (Calculated)",
+      "description": "Calculated total eddy current in the conducting structures surrounding the plasma. This time series is used for plasma control and equilibrium reconstruction to account for induced currents in the vacuum vessel and stabilizing plates.",
+      "unit": "KA",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_calrteddy",
+      "name": "Total Eddy Current Ratio Calibration",
+      "description": "Calibration parameter for the total eddy current ratio used in plasma control calculations. This time series provides a scaling factor relating measured eddy currents to model predictions for control purposes.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comgapu",
+      "name": "Upper Outer Gap (Gu) - Command",
+      "description": "Commanded upper outer gap between the plasma boundary and the outboard wall/limiter, in metres. This time series is the reference signal for the upper outboard gap control loop.",
+      "unit": "m",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comldivlout",
+      "name": "Lower Divertor Outside Strike Point (Dl-out) Command",
+      "description": "Commanded position of the lower divertor outside strike point (Dl-out). Used in divertor strike point control to manage heat and particle fluxes to the divertor target.",
+      "unit": "m",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comp3mode",
+      "name": "P3 Control Mode Command",
+      "description": "Command signal indicating the control mode of the P3 (poloidal field) coil control system. Used to select and monitor the active control mode for plasma position and shape control.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comp7mode",
+      "name": "P7 Control Mode Command",
+      "description": "Command signal indicating the control mode for power supply P7. This is a control system parameter defining the operating mode of the P7 coil power supply.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comp8mode",
+      "name": "P8 Control Mode Command",
+      "description": "Command signal indicating the control mode for the P8 coil system. This time-series signal is part of the plasma control system configuration.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comp9mode",
+      "name": "P9 Control Mode Command",
+      "description": "Command signal indicating the control mode for power supply P9. This is a control system parameter defining the operating mode of the P9 coil power supply.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comrbot",
+      "name": "Plasma Bottom Horizontal Position (RP1) Command",
+      "description": "Commanded horizontal position of the plasma bottom reference point RP1. Used in plasma position control to set the target radial location of the plasma bottom.",
+      "unit": "m",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comrtop",
+      "name": "Plasma Top Horizontal Position (RP3) Computed",
+      "description": "Computed horizontal (radial) position of the plasma top reference point RP3, in metres, as a time series. It is used in the plasma position control loop to regulate the upper plasma boundary.",
+      "unit": "m",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comudiv",
+      "name": "Upper Divertor Control PT (DIV_U) Command",
+      "description": "Command signal for the upper divertor control system, used in the plasma control system to regulate the upper divertor configuration. This is a control command rather than a plasma measurement.",
+      "unit": "",
+      "hand_label": "commanded",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comzbot",
+      "name": "Plasma Bottom Vertical Position (ZP1) Computed",
+      "description": "Computed vertical position of the plasma bottom (ZP1), given in meters. This time-series signal is derived from magnetic diagnostics and provides the lower boundary vertical position of the plasma for shape control.",
+      "unit": "m",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comzp0",
+      "name": "Plasma Vertical Position (Zp0) Computed",
+      "description": "Computed vertical position of the plasma (Zp0), given in meters. This time-series signal represents the vertical coordinate of the plasma centroid or magnetic axis, used for vertical position control.",
+      "unit": "m",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_comztop",
+      "name": "Plasma Top Vertical Position (ZP3, Computed)",
+      "description": "Computed vertical (Z) position of the plasma top, used as a control reference for plasma shape control. Derived from equilibrium reconstruction.",
+      "unit": "m",
+      "hand_label": "derived_or_computed",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_magpbtc10",
+      "name": "Magnetic Probe TC-10 Poloidal Field",
+      "description": "Time series of the magnetic field measured by tangential (poloidal-field) magnetic probe TC-10, in T. Observation of Magnetic Probe TC-(10)",
+      "unit": "T",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_magpbtc17",
+      "name": "Magnetic Probe TC-17 Poloidal Field",
+      "description": "Time series of the magnetic field measured by tangential (poloidal-field) magnetic probe TC-17, in T. Observation of Magnetic Probe TC-(17)",
+      "unit": "T",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_magpbtc3",
+      "name": "Magnetic Probe TC-3 (Tangential)",
+      "description": "Tangential magnetic probe TC-3 (SELENE) measuring poloidal magnetic field, in tesla. Time series.",
+      "unit": "T",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_refap",
+      "name": "Plasma Minor Radius (ap) Reference",
+      "description": "Reference value for the plasma minor radius (ap), in meters. This time-series signal provides the target or requested minor radius used by the plasma control system to regulate the plasma size and shape.",
+      "unit": "m",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_refcombi",
+      "name": "Control Point Pattern (COMBI) Reference",
+      "description": "Time series of the reference control point pattern (COMBI) used by the plasma control system. This defines the target positions of multiple control points for plasma shape and position feedback control.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_refconfig",
+      "name": "Configuration Pattern (CONFIG)",
+      "description": "Signal indicating the configuration pattern used for the discharge, likely defining the plasma shape or control configuration. Time series.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_refkappa",
+      "name": "Reference Plasma Elongation (kappa_ave)",
+      "description": "Reference value for the average plasma elongation (kappa), a dimensionless parameter describing the vertical stretching of the plasma cross-section. This is used as a target in the plasma shape control system.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_refkappal",
+      "name": "Lower Plasma Elongation (kappaL) Reference",
+      "description": "Reference lower plasma elongation (kappaL), a dimensionless measure of the vertical stretching of the lower plasma boundary. This time-series signal provides the target elongation for plasma shape control.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_refkappau",
+      "name": "Upper Plasma Elongation Reference",
+      "description": "Reference (target) value of the upper plasma elongation (kappa_u), a shape parameter describing the vertical stretching of the plasma cross-section. Used as a control reference for plasma shape.",
+      "unit": "",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_refudivlin",
+      "name": "Upper Divertor In-side (Du-in) Reference",
+      "description": "Reference position for the inboard side of the upper divertor (Du-in) used in JT-60SA plasma control, in metres. Defines the target geometry for the upper divertor inner leg.",
+      "unit": "m",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_refzp3",
+      "name": "Plasma Top Vertical Position (ZP3) Reference",
+      "description": "Reference vertical position of the plasma top (ZP3), given in meters. This time-series signal provides the target upper boundary vertical position for plasma shape control.",
+      "unit": "m",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psrc_tccssettag",
+      "name": "TCCS Setting Tag",
+      "description": "Setting tag identifier for the TCCS (Tokamak Control and Configuration System) configuration. This is a metadata tag used to identify the control settings applied to a discharge.",
+      "unit": "",
+      "hand_label": "configuration_parameter",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psscfst_refcurcs1bse",
+      "name": "CS1 Base PS Current Reference",
+      "description": "Reference current for the CS1 base power supply. This time-series signal provides the commanded current waveform for the central solenoid coil 1 base power supply, used in plasma current and shape control.",
+      "unit": "A",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psscfst_refcurcs2bse",
+      "name": "CS2 Base PS Current Reference",
+      "description": "Reference current for the base power supply of Central Solenoid coil 2 (CS2). This time-series signal provides the target current waveform for the superconducting CS coil power supply during plasma discharges.",
+      "unit": "A",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psscfst_refcuref5bst",
+      "name": "EF5 Booster PS Current Reference",
+      "description": "Current reference for the EF5 booster power supply, part of the equilibrium field coil power supply system. This reference waveform drives the booster converter that supplies the EF5 coil current; recorded as a time series in amperes.",
+      "unit": "A",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psscfst_refvcefc7",
+      "name": "EFCC7 Voltage/Current Reference",
+      "description": "Voltage and current reference signals for the inverter driving error field correction coil EFCC7, an in-vessel coil on the stabilizing plate. These references define the commanded waveform supplied to the EFCC7 power supply for error-field correction. Time-series control reference quantities rather than plasma measurements.",
+      "unit": "A/V",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "EFCC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate; not an equilibrium field coil and not a converter"
+        },
+        {
+          "term": "EFC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate (the catalogue spells the abbreviation EFCC); not an equilibrium field coil and not a converter"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psscfst_refvcefc8",
+      "name": "EFCC Inverter 8 Voltage/Current Reference",
+      "description": "Reference voltage and current command signals for inverter 8 of the Error Field Correction Coil (EFCC) power supply system. These references drive the EFCC power supply to produce the desired correction field for controlling error fields and resistive wall mode stability.",
+      "unit": "A/V",
+      "hand_label": "reference_or_setpoint",
+      "glossary": [
+        {
+          "term": "EFCC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate; not an equilibrium field coil and not a converter"
+        },
+        {
+          "term": "EFC",
+          "meaning": "error field correction coil, one of the in-vessel coils on the stabilizing plate (the catalogue spells the abbreviation EFCC); not an equilibrium field coil and not a converter"
+        }
+      ]
+    },
+    {
+      "id": "jt-60sa:general/psscfst_refvolcs4bse",
+      "name": "CS4 Base PS Voltage Reference",
+      "description": "Time-series reference voltage (in V) for the CS4 base power supply of the JT-60SA central solenoid coil system. It is the commanded reference used by the power supply control to drive the CS4 coil during the discharge.",
+      "unit": "V",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psscfst_refvolef1bst",
+      "name": "EF1 Booster Power Supply Voltage Reference",
+      "description": "Reference voltage for the EF1 booster power supply, in volts. This signal is part of the power supply control system for the equilibrium field coils, used to drive the coil currents required for plasma equilibrium.",
+      "unit": "V",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/psscfst_refvolef3bse",
+      "name": "EF3 Base PS Voltage Reference",
+      "description": "Reference voltage for the base power supply of the EF3 poloidal field coil. This is a power supply control signal for the magnetic field coil system, used to drive and regulate the EF3 coil current.",
+      "unit": "V",
+      "hand_label": "reference_or_setpoint",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/qms_predion",
+      "name": "Manifold D Ionization Vacuum Gauge Pressure",
+      "description": "Pressure measurement (in Pa) from the manifold D ionization vacuum gauge. This monitors the vacuum level in the manifold D region of the vacuum system. It is a machine/vacuum diagnostic parameter used for vacuum quality monitoring.",
+      "unit": "Pa",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/qms_prep02cryop",
+      "name": "Cryogenic Pirani Gauge Pressure P02",
+      "description": "Cryogenic vacuum pressure measured by the CRYO_PRESSURE_P02_PIRANI_GAUGE, in Pascals, monitoring the vacuum level relevant to the superconducting magnet and cryoplant operation.",
+      "unit": "Pa",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/qms_v01aqopen",
+      "name": "QMASS A Orifice Valve V01AQ Open Status",
+      "description": "Open/closed status of the V01AQ orifice valve (QMASS_A_Orif._V01AQ_Open) on the QMASS_A (quadrupole mass spectrometer) manifold. This is a vacuum system valve status parameter used for gas analysis and vacuum monitoring.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/qms_v02cqopen",
+      "name": "QMASS C Orifice Valve V02CQ Open Status",
+      "description": "Open/close status of the QMS (Quadrupole Mass Spectrometer) C orifice valve V02CQ (QMASS_C_Orif._V02CQ_Open). This valve controls gas flow to the quadrupole mass spectrometer used for residual gas analysis in the vacuum system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/qms_v02dqopen",
+      "name": "QMASS D Orifice Valve V02DQ Open Status",
+      "description": "Status parameter indicating the open/closed state of the V02DQ orifice (QMASS_D_Orif._V02DQ_Open) of the quadrupole mass spectrometer (QMS) deuterium gas sampling line. Used for gas composition monitoring in the vacuum/gas system.",
+      "unit": "",
+      "hand_label": "status_or_flag",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf01_tfgs0101a",
+      "name": "TF Coil Strain Gauge 01/0101 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 01/0101, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf01_tfgs0101b",
+      "name": "TF Coil Strain Gauge 01/0101 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 01/0101, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf02_tfgs0204a",
+      "name": "TF Coil Strain Gauge 02/0204 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 02/0204, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf02_tfgs0208b",
+      "name": "TF Coil Strain Gauge 02/0208 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 02/0208, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf04_tfgs0402a",
+      "name": "TF Coil Strain Gauge 04/0402 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 04/0402, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf06_tfgs0605b",
+      "name": "TF Coil Strain Gauge 06/0605 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 06/0605, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf07_tfgs0704a",
+      "name": "TF Coil Strain Gauge 07/0704 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 07/0704, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf07_tfgs0705b",
+      "name": "TF Coil Strain Gauge 07/0705 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 07/0705, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf07_tfgs0708c",
+      "name": "TF Coil Strain Gauge 07/0708",
+      "description": "Strain gauge measurement from a Toroidal Field coil, sampled at 10 kHz, in microstrain, monitoring mechanical stress on the TF coil structure. STRAIN_GAUGE_TF_07_08_(10_KHZ)",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf08_tfgs0804c",
+      "name": "TF Coil Strain Gauge 08/0804",
+      "description": "Strain gauge measurement from a Toroidal Field coil, sampled at 10 kHz, in microstrain, monitoring mechanical stress on the TF coil structure. STRAIN_GAUGE_TF_08_04_(10_KHZ)",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf10_tfgs1008a",
+      "name": "TF Coil Strain Gauge 10/1008 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 10/1008, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf11_tfgs1101b",
+      "name": "TF Coil Strain Gauge 11/1101 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 11/1101, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf11_tfgs1102c",
+      "name": "TF Coil Strain Gauge 11/1102",
+      "description": "Strain gauge measurement from a Toroidal Field coil, sampled at 10 kHz, in microstrain, monitoring mechanical stress on the TF coil structure. STRAIN_GAUGE_TF_11_02_(10_KHZ)",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf11_tfgs1107b",
+      "name": "TF Coil Strain Gauge 11/1107 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 11/1107, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf13_tfgs1301c",
+      "name": "TF Coil Strain Gauge 13/1301",
+      "description": "Strain gauge measurement from a Toroidal Field coil, sampled at 10 kHz, in microstrain, monitoring mechanical stress on the TF coil structure. STRAIN_GAUGE_TF_13_01_(10_KHZ)",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf13_tfgs1302b",
+      "name": "TF Coil Strain Gauge 13/1302 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 13/1302, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf13_tfgs1308b",
+      "name": "TF Coil Strain Gauge 13/1308 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 13/1308, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf14_tfgs1405b",
+      "name": "TF Coil Strain Gauge 14/1405 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 14/1405, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf16_tfgs1601a",
+      "name": "TF Coil Strain Gauge 16/1601 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 16/1601, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf17_tfgs1708a",
+      "name": "TF Coil Strain Gauge 17/1708 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 17/1708, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf18_tfgs1803b",
+      "name": "TF Coil Strain Gauge 18/1803 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 18/1803, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf_tfrs03b",
+      "name": "TF Coil Radial Sensor 03 (100 Hz)",
+      "description": "Radial displacement measurement from sensor TFRS03B on the toroidal field coil system, sampled at 100 Hz, monitoring radial movement or strain of the TF coil structure.",
+      "unit": "mm",
+      "hand_label": "measured",
+      "glossary": []
+    },
+    {
+      "id": "jt-60sa:general/tf_tfrs14a",
+      "name": "TF Coil Radial Sensor 14 (1 Hz)",
+      "description": "Radial displacement sensor for toroidal field coil 14, sampled at 1 Hz, monitoring the radial position or strain of the TF coil structure.",
+      "unit": "mm",
+      "hand_label": "measured",
+      "glossary": []
+    }
+  ]
+}
