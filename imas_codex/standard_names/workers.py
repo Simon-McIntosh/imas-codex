@@ -1966,6 +1966,142 @@ def _collect_nearby_name_comparators(
     return nearby
 
 
+#: Lease floor for a rerank. The rerank's price is only known once it
+#: returns, so the lease is opened for this before the call and the actual
+#: spend is charged through the lease already held.
+_RERANK_LEASE_FLOOR_USD = 1e-6
+
+
+async def _rerank_comparators_for_compose(
+    items: Sequence[dict[str, Any]], nearby: list[dict]
+) -> tuple[list[dict], float, str]:
+    """Rerank the nearby-name comparator block when the switch is on.
+
+    Off by default, so the block reaches the composed prompt exactly as the
+    embedding retrieval produced it. When on, each item judges the block and
+    it is reordered by judged relevance, keeping the embedding order on any
+    failure.
+
+    Ranking is not a gate, matching the sibling rerank callers: a raise out of
+    the judgement call — an unresolvable decision model, a state builder that
+    refuses — keeps the embedding order and logs why rather than aborting the
+    compose batch.
+
+    Returns:
+        ``(block, cost, seat)``. ``seat`` is the model the call was billed
+        under, empty when no call was made, so the caller charges the spend to
+        the seat that raised it rather than to the compose model.
+    """
+    from imas_codex.standard_names.context import (
+        comparator_rerank_enabled,
+        rerank_name_comparators,
+    )
+
+    if not comparator_rerank_enabled():
+        return nearby, 0.0, ""
+    try:
+        ordered, cost, seat = await rerank_name_comparators(items, nearby)
+    except Exception as exc:  # noqa: BLE001 - ranking is not a gate
+        logger.warning("comparator rerank unavailable: %s", exc)
+        return nearby, 0.0, ""
+    return list(ordered), cost, seat
+
+
+def _book_rerank_spend(
+    lease: BudgetLease, cost: float, *, seat: str, phase: str
+) -> None:
+    """Charge a rerank's spend on the lease opened before it ran.
+
+    The lease is held before the call, so the charge never depends on a
+    reservation taken afterwards, and ``charge_event`` records it whether or
+    not the lease and the pool can fund it. The event names the seat that
+    actually billed the call, which is the judge seat rather than the compose
+    model.
+    """
+    if cost > 0:
+        from imas_codex.standard_names.budget import LLMCostEvent
+
+        lease.charge_event(
+            cost,
+            LLMCostEvent(
+                model=seat,
+                tokens_in=0,
+                tokens_out=0,
+                phase=phase,
+                service="standard-names",
+            ),
+        )
+    lease.release_unused()
+
+
+async def _reranked_nearby_comparators(
+    mgr: BudgetManager,
+    items: Sequence[dict[str, Any]],
+    nearby: list[dict],
+    *,
+    phase: str,
+) -> tuple[list[dict], float]:
+    """Rerank a compose batch's comparator block and book what it spent.
+
+    The rerank is billed by the judge seat, and its price is only known once it
+    returns, so its lease is opened before the call and the spend is charged
+    through the lease already held. A pool that cannot fund even a floor lease
+    runs the batch without a rerank, in the embedding order the block already
+    has: nothing is charged for a call that was not made.
+
+    The switch is read before the lease is opened, so the off path books
+    nothing at all — no reservation, no charge — and a batch run without the
+    rerank touches the budget exactly as it did before the switch existed.
+
+    Returns ``(block, cost)``; ``cost`` is what the lease charged, ``0.0`` when
+    the switch is off or no lease could be opened.
+    """
+    from imas_codex.standard_names.context import comparator_rerank_enabled
+
+    if not comparator_rerank_enabled():
+        return nearby, 0.0
+    lease = mgr.reserve(_RERANK_LEASE_FLOOR_USD, phase=phase)
+    if lease is None:
+        logger.debug("comparator rerank skipped: no reservable lease")
+        return nearby, 0.0
+    ordered, cost, seat = await _rerank_comparators_for_compose(items, nearby)
+    _book_rerank_spend(lease, cost, seat=seat, phase=phase)
+    return ordered, cost
+
+
+def _compose_budget_phase(state: StandardNameBuildState) -> str:
+    """The phase a compose batch's spend belongs to."""
+    return getattr(state, "budget_phase_tag", "") or "generate_name"
+
+
+async def _rerank_comparators_for_worker(
+    state: StandardNameBuildState,
+    items: Sequence[dict[str, Any]],
+    nearby: list[dict],
+) -> list[dict]:
+    """Rerank a compose worker batch's block and book the spend it made.
+
+    The same booking as the batch path, through the same helper, so the two
+    cannot drift: a floor lease opened before the call, charged under the seat
+    that billed it, recorded even where neither the lease nor the pool can fund
+    it. The spend also goes to the compose cost the worker reports, which the
+    batch path has no equivalent of.
+
+    A worker running without a budget manager is unleased throughout — the
+    compose call it goes on to make is unleased too — so the rerank still runs
+    and the reported cost is its only record.
+    """
+    if state.budget_manager:
+        ordered, cost = await _reranked_nearby_comparators(
+            state.budget_manager, items, nearby, phase=_compose_budget_phase(state)
+        )
+    else:
+        ordered, cost, _seat = await _rerank_comparators_for_compose(items, nearby)
+    if cost:
+        state.compose_stats.cost += cost
+    return ordered
+
+
 # =============================================================================
 # DD context enrichment — fetch rich graph data before composing
 # =============================================================================
@@ -3893,6 +4029,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
     ) -> list[dict] | None:
         # Search for nearby existing names with a bounded share per item.
         nearby = await asyncio.to_thread(_collect_nearby_name_comparators, batch.items)
+        nearby = await _rerank_comparators_for_worker(state, batch.items, nearby)
 
         # IDS-level context — collect for each IDS present in batch
         ids_names = sorted(
@@ -4004,7 +4141,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 response_model=StandardNameComposeBatch,
                 provider_attempts=1,
             )
-            phase_tag = getattr(state, "budget_phase_tag", "") or "generate_name"
+            phase_tag = _compose_budget_phase(state)
             lease = state.budget_manager.reserve(maximum_exposure, phase=phase_tag)
             if lease is None:
                 return None
@@ -5757,6 +5894,9 @@ async def compose_batch(
     # items, give each item a share, and cap at 30 total.
     group_key = batch[0].get("path", "").split("/")[0] if batch else ""
     nearby = await asyncio.to_thread(_collect_nearby_name_comparators, batch)
+    nearby, _rerank_cost = await _reranked_nearby_comparators(
+        mgr, batch, nearby, phase="regen" if regen else "generate_name"
+    )
 
     # ── IDS context ────────────────────────────────────────────────────
     ids_names = sorted(

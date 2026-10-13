@@ -1,0 +1,114 @@
+<section id="ssog-comparator-rerank-record">
+  <h3>The compose comparator block can be reranked by Jev behind a default-off switch</h3>
+  <p id="ssog-comparator-rerank-change">
+    The compose and regen prompts carry a nearby-name comparator block whose
+    order is the embedding retrieval's. <code>rerank_name_comparators</code> in
+    <code>imas_codex/standard_names/context.py</code> reranks a batch's block
+    through <code>rerank_pool</code> under the <code>sn-judge</code> seat with
+    service <code>standard-names</code>: each batch item judges the whole block
+    once, the item's description and DD path are the query, and each
+    comparator's name and description are the state. The per-item orders are
+    fused by <code>rrf_fuse_in_input_order</code> in
+    <code>imas_codex/search/fusion.py</code> — the repository's rank-fusion
+    owner — with the embedding order as the tie order, so equal-mass
+    comparators keep the retrieval order and the merged order is never worse
+    than the order it replaces. The variant shares <code>rrf_fuse</code>'s
+    mass arithmetic through one accumulation helper rather than restating it,
+    and differs from it only on ties; <code>rrf_fuse</code>'s own behaviour,
+    signature and callers are unchanged. The merge is no longer a second
+    rank-fusion implementation beside the owner.
+    <code>rerank_pool</code>'s own failure-order guarantee is pinned by
+    <code>test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails</code>
+    in <code>tests/discovery/test_judgment.py</code>, so the rerank inherits it
+    rather than restating it.
+  </p>
+  <p id="ssog-comparator-rerank-switch">
+    Both compose sites — <code>compose_worker</code>'s per-batch body and
+    <code>compose_batch</code> — now call the block through
+    <code>_rerank_comparators_for_compose</code> in
+    <code>imas_codex/standard_names/workers.py</code>. It reads
+    <code>comparator_rerank_enabled()</code>, which is off unless
+    <code>IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS</code> is set, and returns the
+    block untouched with zero cost when off, so the composed prompt is identical
+    to a run without the rerank. Both sites book the spend the way every other
+    Jev call in these paths is booked — through a <code>BudgetManager</code>
+    lease under the seat that billed it, so the rerank reduces the budget rather
+    than only reporting a cost. <code>compose_worker</code> reaches the block
+    through <code>_rerank_comparators_for_worker</code>, which books through the
+    same helper <code>compose_batch</code> uses and then adds the spend to
+    <code>state.compose_stats.cost</code> as well, so the two sites cannot drift
+    and the worker's reported cost carries the rerank.
+  </p>
+  <p id="ssog-comparator-rerank-booking">
+    A rerank is billed by the judge seat, not by the compose model, and its
+    price is only known once it returns. So each site opens a floor lease
+    <em>before</em> the call and charges the actual spend through the lease
+    already held, naming the seat that billed it; a charge the provider has
+    already made is never dropped for want of a reservation. A pool that cannot
+    fund even the floor lease runs the batch in the embedding order and charges
+    nothing, because nothing was spent. The switch is read before the lease is
+    opened, so a batch run with the rerank off books nothing at all — no
+    reservation, no charge — and touches the budget exactly as it did before the
+    switch existed. Ranking is not a gate: the caller wraps the rerank like its
+    siblings in <code>imas_codex/llm/search_tools.py</code> and
+    <code>imas_codex/discovery/signals/parallel.py</code>, so a raise out of
+    <code>get_model("sn-judge")</code> or a state builder keeps the embedding
+    order instead of aborting the compose batch.
+  </p>
+  <p id="ssog-comparator-rerank-worker-booking">
+    The worker path's booking is pinned twice, because charging is a wiring
+    fact as well as a behavioural one.
+    <code>test_the_worker_path_charges_the_rerank_to_a_lease</code> drives
+    <code>_rerank_comparators_for_worker</code> with a switch-on stub and asserts
+    the spend reaches a lease under the judge seat, the shortfall is recorded
+    against the exhausted pool, and the reported compose cost carries it too;
+    <code>test_compose_worker_books_through_the_charging_helper</code> asserts
+    the worker body reaches the booking helper rather than the unbooked one. A
+    scratch copy restored to the telemetry-only behaviour — the worker adding
+    the spend to <code>state.compose_stats.cost</code> and charging no lease —
+    fails both (<code>EXIT=1</code>, 2 failed against 9 passed,
+    <code>worker_path_control.log</code>).
+  </p>
+  <table id="ssog-comparator-rerank-measure">
+    <caption>Gate: the compose/context tests and <code>tests/discovery/test_judgment.py</code></caption>
+    <thead><tr><th>arm</th><th>revision</th><th>command</th><th>result</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>baseline</td><td><code>c98a0d42d</code></td>
+        <td><code>uv run pytest -p no:cacheprovider &lt;35 compose/context files&gt; tests/discovery/test_judgment.py</code></td>
+        <td>827 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
+      </tr>
+      <tr>
+        <td>head</td><td><code>bb2508c70</code></td>
+        <td><code>uv run pytest -p no:cacheprovider &lt;same files&gt; tests/standard_names/test_comparator_rerank.py tests/search/test_fusion.py</code></td>
+        <td>845 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="ssog-comparator-rerank-negative">
+    <code>tests/standard_names/test_comparator_rerank.py</code> stubs
+    <code>rerank_pool</code>'s decisions and records what it is asked: the query
+    and, through the same <code>state_for</code> the real pool is handed, each
+    comparator's judged state. The on-arm test asserts both — the query is the
+    item's description with its DD path, and each state pairs that query with the
+    comparator's own name and description — so a rerank fed the wrong text fails
+    the test rather than passing on a call count. Removing the rerank call from
+    <code>_rerank_comparators_for_compose</code> turns the on-arm reorder test
+    red (<code>EXIT=1</code>, <code>test_switch_on_reorders_the_comparator_block_by_score</code>
+    and <code>test_comparator_rerank_fuses_item_orders_by_reciprocal_rank</code>), and
+    altering <code>_comparator_rerank_query</code> in a scratch copy so it drops
+    the DD path turns it red on the query assertion alone
+    (<code>EXIT=1</code>); the off-arm test stays green under both, which is what
+    pins the switch as the only path to the reorder.
+  </p>
+  <p id="ssog-comparator-rerank-tie">
+    The fused tie order is pinned the same way. In a scratch copy of
+    <code>fusion.py</code> with the variant's tie-break replaced by
+    <code>rrf_fuse</code>'s <code>(-mass, id)</code> order,
+    <code>test_in_input_order_variant_breaks_ties_by_the_supplied_order</code>
+    fails on the order alone (<code>EXIT=1</code>,
+    <code>tie_order_control.log</code>); the same test passes in the worktree,
+    and the two fusions are asserted equal where no pair of candidates ties.
+    <code>tests/search/test_fusion.py</code>'s existing tests pass unchanged.
+  </p>
+</section>

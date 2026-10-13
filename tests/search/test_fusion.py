@@ -17,7 +17,7 @@ from unittest.mock import MagicMock
 from imas_codex.ids import slot_context
 from imas_codex.llm import search_tools
 from imas_codex.search import fusion
-from imas_codex.search.fusion import RRF_K, rrf_fuse
+from imas_codex.search.fusion import RRF_K, rrf_fuse, rrf_fuse_in_input_order
 
 _FACILITY_DIR = (
     Path(__file__).resolve().parents[2] / "imas_codex" / "config" / "facilities"
@@ -104,6 +104,37 @@ def test_rrf_fuse_prefers_the_candidate_both_streams_rank() -> None:
 
 def test_rrf_fuse_accepts_rows_and_strings() -> None:
     assert rrf_fuse([[{"id": "a"}], ["a"]]) == [("a", 2.0 / (RRF_K + 1))]
+
+
+def test_in_input_order_variant_breaks_ties_by_the_supplied_order() -> None:
+    """Equal-mass candidates keep the caller's order, not id ascending.
+
+    Each stream ranks one candidate first, so the two carry identical fused
+    mass and the fusion has nothing but its tie-break to separate them. The
+    variant returns the caller's order; ``rrf_fuse`` sorts the same tie by id,
+    which is asserted here so a fallback to that rule fails the test.
+    """
+    streams = [["alpha"], ["beta"]]
+    fused = rrf_fuse_in_input_order(streams, ["beta", "alpha"])
+
+    assert [mass for _, mass in fused][0] == [mass for _, mass in fused][1], (
+        "the test needs a genuine tie"
+    )
+    assert [item_id for item_id, _ in fused] == ["beta", "alpha"]
+    assert [item_id for item_id, _ in rrf_fuse(streams)] == ["alpha", "beta"]
+
+
+def test_the_two_fusions_agree_where_no_pair_of_candidates_ties() -> None:
+    """The variant shares rrf_fuse's arithmetic and differs only on ties."""
+    streams = [["a", "b", "c"], ["a"]]
+    assert rrf_fuse_in_input_order(streams, ["a", "b", "c"]) == rrf_fuse(streams)
+
+
+def test_in_input_order_variant_carries_candidates_no_stream_ranked() -> None:
+    """The order names the whole candidate set, so a fused result is total."""
+    fused = rrf_fuse_in_input_order([["ranked"]], ["unranked", "ranked"])
+    assert [item_id for item_id, _ in fused] == ["ranked", "unranked"]
+    assert dict(fused)["unranked"] == 0.0
 
 
 def test_fusion_and_ranking_carry_no_facility_identifier() -> None:

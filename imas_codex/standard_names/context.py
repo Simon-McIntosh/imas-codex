@@ -10,6 +10,8 @@ Caches assembled context in-process (module-level dict).
 from __future__ import annotations
 
 import logging
+import os
+from collections.abc import Mapping, Sequence
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -989,3 +991,166 @@ def locus_context_for(sn_id: str) -> dict[str, Any] | None:
     except Exception:
         logger.debug("locus_context_for: failed for %s", sn_id, exc_info=True)
         return None
+
+
+# ---------------------------------------------------------------------------
+# Comparator-block rerank
+# ---------------------------------------------------------------------------
+
+# Judgements in flight at once within one item's comparator rerank.
+_COMPARATOR_RERANK_CONCURRENCY = 32
+
+# Wall-time budget for one item's rerank. One item's pool is bounded by the
+# comparator cap and the judge answers that pool together, so this is a
+# ceiling, not a schedule.
+_COMPARATOR_RERANK_BUDGET_SECONDS = 30.0
+
+# Service tag the decisions call layer uses for the API key and the request
+# title. The standard-names stages share it.
+_COMPARATOR_RERANK_SERVICE = "standard-names"
+
+# Whether a compose run reranks the nearby-name comparator block through the
+# judge. Off by default so the composed prompt is unchanged until a labelled
+# measurement adopts the rerank.
+_COMPARATOR_RERANK_ENV = "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS"
+
+_COMPARATOR_RERANK_QUESTION = {
+    "relevance_grade": {
+        "type": "score",
+        "instructions": (
+            "How useful is this nearby standard name as a comparator for "
+            "composing a name for the described quantity? Judge whether its "
+            "scope and quantity are close enough to compare against, not "
+            "whether its wording is good."
+        ),
+        "criteria": [
+            "unrelated to the described quantity",
+            "shares a domain but names a different quantity",
+            "a neighbouring quantity worth comparing against",
+            "names the same quantity at a different locus or setting",
+            "names the same quantity and would collide with the new name",
+        ],
+    }
+}
+
+
+def comparator_rerank_enabled() -> bool:
+    """Whether compose reranks its nearby-name comparator block through Jev.
+
+    Off by default: with the switch off the comparator block reaches the
+    prompt exactly as the embedding retrieval produced it, so the compose
+    prompt is byte-identical to a run without the rerank.
+
+    Priority: ``IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS`` env → ``False``.
+    """
+    raw = os.getenv(_COMPARATOR_RERANK_ENV)
+    if raw is None:
+        return False
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _comparator_rerank_query(item: Mapping[str, Any]) -> str:
+    """Build one item's query from its description and DD path."""
+    description = (item.get("description") or "").strip()
+    path = (item.get("path") or "").strip()
+    if description and path:
+        return f"{description} ({path})"
+    return description or path
+
+
+def _comparator_rerank_state(
+    query: str, comparator: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Build the judgement state for one comparator against an item's query."""
+    return {
+        "query": query,
+        "candidate": {
+            "locator": comparator.get("id", ""),
+            "text": (comparator.get("description") or "")[:1500],
+        },
+    }
+
+
+async def rerank_name_comparators(
+    items: Sequence[Mapping[str, Any]],
+    comparators: Sequence[Mapping[str, Any]],
+    *,
+    model: str | None = None,
+    concurrency: int = _COMPARATOR_RERANK_CONCURRENCY,
+    budget_seconds: float | None = _COMPARATOR_RERANK_BUDGET_SECONDS,
+) -> tuple[list[Mapping[str, Any]], float, str]:
+    """Reorder a batch's nearby-name comparators by their judged relevance.
+
+    The comparators arrive in the retrieval's embedding order. Each batch item
+    judges the whole comparator list once through
+    :func:`imas_codex.discovery.base.judgment.rerank_pool`: the query is the
+    item's description and DD path, and each comparator's name and description
+    are its state. The item orders are fused by
+    :func:`imas_codex.search.fusion.rrf_fuse_in_input_order`, the repository's
+    rank-fusion owner, breaking ties by the pool's embedding order, so the
+    merged order is never worse than the retrieval order it replaces and a
+    failed rerank returns the pool unchanged.
+
+    Ranking is not a gate: a failed or slow rerank keeps the embedding order
+    rather than raising, and a pool the decision service could not serve costs
+    nothing.
+
+    Args:
+        items: The batch's items; each carries a ``description`` and a ``path``.
+        comparators: The comparator pool, in embedding order.
+        model: Decisions model id; defaults to the ``sn-judge`` seat.
+        concurrency: Maximum judgements in flight at once within one rerank.
+        budget_seconds: Wall-time budget per item's rerank.
+
+    Returns:
+        ``(ordered, cost, seat)``. ``cost`` is the summed reported decision cost,
+        ``0.0`` when no call was made or every call failed. ``seat`` is the model
+        the call was billed under, empty when no call was made, so a caller can
+        charge the spend to the seat that raised it.
+    """
+    pool = list(comparators)
+    if not pool or not items:
+        return pool, 0.0, ""
+
+    from imas_codex.discovery.base.judgment import rerank_pool
+    from imas_codex.search.fusion import rrf_fuse_in_input_order
+    from imas_codex.settings import get_model
+
+    if model is None:
+        model = get_model("sn-judge")
+
+    question = _COMPARATOR_RERANK_QUESTION["relevance_grade"]
+    keys = [
+        str(candidate.get("id") or f"#{index}") for index, candidate in enumerate(pool)
+    ]
+    identity = {id(candidate): index for index, candidate in enumerate(pool)}
+    streams: list[list[str]] = []
+    cost = 0.0
+
+    for item in items:
+        query = _comparator_rerank_query(item)
+        if not query:
+            continue
+        ordered, _note, item_cost = await rerank_pool(
+            query,
+            pool,
+            state_for=_comparator_rerank_state,
+            levels=question["criteria"],
+            instructions=question["instructions"],
+            model=model,
+            service=_COMPARATOR_RERANK_SERVICE,
+            concurrency=concurrency,
+            budget_seconds=budget_seconds,
+        )
+        cost += item_cost
+        streams.append(
+            [
+                keys[identity[id(candidate)]]
+                for candidate in ordered
+                if id(candidate) in identity
+            ]
+        )
+
+    fused = rrf_fuse_in_input_order(streams, keys)
+    by_key = dict(zip(keys, pool, strict=True))
+    return [by_key[key] for key, _mass in fused], cost, model
