@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from gate-base.log and gate-head.log directly: both arms report 4 passed and no FAILED id, so the run added none; the manifest's own baseline_suite/after_suite values are not parseable JSON and the standard reader returned None for both",
+  "backend": "local",
+  "base_log_revision": "f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T02:50:44.980Z",
+  "dispatched_at": "2026-10-13T02:32:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html",
+      "line": "37",
+      "severity": "blocking",
+      "text": "blocking: the composer column is headed n=174 but its per-slot accuracy is computed over the 48 edit targets whose pre-rename spelling parses canonically, and 126 of the 174 composers do not parse and are silently dropped by run.py:398-407, so the composer comparator the brief required \"on the same sources\" is reported over a subset 0.27x the stated size."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py",
+      "line": "215",
+      "severity": "follow-on",
+      "text": "follow-on: the resume guard \"slot_match\" in pr[0] is unreachable because every write routes through _write_results (run.py:443-454), which strips slot_match along with the other derived fields, so no file the driver writes can satisfy it and a cut-short run re-pays for all 434 rows rather than resuming."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html",
+      "line": "13-16",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment asserts every figure is a metric function from imas_codex/discovery/base/evaluation.py and the driver adds none of its own, but exact-name match, per-slot accuracy, family agreement and composer agreement are computed by driver-local helpers at run.py:275-344, which evaluation.py does not own."
+    },
+    {
+      "file": "docs/figures/sn-selection-over-generation/ssog-segment-selection-measure/per-slot-accuracy.svg",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when requires the figure styled with plt.style.use(\"data-ink\"), but the committed driver contains no plotting code, so the figure is not reproducible from the landed artefacts and the styling requirement cannot be verified from them."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T015404779919-ssog-segment-selection-measure/manifest.md",
+      "line": "72",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are written as inline objects with unquoted keys, which reckon.crew.review._gate_log_path cannot parse, so it returns None for both arms and the run's added-failure count is unmeasurable from its own manifest; the count here was derived by reading gate-base.log and gate-head.log directly."
+    }
+  ],
+  "head_log_revision": "1a0ecaf62e80d022313a91ebbc50b5555e4aab6a",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7 to 1a0ecaf62e80d022313a91ebbc50b5555e4aab6a; ccf88e706 adds the 452-line driver, the slim artifact, the fragment and the SVG, and 1a0ecaf62 trims the artifact and guards the resume, all inside the declared write paths.",
+    "done_when": "the done_when asks for every figure plus one data-ink SVG under docs/figures/sn-selection-over-generation/ssog-segment-selection-measure/ and baseline_suite/after_suite at tests/standard_names/test_segment_selection.py; the manifest records both arms green (exit 0, 4 passed) and the figure exists, but no committed code generates it.",
+    "goal": "the node's goal is a measurement fragment for plan section 2; docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:33-131 reports exact-name match, per-slot accuracy, family agreement, the composer's figures, cost per name, the disagreement AUC with its bootstrap interval, and the recommendation by the plan's fixed rule.",
+    "manifest": "read; it states complete and names the two gate logs and the two revisions, but its baseline_suite and after_suite values are inline pseudo-objects the standard reader cannot parse, so its suite records cannot be reduced by the reader.",
+    "write_paths": "read the manifest's declared four paths; the diff against the base touches exactly those four files and nothing outside them."
+  },
+  "justifications": {
+    "durability": "the node adds no test and declares no negative control, and tests/standard_names/test_segment_selection.py exercises the unchanged module, so nothing reddens if the driver's metric code regresses.",
+    "evidence": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:416-423 pairs \"n\": len(edits) with _slot_accuracy(composer_edits), which covers only the 48 of 174 edit composers that parse, so a recorded figure rests on a subset a quarter the stated size.",
+    "fit": "the driver's helpers (docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:275-344) are mechanism-named with no plan label, though the _DERIVED_RECORD_FIELDS docstring at run.py:437-439 is ungrammatical.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:34-131 reports every figure the goal names and the rule-quoted verdict, but the composer column is a mislabelled sample.",
+    "reuse": "run.py:347-379 reuses evaluation.py's paired_auc, bootstrap_interval and cost_latency_summary, and the per-slot and family helpers have no existing owner in imas_codex/discovery/base/evaluation.py or imas_codex/standard_names/benchmark_roles.py:259.",
+    "scope_discipline": "git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..1a0ecaf62e80d022313a91ebbc50b5555e4aab6a touches only the four declared write paths and no product file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a measurement fragment for plan section 2; docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:33-131 reports exact-name match, per-slot accuracy, family agreement, the composer's figures, cost per name, the disagreement AUC with its bootstrap interval, and the recommendation by the plan's fixed rule.\nVERDICT done_when: the done_when asks for every figure plus one data-ink SVG under docs/figures/sn-selection-over-generation/ssog-segment-selection-measure/ and baseline_suite/after_suite at tests/standard_names/test_segment_selection.py; the manifest records both arms green (exit 0, 4 passed) and the figure exists, but no committed code generates it.\nVERDICT write_paths: read the manifest's declared four paths; the diff against the base touches exactly those four files and nothing outside them.\nVERDICT manifest: read; it states complete and names the two gate logs and the two revisions, but its baseline_suite and after_suite values are inline pseudo-objects the standard reader cannot parse, so its suite records cannot be reduced by the reader.\nVERDICT diff: read commit by commit from f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7 to 1a0ecaf62e80d022313a91ebbc50b5555e4aab6a; ccf88e706 adds the 452-line driver, the slim artifact, the fragment and the SVG, and 1a0ecaf62 trims the artifact and guards the resume, all inside the declared write paths.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:34-131 reports every figure the goal names and the rule-quoted verdict, but the composer column is a mislabelled sample.\nSCORE evidence: 12\nJUSTIFICATION evidence: docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:416-423 pairs \"n\": len(edits) with _slot_accuracy(composer_edits), which covers only the 48 of 174 edit composers that parse, so a recorded figure rests on a subset a quarter the stated size.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..1a0ecaf62e80d022313a91ebbc50b5555e4aab6a touches only the four declared write paths and no product file.\nSCORE durability: 8\nJUSTIFICATION durability: the node adds no test and declares no negative control, and tests/standard_names/test_segment_selection.py exercises the unchanged module, so nothing reddens if the driver's metric code regresses.\nSCORE fit: 17\nJUSTIFICATION fit: the driver's helpers (docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:275-344) are mechanism-named with no plan label, though the _DERIVED_RECORD_FIELDS docstring at run.py:437-439 is ungrammatical.\nSCORE reuse: 18\nJUSTIFICATION reuse: run.py:347-379 reuses evaluation.py's paired_auc, bootstrap_interval and cost_latency_summary, and the per-slot and family helpers have no existing owner in imas_codex/discovery/base/evaluation.py or imas_codex/standard_names/benchmark_roles.py:259.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:37 blocking: the composer column is headed n=174 but its per-slot accuracy is computed over the 48 edit targets whose pre-rename spelling parses canonically, and 126 of the 174 composers do not parse and are silently dropped by run.py:398-407, so the composer comparator the brief required \"on the same sources\" is reported over a subset 0.27x the stated size.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:215 follow-on: the resume guard \"slot_match\" in pr[0] is unreachable because every write routes through _write_results (run.py:443-454), which strips slot_match along with the other derived fields, so no file the driver writes can satisfy it and a cut-short run re-pays for all 434 rows rather than resuming.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:13-16 follow-on: the fragment asserts every figure is a metric function from imas_codex/discovery/base/evaluation.py and the driver adds none of its own, but exact-name match, per-slot accuracy, family agreement and composer agreement are computed by driver-local helpers at run.py:275-344, which evaluation.py does not own.\nFINDING docs/figures/sn-selection-over-generation/ssog-segment-selection-measure/per-slot-accuracy.svg:1 follow-on: the done_when requires the figure styled with plt.style.use(\"data-ink\"), but the committed driver contains no plotting code, so the figure is not reproducible from the landed artefacts and the styling requirement cannot be verified from them.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T015404779919-ssog-segment-selection-measure/manifest.md:72 follow-on: baseline_suite and after_suite are written as inline objects with unquoted keys, which reckon.crew.review._gate_log_path cannot parse, so it returns None for both arms and the run's added-failure count is unmeasurable from its own manifest; the count here was derived by reading gate-base.log and gate-head.log directly.\n",
+  "review_run_id": "r-20261013T023235445643-review-of-ssog-segment-selection-measure-1a0ecaf62e80",
+  "reviewed_base_sha": "f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7",
+  "reviewed_head_sha": "1a0ecaf62e80d022313a91ebbc50b5555e4aab6a",
+  "reviewed_run_id": "r-20261013T015404779919-ssog-segment-selection-measure",
+  "scores": {
+    "durability": 8,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T02:52:00.263765+00:00",
+  "total": 91,
+  "verdict": "DEFECTIVE"
+}
