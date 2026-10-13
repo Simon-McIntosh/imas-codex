@@ -28,6 +28,22 @@
     and through a <code>BudgetManager</code> lease in <code>compose_batch</code> —
     the way every other Jev call in these paths is booked.
   </p>
+  <p id="ssog-comparator-rerank-booking">
+    A rerank is billed by the judge seat, not by the compose model, and its
+    price is only known once it returns. So the batch site opens a floor lease
+    <em>before</em> the call and charges the actual spend through the lease
+    already held, naming the seat that billed it; a charge the provider has
+    already made is never dropped for want of a reservation. A pool that cannot
+    fund even the floor lease runs the batch in the embedding order and charges
+    nothing, because nothing was spent. The switch is read before the lease is
+    opened, so a batch run with the rerank off books nothing at all — no
+    reservation, no charge — and touches the budget exactly as it did before the
+    switch existed. Ranking is not a gate: the caller wraps the rerank like its
+    siblings in <code>imas_codex/llm/search_tools.py</code> and
+    <code>imas_codex/discovery/signals/parallel.py</code>, so a raise out of
+    <code>get_model("sn-judge")</code> or a state builder keeps the embedding
+    order instead of aborting the compose batch.
+  </p>
   <table id="ssog-comparator-rerank-measure">
     <caption>Gate: the compose/context tests and <code>tests/discovery/test_judgment.py</code></caption>
     <thead><tr><th>arm</th><th>revision</th><th>command</th><th>result</th></tr></thead>
@@ -38,9 +54,9 @@
         <td>827 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
       </tr>
       <tr>
-        <td>head</td><td><code>64f272886</code></td>
+        <td>head</td><td><code>b0b8693c9</code></td>
         <td><code>uv run pytest -p no:cacheprovider &lt;same files&gt; tests/standard_names/test_comparator_rerank.py</code></td>
-        <td>830 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
+        <td>835 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
       </tr>
     </tbody>
   </table>
