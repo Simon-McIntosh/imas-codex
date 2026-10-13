@@ -27,25 +27,46 @@ def test_state_uses_only_the_recorded_text() -> None:
             "glossary": [{"term": "CS", "meaning": "current sensor"}],
         }
     }
-    assert set(role.signal_role_questions()["signal_role"]["criteria"]) == set(
-        role.ROLE_CRITERIA
-    )
+    assert set(role.signal_role_questions()["signal_role"]["criteria"]) == {
+        "measured",
+        "commanded",
+        "reference_or_setpoint",
+        "status_or_flag",
+        "configuration_parameter",
+        "derived_or_computed",
+    }
 
 
 @pytest.mark.asyncio
 async def test_judge_accepts_choice_and_reports_response_cost(monkeypatch) -> None:
     async def fake_decision(model, state, questions, *, service):
+        assert state["signal"]["name"] in {"Current sensor", "Current target"}
         assert state["signal"]["unit"] == "A"
         assert questions["signal_role"]["type"] == "choice"
         assert service == "facility-discovery"
-        return {"signal_role": {"choice": "measured"}}, 0.002
+        choice = (
+            "measured"
+            if state["signal"]["name"] == "Current sensor"
+            else "reference_or_setpoint"
+        )
+        return {"signal_role": {"choice": choice}}, 0.002
 
     monkeypatch.setattr(judgment, "acall_decisions", fake_decision)
     accepted, cost, failed = await role.judge_signal_roles(
-        [{"id": "sample", "name": "sensor", "unit": "A"}]
+        [
+            {"id": "observed", "name": "Current sensor", "unit": "A"},
+            {"id": "target", "name": "Current target", "unit": "A"},
+        ]
     )
-    assert accepted == [{"id": "sample", "signal_role": "measured", "cost_usd": 0.002}]
-    assert cost == 0.002
+    assert accepted == [
+        {"id": "observed", "signal_role": "measured", "cost_usd": 0.002},
+        {
+            "id": "target",
+            "signal_role": "reference_or_setpoint",
+            "cost_usd": 0.002,
+        },
+    ]
+    assert cost == 0.004
     assert failed == []
 
 

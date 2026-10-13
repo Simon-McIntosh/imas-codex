@@ -1,0 +1,27 @@
+<section id="ssfms-role-random-sample-results" data-reckon="fragment">
+  <h2 id="ssfms-role-random-sample-title">Uniform random signal-role sample</h2>
+  <p id="ssfms-role-random-sample-selection">A seeded uniform draw without role-word selection: 200 of 14312 eligible JT-60SA signals, seed 20261013. Eligible means enriched at or after 2026-10-11T21:08:54Z. Labels were frozen at 2026-10-13T10:45:25+00:00 before the judge ran. The judge read each fixture's name, description, unit and glossary. No signal_role property was written to the graph.</p>
+  <p id="ssfms-role-random-sample-rule">Measured = direct observation, including plant sensing; commanded = control demand sent to equipment; reference_or_setpoint = target or programmed reference; status_or_flag = discrete state, alarm, or validity; configuration_parameter = setting, identifier, metadata, or analysis setup; derived_or_computed = calculation, fit, reconstruction, simulation, or aggregate.</p>
+  <p id="ssfms-role-random-sample-summary">Overall agreement: <strong>194/200 (97.0%)</strong>, which <strong>meets</strong> the lead's 90% threshold for wiring the role into enrichment. Response-usage spend: <strong>USD 0.005284</strong>, or USD 0.0000264 per signal.</p>
+  <h3 id="ssfms-role-random-sample-distribution">Sample distribution and agreement by hand label</h3>
+  <table><thead><tr><th>Role</th><th>Sampled</th><th>Correct</th><th>Agreement</th></tr></thead><tbody><tr><th>measured</th><td>60</td><td>60</td><td>100.0%</td></tr>
+<tr><th>commanded</th><td>4</td><td>3</td><td>75.0%</td></tr>
+<tr><th>reference_or_setpoint</th><td>4</td><td>4</td><td>100.0%</td></tr>
+<tr><th>status_or_flag</th><td>11</td><td>11</td><td>100.0%</td></tr>
+<tr><th>configuration_parameter</th><td>54</td><td>49</td><td>90.7%</td></tr>
+<tr><th>derived_or_computed</th><td>67</td><td>67</td><td>100.0%</td></tr></tbody></table>
+  <h3 id="ssfms-role-random-sample-confusion">Confusion: hand label by judged role</h3>
+  <table><thead><tr><th>Hand label ↓ / judged →</th><th>measured</th><th>commanded</th><th>reference_or_setpoint</th><th>status_or_flag</th><th>configuration_parameter</th><th>derived_or_computed</th></tr></thead><tbody><tr><th>measured</th><td>60</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><th>commanded</th><td>0</td><td>3</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><th>reference_or_setpoint</th><td>0</td><td>0</td><td>4</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><th>status_or_flag</th><td>0</td><td>0</td><td>0</td><td>11</td><td>0</td><td>0</td></tr>
+<tr><th>configuration_parameter</th><td>0</td><td>0</td><td>0</td><td>0</td><td>49</td><td>5</td></tr>
+<tr><th>derived_or_computed</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>67</td></tr></tbody></table>
+  <h3 id="ssfms-role-random-sample-disagreements">Every disagreement (6)</h3>
+  <table><thead><tr><th>Signal ID</th><th>Name</th><th>Description</th><th>Unit</th><th>Glossary</th><th>Hand label</th><th>Judged role</th><th>Cost [USD]</th></tr></thead><tbody><tr><td>jt-60sa:general/psc_1625_a005</td><td>Ip Damping Phase Transition Factor</td><td>Factor describing the phase transition of the plasma current damping during the discharge, used in the plasma control system. Relevant for current ramp-down and disruption mitigation studies.</td><td></td><td>[]</td><td>configuration_parameter</td><td>derived_or_computed</td><td>0.0000254</td></tr>
+<tr><td>jt-60sa:general/lcdb_h060029_ate.s002_eqtime</td><td>ATE Equilibrium Time</td><td>Time point of the equilibrium reconstruction used as input for the ATE electron temperature profile analysis. Links the temperature profile to the corresponding MHD equilibrium state.</td><td></td><td>[]</td><td>configuration_parameter</td><td>derived_or_computed</td><td>0.0000253</td></tr>
+<tr><td>jt-60sa:general/lcdb_h060029_prad.s002_exseq</td><td>PRAD EXSEQ (Debug)</td><td>Debug output parameter (EXSEQ) from the radiated power (prad) analysis. This is an internal sequence or execution parameter used in the radiated power calculation procedure.</td><td></td><td>[]</td><td>configuration_parameter</td><td>derived_or_computed</td><td>0.0000256</td></tr>
+<tr><td>jt-60sa:general/lcdb_h060029_ati.s001_nfit</td><td>Ion Temperature Fit Point Count (ati.s80729/001)</td><td>Number of data points (NFIT) used in the ion temperature profile fitting from the ATI analysis, dataset ati.s80729/001, indicating the amount of data available for reconstructing the ion temperature profile.</td><td></td><td>[]</td><td>configuration_parameter</td><td>derived_or_computed</td><td>0.0000267</td></tr>
+<tr><td>jt-60sa:general/lcdb_a048717_ati.s005_nfit</td><td>Ion Temperature Fit Point Count (ati.s80296/005)</td><td>Number of fit points (NFIT) for the ion temperature profile dataset ati.s80296/005, indicating how many radial points were used in fitting the measured ion temperature profile.</td><td></td><td>[]</td><td>configuration_parameter</td><td>derived_or_computed</td><td>0.0000263</td></tr>
+<tr><td>jt-60sa:general/dhc_1623_a014</td><td>NBI Unit 3 Stop Timing</td><td>Timing signal indicating the stop time of neutral beam injection from NBI unit #3. This parameter defines when the beam is turned off during a discharge.</td><td>ms</td><td>[]</td><td>commanded</td><td>reference_or_setpoint</td><td>0.0000254</td></tr></tbody></table>
+</section>
