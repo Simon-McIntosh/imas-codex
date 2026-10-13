@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T15:57:05.943Z",
+  "dispatched_at": "2026-10-13T15:45:20Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "93",
+      "severity": "follow-on",
+      "text": "follow-on: the comment states a Choice whose options the rule cannot split is refused at table construction, but _question_def (jev_review.py:290) builds the criteria dict with no such refusal and check_failed (jev_review.py:322) reads options[0] as the acceptable form unconditionally, so a mis-authored options list is mis-decided silently, exactly the outcome the comment claims is prevented."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "500",
+      "severity": "follow-on",
+      "text": "follow-on: an audit-decided check is recorded answered True even when audit_report is None, so an audit that never ran reads as answered-and-not-failed (unknown as pass), inconsistent with the module's own rule at jev_review.py:135 that an absent call is never read as an acceptance."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": "98",
+      "severity": "follow-on",
+      "text": "follow-on: the constant comment cites \"the cascade of the plan\", a forward reference to a plan deliverable in a source comment, which the repository naming rules keep out of code."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T112336580366-srtj-name-review-build/manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the recorded baseline_suite.command names UV_PROJECT_ENVIRONMENT=/tmp/scratch-venv while gate-base.log's header names the main .venv, so the recorded literal command does not match the command the log shows; the result (22 passed) is unaffected."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found; rg for jev_review across imas_codex/ returns none and the module is documented as not wired.",
+    "diff": "read commit by commit against aae4cf82; db0ce7665 adds jev_review.py (525 lines) and its test module (403 lines), 45efcf0bc and cb90cf794 add and extend the landing fragment (115 lines), 1043 insertions, no deletions, all inside scope.",
+    "done_when": "the done_when names unit tests whose mechanisms fail with EXIT=, a live smoke under USD 0.05, and a gate over the new test, the taxonomy tests and tests/discovery/test_judgment.py; the manifest records gate-after.log 43 passed EXIT=0 and negative_control.log 10 failed EXIT=1, and the fragment records the two smoke names, answers and cost USD 0.0001407.",
+    "goal": "the goal is to build the name-axis Jev review as question and state builders that nothing calls yet; imas_codex/standard_names/review/jev_review.py:250 build_name_state, jev_review.py:280 name_question_table and jev_review.py:394 review_names implement it, and no module under imas_codex/ imports it.",
+    "manifest": "read; it states the gate ran 43 passed EXIT=0, the negative control 10 failed EXIT=1, the live smoke booked USD 0.0001407, and names gate-after.log, gate-base.log and negative_control.log.",
+    "write_paths": "the manifest declares imas_codex/standard_names/review/jev_review.py, tests/standard_names/test_jev_name_review.py and docs/evidence/fragments/sn-review-through-jev/srtj-name-review-build.html; git diff --stat aae4cf82..cb90cf79 lists exactly those three files."
+  },
+  "justifications": {
+    "durability": "the negative control reddens 10 tests when the unobserved-marking, the check-question loop, the decision derivation and the sibling-rerank guard are removed.",
+    "evidence": "the manifest records gate-after.log (43 passed EXIT=0) at db0ce7665 and negative_control.log (10 failed EXIT=1), and the fragment records the smoke's answers and cost, but the manifest's baseline_suite.command disagrees with gate-base.log's header.",
+    "fit": "jev_review.py:42 shares judge_stage.py's SERVICE/COST_STEP idiom, but jev_review.py:93 and jev_review.py:98-99 carry comment text that does not match the code.",
+    "goal_fidelity": "jev_review.py:250 builds one state and jev_review.py:280 builds one taxonomy-read question table, both named by the goal, and jev_review.py:394 review_names is the batch entry point the measurement node drives.",
+    "reuse": "jev_review.py:44-51 imports decide_batch, rerank_name_comparators and load_review_checks, adding no third decisions owner and no category definition the repository owns.",
+    "scope_discipline": "git diff --stat aae4cf82..cb90cf79 lists jev_review.py, the test module and the fragment, exactly the three declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node's goal is to build the name-axis Jev review as builders that nothing calls yet; imas_codex/standard_names/review/jev_review.py provides build_name_state, name_question_table and review_names, and rg for jev_review across imas_codex/ returns no production importer.\nVERDICT done_when: The done_when names unit tests whose mechanisms fail with EXIT=, a live smoke under USD 0.05, and a gate over the new test, the taxonomy tests (rg -> tests/standard_names/test_review_checks.py) and tests/discovery/test_judgment.py; the manifest records the gate (43 passed, EXIT=0) and the fragment now records the two smoke names, their answers and the booked cost USD 0.0001407.\nVERDICT write_paths: The manifest declares imas_codex/standard_names/review/jev_review.py, tests/standard_names/test_jev_name_review.py and docs/evidence/fragments/sn-review-through-jev/srtj-name-review-build.html; git diff --stat aae4cf82..cb90cf79 shows exactly those three files and nothing else.\nVERDICT manifest: Read; it states the gate ran 43 passed EXIT=0, the negative control 10 failed EXIT=1, the live smoke booked USD 0.0001407, and it names gate-after.log, gate-base.log and negative_control.log as its logs.\nVERDICT diff: Read commit by commit against aae4cf82; db0ce7665 adds jev_review.py (525 lines) and its test module (403 lines), 45efcf0bc and cb90cf794 add and extend the landing fragment (115 lines), all inside scope, no deletions.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nSCORE evidence: 16\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 15\nSCORE reuse: 19\nJUSTIFICATION goal_fidelity: jev_review.py:250 builds one state and jev_review.py:280 builds one taxonomy-read question table, both named by the goal, and jev_review.py:394 review_names is the batch entry point the measurement node drives.\nJUSTIFICATION evidence: the manifest records gate-after.log (43 passed EXIT=0) at db0ce7665 and negative_control.log (10 failed EXIT=1), and the fragment records the smoke's answers and cost, but the manifest's baseline_suite.command (UV_PROJECT_ENVIRONMENT=/tmp/scratch-venv) disagrees with gate-base.log's own header (UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv).\nJUSTIFICATION scope_discipline: git diff --stat aae4cf82..cb90cf79 lists jev_review.py, tests/standard_names/test_jev_name_review.py and the fragment, exactly the three declared write paths.\nJUSTIFICATION durability: the negative control (negative_control.log) removes the unobserved-marking, the check-question loop, the decision derivation and the sibling-rerank guard and reddens 10 tests, so tests/test_jev_name_review.py::test_sibling_rerank_failure_keeps_embedding_order and its siblings fail on regression.\nJUSTIFICATION fit: jev_review.py:42 shares judge_stage.py's SERVICE/COST_STEP constants and its docstring idiom, but jev_review.py:98-99 and jev_review.py:93 carry comment text that does not match the code.\nJUSTIFICATION reuse: jev_review.py:44-51 imports decide_batch (discovery/base/judgment.py:230), rerank_name_comparators (standard_names/context.py:1074) and load_review_checks (review/checks.py), adding no third decisions owner and no dimension-category definition the repository already owns.\nFINDING imas_codex/standard_names/review/jev_review.py:93 follow-on: the comment states a Choice whose options the rule cannot split is refused at table construction, but _question_def (jev_review.py:290) builds the criteria dict with no such refusal and check_failed (jev_review.py:322) reads options[0] as the acceptable form unconditionally, so a mis-authored options list is mis-decided silently, exactly the outcome the comment claims is prevented.\nFINDING imas_codex/standard_names/review/jev_review.py:500 follow-on: an audit-decided check is recorded answered True even when audit_report is None, so an audit that never ran reads as answered-and-not-failed (unknown as pass), inconsistent with the module's own rule at jev_review.py:135 that an absent call is never read as an acceptance.\nFINDING imas_codex/standard_names/review/jev_review.py:98 follow-on: the constant comment cites \"the cascade of the plan\", a forward reference to a plan deliverable in a source comment, which the repository naming rules keep out of code.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T112336580366-srtj-name-review-build/manifest.md:1 follow-on: the recorded baseline_suite.command names UV_PROJECT_ENVIRONMENT=/tmp/scratch-venv while gate-base.log's header names the main .venv, so the recorded literal command does not match the command the log shows, a small evidence-accuracy gap that does not change the 22-passed result.\n",
+  "review_run_id": "r-20261013T154457013891-review-of-srtj-name-review-build-cb90cf79417f",
+  "reviewed_base_sha": "aae4cf82bf3f2c82ebdfb7677d81b04c4a5e5628",
+  "reviewed_head_sha": "cb90cf79417fa91a1f82428e284a334d142b87fb",
+  "reviewed_run_id": "r-20261013T112336580366-srtj-name-review-build",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T15:54:20.737442+00:00",
+  "total": 105,
+  "verdict": "SOUND WITH FINDINGS"
+}
