@@ -632,6 +632,42 @@ class TestSignalRerankSwitch:
         assert seen["pool"] == RERANK_POOL
 
 
+class TestSignalRerankFollowsServerMode:
+    """The signal rerank switch is a mode decision, like the DD-path one.
+
+    The role-aware signal rerank beat fusion alone on the pooled labels over the
+    three measurement passes, so a full or facility server turns it on and a
+    read-only or DD-only server leaves it off, computed beside the DD-path switch
+    the search tools read. ``_rerank_signals`` is a module global set at server
+    construction, so each case restores it after the check.
+    """
+
+    @pytest.fixture()
+    def server_module(self):
+        from imas_codex.llm import server as module
+
+        prior = module._rerank_signals
+        yield module
+        module._rerank_signals = prior
+
+    def test_a_full_server_reranks_signals(self, server_module):
+        server_module.AgentsServer(read_only=False, dd_only=False)
+
+        assert server_module._rerank_signals is True
+        # Beside the DD-path switch, whose mode decision it mirrors.
+        assert server_module._rerank_dd_paths is True
+
+    def test_a_read_only_server_does_not_rerank_signals(self, server_module):
+        server_module.AgentsServer(read_only=True, dd_only=False)
+
+        assert server_module._rerank_signals is False
+
+    def test_a_dd_only_server_does_not_rerank_signals(self, server_module):
+        server_module.AgentsServer(read_only=True, dd_only=True)
+
+        assert server_module._rerank_signals is False
+
+
 class TestSignalRerankState:
     """The signal state carries the catalogue row the role question reads."""
 

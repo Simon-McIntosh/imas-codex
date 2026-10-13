@@ -1,0 +1,84 @@
+<section id="ssfms-rerank-score-evidence" data-reckon="rerank-signal-search-measurement">
+  <h2 id="ssfms-rerank-score-evidence-title">Rerank signal search against fusion alone</h2>
+
+  <p id="ssfms-rerank-score-evidence-what">
+    The signal rerank was scored on §3's pooled labels — 22 questions, <strong>2 224 labels</strong>
+    — over the eligible population of 14 312 signals, on the discovery-relevance seat, by
+    <code>python -m tests.llm.measure_search_rankings 3 --section signal</code> on node
+    <code>98dci4-clu-2002</code>. Three passes were run for the role-aware arm and for the generic
+    arm, beside <code>rrf</code>, the fused order alone the rerank reorders. Both rerank arms build
+    each candidate's state with the product's <code>_signal_rerank_state</code>; the generic arm is
+    judged on <code>_RERANK_QUESTION</code> and the role-aware arm on <code>_ROLE_RERANK_QUESTION</code>,
+    so the two questions are measured on the same pool (60) and query. Every rerank call is a pool
+    of exactly 60; no question is refused, so the pooled labels cover every candidate of every pool.
+  </p>
+
+  <table id="ssfms-rerank-score-evidence-arms">
+    <caption>
+      Signal arms on the pooled labels, three passes each. <code>rrf</code> is the fused order
+      alone (100-vector and 50-full-text pools), <code>rrf_rerank</code> is the generic relevance
+      question, <code>rrf_rerank_role</code> the role-aware one. nDCG@10 and grade-3 precision@5
+      are shown per pass and as the mean over passes; a rerank arm's worst pass is the lowest of
+      its three nDCG@10 values, and p95 is the 95th percentile of its rerank wall time at pool 60.
+    </caption>
+    <thead>
+      <tr><th>Arm</th><th>nDCG@10 per pass</th><th>mean nDCG@10</th><th>g3 p@5 per pass</th><th>mean g3 p@5</th><th>worst pass nDCG@10</th><th>p95 wall</th></tr>
+    </thead>
+    <tbody>
+      <tr id="ssfms-rerank-score-evidence-arm-rrf"><td><code>rrf</code> (fusion)</td><td>0.7949, 0.7949, 0.7949</td><td>0.7949</td><td>0.7182, 0.7182, 0.7182</td><td>0.7182</td><td>0.7949</td><td>—</td></tr>
+      <tr id="ssfms-rerank-score-evidence-arm-generic"><td><code>rrf_rerank</code> (generic)</td><td>0.9009, 0.9056, 0.9070</td><td>0.9045</td><td>0.8636, 0.8909, 0.8818</td><td>0.8788</td><td>0.9009</td><td>4.848 s</td></tr>
+      <tr id="ssfms-rerank-score-evidence-arm-role"><td><code>rrf_rerank_role</code></td><td>0.9170, 0.9116, 0.9100</td><td>0.9128</td><td>0.8909, 0.8727, 0.8818</td><td>0.8818</td><td>0.9100</td><td>4.722 s</td></tr>
+    </tbody>
+  </table>
+
+  <figure id="ssfms-rerank-score-evidence-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-rerank-score/arms-vs-fusion.svg"
+         alt="Left: mean nDCG@10 and grade-3 precision@5 for fusion, the generic rerank and the role-aware rerank, the two rerank arms above fusion on both. Middle: per-pass nDCG@10, the role-aware arm above the generic arm and both above the flat fusion line on every pass. Right: p95 rerank wall time for the two rerank arms at 4.85 s and 4.72 s, both under the 5 s dotted budget line.">
+    <figcaption>
+      Both rerank arms beat fusion alone on both metrics over three passes, and the role-aware arm
+      beats the generic one. On every pass the role-aware arm's nDCG@10 stays above fusion's 0.7949,
+      its worst pass 0.9100. The rerank reorders its pool between runs, so the spread across passes
+      is the judge's own variation, not a change of inputs.
+    </figcaption>
+  </figure>
+
+  <p id="ssfms-rerank-score-evidence-wins">
+    <strong>Per-question wins and losses against fusion.</strong> Each question's figure is its mean
+    nDCG@10 over the three passes, so a question won on one pass and lost on another reads as a tie.
+    The role-aware arm <em>wins</em> 16 questions and <em>loses</em> 2; no question ties at fusion's
+    figure except the four the arm neither raised nor lowered.
+  </p>
+  <ul id="ssfms-rerank-score-evidence-losses">
+    <li><strong>Wins (16):</strong> booster-power-supply-output-voltage; cryostat-vacuum-pressure;
+      and 14 further questions — deuterium-fuelling-flow-into-vessel, divertor-tile-surface-temperature,
+      helium-coolant-outlet-temperature-of-the-poloidal-field-coils, hydrogen-isotope-partial-pressure,
+      magnetic-fluctuation-toroidal-mode-one, measured-voltage-across-the-superconducting-poloidal-field-coils,
+      nitrogen-seeding-flow-into-vessel, plasma-current-total, plasma-stored-energy-magnetic,
+      poloidal-field-coil-current-measurement, power-supply-dc-output-voltage-for-the-coil-converters,
+      quench-detection-voltage-of-the-superconducting-coils, toroidal-field-coil-current,
+      toroidal-field-coil-voltage.</li>
+    <li><strong>Losses (2):</strong> switching-network-unit-terminal-voltage;
+      temperature-of-the-high-temperature-superconductor-current-leads.</li>
+    <li><strong>Ties (4):</strong> first-wall-surface-temperature;
+      quench-protection-circuit-dump-resistor-voltage; soft-x-ray-emission;
+      vacuum-vessel-port-temperature.</li>
+  </ul>
+
+  <p id="ssfms-rerank-score-evidence-branch">
+    <strong>Branch applied: the switch ships on.</strong> The role-aware arm's mean nDCG@10 (0.9128)
+    beats fusion alone (0.7949), its mean grade-3 precision@5 (0.8818) beats fusion's (0.7182), its
+    worst pass (0.9100) is not below fusion's 0.7949, and its p95 (4.722 s) is within 5 s. All four
+    conditions of the ship rule hold, so <code>_rerank_signals</code> in
+    <code>imas_codex/llm/server.py</code> follows the server mode as <code>_rerank_dd_paths</code>
+    does: <code>not (self.read_only or self.dd_only)</code>, on for a full or facility server, off
+    for a read-only or DD-only server.
+  </p>
+
+  <p id="ssfms-rerank-score-evidence-spend">
+    <strong>Jev spent.</strong> Read from the response usage the judged call layer returns: the
+    generic arm 3 957 calls / <strong>$0.084548</strong>, the role-aware arm 3 959 calls /
+    <strong>$0.093070</strong>, so the whole three-pass run totals <strong>$0.177618</strong>, under
+    the $1 ceiling. <code>rrf</code> spends nothing, being a fusion of the vector and full-text
+    orders.
+  </p>
+</section>

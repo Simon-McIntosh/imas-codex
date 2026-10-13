@@ -181,9 +181,11 @@ _no_embed: bool = False  # Set by AgentsServer when --no-embed is passed
 _rerank_dd_paths: bool = False
 
 # The signal-search rerank switch, wired like ``_rerank_dd_paths``: a server
-# decision recorded at construction and read when a search runs. It is left off
-# in every mode, because the signal rerank ships only once its two arms are
-# scored; the mode block below is where a future decision turns it on.
+# decision recorded at construction and read when a search runs. The role-aware
+# signal rerank beat fusion alone on the pooled labels, so it follows the mode:
+# on for a full or DD-path server that may spend a judgement, off for a
+# read-only or DD-only server that must not. Direct construction of the tools
+# leaves it off.
 _rerank_signals: bool = False
 
 # ---------------------------------------------------------------------------
@@ -1887,10 +1889,13 @@ class AgentsServer:
         # where the mode is known and read when that instance is built.
         _rerank_dd_paths = not (self.read_only or self.dd_only)
 
-        # The signal rerank is left off in every mode until its two arms are
-        # scored, so it is recorded off here beside the DD-path switch rather
-        # than computed from the mode.
-        _rerank_signals = False
+        # The signal rerank was measured against fusion alone over three passes
+        # on the pooled labels and earned its place: the role-aware arm beats
+        # fusion on both mean nDCG@10 and grade-3 precision@5, its worst pass
+        # stays above fusion, and its p95 is inside the 5 s budget. It therefore
+        # follows the mode exactly as the DD-path rerank does, so a read-only or
+        # DD-only server never spends a judgement.
+        _rerank_signals = not (self.read_only or self.dd_only)
 
         name = "imas-codex-readonly" if self.read_only else "imas-codex"
         self.mcp = FastMCP(name=name)
