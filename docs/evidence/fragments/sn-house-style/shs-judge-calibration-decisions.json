@@ -1,0 +1,228 @@
+{
+  "fixtures": [
+    "flux_surface_averaged_carbon_density_at_plasma_boundary",
+    "flux_surface_averaged_argon_density_at_plasma_boundary",
+    "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+    "flux_surface_averaged_electron_density_at_plasma_boundary"
+  ],
+  "calls": 8,
+  "booked_cost_usd": 0.00030609599999999995,
+  "decisions": [
+    {
+      "name_id": "flux_surface_averaged_carbon_density_at_plasma_boundary",
+      "concept_token": "flux_surface_averaged",
+      "concept_phrase": "flux-surface average",
+      "question": {
+        "type": "choice",
+        "instructions": "The entry's documentation may write an equation defining the flux-surface average. Which form does that equation take?",
+        "criteria": {
+          "surface": "A surface integral weighted by dS/|grad psi|: the integral of f dS/|grad psi| divided by the integral of dS/|grad psi|.",
+          "line_poloidal": "A poloidal line integral weighted by dl/B_p, using the poloidal magnetic field B_p (also written B_pol or B_theta).",
+          "line_total_field": "A line integral weighted by dl/B where B is the total magnetic field magnitude, not the poloidal field.",
+          "none": "No equation defining the flux-surface average appears."
+        }
+      },
+      "answer": {
+        "type": "choice",
+        "choice": "line_total_field",
+        "probabilities": {
+          "surface": 0,
+          "line_poloidal": 0.01,
+          "line_total_field": 0.99,
+          "none": 0
+        },
+        "confidence": 0.99
+      },
+      "verdict": "forbidden",
+      "cost_usd": 4.305e-05
+    },
+    {
+      "name_id": "flux_surface_averaged_argon_density_at_plasma_boundary",
+      "concept_token": "flux_surface_averaged",
+      "concept_phrase": "flux-surface average",
+      "question": {
+        "type": "choice",
+        "instructions": "The entry's documentation may write an equation defining the flux-surface average. Which form does that equation take?",
+        "criteria": {
+          "surface": "A surface integral weighted by dS/|grad psi|: the integral of f dS/|grad psi| divided by the integral of dS/|grad psi|.",
+          "line_poloidal": "A poloidal line integral weighted by dl/B_p, using the poloidal magnetic field B_p (also written B_pol or B_theta).",
+          "line_total_field": "A line integral weighted by dl/B where B is the total magnetic field magnitude, not the poloidal field.",
+          "none": "No equation defining the flux-surface average appears."
+        }
+      },
+      "answer": {
+        "type": "choice",
+        "choice": "line_poloidal",
+        "probabilities": {
+          "surface": 0,
+          "line_poloidal": 1,
+          "line_total_field": 0,
+          "none": 0
+        },
+        "confidence": 1
+      },
+      "verdict": "forbidden",
+      "cost_usd": 3.9858e-05
+    },
+    {
+      "name_id": "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+      "concept_token": "flux_surface_averaged",
+      "concept_phrase": "flux-surface average",
+      "question": {
+        "type": "choice",
+        "instructions": "The entry's documentation may write an equation defining the flux-surface average. Which form does that equation take?",
+        "criteria": {
+          "surface": "A surface integral weighted by dS/|grad psi|: the integral of f dS/|grad psi| divided by the integral of dS/|grad psi|.",
+          "line_poloidal": "A poloidal line integral weighted by dl/B_p, using the poloidal magnetic field B_p (also written B_pol or B_theta).",
+          "line_total_field": "A line integral weighted by dl/B where B is the total magnetic field magnitude, not the poloidal field.",
+          "none": "No equation defining the flux-surface average appears."
+        }
+      },
+      "answer": {
+        "type": "choice",
+        "choice": "surface",
+        "probabilities": {
+          "surface": 1,
+          "line_poloidal": 0,
+          "line_total_field": 0,
+          "none": 0
+        },
+        "confidence": 1
+      },
+      "verdict": "canonical",
+      "cost_usd": 3.3306e-05
+    },
+    {
+      "name_id": "flux_surface_averaged_electron_density_at_plasma_boundary",
+      "concept_token": "flux_surface_averaged",
+      "concept_phrase": "flux-surface average",
+      "question": {
+        "type": "choice",
+        "instructions": "The entry's documentation may write an equation defining the flux-surface average. Which form does that equation take?",
+        "criteria": {
+          "surface": "A surface integral weighted by dS/|grad psi|: the integral of f dS/|grad psi| divided by the integral of dS/|grad psi|.",
+          "line_poloidal": "A poloidal line integral weighted by dl/B_p, using the poloidal magnetic field B_p (also written B_pol or B_theta).",
+          "line_total_field": "A line integral weighted by dl/B where B is the total magnetic field magnitude, not the poloidal field.",
+          "none": "No equation defining the flux-surface average appears."
+        }
+      },
+      "answer": {
+        "type": "choice",
+        "choice": "surface",
+        "probabilities": {
+          "surface": 1,
+          "line_poloidal": 0,
+          "line_total_field": 0,
+          "none": 0
+        },
+        "confidence": 1
+      },
+      "verdict": "canonical",
+      "cost_usd": 3.9774e-05
+    },
+    {
+      "name_id": "flux_surface_averaged_carbon_density_at_plasma_boundary",
+      "concept_token": "plasma_boundary",
+      "concept_phrase": "plasma boundary",
+      "question": {
+        "type": "choice",
+        "instructions": "How does the entry's description together with its documentation describe the plasma boundary?",
+        "criteria": {
+          "last_closed_flux_surface": "It describes the plasma boundary as the last closed flux surface \u2014 the outermost closed magnetic flux surface of the confined plasma. It may also give the diverted-configuration name for that same surface as a synonym.",
+          "diverted_name_alone": "It names the plasma boundary only by the term 'separatrix' \u2014 the surface bounding the confined plasma in a diverted configuration \u2014 without describing it as the last closed flux surface.",
+          "not_described": "It does not say what the plasma boundary is."
+        }
+      },
+      "answer": {
+        "type": "choice",
+        "choice": "last_closed_flux_surface",
+        "probabilities": {
+          "last_closed_flux_surface": 0.99,
+          "diverted_name_alone": 0.01,
+          "not_described": 0
+        },
+        "confidence": 0.98
+      },
+      "verdict": "canonical",
+      "cost_usd": 4.158e-05
+    },
+    {
+      "name_id": "flux_surface_averaged_argon_density_at_plasma_boundary",
+      "concept_token": "plasma_boundary",
+      "concept_phrase": "plasma boundary",
+      "question": {
+        "type": "choice",
+        "instructions": "How does the entry's description together with its documentation describe the plasma boundary?",
+        "criteria": {
+          "last_closed_flux_surface": "It describes the plasma boundary as the last closed flux surface \u2014 the outermost closed magnetic flux surface of the confined plasma. It may also give the diverted-configuration name for that same surface as a synonym.",
+          "diverted_name_alone": "It names the plasma boundary only by the term 'separatrix' \u2014 the surface bounding the confined plasma in a diverted configuration \u2014 without describing it as the last closed flux surface.",
+          "not_described": "It does not say what the plasma boundary is."
+        }
+      },
+      "answer": {
+        "type": "choice",
+        "choice": "last_closed_flux_surface",
+        "probabilities": {
+          "last_closed_flux_surface": 1,
+          "diverted_name_alone": 0,
+          "not_described": 0
+        },
+        "confidence": 1
+      },
+      "verdict": "canonical",
+      "cost_usd": 3.8388e-05
+    },
+    {
+      "name_id": "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+      "concept_token": "plasma_boundary",
+      "concept_phrase": "plasma boundary",
+      "question": {
+        "type": "choice",
+        "instructions": "How does the entry's description together with its documentation describe the plasma boundary?",
+        "criteria": {
+          "last_closed_flux_surface": "It describes the plasma boundary as the last closed flux surface \u2014 the outermost closed magnetic flux surface of the confined plasma. It may also give the diverted-configuration name for that same surface as a synonym.",
+          "diverted_name_alone": "It names the plasma boundary only by the term 'separatrix' \u2014 the surface bounding the confined plasma in a diverted configuration \u2014 without describing it as the last closed flux surface.",
+          "not_described": "It does not say what the plasma boundary is."
+        }
+      },
+      "answer": {
+        "type": "choice",
+        "choice": "last_closed_flux_surface",
+        "probabilities": {
+          "last_closed_flux_surface": 0.98,
+          "diverted_name_alone": 0.02,
+          "not_described": 0
+        },
+        "confidence": 0.97
+      },
+      "verdict": "canonical",
+      "cost_usd": 3.1836e-05
+    },
+    {
+      "name_id": "flux_surface_averaged_electron_density_at_plasma_boundary",
+      "concept_token": "plasma_boundary",
+      "concept_phrase": "plasma boundary",
+      "question": {
+        "type": "choice",
+        "instructions": "How does the entry's description together with its documentation describe the plasma boundary?",
+        "criteria": {
+          "last_closed_flux_surface": "It describes the plasma boundary as the last closed flux surface \u2014 the outermost closed magnetic flux surface of the confined plasma. It may also give the diverted-configuration name for that same surface as a synonym.",
+          "diverted_name_alone": "It names the plasma boundary only by the term 'separatrix' \u2014 the surface bounding the confined plasma in a diverted configuration \u2014 without describing it as the last closed flux surface.",
+          "not_described": "It does not say what the plasma boundary is."
+        }
+      },
+      "answer": {
+        "type": "choice",
+        "choice": "last_closed_flux_surface",
+        "probabilities": {
+          "last_closed_flux_surface": 1,
+          "diverted_name_alone": 0,
+          "not_described": 0
+        },
+        "confidence": 1
+      },
+      "verdict": "canonical",
+      "cost_usd": 3.8304e-05
+    }
+  ]
+}

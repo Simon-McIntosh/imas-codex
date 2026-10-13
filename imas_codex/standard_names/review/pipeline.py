@@ -585,20 +585,22 @@ async def enrich_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
             batch["error_lint_findings"] = {}
 
         # Judge stage (report-only), beside the audit stage: the entries a
-        # pattern cannot decide ask the judge one categorising Choice each. The
-        # results join the same per-name findings the reviewer receives, marked
+        # pattern cannot decide ask the judge one categorising Choice each. It
+        # runs whatever the audit does — skipping the audit skips the
+        # deterministic checks, not the judge — so the semantic cases the
+        # registry states as equivalence classes are still judged. The results
+        # join the same per-name findings the reviewer receives, marked
         # report-only, and are never booked as error-lint findings, so they
         # never cap a score. A batch whose names carry no judged entry makes no
         # call.
-        if not state.skip_audit:
-            judge_cost = PipelineCost()
-            judge_findings = await judge_review_stage(
-                batch.get("names", []), cost=judge_cost
-            )
-            for lines in judge_findings.values():
-                batch["audit_findings"].extend(lines)
-            if judge_cost.total_usd:
-                state.enrich_stats.cost += judge_cost.total_usd
+        judge_cost = PipelineCost()
+        judge_findings = await judge_review_stage(
+            batch.get("names", []), cost=judge_cost
+        )
+        for lines in judge_findings.values():
+            batch["audit_findings"].extend(lines)
+        if judge_cost.total_usd:
+            state.enrich_stats.cost += judge_cost.total_usd
 
         state.enrich_stats.processed = i + 1
         state.enrich_stats.record_batch(1)

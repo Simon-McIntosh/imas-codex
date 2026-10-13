@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="fragment">
+  <title>The judge stage asks the calibrated question</title>
+</head>
+<body>
+  <section id="shs-judge-calibration-summary">
+    <h2>The judge stage offers the forms as words, not as patterns</h2>
+    <p>
+      The judge stage built its <code>Choice</code> by handing Jev the
+      registry's <code>forbidden_variants</code> as written forms, but those
+      are regular expressions — the plasma-boundary pattern is
+      <code>the separatrix</code> and the flux-surface-average pattern is a
+      display-equation matcher. In the first live run the boundary gloss was
+      classified forbidden for all four fixtures, including the entries written
+      as the last closed flux surface. The stage now offers an authored form
+      vocabulary per judged concept (<code>_CONCEPT_FORMS</code>): a Choice
+      whose options describe the forms in words, and a mapping from the chosen
+      form to the verdict the registry's pattern states. The registry's
+      patterns never reach the model — neither in the question's options nor in
+      the state the stage builds.
+    </p>
+    <p>
+      Judged concepts are grouped by token so each concept's question offers
+      only its own forms, and every group is judged through the shared
+      <code>decide_batch</code> owner. The stage is also decoupled from
+      <code>--skip-audit</code>: skipping the deterministic audits no longer
+      skips the judge, so the cases the registry states as equivalence classes
+      are still judged. A concept that carries forbidden variants but no
+      authored form vocabulary is left unjudged rather than judged by sending
+      its pattern.
+    </p>
+  </section>
+
+  <section id="shs-judge-calibration-live">
+    <h2>Live run over the four boundary fixtures</h2>
+    <p>
+      The four flux-surface-averaged boundary entries were read from the live
+      graph and driven through the rebuilt stage with the live decisions seat
+      (<code>sn-judge</code>). Eight judged entries — four names x two concepts
+      — made <strong>eight calls</strong>, the pre-declared ceiling. Booked
+      cost: <strong>USD 0.000306</strong>. Driver and raw decisions:
+      <code>shs-judge-calibration-run.py</code> and
+      <code>shs-judge-calibration-decisions.json</code>.
+    </p>
+    <table>
+      <thead>
+        <tr><th>Fixture</th><th>Concept</th><th>Form chosen</th><th>Verdict</th><th>Probability</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>carbon</td><td><code>flux_surface_averaged</code></td><td>line_total_field</td><td>forbidden</td><td>0.99</td></tr>
+        <tr><td>argon</td><td><code>flux_surface_averaged</code></td><td>line_poloidal</td><td>forbidden</td><td>1.00</td></tr>
+        <tr><td>beryllium</td><td><code>flux_surface_averaged</code></td><td>surface</td><td>canonical</td><td>1.00</td></tr>
+        <tr><td>electron</td><td><code>flux_surface_averaged</code></td><td>surface</td><td>canonical</td><td>1.00</td></tr>
+        <tr><td>carbon</td><td><code>plasma_boundary</code></td><td>last_closed_flux_surface</td><td>canonical</td><td>0.99</td></tr>
+        <tr><td>argon</td><td><code>plasma_boundary</code></td><td>last_closed_flux_surface</td><td>canonical</td><td>1.00</td></tr>
+        <tr><td>beryllium</td><td><code>plasma_boundary</code></td><td>last_closed_flux_surface</td><td>canonical</td><td>0.98</td></tr>
+        <tr><td>electron</td><td><code>plasma_boundary</code></td><td>last_closed_flux_surface</td><td>canonical</td><td>1.00</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The expectations hold: the carbon <code>dl/B</code> form and the argon
+      <code>dl/B_p</code> form are classified forbidden, and the beryllium and
+      electron boundary glosses — written as the last closed flux surface —
+      are classified canonical. The over-fire is gone: under the pattern-based
+      framing all four boundary glosses were forbidden; under the calibrated
+      framing all four are canonical, each at probability 0.98 or above.
+    </p>
+  </section>
+
+  <section id="shs-judge-calibration-negative-control">
+    <h2>Negative control</h2>
+    <p>
+      The declared mutation restores the registry's forbidden patterns as
+      Choice options. Applied to the rebuilt stage and re-running the guarding
+      test
+      <code>test_no_option_text_carries_a_registry_forbidden_pattern</code>
+      ends non-zero, failing that test id; the wired head arm passes it.
+    </p>
+  </section>
+
+  <section id="shs-judge-calibration-tests">
+    <h2>Gate</h2>
+    <p>
+      Baseline <code>262 passed</code> (exit 0); after <code>264 passed</code>
+      (exit 0) — the two added tests, no added failure. The gate is
+      <code>tests/standard_names/test_judge_stage.py</code>,
+      <code>tests/discovery/test_judgment.py</code> and every
+      <code>tests/standard_names</code> file referencing
+      <code>the review pipeline</code>.
+    </p>
+  </section>
+</body>
+</html>
