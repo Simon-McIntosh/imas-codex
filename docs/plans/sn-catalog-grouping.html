@@ -25,7 +25,7 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="58ad9b1a4e61408b2da7c9e8232bcb6bccb21c1f,38f0a7336ce3b86ab37ebf5cb353a00363c32274,5c666533b9b786ec14259e85d0a6eb42cae1125c,17f084e2d28d7145d9288c8a5a542d03a7519f4a,aea797386d61d8b3703afbad957f4ff707ea9fab">
 </head>
@@ -152,8 +152,11 @@
       disagreement between writers, not the multiplicity.
     </p>
     <p>
-      <strong>Why the DD domains echo their IDS.</strong> Diagnosed on 2026-10-13
-      (<code>scg-dd-domain-diagnosis</code>). The DD build MERGEs every path and SETs
+      <strong>Why the DD domains echo their IDS.</strong> Diagnosed on 2026-10-13 by
+      <code>scg-dd-domain-diagnosis</code>; its evidence is commit <code>5b31377c7</code> until it
+      lands at
+      <code>docs/evidence/fragments/sn-catalog-grouping/scg-dd-domain-diagnosis.html</code>.
+      The DD build MERGEs every path and SETs
       <code>physics_domain</code> to its IDS default unconditionally
       (<code>build_dd.py</code>, the path upsert), without clearing <code>domain_source</code> or
       <code>domain_classified_at</code>. The classifier then selects only paths whose
@@ -161,7 +164,12 @@
       2026-06-18 were overwritten by the rebuild of 2026-07-22, which re-classified only 23 paths.
       Separately, the classifier prompt's vocabulary table lists 21 of the 32 domains, omitting
       <code>core_plasma_physics</code> among others, and its worked example maps electron
-      temperature in <code>core_profiles</code> to <code>transport</code>.
+      temperature in <code>core_profiles</code> to <code>transport</code>. Measured on the DD
+      sources of the labelled names, a name's labelled domain is among its sources' stored domains
+      for 11 of the 20 lead-approved names and 63 of the 150, and among a fresh classification's
+      for 11 and 67. The graph holds no <code>Cluster</code> nodes, so the cluster-weighted rank
+      is empty and <code>pick_primary_domain</code> falls back to alphabetical order: the name
+      domain it derives matches 1 of the 20.
     </p>
     <p><strong>The design.</strong></p>
     <ol>
@@ -206,8 +214,12 @@
         corrected domains.</li>
     </ol>
     <p>
-      <strong>Done when:</strong> the DD classifier, measured on the DD sources of the labelled
-      names, reproduces all twenty lead-approved domains and reports its accuracy on the 150.
+      <strong>Done when:</strong> the fixed DD classifier is measured on the DD sources of the
+      labelled names, and its accuracy without overrides is reported beside the diagnosis's
+      figures above, for the twenty and the 150. After re-classification and repair, each of the
+      twenty lead-approved names carries its approved domain, reached through the classifier or
+      through a path override in <code>path_domain_overrides.json</code> that records its
+      reason.
       The standard-name DD source paths are re-classified with <code>domain_source</code>
       recorded. A DD rebuild over a classified path leaves its domain and
       <code>domain_source</code> unchanged, shown by a test that fails with the old upsert. Every
