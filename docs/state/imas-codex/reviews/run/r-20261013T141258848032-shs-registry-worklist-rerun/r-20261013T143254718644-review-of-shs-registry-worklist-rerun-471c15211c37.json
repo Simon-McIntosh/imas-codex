@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T14:55:54.450Z",
+  "dispatched_at": "2026-10-13T14:33:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py",
+      "line": "77",
+      "severity": "follow-on",
+      "text": "follow-on: _locus_segment_kind and _iter_operators duplicate terms._locus_segment_kind (terms.py:201) and terms._iter_operators (terms.py:174) while the same module imports the accessor's _qualifier_segment_kind, so the token walk remains a partially copied enumeration; the brief retained the walk, so this does not block, but reading the accessor's two helpers would end the residual copy."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py",
+      "line": "101",
+      "severity": "follow-on",
+      "text": "follow-on: _walk yields the base token unconditionally, so the placeholder base the parser assigns to binary-operator names is listed in concepts (8 names) and notation although select_conventions' _ir_tokens skips a placeholder base and no entry can ever match it, leaving a concepts item that can never close; the fragment documents this at its placeholder note and the worker logged it as a follow_on, so it is the coordinator's call rather than a defect of this change."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py",
+      "line": "168",
+      "severity": "follow-on",
+      "text": "follow-on: every roster name is parsed at :146 and then re-parsed inside select_conventions at :171, so the census parses the 219-name roster twice per run; it is a wasted re-parse, not a correctness defect, and passing the already-parsed IR would remove it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read both commits against base a7de878b2; 64b626517 removes _filled_segments and _template_matches and adds the select_conventions call plus the rerun results JSON, and 471c15211 adds only the fragment HTML, all inside the declared scope.",
+    "done_when": "the done_when asks the driver to stop defining the two copies, to re-run live with a reproducing second run and EXIT=, to keep a ratio-deleted gap-control log, and to gate test_conventions_registry.py at base and head by delta; the manifest records all of these and I re-verified the gate logs (2 passed EXIT=0 both arms) and byte-identical results across runs 1-3 and the two default-out runs.",
+    "goal": "the node goal is to make the registry worklist driver decide template presence through the selector the pipeline uses, and shs-registry-worklist-run.py:171 replaces the removed _filled_segments/_template_matches with select_conventions(name, registry=reg).templates.",
+    "manifest": "read the parsed record at the reviewed run dir; it states status complete, a landing line, the base/head gate logs, the gap-control note and follow_ons, and its changed_paths match the diff.",
+    "write_paths": "the manifest declares the driver .py, the rerun-results .json and the fragment .html; the two commits (64b626517, 471c15211) touch exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "no test reaches the driver (the brief states this and the gate is an environment check only), and the ratio-deleted gap control does not distinguish the new selector from the removed matcher, so nothing reddens if shs-registry-worklist-run.py:171 is reverted.",
+    "evidence": "the gate logs gate-base.log and gate-head.log both read 2 passed EXIT=0 at their stated revisions and I re-verified run1/run2/run3 and the default-out results are byte-identical, so the reproduction the done_when asks for is recorded, not claimed.",
+    "fit": "the driver keeps the surrounding module style and imports the accessor's _qualifier_segment_kind at shs-registry-worklist-run.py:100 while redefining a local _locus_segment_kind at :77, a small inconsistency inside an otherwise consistent file.",
+    "goal_fidelity": "shs-registry-worklist-run.py:171 decides template presence from select_conventions(name, registry=reg).templates, so the selector the pipeline calls is the sole authority and the copies the goal named are gone.",
+    "reuse": "shs-registry-worklist-run.py:171 extends the owner of template selection rather than forking it, and the residual token walk at :93-113 is the walk the brief directed be kept.",
+    "scope_discipline": "git diff a7de878b2..471c15211 over both commits touches only the three declared write paths, and the first run's shs-registry-worklist-results.json and .html are left intact."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make the registry worklist driver decide template presence through the selector the pipeline uses, and shs-registry-worklist-run.py:171 replaces the removed _filled_segments/_template_matches with select_conventions(name, registry=reg).templates.\nVERDICT done_when: the done_when asks the driver to stop defining the two copies, to re-run live with a reproducing second run and EXIT=, to keep a ratio-deleted gap-control log, and to gate test_conventions_registry.py at base and head by delta; the manifest records all of these and I re-verified the gate logs (2 passed EXIT=0 both arms) and byte-identical results across runs 1-3 and the two default-out runs.\nVERDICT write_paths: the manifest declares the driver .py, the rerun-results .json and the fragment .html; the two commits (64b626517, 471c15211) touch exactly those three paths and nothing else.\nVERDICT manifest: read the parsed record at the reviewed run dir; it states status complete, a landing line, the base/head gate logs, the gap-control note and follow_ons, and its changed_paths match the diff.\nVERDICT diff: read both commits against base a7de878b2; 64b626517 removes _filled_segments and _template_matches and adds the select_conventions call plus the rerun results JSON, and 471c15211 adds only the fragment HTML, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: shs-registry-worklist-run.py:171 decides template presence from select_conventions(name, registry=reg).templates, so the selector the pipeline calls is the sole authority and the copies the goal named are gone.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate logs gate-base.log and gate-head.log both read 2 passed EXIT=0 at their stated revisions and I re-verified run1/run2/run3 and the default-out results are byte-identical, so the reproduction the done_when asks for is recorded, not claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff a7de878b2..471c15211 over both commits touches only the three declared write paths, and the first run's shs-registry-worklist-results.json and .html are left intact.\nSCORE durability: 9\nJUSTIFICATION durability: no test reaches the driver (the brief states this and the gate is an environment check only), and the ratio-deleted gap control does not distinguish the new selector from the removed matcher, so nothing reddens if shs-registry-worklist-run.py:171 is reverted.\nSCORE fit: 17\nJUSTIFICATION fit: the driver keeps the surrounding module style and imports the accessor's _qualifier_segment_kind at shs-registry-worklist-run.py:100 while redefining a local _locus_segment_kind at :77, a small inconsistency inside an otherwise consistent file.\nSCORE reuse: 18\nJUSTIFICATION reuse: shs-registry-worklist-run.py:171 extends the owner of template selection rather than forking it, and the residual token walk at :93-113 is the walk the brief directed be kept.\nFINDING docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py:77 follow-on: _locus_segment_kind and _iter_operators duplicate terms._locus_segment_kind (terms.py:201) and terms._iter_operators (terms.py:174) while the same module imports the accessor's _qualifier_segment_kind, so the token walk remains a partially copied enumeration; the brief retained the walk, so this does not block, but reading the accessor's two helpers would end the residual copy.\nFINDING docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py:101 follow-on: _walk yields the base token unconditionally, so the placeholder base the parser assigns to binary-operator names is listed in concepts (8 names) and notation although select_conventions' _ir_tokens skips a placeholder base and no entry can ever match it, leaving a concepts item that can never close; the fragment documents this at its placeholder note and the worker logged it as a follow_on, so it is the coordinator's call rather than a defect of this change.\nFINDING docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py:168 follow-on: every roster name is parsed at :146 and then re-parsed inside select_conventions at :171, so the census parses the 219-name roster twice per run; it is a wasted re-parse, not a correctness defect, and passing the already-parsed IR would remove it.",
+  "review_run_id": "r-20261013T143254718644-review-of-shs-registry-worklist-rerun-471c15211c37",
+  "reviewed_base_sha": "a7de878b2cfb4837b23b7742cf8378d58a66a54e",
+  "reviewed_head_sha": "471c15211c37ec796e9486d363ea5d81492d129a",
+  "reviewed_run_id": "r-20261013T141258848032-shs-registry-worklist-rerun",
+  "scores": {
+    "durability": 9,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T14:58:30.059285+00:00",
+  "total": 101
+}
