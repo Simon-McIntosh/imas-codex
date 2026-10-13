@@ -1,0 +1,80 @@
+<!-- Bulk reprocess of the assigned JT-60SA categories b260008 and CryoHRS
+     (3663 signals) through the current description pipeline.
+     Logs: ~/.config/reckon/crew/runs/r-20261013T132648132380-ssfms-reprocess-bulk-2/bulk-logs
+     Machine-readable progress: reprocess-progress-bulk-2.json -->
+<section id="ssfms-reprocess-bulk-2" data-reckon="evidence">
+  <h2 id="ssfms-reprocess-bulk-2-heading">Reprocessing the JT-60SA b260008 and CryoHRS categories</h2>
+
+  <p id="ssfms-reprocess-bulk-2-intro">
+    3663 JT-60SA signals in the <code>b260008</code> (2959) and
+    <code>CryoHRS</code> (704) categories were reset once to
+    <code>discovered</code> and re-enriched through the current pipeline in
+    three <code>--focus</code> scopes. <strong>3650 of the 3663 assigned signals
+    are finished</strong> — described, embedded, and with no hash mismatch —
+    and <strong>13 remain at <code>discovered</code></strong>, all of them
+    members of one source family that the pipeline never individualises. The
+    residual 13 are reported below rather than silently counted as done.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-2-negative-control">
+    The reset is the step that could have silently done nothing, so each scope
+    carries the declared negative control. Immediately after each reset the
+    scope's census found <em>every</em> signal at <code>discovered</code> with
+    <em>no</em> description — the complement of the control. A census that had
+    found them still described would have meant the reset never ran.
+    For <code>CryoHRS</code> the probe scope read 150 discovered / 0 described
+    (bulk-logs/scope1_probe.postreset.log); for <code>b260008</code> the whole
+    category read 2959 discovered / 0 described
+    (bulk-logs/b260008.postreset.log). Both were taken before any enrichment
+    ran.
+  </p>
+
+  <table id="ssfms-reprocess-bulk-2-scopes-table">
+    <caption>The reset scopes, their commands and their final censuses</caption>
+    <tr><th>scope</th><th>category</th><th>signals</th><th>reset</th><th>post-reset census</th><th>final census</th></tr>
+    <tr><td>cryohrs probe</td><td>CryoHRS</td><td>150</td><td>150</td><td>150 discovered / 0 described</td><td>0 discovered / 0 hash mismatch</td></tr>
+    <tr><td>cryohrs rest</td><td>CryoHRS</td><td>554</td><td>554</td><td>—</td><td>category total: 704 not discovered / 704 described / 0 hash mismatch</td></tr>
+    <tr><td>b260008 full</td><td>b260008</td><td>2959</td><td>2959</td><td>2959 discovered / 0 described</td><td>13 discovered / 2946 described / 13 hash mismatch</td></tr>
+  </table>
+
+  <h3 id="ssfms-reprocess-bulk-2-residue-heading">The 13 signals the pipeline cannot finish</h3>
+  <p id="ssfms-reprocess-bulk-2-residue-prose">
+    The 13 stuck signals are the members of six LCDB <code>zeff</code>
+    signal sources — <code>s002_metafile</code>, <code>s002_xfitdata</code>,
+    <code>s002_cst1</code>, <code>s002_ifunc</code>,
+    <code>s002_used_fitdata_index</code> and <code>s005_topics_xfitdata</code>.
+    Each of those sources was classified <code>underspecified</code>: the
+    catalogue entry carries too little context to describe. The
+    individualisation pass that gives grouped members their own description
+    selects only sources at status <code>enriched</code>
+    (<code>imas_codex/discovery/signals/parallel.py</code>, the
+    <code>SignalSource {status: 'enriched'}</code> match), so the members of an
+    <code>underspecified</code> source are never reached and never leave
+    <code>discovered</code> — the 11 <code>underspecified</code> representatives
+    and their 13 members are a stable residual of the pipeline as it stands.
+    Closing it is a pipeline change outside this node's write scope, and the
+    run's 40-minute reset fence had already passed, so no further reset was
+    permitted. The exact ids are in
+    <code>bulk-logs/ids_b260008_residue.json</code> for a successor node, whose
+    fix is cheap: the seeding half calls no model.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-2-spend">
+    Total Jev spend across the four enrichment passes was
+    <strong>$0.04</strong>, against the node's ceiling of USD 6 — the seeding
+    halves cost nothing (their scanner reads the facility's own catalogue and
+    calls no model), and the enrichment spend is Jev's relevance rerank over
+    the retrieved context.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-2-retries">
+    Two retries are recorded. The first reset hung retrying an unreachable
+    <code>jt-60sa</code> host whose ssh configuration would not parse
+    (<code>Bad owner or permissions on
+    /etc/ssh/ssh_config.d/50-redhat.conf</code>); putting a wrapper that loads
+    only <code>~/.ssh/config</code> on <code>PATH</code> resolved it and the
+    positive control returned the JT-60SA gateway. The <code>b260008</code>
+    enrichment was then killed at the harness background limit partway through
+    and resumed in a second pass without a reset, so the reset still ran once.
+  </p>
+</section>
