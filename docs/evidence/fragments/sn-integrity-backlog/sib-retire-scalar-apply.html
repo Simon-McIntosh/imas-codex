@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-retire-scalar-apply">
+<title>Applying the signed successor-property removal</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-retire-scalar-apply-title">The successor property is removed from the live graph</h1>
+<p id="sib-retire-scalar-apply-summary">The signed authority
+<code>docs/evidence/fragments/sn-integrity-backlog/sib-retire-successor-scalar-authority.json</code>
+was applied against the live graph through <code>apply_signed_manifest</code>, the
+only write path. It carried one <code>set_properties</code> row per scalar holder,
+21 rows, each setting only <code>superseded_by</code> to null. File SHA-256
+<code>930f817490e23be4af4af7c13088262036b94cc9ada036691cc6589e82dea507</code>,
+payload SHA-256
+<code>ca6818003082fe95805f8451044c9c4e9ba32a2017b8454bc2278d983ed74750</code>,
+both recomputed from the committed bytes and unchanged. Logs are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180238714430-sib-retire-scalar-apply/</code>.</p>
+
+<h2 id="sib-retire-scalar-apply-before">Before read</h2>
+<p id="sib-retire-scalar-apply-before-body"><code>before-read.log</code> counted
+<strong>21</strong> <code>StandardName</code> nodes holding <code>superseded_by</code>
+and <strong>0 orphans</strong> — every holder has an outgoing
+<code>HAS_SUCCESSOR</code> edge or an incoming <code>REFINED_FROM</code> to its
+signature successor. The two <code>*_direction_unit_vector_of_sensor</code> holders
+carry an incoming <code>REFINED_FROM</code> and no direct edge; the remaining
+nineteen carry the signed edge. <code>EXIT=0</code>.</p>
+
+<h2 id="sib-retire-scalar-apply-preview">Preview</h2>
+<p id="sib-retire-scalar-apply-preview-body"><code>preview.log</code> previewed the
+committed authority unchanged: <code>would_apply</code>, <strong>21 admitted and
+0 refused</strong>, <code>would_change</code> 21, under manifest digest
+<code>9824d632fe6da863af37287059db9a3a1a9b6da20892c8cab4a701cc185e4c40</code> —
+matching the digest recorded when the retirement node previewed it.
+<code>EXIT=0</code>. The manifest digest is a function of the authority bytes and
+the invocation reason; the reason reproduced here is
+<code>retire redundant successor scalar after edge and lineage verification</code>.</p>
+
+<h2 id="sib-retire-scalar-apply-apply">Apply</h2>
+<p id="sib-retire-scalar-apply-apply-body"><code>apply.log</code> applied under that
+digest: outcome <code>applied</code>, <code>changed</code> 21,
+<code>mutations</code> 21, <strong><code>receipt_rows</code> 21</strong>,
+<code>persistent_writes</code> 42, counts 21 admitted and 0 refused, under the same
+manifest digest <code>9824d632fe6da863af37287059db9a3a1a9b6da20892c8cab4a701cc185e4c40</code>.
+<code>EXIT=0</code>.</p>
+
+<h2 id="sib-retire-scalar-apply-readback">Readback</h2>
+<p id="sib-retire-scalar-apply-readback-body"><code>readback.log</code> counted
+<strong>0</strong> <code>StandardName</code> nodes still holding
+<code>superseded_by</code>, and <strong>21</strong> <code>StandardNameChange</code>
+removal receipts carrying <code>operation: retire_successor_property</code> and the
+apply digest. Re-running the relation read over the same 21-name cohort found
+<strong>21 names with a successor relation and 0 orphans</strong>: nineteen reach
+their successor by an outgoing <code>HAS_SUCCESSOR</code> edge, and the two
+<code>*_direction_unit_vector_of_sensor</code> holders by an incoming
+<code>REFINED_FROM</code>. <code>EXIT=0</code>.</p>
+
+<h2 id="sib-retire-scalar-apply-replay">Replay</h2>
+<p id="sib-retire-scalar-apply-replay-body"><code>replay.log</code> re-ran the apply
+under the recording digest: outcome <strong><code>already_applied</code></strong>,
+<code>changed</code> 0, <code>persistent_writes</code> 0, <code>receipt_rows</code> 21,
+returning the recorded admission cohort and writing nothing — the apply is
+idempotent. A plain dry run still enumerates the 21 rows as
+<code>would_change</code> (its admission is not state-sensitive for this mutation)
+but reports <code>changed</code> 0 and no refusals. <code>EXIT=0</code>.</p>
+
+</main>
+</body>
+</html>
