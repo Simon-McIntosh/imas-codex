@@ -32,7 +32,6 @@ SORTED_LIST_FIELDS: frozenset[str] = frozenset({"deprecates", "constraints"})
 NULLABLE_SCALAR_FIELDS: frozenset[str] = frozenset(
     {
         "deprecates",
-        "superseded_by",
         "validity_domain",
         "cocos_transformation_type",
         "provenance",
@@ -66,7 +65,6 @@ CANONICAL_KEY_ORDER: tuple[str, ...] = (
     "arguments",
     "error_variants",
     "deprecates",
-    "superseded_by",
     "provenance",
     "sources",
 )

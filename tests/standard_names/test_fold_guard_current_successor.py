@@ -57,7 +57,6 @@ def _reverted_beta_state() -> _State:
                 stage="superseded",
                 validation="valid",
                 superseded_from_stage="accepted",
-                superseded_by=None,
             ),
             _BETA: _node(_BETA, stage="accepted"),
         },

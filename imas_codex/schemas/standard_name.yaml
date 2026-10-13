@@ -959,10 +959,6 @@ classes:
         description: >-
           ID of the standard name this entry deprecates. Set during
           catalog import when a name supersedes an older one.
-      superseded_by:
-        description: >-
-          ID of the standard name that supersedes this entry. Set
-          during catalog import when this name is replaced.
       catalog_pr_number:
         description: >-
           GitHub PR number of the merged catalog PR that approved this
@@ -2029,8 +2025,8 @@ classes:
       successor:
         description: >-
           The standard name that supersedes this entry (deprecation lineage).
-          Scalar — a name has at most one direct successor. Derived from the
-          superseded_by scalar at write time.
+          The target of the receipt-stamped HAS_SUCCESSOR edge written by a
+          signed supersede mutation.
         range: StandardName
         inlined: false
         annotations:

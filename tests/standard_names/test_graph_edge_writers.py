@@ -8,7 +8,7 @@ Edge types covered:
   HAS_PARENT      — derived from the ISN parser
   HAS_ERROR       — uncertainty siblings, inverted direction
   HAS_PREDECESSOR — from the ``deprecates`` field
-  HAS_SUCCESSOR   — from the ``superseded_by`` field
+  HAS_SUCCESSOR   — reserved for signed supersede mutations
   IN_CLUSTER      — from the ``primary_cluster_id`` field
   HAS_PHYSICS_DOMAIN — from the ``physics_domain`` field
 """
@@ -345,7 +345,6 @@ class TestEndpointAuthority:
                     "primary_cluster_id": "transport-cluster",
                     "physics_domain": "transport",
                     "deprecates": "electron_temperature",
-                    "superseded_by": "ion_temperature",
                 },
                 {"id": "upper_uncertainty_of_temperature", "unit": "eV"},
                 {"id": "electron_temperature_at_magnetic_axis", "unit": "eV"},
@@ -359,7 +358,6 @@ class TestEndpointAuthority:
             "HAS_ERROR",
             "HAS_LOCUS",
             "HAS_PREDECESSOR",
-            "HAS_SUCCESSOR",
             "IN_CLUSTER",
             "HAS_PHYSICS_DOMAIN",
         ):
@@ -731,44 +729,25 @@ class TestG7:
 
 
 # ---------------------------------------------------------------------------
-# HAS_SUCCESSOR from superseded_by field
+# Signed supersede owns HAS_SUCCESSOR
 # ---------------------------------------------------------------------------
 
 
 class TestG8:
-    """Write StandardName with ``superseded_by`` field → HAS_SUCCESSOR edge."""
+    """The generic writer cannot mint a successor edge from its payload."""
 
-    def test_has_successor_edge_pipeline(self) -> None:
+    def test_successor_payload_does_not_write_signed_edge(self) -> None:
         names = [
             {
                 "id": "ion_temperature",
                 "unit": "eV",
-                "superseded_by": "electron_temperature",
+                "successor": "electron_temperature",
             }
         ]
         mock_gc = _make_mock_gc()
         _call_write(names, mock_gc)
 
-        assert any("HAS_SUCCESSOR" in c for c in _cyphers(mock_gc))
-
-    def test_has_successor_batch_pipeline(self) -> None:
-        names = [
-            {
-                "id": "ion_temperature",
-                "unit": "eV",
-                "superseded_by": "electron_temperature",
-            }
-        ]
-        mock_gc = _make_mock_gc()
-        _call_write(names, mock_gc)
-
-        batch = _batch_for(mock_gc, "HAS_SUCCESSOR")
-        assert batch is not None
-        assert any(
-            b["from_name"] == "ion_temperature"
-            and b["to_name"] == "electron_temperature"
-            for b in batch
-        )
+        assert not any("HAS_SUCCESSOR" in c for c in _cyphers(mock_gc))
 
 
 # ---------------------------------------------------------------------------

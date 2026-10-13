@@ -78,7 +78,6 @@ class TestExportOmitsSupersessionLineage:
         live = _candidate(
             "core_ion_temperature",
             deprecates="ion_temperature_core",
-            superseded_by="future_ion_temperature",
         )
         excluded = _candidate("documentation_pending", docs_stage="pending")
         graph = _ReadOnlyGraphClient()
@@ -157,7 +156,6 @@ def test_active_entry_projection_drops_graph_lifecycle_fields() -> None:
             "core_ion_temperature",
             status="active",
             deprecates="ion_temperature_core",
-            superseded_by="future_ion_temperature",
         )
     )
 

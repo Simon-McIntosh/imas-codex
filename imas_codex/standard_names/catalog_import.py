@@ -329,7 +329,6 @@ def _entry_to_graph_dict(
         "source_domains": source_domains,
         "status": str(entry.status) if entry.status else "draft",
         "deprecates": str(entry.deprecates) if entry.deprecates else None,
-        "superseded_by": str(entry.superseded_by) if entry.superseded_by else None,
     }
 
     # Merge grammar fields

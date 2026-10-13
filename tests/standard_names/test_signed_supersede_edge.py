@@ -164,6 +164,44 @@ def _write_authority(path: Path) -> tuple[str, str]:
     return hashlib.sha256(raw).hexdigest(), payload_sha256
 
 
+def test_supersede_postcondition_refuses_missing_signed_edge() -> None:
+    row = signed_manifest._LoadedRow(
+        id=_ROW_ID,
+        identity={"target_id": _PREDECESSOR},
+        participants=({"id": _PREDECESSOR, "kind": "node"},),
+        mutations=(
+            {
+                "kind": "supersede",
+                "participant_id": _PREDECESSOR,
+                "arguments": {"successor_id": _SUCCESSOR},
+            },
+        ),
+        guards=(),
+        orphan_policy="refuse",
+    )
+    authority = signed_manifest._Authority(
+        data={},
+        operation_id=_OPERATION,
+        rows=(row,),
+        receipt_policy={},
+        file_sha256="",
+        payload_sha256="",
+    )
+
+    class _MissingEdge:
+        def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+            if "RETURN node.name_stage AS name_stage" in cypher:
+                return [{"name_stage": "superseded", "status": "superseded"}]
+            if "RETURN collect(relationship.receipt_id)" in cypher:
+                return [{"receipt_ids": [], "successor_ids": [], "count": 0}]
+            raise AssertionError(f"unexpected postcondition query: {cypher}")
+
+    with pytest.raises(SignedManifestConflict, match="successor edge"):
+        signed_manifest._verify_postconditions(
+            _MissingEdge(), authority, [_ROW_ID], "0" * 64
+        )
+
+
 def _apply(
     client: GraphClient, authority_path: Path, file_sha256: str, payload_sha256: str
 ) -> dict[str, Any]:
@@ -282,13 +320,12 @@ def test_supersede_postcondition_refuses_missing_successor_edge(
 def test_supersede_postcondition_refuses_a_second_successor_edge(
     client: GraphClient, tmp_path: Path
 ) -> None:
-    """A derived successor edge beside the signed one is refused.
+    """An unstamped successor edge beside the signed one is refused.
 
-    ``HAS_SUCCESSOR`` is also rebuilt from the ``superseded_by`` scalar, so a
-    predecessor can carry an unstamped edge the signed mutation did not mint.
+    A predecessor can carry an unstamped edge the signed mutation did not mint.
     The postcondition must count every successor edge from the predecessor and
     require the single one to carry the minting receipt; a check that reads
-    only the edge to the signed successor misses the scalar-derived edge
+    only the edge to the signed successor misses the stray edge
     entirely.
     """
     _seed(client)
