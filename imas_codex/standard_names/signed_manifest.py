@@ -2713,8 +2713,59 @@ def _rewire_relocation_retirement_refusal(
     return None
 
 
+def _is_superseded_name(properties: Mapping[str, Any]) -> bool:
+    return (
+        properties.get("name_stage") == "superseded"
+        or properties.get("status") == "superseded"
+    )
+
+
+def _structural_release_lifecycle(
+    child_properties: Mapping[str, Any], parent_properties: Mapping[str, Any]
+) -> tuple[str | None, bool, bool]:
+    """Classify a release pair as ``(refusal, child_retired, parent_retired)``.
+
+    A live child may leave an accepted or a superseded parent. A superseded
+    child is admitted only under a superseded parent. A deprecated name on
+    either side, and an accepted child that is not valid, are refused.
+    """
+    if parent_properties.get("status") == "deprecated":
+        return "signed structural release old parent is deprecated", False, False
+    if child_properties.get("status") == "deprecated":
+        return "signed structural release child is deprecated", False, False
+    parent_retired = _is_superseded_name(parent_properties)
+    if not parent_retired and parent_properties.get("name_stage") != "accepted":
+        return (
+            "signed structural release old parent is neither accepted nor superseded",
+            False,
+            False,
+        )
+    if _is_superseded_name(child_properties):
+        if not parent_retired:
+            return (
+                "signed structural release superseded child requires a "
+                "superseded old parent",
+                True,
+                False,
+            )
+        return None, True, True
+    if child_properties.get("name_stage") != "accepted":
+        return (
+            "signed structural release child is neither accepted nor superseded",
+            False,
+            parent_retired,
+        )
+    if child_properties.get("validation_status") != "valid":
+        return (
+            "signed structural release accepted child is not valid",
+            False,
+            parent_retired,
+        )
+    return None, False, parent_retired
+
+
 def _structural_release_refusal(query: _Query, action: dict[str, Any]) -> str | None:
-    """Require one exact parent edge and independent live child authority."""
+    """Require one exact parent edge and, for a live child, producer authority."""
     row: _LoadedRow = action["row"]
     if not _is_structural_release(row):
         return None
@@ -2725,15 +2776,11 @@ def _structural_release_refusal(query: _Query, action: dict[str, Any]) -> str | 
     old_parent_snapshot = snapshots[str(arguments["old_end_id"])]
     relationship_snapshot = snapshots[str(mutation["participant_id"])]
     child_properties = child_snapshot["properties"]
-    if (
-        child_properties.get("name_stage") != "accepted"
-        or child_properties.get("validation_status") != "valid"
-        or child_properties.get("status") in {"deprecated", "superseded"}
-        or old_parent_snapshot["properties"].get("name_stage") != "accepted"
-        or old_parent_snapshot["properties"].get("status")
-        in {"deprecated", "superseded"}
-    ):
-        return "signed structural release lifecycle is not independently live"
+    lifecycle_refusal, child_retired, parent_retired = _structural_release_lifecycle(
+        child_properties, old_parent_snapshot["properties"]
+    )
+    if lifecycle_refusal is not None:
+        return lifecycle_refusal
 
     closure_rows = query.query(
         """
@@ -2782,7 +2829,7 @@ def _structural_release_refusal(query: _Query, action: dict[str, Any]) -> str | 
         or parents != [expected_parent]
     ):
         return "signed structural release closure does not match exact incumbent parent"
-    if not any(
+    if not child_retired and not any(
         producer["source_properties"].get("status") != "stale" for producer in producers
     ):
         return "signed structural release child has no live producing source"
@@ -2797,6 +2844,10 @@ def _structural_release_refusal(query: _Query, action: dict[str, Any]) -> str | 
         }
     )
     action["structural_release_child_state"] = signed_child_state
+    action["structural_release_retirement"] = {
+        "child": child_retired,
+        "old_parent": parent_retired,
+    }
     return None
 
 
@@ -3785,6 +3836,7 @@ def _verify_structural_release_postcondition(
         MATCH (child:StandardName {id: $child_id}),
               (old:StandardName {id: $old_parent_id})
         RETURN properties(child) AS child_properties,
+               properties(old) AS old_parent_properties,
                [(child)-[parent:HAS_PARENT]->(current:StandardName) | {
                  relationship_properties: properties(parent),
                  parent_id: current.id
@@ -3818,6 +3870,14 @@ def _verify_structural_release_postcondition(
     } != signed_child_state:
         raise SignedManifestConflict(
             "structural release changed child lifecycle or producing-source authority"
+        )
+    retirement = action["structural_release_retirement"]
+    if {
+        "child": _is_superseded_name(state.get("child_properties") or {}),
+        "old_parent": _is_superseded_name(state.get("old_parent_properties") or {}),
+    } != retirement:
+        raise SignedManifestConflict(
+            "structural release changed child or old parent supersession"
         )
 
 
