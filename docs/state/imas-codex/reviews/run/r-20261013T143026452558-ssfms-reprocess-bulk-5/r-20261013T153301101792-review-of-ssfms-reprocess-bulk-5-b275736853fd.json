@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T15:50:05.243Z",
+  "dispatched_at": "2026-10-13T15:33:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-5.json",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: the psrc scope's post_reset_census is null, so the done-when's per-scope post-reset census and its negative control exist for only one of the two reset scopes; only CryoMag's reset is negatively controlled, and a PSRC reset that silently did nothing would leave no contradicting census."
+    },
+    {
+      "file": "docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-5/assigned-category-coverage.svg",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the legend labels the plotted quantity, the census since_start column, 'reprocessed this node', but since_start counts every signal enriched since the reprocess start 2026-10-13T11:53:35Z across the sample node and sibling bulk nodes, so h060029's 728, CryoCTB's 5 and b240064's 4 bar segments attribute other nodes' work to this node, which reset none of those categories."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-5.html",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment cites census_signal_embeddings(facility='jt-60sa') as the hash confirmation, but the run's census (scratch/census.py) calls find_signal_hash_mismatches directly and the facility census it reports is not zero (13 mismatches in lcdb_b260008), so the reader is pointed at the facility-wide figure the fragment elsewhere notes is non-zero."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read against base e44c9048f7c98d6104a27ee6b0371fd298160174; one commit (b275736853fd) adds reprocess-progress-bulk-5.json (131 lines), ssfms-reprocess-bulk-5.html (68 lines) and assigned-category-coverage.svg (1282 lines), 1481 insertions, nothing else.",
+    "done_when": "the done_when names the assigned categories (h060029,CryoMag,CryoCTB,b240064,PSRC; 2980 signals claimed), a terminal state of none at discovered with a description and a matching embedding text hash, per-scope post-reset and final censuses captured to run logs, a continuation fragment, and a $6 ceiling; the final census (scratch/census-assigned-final.json) reports discovered=0, described=3708, hash_mismatch=0 over the five categories, the per-scope enrich cost lines reconcile ($0.03/572.6s, $0.02/620.6s), total spend $0.061 is well under $6, and the fragment lists three categories left for a continue node.",
+    "goal": "the goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; the landed fragment docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-5.json records two scopes reset and finished (PSRC 325, CryoMag 413) and the reset logs (scratch/gate-psrc-reset.log, gate-cryomag-reset.log) each carry the reset line ('Reset 325/413 signals to discovered'), tested by scope1/scope2 reset logs, so every scope this node reset was finished.",
+    "manifest": "read; status complete, commit b275736853fd, changed_paths the two docs files plus the figure svg, tests the reset+enrich+census commands with their results, and negative_control_log 'none: <reason>' with the post-reset CryoMag census named as the control.",
+    "write_paths": "the manifest declares the reprocess-progress-bulk-5.json fragment, the ssfms-reprocess-bulk-5.html fragment and the docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-5 directory; git show --stat b275736853fd lists exactly the two docs files plus the figure svg, all inside the fence, no product or test path."
+  },
+  "justifications": {
+    "durability": "the change is documentation and a figure; it adds no test assertion, and its only guard is CryoMag's post-reset census (scratch/census-cryomag-postreset.json), which would redden if the reset did not run but controls one of the two scopes.",
+    "evidence": "census-assigned-final.json's hash_mismatch=0 comes from find_signal_hash_mismatches (imas_codex/discovery/signals/parallel.py:1794), which recomputes the hash from text rather than reading the stored field, but the PSRC scope carries no post-reset census (reprocess-progress-bulk-5.json:28) and the census gate logs hold only a header and EXIT=0.",
+    "fit": "the fragment follows the evidence-fragment idiom with node-prefixed ids and a project-absolute figure src, but the figure legend (assigned-category-coverage.svg) labels the plotted since_start column 'reprocessed this node' and the caption disagrees with its own bars.",
+    "goal_fidelity": "reprocess-progress-bulk-5.json:scopes records PSRC (325) and CryoMag (413) both finished with discovered=0 and hash_mismatch=0, and lists the remainder for a continue node.",
+    "reuse": "the landed change adds no new capability; the scratch census reuses find_signal_hash_mismatches (imas_codex/discovery/signals/parallel.py:1794), which the census already owns, extending no parallel implementation.",
+    "scope_discipline": "every path in the diff against e44c9048f7c98 is one of the three declared write paths, with no product or test file touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; the landed fragment docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-5.json records two scopes reset and finished (PSRC 325, CryoMag 413) and the reset logs (scratch/gate-psrc-reset.log, gate-cryomag-reset.log) each carry the reset line ('Reset 325/413 signals to discovered'), tested by scope1/scope2 reset logs, so every scope this node reset was finished.\nVERDICT done_when: the done_when names the assigned categories (h060029,CryoMag,CryoCTB,b240064,PSRC; 2980 signals claimed), a terminal state of none at discovered with a description and a matching embedding text hash, per-scope post-reset and final censuses captured to run logs, a continuation fragment, and a $6 ceiling; the final census (scratch/census-assigned-final.json) reports discovered=0, described=3708, hash_mismatch=0 over the five categories, the per-scope enrich cost lines reconcile ($0.03/572.6s, $0.02/620.6s), total spend $0.061 is well under $6, and the fragment lists three categories left for a continue node.\nVERDICT write_paths: the manifest declares the reprocess-progress-bulk-5.json fragment, the ssfms-reprocess-bulk-5.html fragment and the docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-5 directory; git show --stat b275736853fd lists exactly the two docs files plus the figure svg, all inside the fence, no product or test path.\nVERDICT manifest: read; status complete, commit b275736853fd, changed_paths the two docs files plus the figure svg, tests the reset+enrich+census commands with their results, and negative_control_log 'none: <reason>' with the post-reset CryoMag census named as the control.\nVERDICT diff: read against base e44c9048f7c98d6104a27ee6b0371fd298160174; one commit (b275736853fd) adds reprocess-progress-bulk-5.json (131 lines), ssfms-reprocess-bulk-5.html (68 lines) and assigned-category-coverage.svg (1282 lines), 1481 insertions, nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: reprocess-progress-bulk-5.json:scopes records PSRC (325) and CryoMag (413) both finished with discovered=0 and hash_mismatch=0, and lists the remainder for a continue node.\nSCORE evidence: 15\nJUSTIFICATION evidence: census-assigned-final.json's hash_mismatch=0 comes from find_signal_hash_mismatches (imas_codex/discovery/signals/parallel.py:1794), which recomputes the hash from text rather than reading the stored field, but the PSRC scope carries no post-reset census (reprocess-progress-bulk-5.json:28) and the census gate logs hold only a header and EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff against e44c9048f7c98 is one of the three declared write paths, with no product or test file touched.\nSCORE durability: 10\nJUSTIFICATION durability: the change is documentation and a figure; it adds no test assertion, and its only guard is CryoMag's post-reset census (scratch/census-cryomag-postreset.json), which would redden if the reset did not run but controls one of the two scopes.\nSCORE fit: 15\nJUSTIFICATION fit: the fragment follows the evidence-fragment idiom with node-prefixed ids and a project-absolute figure src, but the figure legend (assigned-category-coverage.svg) labels the plotted since_start column 'reprocessed this node' and the caption disagrees with its own bars.\nSCORE reuse: 20\nJUSTIFICATION reuse: the landed change adds no new capability; the scratch census reuses find_signal_hash_mismatches (imas_codex/discovery/signals/parallel.py:1794), which the census already owns, extending no parallel implementation.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-5.json:28 follow-on: the psrc scope's post_reset_census is null, so the done-when's per-scope post-reset census and its negative control exist for only one of the two reset scopes; only CryoMag's reset is negatively controlled, and a PSRC reset that silently did nothing would leave no contradicting census.\nFINDING docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-5/assigned-category-coverage.svg:1 follow-on: the legend labels the plotted quantity, the census since_start column, 'reprocessed this node', but since_start counts every signal enriched since the reprocess start 2026-10-13T11:53:35Z across the sample node and sibling bulk nodes, so h060029's 728, CryoCTB's 5 and b240064's 4 bar segments attribute other nodes' work to this node, which reset none of those categories.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-5.html:18 follow-on: the fragment cites census_signal_embeddings(facility='jt-60sa') as the hash confirmation, but the run's census (scratch/census.py) calls find_signal_hash_mismatches directly and the facility census it reports is not zero (13 mismatches in lcdb_b260008), so the reader is pointed at the facility-wide figure the fragment elsewhere notes is non-zero.",
+  "review_run_id": "r-20261013T153301101792-review-of-ssfms-reprocess-bulk-5-b275736853fd",
+  "reviewed_base_sha": "e44c9048f7c98d6104a27ee6b0371fd298160174",
+  "reviewed_head_sha": "b275736853fd0be9334369691d604503933deee5",
+  "reviewed_run_id": "r-20261013T143026452558-ssfms-reprocess-bulk-5",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T15:48:09.201662+00:00",
+  "total": 97,
+  "verdict": "SOUND WITH FINDINGS"
+}
