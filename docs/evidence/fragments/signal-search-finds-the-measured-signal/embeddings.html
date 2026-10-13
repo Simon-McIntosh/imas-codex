@@ -117,4 +117,14 @@
     byte-identical to the base revision — so the refusal is a labelling gap the improved vectors opened,
     not a lowering of the arm, and it is carried as a follow-on for the fixture owner.
   </p>
+
+  <p id="ssfms-rerank-measure-module-embed-text-command">
+    <strong>The ported embed-text measurement is a module.</strong> Section 5's description-only
+    against name-plus-description-plus-unit comparison is reproduced by
+    <code>tests/llm/measure_search_rankings.py</code>, which embeds every eligible signal in memory
+    both ways and scores a vector-only arm and an RRF arm per text, writing no stored vector. Run
+    from a worktree, reusing the main checkout's environment:
+
+    <code>UV_PROJECT_ENVIRONMENT=&lt;main&gt;/.venv PYTHONPATH=$PWD uv run --no-sync python -m tests.llm.measure_search_rankings 1 --section embed_text</code>
+  </p>
 </section>

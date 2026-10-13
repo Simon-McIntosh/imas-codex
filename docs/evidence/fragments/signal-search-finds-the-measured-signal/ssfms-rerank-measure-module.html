@@ -1,0 +1,63 @@
+<section id="ssfms-rerank-measure-module-node" data-reckon="fragment">
+  <h2 id="ssfms-rerank-measure-module-node-title">A measurement module for the signal search</h2>
+
+  <p id="ssfms-rerank-measure-module-node-what">
+    This node builds <code>tests/llm/measure_search_rankings.py</code>, the module that scores, for a
+    given number of passes, the signal arms and the two ported measurements, together with the harness
+    changes the module rests on. It runs as
+    <code>python -m tests.llm.measure_search_rankings [passes] [--section signal|docs_code|embed_text]</code>:
+    <code>signal</code> scores the fused order alone (<code>rrf</code>) and both rerank arms over the
+    passes, each rerank arm building its candidate state with the product's
+    <code>_signal_rerank_state</code> (the generic arm judged on the generic relevance question, the
+    role-aware arm on the role-aware one); <code>docs_code</code> ports section 4; <code>embed_text</code>
+    ports section 5. Only the two Jev sections spend on the discovery-relevance seat, and each reports
+    the spend read from the response usage the judged call layer returns.
+  </p>
+
+  <p id="ssfms-rerank-measure-module-node-docs-code">
+    <strong>Section 4 reproduced.</strong> The port retrieves the 18 JT-60SA docs and code questions in
+    <code>tests/llm/fixtures/docs_code_search_questions.json</code> live and reranks them live, then
+    scores labelled-only nDCG@10 at pool 60. Two passes give <strong>0.5345</strong> and
+    <strong>0.5303</strong> against section 4's <strong>0.5136</strong> — the second inside the ±0.02
+    band, the first a hair outside it — while the embedding order under the same labels lands at
+    <strong>0.4627</strong> in <em>both</em> passes, exactly section 4's 0.4627. The embedding figure
+    reproducing to the digit shows the fixture and the label rule are faithful; the residual is the
+    judge's ordering over repeats, which is what the band absorbs.
+  </p>
+
+  <p id="ssfms-rerank-measure-module-node-spend">
+    <strong>Jev spent reproducing section 4.</strong> Read from the response usage the judged call layer
+    returns: <strong>1191 calls</strong> and <strong>$0.040528</strong> per pass, over 18 questions at
+    pool 60 (the code questions rerank a pool of 60, the docs questions up to 92, since the docs search
+    scores chunks and documents together). Two passes total <strong>2382 calls / $0.081056</strong>.
+    No test in the suite spends Jev: the suite's arms carry a switch and never call the seat, and the
+    paid scoring lives only in this module.
+  </p>
+
+  <p id="ssfms-rerank-measure-module-node-harness">
+    <strong>Harness changes.</strong> In <code>tests/llm/test_signal_search_goldens.py</code>,
+    <code>_additive_rank</code> breaks score ties by signal id, the arm-table test asserts
+    <code>rrf</code> above the frozen <code>additive_rule</code> on mean nDCG@10, and the rerank arms
+    refuse an unlabelled candidate <em>anywhere</em> in their pool of 60 rather than only in the top 10,
+    because the rerank may lift any pool member into its top 10. In
+    <code>tests/llm/test_search_tools.py</code>, a test with the product switch on and <code>k=10</code>
+    asserts the rerank receives 60 candidates.
+  </p>
+
+  <p id="ssfms-rerank-measure-module-node-control">
+    <strong>Declared negative control.</strong> With the rerank arms' label refusal narrowed back to
+    their top 10,
+    <code>test_a_rerank_arm_refuses_an_unlabelled_candidate_anywhere_in_its_pool</code> fails
+    (<code>DID NOT RAISE UnlabelledCandidates</code>, <code>EXIT=1</code>); at head the same test, and
+    its positive control <code>test_a_fully_labelled_rerank_pool_is_not_refused</code>, both pass
+    (<code>EXIT=0</code>). The focused gate over the two changed files is green: 122 passed, 8 skipped,
+    3 deselected (<code>EXIT=0</code>).
+  </p>
+
+  <p id="ssfms-rerank-measure-module-node-logs">
+    <strong>Logs.</strong> Module runs: <code>docs_code_measure.log</code> and
+    <code>docs_code_measure_2.log</code>; negative control: <code>negative_control.log</code>; positive
+    control: <code>negative_control_head.log</code>; gate: <code>gate_llm.log</code> — all under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T045722386733-ssfms-rerank-measure-module</code>.
+  </p>
+</section>

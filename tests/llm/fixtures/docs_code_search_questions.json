@@ -1,0 +1,2293 @@
+{
+  "facility": "jt-60sa",
+  "note": "Vendored from the search-rerank prototype's queries.json and labels.json (crew reports, imas-codex/search-rerank-prototype). Questions carry the query, each labelled candidate's id and its hand grade, and no candidate text: the ported docs-and-code measurement retrieves candidates live and scores them against these grades.",
+  "k": 30,
+  "questions": [
+    {
+      "id": "q01",
+      "kind": "code",
+      "query": "Where are the flux loop positions defined?",
+      "labels": [
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_0:8cbf5304",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_20:6c0059c9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_5:a1f023aa",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_4:0639e56a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:nllsqf:f1c7bbce:chunk_0:a4704ec4",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqlinc:799487fb:chunk_5:c1f7e677",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_2:55146cd8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_1:71ba3f82",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_2:cff8ab02",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:jt60u:2fe7cc79:chunk_2:e796c79d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:FleddTool:615f502b:chunk_2:cf06cd2d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_15:7ec33c07",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_3:94637338",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:jt60u:2fe7cc79:chunk_4:5838284c",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqoutex:78ecc232:chunk_0:860bfec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqlinc:799487fb:chunk_3:44ac18e8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqadj:006981cd:chunk_1:f1525a09",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Plot:45d8c056:chunk_5:67251fac",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:jt60u:2fe7cc79:chunk_3:15f1ce2e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqequb:54ee7948:chunk_0:c92f3da7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Plot:45d8c056:chunk_10:1e503cf2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:56e0a049:chunk_4:e065263f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_0:1db330af",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqlinc:799487fb:chunk_0:bd6de22f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqlinc:799487fb:chunk_4:aeb273be",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_4:9ab7c31f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_2:48b52f4f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_19:573c4c07",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_19:c5d2145c",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_2:f6e6d91b",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q02",
+      "kind": "code",
+      "query": "How does getseldata read EDDB channels?",
+      "labels": [
+        {
+          "id": "jt-60sa:edas_eddb_api:7127d449:chunk_1:8890374b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7e1df638:chunk_1:8890374b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7e1df638:chunk_12:9b44b2af",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7127d449:chunk_12:0b648722",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7127d449:chunk_2:0ad3a659",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7e1df638:chunk_2:0ad3a659",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mapping:f9f5babc:chunk_8:2e6e2d9f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mapping:f9f5babc:chunk_7:771aa0ac",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7e1df638:chunk_5:e29f5740",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7127d449:chunk_5:e29f5740",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7127d449:chunk_4:3041d3b0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7e1df638:chunk_4:3041d3b0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:egis_plantmonitor_workspace:81780cd0:chunk_2:f09aa034",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Adam3Tool:65104958:chunk_2:7171158f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7e1df638:chunk_8:05953d0e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7127d449:chunk_8:6f63645d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7e1df638:chunk_9:a0314432",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7127d449:chunk_9:96281723",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:geteddb:ea9a9c91:chunk_2:dc5e528a",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:geteddbt:2eaccd54:chunk_2:b307ac9b",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Adam3Tool:65104958:chunk_3:25bb656d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu:f46cc4f8:chunk_1:804a1957",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:shtrd96:357f7abe:chunk_0:f9e5b8fb",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu96:d4174322:chunk_4:139288d2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu:c3281650:chunk_3:2334d495",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu:c3281650:chunk_2:60db4740",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu96:d4174322:chunk_3:4ae101a1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:main:a65ff743:chunk_0:eab53181",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu:f46cc4f8:chunk_0:5ebe6720",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqvacu:d09c648a:chunk_1:f7e386f8",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q03",
+      "kind": "code",
+      "query": "Which routine writes the equilibrium to EDDB?",
+      "labels": [
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_16:e869245f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Eqread:81ba0f68:chunk_5:68ea6e88",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_3:bb5c51a9",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_3:cd80857d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_11:cfbeaa0e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_6:c0dfbc7b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_10:1aec3fc0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_17:00ea3451",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_2:cad98c84",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:FleddTool:615f502b:chunk_2:cf06cd2d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_18:2e8ce72f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mapping:f9f5babc:chunk_23:dc1006cf",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_0:4d1a4f62",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_2:55146cd8",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_6:2fe723d1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_0:8cbf5304",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mapping:f9f5babc:chunk_16:f945d49a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_2:f6e6d91b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_7:b8cf5237",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_1:bc975f07",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu:c3281650:chunk_5:93cae08c",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu96:d4174322:chunk_6:5868c1ee",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:main:fc495df8:chunk_0:42c73378",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_profiledata_creation_monitor_area:adcd2348:chunk_22:c38e7cb0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_9:300ecde3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqdbget_remote:911c7e5c:chunk_3:31943d3e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqequb:54ee7948:chunk_0:c92f3da7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_8:56a64e3b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:8ee5cef9:chunk_7:5b5caec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:c7c2b8fb:chunk_7:5b5caec5",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q04",
+      "kind": "code",
+      "query": "Which routine computes the magnetic flux correction due to the ferrite tiles at the flux loops?",
+      "labels": [
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_2:55146cd8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_3:bb5c51a9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_1:71ba3f82",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:nllsqf:f1c7bbce:chunk_0:a4704ec4",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_0:8cbf5304",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:main:a65ff743:chunk_2:1b116ad0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_5:a1f023aa",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:main:fc495df8:chunk_0:42c73378",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_2:f6e6d91b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:mgpos:b87256c1:chunk_0:68b36433",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_11:cfbeaa0e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_2:eed87e06",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_2:cff8ab02",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:bfld_ex:4781e3c9:chunk_0:5fcbdcd2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu96:d4174322:chunk_2:686031bf",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu:c3281650:chunk_1:dcc6571f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ablcnv:8cb62950:chunk_0:4f184f7d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_9:300ecde3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqouta:b3b171d5:chunk_0:12844ae2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_3:94637338",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_5:cbebbac0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:contor:53fe6513:chunk_2:11ff866a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Eqread:81ba0f68:chunk_2:3f6d0944",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_3:2670e317",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eltg95:b1790053:chunk_0:9f6d978e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_20:6c0059c9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_12:b72c503a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_9:e800cee2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:plteq:dd434a36:chunk_1:3b64674b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqmagf:3a3cd544:chunk_1:cbee6f57",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q05",
+      "kind": "code",
+      "query": "How is the poloidal flux grid built in SELENE?",
+      "labels": [
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_3:bb5c51a9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_2:55146cd8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_2:f6e6d91b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_0:8cbf5304",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_0:1db330af",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:nllsqf:f1c7bbce:chunk_0:a4704ec4",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:egis_plantmonitor_workspace:81780cd0:chunk_2:f09aa034",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_5:a1f023aa",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_3:2670e317",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqread_main:67f07e95:chunk_2:c1af6828",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_4:0639e56a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ferpol:b399de72:chunk_0:f01a0c58",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_2:cff8ab02",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:mcxr_ex:8ec0b9a8:chunk_0:87bf0fc9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:jt60u:2fe7cc79:chunk_12:2793fbf0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_10:1aec3fc0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:jt60u:2fe7cc79:chunk_2:e796c79d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:cxr_ex:9c55d69c:chunk_0:b99c7b45",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_20:6c0059c9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_2:48b52f4f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqoutex:78ecc232:chunk_0:860bfec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_18:dd974915",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_11:cfbeaa0e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqvag:481e8d28:chunk_0:4e47cfef",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_default_device:a776f23f:chunk_2:b40d6a31",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:getcxr:43e2c3bb:chunk_0:f1fa3edb",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_22:be5cabe3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_default_device:a776f23f:chunk_3:8db0e03d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_2:eed87e06",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:plteq:dd434a36:chunk_1:3b64674b",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q06",
+      "kind": "code",
+      "query": "Which routine reads the coil geometry?",
+      "labels": [
+        {
+          "id": "jt-60sa:eqjt60sa:b13eea83:chunk_0:996448fc",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eqjt60:73111ab1:chunk_0:5e38bb00",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_3:cd80857d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_11:cfbeaa0e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqouta:b3b171d5:chunk_3:385af866",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqoutex:78ecc232:chunk_0:860bfec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Plot:45d8c056:chunk_10:1e503cf2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_10:1aec3fc0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:jt60u:2fe7cc79:chunk_8:9b3400f3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu:c3281650:chunk_5:93cae08c",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:geteddb:ea9a9c91:chunk_3:c9814d3f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:geteddbt:2eaccd54:chunk_3:7e0e8b52",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu96:d4174322:chunk_6:5868c1ee",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_2:f6e6d91b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqvacu:d09c648a:chunk_0:4ab929f3",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_0:8cbf5304",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqvac0:2b6b4af9:chunk_0:67aae0cd",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:contor:53fe6513:chunk_1:38ed23ad",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqouta:b3b171d5:chunk_2:a254cba5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqvacu3:e421e885:chunk_0:5b1755bf",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eqvacu:9c222269:chunk_1:7b0b641e",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eqvacu:9c222269:chunk_0:a478761d",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Eqread:81ba0f68:chunk_12:02602e7d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqvacl:f6145e15:chunk_0:e68f6d7e",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_16:e869245f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Eqread:81ba0f68:chunk_5:68ea6e88",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:shtrd96:357f7abe:chunk_3:551448ba",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqadj:006981cd:chunk_1:f1525a09",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:shtrd:1f5c1c63:chunk_1:f61f69c8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_9:300ecde3",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q07",
+      "kind": "code",
+      "query": "Where is the plasma boundary or vessel contour defined?",
+      "labels": [
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_2:55146cd8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:plteq:dd434a36:chunk_0:f1c92ddd",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqread_main:67f07e95:chunk_3:9384627a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_profiledata_creation_monitor_area:adcd2348:chunk_26:38dadb10",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:jt60u:2fe7cc79:chunk_12:2793fbf0",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eslice_profiledata_creation_monitor_area:adcd2348:chunk_16:cf1961b1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:FleddTool:615f502b:chunk_2:cf06cd2d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:contor:53fe6513:chunk_0:463f50c9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_19:c5d2145c",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:plteq:dd434a36:chunk_1:3b64674b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqread_main:67f07e95:chunk_2:c1af6828",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_8:576f3917",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:dswt70:f13a13d7:chunk_0:b766669d",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:prb_ex:c0728042:chunk_0:714728d1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqoutex:78ecc232:chunk_0:860bfec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:lprb1_ex:450f5a96:chunk_0:ce343c3e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Eqread:81ba0f68:chunk_5:68ea6e88",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:jt60u:2fe7cc79:chunk_2:e796c79d",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:esurf_default_device:a776f23f:chunk_2:b40d6a31",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_22:be5cabe3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:egis_custom_classes_matplotlib_figureoptions_EQ:35b95268:chunk_7:51f83328",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqtrace:77b34c43:chunk_2:67bcdf35",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_1:71ba3f82",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Plot:45d8c056:chunk_2:81704208",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_15:90e324be",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:56e0a049:chunk_4:e065263f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_mbdb_api:85801a1f:chunk_2:674169ea",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_device_widget_jt60sa:c3757721:chunk_10:7ec9da56",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_device_widget_jt60sa:c3757721:chunk_12:21506bf2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:egis_custom_classes_matplotlib_figureoptions_eSLICE:a3a343ee:chunk_0:b92f582b",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q08",
+      "kind": "code",
+      "query": "Which routine performs the Grad-Shafranov equilibrium solve?",
+      "labels": [
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_15:1ae82bef",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_16:e869245f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_17:e49d9542",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_1:71ba3f82",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_16:dc94d99d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_20:6c0059c9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Eqread:81ba0f68:chunk_5:68ea6e88",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_17:95839d9f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_21:6306b698",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_3:cd80857d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_3:bb5c51a9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu:c3281650:chunk_5:93cae08c",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu96:d4174322:chunk_6:5868c1ee",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_11:cfbeaa0e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_3:37ff09d7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_13:fc3940a3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_6:c0dfbc7b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_5:8985cd68",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_10:1aec3fc0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_18:57ef7e2a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_19:573c4c07",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mapping:f9f5babc:chunk_23:dc1006cf",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:FleddTool:615f502b:chunk_2:cf06cd2d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_2:cad98c84",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqjt60:73111ab1:chunk_0:5e38bb00",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:56e0a049:chunk_2:f9a505e2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqjt60sa:b13eea83:chunk_0:996448fc",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:main:fc495df8:chunk_0:42c73378",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_0:4d1a4f62",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mapping:f9f5babc:chunk_16:f945d49a",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q09",
+      "kind": "code",
+      "query": "How does the code access measured shot data from the facility data system?",
+      "labels": [
+        {
+          "id": "jt-60sa:egis_plantmonitor_workspace:81780cd0:chunk_2:f09aa034",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_19:c5d2145c",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:edas_mbdb_api:85801a1f:chunk_8:51b458f5",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_17:e49d9542",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Adam3Tool:65104958:chunk_2:7171158f",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:edas_mbdb_api:85801a1f:chunk_10:cd49e19a",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:edas_mbdb_api:85801a1f:chunk_9:70f91065",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:tms_ex:1c75f008:chunk_1:6703b2e3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_16:e869245f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_17:00ea3451",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_18:dd974915",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_0:4d1a4f62",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqdb_get:62ef538e:chunk_0:b5c961ba",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eqlist_get:e44d059d:chunk_0:95940416",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Adam3Tool:65104958:chunk_3:25bb656d",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mdsplus:34b21451:chunk_5:8c72a2bc",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mdsplus:b787a8c5:chunk_5:8c72a2bc",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_6:c0dfbc7b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:FleddTool:615f502b:chunk_2:cf06cd2d",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:edas_mbdb_api:85801a1f:chunk_12:89042ba8",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_plantmonitor:ad2dd111:chunk_8:b141faf2",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Fledd:56e0a049:chunk_2:f9a505e2",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Adam3Tool:65104958:chunk_4:f3236795",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eqdata_get:4fcd8213:chunk_0:1046db2a",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Adam3:274d1dcf:chunk_6:315b31c6",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_plantmonitor:ad2dd111:chunk_7:3bb7f2e5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:set_limitr_info:60e0743e:chunk_2:b98b8454",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_mbdb_api:85801a1f:chunk_2:674169ea",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:localio:cabe5837:chunk_3:33986677",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mdsplus:b787a8c5:chunk_2:95b483d1",
+          "grade": 1
+        }
+      ]
+    },
+    {
+      "id": "q10",
+      "kind": "code",
+      "query": "Which routine extracts the separatrix or the last closed flux surface?",
+      "labels": [
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_10:1aec3fc0",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_11:cfbeaa0e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_2:f6e6d91b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_0:1db330af",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_3:bb5c51a9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_main_window:8a948275:chunk_9:3eb7e0c5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:contor:53fe6513:chunk_2:11ff866a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_9:300ecde3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqlinc:799487fb:chunk_5:c1f7e677",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:c7c2b8fb:chunk_6:1a95cb70",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:8ee5cef9:chunk_6:1a95cb70",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Eqread:81ba0f68:chunk_2:3f6d0944",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_0:8cbf5304",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_15:1ae82bef",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_8:09a6ec94",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:8ee5cef9:chunk_7:5b5caec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:c7c2b8fb:chunk_7:5b5caec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_main_window:8a948275:chunk_8:edf0419a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_2:55146cd8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_2:e3d2e63e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:prb_ex:c0728042:chunk_0:714728d1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:contor:53fe6513:chunk_1:38ed23ad",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqouta:b3b171d5:chunk_0:12844ae2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:plteq:dd434a36:chunk_0:f1c92ddd",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_5:7964f5ba",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:egis_custom_classes_matplotlib_figureoptions_EQ:35b95268:chunk_0:b78df920",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqread_main:67f07e95:chunk_3:9384627a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:mgpos:b87256c1:chunk_0:68b36433",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_1:71ba3f82",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:calc_DL:fa027c53:chunk_1:652fdb0e",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q11",
+      "kind": "code",
+      "query": "Which routine writes the plasma boundary outline to a file?",
+      "labels": [
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_11:cfbeaa0e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:prbplt3:95d8f8a8:chunk_0:4be7aab3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_3:bb5c51a9",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_10:1aec3fc0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqmagf:3a3cd544:chunk_0:9c3f5fc4",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Eqread:81ba0f68:chunk_5:68ea6e88",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:plteq:dd434a36:chunk_2:215992c0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:8ee5cef9:chunk_7:5b5caec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:c7c2b8fb:chunk_7:5b5caec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_0:8cbf5304",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_2:eed87e06",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fwlprb:49f2556a:chunk_1:71ba3f82",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:egis_custom_classes_matplotlib_figureoptions_eSLICE:a3a343ee:chunk_0:b92f582b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:egis_custom_classes_matplotlib_figureoptions_eSLICE:43e631f2:chunk_0:663e7998",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_2:48b52f4f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_2:cad98c84",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_15:1ae82bef",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_5:8985cd68",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Adam3:274d1dcf:chunk_2:f4fa431e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:egis_custom_classes_matplotlib_figureoptions_EQ:35b95268:chunk_0:b78df920",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_profiledata_creation_monitor_area:adcd2348:chunk_22:c38e7cb0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_9:300ecde3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_17:e49d9542",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_2:55146cd8",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:eqequb:54ee7948:chunk_0:c92f3da7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu96:d4174322:chunk_5:dd67184f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqinpu:c3281650:chunk_4:0ecb7da6",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ablcnv:8cb62950:chunk_0:4f184f7d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqsepb:679027f5:chunk_5:3521edf1",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:main:fc495df8:chunk_0:42c73378",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q12",
+      "kind": "code",
+      "query": "Which routine reads the plasma current into the magnetics common block?",
+      "labels": [
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_2:55146cd8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_17:e49d9542",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:efitout:bd5fcd63:chunk_3:bb5c51a9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_0:8cbf5304",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_16:e869245f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:nllsqf:f1c7bbce:chunk_0:a4704ec4",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:movprb:7bc1236a:chunk_11:cfbeaa0e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:c7c2b8fb:chunk_4:0a0b32bf",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:esurf_main_window:8ee5cef9:chunk_4:0a0b32bf",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_profiledata_creation_monitor_area:adcd2348:chunk_22:c38e7cb0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:fercor:3598b053:chunk_3:2670e317",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:2972c173:chunk_17:00ea3451",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqoutex:78ecc232:chunk_0:860bfec5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_13:003035fa",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Adam3:274d1dcf:chunk_8:aaf4aa5c",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7127d449:chunk_11:5be87cc0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Adam3Tool:65104958:chunk_6:87c9542a",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7e1df638:chunk_11:e8d74ea4",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mapping:f9f5babc:chunk_12:a48e692e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_2:48b52f4f",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqjt60sa:b13eea83:chunk_0:996448fc",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqjt60:73111ab1:chunk_0:5e38bb00",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eqsdl:f5452d6a:chunk_0:9bb3ad0b",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_eddb_api:7127d449:chunk_10:8aa73fa2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_slicetool_eq:fe8d89d6:chunk_14:95f28371",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Fledd:b5f5ab92:chunk_3:cd80857d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:edas_device_widget_jt60sa:c3757721:chunk_15:8b35c4ba",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:datalineinputparams_mdsplus:b787a8c5:chunk_10:893a3d2d",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:FleddTool:615f502b:chunk_3:6f892d6e",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:eslice_main_window:8a948275:chunk_2:b1be2b12",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q13",
+      "kind": "docs",
+      "query": "How does a user access the JT-60SA equilibrium database?",
+      "labels": [
+        {
+          "id": "jt-60sa:EddbWrapperEddbreadCatTable:chunk_5",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:EGIS_eng:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGISPreface:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICEPreface:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EddbWrapperEddbreadCatTable:chunk_6",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Mecs_eng:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESURFPreface:chunk_3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ExperimentDBEng:chunk_7",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:Mecs_eng:chunk_14",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ExperimentDBEng:chunk_1",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:EGIS4UsingAnExternalDataFile:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:use_compiler-en.html:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_31",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_32",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_33",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_30",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:use_login-en.html:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:use_file-en.html:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:use_login-en.html:chunk_9",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_6",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:use_file-en.html:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:use_login-en.html:chunk_8",
+          "grade": 1
+        }
+      ]
+    },
+    {
+      "id": "q14",
+      "kind": "docs",
+      "query": "How do you set up the environment on the JT-60SA data analysis server?",
+      "labels": [
+        {
+          "id": "jt-60sa:EGISPreface:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICEPreface:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESURFPreface:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGIS_eng:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:SiteUpdateLog:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ACCOME:chunk_192",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ExperimentDBEng:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ExperimentDBEng:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EddbWrapperEddbreadCatTable:chunk_5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng:chunk_250",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng:chunk_186",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng2:chunk_181",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng2:chunk_245",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Mecs_eng:chunk_13",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng2:chunk_276",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:use_file-en.html:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_6",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_32",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_33",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_30",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:JT60SADataHandbook:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:use_file-en.html:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_4",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_26",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_27",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGIS4UsingAnExternalDataFile:chunk_2",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q15",
+      "kind": "docs",
+      "query": "How is measurement data mapped onto the magnetic flux surfaces as spatial profile data?",
+      "labels": [
+        {
+          "id": "jt-60sa:ESLICEPreface:chunk_2",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE1Introduction:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICEPreface:chunk_4",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng:chunk_283",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng2:chunk_272",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSout_eng:chunk_4",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:20210510_MECS_Output_File_v16_YM.xlsx:chunk_13",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSout_eng:chunk_13",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:20210510_MECS_Output_File_v16_YM.xlsx:chunk_241",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng:chunk_136",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE:chunk_21",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng2:chunk_134",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICEPreface:chunk_3",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:20210510_MECS_Output_File_v16_YM.xlsx:chunk_14",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:20210510_MECS_Output_File_v16_YM.xlsx:chunk_240",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE:chunk_4",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_1",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE11CreatingInputDataForTOPICS:chunk_9",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_15",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE11CreatingInputDataForTOPICS:chunk_8",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_13",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_14",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_12",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE3UsingAlgebraicFunctionToFitTheMappedProfile:chunk_14",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE11CreatingInputDataForTOPICS:chunk_10",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE8PerformingTheAbelTransform:chunk_12",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE3UsingAlgebraicFunctionToFitTheMappedProfile:chunk_0",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE8PerformingTheAbelTransform:chunk_13",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE9ConvertingTheRhoType:chunk_2",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_16",
+          "grade": 1
+        }
+      ]
+    },
+    {
+      "id": "q16",
+      "kind": "docs",
+      "query": "What is the procedure to run the pru command for equilibrium database access?",
+      "labels": [
+        {
+          "id": "jt-60sa:ESliceOutline:chunk_9",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESliceOutline:chunk_8",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:use_login-en.html:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESliceOutline:chunk_10",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE7CreatingAProfile:chunk_8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE7CreatingAProfile:chunk_9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ExperimentDBEng:chunk_6",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGIS1Introduction:chunk_15",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ExperimentDBEng:chunk_5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_129",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_118",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_110",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_124",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_133",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_128",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_116",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_113",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_114",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_130",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_115",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_117",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_120",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_125",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_127",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_119",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_131",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_111",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_126",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSver_eng:chunk_123",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGIS3UsingDataOfADatabase:chunk_7",
+          "grade": 0
+        }
+      ]
+    },
+    {
+      "id": "q17",
+      "kind": "docs",
+      "query": "How is fitting performed on the equilibrium data in the ESLICE analysis tool?",
+      "labels": [
+        {
+          "id": "jt-60sa:ESLICE1Introduction:chunk_6",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE1Introduction:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICEPreface:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESliceOutline:chunk_4",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE1Introduction:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICEPreface:chunk_6",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESliceOutline:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESliceOutline:chunk_6",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESliceOutline:chunk_3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE1Introduction:chunk_10",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESliceOutline:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE1Introduction:chunk_9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESliceOutline:chunk_5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE:chunk_3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE1Introduction:chunk_18",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE1Introduction:chunk_5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE5SavingTheCreatedData:chunk_0",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE8PerformingTheAbelTransform:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGIS4UsingAnExternalDataFile:chunk_4",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGIS4UsingAnExternalDataFile:chunk_5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGIS4UsingAnExternalDataFile:chunk_6",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGIS4UsingAnExternalDataFile:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE11CreatingInputDataForTOPICS:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE11CreatingInputDataForTOPICS:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE10ExportingAnalysisResult:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE6LoadingTheSavedLCDBData:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICE2MappingTheMeasurementData:chunk_8",
+          "grade": 1
+        },
+        {
+          "id": "jt-60sa:ESLICE5SavingTheCreatedData:chunk_3",
+          "grade": 1
+        }
+      ]
+    },
+    {
+      "id": "q18",
+      "kind": "docs",
+      "query": "What are the login and account steps for the JT-60SA analysis server?",
+      "labels": [
+        {
+          "id": "jt-60sa:MECSfeat_eng2:chunk_245",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ESLICEPreface:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ExperimentDBEng:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Mecs_eng:chunk_13",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ExperimentDBEng:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGISPreface:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGISPreface:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:MECSfeat_eng2:chunk_238",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ACCOME:chunk_192",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EGIS_eng:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:SiteUpdateLog:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:ExperimentDB:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:EDASContact:chunk_0",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:Mecs_eng:chunk_12",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_8",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_31",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_32",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_33",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_2",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_30",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_9",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_3",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_7",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_6",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_26",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:use_file-en.html:chunk_1",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_27",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_5",
+          "grade": 0
+        },
+        {
+          "id": "jt-60sa:IntroductionOfJT60SADBSystem:chunk_4",
+          "grade": 0
+        }
+      ]
+    }
+  ]
+}

@@ -379,21 +379,23 @@ def arm_ranking(question: Question, ctx) -> list[str]:
 def _rerank_arm(arm: str, question: Question, pool: list[str], ctx) -> list[str]:
     """Reorder ``pool`` with a Jev relevance score (spends on the Jev seat).
 
-    The role-aware arm uses the five-level role question; the generic arm uses
-    the product's existing ``_RERANK_QUESTION`` levels, so the two are measured
-    beside each other on the same pool and query.
+    Both rerank arms judge each candidate through the product's signal state
+    builder, so the switch is decided on the state that ships rather than the
+    generic document state the prototype used. The role-aware arm uses the
+    five-level role question; the generic arm uses the product's existing
+    ``_RERANK_QUESTION`` levels, so the two are measured beside each other on
+    the same pool and query.
     """
     from imas_codex.discovery.base.judgment import rerank_pool
     from imas_codex.llm.search_tools import (
         _RERANK_QUESTION,
         _RERANK_SERVICE,
-        _rerank_state,
         _run_batch,
+        _signal_rerank_state,
     )
     from imas_codex.settings import get_model
 
-    briefs = _signal_texts(ctx.gc, pool)
-    candidates = [{"id": sid, "text": briefs.get(sid, ""), "path": sid} for sid in pool]
+    candidates = _signal_candidates(ctx.gc, pool)
     if arm == "rrf_rerank_role":
         levels = _ROLE_RERANK_LEVELS
         instructions = _ROLE_RERANK_INSTRUCTIONS
@@ -404,7 +406,7 @@ def _rerank_arm(arm: str, question: Question, pool: list[str], ctx) -> list[str]
         rerank_pool(
             question.query,
             candidates,
-            state_for=_rerank_state,
+            state_for=_signal_rerank_state,
             levels=levels,
             instructions=instructions,
             model=get_model("discovery-relevance"),
@@ -415,7 +417,23 @@ def _rerank_arm(arm: str, question: Question, pool: list[str], ctx) -> list[str]
     return [c["id"] for c in ordered]
 
 
-def _signal_texts(gc, ids: list[str]) -> dict[str, str]:
+def _signal_candidates(gc, ids: list[str]) -> list[dict[str, str]]:
+    """The catalogue rows the signal state builder reads, in ``ids`` order."""
+    rows = _signal_rows(gc, ids)
+    return [
+        {
+            "id": sid,
+            "name": rows.get(sid, {}).get("name", ""),
+            "description": rows.get(sid, {}).get("description", ""),
+            "unit": rows.get(sid, {}).get("unit", ""),
+            "data_class": rows.get(sid, {}).get("data_class", ""),
+            "accessor": rows.get(sid, {}).get("accessor", ""),
+        }
+        for sid in ids
+    ]
+
+
+def _signal_rows(gc, ids: list[str]) -> dict[str, dict[str, str]]:
     if not ids:
         return {}
     cypher = """
@@ -423,13 +441,11 @@ def _signal_texts(gc, ids: list[str]) -> dict[str, str]:
         MATCH (s:FacilitySignal {id: sid})
         RETURN s.id AS id, coalesce(s.name, '') AS name,
                coalesce(s.description, '') AS description,
-               coalesce(s.unit, '') AS unit
+               coalesce(s.unit, '') AS unit,
+               coalesce(s.data_class, '') AS data_class,
+               coalesce(s.accessor, '') AS accessor
     """
-    rows = gc.query(cypher, ids=ids)
-    return {
-        r["id"]: " ".join(p for p in (r["name"], r["description"], r["unit"]) if p)
-        for r in rows
-    }
+    return {r["id"]: r for r in gc.query(cypher, ids=ids)}
 
 
 @dataclass
