@@ -43,18 +43,18 @@
 
   <h3 id="ssog-segment-selection-measure-figures-heading">Exact-name match and per-slot accuracy</h3>
   <table id="ssog-segment-selection-measure-figures-table">
-    <caption>Exact-name match and per-slot accuracy. All three columns run over the full 174 edit targets (167 positives for Jev's positives column); the composer column includes the 126 of 174 whose pre-rename spelling does not parse, counted as per-slot mismatches.</caption>
+    <caption>Exact-name match and per-slot accuracy. All three columns run over the full 174 edit targets (167 positives for Jev's positives column); the composer column includes the 126 of 174 whose pre-rename spelling does not parse. Such a spelling supplies no segment, so it is counted as a per-slot mismatch on <em>every</em> slot, empty or not.</caption>
     <thead>
       <tr><th>Metric</th><th>Jev, positives (n=167)</th><th>Jev, edit targets (n=174)</th><th>Composer, edit targets (n=174)</th></tr>
     </thead>
     <tbody>
       <tr><td>Exact-name match</td><td>0.0299</td><td>0.0287</td><td>0.0000</td></tr>
       <tr><td><code>physical_base</code></td><td>0.515</td><td>0.506</td><td>0.195</td></tr>
-      <tr><td><code>subject</code></td><td>0.605</td><td>0.535</td><td>0.540</td></tr>
-      <tr><td><code>component</code></td><td>0.563</td><td>0.563</td><td>0.776</td></tr>
-      <tr><td><code>operator</code></td><td>0.665</td><td>0.575</td><td>0.672</td></tr>
-      <tr><td><code>locus</code></td><td>0.503</td><td>0.477</td><td>0.425</td></tr>
-      <tr><td><code>process</code></td><td>0.784</td><td>0.805</td><td>0.885</td></tr>
+      <tr><td><code>subject</code></td><td>0.605</td><td>0.535</td><td>0.224</td></tr>
+      <tr><td><code>component</code></td><td>0.563</td><td>0.563</td><td>0.264</td></tr>
+      <tr><td><code>operator</code></td><td>0.665</td><td>0.575</td><td>0.264</td></tr>
+      <tr><td><code>locus</code></td><td>0.503</td><td>0.477</td><td>0.190</td></tr>
+      <tr><td><code>process</code></td><td>0.784</td><td>0.805</td><td>0.247</td></tr>
     </tbody>
   </table>
   <img src="/imas-codex/figures/sn-selection-over-generation/ssog-segment-selection-measure/per-slot-accuracy.svg"
@@ -80,15 +80,22 @@
     sources Jev selects over.</strong> A recorded spelling that does not parse
     canonically supplies no segment, so it matches no slot and stays in the
     denominator; <strong>126 of the 174 do not parse</strong> and are counted as
-    per-slot mismatches, not dropped. The table's composer row is that full-set
-    figure. Restricted to the <strong>48 targets whose pre-rename spelling does
-    parse</strong>, the composer's per-slot accuracy is much higher — base 0.708,
-    subject 0.813, component 0.958, operator 0.958, locus 0.688, process 0.896
-    (<code>slot_accuracy_parsable</code> in the results JSON) — and that is the
-    like-for-like figure for a reader asking how near the composer sat when its
-    output was a parseable name at all. The full-set figures are lower precisely
-    because three quarters of the composer's pre-rename spellings were not
-    parseable canonical names, which is why a human renamed them.
+    per-slot mismatches, not dropped. A missing prediction is compared as a
+    sentinel that equals no token, so it is a mismatch on <em>every</em> slot
+    including those whose gold token is empty; treating a missing prediction as a
+    plain <code>None</code> would instead have credited it on every empty gold
+    slot, which inflated five of the six figures in the table above. The table's
+    composer row is the full-set figure. Restricted to the <strong>48 targets
+    whose pre-rename spelling does parse</strong>, the composer's per-slot
+    accuracy is much higher — base 0.708, subject 0.813, component 0.958, operator
+    0.958, locus 0.688, process 0.896 (<code>slot_accuracy_parsable</code> in the
+    results JSON) — and that is the like-for-like figure for a reader asking how
+    near the composer sat when its output was a parseable name at all. The full-set
+    figures are exactly the parsable figure scaled by 48/174 (the share of edit
+    targets that parse), because the other 126 targets contribute no hit at all;
+    they are lower precisely because three quarters of the composer's pre-rename
+    spellings were not parseable canonical names, which is why a human renamed
+    them.
   </p>
 
   <h3 id="ssog-segment-selection-measure-family-heading">Family agreement</h3>
@@ -130,10 +137,14 @@
   <h3 id="ssog-segment-selection-measure-crosscheck-heading">Cross-check separation</h3>
   <p id="ssog-segment-selection-measure-crosscheck-body">
     The cross-check signal is the six-slot agreement between Jev's selection and
-    the composer's recorded spelling. Over the 260 golden rows that resolve to a
-    DD source (167 positives, 93 negatives), flagging composer-against-Jev
-    <em>disagreement</em> separates the negatives from the positives with
-    <strong>AUC 0.480</strong>, bootstrap 95% interval
+    the composer's recorded spelling. <strong>On golden A the composer's recorded
+    spelling is the very name the fixture labels</strong> — the positives are the
+    composer's own outputs — so this AUC measures only whether Jev's selection
+    disagrees more with the rejected names than with the accepted ones; it is not
+    a comparison of Jev against an independent second selector. Over the 260 golden
+    rows that resolve to a DD source (167 positives, 93 negatives), flagging
+    composer-against-Jev <em>disagreement</em> separates the negatives from the
+    positives with <strong>AUC 0.480</strong>, bootstrap 95% interval
     <strong>[0.408, 0.552]</strong> (<code>paired_auc</code> against the mirror
     agreement arm gives the same figure, difference −0.0397;
     <code>bootstrap_interval</code> resamples by <code>copy_group</code>,

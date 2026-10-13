@@ -296,6 +296,13 @@ def _rederive_record(r: dict[str, Any]) -> dict[str, Any]:
     return r
 
 
+#: Sentinel for a prediction that is absent outright -- an unparseable composer
+#: spelling supplies no segment at all.  Identity comparison means it equals no
+#: token, ``None`` included, so such a spelling is a mismatch on every slot
+#: rather than being credited on each slot whose gold token is empty.
+_MISSING_PREDICTION = object()
+
+
 def _slot_accuracy(
     pairs: list[tuple[dict[str, Any] | None, dict[str, Any] | None]],
 ) -> dict[str, float]:
@@ -303,9 +310,11 @@ def _slot_accuracy(
 
     Delegates the slot comparison to
     :func:`imas_codex.standard_names.benchmark_roles.exact_match_accuracy`, the
-    project's own match, rather than re-implementing it.  A missing predicted
-    segment counts as incorrect, so a pair whose prediction is ``None`` matches
-    no slot.
+    project's own match, rather than re-implementing it.  Its comparison is
+    ``predicted.get(slot) == expected[slot]``, so a predicted ``None`` equals no
+    token.  An absent prediction is therefore forwarded as
+    :data:`_MISSING_PREDICTION`, not as ``None``: forwarding ``None`` would let
+    an unparseable spelling match every slot whose gold token is itself empty.
     """
     from imas_codex.standard_names.benchmark_roles import exact_match_accuracy
 
@@ -315,7 +324,8 @@ def _slot_accuracy(
     for s in SLOTS:
         hits = [
             exact_match_accuracy(
-                {s: (p.get(s) if p else None)}, {s: (g.get(s) if g else None)}
+                {s: (p.get(s) if p is not None else _MISSING_PREDICTION)},
+                {s: (g.get(s) if g else None)},
             )[0]
             for p, g in pairs
         ]
@@ -456,9 +466,11 @@ def _aggregate(
     cost = cost_latency_summary(calls)
 
     # The composer comparator runs over the SAME edit targets Jev selects over.
-    # A composer spelling that does not parse canonically supplies no segment,
-    # so it matches no slot: those rows stay in the denominator rather than
-    # being dropped, and the parsable subset is reported beside the full set.
+    # A composer spelling that does not parse canonically supplies no segment, so
+    # it matches no slot: those rows stay in the denominator rather than being
+    # dropped, and the parsable subset is reported beside the full set. The
+    # missing prediction is passed as _MISSING_PREDICTION so it is a mismatch even
+    # on a slot whose gold token is empty, which a plain None would have matched.
     composer_pairs = [(r["composer_segments"], r["gold"]) for r in edits]
     composer_pairs_parsable = [(p, g) for p, g in composer_pairs if p is not None]
 
