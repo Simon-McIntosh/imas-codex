@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T03:13:06.298Z",
+  "dispatched_at": "2026-10-13T03:04:04Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:341",
+      "id": "single_goal-1",
+      "reason": "a \u00a77 worker reading the node list would not do this work while the section prose says it happens, the same prose-versus-node-count split an earlier review had to repair, so the coordinator must decide whether to prise it out as its own node or drop it.",
+      "text": "the sentence adds a deliverable (\"the \u00a74 and \u00a75 measurement scripts \u2026 move into it\") that no \u00a77 node names: \u00a77 opens \"The section is three nodes\" and enumerates labelling, the product change, and \"scores the arms and decides the switch\", none of which covers relocating two prior sections' scripts",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:341",
+      "id": "reasoning-1",
+      "reason": "without a clause to update (or to keep) those fragment recipes, the section does not say what a later reader following \u00a74's or \u00a75's evidence is to open, and a landed reproduction path that no longer resolves is the defect this rubric exists to catch.",
+      "text": "moving the \u00a74/\u00a75 scripts into the tree orphans the reproduction recipes their landed fragments already cite: `docs/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html:61` names `signal-embed-text/measure_embed_text.py` \"under the crew reports directory\", and `fusion.html:98` names the outside `signal-fusion-measure/` logs, so the move leaves those recipes pointing at removed paths and \u00a77's done-when measures nothing about it",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "68e9fa3551062bc053989cb5faefd0d576cada76f30d5bddbadbd062e17f5a3e",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 63,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T030339227488-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "3cc0f92dabd702155418d496c8e9c12589bbeb4e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a77's anchors all resolve: `rerank_candidates` and `_RERANK_QUESTION` (`search_tools.py:179,92`), `RERANK_POOL = 60` (`search_tools.py:70`), the five-level role question kept in the harness (`tests/llm/test_signal_search_goldens.py:84-90`), and the server switch it says it follows (the construction-time `rerank_dd_paths` pinned at `tests/tools/test_dd_path_search_rerank.py:140-168`); the added sentence cites no anchor that fails.",
+    "done_when": "pass \u2014 \u00a77's done-when carries a real control for its decision (\"Otherwise it ships off, and this section records why\"), measured against fusion-alone on both mean nDCG@10 and grade-3 precision@5 with a worst-pass floor; the added sentence leaves that measure untouched, so this item is neither strengthened nor broken by the edit.",
+    "evidence_paths": "pass \u2014 the added sentence directs figures into the repository (\"a module in the repository, so its figures reproduce from a checkout\") and \u00a77's done-when names `docs/evidence/fragments/signal-search-finds-the-measured-signal/rerank.html`, a durable in-repo path; the \u00a74/\u00a75 scripts it proposes to move do sit outside the tree today, confirmed under the crew reports directory (`signal-fusion-measure/measure_signal_arms.py`, `signal-embed-text/measure_embed_text.py`).",
+    "naming": "pass \u2014 the edit introduces no plan label, stage name, ticket number or version tag; the task is named by its mechanism (\"measurement scripts \u2026 move into it\").",
+    "reasoning": "a finding \u2014 the added mechanism (moving \u00a74's and \u00a75's measurement scripts into the tree) produces nothing in \u00a77's done-when and silently invalidates the reproduction recipes those closed sections' landed fragments carry.",
+    "single_goal": "a finding \u2014 the added sentence lands a second deliverable, relocating \u00a74's and \u00a75's measurement scripts into the repository, that none of \u00a77's three named nodes covers.",
+    "wiring": "pass \u2014 the edit declares no new relationship; \u00a77 still consumes \u00a73's pooled labels and fixture and still follows \u00a74 per the followup `f-ssfms-001` (\"\u00a77 follows \u00a74\"), and `_search_signals` \u2192 `rerank_candidates` (the shared owner at `imas_codex/llm/search_tools.py:179`, reached already from `search_tools.py:963,1679`, `ids/slot_context.py:212`, `graph_search.py:372`, `domain_queries.py:527`) is the path \u00a77 asserts."
+  },
+  "section_digests": {
+    "_document": "6696124ebd584b8301282dba9ed1faa4ea8816e65a64a881eaaa5dc88d764ffe",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "5a77efb737bcf64e7fd5b30aaa71ed3ff5a27b6c8e7b4d33023f03292a98fb15",
+    "s4": "31e1b80d34ee0473acbbff8894edb94dee236159b67ee202ce8891143f015e9a",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "0bb6a0a46e9c9aeaf7b8677fa4a91c7e36965867a086521ff309bf6e9763f6a4",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "37a1002a450850d41b5c609a5a3ea2a4591ba2f6fb3e3bc91d6cfee5d3cd82ee"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T03:14:47.602922+00:00"
+}
