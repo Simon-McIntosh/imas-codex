@@ -1084,11 +1084,12 @@ async def rerank_name_comparators(
     The comparators arrive in the retrieval's embedding order. Each batch item
     judges the whole comparator list once through
     :func:`imas_codex.discovery.base.judgment.rerank_pool`: the query is the
-    item's description and DD path, and each comparator is shown by its name
-    and description. A comparator's final rank is its mean rank across the
-    items, and ties — including every comparator of a failed rerank — keep the
-    embedding order, so the merged order is never worse than the retrieval
-    order it replaces and a failed rerank returns the pool unchanged.
+    item's description and DD path, and each comparator's name and description
+    are its state. The item orders are fused by
+    :func:`imas_codex.search.fusion.rrf_fuse_in_input_order`, the repository's
+    rank-fusion owner, breaking ties by the pool's embedding order, so the
+    merged order is never worse than the retrieval order it replaces and a
+    failed rerank returns the pool unchanged.
 
     Ranking is not a gate: a failed or slow rerank keeps the embedding order
     rather than raising, and a pool the decision service could not serve costs
@@ -1112,14 +1113,18 @@ async def rerank_name_comparators(
         return pool, 0.0, ""
 
     from imas_codex.discovery.base.judgment import rerank_pool
+    from imas_codex.search.fusion import rrf_fuse_in_input_order
     from imas_codex.settings import get_model
 
     if model is None:
         model = get_model("sn-judge")
 
     question = _COMPARATOR_RERANK_QUESTION["relevance_grade"]
+    keys = [
+        str(candidate.get("id") or f"#{index}") for index, candidate in enumerate(pool)
+    ]
     identity = {id(candidate): index for index, candidate in enumerate(pool)}
-    ranks: dict[int, list[int]] = {index: [] for index in range(len(pool))}
+    streams: list[list[str]] = []
     cost = 0.0
 
     for item in items:
@@ -1138,15 +1143,14 @@ async def rerank_name_comparators(
             budget_seconds=budget_seconds,
         )
         cost += item_cost
-        for rank, candidate in enumerate(ordered):
-            index = identity.get(id(candidate))
-            if index is not None:
-                ranks[index].append(rank)
+        streams.append(
+            [
+                keys[identity[id(candidate)]]
+                for candidate in ordered
+                if id(candidate) in identity
+            ]
+        )
 
-    def _sort_key(index: int) -> tuple[float, int]:
-        positions = ranks[index]
-        mean = sum(positions) / len(positions) if positions else float(len(pool))
-        return (mean, index)
-
-    order = sorted(range(len(pool)), key=_sort_key)
-    return [pool[index] for index in order], cost, model
+    fused = rrf_fuse_in_input_order(streams, keys)
+    by_key = dict(zip(keys, pool, strict=True))
+    return [by_key[key] for key, _mass in fused], cost, model
