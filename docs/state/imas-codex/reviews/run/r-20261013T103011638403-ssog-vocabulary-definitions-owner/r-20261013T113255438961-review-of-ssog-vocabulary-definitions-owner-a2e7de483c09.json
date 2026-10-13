@@ -1,0 +1,51 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8768",
+    "imas_codex/standard_names/segment_selection.py:360",
+    "imas_codex/standard_names/segment_selection.py:407",
+    "imas_codex/standard_names/segment_selection.py:825"
+  ],
+  "completed_at": "2026-10-13T11:40:47.827Z",
+  "dispatched_at": "2026-10-13T11:33:09Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "four production call sites reached the change: imas_codex/standard_names/workers.py:8768 (semantic_gate_name_text in the review cycle), and segment_selection.py:360 (_has_definition), :407 (option_text in _build_tree) and :825 (_retrieval_text).",
+    "diff": "read both commits against the base - 3aaeee44d moves the map into the new module and rewires the two consumers plus one selection test assertion and one fixture teardown, and a2e7de483 adds only the 49-line evidence fragment.",
+    "done_when": "the done-when asks for the grep recorded in the fragment, three owner properties proven by new tests, a clean mutation re-run, and a base/head delta gate; the fragment records the grep, tests/standard_names/test_vocabulary_definitions.py:21-90 carries the properties, mutation-after-fix.log ends 2 failed/10 passed/EXIT=1 with no errors, and head-gate.log:19 reads 31 passed against baseline-gate.log:19 27 passed.",
+    "goal": "the goal is one owner for the vocabulary token-to-definition map plus selection tests that can fail; imas_codex/standard_names/vocabulary_definitions.py:9 now owns the map, and imas_codex/standard_names/workers.py:8523 and segment_selection.py:268 both reach it.",
+    "manifest": "read; status complete, two commits (3aaeee44d code+tests, a2e7de483 fragment), baseline_suite and after_suite arms each carrying revision/command/exit_status/completed/failure_count/failure_ids, negative_control_log naming negative-control.log, and one landing line.",
+    "write_paths": "the manifest declares six write paths; the 29229121..a2e7de483 diff changes exactly those six files and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_vocabulary_definitions.py:21,42,66,84 all redden under the recorded stub control (negative-control.log, 4 failed EXIT=1), and tests/standard_names/test_segment_selection.py:253 reddens on a formatter returning a wrong meaning (option-meaning-negative-control.log, 1 failed EXIT=1).",
+    "evidence": "head-gate.log:19 records 31 passed EXIT=0 at 3aaeee44d and baseline-gate.log:19 records 27 passed EXIT=0 at 29229121, both logs naming the same gate command and both arm records carrying completed=true with zero failures.",
+    "fit": "imas_codex/standard_names/vocabulary_definitions.py:7 follows the surrounding lru_cache-plus-loader idiom and its name states the capability; the retained private alias at workers.py:8495 that shadows the public function is a mild wart but the module's own test at test_name_gate_definition_floor.py:47 resolves that exact name.",
+    "goal_fidelity": "imas_codex/standard_names/vocabulary_definitions.py:9 is the single owner and both consumers at workers.py:8523 and segment_selection.py:268 delegate to it, matching the goal.",
+    "reuse": "the change is itself the consolidation - segment_selection.py:266 no longer re-reads the loaders for definitions and delegates to the one owner - and a capability search over imas_codex/ found no other token-to-definition map (context.py:976 reads the locus registry for a docs-prompt gloss, a different capability).",
+    "scope_discipline": "every path in the 29229121..a2e7de483 diff is inside the six declared write paths; the docstring edits at segment_selection.py:44,79,115,148 strip plan-label words and stay within the file the node owns."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is one owner for the vocabulary token-to-definition map plus selection tests that can fail; imas_codex/standard_names/vocabulary_definitions.py:9 now owns the map, and imas_codex/standard_names/workers.py:8523 and segment_selection.py:268 both reach it, so the goal is met.\nVERDICT done_when: the done-when asks for the grep recorded in the fragment, three owner properties proven by new tests, a clean mutation re-run, and a base/head delta gate; the fragment at docs/evidence/fragments/sn-selection-over-generation/ssog-vocabulary-definitions-owner.html records the grep, tests/standard_names/test_vocabulary_definitions.py:21-90 carries the properties, mutation-after-fix.log ends 2 failed/10 passed/EXIT=1 with no errors, and head-gate.log:19 reads 31 passed against baseline-gate.log:19 27 passed.\nVERDICT write_paths: the manifest declares six write paths; the 29229121..a2e7de483 diff changes exactly those six files - imas_codex/standard_names/{vocabulary_definitions.py,workers.py,segment_selection.py}, tests/standard_names/{test_vocabulary_definitions.py,test_segment_selection.py}, and the node fragment - and nothing else.\nVERDICT manifest: read; status complete, two commits (3aaeee44d code+tests, a2e7de483 fragment), baseline_suite and after_suite arms each carrying revision/command/exit_status/completed/failure_count/failure_ids, negative_control_log naming negative-control.log, and one landing line.\nVERDICT diff: read both commits against the base - 3aaeee44d moves the map into the new module and rewires the two consumers plus one selection test assertion and one fixture teardown, and a2e7de483 adds only the 49-line evidence fragment.\nCALL_SITES: imas_codex/standard_names/workers.py:8768, imas_codex/standard_names/segment_selection.py:360, imas_codex/standard_names/segment_selection.py:407, imas_codex/standard_names/segment_selection.py:825\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/vocabulary_definitions.py:9 is the single owner and both consumers at workers.py:8523 and segment_selection.py:268 delegate to it, matching the goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-gate.log:19 records 31 passed EXIT=0 at 3aaeee44d and baseline-gate.log:19 records 27 passed EXIT=0 at 29229121, both logs naming the same gate command and both arm records carrying completed=true with zero failures.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the 29229121..a2e7de483 diff is inside the six declared write paths; the docstring edits at segment_selection.py:44,79,115,148 strip plan-label words and stay within the file the node owns.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_vocabulary_definitions.py:21,42,66,84 all redden under the recorded stub control (negative-control.log, 4 failed EXIT=1), and tests/standard_names/test_segment_selection.py:253 reddens on a formatter returning a wrong meaning (option-meaning-negative-control.log, 1 failed EXIT=1).\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/standard_names/vocabulary_definitions.py:7 follows the surrounding lru_cache-plus-loader idiom and its name states the capability; the retained private alias at workers.py:8495 that shadows the public function is a mild wart but the module's own test at test_name_gate_definition_floor.py:47 resolves that exact name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change is itself the consolidation - segment_selection.py:266 no longer re-reads the loaders for definitions and delegates to the one owner - and a capability search over imas_codex/ found no other token-to-definition map (context.py:976 reads the locus registry for a docs-prompt gloss, a different capability).\n\n",
+  "review_run_id": "r-20261013T113255438961-review-of-ssog-vocabulary-definitions-owner-a2e7de483c09",
+  "reviewed_base_sha": "29229121a92fea535cd9adda6eac147b432dab40",
+  "reviewed_head_sha": "a2e7de483c098b036d712cf27c850a4d6b083adf",
+  "reviewed_run_id": "r-20261013T103011638403-ssog-vocabulary-definitions-owner",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T11:39:52.058247+00:00",
+  "total": 111
+}
