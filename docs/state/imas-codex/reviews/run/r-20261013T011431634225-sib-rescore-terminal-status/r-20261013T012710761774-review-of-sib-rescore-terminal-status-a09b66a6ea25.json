@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: baseline-suite.log (base 22f08a9ac, 264 passed/3 errors, EXIT=1, completed) and after-suite-committed.log (head a09b66a6e, 268 passed/the same 3 errors, EXIT=1, completed) both reach their pytest summary line; the 3 failure ids are identical on both arms, so 0 added failures.",
+  "backend": "deepseek-v4.1-flash",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/edit.py:3946",
+    "imas_codex/cli/sn.py:8348"
+  ],
+  "completed_at": "2026-10-13T01:32:50.834Z",
+  "dispatched_at": "2026-10-13T01:27:26Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-rescore-terminal-status.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment is an 11-line measurement table with no figure although the source node's write scope granted docs/figures/sn-integrity-backlog/sib-rescore-terminal-status, so the granted-figure default is unmet for this record."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "24555",
+      "severity": "follow-on",
+      "text": "follow-on: the diagnostic OPTIONAL MATCH (sn)-[:HAS_SUCCESSOR]->(next) can return several rows for a node with multiple successors and current[0] then names one arbitrarily; the refusal message would cite a nondeterministic successor rather than all of them."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two production call sites examined: imas_codex/standard_names/edit.py:3946 (rescore_name) calls stage_name_for_rescore and returns its refusal verbatim, reached from the CLI at imas_codex/cli/sn.py:8348 (sn rescore).",
+    "diff": "read commit by commit against base 22f08a9ac; one commit a09b66a6e adds 148 and removes 11 lines across exactly three files \u2014 graph_ops.py (the guard at :24513 and the two-axis refusal at :24566-24586), tests/standard_names/test_rescore_terminal_status.py (new, 110 lines) and the evidence fragment \u2014 all inside the declared scope.",
+    "done_when": "the done_when asks for a fake graph that executes the guarded conditions (the test file's _GuardedGraph parses the production Cypher with regex rather than restating it), the three named cases, a guard-removed red log, a Cypher check, and recorded suites \u2014 all hold: negative-control.log EXIT=1 (2 failed), cypher-property.log 4 passed EXIT=0, and baseline/after suites recorded with revision, exit_status and completed:true.",
+    "goal": "the node goal is that rescore refuses a terminal status and names the route out; graph_ops.py:24513 adds the status guard to the compare-and-set and the refusal at :24566-24586 reports both axes and names imas_codex/standard_names/signed_manifest.py as the recovery route, so the goal is met.",
+    "manifest": "read; status complete, the gate command, base and head suite JSON with revision/exit_status/completed, seven gate logs, the negative-control log named as a bare path, and a follow_on for the three pre-existing test_sn_approve git-init setup errors.",
+    "write_paths": "three declared paths (graph_ops.py, tests/standard_names/test_rescore_terminal_status.py and the evidence fragment); the diff's three files are exactly those, and the granted figures directory is unused."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_rescore_terminal_status.py:74 reddens when the status predicate is removed from the production query (negative-control.log EXIT=1, both terminal parametrisations failed) because _GuardedGraph executes the query's own WHERE clauses instead of restating them.",
+    "evidence": "the gate measures the done_when: negative-control.log EXIT=1 and cypher-property.log (4 passed, EXIT=0) are complete, and baseline-suite.log (264 passed/3 errors) and after-suite-committed.log (268 passed/3 errors) both reach their summary line so the 0-added result is read from receipt rather than claimed.",
+    "fit": "graph_ops.py:24513 matches the terminal-status vocabulary already used across imas_codex/standard_names/signed_manifest.py:2481,3082,3171 and the test/fragment names carry no plan, sprint or ticket labels.",
+    "goal_fidelity": "imas_codex/standard_names/graph_ops.py:24513 refuses a row whose status is deprecated or superseded and :24566-24586 names the signed transition as the route out, exactly as the goal states.",
+    "reuse": "the guard reuses the coalesce-terminal-status predicate the repository already owns across imas_codex/standard_names/signed_manifest.py:2481 and it points operators at signed_manifest.apply_signed_manifest rather than forking a recovery path; a search for a single-call stage/status/successor accessor found none, so the in-function diagnostic read is the first.",
+    "scope_discipline": "git show --stat a09b66a6e names only graph_ops.py, tests/standard_names/test_rescore_terminal_status.py and the fragment, all within the manifest's declared write paths and carrying nothing the goal does not imply."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that rescore refuse a terminal catalog status and name the route out; the landed guard at imas_codex/standard_names/graph_ops.py:24513 adds `AND coalesce(sn.status, '') NOT IN ['deprecated', 'superseded']` to the compare-and-set and the refusal at :24566-24586 reports both lifecycle axes and names the signed transition, so the goal is met.\nVERDICT done_when: the done_when asks for a fake graph that executes the guarded conditions (tests/standard_names/test_rescore_terminal_status.py:29 _GuardedGraph parses the production Cypher with regex rather than restating it), an exhausted superseded-status row refused unchanged (:74), an exhausted draft-status row still rescored (:88), a guard-removed red log, a Cypher check and recorded suites \u2014 all hold: negative-control.log EXIT=1 (2 failed), cypher-property.log 4 passed EXIT=0, baseline-suite.log and after-suite-committed.log recorded with revision/exit_status/completed:true.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/graph_ops.py, tests/standard_names/test_rescore_terminal_status.py and the fragment (plus a granted figures dir); the diff's three files are exactly those and the figures dir is unused.\nVERDICT manifest: read; status complete, records the gate command, base and head suite JSON with revision/exit_status/completed, seven gate logs and the negative-control log, with a follow_on for the test_sn_approve git-init setup errors.\nVERDICT diff: one commit a09b66a6e against base 22f08a9ac adds 148 and removes 11 lines across exactly three files \u2014 the guard and two-axis refusal in graph_ops.py, the new 110-line test file, and the fragment \u2014 all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/edit.py:3946 (rescore_name), imas_codex/cli/sn.py:8348 (sn rescore)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_ops.py:24513 refuses a deprecated/superseded row and :24566-24586 names the signed transition as the route out, exactly as the goal states.\nSCORE evidence: 19\nJUSTIFICATION evidence: negative-control.log (EXIT=1) and cypher-property.log (4 passed, EXIT=0) are complete, and baseline-suite.log (264 passed/3 errors) and after-suite-committed.log (268 passed/3 errors) both reach a summary line, so the 0-added result is read from receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat a09b66a6e names only graph_ops.py, tests/standard_names/test_rescore_terminal_status.py and the fragment, all within the manifest's declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_rescore_terminal_status.py:74 reddens when the status predicate is removed from the production query (negative-control.log EXIT=1), because _GuardedGraph executes the query's own WHERE clauses rather than restating them.\nSCORE fit: 19\nJUSTIFICATION fit: graph_ops.py:24513 matches the terminal-status vocabulary at imas_codex/standard_names/signed_manifest.py:2481 and the test and fragment names carry no plan, sprint or ticket labels.\nSCORE reuse: 18\nJUSTIFICATION reuse: the guard reuses the coalesce-terminal-status predicate already owned across imas_codex/standard_names/signed_manifest.py:2481 and points at apply_signed_manifest rather than forking a recovery path; a search found no single-call stage/status/successor accessor, so the diagnostic read is the first.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-rescore-terminal-status.html:1 follow-on: the fragment is an 11-line measurement table with no figure although the write scope granted docs/figures/sn-integrity-backlog/sib-rescore-terminal-status, so the granted-figure default is unmet.\nFINDING imas_codex/standard_names/graph_ops.py:24555 follow-on: the diagnostic OPTIONAL MATCH (sn)-[:HAS_SUCCESSOR]->(next) can return several rows for a multi-successor node and current[0] then names one arbitrarily, so the refusal message cites a nondeterministic successor.\n",
+  "review_run_id": "r-20261013T012710761774-review-of-sib-rescore-terminal-status-a09b66a6ea25",
+  "reviewed_base_sha": "22f08a9acff320b92af11b7d2e141108f6bc9f69",
+  "reviewed_commits": [
+    "a09b66a6e"
+  ],
+  "reviewed_head_sha": "a09b66a6ea25d98add2d2415a990ab90fc16bd6a",
+  "reviewed_run_id": "r-20261013T011431634225-sib-rescore-terminal-status",
+  "reviewer_run_id": "r-20261013T012710761774-review-of-sib-rescore-terminal-status-a09b66a6ea25",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:32:00+00:00",
+  "total": 114
+}
