@@ -14,7 +14,11 @@ stubbed, so what they assert is the orchestration, not a mock of it:
 * the snapshot is taken for every reset name before its reset, so the family
   restores from it;
 * a repeated apply over an unchanged scope plans zero calls;
-* ``--dry-run`` writes nothing and prints the planned calls and cost.
+* ``--dry-run`` writes nothing and prints the planned calls and cost;
+* over a scope of several families, one whose member is refused makes the dry
+  run report the whole apply as refused — zero calls, zero cost, the refusing
+  family named and the others not reported as running — with the per-family
+  refusal under ``--force``.
 """
 
 from __future__ import annotations
@@ -37,10 +41,11 @@ def _node(
     score: float | None = None,
     *,
     name_stage: str = "drafted",
+    physical_base: str = "base",
 ) -> dict[str, Any]:
     return {
         "id": node_id,
-        "physical_base": "base",
+        "physical_base": physical_base,
         "description": f"base quantity for {node_id}",
         "documentation": f"The base quantity documented for {node_id}.",
         "docs_stage": docs_stage,
@@ -390,5 +395,84 @@ def test_dry_run_counts_calls_for_a_forced_recommended_member(
     assert _MEMBERS[0] in result.output
     assert "name_stage=approved" in result.output
     assert "3 planned call(s)" in result.output
+    assert graph.writes() == []
+    assert pipeline.revisions == {}
+
+
+#: Two distinct pattern families (their invariant physical_base differs), so a
+#: refusal in one can be measured against the other's planned calls.
+_TWO_FAMILIES = [
+    ("base_a", "a_at_axis", "a_at_boundary"),
+    ("base_b", "b_at_axis", "b_at_boundary"),
+]
+
+
+def _two_family_nodes() -> list[dict[str, Any]]:
+    nodes: list[dict[str, Any]] = []
+    for base, anchor, member in _TWO_FAMILIES:
+        nodes.append(_node(anchor, "accepted", 0.9, physical_base=base))
+        nodes.append(_node(member, "drafted", physical_base=base))
+    return nodes
+
+
+def _invoke_dry_run_all(
+    monkeypatch: Any, graph: _FamilyGraph, pipeline: _DocsPipeline, *extra: str
+):
+    """Run ``harmonize --all --apply --dry-run`` over the whole fixture."""
+    from imas_codex.cli.sn import sn
+    from imas_codex.graph import client as graph_client
+
+    _install_docs_pipeline(monkeypatch, pipeline)
+    monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
+    return CliRunner().invoke(
+        sn, ["harmonize", "--all", "--apply", "--dry-run", *extra]
+    )
+
+
+def test_dry_run_reports_the_whole_apply_refused(monkeypatch: Any) -> None:
+    """One refused family refuses the whole apply, not just its own calls.
+
+    Over two families, one holding a protected member, the summary reports zero
+    planned calls and zero cost and names the refusing family; the other family
+    is not reported as running; nothing is written.
+    """
+    nodes = _two_family_nodes()
+    nodes[1]["name_stage"] = "approved"  # the first base_a member
+    pipeline = _DocsPipeline(nodes)
+    graph = _FamilyGraph(nodes)
+
+    result = _invoke_dry_run_all(monkeypatch, graph, pipeline)
+
+    assert result.exit_code == 0, result.output
+    # The refused family is named with its calls withheld.
+    assert "decision=refused" in result.output
+    assert "base_a" in result.output
+    # The other family would not run either — it is not reported as applying.
+    assert "decision=apply (blocked by refusal)" in result.output
+    assert "base_b" in result.output
+    assert "decision=apply  anchor" not in result.output
+    # The apply as a whole is refused: zero calls, zero cost.
+    assert "0 planned call(s)" in result.output
+    assert "estimated cost $0.00" in result.output
+    assert graph.writes() == []
+    assert pipeline.revisions == {}
+
+
+def test_dry_run_counts_both_families_under_force(monkeypatch: Any) -> None:
+    """With --force both families count: the protected one is forced, not blocked."""
+    nodes = _two_family_nodes()
+    nodes[1]["name_stage"] = "approved"
+    pipeline = _DocsPipeline(nodes)
+    graph = _FamilyGraph(nodes)
+
+    result = _invoke_dry_run_all(
+        monkeypatch, graph, pipeline, "--force", "lead authorised the family"
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "decision=forced" in result.output
+    assert "decision=blocked" not in result.output
+    # 2 families × 2 members, all counted.
+    assert "4 planned call(s)" in result.output
     assert graph.writes() == []
     assert pipeline.revisions == {}
