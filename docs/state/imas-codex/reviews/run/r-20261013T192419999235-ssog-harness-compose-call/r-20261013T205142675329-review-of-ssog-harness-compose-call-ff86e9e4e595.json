@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline-gate.log records 121 passed EXIT=0 at a90aa9a2b and head-gate.log records 124 passed EXIT=0 at ff86e9e4e; both arms declare their arm and revision on line 1, both ran to their summary line, and neither carries a failing test id, so added_failure_count is 0 against a measured green base arm, not merely a bounded one. The three-test delta is the whole difference.",
+  "backend": "clive",
+  "base_log_revision": "a90aa9a2bfa6bba00f9a20671e443bf23355e265",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/benchmark.py:1055",
+    "imas_codex/cli/sn.py:3735",
+    "imas_codex/standard_names/benchmark.py:2019"
+  ],
+  "completed_at": "2026-10-13T21:02:46.442Z",
+  "dispatched_at": "2026-10-13T20:51:57Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/benchmark.py",
+      "line": "41",
+      "severity": "follow-on",
+      "text": "follow-on: BenchmarkConfig.temperature (defined at imas_codex/standard_names/benchmark.py:41, set by the sn benchmark CLI's --temperature flag) is now read nowhere in the module - the compose path at :1693 no longer consumes it and _render_cost_summary at :2308 prints a literal 'provider default' - so --temperature silently does nothing on the compose path while the run's own follow_ons note the field and flag would need removing in imas_codex/cli/sn.py, outside this node's write scope."
+    },
+    {
+      "file": "tests/standard_names/test_benchmark_compose_bounds.py",
+      "line": "108",
+      "severity": "follow-on",
+      "text": "follow-on: test_harness_compose_request_matches_production builds its 'production' side as a hand-written dict (:97-102) with a hard-coded service and reasoning_effort rather than importing them from the production compose call at imas_codex/standard_names/workers.py:6069, so the guard checks the harness against the author's restatement of production; a future change to production's parameters would leave this test green and the two calls free to diverge again."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T181918155413-ssog-harness-compose-call/manifest.md",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's baseline_suite and after_suite 'command' fields carry a literal '<worktree>' placeholder instead of the absolute worktree path, so the recorded command is not the literal command that ran even though the arms themselves are named in the gate logs' first lines (baseline-gate.log:1 names revision a90aa9a2b and the tree)."
+    }
+  ],
+  "gate_log_revision": "ff86e9e4e595f89b011427317a2a507345c4348d",
+  "head_log_revision": "ff86e9e4e595f85b011427317a2a507345c4348d",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s): imas_codex/standard_names/benchmark.py:1055 (_run_model invoked by run_benchmark), imas_codex/cli/sn.py:3735 (run_benchmark(config) from the sn benchmark CLI), imas_codex/standard_names/benchmark.py:2019 (_render_cost_summary).",
+    "diff": "read the single commit ff86e9e4e595f85b011427317a2a507345c4348d against a90aa9a2bfa6bba00f9a20671e443bf23355e265: it removes the temperature local and the temperature=temp argument from the harness compose call, replaces the stale GPT-5.x comment with a mechanism comment, rewrites the cost-summary temperature label to 'provider default', and adds tests/standard_names/test_benchmark_compose_bounds.py with three stubbed tests.",
+    "done_when": "the done_when names an EXIT=0 single-source compose log with wall time and completion tokens (harness-compose.log: EXIT=0, wall=142.3s, tokens=57563), a stubbed bounds test that fails on revert (negative-control.log records EXIT=1 with test_harness_compose_call_omits_temperature and test_harness_compose_request_matches_production both red), a fragment showing both kwargs dumps (docs/evidence/fragments/sn-selection-over-generation/ssog-harness-compose-call.html shows the two together and names temperature as the sole difference), and the test_benchmark*.py gate at base and head judged by delta (121->124 passed, 0 added failures); all four clauses are met.",
+    "goal": "the node goal is to make one benchmark harness compose call complete on the local compose seat; imas_codex/standard_names/benchmark.py:1693 _run_model no longer passes temperature=0.0 to acall_llm_structured, so the harness request now equals the production compose request at imas_codex/standard_names/workers.py:6069, and the run's harness-compose.log records EXIT=0 wall=142.3s tokens=57563 through _run_model itself, so the call completes where the pre-fix probe stalled to 526 s and was killed.",
+    "manifest": "read at runs/r-20261013T181918155413-ssog-harness-compose-call/manifest.md, the path the reviewed run's live pointer names; status complete, commits names ff86e9e4e as the sole head, the gate and control logs are named, baseline_suite and after_suite both record completed=true with 0 failures; the suite command field carries a '<worktree>' placeholder rather than the literal path.",
+    "write_paths": "the brief declares imas_codex/standard_names/benchmark.py, tests/standard_names/test_benchmark_compose_bounds.py and docs/evidence/fragments/sn-selection-over-generation/ssog-harness-compose-call.html; git diff --stat a90aa9a2b ff86e9e4e changes exactly those three paths (12 lines in benchmark.py, 130 new test lines, 71 new fragment lines) and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_benchmark_compose_bounds.py reddens on revert (negative-control.log: two failures), so the guard is demonstrated, but test_harness_compose_request_matches_production at :108-119 compares the harness request against a hand-written production dict rather than the production call's own parameters, so a later change to workers.py:6069 would leave it green.",
+    "evidence": "the gate and the negative control are both recorded with revisions and exit codes (baseline-gate.log:1 arm=base revision=a90aa9a2b, 121 passed EXIT=0; head-gate.log:1 arm=head revision=ff86e9e4e, 124 passed EXIT=0; negative-control.log EXIT=1), but the fragment's parameter-level reproduction (probe-harness killed at 526s, probe-production EXIT=0 at 266.3s) rests on probe logs in the sibling run dir r-20261013T192419999235 whose first lines name no revision or tree, and the fixed-path timing runs cited in the fragment beyond harness-compose.log are not all retained on disk.",
+    "fit": "the change follows the module's surrounding style and the removal is minimal, the commit carries a conventional subject and a mechanism body at imas_codex/standard_names/benchmark.py:1682-1685, and no plan label, ticket id or AI attribution appears in the code, test names or commit.",
+    "goal_fidelity": "imas_codex/standard_names/benchmark.py:1693-1700 issues the compose call with model/messages/response_model/service/reasoning_effort and no temperature, matching workers.py:6069, and the fixed path returns EXIT=0 at 142.3s in runs/r-20261013T181918155413-ssog-harness-compose-call/harness-compose.log against the pre-fix probe's kill at 540s.",
+    "reuse": "the change adds no new capability; the test reuses the shared builder imas_codex/discovery/base/llm.py:2008 _build_kwargs rather than re-deriving the provider request, and the harness now sends exactly the production compose request.",
+    "scope_discipline": "git diff --stat a90aa9a2b ff86e9e4e lists only the three paths the brief declares, and no commit touches a file outside them."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: a90aa9a2bfa6bba00f9a20671e443bf23355e265\nreviewed_head_sha: ff86e9e4e595f85b011427317a2a507345c4348d\nVERDICT goal: the node goal is to make one benchmark harness compose call complete on the local compose seat; imas_codex/standard_names/benchmark.py:1693 _run_model no longer passes temperature=0.0 to acall_llm_structured, so the harness request now equals the production compose request at imas_codex/standard_names/workers.py:6069, and the run's harness-compose.log records EXIT=0 wall=142.3s tokens=57563 through _run_model itself, so the call completes where the pre-fix probe stalled to 526 s and was killed.\nVERDICT done_when: the done_when names an EXIT=0 single-source compose log with wall time and completion tokens (harness-compose.log: EXIT=0, wall=142.3s, tokens=57563), a stubbed bounds test that fails on revert (negative-control.log records EXIT=1 with test_harness_compose_call_omits_temperature and test_harness_compose_request_matches_production both red), a fragment showing both kwargs dumps (docs/evidence/fragments/sn-selection-over-generation/ssog-harness-compose-call.html shows the two together and names temperature as the sole difference), and the test_benchmark*.py gate at base and head judged by delta (121->124 passed, 0 added failures); all four clauses are met.\nVERDICT write_paths: the brief declares imas_codex/standard_names/benchmark.py, tests/standard_names/test_benchmark_compose_bounds.py and docs/evidence/fragments/sn-selection-over-generation/ssog-harness-compose-call.html; git diff --stat a90aa9a2b ff86e9e4e changes exactly those three paths (12 lines in benchmark.py, 130 new test lines, 71 new fragment lines) and nothing else.\nVERDICT manifest: read at runs/r-20261013T181918155413-ssog-harness-compose-call/manifest.md, the path the reviewed run's live pointer names; status complete, commits names ff86e9e4e as the sole head, the gate and control logs are named, baseline_suite and after_suite both record completed=true with 0 failures; the suite command field carries a '<worktree>' placeholder rather than the literal path.\nVERDICT diff: read the single commit ff86e9e4e595f85b011427317a2a507345c4348d against a90aa9a2bfa6bba00f9a20671e443bf23355e265: it removes the temperature local and the temperature=temp argument from the harness compose call, replaces the stale GPT-5.x comment with a mechanism comment, rewrites the cost-summary temperature label to 'provider default', and adds tests/standard_names/test_benchmark_compose_bounds.py with three stubbed tests.\nCALL_SITES: imas_codex/standard_names/benchmark.py:1055, imas_codex/cli/sn.py:3735, imas_codex/standard_names/benchmark.py:2019\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/benchmark.py:1693-1700 issues the compose call with model/messages/response_model/service/reasoning_effort and no temperature, matching workers.py:6069, and the fixed path returns EXIT=0 at 142.3s in runs/r-20261013T181918155413-ssog-harness-compose-call/harness-compose.log against the pre-fix probe's kill at 540s.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate and the negative control are both recorded with revisions and exit codes (baseline-gate.log:1 arm=base revision=a90aa9a2b, 121 passed EXIT=0; head-gate.log:1 arm=head revision=ff86e9e4e, 124 passed EXIT=0; negative-control.log EXIT=1), but the fragment's parameter-level reproduction (probe-harness killed at 526s, probe-production EXIT=0 at 266.3s) rests on probe logs in the sibling run dir r-20261013T192419999235 whose first lines name no revision or tree, and the fixed-path timing runs cited in the fragment beyond harness-compose.log are not all retained on disk.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat a90aa9a2b ff86e9e4e lists only the three paths the brief declares, and no commit touches a file outside them.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_benchmark_compose_bounds.py reddens on revert (negative-control.log: two failures), so the guard is demonstrated, but test_harness_compose_request_matches_production at :108-119 compares the harness request against a hand-written production dict rather than the production call's own parameters, so a later change to workers.py:6069 would leave it green.\nSCORE fit: 18\nJUSTIFICATION fit: the change follows the module's surrounding style and the removal is minimal, the commit carries a conventional subject and a mechanism body at imas_codex/standard_names/benchmark.py:1682-1685, and no plan label, ticket id or AI attribution appears in the code, test names or commit.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no new capability; the test reuses the shared builder imas_codex/discovery/base/llm.py:2008 _build_kwargs rather than re-deriving the provider request, and the harness now sends exactly the production compose request.\nFINDING imas_codex/standard_names/benchmark.py:41 follow-on: BenchmarkConfig.temperature is now read nowhere in the module - the compose path at :1693 no longer consumes it and _render_cost_summary at :2308 prints a literal 'provider default' - so --temperature silently does nothing on the compose path while the run's own follow_ons note the field and flag would need removing in imas_codex/cli/sn.py, outside this node's write scope.\nFINDING tests/standard_names/test_benchmark_compose_bounds.py:108 follow-on: test_harness_compose_request_matches_production builds its 'production' side as a hand-written dict (:97-102) with a hard-coded service and reasoning_effort rather than importing them from the production compose call at imas_codex/standard_names/workers.py:6069, so the guard checks the harness against the author's restatement of production; a future change to production's parameters would leave this test green and the two calls free to diverge again.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T181918155413-ssog-harness-compose-call/manifest.md:20 follow-on: the manifest's baseline_suite and after_suite 'command' fields carry a literal '<worktree>' placeholder instead of the absolute worktree path, so the recorded command is not the literal command that ran even though the arms themselves are named in the gate logs' first lines.\n",
+  "review_run_id": "r-20261013T205142675329-review-of-ssog-harness-compose-call-ff86e9e4e595",
+  "reviewed_base_sha": "a90aa9a2bfa6bba00f9a20671e443bf23355e265",
+  "reviewed_head_sha": "ff86e9e4e595f85b011427317a2a507345c4348d",
+  "reviewed_run_id": "r-20261013T192419999235-ssog-harness-compose-call",
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T20:58:00.000000+00:00",
+  "total": 111,
+  "verdict": "SOUND WITH FINDINGS"
+}
