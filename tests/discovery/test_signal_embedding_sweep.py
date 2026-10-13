@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import hashlib
 
+import pytest
+
 from imas_codex.discovery.signals import parallel
 
 
@@ -185,3 +187,62 @@ def test_empty_text_signal_records_its_hash_without_a_vector(monkeypatch):
     assert node["embedded_text_hash"] == _text_hash("")
     assert node.get("embedding") is None
     assert parallel.census_signal_embeddings(gc=graph)["mismatch"] == 0
+
+
+def test_writer_and_census_share_one_embed_text_derivation(monkeypatch):
+    """The writer's stored hash and the census's expected hash come from one function.
+
+    ``signal_embed_text`` is the single derivation of a signal's embed text:
+    the description writer takes it as its default, and the census recomputes
+    it to decide a stored vector is stale. Pointing it at a composed
+    ``name — description (unit)`` derivation moves both the hash the writer
+    stores and the hash the census expects. A derivation held privately by
+    either side would not move, so the two would disagree and the census would
+    report the row the sweep just wrote as a mismatch — this test then fails.
+    """
+
+    def composed(row: dict) -> str:
+        return (row.get("description") or "") + " (unit)"
+
+    graph = _SweepGraph(
+        {"tcv:ip": {"description": "Plasma current", "embedded_text_hash": None}}
+    )
+    _wire(monkeypatch, graph)
+    monkeypatch.setattr(parallel, "signal_embed_text", composed)
+
+    parallel.reembed_stale_signal_descriptions(gc=graph)
+
+    node = graph.nodes["tcv:ip"]
+    assert node["embedded_text_hash"] == _text_hash("Plasma current (unit)")
+    assert node["embedding"] == _embedding_of("Plasma current (unit)")
+    # The census recomputes the same derivation, so the sweep cleared the row.
+    assert parallel.census_signal_embeddings(gc=graph)["mismatch"] == 0
+
+    # The writer's own default is the same derivation, not a private copy.
+    direct = _SweepGraph(
+        {"tcv:ip": {"description": "Plasma current", "embedded_text_hash": None}}
+    )
+    parallel.write_signal_descriptions(
+        [{"id": "tcv:ip", "description": "Plasma current"}], gc=direct
+    )
+    assert direct.nodes["tcv:ip"]["embedded_text_hash"] == _text_hash(
+        "Plasma current (unit)"
+    )
+
+
+@pytest.mark.graph
+def test_census_statement_runs_against_the_live_graph():
+    """The real read-only census statement runs on the graph and returns counts.
+
+    ``census_signal_embeddings`` opens its own ``GraphClient``, reads every
+    ``FacilitySignal`` and runs the hash-mismatch statement over them. Against
+    the live graph it must return a population count and a mismatch count whose
+    parts add up, with one named id per mismatch. Run with ``-m graph``; the
+    default markers exclude it.
+    """
+    result = parallel.census_signal_embeddings()
+
+    assert isinstance(result["n"], int), result
+    assert result["n"] >= 0, result
+    assert result["mismatch"] == result["missing_hash"] + result["differing"], result
+    assert len(result["mismatch_ids"]) == result["mismatch"], result
