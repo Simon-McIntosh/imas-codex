@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s7&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-harmonize-command#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -62,7 +62,7 @@
     </p>
 
     <h2 id="s2">§2 — Grammar segments chosen from the vocabulary</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Given a DD path, its documentation and its enriched description, Jev answers one Choice
       per grammar slot over that slot's closed ISN vocabulary: physical base, subject, component,
@@ -233,7 +233,10 @@
     <div class="r-comment-body"><p>ssog-vocabulary-definitions-owner landed (merge <code>517fb5052</code>, review 111/120): one owner for token definitions, used by the name gate and segment selection. The arm-2 measurement is running. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s2-vocabulary-definitions-owner">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261013T111910803936-ssog-segment-arm2-measure" data-who="reckon-build" data-when="2026-10-13T12:13:53.865Z">
-    <div class="r-comment-body"><p>ssog-segment-arm2-measure — the second segment-selection arm&#x27;s driver, 434-row results JSON, fragment and per-slot figure measure it beside the first arm and the composer on golden A, applying the plan&#x27;s fixed rule (verdict: neither)</p></div>
+    <div class="r-comment-body"><p>ssog-segment-arm2-measure — the second segment-selection arm's driver, 434-row results JSON, fragment and per-slot figure measure it beside the first arm and the composer on golden A, applying the plan's fixed rule (verdict: neither)</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2-arm2" data-who="reckon-build" data-when="2026-10-13T14:10:00Z">
+    <div class="r-comment-body"><p>§2 closed again on its fixed rule: <strong>neither</strong>. The second arm fixed the first arm's design faults: a mandatory base, defined options, and slots asked in sequence. It lifts component and operator accuracy above the first arm. But its base shortlist holds the right token for only 27% of rows, so base accuracy falls to 0.137, and the cross-check AUC is 0.50. The bottleneck has moved from the question to the retrieval. A third arm with a wider or reranked base shortlist would be a new measurement and is the lead's call. Two follow-ons are recorded for the driver: its resume path drops duplicate-target rows, and it never emits the composer's exact-match figure on the positives. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s2-arm2-measure">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T012137597192-review-of-ssog-comparator-rerank-4a1e53c1c23b" data-who="reckon-build" data-when="2026-10-13T01:30:27.987Z">
     <div class="r-comment-body"><p>Review stored for r-20261013T005036802056-ssog-comparator-rerank at base c98a0d42d head 4a1e53c1c: goal_fidelity 19, evidence 14, scope_discipline 19, durability 16, fit 18, reuse 20 (total 106); 0 added failures (base 0 vs head 0); three follow-on findings, no blocking findings.</p></div>
@@ -270,6 +273,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T122114496722-ssog-rerank-batch-acceptance" data-who="reckon-build" data-when="2026-10-13T12:35:42.745Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-batch-acceptance.html — measured first-pass review acceptance of a held-out compose batch with the comparator rerank off versus on; blocked at the positive control because the benchmark harness renders no comparator block, so the switch leaves the harness compose prompt byte-identical (both arms hash 9e369f27), 0 of the 2 arms run, spend USD 0.00 of USD 3.00</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-acceptance-blocked" data-who="reckon-build" data-when="2026-10-13T14:10:00Z">
+    <div class="r-comment-body"><p>The held-out acceptance measure stopped at its positive control, as designed (merge <code>c0ba264fb</code>, USD 0.00 spent). The benchmark harness renders no comparator block, so with the rerank switch off and on the two arms' compose prompts are byte-identical (hash <code>9e369f27</code>). The harness also composes only its fixed reference paths. The production compose path writes names to the graph, so it cannot serve as an arm. The harness instead gains an opt-in comparator block, taken from the production helpers (<code>_collect_nearby_name_comparators</code>, then <code>_rerank_comparators_for_compose</code>), and a named held-out source list (node <code>ssog-benchmark-comparator-arms</code>, queued). The acceptance measure reruns on it.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e" data-who="reckon-build" data-when="2026-10-13T05:56:49.621Z">
     <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
