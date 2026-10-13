@@ -6,6 +6,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-13T14:49:24.820Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "an operational reprocess writes only evidence, so no test can redden on an edited figure; its post-condition is re-measured live by section 12's third node, whose census over every JT-60SA signal must read no signal at discovered, no hash mismatch and no role-less described signal",
+      "recorded_at": "2026-10-13T14:51:55.105853+00:00"
+    }
+  },
   "dispatched_at": "2026-10-13T14:30:12Z",
   "findings": [
     {
