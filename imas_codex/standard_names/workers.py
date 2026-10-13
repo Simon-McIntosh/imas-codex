@@ -9643,6 +9643,8 @@ def _instantiated_documentation_opening(
     from imas_standard_names.grammar.parser import ParseError, parse
     from imas_standard_names.grammar.vocab_loaders import load_subjects
 
+    from imas_codex.standard_names.docs_gates import _template_opening_pattern
+
     try:
         ir = parse(name, strict=True).ir
     except ParseError:
@@ -9661,7 +9663,12 @@ def _instantiated_documentation_opening(
         if opening and placeholders <= fields.keys():
             for placeholder in placeholders:
                 opening = opening.replace(f"{{{placeholder}}}", fields[placeholder])
-            if not _re.search(r"\{[^{}]+\}", opening):
+            pattern = _template_opening_pattern(template.documentation)
+            if (
+                not _re.search(r"\{[^{}]+\}", opening)
+                and pattern is not None
+                and pattern.fullmatch(opening)
+            ):
                 return opening
     return None
 
@@ -9676,6 +9683,7 @@ def _documentation_with_registry_form(
         _DISPLAY_MATH_RE,
         HouseStyleFindingClass,
         _is_canonical_equation,
+        _opening_line,
         house_style_findings,
     )
 
@@ -9686,7 +9694,10 @@ def _documentation_with_registry_form(
     opening = _instantiated_documentation_opening(name, applied.templates)
     if opening is not None:
         lines = written.splitlines()
-        first = next((i for i, line in enumerate(lines) if line.strip()), None)
+        model_opening = _opening_line(written)
+        first = next(
+            (i for i, line in enumerate(lines) if line.strip() == model_opening), None
+        )
         if first is None:
             written = opening
         else:
