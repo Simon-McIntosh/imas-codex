@@ -18,13 +18,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="62">
+<meta name="plan-version" content="63">
 <meta name="plan-modified" content="2026-10-13">
-<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48">
+<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e">
 </head>
 <body>
   <main class="plan-doc">
@@ -296,7 +296,7 @@
     </p>
 
     <h2 id="s6">§6 — Index the words a searcher types</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s6" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       Widen <code>facility_signal_text</code> to cover <code>keywords</code>, <code>aliases</code>, <code>unit</code>
       and <code>source_description</code> beside <code>name</code>, <code>description</code> and <code>node_path</code>,
@@ -635,7 +635,10 @@
     <div class="r-comment-body"><p>Independent review of ssfms-fulltext-guard at fb6b0935e stored; six dimensions scored (goal_fidelity 20, evidence 18, scope_discipline 20, durability 17, fit 18, reuse 20; total 113), reviewed_base_sha 3c41db53, reviewed_head_sha fb6b0935e, added_failure_count 0, added_failure_ids []; two follow-on findings (negative-control log header names the wrong revision; tests/graph package docstring now misdescribes its contents), no blocking defect.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261013T022632874875-ssfms-fulltext-guard" data-who="reckon-build" data-when="2026-10-13T02:50:46.575Z">
-    <div class="r-comment-body"><p>Guard at tests/graph/test_signal_fulltext_fields.py reads the facility_signal_text definition through GraphSchema.fulltext_indexes (LinkML schema) and through the generated FULLTEXT_INDEXES that GraphClient&#x27;s EXPECTED_FULLTEXT_INDEXES builds the live index from, requiring both to carry name, description, node_path, keywords, aliases, unit, source_description (no graph); the _text_search_signals docstring names those seven fields and marks the CONTAINS fallback as covering only name/description/node_path; gate = 108 passed, 8 skipped, exit 0; declared negative control (remove keywords from the annotation in a scratch copy) = exit 1, the schema test fails.</p></div>
+    <div class="r-comment-body"><p>Guard at tests/graph/test_signal_fulltext_fields.py reads the facility_signal_text definition through GraphSchema.fulltext_indexes (LinkML schema) and through the generated FULLTEXT_INDEXES that GraphClient's EXPECTED_FULLTEXT_INDEXES builds the live index from, requiring both to carry name, description, node_path, keywords, aliases, unit, source_description (no graph); the _text_search_signals docstring names those seven fields and marks the CONTAINS fallback as covering only name/description/node_path; gate = 108 passed, 8 skipped, exit 0; declared negative control (remove keywords from the annotation in a scratch copy) = exit 1, the schema test fails.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-13T03:03:00Z">
+    <div class="r-comment-body"><p>§6 landed (final merge <code>93f680ff2</code>): the signal full-text index covers keywords, aliases, unit and the catalogue wording; the handbook alias <code>4451 A231</code> now finds the EF5 supply DC voltage first, and the fused tool's mean nDCG@10 rose from 0.7767 to 0.7924 on the same labels. A schema-level guard fails if a field is dropped. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s6">evidence</a></p></div>
 </div>
 </section>
 </main>
