@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-13T08:19:57.383Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "scg-domain-sheet-split-reuse",
+      "recorded_at": "2026-10-13T08:19:12.918613+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T08:05:23Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py",
+      "line": 198,
+      "severity": "follow-on",
+      "text": "assign_splits duplicates the calibration/validation split rule that judgment_goldens.py:222 owns inline in _finish rather than importing it as the brief required ('do not copy them'); repair is to factor the rule into a callable in that module and import it, which is outside this node's write scope so it does not hold the landing."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py",
+      "line": 300,
+      "severity": "follow-on",
+      "text": "_family_key counts families by the displayed grammar segments, a different key from the pattern_family the split is keyed on, so the fragment's '150 families, 1 row each' table does not describe the grouping the split uses and can read as if the split groups nothing."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: no production module imports the driver or its artefacts; it is a standalone evidence script and the change alters no runtime path.",
+    "diff": "read commit by commit against the base 6168972; one additive commit (5615 insertions, 0 deletions) that creates the driver and its three artefacts, imports _sample, _rank and pattern_signature from their owners, keeps the stored domain in the separate incumbent file, and changes nothing under imas_codex/.",
+    "done_when": "the done-when asks for two logged runs that exit 0 and write identical files, a fragment reporting the rule and its picks, the counts by family/domain/split, the null-domain count and the no-domain-field check, and the test_judgment_goldens.py gate; the manifest records driver-run1.log and driver-run2.log both EXIT=0 with equal printed counts and gate-base.log showing 14 passed EXIT=0.",
+    "goal": "the goal is a driver writing a blind physics-domain label sheet; scg-domain-label-sheet-run.py:233 build() emits 20 reference rows (the five fixed plus fifteen chosen by the rule at :150) and 150 sampled rows each carrying name, description, unit, segments and up to two DD sources with empty label and note, and :212 load_options reads the 32 ISN physics-domain values from the installed package.",
+    "manifest": "read; status complete; single commit 7bae2e16; changed_paths names the four files; the tests line records the gate and driver runs; test_logs names gate-base.log, driver-run1.log and driver-run2.log, all present; negative_control_log names negative-control.log; blockers and follow_ons empty.",
+    "write_paths": "git diff --name-only 6168972705c17a611cc0ee860d314497a5283ab4..7bae2e16c88e8987c6f50af177ef8adb18cfe566 lists exactly four paths, all inside the brief's declared write scope: scg-domain-label-sheet-run.py, scg-domain-label-sheet.json, scg-domain-incumbent.json and scg-domain-label-sheet.html."
+  },
+  "justifications": {
+    "durability": "scg-domain-label-sheet-run.py:274 check_blindness is a live guard whose negative-control.log shows 'REFUSED: sheet rows carry a domain field' on a poisoned row, and :287 check_query_properties runs on every driver execution, but no committed test fails if the driver regresses, so the protection is manual rather than automatic.",
+    "evidence": "gate-base.log records '14 passed ... EXIT=0' over tests/standard_names/test_judgment_goldens.py and tests/graph/test_cypher_property_check.py, and driver-run1.log and driver-run2.log each show 'reference=20 sample=150 options=32 rows=170' at EXIT=0, but the done-when's head arm has no separate gate log and the 'byte-identical' claim is asserted rather than shown in a log.",
+    "fit": "scg-domain-label-sheet-run.py follows the module-docstring, type-hint and html.escape idiom of the surrounding imas_codex/standard_names modules, its single commit carries a conventional subject and a body with no AI trailer, and no symbol carries a plan or ticket label, though the filenames carry the mandated fragment slug.",
+    "goal_fidelity": "scg-domain-label-sheet-run.py:233 build() produces the 20-row reference block (five fixed plus fifteen chosen by the rule at :150) and the 150-row sample the goal names, with :212 load_options reading the 32 ISN values from the installed package and :134 sheet_row withholding the stored physics_domain.",
+    "reuse": "assign_splits at scg-domain-label-sheet-run.py:198 re-implements the calibration/validation split rule that imas_codex/standard_names/judgment_goldens.py:222 owns inline in _finish, duplicating the owner rather than extending it, while _sample and _rank are correctly imported from the same module and _family semantics are reused via pattern_signature.",
+    "scope_discipline": "git diff --name-only 6168972..7bae2e16 lists exactly the four paths the brief grants (scg-domain-label-sheet-run.py, scg-domain-label-sheet.json, scg-domain-incumbent.json, scg-domain-label-sheet.html), all additive in one commit, and no file under imas_codex/ is modified."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a driver writing a blind physics-domain sheet; scg-domain-label-sheet-run.py:233 build() emits 20 reference rows (the five fixed plus fifteen chosen by the rule at :150) and 150 sampled rows with empty label/note, and :212 reads the 32 ISN options.\nVERDICT done_when: the done-when asks for two identical logged runs and a fragment reporting the rule, the by-family/domain/split counts, the null-domain count and the no-domain-field check; manifest records driver-run1.log and driver-run2.log both EXIT=0 with equal counts and gate-base.log at 14 passed EXIT=0.\nVERDICT write_paths: git diff --name-only 6168972..7bae2e16 lists exactly four paths (scg-domain-label-sheet-run.py, scg-domain-label-sheet.json, scg-domain-incumbent.json, scg-domain-label-sheet.html), all inside the brief's declared write scope.\nVERDICT manifest: read; status complete; single commit 7bae2e16; changed_paths names the four files; tests line records 14 passed EXIT=0; test_logs names gate-base.log, driver-run1.log, driver-run2.log; negative_control_log present.\nVERDICT diff: read commit by commit against the base; one additive commit (5615 insertions, 0 deletions) creating the driver and its three artefacts, importing _sample/_rank/pattern_signature and touching nothing under imas_codex/.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scg-domain-label-sheet-run.py:233 build() produces the 20-row reference block and 150-row sample the goal names, with :212 load_options reading the 32 ISN values and :134 sheet_row withholding the stored domain.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-base.log records '14 passed ... EXIT=0' and driver-run1.log/driver-run2.log each show reference=20 sample=150 options=32 rows=170 at EXIT=0, but the done-when's head arm has no separate gate log and 'byte-identical' is asserted, not shown.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 6168972..7bae2e16 is exactly the four granted fragment paths in one commit, and no file under imas_codex/ is modified.\nSCORE durability: 14\nJUSTIFICATION durability: scg-domain-label-sheet-run.py:274 check_blindness is a live guard whose negative-control.log shows REFUSED on a poisoned row and :287 check_query_properties runs each execution, but no committed test fails if the driver regresses.\nSCORE fit: 18\nJUSTIFICATION fit: scg-domain-label-sheet-run.py follows the module-docstring, type-hint and html.escape idiom of imas_codex/standard_names modules and its commit carries a body with no trailer, though the filenames carry the mandated fragment slug.\nSCORE reuse: 5\nJUSTIFICATION reuse: assign_splits at scg-domain-label-sheet-run.py:198 re-implements the calibration/validation split rule owned inline by imas_codex/standard_names/judgment_goldens.py:222 instead of importing it, duplicating the owner while _sample and _rank are correctly imported.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py:198 follow-on: assign_splits duplicates the calibration/validation split rule that judgment_goldens.py:222 owns inline in _finish rather than importing it as the brief required; repair is to factor the rule out of _finish into a callable in that module and import it, which is outside this node's write scope so it does not hold the landing.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py:300 follow-on: _family_key counts families by the displayed grammar segments, a different key from the pattern_family the split is keyed on, so the fragment's '150 families, 1 row each' table does not describe the grouping the split actually uses and can read as if the split groups nothing.",
+  "review_run_id": "r-20261013T080503542552-review-of-scg-domain-label-sheet",
+  "reviewed_base_sha": "6168972705c17a611cc0ee860d314497a5283ab4",
+  "reviewed_head_sha": "7bae2e16c88e8987c6f50af177ef8adb18cfe566",
+  "reviewed_run_id": "r-20261013T072746142048-scg-domain-label-sheet",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T08:20:00+00:00",
+  "total": 92
+}
