@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6098",
+    "imas_codex/cli/sn.py:6154",
+    "imas_codex/cli/sn.py:6241",
+    "imas_codex/standard_names/harmonize.py:1122"
+  ],
+  "completed_at": "2026-10-13T16:31:43.542Z",
+  "dispatched_at": "2026-10-13T16:05:51Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/families.py",
+      "line": "605",
+      "severity": "blocking",
+      "text": "blocking: existing_name_ids is a verbatim duplicate of graph_ops.get_existing_standard_names (graph_ops.py:865, same \"MATCH (sn:StandardName) RETURN sn.id AS id\"), and the source brief's follow-on said to \"call the owner instead and delete the copy\"; the copy was moved from harmonize.py into families.py instead, and harmonize.py:526-527's comment even claims a caller with a client \"reads through\" the owner while it in fact forks it."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1122",
+      "severity": "follow-on",
+      "text": "follow-on: the force=force is not None argument is unreachable in production \u2014 imas_codex/cli/sn.py:6098 pre-builds the plan with plan_family_applies(gc, seeds=, min_size=) and passes it as plan= to apply_families at sn.py:6154, so apply_families' own re-plan branch never runs and --force cannot override a pin; the brief's third clause is met in the library but not end-to-end."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "851",
+      "severity": "follow-on",
+      "text": "follow-on: the pin is not keyed to the scope run id that \u00a77 states (\"A run records the anchor it chose against its scope run id ... a new scope run selects normally\"); pinned_family_anchor at :771 returns the recorded value for any plan while the family is unstamped, so a fresh scope run over an interrupted family reuses the previous run's anchor rather than ranking afresh."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1156",
+      "severity": "follow-on",
+      "text": "follow-on: the change's central mechanism, the apply-time _record_family_anchor call, has no test that fails if it is removed \u2014 the three added tests seed harmonized_anchor directly on the fixture nodes \u2014 so deleting the recording call would redden no assertion."
+    },
+    {
+      "file": "imas_codex/standard_names/families.py",
+      "line": "613",
+      "severity": "follow-on",
+      "text": "follow-on: the new query drops the LIMIT 200000 the replaced _NAME_IDS_QUERY carried, while the comment at harmonize.py:528 still asserts the read is \"bounded\"; naming a row set is not a bound, and the claim now understates an unbounded result."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit (one commit f60614237 against base 48c569aff) \u2014 the pin property, pinned_family_anchor, _record_family_anchor/_clear_family_anchor, the plan_family_applies reuse block, the _stamp_applied_family release, the new families.existing_name_ids, and 196 lines of tests, all inside the declared scope.",
+    "done_when": "the done_when names a reused-over-a-higher-scorer test, a stamped-family test, a no-client report test, and a delta gate on the harmonize/families tests plus a cypher check; all four are present and their results are recorded \u2014 tests/standard_names/test_harmonize_anchor_pin.py (3 tests), logs/base_gate.log 175 passed / logs/head_gate.log 178 passed, logs/cypher_check.log 4 passed, and logs/neg_pin.log, neg_release.log and neg_scope.log each 1 failed.",
+    "goal": "the node's goal is that a harmonize run keeps the anchor it chose until its family is stamped; harmonize.py:771 pinned_family_anchor reads the recorded harmonized_anchor, harmonize.py:851, and plan_family_applies reuses it while the family is unstamped, so bullets 1 and 2 hold, while bullet 3 (a forced apply selects fresh) is implemented only in the library and the plan clause in \u00a77 (\"a new scope run selects normally\") is not honoured because the pin carries no scope run id.",
+    "manifest": "read; status complete, names commit f60614237 as head, records base and head gate results, names all three negative-control logs, and its notes pre-disclose the CLI force gap and the relocated name-id query \u2014 a residual the diff confirms but that the manifest frames as acceptable.",
+    "write_paths": "read the manifest's declared scope (harmonize.py, families.py, test_harmonize_anchor_pin.py, the shc-pin-anchor fragment) and git diff --stat 48c569aff..f60614237 changes exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "each of the three assertions in tests/standard_names/test_harmonize_anchor_pin.py reddens under its own mutation (logs/neg_pin.log, neg_release.log, neg_scope.log), but the apply-time recording call at harmonize.py:1156 has no test that fails if it is deleted.",
+    "evidence": "logs/head_gate.log records 178 passed against logs/base_gate.log 175 passed (added failures 0) and logs/neg_pin.log records the required red run, so the measures the done_when names are recorded, not claimed.",
+    "fit": "the helpers at harmonize.py:791 and families.py:605 follow the module idiom and carry no plan or ticket label; the comment block at harmonize.py:526-528 sits directly above known_name_ids at :529 with no blank line, a style deviation from the surrounding module.",
+    "goal_fidelity": "harmonize.py:851 reuses the recorded anchor and families.py:674 releases it on the stamp, but the pin at harmonize.py:771 ignores the scope run id so a fresh run reuses an interrupted run's anchor, and the force clause is unreachable from imas_codex/cli/sn.py:6098.",
+    "reuse": "families.py:605 existing_name_ids restates the MATCH (sn:StandardName) RETURN sn.id AS id that graph_ops.get_existing_standard_names owns at graph_ops.py:865, so the copy harmonize.py's follow-on asked to delete was relocated rather than removed.",
+    "scope_discipline": "git diff --stat 48c569aff..f60614237 lists exactly the four declared paths \u2014 harmonize.py, families.py, tests/standard_names/test_harmonize_anchor_pin.py and the shc-pin-anchor fragment \u2014 with no out-of-scope file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a harmonize run keeps the anchor it chose until its family is stamped; harmonize.py:771 pinned_family_anchor reads the recorded harmonized_anchor, harmonize.py:851, and plan_family_applies reuses it while the family is unstamped, so bullets 1 and 2 hold, while bullet 3 (a forced apply selects fresh) is implemented only in the library and the plan clause in \u00a77 (\"a new scope run selects normally\") is not honoured because the pin carries no scope run id.\nVERDICT done_when: the done_when names a reused-over-a-higher-scorer test, a stamped-family test, a no-client report test, and a delta gate on the harmonize/families tests plus a cypher check; all four are present and their results are recorded \u2014 tests/standard_names/test_harmonize_anchor_pin.py (3 tests), logs/base_gate.log 175 passed / logs/head_gate.log 178 passed, logs/cypher_check.log 4 passed, and logs/neg_pin.log, neg_release.log and neg_scope.log each 1 failed.\nVERDICT write_paths: read the manifest's declared scope (harmonize.py, families.py, test_harmonize_anchor_pin.py, the shc-pin-anchor fragment) and git diff --stat 48c569aff..f60614237 changes exactly those four paths and nothing else.\nVERDICT manifest: read; status complete, names commit f60614237 as head, records base and head gate results, names all three negative-control logs, and its notes pre-disclose the CLI force gap and the relocated name-id query \u2014 a residual the diff confirms but that the manifest frames as acceptable.\nVERDICT diff: read commit by commit (one commit f60614237 against base 48c569aff) \u2014 the pin property, pinned_family_anchor, _record_family_anchor/_clear_family_anchor, the plan_family_applies reuse block, the _stamp_applied_family release, the new families.existing_name_ids, and 196 lines of tests, all inside the declared scope.\nCALL_SITES: imas_codex/cli/sn.py:6098, imas_codex/cli/sn.py:6154, imas_codex/cli/sn.py:6241, imas_codex/standard_names/harmonize.py:1122\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: harmonize.py:851 reuses the recorded anchor and families.py:674 releases it on the stamp, but the pin at harmonize.py:771 ignores the scope run id so a fresh run reuses an interrupted run's anchor, and the force clause is unreachable from imas_codex/cli/sn.py:6098.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/head_gate.log records 178 passed against logs/base_gate.log 175 passed (added failures 0) and logs/neg_pin.log records the required red run, so the measures the done_when names are recorded, not claimed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 48c569aff..f60614237 lists exactly the four declared paths \u2014 harmonize.py, families.py, tests/standard_names/test_harmonize_anchor_pin.py and the shc-pin-anchor fragment \u2014 with no out-of-scope file.\nSCORE durability: 16\nJUSTIFICATION durability: each of the three assertions in tests/standard_names/test_harmonize_anchor_pin.py reddens under its own mutation (logs/neg_pin.log, neg_release.log, neg_scope.log), but the apply-time recording call at harmonize.py:1156 has no test that fails if it is deleted.\nSCORE fit: 18\nJUSTIFICATION fit: the helpers at harmonize.py:791 and families.py:605 follow the module idiom and carry no plan or ticket label; the comment block at harmonize.py:526-528 sits directly above known_name_ids at :529 with no blank line, a style deviation from the surrounding module.\nSCORE reuse: 4\nJUSTIFICATION reuse: families.py:605 existing_name_ids restates the MATCH (sn:StandardName) RETURN sn.id AS id that graph_ops.get_existing_standard_names owns at graph_ops.py:865, so the copy harmonize.py's follow-on asked to delete was relocated rather than removed.\nFINDING imas_codex/standard_names/families.py:605 blocking: existing_name_ids is a verbatim duplicate of graph_ops.get_existing_standard_names (graph_ops.py:865, same \"MATCH (sn:StandardName) RETURN sn.id AS id\"), and the source brief's follow-on said to \"call the owner instead and delete the copy\"; the copy was moved from harmonize.py into families.py instead, and harmonize.py:526-527's comment even claims a caller with a client \"reads through\" the owner while it in fact forks it.\nFINDING imas_codex/standard_names/harmonize.py:1122 follow-on: the force=force is not None argument is unreachable in production \u2014 imas_codex/cli/sn.py:6098 pre-builds the plan with plan_family_applies(gc, seeds=, min_size=) and passes it as plan= to apply_families at sn.py:6154, so apply_families' own re-plan branch never runs and --force cannot override a pin; the brief's third clause is met in the library but not end-to-end.\nFINDING imas_codex/standard_names/harmonize.py:851 follow-on: the pin is not keyed to the scope run id that \u00a77 states (\"A run records the anchor it chose against its scope run id ... a new scope run selects normally\"); pinned_family_anchor at :771 returns the recorded value for any plan while the family is unstamped, so a fresh scope run over an interrupted family reuses the previous run's anchor rather than ranking afresh.\nFINDING imas_codex/standard_names/harmonize.py:1156 follow-on: the change's central mechanism, the apply-time _record_family_anchor call, has no test that fails if it is removed \u2014 the three added tests seed harmonized_anchor directly on the fixture nodes \u2014 so deleting the recording call would redden no assertion.\nFINDING imas_codex/standard_names/families.py:613 follow-on: the new query drops the LIMIT 200000 the replaced _NAME_IDS_QUERY carried, while the comment at harmonize.py:528 still asserts the read is \"bounded\"; naming a row set is not a bound, and the claim now understates an unbounded result.",
+  "review_run_id": "r-20261013T160538070551-review-of-shc-pin-anchor-f60614237a09",
+  "reviewed_base_sha": "48c569aff3430879dd3c777a236b09526b230d7d",
+  "reviewed_head_sha": "f60614237a099845bf3a7e07e79632080138826b",
+  "reviewed_run_id": "r-20261013T145943345276-shc-pin-anchor",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T16:32:35.355211+00:00",
+  "total": 89
+}
