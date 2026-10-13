@@ -729,7 +729,7 @@
           "ids": "pulse_schedule"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     },
@@ -752,7 +752,7 @@
           "ids": "pellets"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     },
@@ -775,7 +775,7 @@
           "ids": "edge_profiles"
         }
       ],
-      "label": "",
+      "label": "edge_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -798,7 +798,7 @@
           "ids": "waves"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "validation"
     },
@@ -816,7 +816,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "magnetohydrodynamics",
       "note": "",
       "split": "calibration"
     },
@@ -839,7 +839,7 @@
           "ids": "soft_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -866,7 +866,7 @@
           "ids": "waves"
         }
       ],
-      "label": "",
+      "label": "waves",
       "note": "",
       "split": "calibration"
     },
@@ -889,7 +889,7 @@
           "ids": "runaway_electrons"
         }
       ],
-      "label": "",
+      "label": "runaway_electrons",
       "note": "",
       "split": "validation"
     },
@@ -907,7 +907,7 @@
         "process": "non_inductive_current_drive"
       },
       "sources": [],
-      "label": "",
+      "label": "current_drive",
       "note": "",
       "split": "validation"
     },
@@ -934,7 +934,7 @@
           "ids": "reflectometer_profile"
         }
       ],
-      "label": "",
+      "label": "electromagnetic_wave_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -957,7 +957,7 @@
           "ids": "spectrometer_x_ray_crystal"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -980,7 +980,7 @@
           "ids": "lh_antennas"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "calibration"
     },
@@ -1003,7 +1003,7 @@
           "ids": "equilibrium"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     },
@@ -1026,7 +1026,7 @@
           "ids": "ece"
         }
       ],
-      "label": "",
+      "label": "electromagnetic_wave_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -1049,7 +1049,7 @@
           "ids": "hard_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -1072,7 +1072,7 @@
           "ids": "distributions"
         }
       ],
-      "label": "",
+      "label": "fast_particles",
       "note": "",
       "split": "validation"
     },
@@ -1090,7 +1090,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     },
@@ -1117,7 +1117,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -1140,7 +1140,7 @@
           "ids": "barometry"
         }
       ],
-      "label": "",
+      "label": "particle_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -1158,7 +1158,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "magnetohydrodynamics",
       "note": "",
       "split": "calibration"
     },
@@ -1176,7 +1176,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "general",
       "note": "",
       "split": "validation"
     },
@@ -1203,7 +1203,7 @@
           "ids": "gyrokinetics_local"
         }
       ],
-      "label": "",
+      "label": "gyrokinetics",
       "note": "",
       "split": "calibration"
     },
@@ -1230,7 +1230,7 @@
           "ids": "edge_profiles"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -1248,7 +1248,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -1271,7 +1271,7 @@
           "ids": "equilibrium"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "validation"
     },
@@ -1298,7 +1298,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     },
@@ -1321,7 +1321,7 @@
           "ids": "plasma_profiles"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -1344,7 +1344,7 @@
           "ids": "equilibrium"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     },
@@ -1367,7 +1367,7 @@
           "ids": "tf"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_systems",
       "note": "",
       "split": "calibration"
     },
@@ -1390,7 +1390,7 @@
           "ids": "spi"
         }
       ],
-      "label": "",
+      "label": "fueling",
       "note": "",
       "split": "calibration"
     },
@@ -1413,7 +1413,7 @@
           "ids": "gyrokinetics_local"
         }
       ],
-      "label": "",
+      "label": "gyrokinetics",
       "note": "",
       "split": "validation"
     },
@@ -1436,7 +1436,7 @@
           "ids": "pf_plasma"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     },
@@ -1459,7 +1459,7 @@
           "ids": "spectrometer_visible"
         }
       ],
-      "label": "",
+      "label": "spectroscopy",
       "note": "",
       "split": "validation"
     },
@@ -1486,7 +1486,7 @@
           "ids": "ic_antennas"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "validation"
     },
@@ -1513,7 +1513,7 @@
           "ids": "equilibrium"
         }
       ],
-      "label": "",
+      "label": "electromagnetic_wave_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -1536,7 +1536,7 @@
           "ids": "breeding_blanket"
         }
       ],
-      "label": "",
+      "label": "neutronics",
       "note": "",
       "split": "calibration"
     },
@@ -1554,7 +1554,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "turbulence",
       "note": "",
       "split": "calibration"
     },
@@ -1581,7 +1581,7 @@
           "ids": "neutron_diagnostic"
         }
       ],
-      "label": "",
+      "label": "plasma_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -1604,7 +1604,7 @@
           "ids": "soft_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -1627,7 +1627,7 @@
           "ids": "mhd_linear"
         }
       ],
-      "label": "",
+      "label": "magnetohydrodynamics",
       "note": "",
       "split": "calibration"
     },
@@ -1645,7 +1645,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "magnetohydrodynamics",
       "note": "",
       "split": "calibration"
     },
@@ -1668,7 +1668,7 @@
           "ids": "equilibrium"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "validation"
     },
@@ -1691,7 +1691,7 @@
           "ids": "wall"
         }
       ],
-      "label": "",
+      "label": "plasma_wall_interactions",
       "note": "",
       "split": "validation"
     },
@@ -1714,7 +1714,7 @@
           "ids": "distributions"
         }
       ],
-      "label": "",
+      "label": "fast_particles",
       "note": "",
       "split": "validation"
     },
@@ -1741,7 +1741,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "waves",
       "note": "",
       "split": "calibration"
     },
@@ -1768,7 +1768,7 @@
           "ids": "wall"
         }
       ],
-      "label": "",
+      "label": "plasma_wall_interactions",
       "note": "",
       "split": "validation"
     },
@@ -1791,7 +1791,7 @@
           "ids": "soft_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -1814,7 +1814,7 @@
           "ids": "charge_exchange"
         }
       ],
-      "label": "",
+      "label": "plasma_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -1832,7 +1832,7 @@
         "process": "injection"
       },
       "sources": [],
-      "label": "",
+      "label": "fueling",
       "note": "",
       "split": "validation"
     },
@@ -1859,7 +1859,7 @@
           "ids": "polarimeter"
         }
       ],
-      "label": "",
+      "label": "electromagnetic_wave_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -1882,7 +1882,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -1909,7 +1909,7 @@
           "ids": "waves"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "calibration"
     },
@@ -1932,7 +1932,7 @@
           "ids": "pf_active"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_systems",
       "note": "",
       "split": "calibration"
     },
@@ -1955,7 +1955,7 @@
           "ids": "wall"
         }
       ],
-      "label": "",
+      "label": "neutronics",
       "note": "",
       "split": "validation"
     },
@@ -1978,7 +1978,7 @@
           "ids": "charge_exchange"
         }
       ],
-      "label": "",
+      "label": "spectroscopy",
       "note": "",
       "split": "validation"
     },
@@ -2001,7 +2001,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "current_drive",
       "note": "",
       "split": "calibration"
     },
@@ -2024,7 +2024,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "validation"
     },
@@ -2047,7 +2047,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "neutronics",
       "note": "",
       "split": "validation"
     },
@@ -2070,7 +2070,7 @@
           "ids": "breeding_blanket"
         }
       ],
-      "label": "",
+      "label": "neutronics",
       "note": "",
       "split": "calibration"
     },
@@ -2093,7 +2093,7 @@
           "ids": "disruption"
         }
       ],
-      "label": "",
+      "label": "plasma_wall_interactions",
       "note": "",
       "split": "calibration"
     },
@@ -2116,7 +2116,7 @@
           "ids": "spectrometer_visible"
         }
       ],
-      "label": "",
+      "label": "spectroscopy",
       "note": "",
       "split": "validation"
     },
@@ -2134,7 +2134,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     },
@@ -2157,7 +2157,7 @@
           "ids": "spectrometer_visible"
         }
       ],
-      "label": "",
+      "label": "edge_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -2184,7 +2184,7 @@
           "ids": "pf_passive"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_systems",
       "note": "",
       "split": "validation"
     },
@@ -2207,7 +2207,7 @@
           "ids": "edge_transport"
         }
       ],
-      "label": "",
+      "label": "plasma_wall_interactions",
       "note": "",
       "split": "validation"
     },
@@ -2230,7 +2230,7 @@
           "ids": "charge_exchange"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -2253,7 +2253,7 @@
           "ids": "ferritic"
         }
       ],
-      "label": "",
+      "label": "structural_components",
       "note": "",
       "split": "calibration"
     },
@@ -2276,7 +2276,7 @@
           "ids": "nbi"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "validation"
     },
@@ -2294,7 +2294,7 @@
         "process": "collisions"
       },
       "sources": [],
-      "label": "",
+      "label": "transport",
       "note": "",
       "split": "validation"
     },
@@ -2317,7 +2317,7 @@
           "ids": "equilibrium"
         }
       ],
-      "label": "",
+      "label": "plasma_control",
       "note": "",
       "split": "validation"
     },
@@ -2344,7 +2344,7 @@
           "ids": "edge_profiles"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -2371,7 +2371,7 @@
           "ids": "plasma_profiles"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -2394,7 +2394,7 @@
           "ids": "spi"
         }
       ],
-      "label": "",
+      "label": "fueling",
       "note": "",
       "split": "calibration"
     },
@@ -2417,7 +2417,7 @@
           "ids": "camera_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -2444,7 +2444,7 @@
           "ids": "tf"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_systems",
       "note": "",
       "split": "calibration"
     },
@@ -2467,7 +2467,7 @@
           "ids": "lh_antennas"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "validation"
     },
@@ -2490,7 +2490,7 @@
           "ids": "nbi"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "calibration"
     },
@@ -2513,7 +2513,7 @@
           "ids": "ferritic"
         }
       ],
-      "label": "",
+      "label": "structural_components",
       "note": "",
       "split": "validation"
     },
@@ -2536,7 +2536,7 @@
           "ids": "gyrokinetics_local"
         }
       ],
-      "label": "",
+      "label": "gyrokinetics",
       "note": "",
       "split": "validation"
     },
@@ -2559,7 +2559,7 @@
           "ids": "divertors"
         }
       ],
-      "label": "",
+      "label": "plasma_wall_interactions",
       "note": "",
       "split": "calibration"
     },
@@ -2582,7 +2582,7 @@
           "ids": "spi"
         }
       ],
-      "label": "",
+      "label": "fueling",
       "note": "",
       "split": "calibration"
     },
@@ -2605,7 +2605,7 @@
           "ids": "neutron_diagnostic"
         }
       ],
-      "label": "",
+      "label": "neutronics",
       "note": "",
       "split": "calibration"
     },
@@ -2628,7 +2628,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "current_drive",
       "note": "",
       "split": "validation"
     },
@@ -2651,7 +2651,7 @@
           "ids": "wall"
         }
       ],
-      "label": "",
+      "label": "neutronics",
       "note": "",
       "split": "calibration"
     },
@@ -2674,7 +2674,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "fueling",
       "note": "",
       "split": "validation"
     },
@@ -2692,7 +2692,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "gyrokinetics",
       "note": "",
       "split": "validation"
     },
@@ -2715,7 +2715,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -2733,7 +2733,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "magnetohydrodynamics",
       "note": "",
       "split": "validation"
     },
@@ -2760,7 +2760,7 @@
           "ids": "neutron_diagnostic"
         }
       ],
-      "label": "",
+      "label": "neutronics",
       "note": "",
       "split": "calibration"
     },
@@ -2783,7 +2783,7 @@
           "ids": "refractometer"
         }
       ],
-      "label": "",
+      "label": "electromagnetic_wave_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -2806,7 +2806,7 @@
           "ids": "soft_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -2824,7 +2824,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "magnetohydrodynamics",
       "note": "",
       "split": "validation"
     },
@@ -2847,7 +2847,7 @@
           "ids": "magnetics"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -2870,7 +2870,7 @@
           "ids": "spectrometer_visible"
         }
       ],
-      "label": "",
+      "label": "spectroscopy",
       "note": "",
       "split": "validation"
     },
@@ -2897,7 +2897,7 @@
           "ids": "langmuir_probes"
         }
       ],
-      "label": "",
+      "label": "particle_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -2920,7 +2920,7 @@
           "ids": "magnetics"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -2938,7 +2938,7 @@
         "process": "perturbed_parallel_vector_potential"
       },
       "sources": [],
-      "label": "",
+      "label": "gyrokinetics",
       "note": "",
       "split": "calibration"
     },
@@ -2961,7 +2961,7 @@
           "ids": "ntms"
         }
       ],
-      "label": "",
+      "label": "magnetohydrodynamics",
       "note": "",
       "split": "validation"
     },
@@ -2984,7 +2984,7 @@
           "ids": "ic_antennas"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "validation"
     },
@@ -3002,7 +3002,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "edge_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -3025,7 +3025,7 @@
           "ids": "soft_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -3048,7 +3048,7 @@
           "ids": "spectrometer_uv"
         }
       ],
-      "label": "",
+      "label": "spectroscopy",
       "note": "",
       "split": "calibration"
     },
@@ -3075,7 +3075,7 @@
           "ids": "distribution_sources"
         }
       ],
-      "label": "",
+      "label": "fast_particles",
       "note": "",
       "split": "validation"
     },
@@ -3098,7 +3098,7 @@
           "ids": "focs"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -3121,7 +3121,7 @@
           "ids": "hard_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -3144,7 +3144,7 @@
           "ids": "spectrometer_visible"
         }
       ],
-      "label": "",
+      "label": "edge_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -3171,7 +3171,7 @@
           "ids": "equilibrium"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -3194,7 +3194,7 @@
           "ids": "camera_ir"
         }
       ],
-      "label": "",
+      "label": "plasma_wall_interactions",
       "note": "",
       "split": "validation"
     },
@@ -3212,7 +3212,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "plasma_wall_interactions",
       "note": "",
       "split": "validation"
     },
@@ -3239,7 +3239,7 @@
           "ids": "hard_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -3266,7 +3266,7 @@
           "ids": "ic_antennas"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "calibration"
     },
@@ -3293,7 +3293,7 @@
           "ids": "core_profiles"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -3311,7 +3311,7 @@
         "process": "e_cross_b_drift"
       },
       "sources": [],
-      "label": "",
+      "label": "gyrokinetics",
       "note": "",
       "split": "calibration"
     },
@@ -3334,7 +3334,7 @@
           "ids": "interferometer"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -3361,7 +3361,7 @@
           "ids": "coils_non_axisymmetric"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_systems",
       "note": "",
       "split": "validation"
     },
@@ -3388,7 +3388,7 @@
           "ids": "camera_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -3411,7 +3411,7 @@
           "ids": "distributions"
         }
       ],
-      "label": "",
+      "label": "fast_particles",
       "note": "",
       "split": "calibration"
     },
@@ -3438,7 +3438,7 @@
           "ids": "hard_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -3461,7 +3461,7 @@
           "ids": "pf_passive"
         }
       ],
-      "label": "",
+      "label": "structural_components",
       "note": "",
       "split": "validation"
     },
@@ -3479,7 +3479,7 @@
         "process": "recombination"
       },
       "sources": [],
-      "label": "",
+      "label": "plasma_wall_interactions",
       "note": "",
       "split": "calibration"
     },
@@ -3506,7 +3506,7 @@
           "ids": "core_profiles"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "calibration"
     },
@@ -3533,7 +3533,7 @@
           "ids": "edge_profiles"
         }
       ],
-      "label": "",
+      "label": "edge_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -3556,7 +3556,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "fueling",
       "note": "",
       "split": "calibration"
     },
@@ -3579,7 +3579,7 @@
           "ids": "spectrometer_x_ray_crystal"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -3602,7 +3602,7 @@
           "ids": "pellets"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -3629,7 +3629,7 @@
           "ids": "waves"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "validation"
     },
@@ -3647,7 +3647,7 @@
         "process": ""
       },
       "sources": [],
-      "label": "",
+      "label": "gyrokinetics",
       "note": "",
       "split": "validation"
     },
@@ -3670,7 +3670,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "validation"
     },
@@ -3693,7 +3693,7 @@
           "ids": "spectrometer_uv"
         }
       ],
-      "label": "",
+      "label": "spectroscopy",
       "note": "",
       "split": "calibration"
     },
@@ -3720,7 +3720,7 @@
           "ids": "pf_active"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_systems",
       "note": "",
       "split": "validation"
     },
@@ -3738,7 +3738,7 @@
         "process": "wave_driven_current_drive"
       },
       "sources": [],
-      "label": "",
+      "label": "current_drive",
       "note": "",
       "split": "calibration"
     },
@@ -3756,7 +3756,7 @@
         "process": "fast_ion"
       },
       "sources": [],
-      "label": "",
+      "label": "fast_particles",
       "note": "",
       "split": "validation"
     },
@@ -3779,7 +3779,7 @@
           "ids": "wall"
         }
       ],
-      "label": "",
+      "label": "plasma_wall_interactions",
       "note": "",
       "split": "calibration"
     },
@@ -3802,7 +3802,7 @@
           "ids": "magnetics"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -3825,7 +3825,7 @@
           "ids": "pf_plasma"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "validation"
     },
@@ -3852,7 +3852,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "validation"
     },
@@ -3875,7 +3875,7 @@
           "ids": "pf_active"
         }
       ],
-      "label": "",
+      "label": "magnetic_field_systems",
       "note": "",
       "split": "validation"
     },
@@ -3898,7 +3898,7 @@
           "ids": "plasma_initiation"
         }
       ],
-      "label": "",
+      "label": "plasma_initiation",
       "note": "",
       "split": "calibration"
     },
@@ -3921,7 +3921,7 @@
           "ids": "interferometer"
         }
       ],
-      "label": "",
+      "label": "electromagnetic_wave_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -3944,7 +3944,7 @@
           "ids": "spectrometer_x_ray_crystal"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -3971,7 +3971,7 @@
           "ids": "spectrometer_uv"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -3994,7 +3994,7 @@
           "ids": "divertors"
         }
       ],
-      "label": "",
+      "label": "divertor_physics",
       "note": "",
       "split": "calibration"
     },
@@ -4017,7 +4017,7 @@
           "ids": "operational_instrumentation"
         }
       ],
-      "label": "",
+      "label": "mechanical_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -4040,7 +4040,7 @@
           "ids": "soft_x_rays"
         }
       ],
-      "label": "",
+      "label": "radiation_measurement_diagnostics",
       "note": "",
       "split": "validation"
     },
@@ -4063,7 +4063,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "edge_plasma_physics",
       "note": "",
       "split": "validation"
     },
@@ -4086,7 +4086,7 @@
           "ids": "nbi"
         }
       ],
-      "label": "",
+      "label": "auxiliary_heating",
       "note": "",
       "split": "validation"
     },
@@ -4109,7 +4109,7 @@
           "ids": "thomson_scattering"
         }
       ],
-      "label": "",
+      "label": "particle_measurement_diagnostics",
       "note": "",
       "split": "calibration"
     },
@@ -4136,7 +4136,7 @@
           "ids": "summary"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     },
@@ -4159,7 +4159,7 @@
           "ids": "plasma_transport"
         }
       ],
-      "label": "",
+      "label": "transport",
       "note": "",
       "split": "validation"
     },
@@ -4182,7 +4182,7 @@
           "ids": "pf_plasma"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
       "split": "calibration"
     }
