@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="86">
+<meta name="plan-version" content="87">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -339,7 +339,7 @@
     <div class="r-comment-body"><p>§23 closed. Every source-migration conflict that a retry cannot settle now raises a named outcome under <code>SourceMigrationConflictError</code>, and compose withholds it without spending an attempt. That covers both the dual-live and the live-beside-retired bindings (merges <code>b5a5ab30b</code>, <code>b9c128a92</code>, <code>060e352e9</code>, <code>61aec6649</code>). Whether a source may keep a binding to a retired identity is still the lead's question <code>q-sib-path-source-cardinality</code>. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s23-retired-successor">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s23" data-id="c-run-r-20261013T011137046681-review-of-sib-conflict-base-288db9e2fb9d" data-who="reckon-build" data-when="2026-10-13T01:19:56.344Z">
-    <div class="r-comment-body"><p>review of sib-conflict-base (r-20261013T004927709564 at head 288db9e2f) — all six dimensions scored, total 117 (goal_fidelity 20, evidence 18, scope_discipline 20, durability 19, fit 20, reuse 20), one follow-on finding that the negative-control logs&#x27; revision headers name the base while they executed the head test file; zero added failures</p></div>
+    <div class="r-comment-body"><p>review of sib-conflict-base (r-20261013T004927709564 at head 288db9e2f) — all six dimensions scored, total 117 (goal_fidelity 20, evidence 18, scope_discipline 20, durability 19, fit 20, reuse 20), one follow-on finding that the negative-control logs' revision headers name the base while they executed the head test file; zero added failures</p></div>
 </div>
 <div class="r-comment" data-section="s20" data-id="c-run-sib-signed-supersede-edge" data-who="reckon-build" data-when="2026-10-12T20:30:00Z">
     <div class="r-comment-body"><p>The signed supersede writes a receipt-stamped successor edge and requires it (merge <code>0d94713db</code>); review 112/120. §20 stays open until the postcondition counts every successor edge rather than grouping by receipt. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s20-edge">evidence</a></p></div>
@@ -427,6 +427,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-holes-decided" data-who="reckon-build" data-when="2026-10-13T01:15:00Z">
     <div class="r-comment-body"><p>All three holes reproduce (<a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s7-holes-diagnosed">diagnosis</a>). Decisions:</p><ul><li><strong>Docs edit at pending:</strong> admit <code>pending</code> under the existing claim. The fix node has delivered and is awaiting review.</li><li><strong>Rescore:</strong> refuse a terminal <code>status</code> in <code>stage_name_for_rescore</code>'s guarded transition, and make every refusal name the signed transition in <code>imas_codex/standard_names/signed_manifest.py</code> as the route out of a terminal state. That is the only mechanism that moves one today. Rescore then never leaves the two axes disagreeing. This makes rescore refuse rather than proceed for that state, a deliberate narrowing of the done-when's "proceeds": the original followup said the terminal-status refusal should be reached through a sanctioned transition, not bypassed.</li><li><strong>Rename onto a tombstone: a question for the lead.</strong> The proposed repair resurrects a successor-less superseded row in place, reusing it as the rename's successor, because two rows cannot share an id. That overwrites a historical row's fields. The sn-edit skill documents rename as the resurrection route for exactly this case. The alternative keeps the refusal and makes it name the signed transition back to <code>draft</code>, followed by an edit of that identity. Which route should the sanctioned surface offer?</li></ul></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261013T011431634225-sib-rescore-terminal-status" data-who="reckon-build" data-when="2026-10-13T01:26:49Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-integrity-backlog/sib-rescore-terminal-status.html#sib-rescore-terminal-status — terminal status refused; 4 focused passes, 0 added rescore failures (3 unchanged fixture setup errors).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
