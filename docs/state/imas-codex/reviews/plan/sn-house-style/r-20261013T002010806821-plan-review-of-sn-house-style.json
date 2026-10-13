@@ -32,7 +32,24 @@
   "plan_slug": "sn-house-style",
   "plan_version": 42,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-13T00:34:59.136448+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-13T00:34:59.136448+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-house-style/r-20261013T002010806821-plan-review-of-sn-house-style.json",
   "review_run_id": "r-20261013T002010806821-plan-review-of-sn-house-style",
   "reviewed_blob_sha": "5153ff4b017646433fdfd170737eec302de70229",
   "rubric": "content",
