@@ -2567,7 +2567,7 @@ classes:
     annotations:
       fulltext_index:
         tag: fulltext_index
-        value: "facility_signal_text:name,description,node_path"
+        value: "facility_signal_text:name,description,node_path,keywords,aliases,unit,source_description"
     mixins:
       - DiscoveryProvenance
       - LLMOperation

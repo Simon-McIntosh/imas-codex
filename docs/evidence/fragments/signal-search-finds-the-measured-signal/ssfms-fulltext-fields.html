@@ -1,0 +1,26 @@
+<section id="ssfms-fulltext-fields-node" data-reckon="signal-full-text-index-fields-node">
+  <h2 id="ssfms-fulltext-fields-node-title">Signal full-text index widened to keywords, aliases, unit and source_description</h2>
+
+  <p id="ssfms-fulltext-fields-node-what">
+    The <code>facility_signal_text</code> index definition in
+    <code>imas_codex/schemas/facility.yaml</code> now lists the seven properties a searcher's words
+    can live in — <code>name</code>, <code>description</code>, <code>node_path</code>,
+    <code>keywords</code>, <code>aliases</code>, <code>unit</code>,
+    <code>source_description</code> — and the live index was dropped and rebuilt from that schema
+    definition, reaching <code>ONLINE</code> with the seven properties. The measured outcome, the
+    control pair and the labelled-candidate census are in the section record
+    <a href="/imas-codex/evidence/fragments/signal-search-finds-the-measured-signal/fulltext.html">fulltext.html</a>.
+  </p>
+
+  <ul id="ssfms-fulltext-fields-node-summary">
+    <li id="ssfms-fulltext-fields-node-summary-control">The alias code <code>4451 A231</code> (the JT-60SA handbook's name for the EF5 supply's DC voltage) matches <strong>0 hits before the rebuild and 3 after</strong>, placing <code>jt-60sa:general/ef5_volpsdc</code> at rank 1 — the declared negative control reproduces and the positive control passes, both logged.</li>
+    <li id="ssfms-fulltext-fields-node-summary-measure">The four-arm table on the head, run twice back to back, reads <code>current_tool</code> <strong>0.7924</strong> against a floor of <strong>0.7653</strong> (dispatched 0.7773 less the 0.012 spread); the like-for-like narrow-index reading on the identical fixture is 0.7767, so the widening raised the product arm.</li>
+    <li id="ssfms-fulltext-fields-node-summary-labels">Fifty-six candidate labels were added across seventeen questions so every signal the widened stream lifts into an arm's top 10 is graded; the harness then ran green with no unlabelled candidate.</li>
+  </ul>
+
+  <p id="ssfms-fulltext-fields-node-followon">
+    One follow-on: the <code>_text_search_signals</code> docstring in
+    <code>imas_codex/llm/search_tools.py</code> still enumerates the old three fields and is now
+    stale; it lives outside this node's write scope.
+  </p>
+</section>
