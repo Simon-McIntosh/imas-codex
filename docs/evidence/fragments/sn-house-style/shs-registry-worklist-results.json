@@ -1,0 +1,3673 @@
+{
+  "framework": "conventions-registry-gap-census",
+  "registry_dir": "(live: ISN default)",
+  "roster": "imas_codex/standard_names/manifests/reviews/v0.4.0rc7+west-task-2e.sn_names.yaml",
+  "totals": {
+    "roster_names": 220,
+    "parsed": 219,
+    "unparsed": 1,
+    "concepts": {
+      "distinct_tokens": 139,
+      "kinds": {
+        "coordinate": {
+          "distinct_tokens": 3,
+          "with_entry": 0,
+          "missing": 3
+        },
+        "geometric_base": {
+          "distinct_tokens": 8,
+          "with_entry": 0,
+          "missing": 8
+        },
+        "object": {
+          "distinct_tokens": 26,
+          "with_entry": 0,
+          "missing": 26
+        },
+        "physical_base": {
+          "distinct_tokens": 61,
+          "with_entry": 0,
+          "missing": 61
+        },
+        "position": {
+          "distinct_tokens": 24,
+          "with_entry": 1,
+          "missing": 23
+        },
+        "region": {
+          "distinct_tokens": 1,
+          "with_entry": 0,
+          "missing": 1
+        },
+        "transformation": {
+          "distinct_tokens": 18,
+          "with_entry": 1,
+          "missing": 17
+        }
+      }
+    },
+    "notation": {
+      "distinct_tokens": 79,
+      "kinds": {
+        "component": {
+          "distinct_tokens": 4,
+          "with_entry": 0,
+          "missing": 4
+        },
+        "coordinate": {
+          "distinct_tokens": 3,
+          "with_entry": 0,
+          "missing": 3
+        },
+        "geometric_base": {
+          "distinct_tokens": 8,
+          "with_entry": 0,
+          "missing": 8
+        },
+        "physical_base": {
+          "distinct_tokens": 61,
+          "with_entry": 1,
+          "missing": 60
+        },
+        "subject": {
+          "distinct_tokens": 5,
+          "with_entry": 0,
+          "missing": 5
+        }
+      }
+    },
+    "templates": {
+      "distinct_patterns": 125,
+      "distinct_bases": 69,
+      "with_template": 4,
+      "missing": 121
+    }
+  },
+  "concepts": [
+    {
+      "token": "coordinate",
+      "kind": "geometric_base",
+      "count": 17,
+      "names": [
+        "toroidal_coordinate_at_detector_pixel",
+        "toroidal_coordinate_of_aperture",
+        "toroidal_coordinate_of_camera",
+        "toroidal_coordinate_of_line_of_sight",
+        "vertical_coordinate_of_camera"
+      ]
+    },
+    {
+      "token": "vertical",
+      "kind": "coordinate",
+      "count": 17,
+      "names": [
+        "vertical_coordinate_of_camera",
+        "vertical_coordinate_of_conductor_cross_section",
+        "vertical_coordinate_of_detector_pixel",
+        "vertical_coordinate_of_ece_channel",
+        "vertical_coordinate_of_flux_loop"
+      ]
+    },
+    {
+      "token": "flux_surface",
+      "kind": "position",
+      "count": 13,
+      "names": [
+        "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "elongation_of_flux_surface",
+        "lower_triangularity_of_flux_surface"
+      ]
+    },
+    {
+      "token": "radial_coordinate",
+      "kind": "geometric_base",
+      "count": 13,
+      "names": [
+        "radial_coordinate_at_inboard_midplane",
+        "radial_coordinate_at_outboard_midplane",
+        "radial_coordinate_of_camera",
+        "radial_coordinate_of_conductor_cross_section",
+        "radial_coordinate_of_detector_pixel"
+      ]
+    },
+    {
+      "token": "magnitude",
+      "kind": "transformation",
+      "count": 10,
+      "names": [
+        "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_magnetic_field_magnitude",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+        "flux_surface_averaged_square_of_magnetic_field_magnitude"
+      ]
+    },
+    {
+      "token": "power",
+      "kind": "physical_base",
+      "count": 10,
+      "names": [
+        "forward_power_of_ion_cyclotron_heating_antenna",
+        "launched_power_of_lower_hybrid_antenna",
+        "net_power_due_to_ion_cyclotron_heating",
+        "power_of_soft_xray_detector",
+        "radiated_power_over_core_region"
+      ]
+    },
+    {
+      "token": "temperature",
+      "kind": "physical_base",
+      "count": 10,
+      "names": [
+        "cold_neutral_temperature",
+        "coolant_temperature_at_inlet",
+        "coolant_temperature_at_outlet",
+        "electron_temperature",
+        "electron_temperature_at_divertor_target"
+      ]
+    },
+    {
+      "token": "ion_cyclotron_heating_antenna",
+      "kind": "object",
+      "count": 9,
+      "names": [
+        "capacitance_of_ion_cyclotron_heating_antenna",
+        "forward_power_of_ion_cyclotron_heating_antenna",
+        "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+        "frequency_of_ion_cyclotron_heating_antenna",
+        "pressure_of_ion_cyclotron_heating_antenna"
+      ]
+    },
+    {
+      "token": "magnetic_field",
+      "kind": "physical_base",
+      "count": 9,
+      "names": [
+        "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_magnetic_field_magnitude",
+        "flux_surface_averaged_square_of_magnetic_field_magnitude",
+        "maximum_magnetic_field_magnitude",
+        "minimum_over_flux_surface_magnetic_field_magnitude"
+      ]
+    },
+    {
+      "token": "magnetic_axis",
+      "kind": "position",
+      "count": 8,
+      "names": [
+        "electron_density_at_magnetic_axis",
+        "electron_temperature_at_magnetic_axis",
+        "poloidal_magnetic_flux_at_magnetic_axis",
+        "radial_coordinate_of_magnetic_axis",
+        "radiative_temperature_at_magnetic_axis"
+      ]
+    },
+    {
+      "token": "magnetic_flux",
+      "kind": "physical_base",
+      "count": 8,
+      "names": [
+        "poloidal_magnetic_flux_at_flux_surface",
+        "poloidal_magnetic_flux_at_magnetic_axis",
+        "poloidal_magnetic_flux_at_measurement_position",
+        "poloidal_magnetic_flux_at_plasma_boundary",
+        "poloidal_magnetic_flux_of_flux_loop"
+      ]
+    },
+    {
+      "token": "outline",
+      "kind": "geometric_base",
+      "count": 8,
+      "names": [
+        "radial_outline_of_antenna_strap",
+        "radial_outline_of_limiter_tile",
+        "radial_outline_of_plasma_boundary",
+        "radial_outline_of_wall",
+        "vertical_outline_of_antenna_strap"
+      ]
+    },
+    {
+      "token": "placeholder",
+      "kind": "physical_base",
+      "count": 8,
+      "names": [
+        "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy",
+        "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+        "product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate"
+      ]
+    },
+    {
+      "token": "square",
+      "kind": "transformation",
+      "count": 8,
+      "names": [
+        "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_inverse_of_square_of_major_radius",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+        "flux_surface_averaged_square_of_magnetic_field_magnitude"
+      ]
+    },
+    {
+      "token": "area",
+      "kind": "physical_base",
+      "count": 7,
+      "names": [
+        "area_of_diagnostic_aperture",
+        "area_of_poloidal_magnetic_field_probe",
+        "area_of_toroidal_magnetic_field_probe",
+        "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "poloidal_plane_cross_sectional_area_of_flux_surface"
+      ]
+    },
+    {
+      "token": "density",
+      "kind": "physical_base",
+      "count": 7,
+      "names": [
+        "electron_density_at_divertor_target",
+        "electron_density_at_magnetic_axis",
+        "electron_density_at_plasma_boundary",
+        "line_averaged_electron_density",
+        "thermal_electron_density"
+      ]
+    },
+    {
+      "token": "poloidal_magnetic_field_probe",
+      "kind": "object",
+      "count": 7,
+      "names": [
+        "area_of_poloidal_magnetic_field_probe",
+        "length_of_poloidal_magnetic_field_probe",
+        "radial_coordinate_of_poloidal_magnetic_field_probe",
+        "toroidal_angle_of_poloidal_magnetic_field_probe",
+        "turn_count_of_poloidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "antenna_strap",
+      "kind": "object",
+      "count": 6,
+      "names": [
+        "radial_outline_of_antenna_strap",
+        "toroidal_angle_of_antenna_strap",
+        "toroidal_width_of_antenna_strap",
+        "vertical_outline_of_antenna_strap",
+        "wave_current_amplitude_of_antenna_strap"
+      ]
+    },
+    {
+      "token": "measurement_position",
+      "kind": "position",
+      "count": 6,
+      "names": [
+        "normalized_toroidal_flux_coordinate_at_measurement_position",
+        "poloidal_angle_of_measurement_position",
+        "poloidal_magnetic_flux_at_measurement_position",
+        "radial_coordinate_of_measurement_position",
+        "toroidal_angle_of_measurement_position"
+      ]
+    },
+    {
+      "token": "toroidal_magnetic_field_probe",
+      "kind": "object",
+      "count": 6,
+      "names": [
+        "area_of_toroidal_magnetic_field_probe",
+        "length_of_toroidal_magnetic_field_probe",
+        "poloidal_angle_of_toroidal_magnetic_field_probe",
+        "toroidal_angle_of_toroidal_magnetic_field_probe",
+        "turn_count_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "current",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "current_of_passive_loop",
+        "current_of_poloidal_field_coil",
+        "ion_current_of_mass_spectrometer_channel",
+        "plasma_current",
+        "wave_current_amplitude_of_antenna_strap"
+      ]
+    },
+    {
+      "token": "line_averaged",
+      "kind": "transformation",
+      "count": 5,
+      "names": [
+        "line_averaged_effective_charge",
+        "line_averaged_electron_density",
+        "ratio_of_line_averaged_electron_density_to_greenwald_density",
+        "ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density"
+      ]
+    },
+    {
+      "token": "phase",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+        "reflected_phase_of_ion_cyclotron_heating_antenna",
+        "wave_phase_of_antenna_strap",
+        "wave_phase_of_ion_cyclotron_heating_antenna",
+        "wave_phase_of_wave_beam"
+      ]
+    },
+    {
+      "token": "radius",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "flux_surface_averaged_inverse_of_major_radius",
+        "flux_surface_averaged_inverse_of_square_of_major_radius",
+        "flux_surface_averaged_major_radius",
+        "minor_radius_of_plasma_boundary",
+        "reference_major_radius"
+      ]
+    },
+    {
+      "token": "ratio",
+      "kind": "transformation",
+      "count": 5,
+      "names": [
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+        "ratio_of_line_averaged_electron_density_to_greenwald_density",
+        "ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density",
+        "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope"
+      ]
+    },
+    {
+      "token": "triangularity",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "lower_triangularity_of_flux_surface",
+        "lower_triangularity_of_plasma_boundary",
+        "triangularity_of_plasma_boundary",
+        "upper_triangularity_of_flux_surface",
+        "upper_triangularity_of_plasma_boundary"
+      ]
+    },
+    {
+      "token": "wavelength",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "lower_wavelength_of_filter",
+        "spectral_wavelength_of_optical_element",
+        "upper_wavelength_of_filter",
+        "wavelength_of_spectral_line",
+        "wavelength_of_wave_beam"
+      ]
+    },
+    {
+      "token": "length",
+      "kind": "physical_base",
+      "count": 4,
+      "names": [
+        "length_of_poloidal_magnetic_field_probe",
+        "length_of_toroidal_magnetic_field_probe",
+        "length_variation_of_interferometer_beam",
+        "poloidal_length_of_flux_surface"
+      ]
+    },
+    {
+      "token": "line_of_sight",
+      "kind": "position",
+      "count": 4,
+      "names": [
+        "radial_coordinate_of_line_of_sight",
+        "spectral_calibration_factor_at_line_of_sight",
+        "toroidal_coordinate_of_line_of_sight",
+        "vertical_coordinate_of_line_of_sight"
+      ]
+    },
+    {
+      "token": "radial",
+      "kind": "coordinate",
+      "count": 4,
+      "names": [
+        "radial_outline_of_antenna_strap",
+        "radial_outline_of_limiter_tile",
+        "radial_outline_of_plasma_boundary",
+        "radial_outline_of_wall"
+      ]
+    },
+    {
+      "token": "safety_factor",
+      "kind": "physical_base",
+      "count": 4,
+      "names": [
+        "minimum_safety_factor",
+        "safety_factor",
+        "safety_factor_at_magnetic_axis",
+        "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95"
+      ]
+    },
+    {
+      "token": "toroidal",
+      "kind": "coordinate",
+      "count": 4,
+      "names": [
+        "toroidal_coordinate_at_detector_pixel",
+        "toroidal_coordinate_of_aperture",
+        "toroidal_coordinate_of_camera",
+        "toroidal_coordinate_of_line_of_sight"
+      ]
+    },
+    {
+      "token": "toroidal_angle",
+      "kind": "geometric_base",
+      "count": 4,
+      "names": [
+        "toroidal_angle_of_antenna_strap",
+        "toroidal_angle_of_measurement_position",
+        "toroidal_angle_of_poloidal_magnetic_field_probe",
+        "toroidal_angle_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "turn_count",
+      "kind": "physical_base",
+      "count": 4,
+      "names": [
+        "effective_turn_count_of_coil_conductor_element",
+        "effective_turn_count_of_passive_loop",
+        "turn_count_of_poloidal_magnetic_field_probe",
+        "turn_count_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "volume",
+      "kind": "physical_base",
+      "count": 4,
+      "names": [
+        "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "volume_of_flux_surface",
+        "volume_of_plasma_boundary"
+      ]
+    },
+    {
+      "token": "beta",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "normalized_toroidal_beta",
+        "poloidal_beta",
+        "toroidal_beta"
+      ]
+    },
+    {
+      "token": "camera",
+      "kind": "object",
+      "count": 3,
+      "names": [
+        "radial_coordinate_of_camera",
+        "toroidal_coordinate_of_camera",
+        "vertical_coordinate_of_camera"
+      ]
+    },
+    {
+      "token": "count",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "accumulated_total_gas_count",
+        "atomic_count",
+        "total_electron_count"
+      ]
+    },
+    {
+      "token": "detector_pixel",
+      "kind": "position",
+      "count": 3,
+      "names": [
+        "radial_coordinate_of_detector_pixel",
+        "toroidal_coordinate_at_detector_pixel",
+        "vertical_coordinate_of_detector_pixel"
+      ]
+    },
+    {
+      "token": "difference",
+      "kind": "transformation",
+      "count": 3,
+      "names": [
+        "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy",
+        "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function",
+        "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope"
+      ]
+    },
+    {
+      "token": "divertor_target",
+      "kind": "position",
+      "count": 3,
+      "names": [
+        "electron_density_at_divertor_target",
+        "electron_temperature_at_divertor_target",
+        "energy_flux_maximum_at_divertor_target"
+      ]
+    },
+    {
+      "token": "filter",
+      "kind": "object",
+      "count": 3,
+      "names": [
+        "lower_wavelength_of_filter",
+        "thickness_of_filter",
+        "upper_wavelength_of_filter"
+      ]
+    },
+    {
+      "token": "flux_loop",
+      "kind": "object",
+      "count": 3,
+      "names": [
+        "poloidal_magnetic_flux_of_flux_loop",
+        "radial_coordinate_of_flux_loop",
+        "vertical_coordinate_of_flux_loop"
+      ]
+    },
+    {
+      "token": "inverse",
+      "kind": "transformation",
+      "count": 3,
+      "names": [
+        "flux_surface_averaged_inverse_of_major_radius",
+        "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_inverse_of_square_of_major_radius"
+      ]
+    },
+    {
+      "token": "limiter_tile",
+      "kind": "object",
+      "count": 3,
+      "names": [
+        "radial_outline_of_limiter_tile",
+        "toroidal_angular_width_of_limiter_tile",
+        "vertical_outline_of_limiter_tile"
+      ]
+    },
+    {
+      "token": "normalized_toroidal_flux_coordinate",
+      "kind": "geometric_base",
+      "count": 3,
+      "names": [
+        "normalized_toroidal_flux_coordinate",
+        "normalized_toroidal_flux_coordinate_at_measurement_position",
+        "normalized_toroidal_flux_coordinate_at_minimum_absolute_safety_factor"
+      ]
+    },
+    {
+      "token": "photon_radiance",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "photon_radiance_at_spectral_line",
+        "spectral_bremsstrahlung_photon_radiance",
+        "spectral_photon_radiance"
+      ]
+    },
+    {
+      "token": "poloidal_angle",
+      "kind": "geometric_base",
+      "count": 3,
+      "names": [
+        "poloidal_angle_of_flux_surface",
+        "poloidal_angle_of_measurement_position",
+        "poloidal_angle_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "poloidal_field_coil",
+      "kind": "object",
+      "count": 3,
+      "names": [
+        "current_of_poloidal_field_coil",
+        "height_of_poloidal_field_coil",
+        "width_of_poloidal_field_coil"
+      ]
+    },
+    {
+      "token": "pressure",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "pressure_of_ion_cyclotron_heating_antenna",
+        "thermal_electron_pressure_at_post_sawtooth_crash",
+        "total_electron_pressure"
+      ]
+    },
+    {
+      "token": "soft_xray_detector",
+      "kind": "object",
+      "count": 3,
+      "names": [
+        "etendue_of_soft_xray_detector",
+        "power_of_soft_xray_detector",
+        "temperature_of_soft_xray_detector"
+      ]
+    },
+    {
+      "token": "spectral_line",
+      "kind": "position",
+      "count": 3,
+      "names": [
+        "intensity_at_spectral_line",
+        "photon_radiance_at_spectral_line",
+        "wavelength_of_spectral_line"
+      ]
+    },
+    {
+      "token": "voltage",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "voltage_amplitude_of_ion_cyclotron_heating_antenna",
+        "voltage_of_mass_spectrometer_channel",
+        "voltage_of_poloidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "amplitude",
+      "kind": "transformation",
+      "count": 2,
+      "names": [
+        "voltage_amplitude_of_ion_cyclotron_heating_antenna",
+        "wave_current_amplitude_of_antenna_strap"
+      ]
+    },
+    {
+      "token": "charge",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "effective_charge",
+        "line_averaged_effective_charge"
+      ]
+    },
+    {
+      "token": "conductor_cross_section",
+      "kind": "object",
+      "count": 2,
+      "names": [
+        "radial_coordinate_of_conductor_cross_section",
+        "vertical_coordinate_of_conductor_cross_section"
+      ]
+    },
+    {
+      "token": "confinement_time",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "energy_confinement_time",
+        "ipb98y2_confinement_time"
+      ]
+    },
+    {
+      "token": "current_density",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "flux_surface_averaged_parallel_current_density",
+        "flux_surface_averaged_toroidal_current_density"
+      ]
+    },
+    {
+      "token": "derivative_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "kind": "transformation",
+      "count": 2,
+      "names": [
+        "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate"
+      ]
+    },
+    {
+      "token": "derivative_with_respect_to_toroidal_flux_coordinate",
+      "kind": "transformation",
+      "count": 2,
+      "names": [
+        "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+      ]
+    },
+    {
+      "token": "ece_channel",
+      "kind": "position",
+      "count": 2,
+      "names": [
+        "radiative_temperature_at_ece_channel",
+        "vertical_coordinate_of_ece_channel"
+      ]
+    },
+    {
+      "token": "elongation",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "elongation_of_flux_surface",
+        "elongation_of_plasma_boundary"
+      ]
+    },
+    {
+      "token": "energy",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+        "mhd_energy"
+      ]
+    },
+    {
+      "token": "etendue",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "etendue_of_hard_xray_detector",
+        "etendue_of_soft_xray_detector"
+      ]
+    },
+    {
+      "token": "fraction",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "cold_neutral_fraction",
+        "hot_neutral_fraction"
+      ]
+    },
+    {
+      "token": "frequency",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "frequency_of_ion_cyclotron_heating_antenna",
+        "frequency_of_wave_diagnostic_channel"
+      ]
+    },
+    {
+      "token": "gap",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "gap_at_closest_wall_point",
+        "gap_at_outboard_midplane"
+      ]
+    },
+    {
+      "token": "geometric_axis",
+      "kind": "position",
+      "count": 2,
+      "names": [
+        "radial_coordinate_of_geometric_axis",
+        "vertical_coordinate_of_geometric_axis"
+      ]
+    },
+    {
+      "token": "mass_spectrometer_channel",
+      "kind": "object",
+      "count": 2,
+      "names": [
+        "ion_current_of_mass_spectrometer_channel",
+        "voltage_of_mass_spectrometer_channel"
+      ]
+    },
+    {
+      "token": "normalized_poloidal_flux_coordinate",
+      "kind": "geometric_base",
+      "count": 2,
+      "names": [
+        "normalized_poloidal_flux_coordinate",
+        "normalized_poloidal_flux_coordinate_of_plasma_boundary"
+      ]
+    },
+    {
+      "token": "outboard_midplane",
+      "kind": "position",
+      "count": 2,
+      "names": [
+        "gap_at_outboard_midplane",
+        "radial_coordinate_at_outboard_midplane"
+      ]
+    },
+    {
+      "token": "passive_loop",
+      "kind": "object",
+      "count": 2,
+      "names": [
+        "current_of_passive_loop",
+        "effective_turn_count_of_passive_loop"
+      ]
+    },
+    {
+      "token": "photon_energy",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "lower_bound_photon_energy",
+        "upper_photon_energy"
+      ]
+    },
+    {
+      "token": "rate",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "spectral_rate_of_spectrometer_channel",
+        "total_neutron_rate"
+      ]
+    },
+    {
+      "token": "strike_point",
+      "kind": "position",
+      "count": 2,
+      "names": [
+        "radial_coordinate_of_strike_point",
+        "vertical_coordinate_of_strike_point"
+      ]
+    },
+    {
+      "token": "toroidal_flux_coordinate_gradient",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude",
+        "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude"
+      ]
+    },
+    {
+      "token": "wave_beam",
+      "kind": "object",
+      "count": 2,
+      "names": [
+        "wave_phase_of_wave_beam",
+        "wavelength_of_wave_beam"
+      ]
+    },
+    {
+      "token": "width",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "toroidal_width_of_antenna_strap",
+        "width_of_poloidal_field_coil"
+      ]
+    },
+    {
+      "token": "x_point",
+      "kind": "position",
+      "count": 2,
+      "names": [
+        "radial_coordinate_of_x_point",
+        "vertical_coordinate_of_primary_x_point"
+      ]
+    },
+    {
+      "token": "angle",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "faraday_angle"
+      ]
+    },
+    {
+      "token": "angular_width",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "toroidal_angular_width_of_limiter_tile"
+      ]
+    },
+    {
+      "token": "aperture",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "toroidal_coordinate_of_aperture"
+      ]
+    },
+    {
+      "token": "atomic_number",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "atomic_number"
+      ]
+    },
+    {
+      "token": "brightness",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "hard_xray_brightness"
+      ]
+    },
+    {
+      "token": "calorimetry_component",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "accumulated_coolant_absorbed_energy_of_calorimetry_component"
+      ]
+    },
+    {
+      "token": "capacitance",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "capacitance_of_ion_cyclotron_heating_antenna"
+      ]
+    },
+    {
+      "token": "closest_wall_point",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "gap_at_closest_wall_point"
+      ]
+    },
+    {
+      "token": "coil_conductor_element",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "effective_turn_count_of_coil_conductor_element"
+      ]
+    },
+    {
+      "token": "confinement_enhancement_factor",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "energy_confinement_enhancement_factor"
+      ]
+    },
+    {
+      "token": "core_region",
+      "kind": "region",
+      "count": 1,
+      "names": [
+        "radiated_power_over_core_region"
+      ]
+    },
+    {
+      "token": "diagnostic_aperture",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "area_of_diagnostic_aperture"
+      ]
+    },
+    {
+      "token": "duration",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "pulse_duration"
+      ]
+    },
+    {
+      "token": "ece_channel_emission_position",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "opacity_at_ece_channel_emission_position"
+      ]
+    },
+    {
+      "token": "ellipticity",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "initial_polarization_ellipticity_of_polarimeter_beam"
+      ]
+    },
+    {
+      "token": "emissivity",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "hard_xray_emissivity"
+      ]
+    },
+    {
+      "token": "factor",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "spectral_calibration_factor_at_line_of_sight"
+      ]
+    },
+    {
+      "token": "flux",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "energy_flux_maximum_at_divertor_target"
+      ]
+    },
+    {
+      "token": "hard_xray_detector",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "etendue_of_hard_xray_detector"
+      ]
+    },
+    {
+      "token": "heating_power",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "total_external_heating_power"
+      ]
+    },
+    {
+      "token": "height",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "height_of_poloidal_field_coil"
+      ]
+    },
+    {
+      "token": "inboard_midplane",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "radial_coordinate_at_inboard_midplane"
+      ]
+    },
+    {
+      "token": "inlet",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "coolant_temperature_at_inlet"
+      ]
+    },
+    {
+      "token": "intensity",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "intensity_at_spectral_line"
+      ]
+    },
+    {
+      "token": "interferometer_beam",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "length_variation_of_interferometer_beam"
+      ]
+    },
+    {
+      "token": "internal_inductance",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "normalized_plasma_internal_inductance"
+      ]
+    },
+    {
+      "token": "line_integrated",
+      "kind": "transformation",
+      "count": 1,
+      "names": [
+        "line_integrated_electron_number_density"
+      ]
+    },
+    {
+      "token": "loop_voltage",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "loop_voltage_at_plasma_boundary"
+      ]
+    },
+    {
+      "token": "lower_hybrid_antenna",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "launched_power_of_lower_hybrid_antenna"
+      ]
+    },
+    {
+      "token": "magnetic_shear",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "magnetic_shear_at_flux_surface"
+      ]
+    },
+    {
+      "token": "mass",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "atomic_mass"
+      ]
+    },
+    {
+      "token": "mass_flow_rate",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "coolant_mass_flow_rate"
+      ]
+    },
+    {
+      "token": "maximum",
+      "kind": "transformation",
+      "count": 1,
+      "names": [
+        "energy_flux_maximum_at_divertor_target"
+      ]
+    },
+    {
+      "token": "minimum_absolute_safety_factor",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "normalized_toroidal_flux_coordinate_at_minimum_absolute_safety_factor"
+      ]
+    },
+    {
+      "token": "minimum_over_flux_surface",
+      "kind": "transformation",
+      "count": 1,
+      "names": [
+        "minimum_over_flux_surface_magnetic_field_magnitude"
+      ]
+    },
+    {
+      "token": "normalized_poloidal_magnetic_flux",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95"
+      ]
+    },
+    {
+      "token": "number_density",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "line_integrated_electron_number_density"
+      ]
+    },
+    {
+      "token": "opacity",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "opacity_at_ece_channel_emission_position"
+      ]
+    },
+    {
+      "token": "optical_element",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "spectral_wavelength_of_optical_element"
+      ]
+    },
+    {
+      "token": "outlet",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "coolant_temperature_at_outlet"
+      ]
+    },
+    {
+      "token": "plant_component_port",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "coolant_transit_time_of_plant_component_port"
+      ]
+    },
+    {
+      "token": "plasma_facing_component",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "vertical_outline_of_plasma_facing_component"
+      ]
+    },
+    {
+      "token": "polarimeter_beam",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "initial_polarization_ellipticity_of_polarimeter_beam"
+      ]
+    },
+    {
+      "token": "poloidal_current_function",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "vacuum_poloidal_current_function"
+      ]
+    },
+    {
+      "token": "post_sawtooth_crash",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "thermal_electron_pressure_at_post_sawtooth_crash"
+      ]
+    },
+    {
+      "token": "product",
+      "kind": "transformation",
+      "count": 1,
+      "names": [
+        "product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate"
+      ]
+    },
+    {
+      "token": "radial_derivative",
+      "kind": "transformation",
+      "count": 1,
+      "names": [
+        "radial_derivative_of_poloidal_magnetic_flux"
+      ]
+    },
+    {
+      "token": "radiance",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "incident_soft_xray_radiance"
+      ]
+    },
+    {
+      "token": "separatrix",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "total_power_at_separatrix"
+      ]
+    },
+    {
+      "token": "source_rate",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "total_neutral_source_rate_due_to_gas_injection"
+      ]
+    },
+    {
+      "token": "spectrometer_channel",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "spectral_rate_of_spectrometer_channel"
+      ]
+    },
+    {
+      "token": "thickness",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "thickness_of_filter"
+      ]
+    },
+    {
+      "token": "time",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "breakdown_initial_time"
+      ]
+    },
+    {
+      "token": "time_derivative",
+      "kind": "transformation",
+      "count": 1,
+      "names": [
+        "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy"
+      ]
+    },
+    {
+      "token": "toroidal_flux_coordinate",
+      "kind": "geometric_base",
+      "count": 1,
+      "names": [
+        "toroidal_flux_coordinate"
+      ]
+    },
+    {
+      "token": "transit_time",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "coolant_transit_time_of_plant_component_port"
+      ]
+    },
+    {
+      "token": "variation",
+      "kind": "transformation",
+      "count": 1,
+      "names": [
+        "length_variation_of_interferometer_beam"
+      ]
+    },
+    {
+      "token": "volume_averaged",
+      "kind": "transformation",
+      "count": 1,
+      "names": [
+        "volume_averaged_electron_density"
+      ]
+    },
+    {
+      "token": "wall",
+      "kind": "position",
+      "count": 1,
+      "names": [
+        "radial_outline_of_wall"
+      ]
+    },
+    {
+      "token": "wave_diagnostic_channel",
+      "kind": "object",
+      "count": 1,
+      "names": [
+        "frequency_of_wave_diagnostic_channel"
+      ]
+    }
+  ],
+  "notation": [
+    {
+      "token": "coordinate",
+      "kind": "geometric_base",
+      "count": 17,
+      "names": [
+        "toroidal_coordinate_at_detector_pixel",
+        "toroidal_coordinate_of_aperture",
+        "toroidal_coordinate_of_camera",
+        "toroidal_coordinate_of_line_of_sight",
+        "vertical_coordinate_of_camera"
+      ]
+    },
+    {
+      "token": "vertical",
+      "kind": "coordinate",
+      "count": 17,
+      "names": [
+        "vertical_coordinate_of_camera",
+        "vertical_coordinate_of_conductor_cross_section",
+        "vertical_coordinate_of_detector_pixel",
+        "vertical_coordinate_of_ece_channel",
+        "vertical_coordinate_of_flux_loop"
+      ]
+    },
+    {
+      "token": "electron",
+      "kind": "subject",
+      "count": 14,
+      "names": [
+        "electron_density_at_divertor_target",
+        "electron_density_at_magnetic_axis",
+        "electron_density_at_plasma_boundary",
+        "electron_temperature",
+        "electron_temperature_at_divertor_target"
+      ]
+    },
+    {
+      "token": "radial_coordinate",
+      "kind": "geometric_base",
+      "count": 13,
+      "names": [
+        "radial_coordinate_at_inboard_midplane",
+        "radial_coordinate_at_outboard_midplane",
+        "radial_coordinate_of_camera",
+        "radial_coordinate_of_conductor_cross_section",
+        "radial_coordinate_of_detector_pixel"
+      ]
+    },
+    {
+      "token": "toroidal",
+      "kind": "component",
+      "count": 13,
+      "names": [
+        "flux_surface_averaged_toroidal_current_density",
+        "toroidal_angular_width_of_limiter_tile",
+        "toroidal_beta",
+        "toroidal_coordinate_at_detector_pixel",
+        "toroidal_coordinate_of_aperture"
+      ]
+    },
+    {
+      "token": "power",
+      "kind": "physical_base",
+      "count": 10,
+      "names": [
+        "forward_power_of_ion_cyclotron_heating_antenna",
+        "launched_power_of_lower_hybrid_antenna",
+        "net_power_due_to_ion_cyclotron_heating",
+        "power_of_soft_xray_detector",
+        "radiated_power_over_core_region"
+      ]
+    },
+    {
+      "token": "temperature",
+      "kind": "physical_base",
+      "count": 10,
+      "names": [
+        "cold_neutral_temperature",
+        "coolant_temperature_at_inlet",
+        "coolant_temperature_at_outlet",
+        "electron_temperature",
+        "electron_temperature_at_divertor_target"
+      ]
+    },
+    {
+      "token": "magnetic_field",
+      "kind": "physical_base",
+      "count": 9,
+      "names": [
+        "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_magnetic_field_magnitude",
+        "flux_surface_averaged_square_of_magnetic_field_magnitude",
+        "maximum_magnetic_field_magnitude",
+        "minimum_over_flux_surface_magnetic_field_magnitude"
+      ]
+    },
+    {
+      "token": "poloidal",
+      "kind": "component",
+      "count": 9,
+      "names": [
+        "poloidal_beta",
+        "poloidal_length_of_flux_surface",
+        "poloidal_magnetic_field",
+        "poloidal_magnetic_flux_at_flux_surface",
+        "poloidal_magnetic_flux_at_magnetic_axis"
+      ]
+    },
+    {
+      "token": "magnetic_flux",
+      "kind": "physical_base",
+      "count": 8,
+      "names": [
+        "poloidal_magnetic_flux_at_flux_surface",
+        "poloidal_magnetic_flux_at_magnetic_axis",
+        "poloidal_magnetic_flux_at_measurement_position",
+        "poloidal_magnetic_flux_at_plasma_boundary",
+        "poloidal_magnetic_flux_of_flux_loop"
+      ]
+    },
+    {
+      "token": "outline",
+      "kind": "geometric_base",
+      "count": 8,
+      "names": [
+        "radial_outline_of_antenna_strap",
+        "radial_outline_of_limiter_tile",
+        "radial_outline_of_plasma_boundary",
+        "radial_outline_of_wall",
+        "vertical_outline_of_antenna_strap"
+      ]
+    },
+    {
+      "token": "placeholder",
+      "kind": "physical_base",
+      "count": 8,
+      "names": [
+        "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy",
+        "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+        "product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate"
+      ]
+    },
+    {
+      "token": "area",
+      "kind": "physical_base",
+      "count": 7,
+      "names": [
+        "area_of_diagnostic_aperture",
+        "area_of_poloidal_magnetic_field_probe",
+        "area_of_toroidal_magnetic_field_probe",
+        "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "poloidal_plane_cross_sectional_area_of_flux_surface"
+      ]
+    },
+    {
+      "token": "current",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "current_of_passive_loop",
+        "current_of_poloidal_field_coil",
+        "ion_current_of_mass_spectrometer_channel",
+        "plasma_current",
+        "wave_current_amplitude_of_antenna_strap"
+      ]
+    },
+    {
+      "token": "neutral",
+      "kind": "subject",
+      "count": 5,
+      "names": [
+        "cold_neutral_fraction",
+        "cold_neutral_temperature",
+        "hot_neutral_fraction",
+        "hot_neutral_temperature",
+        "total_neutral_source_rate_due_to_gas_injection"
+      ]
+    },
+    {
+      "token": "phase",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+        "reflected_phase_of_ion_cyclotron_heating_antenna",
+        "wave_phase_of_antenna_strap",
+        "wave_phase_of_ion_cyclotron_heating_antenna",
+        "wave_phase_of_wave_beam"
+      ]
+    },
+    {
+      "token": "radius",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "flux_surface_averaged_inverse_of_major_radius",
+        "flux_surface_averaged_inverse_of_square_of_major_radius",
+        "flux_surface_averaged_major_radius",
+        "minor_radius_of_plasma_boundary",
+        "reference_major_radius"
+      ]
+    },
+    {
+      "token": "triangularity",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "lower_triangularity_of_flux_surface",
+        "lower_triangularity_of_plasma_boundary",
+        "triangularity_of_plasma_boundary",
+        "upper_triangularity_of_flux_surface",
+        "upper_triangularity_of_plasma_boundary"
+      ]
+    },
+    {
+      "token": "wavelength",
+      "kind": "physical_base",
+      "count": 5,
+      "names": [
+        "lower_wavelength_of_filter",
+        "spectral_wavelength_of_optical_element",
+        "upper_wavelength_of_filter",
+        "wavelength_of_spectral_line",
+        "wavelength_of_wave_beam"
+      ]
+    },
+    {
+      "token": "length",
+      "kind": "physical_base",
+      "count": 4,
+      "names": [
+        "length_of_poloidal_magnetic_field_probe",
+        "length_of_toroidal_magnetic_field_probe",
+        "length_variation_of_interferometer_beam",
+        "poloidal_length_of_flux_surface"
+      ]
+    },
+    {
+      "token": "radial",
+      "kind": "coordinate",
+      "count": 4,
+      "names": [
+        "radial_outline_of_antenna_strap",
+        "radial_outline_of_limiter_tile",
+        "radial_outline_of_plasma_boundary",
+        "radial_outline_of_wall"
+      ]
+    },
+    {
+      "token": "safety_factor",
+      "kind": "physical_base",
+      "count": 4,
+      "names": [
+        "minimum_safety_factor",
+        "safety_factor",
+        "safety_factor_at_magnetic_axis",
+        "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95"
+      ]
+    },
+    {
+      "token": "toroidal_angle",
+      "kind": "geometric_base",
+      "count": 4,
+      "names": [
+        "toroidal_angle_of_antenna_strap",
+        "toroidal_angle_of_measurement_position",
+        "toroidal_angle_of_poloidal_magnetic_field_probe",
+        "toroidal_angle_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "turn_count",
+      "kind": "physical_base",
+      "count": 4,
+      "names": [
+        "effective_turn_count_of_coil_conductor_element",
+        "effective_turn_count_of_passive_loop",
+        "turn_count_of_poloidal_magnetic_field_probe",
+        "turn_count_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "volume",
+      "kind": "physical_base",
+      "count": 4,
+      "names": [
+        "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+        "volume_of_flux_surface",
+        "volume_of_plasma_boundary"
+      ]
+    },
+    {
+      "token": "beta",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "normalized_toroidal_beta",
+        "poloidal_beta",
+        "toroidal_beta"
+      ]
+    },
+    {
+      "token": "count",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "accumulated_total_gas_count",
+        "atomic_count",
+        "total_electron_count"
+      ]
+    },
+    {
+      "token": "normalized_toroidal_flux_coordinate",
+      "kind": "geometric_base",
+      "count": 3,
+      "names": [
+        "normalized_toroidal_flux_coordinate",
+        "normalized_toroidal_flux_coordinate_at_measurement_position",
+        "normalized_toroidal_flux_coordinate_at_minimum_absolute_safety_factor"
+      ]
+    },
+    {
+      "token": "photon_radiance",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "photon_radiance_at_spectral_line",
+        "spectral_bremsstrahlung_photon_radiance",
+        "spectral_photon_radiance"
+      ]
+    },
+    {
+      "token": "poloidal_angle",
+      "kind": "geometric_base",
+      "count": 3,
+      "names": [
+        "poloidal_angle_of_flux_surface",
+        "poloidal_angle_of_measurement_position",
+        "poloidal_angle_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "pressure",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "pressure_of_ion_cyclotron_heating_antenna",
+        "thermal_electron_pressure_at_post_sawtooth_crash",
+        "total_electron_pressure"
+      ]
+    },
+    {
+      "token": "voltage",
+      "kind": "physical_base",
+      "count": 3,
+      "names": [
+        "voltage_amplitude_of_ion_cyclotron_heating_antenna",
+        "voltage_of_mass_spectrometer_channel",
+        "voltage_of_poloidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "token": "charge",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "effective_charge",
+        "line_averaged_effective_charge"
+      ]
+    },
+    {
+      "token": "confinement_time",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "energy_confinement_time",
+        "ipb98y2_confinement_time"
+      ]
+    },
+    {
+      "token": "current_density",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "flux_surface_averaged_parallel_current_density",
+        "flux_surface_averaged_toroidal_current_density"
+      ]
+    },
+    {
+      "token": "elongation",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "elongation_of_flux_surface",
+        "elongation_of_plasma_boundary"
+      ]
+    },
+    {
+      "token": "energy",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "accumulated_coolant_absorbed_energy_of_calorimetry_component",
+        "mhd_energy"
+      ]
+    },
+    {
+      "token": "etendue",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "etendue_of_hard_xray_detector",
+        "etendue_of_soft_xray_detector"
+      ]
+    },
+    {
+      "token": "fraction",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "cold_neutral_fraction",
+        "hot_neutral_fraction"
+      ]
+    },
+    {
+      "token": "frequency",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "frequency_of_ion_cyclotron_heating_antenna",
+        "frequency_of_wave_diagnostic_channel"
+      ]
+    },
+    {
+      "token": "gap",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "gap_at_closest_wall_point",
+        "gap_at_outboard_midplane"
+      ]
+    },
+    {
+      "token": "hard_xray",
+      "kind": "subject",
+      "count": 2,
+      "names": [
+        "hard_xray_brightness",
+        "hard_xray_emissivity"
+      ]
+    },
+    {
+      "token": "normalized_poloidal_flux_coordinate",
+      "kind": "geometric_base",
+      "count": 2,
+      "names": [
+        "normalized_poloidal_flux_coordinate",
+        "normalized_poloidal_flux_coordinate_of_plasma_boundary"
+      ]
+    },
+    {
+      "token": "photon_energy",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "lower_bound_photon_energy",
+        "upper_photon_energy"
+      ]
+    },
+    {
+      "token": "rate",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "spectral_rate_of_spectrometer_channel",
+        "total_neutron_rate"
+      ]
+    },
+    {
+      "token": "toroidal_flux_coordinate_gradient",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude",
+        "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude"
+      ]
+    },
+    {
+      "token": "width",
+      "kind": "physical_base",
+      "count": 2,
+      "names": [
+        "toroidal_width_of_antenna_strap",
+        "width_of_poloidal_field_coil"
+      ]
+    },
+    {
+      "token": "angle",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "faraday_angle"
+      ]
+    },
+    {
+      "token": "angular_width",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "toroidal_angular_width_of_limiter_tile"
+      ]
+    },
+    {
+      "token": "atomic_number",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "atomic_number"
+      ]
+    },
+    {
+      "token": "brightness",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "hard_xray_brightness"
+      ]
+    },
+    {
+      "token": "capacitance",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "capacitance_of_ion_cyclotron_heating_antenna"
+      ]
+    },
+    {
+      "token": "confinement_enhancement_factor",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "energy_confinement_enhancement_factor"
+      ]
+    },
+    {
+      "token": "duration",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "pulse_duration"
+      ]
+    },
+    {
+      "token": "ellipticity",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "initial_polarization_ellipticity_of_polarimeter_beam"
+      ]
+    },
+    {
+      "token": "emissivity",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "hard_xray_emissivity"
+      ]
+    },
+    {
+      "token": "factor",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "spectral_calibration_factor_at_line_of_sight"
+      ]
+    },
+    {
+      "token": "flux",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "energy_flux_maximum_at_divertor_target"
+      ]
+    },
+    {
+      "token": "heating_power",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "total_external_heating_power"
+      ]
+    },
+    {
+      "token": "height",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "height_of_poloidal_field_coil"
+      ]
+    },
+    {
+      "token": "intensity",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "intensity_at_spectral_line"
+      ]
+    },
+    {
+      "token": "internal_inductance",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "normalized_plasma_internal_inductance"
+      ]
+    },
+    {
+      "token": "ion",
+      "kind": "subject",
+      "count": 1,
+      "names": [
+        "ion_current_of_mass_spectrometer_channel"
+      ]
+    },
+    {
+      "token": "loop_voltage",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "loop_voltage_at_plasma_boundary"
+      ]
+    },
+    {
+      "token": "magnetic_shear",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "magnetic_shear_at_flux_surface"
+      ]
+    },
+    {
+      "token": "mass",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "atomic_mass"
+      ]
+    },
+    {
+      "token": "mass_flow_rate",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "coolant_mass_flow_rate"
+      ]
+    },
+    {
+      "token": "neutron",
+      "kind": "subject",
+      "count": 1,
+      "names": [
+        "total_neutron_rate"
+      ]
+    },
+    {
+      "token": "normalized_toroidal",
+      "kind": "component",
+      "count": 1,
+      "names": [
+        "normalized_toroidal_beta"
+      ]
+    },
+    {
+      "token": "number_density",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "line_integrated_electron_number_density"
+      ]
+    },
+    {
+      "token": "opacity",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "opacity_at_ece_channel_emission_position"
+      ]
+    },
+    {
+      "token": "parallel",
+      "kind": "component",
+      "count": 1,
+      "names": [
+        "flux_surface_averaged_parallel_current_density"
+      ]
+    },
+    {
+      "token": "poloidal_current_function",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "vacuum_poloidal_current_function"
+      ]
+    },
+    {
+      "token": "radiance",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "incident_soft_xray_radiance"
+      ]
+    },
+    {
+      "token": "source_rate",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "total_neutral_source_rate_due_to_gas_injection"
+      ]
+    },
+    {
+      "token": "thickness",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "thickness_of_filter"
+      ]
+    },
+    {
+      "token": "time",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "breakdown_initial_time"
+      ]
+    },
+    {
+      "token": "toroidal_flux_coordinate",
+      "kind": "geometric_base",
+      "count": 1,
+      "names": [
+        "toroidal_flux_coordinate"
+      ]
+    },
+    {
+      "token": "transit_time",
+      "kind": "physical_base",
+      "count": 1,
+      "names": [
+        "coolant_transit_time_of_plant_component_port"
+      ]
+    }
+  ],
+  "templates": [
+    {
+      "base": "coordinate",
+      "segments": [
+        "coordinate",
+        "geometric_base",
+        "position"
+      ],
+      "count": 10,
+      "names": [
+        "toroidal_coordinate_at_detector_pixel",
+        "toroidal_coordinate_of_line_of_sight",
+        "vertical_coordinate_of_detector_pixel",
+        "vertical_coordinate_of_ece_channel",
+        "vertical_coordinate_of_geometric_axis"
+      ]
+    },
+    {
+      "base": "radial_coordinate",
+      "segments": [
+        "geometric_base",
+        "position"
+      ],
+      "count": 9,
+      "names": [
+        "radial_coordinate_at_inboard_midplane",
+        "radial_coordinate_at_outboard_midplane",
+        "radial_coordinate_of_detector_pixel",
+        "radial_coordinate_of_geometric_axis",
+        "radial_coordinate_of_line_of_sight"
+      ]
+    },
+    {
+      "base": "placeholder",
+      "segments": [
+        "physical_base",
+        "transformation"
+      ],
+      "count": 8,
+      "names": [
+        "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy",
+        "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+        "product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate"
+      ]
+    },
+    {
+      "base": "coordinate",
+      "segments": [
+        "coordinate",
+        "geometric_base",
+        "object"
+      ],
+      "count": 7,
+      "names": [
+        "toroidal_coordinate_of_aperture",
+        "toroidal_coordinate_of_camera",
+        "vertical_coordinate_of_camera",
+        "vertical_coordinate_of_conductor_cross_section",
+        "vertical_coordinate_of_flux_loop"
+      ]
+    },
+    {
+      "base": "outline",
+      "segments": [
+        "coordinate",
+        "geometric_base",
+        "object"
+      ],
+      "count": 5,
+      "names": [
+        "radial_outline_of_antenna_strap",
+        "radial_outline_of_limiter_tile",
+        "vertical_outline_of_antenna_strap",
+        "vertical_outline_of_limiter_tile",
+        "vertical_outline_of_plasma_facing_component"
+      ]
+    },
+    {
+      "base": "phase",
+      "segments": [
+        "object",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 5,
+      "names": [
+        "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+        "reflected_phase_of_ion_cyclotron_heating_antenna",
+        "wave_phase_of_antenna_strap",
+        "wave_phase_of_ion_cyclotron_heating_antenna",
+        "wave_phase_of_wave_beam"
+      ]
+    },
+    {
+      "base": "magnetic_field",
+      "segments": [
+        "physical_base",
+        "transformation"
+      ],
+      "count": 4,
+      "names": [
+        "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+        "flux_surface_averaged_magnetic_field_magnitude",
+        "flux_surface_averaged_square_of_magnetic_field_magnitude",
+        "minimum_over_flux_surface_magnetic_field_magnitude"
+      ]
+    },
+    {
+      "base": "magnetic_flux",
+      "segments": [
+        "component",
+        "physical_base",
+        "position"
+      ],
+      "count": 4,
+      "names": [
+        "poloidal_magnetic_flux_at_flux_surface",
+        "poloidal_magnetic_flux_at_magnetic_axis",
+        "poloidal_magnetic_flux_at_measurement_position",
+        "poloidal_magnetic_flux_at_plasma_boundary"
+      ]
+    },
+    {
+      "base": "radial_coordinate",
+      "segments": [
+        "geometric_base",
+        "object"
+      ],
+      "count": 4,
+      "names": [
+        "radial_coordinate_of_camera",
+        "radial_coordinate_of_conductor_cross_section",
+        "radial_coordinate_of_flux_loop",
+        "radial_coordinate_of_poloidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "base": "temperature",
+      "segments": [
+        "physical_base",
+        "position",
+        "qualifier"
+      ],
+      "count": 4,
+      "names": [
+        "coolant_temperature_at_inlet",
+        "coolant_temperature_at_outlet",
+        "radiative_temperature_at_ece_channel",
+        "radiative_temperature_at_magnetic_axis"
+      ]
+    },
+    {
+      "base": "triangularity",
+      "segments": [
+        "physical_base",
+        "position",
+        "zone"
+      ],
+      "count": 4,
+      "names": [
+        "lower_triangularity_of_flux_surface",
+        "lower_triangularity_of_plasma_boundary",
+        "upper_triangularity_of_flux_surface",
+        "upper_triangularity_of_plasma_boundary"
+      ]
+    },
+    {
+      "base": "area",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 3,
+      "names": [
+        "area_of_diagnostic_aperture",
+        "area_of_poloidal_magnetic_field_probe",
+        "area_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "base": "beta",
+      "segments": [
+        "component",
+        "physical_base"
+      ],
+      "count": 3,
+      "names": [
+        "normalized_toroidal_beta",
+        "poloidal_beta",
+        "toroidal_beta"
+      ]
+    },
+    {
+      "base": "outline",
+      "segments": [
+        "coordinate",
+        "geometric_base",
+        "position"
+      ],
+      "count": 3,
+      "names": [
+        "radial_outline_of_plasma_boundary",
+        "radial_outline_of_wall",
+        "vertical_outline_of_plasma_boundary"
+      ]
+    },
+    {
+      "base": "power",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "process"
+      ],
+      "count": 3,
+      "names": [
+        "net_power_due_to_ion_cyclotron_heating",
+        "total_power_due_to_ion_cyclotron_heating",
+        "total_power_due_to_ohmic_dissipation"
+      ]
+    },
+    {
+      "base": "power",
+      "segments": [
+        "object",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 3,
+      "names": [
+        "forward_power_of_ion_cyclotron_heating_antenna",
+        "launched_power_of_lower_hybrid_antenna",
+        "reflected_power_of_ion_cyclotron_heating_antenna"
+      ]
+    },
+    {
+      "base": "radius",
+      "segments": [
+        "physical_base",
+        "qualifier",
+        "transformation"
+      ],
+      "count": 3,
+      "names": [
+        "flux_surface_averaged_inverse_of_major_radius",
+        "flux_surface_averaged_inverse_of_square_of_major_radius",
+        "flux_surface_averaged_major_radius"
+      ]
+    },
+    {
+      "base": "toroidal_angle",
+      "segments": [
+        "geometric_base",
+        "object"
+      ],
+      "count": 3,
+      "names": [
+        "toroidal_angle_of_antenna_strap",
+        "toroidal_angle_of_poloidal_magnetic_field_probe",
+        "toroidal_angle_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "base": "area",
+      "segments": [
+        "physical_base",
+        "position",
+        "qualifier",
+        "section_plane"
+      ],
+      "count": 2,
+      "names": [
+        "poloidal_plane_cross_sectional_area_of_flux_surface",
+        "poloidal_plane_cross_sectional_area_of_plasma_boundary"
+      ]
+    },
+    {
+      "base": "confinement_time",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 2,
+      "names": [
+        "energy_confinement_time",
+        "ipb98y2_confinement_time"
+      ]
+    },
+    {
+      "base": "current",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 2,
+      "names": [
+        "current_of_passive_loop",
+        "current_of_poloidal_field_coil"
+      ]
+    },
+    {
+      "base": "current_density",
+      "segments": [
+        "component",
+        "physical_base",
+        "transformation"
+      ],
+      "count": 2,
+      "names": [
+        "flux_surface_averaged_parallel_current_density",
+        "flux_surface_averaged_toroidal_current_density"
+      ]
+    },
+    {
+      "base": "elongation",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 2,
+      "names": [
+        "elongation_of_flux_surface",
+        "elongation_of_plasma_boundary"
+      ]
+    },
+    {
+      "base": "etendue",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 2,
+      "names": [
+        "etendue_of_hard_xray_detector",
+        "etendue_of_soft_xray_detector"
+      ]
+    },
+    {
+      "base": "fraction",
+      "segments": [
+        "physical_base",
+        "population",
+        "subject"
+      ],
+      "count": 2,
+      "names": [
+        "cold_neutral_fraction",
+        "hot_neutral_fraction"
+      ]
+    },
+    {
+      "base": "frequency",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 2,
+      "names": [
+        "frequency_of_ion_cyclotron_heating_antenna",
+        "frequency_of_wave_diagnostic_channel"
+      ]
+    },
+    {
+      "base": "gap",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 2,
+      "names": [
+        "gap_at_closest_wall_point",
+        "gap_at_outboard_midplane"
+      ]
+    },
+    {
+      "base": "length",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 2,
+      "names": [
+        "length_of_poloidal_magnetic_field_probe",
+        "length_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "base": "magnetic_field",
+      "segments": [
+        "component",
+        "physical_base"
+      ],
+      "count": 2,
+      "names": [
+        "poloidal_magnetic_field",
+        "toroidal_magnetic_field"
+      ]
+    },
+    {
+      "base": "normalized_toroidal_flux_coordinate",
+      "segments": [
+        "geometric_base",
+        "position"
+      ],
+      "count": 2,
+      "names": [
+        "normalized_toroidal_flux_coordinate_at_measurement_position",
+        "normalized_toroidal_flux_coordinate_at_minimum_absolute_safety_factor"
+      ]
+    },
+    {
+      "base": "photon_radiance",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 2,
+      "names": [
+        "spectral_bremsstrahlung_photon_radiance",
+        "spectral_photon_radiance"
+      ]
+    },
+    {
+      "base": "poloidal_angle",
+      "segments": [
+        "geometric_base",
+        "position"
+      ],
+      "count": 2,
+      "names": [
+        "poloidal_angle_of_flux_surface",
+        "poloidal_angle_of_measurement_position"
+      ]
+    },
+    {
+      "base": "safety_factor",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 2,
+      "names": [
+        "safety_factor_at_magnetic_axis",
+        "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95"
+      ]
+    },
+    {
+      "base": "temperature",
+      "segments": [
+        "physical_base",
+        "population",
+        "subject"
+      ],
+      "count": 2,
+      "names": [
+        "cold_neutral_temperature",
+        "hot_neutral_temperature"
+      ]
+    },
+    {
+      "base": "temperature",
+      "segments": [
+        "physical_base",
+        "position",
+        "subject"
+      ],
+      "count": 2,
+      "names": [
+        "electron_temperature_at_divertor_target",
+        "electron_temperature_at_magnetic_axis"
+      ]
+    },
+    {
+      "base": "toroidal_flux_coordinate_gradient",
+      "segments": [
+        "physical_base",
+        "transformation"
+      ],
+      "count": 2,
+      "names": [
+        "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude",
+        "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude"
+      ]
+    },
+    {
+      "base": "turn_count",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 2,
+      "names": [
+        "turn_count_of_poloidal_magnetic_field_probe",
+        "turn_count_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "base": "turn_count",
+      "segments": [
+        "object",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 2,
+      "names": [
+        "effective_turn_count_of_coil_conductor_element",
+        "effective_turn_count_of_passive_loop"
+      ]
+    },
+    {
+      "base": "voltage",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 2,
+      "names": [
+        "voltage_of_mass_spectrometer_channel",
+        "voltage_of_poloidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "base": "volume",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 2,
+      "names": [
+        "volume_of_flux_surface",
+        "volume_of_plasma_boundary"
+      ]
+    },
+    {
+      "base": "volume",
+      "segments": [
+        "physical_base",
+        "position",
+        "transformation"
+      ],
+      "count": 2,
+      "names": [
+        "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+      ]
+    },
+    {
+      "base": "wavelength",
+      "segments": [
+        "object",
+        "physical_base",
+        "zone"
+      ],
+      "count": 2,
+      "names": [
+        "lower_wavelength_of_filter",
+        "upper_wavelength_of_filter"
+      ]
+    },
+    {
+      "base": "angle",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "faraday_angle"
+      ]
+    },
+    {
+      "base": "angular_width",
+      "segments": [
+        "component",
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "toroidal_angular_width_of_limiter_tile"
+      ]
+    },
+    {
+      "base": "area",
+      "segments": [
+        "physical_base",
+        "position",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "surface_area_of_flux_surface"
+      ]
+    },
+    {
+      "base": "area",
+      "segments": [
+        "physical_base",
+        "position",
+        "transformation"
+      ],
+      "count": 1,
+      "names": [
+        "derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+      ]
+    },
+    {
+      "base": "atomic_number",
+      "segments": [
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "atomic_number"
+      ]
+    },
+    {
+      "base": "brightness",
+      "segments": [
+        "physical_base",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "hard_xray_brightness"
+      ]
+    },
+    {
+      "base": "capacitance",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "capacitance_of_ion_cyclotron_heating_antenna"
+      ]
+    },
+    {
+      "base": "charge",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "effective_charge"
+      ]
+    },
+    {
+      "base": "charge",
+      "segments": [
+        "physical_base",
+        "qualifier",
+        "transformation"
+      ],
+      "count": 1,
+      "names": [
+        "line_averaged_effective_charge"
+      ]
+    },
+    {
+      "base": "confinement_enhancement_factor",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "energy_confinement_enhancement_factor"
+      ]
+    },
+    {
+      "base": "count",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "accumulated_total_gas_count"
+      ]
+    },
+    {
+      "base": "count",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "total_electron_count"
+      ]
+    },
+    {
+      "base": "count",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "atomic_count"
+      ]
+    },
+    {
+      "base": "current",
+      "segments": [
+        "object",
+        "physical_base",
+        "qualifier",
+        "transformation"
+      ],
+      "count": 1,
+      "names": [
+        "wave_current_amplitude_of_antenna_strap"
+      ]
+    },
+    {
+      "base": "current",
+      "segments": [
+        "object",
+        "physical_base",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "ion_current_of_mass_spectrometer_channel"
+      ]
+    },
+    {
+      "base": "current",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "plasma_current"
+      ]
+    },
+    {
+      "base": "duration",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "pulse_duration"
+      ]
+    },
+    {
+      "base": "ellipticity",
+      "segments": [
+        "object",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "initial_polarization_ellipticity_of_polarimeter_beam"
+      ]
+    },
+    {
+      "base": "emissivity",
+      "segments": [
+        "physical_base",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "hard_xray_emissivity"
+      ]
+    },
+    {
+      "base": "energy",
+      "segments": [
+        "physical_base",
+        "position",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "accumulated_coolant_absorbed_energy_of_calorimetry_component"
+      ]
+    },
+    {
+      "base": "energy",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "mhd_energy"
+      ]
+    },
+    {
+      "base": "factor",
+      "segments": [
+        "physical_base",
+        "position",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "spectral_calibration_factor_at_line_of_sight"
+      ]
+    },
+    {
+      "base": "flux",
+      "segments": [
+        "physical_base",
+        "position",
+        "qualifier",
+        "transformation"
+      ],
+      "count": 1,
+      "names": [
+        "energy_flux_maximum_at_divertor_target"
+      ]
+    },
+    {
+      "base": "heating_power",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "total_external_heating_power"
+      ]
+    },
+    {
+      "base": "height",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "height_of_poloidal_field_coil"
+      ]
+    },
+    {
+      "base": "intensity",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "intensity_at_spectral_line"
+      ]
+    },
+    {
+      "base": "internal_inductance",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "normalized_plasma_internal_inductance"
+      ]
+    },
+    {
+      "base": "length",
+      "segments": [
+        "component",
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "poloidal_length_of_flux_surface"
+      ]
+    },
+    {
+      "base": "length",
+      "segments": [
+        "object",
+        "physical_base",
+        "transformation"
+      ],
+      "count": 1,
+      "names": [
+        "length_variation_of_interferometer_beam"
+      ]
+    },
+    {
+      "base": "loop_voltage",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "loop_voltage_at_plasma_boundary"
+      ]
+    },
+    {
+      "base": "magnetic_field",
+      "segments": [
+        "component",
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "toroidal_magnetic_field_at_magnetic_axis"
+      ]
+    },
+    {
+      "base": "magnetic_field",
+      "segments": [
+        "component",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "toroidal_vacuum_magnetic_field"
+      ]
+    },
+    {
+      "base": "magnetic_field",
+      "segments": [
+        "physical_base",
+        "qualifier",
+        "transformation"
+      ],
+      "count": 1,
+      "names": [
+        "maximum_magnetic_field_magnitude"
+      ]
+    },
+    {
+      "base": "magnetic_flux",
+      "segments": [
+        "component",
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "poloidal_magnetic_flux_of_flux_loop"
+      ]
+    },
+    {
+      "base": "magnetic_flux",
+      "segments": [
+        "component",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "toroidal_magnetic_flux"
+      ]
+    },
+    {
+      "base": "magnetic_flux",
+      "segments": [
+        "component",
+        "physical_base",
+        "process"
+      ],
+      "count": 1,
+      "names": [
+        "toroidal_magnetic_flux_due_to_diamagnetic_drift"
+      ]
+    },
+    {
+      "base": "magnetic_flux",
+      "segments": [
+        "component",
+        "physical_base",
+        "transformation"
+      ],
+      "count": 1,
+      "names": [
+        "radial_derivative_of_poloidal_magnetic_flux"
+      ]
+    },
+    {
+      "base": "magnetic_shear",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "magnetic_shear_at_flux_surface"
+      ]
+    },
+    {
+      "base": "mass",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "atomic_mass"
+      ]
+    },
+    {
+      "base": "mass_flow_rate",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "coolant_mass_flow_rate"
+      ]
+    },
+    {
+      "base": "normalized_poloidal_flux_coordinate",
+      "segments": [
+        "geometric_base"
+      ],
+      "count": 1,
+      "names": [
+        "normalized_poloidal_flux_coordinate"
+      ]
+    },
+    {
+      "base": "normalized_poloidal_flux_coordinate",
+      "segments": [
+        "geometric_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "normalized_poloidal_flux_coordinate_of_plasma_boundary"
+      ]
+    },
+    {
+      "base": "normalized_toroidal_flux_coordinate",
+      "segments": [
+        "geometric_base"
+      ],
+      "count": 1,
+      "names": [
+        "normalized_toroidal_flux_coordinate"
+      ]
+    },
+    {
+      "base": "number_density",
+      "segments": [
+        "physical_base",
+        "subject",
+        "transformation"
+      ],
+      "count": 1,
+      "names": [
+        "line_integrated_electron_number_density"
+      ]
+    },
+    {
+      "base": "opacity",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "opacity_at_ece_channel_emission_position"
+      ]
+    },
+    {
+      "base": "photon_energy",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "lower_bound_photon_energy"
+      ]
+    },
+    {
+      "base": "photon_energy",
+      "segments": [
+        "physical_base",
+        "zone"
+      ],
+      "count": 1,
+      "names": [
+        "upper_photon_energy"
+      ]
+    },
+    {
+      "base": "photon_radiance",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "photon_radiance_at_spectral_line"
+      ]
+    },
+    {
+      "base": "poloidal_angle",
+      "segments": [
+        "geometric_base",
+        "object"
+      ],
+      "count": 1,
+      "names": [
+        "poloidal_angle_of_toroidal_magnetic_field_probe"
+      ]
+    },
+    {
+      "base": "poloidal_current_function",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "vacuum_poloidal_current_function"
+      ]
+    },
+    {
+      "base": "power",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "total_power_at_separatrix"
+      ]
+    },
+    {
+      "base": "power",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "total_plasma_radiated_power"
+      ]
+    },
+    {
+      "base": "power",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "power_of_soft_xray_detector"
+      ]
+    },
+    {
+      "base": "power",
+      "segments": [
+        "physical_base",
+        "qualifier",
+        "region"
+      ],
+      "count": 1,
+      "names": [
+        "radiated_power_over_core_region"
+      ]
+    },
+    {
+      "base": "pressure",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "total_electron_pressure"
+      ]
+    },
+    {
+      "base": "pressure",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "pressure_of_ion_cyclotron_heating_antenna"
+      ]
+    },
+    {
+      "base": "pressure",
+      "segments": [
+        "physical_base",
+        "population",
+        "position",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "thermal_electron_pressure_at_post_sawtooth_crash"
+      ]
+    },
+    {
+      "base": "radiance",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "incident_soft_xray_radiance"
+      ]
+    },
+    {
+      "base": "radius",
+      "segments": [
+        "physical_base",
+        "position",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "minor_radius_of_plasma_boundary"
+      ]
+    },
+    {
+      "base": "radius",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "reference_major_radius"
+      ]
+    },
+    {
+      "base": "rate",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "total_neutron_rate"
+      ]
+    },
+    {
+      "base": "rate",
+      "segments": [
+        "object",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "spectral_rate_of_spectrometer_channel"
+      ]
+    },
+    {
+      "base": "safety_factor",
+      "segments": [
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "safety_factor"
+      ]
+    },
+    {
+      "base": "safety_factor",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "minimum_safety_factor"
+      ]
+    },
+    {
+      "base": "source_rate",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "process",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "total_neutral_source_rate_due_to_gas_injection"
+      ]
+    },
+    {
+      "base": "temperature",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "temperature_of_soft_xray_detector"
+      ]
+    },
+    {
+      "base": "temperature",
+      "segments": [
+        "physical_base",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "electron_temperature"
+      ]
+    },
+    {
+      "base": "thickness",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "thickness_of_filter"
+      ]
+    },
+    {
+      "base": "time",
+      "segments": [
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "breakdown_initial_time"
+      ]
+    },
+    {
+      "base": "toroidal_angle",
+      "segments": [
+        "geometric_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "toroidal_angle_of_measurement_position"
+      ]
+    },
+    {
+      "base": "toroidal_flux_coordinate",
+      "segments": [
+        "geometric_base"
+      ],
+      "count": 1,
+      "names": [
+        "toroidal_flux_coordinate"
+      ]
+    },
+    {
+      "base": "transit_time",
+      "segments": [
+        "object",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "coolant_transit_time_of_plant_component_port"
+      ]
+    },
+    {
+      "base": "triangularity",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "triangularity_of_plasma_boundary"
+      ]
+    },
+    {
+      "base": "voltage",
+      "segments": [
+        "object",
+        "physical_base",
+        "transformation"
+      ],
+      "count": 1,
+      "names": [
+        "voltage_amplitude_of_ion_cyclotron_heating_antenna"
+      ]
+    },
+    {
+      "base": "wavelength",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "wavelength_of_wave_beam"
+      ]
+    },
+    {
+      "base": "wavelength",
+      "segments": [
+        "object",
+        "physical_base",
+        "qualifier"
+      ],
+      "count": 1,
+      "names": [
+        "spectral_wavelength_of_optical_element"
+      ]
+    },
+    {
+      "base": "wavelength",
+      "segments": [
+        "physical_base",
+        "position"
+      ],
+      "count": 1,
+      "names": [
+        "wavelength_of_spectral_line"
+      ]
+    },
+    {
+      "base": "width",
+      "segments": [
+        "component",
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "toroidal_width_of_antenna_strap"
+      ]
+    },
+    {
+      "base": "width",
+      "segments": [
+        "object",
+        "physical_base"
+      ],
+      "count": 1,
+      "names": [
+        "width_of_poloidal_field_coil"
+      ]
+    }
+  ],
+  "templates_satisfied": [
+    {
+      "base": "density",
+      "segments": [
+        "physical_base",
+        "position",
+        "subject"
+      ],
+      "count": 3,
+      "names": [
+        "electron_density_at_divertor_target",
+        "electron_density_at_magnetic_axis",
+        "electron_density_at_plasma_boundary"
+      ]
+    },
+    {
+      "base": "density",
+      "segments": [
+        "physical_base",
+        "subject",
+        "transformation"
+      ],
+      "count": 2,
+      "names": [
+        "line_averaged_electron_density",
+        "volume_averaged_electron_density"
+      ]
+    },
+    {
+      "base": "density",
+      "segments": [
+        "aggregation",
+        "physical_base",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "total_electron_density"
+      ]
+    },
+    {
+      "base": "density",
+      "segments": [
+        "physical_base",
+        "population",
+        "subject"
+      ],
+      "count": 1,
+      "names": [
+        "thermal_electron_density"
+      ]
+    }
+  ],
+  "unparsed": [
+    {
+      "name": "inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width",
+      "error": "ParseError: residue 'inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width' does not match any physical_base or geometry_carrier; nearest candidates: ['normalized_toroidal_flux_coordinate']"
+    }
+  ]
+}
