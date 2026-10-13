@@ -1,0 +1,79 @@
+<section>
+  <h2 id="shc-docs-conformance-gate">Reviewed documentation is accepted only if it conforms to the registry</h2>
+  <p id="shc-docs-conformance-gate-scope">
+    The documentation axis accepted on the review score alone, so an opening
+    that followed none of its selected templates, a forbidden equation variant,
+    and an equation written for a concept the registry names and links all
+    reached acceptance at a score of 1.0. The worker now decides those from the
+    registry before it persists the review. Write paths:
+    <code>imas_codex/standard_names/workers.py</code>,
+    <code>imas_codex/standard_names/docs_gates.py</code>,
+    <code>imas_codex/llm/prompts/sn/_conventions.md</code>,
+    <code>tests/standard_names/test_docs_conformance_gate.py</code>.
+  </p>
+
+  <h3 id="shc-docs-conformance-gate-acceptance">One check at the acceptance point</h3>
+  <p id="shc-docs-conformance-gate-acceptance-text">
+    <code>process_review_docs_batch</code> calls
+    <code>conformance_findings</code>, the same function the audit report uses,
+    on the reviewed document before <code>persist_reviewed_docs</code>. A
+    <code>template_opening</code>, <code>forbidden_equation_variant</code>,
+    <code>forbidden_locus_gloss</code> or <code>restated_equation</code> finding
+    clamps the score below the accept threshold, as the link-label demotion
+    does, so the name is refined. The finding text is appended to the review
+    comments and recorded under <code>registry_conformance</code> in the
+    per-dimension comments, which is what the refiner reads. The quorum score
+    is untouched on a conforming document, and a forbidden-symbol finding
+    stays out of the decision. A name the grammar cannot parse selects no
+    registry entry and is accepted on score.
+  </p>
+
+  <h3 id="shc-docs-conformance-gate-restated">The restated-equation finding</h3>
+  <p id="shc-docs-conformance-gate-restated-text">
+    <code>docs_gates.py</code> gains <code>RESTATED_EQUATION</code>, produced
+    beside the forbidden-variant check. For a selected concept whose entry has
+    <code>restates_equation: false</code>, a display equation is a restatement
+    when it performs the concept's operation, identified by the operation
+    commands on the left-hand side of the canonical equation (or the whole
+    equation when the left-hand side names none), or when it contains the
+    canonical equation. Spelling is immaterial: all 21 live
+    <code>flux_surface_averaged_*_density_at_plasma_boundary</code>
+    documents, which write the average in many forms, produce the finding. A
+    concept with <code>restates_equation: true</code> is never reported, so the
+    equation the registry requires is not penalised.
+  </p>
+
+  <h3 id="shc-docs-conformance-gate-prompt">The prompt clause</h3>
+  <p id="shc-docs-conformance-gate-prompt-text">
+    For a concept with <code>restates_equation: false</code> the conventions
+    block now reads "name the concept and link to it; write no display equation
+    for it, in any form, and do not restate it in prose". The "unless needed to
+    define this quantity" exception is gone.
+  </p>
+
+  <h3 id="shc-docs-conformance-gate-measure">Measure</h3>
+  <ul id="shc-docs-conformance-gate-measure-list">
+    <li>New tests, <code>tests/standard_names/test_docs_conformance_gate.py</code>:
+      14 passed. With the review worker's model and graph calls stubbed at a
+      score of 1.0, an off-template opening, a forbidden line-form equation and
+      the canonical flux-surface average are each persisted below the accept
+      threshold with the finding as the reason; a conforming document, a name
+      with no selected template and a name the grammar cannot parse are
+      persisted at 1.0.</li>
+    <li>Negative controls, each EXIT=1: acceptance check removed, 5 failed
+      (the three routed cases, the any-form case, the note-serialisation case);
+      restated-equation finding removed, 5 failed; "unless needed" restored,
+      2 failed.</li>
+    <li>Gate over the documentation-axis, <code>test_docs_gates*</code> and
+      conventions-prompt suites: base 4 failed, 1648 passed; head 6 failed,
+      1660 passed. The 4 base failures are the same in both
+      (<code>test_conventions_prompt_block</code>, a name the installed grammar
+      now gives a template). The 2 added failures are in
+      <code>tests/standard_names/test_house_style_checks.py</code>, outside this
+      node's write scope: <code>test_canonical_entry_yields_zero_findings</code>
+      asserts the canonical flux-surface-average equation yields no finding,
+      and <code>test_fixture_census_counts_each_class_once</code> omits the
+      <code>restated_equation: 4</code> the same fixtures now carry. Both
+      encode the policy this node reverses and need their expectations moved.</li>
+  </ul>
+</section>
