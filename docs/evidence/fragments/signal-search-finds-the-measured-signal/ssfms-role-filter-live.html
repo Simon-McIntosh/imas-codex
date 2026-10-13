@@ -1,0 +1,513 @@
+<section id="ssfms-role-filter-live" data-reckon="fragment">
+<h2 id="ssfms-role-filter-live-title">A live role=measured search keeps commands and references out</h2>
+<p id="ssfms-role-filter-live-intro">Twenty-two graded physics questions were each searched against the live graph through the served signal search with the rerank off (<code>_search_signals</code>, the body of the <code>search_signals</code> tool), once with <code>role="measured"</code> and once with no role. Each question carries hand grades from the fixture (<code>tests/llm/fixtures/signal_search_questions.json</code>): 3 measures the queried quantity, 2 is a commanded or reference value of it or the same quantity at an adjacent point, 1 is related hardware, 0 is read and judged irrelevant. Every signal also carries the role the enrichment judge stored for it.</p>
+<h3 id="ssfms-role-filter-live-headline">Headline</h3>
+<ul>
+<li id="ssfms-role-filter-live-h1">Filtered results carrying a role other than <code>measured</code>: <strong>0</strong>.</li>
+<li id="ssfms-role-filter-live-h2">Filtered top-5 positions holding a graded-2 command or reference: <strong>0</strong>.</li>
+<li id="ssfms-role-filter-live-h3">Questions whose <em>unfiltered</em> top 5 holds a graded-2 command or reference: <strong>4</strong> of 22.</li>
+</ul>
+<p id="ssfms-role-filter-live-control">The control questions are <code>plasma-current-total</code>, <code>booster-power-supply-output-voltage</code>, <code>toroidal-field-coil-current</code>, <code>toroidal-field-coil-voltage</code>. On each, the unfiltered search places a signal stored as a <code>commanded</code> or <code>reference_or_setpoint</code> value in its top 5; the filtered search removes it, and no such signal reaches a filtered top 5 on any question.</p>
+<h3 id="ssfms-role-filter-live-adjacent">Graded-2 signals the filter kept</h3>
+<p id="ssfms-role-filter-live-adjacent-intro">The filter keeps graded-2 candidates that measure the queried quantity at an adjacent point; it must not keep a reference, command or setpoint. For each graded-2 candidate in a filtered top 5, its own name and description give the reason it is an adjacent-point measurement rather than a reference the judge called measured:</p>
+<table>
+<thead><tr><th>question</th><th>signal</th><th>why it is an adjacent measurement, not a reference</th></tr></thead><tbody>
+<tr><td><code>plasma-stored-energy-magnetic</code></td><td><code>mdac_voldmagl3</code></td><td>diamagnetic loop 3 voltage, the flux change the stored energy is inferred from, not the energy itself</td></tr>
+<tr><td><code>plasma-stored-energy-magnetic</code></td><td><code>psrc_cordmagl1</code></td><td>corrected diamagnetic loop 1 flux, an intermediate the stored energy is derived from</td></tr>
+<tr><td><code>plasma-stored-energy-magnetic</code></td><td><code>mdac_voldmagl2</code></td><td>diamagnetic loop 2 voltage, one coil&#x27;s flux rather than the plasma stored energy</td></tr>
+<tr><td><code>plasma-stored-energy-magnetic</code></td><td><code>mdac_voldmagl1</code></td><td>diamagnetic loop 1 voltage, one coil&#x27;s flux rather than the plasma stored energy</td></tr>
+<tr><td><code>magnetic-fluctuation-toroidal-mode-one</code></td><td><code>mag_mhdtor</code></td><td>magnetic fluctuation at toroidal mode n=8, a different mode to the n=1 the question asks for</td></tr>
+<tr><td><code>magnetic-fluctuation-toroidal-mode-one</code></td><td><code>mag_tmode2</code></td><td>magnetic fluctuation amplitude at n=2, a different mode to the n=1 asked for</td></tr>
+<tr><td><code>magnetic-fluctuation-toroidal-mode-one</code></td><td><code>mag_tmode0</code></td><td>magnetic fluctuation amplitude at n=0, a different mode to the n=1 asked for</td></tr>
+<tr><td><code>magnetic-fluctuation-toroidal-mode-one</code></td><td><code>mag_tmode3</code></td><td>magnetic fluctuation amplitude at n=3, a different mode to the n=1 asked for</td></tr>
+<tr><td><code>divertor-tile-surface-temperature</code></td><td><code>tcud_temdu2</code></td><td>upper divertor tile 2 temperature by thermocouple, a different tile and diagnostic to the infrared measurement asked for</td></tr>
+<tr><td><code>divertor-tile-surface-temperature</code></td><td><code>tcud_temdu12</code></td><td>upper divertor tile 12 temperature by thermocouple, a different tile and diagnostic to the infrared measurement asked for</td></tr>
+<tr><td><code>divertor-tile-surface-temperature</code></td><td><code>tcud_temdu18</code></td><td>upper divertor tile 18 temperature by thermocouple, a different tile and diagnostic to the infrared measurement asked for</td></tr>
+<tr><td><code>booster-power-supply-output-voltage</code></td><td><code>mmsys_volef1</code></td><td>EF1 coil voltage, a different coil to the EF6 booster supply voltage asked for</td></tr>
+</tbody></table>
+<h3 id="ssfms-role-filter-live-tables">Per-question top 5</h3>
+<h4 id="ssfms-role-filter-live-q-plasma-current-total">the total plasma current carried by the discharge</h4>
+<p>a grade-3 signal measures the total toroidal plasma current itself; a programmed or feedback reference waveform of it, or a current in a magnet coil rather than in the plasma, is only grade 2</p>
+<table>
+<caption>plasma-current-total — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>psrc_ip</code></td><td>Plasma Current (Ip)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_calip</code></td><td>Plasma Current (Ip) Calibration</td></tr>
+<tr><td>3</td><td>measured</td><td><code>dhc_obsip</code></td><td>Plasma Current Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_obsip</code></td><td>Plasma Current (Observed)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mdac_currcip3</code></td><td>Rogowski Coil 3 Plasma Current</td></tr>
+</tbody></table>
+<table>
+<caption>plasma-current-total — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>derived_or_computed</td><td><code>psrc_calip</code></td><td>Plasma Current (Ip)</td></tr>
+<tr><td>2</td><td>reference_or_setpoint</td><td><code>psc_refip</code></td><td>Plasma Current Reference</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psrc_ip</code></td><td>Plasma Current (Ip)</td></tr>
+<tr><td>2</td><td>reference_or_setpoint</td><td><code>dcsv_ppip</code></td><td>Plasma Current (Ip)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_calip</code></td><td>Plasma Current (Ip) Calibration</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-plasma-stored-energy-magnetic">the stored energy of the plasma inferred from magnetic measurements</h4>
+<p>a grade-3 signal is a measured global plasma stored energy obtained from the diamagnetic flux; a raw diamagnetic loop voltage or surface integral, or an equilibrium-reconstruction estimate rather than the diamagnetic measurement, is only grade 2</p>
+<table>
+<caption>plasma-stored-energy-magnetic — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>mag_wdia7rt</code></td><td>Stored Energy (Diamagnetic)</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mdac_voldmagl3</code></td><td>Diamagnetic Loop (3) Voltage</td></tr>
+<tr><td>2</td><td>measured</td><td><code>psrc_cordmagl1</code></td><td>Corrected Diamagnetic Loop 1 Flux</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mdac_voldmagl2</code></td><td>Diamagnetic Loop 2 Voltage</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mdac_voldmagl1</code></td><td>Diamagnetic Loop 1 Voltage</td></tr>
+</tbody></table>
+<table>
+<caption>plasma-stored-energy-magnetic — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>2</td><td>derived_or_computed</td><td><code>dhc_energy</code></td><td>Stored Energy</td></tr>
+<tr><td>2</td><td>derived_or_computed</td><td><code>fame_wdia8</code></td><td>Stored Energy from FBI</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mag_wdia7rt</code></td><td>Stored Energy (Diamagnetic)</td></tr>
+<tr><td>3</td><td>derived_or_computed</td><td><code>psrc_calwdia</code></td><td>Plasma Stored Energy (Wdia)</td></tr>
+<tr><td>3</td><td>derived_or_computed</td><td><code>psrc_calwdiacor</code></td><td>Corrected Plasma Stored Energy</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-magnetic-fluctuation-toroidal-mode-one">the amplitude of the toroidal mode number one magnetic fluctuation</h4>
+<p>a grade-3 signal is a measured amplitude, or its sine or cosine component, of the n=1 toroidal magnetic field fluctuation from Mirnov-type probes; a raw probe signal at an unspecified mode, or an instability detection flag, is only grade 2 or lower</p>
+<table>
+<caption>magnetic-fluctuation-toroidal-mode-one — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>2</td><td>measured</td><td><code>mag_mhdtor</code></td><td>Magnetic Fluctuation (Toroidal Mode n=8)</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mag_tmode2</code></td><td>Magnetic Fluctuation Amplitude (n=2)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mag_tmode1</code></td><td>Magnetic Fluctuation Amplitude (n=1)</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mag_tmode0</code></td><td>Magnetic Fluctuation Amplitude (n=0)</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mag_tmode3</code></td><td>Magnetic Fluctuation Amplitude n=3</td></tr>
+</tbody></table>
+<table>
+<caption>magnetic-fluctuation-toroidal-mode-one — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>2</td><td>measured</td><td><code>mag_mhdtor</code></td><td>Magnetic Fluctuation (Toroidal Mode n=8)</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mag_tmode2</code></td><td>Magnetic Fluctuation Amplitude (n=2)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mag_tmode1</code></td><td>Magnetic Fluctuation Amplitude (n=1)</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mag_tmode0</code></td><td>Magnetic Fluctuation Amplitude (n=0)</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mag_tmode3</code></td><td>Magnetic Fluctuation Amplitude n=3</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-soft-x-ray-emission">soft x-ray emission from the plasma along a viewing chord</h4>
+<p>a grade-3 signal is a measured soft x-ray emission or intensity along a viewing chord, including filtered photodiode channels; a hard x-ray signal, a bolometric total radiated power, or a camera image of the plasma is only grade 1 or 2</p>
+<table>
+<caption>soft-x-ray-emission — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxl</code></td><td>Soft X-ray Lower Chord</td></tr>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxlo</code></td><td>Soft X-ray Lower Oblique</td></tr>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxh</code></td><td>Soft X-ray Horizontal</td></tr>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxuo</code></td><td>Soft X-ray Upper Oblique</td></tr>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxu</code></td><td>Soft X-ray Upper</td></tr>
+</tbody></table>
+<table>
+<caption>soft-x-ray-emission — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxl</code></td><td>Soft X-ray Lower Chord</td></tr>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxlo</code></td><td>Soft X-ray Lower Oblique</td></tr>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxh</code></td><td>Soft X-ray Horizontal</td></tr>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxu</code></td><td>Soft X-ray Upper</td></tr>
+<tr><td>3</td><td>measured</td><td><code>sxr_sxuo</code></td><td>Soft X-ray Upper Oblique</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-divertor-tile-surface-temperature">the surface temperature of the divertor target tiles measured by infrared thermography</h4>
+<p>a grade-3 signal is a time series of divertor target tile surface temperature from an infrared camera region of interest; the camera&#x27;s raw image frame, or a thermocouple in the supporting structure rather than the tile surface, is only grade 2</p>
+<table>
+<caption>divertor-tile-surface-temperature — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cam_divirmp15r7</code></td><td>Divertor Infrared Camera ROI7 at P15 (Horizontal)</td></tr>
+<tr><td>2</td><td>measured</td><td><code>tcud_temdu2</code></td><td>Upper Divertor Temperature 2</td></tr>
+<tr><td>2</td><td>measured</td><td><code>tcud_temdu12</code></td><td>Upper Divertor Tile 12 Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cam_divirmp15r5</code></td><td>Divertor IR Camera ROI5 at P15 Horizontal</td></tr>
+<tr><td>2</td><td>measured</td><td><code>tcud_temdu18</code></td><td>Upper Divertor Tile 18 Temperature</td></tr>
+</tbody></table>
+<table>
+<caption>divertor-tile-surface-temperature — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cam_divirmp15r7</code></td><td>Divertor Infrared Camera ROI7 at P15 (Horizontal)</td></tr>
+<tr><td>2</td><td>measured</td><td><code>tcud_temdu2</code></td><td>Upper Divertor Temperature 2</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cam_divirmp15r5</code></td><td>Divertor IR Camera ROI5 at P15 Horizontal</td></tr>
+<tr><td>2</td><td>measured</td><td><code>tcud_temdu12</code></td><td>Upper Divertor Tile 12 Temperature</td></tr>
+<tr><td>2</td><td>measured</td><td><code>tcud_temdu18</code></td><td>Upper Divertor Tile 18 Temperature</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-first-wall-surface-temperature">the surface temperature of the inboard first wall panels</h4>
+<p>a grade-3 signal is a measured surface temperature of a plasma-facing first wall panel; a coolant inlet or outlet temperature of the wall&#x27;s cooling circuit, or a temperature of a neighbouring structure such as a port plug, is only grade 2</p>
+<table>
+<caption>first-wall-surface-temperature — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw2in</code></td><td>Inboard First Wall Temperature 2</td></tr>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw3in</code></td><td>Inboard First Wall Temperature 3</td></tr>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw4in</code></td><td>Inboard First Wall Temperature 4</td></tr>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw7in</code></td><td>Inboard First Wall Temperature 7</td></tr>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw10in</code></td><td>Inboard First Wall Tile 10 Temperature</td></tr>
+</tbody></table>
+<table>
+<caption>first-wall-surface-temperature — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw2in</code></td><td>Inboard First Wall Temperature 2</td></tr>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw3in</code></td><td>Inboard First Wall Temperature 3</td></tr>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw4in</code></td><td>Inboard First Wall Temperature 4</td></tr>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw7in</code></td><td>Inboard First Wall Temperature 7</td></tr>
+<tr><td>3</td><td>measured</td><td><code>tcifw_temfw10in</code></td><td>Inboard First Wall Tile 10 Temperature</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-vacuum-vessel-port-temperature">the temperature of the vacuum vessel port structures</h4>
+<p>a grade-3 signal is a measured temperature of a vacuum vessel port structure; a port plug or other in-vessel component temperature is a different structure and grade 2, as is a cooling circuit inlet temperature</p>
+<table>
+<caption>vacuum-vessel-port-temperature — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop12a</code></td><td>Vacuum Vessel Lower Port LO P12a Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop12b</code></td><td>Vacuum Vessel Lower Port LO P12b Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop01b</code></td><td>Vacuum Vessel Lower Port LO P01b Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop07a</code></td><td>Vacuum Vessel Lower Port LO P07a Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop07b</code></td><td>Vacuum Vessel Lower Port LO P07b Temperature</td></tr>
+</tbody></table>
+<table>
+<caption>vacuum-vessel-port-temperature — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop12a</code></td><td>Vacuum Vessel Lower Port LO P12a Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop12b</code></td><td>Vacuum Vessel Lower Port LO P12b Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop01b</code></td><td>Vacuum Vessel Lower Port LO P01b Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop07a</code></td><td>Vacuum Vessel Lower Port LO P07a Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>vv_temlop07b</code></td><td>Vacuum Vessel Lower Port LO P07b Temperature</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-cryostat-vacuum-pressure">the vacuum pressure in the cryostat measured by cold cathode gauges</h4>
+<p>a grade-3 signal is a cold cathode gauge pressure in the cryostat or cryogenic pumping volume, in pascals; a pirani gauge reading at the same location, or the cryoplant&#x27;s own helium temperature or valve position, is only grade 2</p>
+<table>
+<caption>cryostat-vacuum-pressure — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>qms_prep12cryo</code></td><td>Cryo Line P12 Cold Cathode Gauge Pressure</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_prep02cryo</code></td><td>Cryo Pressure P02 (Cold Cathode Gauge)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_prep14cryo</code></td><td>Cryo Line P14 Cold Cathode Gauge Pressure</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_prep18cryo</code></td><td>Cryo Line P18 Cold Cathode Gauge Pressure</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_precvbion</code></td><td>Manifold CRYO Ionization Vacuum Gauge Pressure</td></tr>
+</tbody></table>
+<table>
+<caption>cryostat-vacuum-pressure — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>qms_prep12cryo</code></td><td>Cryo Line P12 Cold Cathode Gauge Pressure</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_prep02cryo</code></td><td>Cryo Pressure P02 (Cold Cathode Gauge)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_prep14cryo</code></td><td>Cryo Line P14 Cold Cathode Gauge Pressure</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_prep18cryo</code></td><td>Cryo Line P18 Cold Cathode Gauge Pressure</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_precvbion</code></td><td>Manifold CRYO Ionization Vacuum Gauge Pressure</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-hydrogen-isotope-partial-pressure">the partial pressure of hydrogen isotopes in the vacuum vessel measured with a mass spectrometer</h4>
+<p>a grade-3 signal is a mass-spectrometer partial pressure, or the ion current or partial pressure ratio from which it is derived, attributed to mass-to-charge ratio one; a valve status or manifold channel on the same spectrometer is only grade 1</p>
+<table>
+<caption>hydrogen-isotope-partial-pressure — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>gau_ph2pngh</code></td><td>Hydrogen Partial Pressure (P8 horizontal)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>gau_ph2pnguo</code></td><td>Hydrogen Partial Pressure at P14 Manifold</td></tr>
+<tr><td>1</td><td>measured</td><td><code>qms_mzrv5c</code></td><td>Partial Pressure (m/z any_value[5])</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_mzrv1crat</code></td><td>Partial Pressure Ratio (m/z any_value[1])</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_mz01arat</code></td><td>QMS Partial Pressure Ratio mz01aRat</td></tr>
+</tbody></table>
+<table>
+<caption>hydrogen-isotope-partial-pressure — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>gau_ph2pngh</code></td><td>Hydrogen Partial Pressure (P8 horizontal)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>gau_ph2pnguo</code></td><td>Hydrogen Partial Pressure at P14 Manifold</td></tr>
+<tr><td>1</td><td>measured</td><td><code>qms_mzrv5c</code></td><td>Partial Pressure (m/z any_value[5])</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_mzrv1crat</code></td><td>Partial Pressure Ratio (m/z any_value[1])</td></tr>
+<tr><td>3</td><td>measured</td><td><code>qms_mz01arat</code></td><td>QMS Partial Pressure Ratio mz01aRat</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-nitrogen-seeding-flow-into-vessel">the flow rate of nitrogen injected into the vacuum vessel for radiative divertor cooling</h4>
+<p>a grade-3 signal is a measured volumetric nitrogen flow rate at a vacuum vessel inlet used for impurity seeding; an inlet pressure or temperature of the same line, or a deuterium fuelling flow, is only grade 2 or lower</p>
+<table>
+<caption>nitrogen-seeding-flow-into-vessel — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinleti</code></td><td>Vacuum Vessel Inlet Flow (I)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinletd</code></td><td>Vacuum Vessel Inlet Flow (D)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinletb</code></td><td>Vacuum Vessel Inlet Flow (B)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinlete</code></td><td>Vacuum Vessel Inlet Flow (E)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinletf</code></td><td>N2 Gas Inlet Flow F</td></tr>
+</tbody></table>
+<table>
+<caption>nitrogen-seeding-flow-into-vessel — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinleti</code></td><td>Vacuum Vessel Inlet Flow (I)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinletd</code></td><td>Vacuum Vessel Inlet Flow (D)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinletb</code></td><td>Vacuum Vessel Inlet Flow (B)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinlete</code></td><td>Vacuum Vessel Inlet Flow (E)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>n2gas_flwinletf</code></td><td>N2 Gas Inlet Flow F</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-deuterium-fuelling-flow-into-vessel">the deuterium fuelling flow rate injected into the vacuum vessel</h4>
+<p>a grade-3 signal is a measured deuterium flow rate delivered through a fuelling line into the vacuum vessel; a gas puff valve command or setpoint, a pressure of the same line, or a plasma density derived from it, is only grade 2 or lower</p>
+<table>
+<caption>deuterium-fuelling-flow-into-vessel — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>gas_flwdip12</code></td><td>Deuterium Gas Injection Flow P12</td></tr>
+<tr><td>3</td><td>measured</td><td><code>gas_flwdip2</code></td><td>Deuterium Gas Injection Flow P2</td></tr>
+<tr><td>3</td><td>measured</td><td><code>gas_flwdop2</code></td><td>Gas D-out P2 Flow Rate</td></tr>
+<tr><td>0</td><td>measured</td><td><code>n2gas_flwinleti</code></td><td>Vacuum Vessel Inlet Flow (I)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>gas_flwdop12</code></td><td>Deuterium Gas Flow (D-out P12)</td></tr>
+</tbody></table>
+<table>
+<caption>deuterium-fuelling-flow-into-vessel — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>gas_flwdip12</code></td><td>Deuterium Gas Injection Flow P12</td></tr>
+<tr><td>3</td><td>measured</td><td><code>gas_flwdip2</code></td><td>Deuterium Gas Injection Flow P2</td></tr>
+<tr><td>3</td><td>measured</td><td><code>gas_flwdop2</code></td><td>Gas D-out P2 Flow Rate</td></tr>
+<tr><td>0</td><td>measured</td><td><code>n2gas_flwinleti</code></td><td>Vacuum Vessel Inlet Flow (I)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>gas_flwdop12</code></td><td>Deuterium Gas Flow (D-out P12)</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-booster-power-supply-output-voltage">booster power supply output voltage</h4>
+<p>a grade-3 signal is a measured booster power supply output voltage; the reference voltage waveform for it is grade 2 and a reference current is grade 1</p>
+<table>
+<caption>booster-power-supply-output-voltage — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volef6bps</code></td><td>EF6 Booster Power Supply Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volef2bps</code></td><td>EF2 Booster Power Supply Voltage (BPS)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef5_volpsdc</code></td><td>EF5 PS DC Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volef5bps</code></td><td>EF5 Booster Power Supply Voltage</td></tr>
+<tr><td>2</td><td>measured</td><td><code>mmsys_volef1</code></td><td>EF1 Coil Voltage</td></tr>
+</tbody></table>
+<table>
+<caption>booster-power-supply-output-voltage — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volef6bps</code></td><td>EF6 Booster Power Supply Voltage</td></tr>
+<tr><td>2</td><td>reference_or_setpoint</td><td><code>ech_modphu2</code></td><td>EF1 Booster PS Voltage Reference</td></tr>
+<tr><td>1</td><td>reference_or_setpoint</td><td><code>psscfst_refcuref5bst</code></td><td>EF5 Booster PS Current Reference</td></tr>
+<tr><td>2</td><td>reference_or_setpoint</td><td><code>psscfst_refvolef1bst</code></td><td>EF1 Booster Power Supply Voltage Reference</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volef2bps</code></td><td>EF2 Booster Power Supply Voltage (BPS)</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-measured-voltage-across-the-superconducting-poloidal-field-coils">measured voltage across the superconducting poloidal field coils</h4>
+<p>a grade-3 signal is a measured voltage across a superconducting poloidal field coil, including the coil and its current lead; a DC converter output voltage is grade 2 and a converter or current-lead voltage reference is grade 1</p>
+<table>
+<caption>measured-voltage-across-the-superconducting-poloidal-field-coils — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volef3</code></td><td>EF3 Coil Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volef4</code></td><td>EF4 Coil Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_oef4vol</code></td><td>EF4 Coil Voltage Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_oef5vol</code></td><td>EF5 Coil Voltage (Observed)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_oef3vol</code></td><td>EF3 Coil Voltage Observation</td></tr>
+</tbody></table>
+<table>
+<caption>measured-voltage-across-the-superconducting-poloidal-field-coils — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volef3</code></td><td>EF3 Coil Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volef4</code></td><td>EF4 Coil Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_oef4vol</code></td><td>EF4 Coil Voltage Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_oef5vol</code></td><td>EF5 Coil Voltage (Observed)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_oef3vol</code></td><td>EF3 Coil Voltage Observation</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-poloidal-field-coil-current-measurement">poloidal field coil current measurement</h4>
+<p>a grade-3 signal is a measured current in a poloidal field coil; a commanded or reference current for the same coil is grade 2</p>
+<table>
+<caption>poloidal-field-coil-current-measurement — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>psrc_curef5coil</code></td><td>EF5 Coil Current</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mdac_oef2cur</code></td><td>EF2 Coil Current Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mdac_oef5cur</code></td><td>EF5 Coil Current Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psrc_curef4coil</code></td><td>EF4 Coil Current</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_oef2cur</code></td><td>EF2 Coil Current (Observed)</td></tr>
+</tbody></table>
+<table>
+<caption>poloidal-field-coil-current-measurement — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>psrc_curef5coil</code></td><td>EF5 Coil Current</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mdac_oef5cur</code></td><td>EF5 Coil Current Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mdac_oef2cur</code></td><td>EF2 Coil Current Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_oef2cur</code></td><td>EF2 Coil Current (Observed)</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_oef5cur</code></td><td>EF5 Coil Current (Observed)</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-power-supply-dc-output-voltage-for-the-coil-converters">power supply DC output voltage for the coil converters</h4>
+<p>a grade-3 signal is a measured DC output voltage of a coil power supply converter; its reference voltage is grade 2 and a converter control or interlock flag is grade 1</p>
+<table>
+<caption>power-supply-dc-output-voltage-for-the-coil-converters — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cs2_volpsdc</code></td><td>CS2 Power Supply DC Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs4_volpsdc</code></td><td>CS4 Power Supply DC Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef5_volpsdc</code></td><td>EF5 PS DC Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef4_volpsdc</code></td><td>EF4 Power Supply DC Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs3_volpsdc</code></td><td>CS3 Power Supply DC Voltage</td></tr>
+</tbody></table>
+<table>
+<caption>power-supply-dc-output-voltage-for-the-coil-converters — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cs4_volpsdc</code></td><td>CS4 Power Supply DC Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs2_volpsdc</code></td><td>CS2 Power Supply DC Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef5_volpsdc</code></td><td>EF5 PS DC Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef4_volpsdc</code></td><td>EF4 Power Supply DC Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_volcs4</code></td><td>CS4 Coil Voltage</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-temperature-of-the-high-temperature-superconductor-current-leads">temperature of the high temperature superconductor current leads</h4>
+<p>a grade-3 signal is a measured temperature of an HTS current lead, including its warm and cold ends; a lead cooling circuit status flag or a neighbouring structure temperature is grade 1</p>
+<table>
+<caption>temperature-of-the-high-temperature-superconductor-current-leads — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg16</code></td><td>HTS Warm End Inlet Temperature 16</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg13</code></td><td>HTS Warm End Inlet Temperature 13</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg25</code></td><td>HTS Warm End Inlet Temperature 25</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg24</code></td><td>HTS Warm End Inlet Temperature 24</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg11</code></td><td>HTS Warm End Inlet Temperature 11</td></tr>
+</tbody></table>
+<table>
+<caption>temperature-of-the-high-temperature-superconductor-current-leads — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg16</code></td><td>HTS Warm End Inlet Temperature 16</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg13</code></td><td>HTS Warm End Inlet Temperature 13</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg25</code></td><td>HTS Warm End Inlet Temperature 25</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg24</code></td><td>HTS Warm End Inlet Temperature 24</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryoctb_m1tpg11</code></td><td>HTS Warm End Inlet Temperature 11</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-quench-detection-voltage-of-the-superconducting-coils">quench detection voltage of the superconducting coils</h4>
+<p>a grade-3 signal is a measured quench-detection voltage of a superconducting coil; a detection threshold or reference voltage is grade 2 and a quench-detection enable or interlock flag is grade 1</p>
+<table>
+<caption>quench-detection-voltage-of-the-superconducting-coils — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m2c01cv</code></td><td>CS Coil 01 Quench Detection Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m1e04cv</code></td><td>EF 04 Coil Quench Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m1e03cv</code></td><td>EF 03 Coil Quench Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m1e02cv</code></td><td>EF 02 Coil Quench Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m1e05cv</code></td><td>EF 05 Coil Quench Voltage</td></tr>
+</tbody></table>
+<table>
+<caption>quench-detection-voltage-of-the-superconducting-coils — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m2c01cv</code></td><td>CS Coil 01 Quench Detection Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m1e04cv</code></td><td>EF 04 Coil Quench Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m1e03cv</code></td><td>EF 03 Coil Quench Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m1e02cv</code></td><td>EF 02 Coil Quench Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_m1c01cv</code></td><td>CS 01 Coil Quench Voltage</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-helium-coolant-outlet-temperature-of-the-poloidal-field-coils">helium coolant outlet temperature of the poloidal field coils</h4>
+<p>a grade-3 signal is a measured helium coolant outlet temperature of a poloidal field coil; no commanded or reference form of this quantity is labelled</p>
+<table>
+<caption>helium-coolant-outlet-temperature-of-the-poloidal-field-coils — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cryomag_me2tho2</code></td><td>EF 02 Helium Outlet Pipe Temperature 2</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_me5tho1</code></td><td>EF 05 Helium Outlet Pipe Temperature 1</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_mc4tho</code></td><td>CS 04 Helium Outlet Pipe Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_me6tho1</code></td><td>EF Coil 06 Helium Outlet Pipe Temperature 1</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_mc1tho</code></td><td>CS 01 Helium Outlet Pipe Temperature</td></tr>
+</tbody></table>
+<table>
+<caption>helium-coolant-outlet-temperature-of-the-poloidal-field-coils — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cryomag_me2tho2</code></td><td>EF 02 Helium Outlet Pipe Temperature 2</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_me5tho1</code></td><td>EF 05 Helium Outlet Pipe Temperature 1</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_mc4tho</code></td><td>CS 04 Helium Outlet Pipe Temperature</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_me6tho1</code></td><td>EF Coil 06 Helium Outlet Pipe Temperature 1</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_mc1tho</code></td><td>CS 01 Helium Outlet Pipe Temperature</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-toroidal-field-coil-current">toroidal field coil current</h4>
+<p>a grade-3 signal is a measured current in a toroidal field coil; a commanded or reference current for the same coil is grade 2</p>
+<table>
+<caption>toroidal-field-coil-current — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cryomag_mtf00cr</code></td><td>TF Coil Current</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mdac_otfcur</code></td><td>Toroidal Field Coil Current Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_otfcur</code></td><td>TF Coil Current Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_cur1tflkat</code></td><td>TF Coil Current No.1 (LKAT2)</td></tr>
+<tr><td>0</td><td>measured</td><td><code>dcsv_tmagremi</code></td><td>Toroidal Magnet Field Re-setting Start Time</td></tr>
+</tbody></table>
+<table>
+<caption>toroidal-field-coil-current — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>2</td><td>commanded</td><td><code>psc_ctfcur</code></td><td>TF Coil Current Command</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cryomag_mtf00cr</code></td><td>TF Coil Current</td></tr>
+<tr><td>2</td><td>reference_or_setpoint</td><td><code>dcsv_pptfcur</code></td><td>TF Coil Current Reference</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mdac_otfcur</code></td><td>Toroidal Field Coil Current Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_cur1tflkat</code></td><td>TF Coil Current No.1 (LKAT2)</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-toroidal-field-coil-voltage">toroidal field coil voltage</h4>
+<p>a grade-3 signal is a measured voltage across a toroidal field coil; a converter output voltage for it is grade 2</p>
+<table>
+<caption>toroidal-field-coil-voltage — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>mmsys_vol2tf</code></td><td>TF Coil Voltage No.2</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_vol1tf</code></td><td>TF Coil Voltage No.1</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_vol3tf</code></td><td>TF Coil Voltage No.3</td></tr>
+<tr><td>3</td><td>measured</td><td><code>psc_otfvol</code></td><td>TF Coil Voltage Observation</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mdac_otfvol</code></td><td>TF Coil Voltage Observation</td></tr>
+</tbody></table>
+<table>
+<caption>toroidal-field-coil-voltage — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>2</td><td>commanded</td><td><code>psc_ctfvol</code></td><td>TF Coil Voltage Command</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_vol2tf</code></td><td>TF Coil Voltage No.2</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_vol1tf</code></td><td>TF Coil Voltage No.1</td></tr>
+<tr><td>3</td><td>measured</td><td><code>mmsys_vol3tf</code></td><td>TF Coil Voltage No.3</td></tr>
+<tr><td>2</td><td>reference_or_setpoint</td><td><code>dcsv_pptfvol</code></td><td>TF Coil Voltage Reference</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-switching-network-unit-terminal-voltage">switching network unit terminal voltage</h4>
+<p>a grade-3 signal is a measured terminal voltage of a switching network unit; a unit status, configuration or interlock flag is grade 1</p>
+<table>
+<caption>switching-network-unit-terminal-voltage — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cs4_volsnuat</code></td><td>CS4 SNU Terminal Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs2_volsnuat</code></td><td>CS2 SNU Terminal Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs1_volsnuat</code></td><td>CS1 Switching Network Unit Terminal Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs3_vosnulat</code></td><td>CS3 SNU Terminal Voltage</td></tr>
+<tr><td>1</td><td>measured</td><td><code>psc_crcs1snu</code></td><td>CS1 Switching Network Unit Resistance</td></tr>
+</tbody></table>
+<table>
+<caption>switching-network-unit-terminal-voltage — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cs4_volsnuat</code></td><td>CS4 SNU Terminal Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs2_volsnuat</code></td><td>CS2 SNU Terminal Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs1_volsnuat</code></td><td>CS1 Switching Network Unit Terminal Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs3_vosnulat</code></td><td>CS3 SNU Terminal Voltage</td></tr>
+<tr><td>1</td><td>measured</td><td><code>psc_crcs1snu</code></td><td>CS1 Switching Network Unit Resistance</td></tr>
+</tbody></table>
+<h4 id="ssfms-role-filter-live-q-quench-protection-circuit-dump-resistor-voltage">quench protection circuit dump resistor voltage</h4>
+<p>a grade-3 signal is a measured voltage across a quench protection circuit dump resistor; no commanded or reference form of this quantity is labelled</p>
+<table>
+<caption>quench-protection-circuit-dump-resistor-voltage — filtered role=measured</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cs3_volqpcdr</code></td><td>CS3 Quench Protection Circuit Dump Resistor Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef1_volqpcdr</code></td><td>EF1 Quench Protection Circuit Dump Resistor Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef6_volqpcdr</code></td><td>EF6 Quench Protection Circuit Dump Resistor Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs4_volqpcdr</code></td><td>CS4 QPC Dump Resistor Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef5_volqpcdr</code></td><td>EF5 Quench Protection Circuit Dump Resistor Voltage</td></tr>
+</tbody></table>
+<table>
+<caption>quench-protection-circuit-dump-resistor-voltage — unfiltered (no role)</caption>
+<thead><tr><th>grade</th><th>stored role</th><th>signal</th><th>name</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>measured</td><td><code>cs3_volqpcdr</code></td><td>CS3 Quench Protection Circuit Dump Resistor Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef1_volqpcdr</code></td><td>EF1 Quench Protection Circuit Dump Resistor Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef6_volqpcdr</code></td><td>EF6 Quench Protection Circuit Dump Resistor Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>cs4_volqpcdr</code></td><td>CS4 QPC Dump Resistor Voltage</td></tr>
+<tr><td>3</td><td>measured</td><td><code>ef4_volqpcdr</code></td><td>EF4 QPC Dump Resistor Voltage</td></tr>
+</tbody></table>
+</section>
