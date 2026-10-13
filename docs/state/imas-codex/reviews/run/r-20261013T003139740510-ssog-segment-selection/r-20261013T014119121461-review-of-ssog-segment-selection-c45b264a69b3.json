@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "ea633f0528d1b2f68412d6c88ce518bd802d8a7d",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T01:51:02.918Z",
+  "dispatched_at": "2026-10-13T01:41:36Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_segment_selection.py",
+      "line": "231",
+      "severity": "follow-on",
+      "text": "follow-on: the empty-beam-to-recorded-failure hand-off at imas_codex/standard_names/segment_selection.py:749-752 is still asserted only indirectly - the test stops at ranked[0]==[] and drives _search_slot directly - so a regression in select_segments rendering a missing slot to item.failure would redden no test."
+    }
+  ],
+  "head_log_revision": "c45b264a69b3e08c1233fa948bdba42b766c4010",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit; the single gained commit c45b264a6 replaces render_name's local compose()+parse(strict=True) pair at imas_codex/standard_names/segment_selection.py:671-673 with compose_canonical_ir(ir) at :674 and fixes the duplicated <tr><tr> at the fragment's locus row.",
+    "done_when": "the done_when's gate is tests/standard_names/test_segment_selection.py plus the evaluation module's tests recorded as baseline_suite and after_suite with revision, exit_status and completed; the manifest records both arms and I reproduced the head arm at c45b264a6 (4 passed, EXIT=0, review_head_arm.log).",
+    "goal": "the node goal is a module through which Jev chooses each grammar segment from the closed ISN vocabulary; the gained commit keeps imas_codex/standard_names/segment_selection.py:684 select_segments returning per-item selections and the call layer's cost and only reroutes render_name's render step, so the goal's entry point is unchanged.",
+    "manifest": "read; it records status complete, the three commits, four guarded tests and negative_control_round2.log as the negative-control log, and its account of the round-1 head arm (4 passed, EXIT=0) and the two red mutation arms matches the logs it cites.",
+    "write_paths": "the fence is imas_codex/standard_names/segment_selection.py, tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html; git diff 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b..c45b264a69b3e08c1233fa948bdba42b766c4010 touches only the module and the fragment, both inside it."
+  },
+  "justifications": {
+    "durability": "the head commit adds no assertion, but the refusal guard it touches still fails when its mechanism is removed - SS_SEGMENT_MUTATION=no-grammar-refusal reddens test_grammar_refusal_is_recorded_and_not_repaired at c45b264a6 (1 failed, EXIT=1, review_negative_control.log).",
+    "evidence": "the manifest's after_suite now names tests/standard_names/test_segment_selection.py with 39 passed EXIT=0, and my head-arm rerun at c45b264a6 (review_head_arm.log) reproduces 4 passed EXIT=0.",
+    "fit": "the changed docstring and comment at imas_codex/standard_names/segment_selection.py:659-666 state the mechanism by name and introduce no plan, gate or author label.",
+    "goal_fidelity": "imas_codex/standard_names/segment_selection.py:674 render_name still renders the chosen tokens through ISN and still records a refusal, so the entry-point contract at :684 is unchanged.",
+    "reuse": "imas_codex/standard_names/segment_selection.py:674 now routes through the capability owner imas_codex/standard_names/grammar_adapter.py:144 compose_canonical_ir, the same owner used by models.py:553 and derivation.py:84, replacing a local re-implementation of compose-and-prove.",
+    "scope_discipline": "git diff 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b..c45b264a69b3e08c1233fa948bdba42b766c4010 touches only imas_codex/standard_names/segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html, both inside the declared fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261013T003139740510-ssog-segment-selection (imas-codex, plan sn-selection-over-generation section 2, node ssog-segment-selection), covering the single commit gained since the prior review, base 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b, head c45b264a69b3e08c1233fa948bdba42b766c4010.\nreviewed_base_sha: 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b\nreviewed_head_sha: c45b264a69b3e08c1233fa948bdba42b766c4010\nVERDICT goal: the node goal is a module through which Jev chooses each grammar segment from the closed ISN vocabulary; the gained commit keeps imas_codex/standard_names/segment_selection.py:684 select_segments returning per-item selections and the call layer's cost and only reroutes render_name's render step, so the goal's entry point is unchanged.\nVERDICT done_when: the done_when's gate is tests/standard_names/test_segment_selection.py plus the evaluation module's tests recorded as baseline_suite and after_suite with revision, exit_status and completed; the manifest records both arms and I reproduced the head arm at c45b264a6 (4 passed, EXIT=0, review_head_arm.log).\nVERDICT write_paths: the fence is imas_codex/standard_names/segment_selection.py, tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html; git diff 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b..c45b264a69b3e08c1233fa948bdba42b766c4010 touches only the module and the fragment, both inside it.\nVERDICT manifest: read; it records status complete, the three commits, four guarded tests and negative_control_round2.log as the negative-control log, and its account of the round-1 head arm (4 passed, EXIT=0) and the two red mutation arms matches the logs it cites.\nVERDICT diff: read commit by commit; the single gained commit c45b264a6 replaces render_name's local compose()+parse(strict=True) pair at imas_codex/standard_names/segment_selection.py:671-673 with compose_canonical_ir(ir) at :674 and fixes the duplicated <tr><tr> at the fragment's locus row (docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html:34).\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/segment_selection.py:674 render_name still renders the chosen tokens through ISN and still records a refusal, so the entry-point contract at :684 is unchanged.\nSCORE evidence: 19\nJUSTIFICATION evidence: the manifest's after_suite now names tests/standard_names/test_segment_selection.py with 39 passed EXIT=0, and my head-arm rerun at c45b264a6 (review_head_arm.log) reproduces 4 passed EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b..c45b264a69b3e08c1233fa948bdba42b766c4010 touches only imas_codex/standard_names/segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html, both inside the declared fence.\nSCORE durability: 19\nJUSTIFICATION durability: the head commit adds no assertion, but the refusal guard it touches still fails when its mechanism is removed - SS_SEGMENT_MUTATION=no-grammar-refusal reddens tests/standard_names/test_segment_selection.py::test_grammar_refusal_is_recorded_and_not_repaired at c45b264a6 (1 failed, EXIT=1, review_negative_control.log).\nSCORE fit: 20\nJUSTIFICATION fit: the changed docstring and comment at imas_codex/standard_names/segment_selection.py:659-666 state the mechanism by name and introduce no plan, gate or author label.\nSCORE reuse: 20\nJUSTIFICATION reuse: imas_codex/standard_names/segment_selection.py:674 now routes through the capability owner imas_codex/standard_names/grammar_adapter.py:144 compose_canonical_ir, the same owner used by models.py:553 and derivation.py:84, replacing a local re-implementation of compose-and-prove.\nFINDING tests/standard_names/test_segment_selection.py:231 follow-on: the empty-beam-to-recorded-failure hand-off at imas_codex/standard_names/segment_segment_selection.py:749-752 is still asserted only indirectly - the test stops at ranked[0]==[] and drives _search_slot directly - so a regression in select_segments rendering a missing slot to item.failure would redden no test.\nFINAL: SOUND WITH FINDINGS. The gained commit is a clean reuse fix: render_name no longer re-implements the compose-then-parse pair but returns compose_canonical_ir(ir), the adapter that composes, canonicalises and proves semantic IR preservation and that models.py, parents.py, audits.py and derivation.py already use; the refusal rule is unchanged and I reproduced the refusal guard reddening under the declared mutation at the head revision. Scope is two files, both inside the fence. The one remaining gap is the prior review's follow-on, unaddressed here: the select_segments boundary that turns an empty beam into item.failure has no end-to-end test.",
+  "review_run_id": "r-20261013T014119121461-review-of-ssog-segment-selection-c45b264a69b3",
+  "reviewed_base_sha": "5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b",
+  "reviewed_head_sha": "c45b264a69b3e08c1233fa948bdba42b766c4010",
+  "reviewed_run_id": "r-20261013T003139740510-ssog-segment-selection",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:49:26.574840+00:00",
+  "total": 118,
+  "verdict": "SOUND WITH FINDINGS"
+}
