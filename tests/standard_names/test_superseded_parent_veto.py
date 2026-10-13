@@ -2,6 +2,8 @@
 
 from unittest.mock import patch
 
+import pytest
+
 from imas_codex.standard_names.derivation import DerivedEdge
 from imas_codex.standard_names.graph_ops import _filter_admissible_parents
 from imas_codex.standard_names.parents import superseded_parent_names
@@ -72,6 +74,17 @@ def test_superseded_lookup_finds_only_the_retired_candidate():
         and set(params["ids"]) == {RETIRED, CURRENT}
         for cypher, params in graph.queries
     )
+
+
+def test_failed_topology_probe_cannot_admit_unchecked_parent():
+    class _BrokenGraph:
+        def query(self, _cypher, **_params):
+            raise RuntimeError("topology unavailable")
+
+    with pytest.raises(RuntimeError, match="topology unavailable"):
+        _filter_admissible_parents(
+            [{"from_name": CHILD, "to_name": RETIRED}], _BrokenGraph()
+        )
 
 
 def test_reconcile_releases_existing_edge_to_superseded_parent():

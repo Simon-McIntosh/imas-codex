@@ -2772,9 +2772,9 @@ def _filter_admissible_parents(
                 names=list(targets),
             )
         )
-    except Exception as exc:  # pragma: no cover - defensive
-        logger.warning("Parent-admission topology probe failed: %s; admitting all", exc)
-        return co_batch
+    except Exception:  # pragma: no cover - defensive
+        logger.exception("Parent-admission topology probe failed; aborting reconcile")
+        raise
 
     superseded_targets = superseded_parent_names(gc, targets, lifecycle_rows=rows)
     for r in rows:
