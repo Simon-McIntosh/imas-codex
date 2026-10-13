@@ -4,7 +4,9 @@
   <p id="ssog-rerank-held-out-acceptance-status">
     <strong>Status: blocked — the measurement did not complete.</strong>
     Neither arm produced a first-pass acceptance rate, so no paired difference
-    and no bootstrap interval are reported. The held-out batch is fixed and the
+    and no bootstrap interval are reported. The stop condition is confirmed:
+    a probe shows that a single-source compose call through the harness path
+    does not complete inside a 500 s bound. The held-out batch is fixed and the
     driver is landed, so the run is reproducible the moment the compose seat
     answers.
   </p>
@@ -55,13 +57,34 @@
 
   <h3 id="ssog-rerank-held-out-acceptance-blocker">Blocker</h3>
   <p id="ssog-rerank-held-out-acceptance-blocker-body">
-    Three attempts each stalled the same way: a single LLM call stayed in flight
-    past 150 s with no completion —
+    The locally served compose seat does not answer. A probe ran one compose call
+    through the same harness path (<code>_run_model</code> with
+    <code>comparator_block=True</code>) for a <strong>single-source</strong>
+    batch under a 500 s bound; it returned
+    <code>TimeoutError</code> at wall 500.0 s, so a call of the smallest possible
+    size does not fit inside one pass. Completion-token counts are unavailable
+    because the call never returned. The probe log is
+    <code>acceptance-probe.log</code>.
+  </p>
+  <p id="ssog-rerank-held-out-acceptance-shape">
+    The decisive shape fact: extraction emits <strong>29 single-item batches</strong>
+    (every batch has exactly one item), so the driver's batch size is already 1
+    and capping it cannot make a call fit a pass.
+  </p>
+  <p id="ssog-rerank-held-out-acceptance-lane">
+    The lane at the probe moment read <code>running 12</code>,
+    <code>concurrent_requests 45</code>, <code>headroom -5</code>,
+    <code>waiting 0</code>, <code>admission.worker_slots 0</code> (basis
+    <code>measured</code>, <code>requests_per_run 0.516</code>): over the request
+    ceiling with no worker slots, which is congestion rather than a fault.
+    Snapshots: <code>lane-probe-1.json</code>, <code>lane-probe-2.json</code>.
+  </p>
+  <p id="ssog-rerank-held-out-acceptance-attempts-body">
+    Three earlier full-run attempts stalled the same way —
     <code>LLM possible stall: 1 call(s) in flight, no completion for 151s /
-    166s — provider or governor</code>. Extraction completed every time (29 of
-    40 sources admitted); the stall sits in the compose phase on the locally
-    served seat. The node's time fence expired before the run could be brought
-    back under a bounded retry.
+    166s — provider or governor</code> — with extraction completing every time
+    (29 of 40 sources admitted). The node's time fence expired before the run
+    could be brought back under a bounded retry.
   </p>
 
   <h3 id="ssog-rerank-held-out-acceptance-spend">Spend</h3>

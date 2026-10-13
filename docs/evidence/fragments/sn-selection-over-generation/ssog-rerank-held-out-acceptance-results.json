@@ -1,6 +1,6 @@
 {
   "status": "blocked",
-  "reason": "the locally served compose seat stalled on every attempt: a single LLM call stayed in flight past 150 s without completion, so neither the positive control nor either arm completed inside the node's time fence",
+  "reason": "the locally served compose seat did not answer: a single-source compose call, run through the harness path under a 500 s bound, timed out (wall 500.0 s, TimeoutError), so neither the positive control nor either arm could complete",
   "seed": 20261014,
   "switch_env": "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS",
   "compose_seat": "local/deepseek-v4.1-flash",
@@ -74,7 +74,7 @@
   },
   "positive_control": {
     "switch_changes_harness_compose_prompt": null,
-    "note": "not reached: the compose/judge calls it depends on stalled before any batch hash was produced"
+    "note": "not reached: the compose call it renders from timed out before any batch hash was produced"
   },
   "arm_a": {
     "records": []
@@ -98,5 +98,34 @@
   },
   "spend_usd": 9.9e-05,
   "spend_note": "no arm or control call completed, so no arm spend was incurred; the figure is one diagnostic comparator-rerank probe through the paid judge seat (typesafe/jev-1.13). Ceiling was USD 3.00.",
-  "next_action": "redispatch when the locally served compose seat answers; re-run the driver unchanged (--out ...-results.json), it reproduces the same fixed draw from seed 20261014"
+  "next_action": "re-run the landed driver unchanged when the local compose seat answers; the seed-20261014 draw is fixed and reproduces. The probe shows a single call exceeds 500 s while the lane is over ceiling, so the run should start when admission headroom is positive. Incremental per-batch persistence was not implemented because the one-source call did not complete, which is the stop condition.",
+  "probe": {
+    "shape": "one compose call through the harness path (_run_model with comparator_block=True), mode=one, item count 1",
+    "wall_seconds": 500.0,
+    "outcome": "TimeoutError (asyncio.wait_for at 500 s)",
+    "completion_tokens": null,
+    "note": "reported token counts are unavailable because the call never returned",
+    "extraction_batch_shape": {
+      "n_batches": 29,
+      "items_per_batch": 1,
+      "finding": "extraction emits 29 single-item batches, so the driver's batch size is already 1 and capping it cannot make a call fit a pass"
+    },
+    "lane_at_probe": {
+      "observed_at": "2026-10-13T17:52:40Z",
+      "running": 12,
+      "concurrent_requests": 45,
+      "headroom": -5,
+      "waiting": 0,
+      "sizing_verdict": "usable",
+      "admission_worker_slots": 0,
+      "admission_worker_slots_basis": "measured",
+      "admission_requests_per_run": 0.516,
+      "finding": "the lane is over its request ceiling (headroom -5) with zero worker slots, consistent with a congested local seat rather than a fault"
+    },
+    "probe_log": "acceptance-probe.log",
+    "lane_snapshots": [
+      "lane-probe-1.json",
+      "lane-probe-2.json"
+    ]
+  }
 }
