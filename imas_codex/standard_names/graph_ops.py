@@ -24500,8 +24500,10 @@ def stage_name_for_rescore(
     left behind.
 
     Refuses (``{"ok": False, "reason": ...}``) for names that must not be
-    force-staged: not found, already ``accepted``/``approved``, ``superseded``
-    (edit the successor instead), or already live (``drafted``/``refining``).
+    force-staged: not found, terminal catalog status, already
+    ``accepted``/``approved``/``superseded``, or already live
+    (``drafted``/``refining``). A terminal identity needs a signed transition
+    before rescore can recover it.
 
     Returns ``{"ok": True, "sn_id", "prior_stage", "run_id", "dry_run"}`` on
     success.
@@ -24511,6 +24513,7 @@ def stage_name_for_rescore(
             """
             MATCH (sn:StandardName {id: $id})
             WHERE sn.name_stage IN ['exhausted', 'reviewed']
+              AND coalesce(sn.status, '') NOT IN ['deprecated', 'superseded']
             WITH sn, sn.name_stage AS prior_stage
             // One compare-and-set transition: if another worker moves the
             // stage before this MATCH acquires the write, no row is returned
@@ -24548,20 +24551,33 @@ def stage_name_for_rescore(
             # this read can refine the refusal message but can never turn the
             # failed transition into success.
             current = gc.query(
-                "MATCH (sn:StandardName {id: $id}) RETURN sn.name_stage AS stage",
+                """MATCH (sn:StandardName {id: $id})
+                OPTIONAL MATCH (sn)-[:HAS_SUCCESSOR]->(next:StandardName)
+                RETURN sn.name_stage AS stage, sn.status AS status,
+                       coalesce(next.id, sn.superseded_by) AS successor""",
                 id=sn_id,
             )
             if not current:
                 return {"ok": False, "reason": f"name {sn_id!r} not found"}
             stage = current[0].get("stage")
-            return {
-                "ok": False,
-                "reason": (
-                    f"{sn_id!r} is name_stage={stage!r} — rescore only recovers "
-                    "'exhausted' or 'reviewed' names (accepted names are already "
-                    "live; superseded names should be recovered via their successor)"
-                ),
-            }
+            status = current[0].get("status")
+            successor = current[0].get("successor")
+            reason = f"{sn_id!r} is name_stage={stage!r}, status={status!r} — "
+            if status in {"deprecated", "superseded"}:
+                reason += "rescore refuses terminal status"
+            elif stage == "superseded":
+                reason += "rescore refuses a superseded name stage"
+            else:
+                reason += "rescore only recovers 'exhausted' or 'reviewed' names"
+            if status in {"deprecated", "superseded"} or stage == "superseded":
+                reason += (
+                    "; use a signed transition in "
+                    "imas_codex/standard_names/signed_manifest.py to return it "
+                    "to a recoverable state"
+                )
+            if successor:
+                reason += f"; successor {successor!r}"
+            return {"ok": False, "reason": reason}
         stage = rows[0].get("prior_stage")
     result = {
         "ok": True,
