@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "clive",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/llm/search_tools.py:402",
+    "imas_codex/llm/search_tools.py:435"
+  ],
+  "completed_at": "2026-10-13T09:35:36.429Z",
+  "dispatched_at": "2026-10-13T09:17:33Z",
+  "findings": [
+    {
+      "file": "imas_codex/llm/search_formatters.py",
+      "line": "291",
+      "severity": "follow-on",
+      "text": "_interpolate_template is now dead in production - the change removed its only caller - so the private helper survives solely for its own tests in tests/llm/test_search_tools.py and should be deleted or its caller restored"
+    },
+    {
+      "file": "imas_codex/llm/search_formatters.py",
+      "line": "255",
+      "severity": "follow-on",
+      "text": "the shared access template is emitted verbatim, so placeholders such as {accessor} reach the agent unresolved (after_booster.log shows \"ok, rtn = db.{accessor}\"); for single-member rows the copy-pasteable call now lives only in the \"Accessors:\" line"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit - 9a53adc07 adds tests/llm/test_signal_report_rows.py, 43a909a3c rewrites format_signals_report and adjusts search_tools.py, 97eac4222 adds the two evidence fragments; all five paths are inside the grant",
+    "done_when": "the done_when's three measures are all recorded - golden_reports.log reports duplicates=0 over 22 k=20 questions, baseline_booster.log/after_booster.log give REPORT_LINES 341 and 112 while naming all four booster voltages, and baseline_suite.log/after_suite.log both print current_tool 0.7889953304713903",
+    "goal": "the goal is to collapse signal search rows sharing a name template within one data-source category into one row; imas_codex/llm/search_formatters.py:156 groups by (category, digit-stripped name) and after_booster.log:21 shows EF{1,2,5,6} Booster BPS Voltage (4 members) as one row",
+    "manifest": "read; it records status complete, three commits, the formatter/golden/search-then gates and the baseline_suite/after_suite pair, with zero added failures and one recorded follow-on outside the grant",
+    "write_paths": "the six declared paths cover every diff path - imas_codex/llm/search_formatters.py, imas_codex/llm/search_tools.py, tests/llm/test_signal_report_rows.py and the two evidence fragments; no file outside them changed"
+  },
+  "justifications": {
+    "durability": "the negative_control.log shows that removing the template collapse reddens the grouping assertion at tests/llm/test_signal_report_rows.py:39 (EXIT=1), so that assertion is a guard that fails on the regression it names; the rank-after-rerank assertion at line 65 passes a literal 7 and enumerated order would give 1, so it discriminates too.",
+    "evidence": "golden_reports.log's own summary line (SUMMARY questions=22 failures=0) and REPORT_LINES=341/112 in baseline_booster.log and after_booster.log are the done_when's measure, recorded rather than claimed.",
+    "fit": "imas_codex/llm/search_formatters.py:291 leaves _interpolate_template defined with no production caller, and the template block at line 255 emits placeholders like {accessor} un-interpolated.",
+    "goal_fidelity": "imas_codex/llm/search_formatters.py:156 keys each group on (_signal_category(sig), the name with digits removed) and after_booster.log:21 renders the four EF booster voltages as one row.",
+    "reuse": "the nearest owner is the accessor numeric-templating helper at imas_codex/discovery/signals/parallel.py:2219 (_accessor_to_source_key), which serves ingestion grouping rather than report display, so the formatter adds a display capability rather than forking that one.",
+    "scope_discipline": "every path in git diff 7f54df09..97eac4222 is one of the six declared write paths; the figures directory is unused and nothing outside the grant is touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to collapse signal search rows sharing a name template within one data-source category into one row; imas_codex/llm/search_formatters.py:156 groups by (category, digit-stripped name) and after_booster.log:21 shows EF{1,2,5,6} Booster BPS Voltage (4 members) as one row.\nVERDICT done_when: the done_when's three measures are all recorded - golden_reports.log reports duplicates=0 over 22 k=20 questions, baseline_booster.log and after_booster.log give REPORT_LINES 341 and 112 while naming all four booster voltages, and baseline_suite.log and after_suite.log both print current_tool 0.7889953304713903.\nVERDICT write_paths: the six declared paths cover every diff path - imas_codex/llm/search_formatters.py, imas_codex/llm/search_tools.py, tests/llm/test_signal_report_rows.py and the two evidence fragments; no file outside them changed.\nVERDICT manifest: read; it records status complete, three commits, the formatter and golden and search-then gates and the baseline_suite/after_suite pair, with zero added failures and one recorded follow-on outside the grant.\nVERDICT diff: read commit by commit - 9a53adc07 adds tests/llm/test_signal_report_rows.py, 43a909a3c rewrites format_signals_report and adjusts search_tools.py, 97eac4222 adds the two evidence fragments; all five paths are inside the grant.\nCALL_SITES: imas_codex/llm/search_tools.py:402, imas_codex/llm/search_tools.py:435\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/llm/search_formatters.py:156 keys each group on (_signal_category(sig), re.sub digits from name) and after_booster.log:21 renders the four EF booster voltages as one row.\nSCORE evidence: 18\nJUSTIFICATION evidence: golden_reports.log's own summary line (SUMMARY questions=22 failures=0) and REPORT_LINES=341/112 in baseline_booster.log and after_booster.log are the done_when's measure, recorded rather than claimed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 7f54df09..97eac4222 is one of the six declared write paths; the figures directory is unused and nothing outside the grant is touched.\nSCORE durability: 18\nJUSTIFICATION durability: the negative_control.log shows that removing the template collapse reddens the grouping assertion at tests/llm/test_signal_report_rows.py:39 (EXIT=1), so that assertion is a guard that fails on the regression it names.\nSCORE fit: 15\nJUSTIFICATION fit: imas_codex/llm/search_formatters.py:291 leaves _interpolate_template defined with no production caller, and the template block at line 255 emits placeholders like {accessor} un-interpolated.\nSCORE reuse: 16\nJUSTIFICATION reuse: the nearest owner is the accessor numeric-templating helper at imas_codex/discovery/signals/parallel.py:2219 (_accessor_to_source_key), which serves ingestion grouping rather than report display, so the formatter adds a display capability rather than forking that one.\nFINDING imas_codex/llm/search_formatters.py:291 follow-on: _interpolate_template is now dead in production - the change removed its only caller - so the private helper survives solely for its own tests in tests/llm/test_search_tools.py and should be deleted or its caller restored.\nFINDING imas_codex/llm/search_formatters.py:255 follow-on: the shared access template is emitted verbatim, so placeholders such as {accessor} reach the agent unresolved (after_booster.log shows the raw template); for single-member rows the copy-pasteable call now lives only in the Accessors line.",
+  "review_run_id": "r-20261013T091702235762-review-of-ssfms-result-rows-97eac4222c89",
+  "reviewed_base_sha": "7f54df09dd95bd456d45f56b9b7676b6ef5867f4",
+  "reviewed_head_sha": "97eac4222c89103942f49538791b294ab9134abf",
+  "reviewed_run_id": "r-20261013T085005496411-ssfms-result-rows",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T09:30:36+00:00",
+  "total": 105
+}
