@@ -1,0 +1,80 @@
+{
+  "absent": {},
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest (r-20261013T002012798972-ssfms-reembed-census) names no baseline_suite or after_suite gate log, so no base/head suite delta was taken; its own recorded gate is tests/discovery/test_signal_embedding_sweep.py 3 passed at head (logs/gate_head.log) against 3 failed under the null-blind mutation (logs/negative_control.log).",
+  "backend": "local",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:1931 (mark_signals_enriched)",
+    "imas_codex/discovery/signals/parallel.py:2019 (mark_signals_underspecified)",
+    "imas_codex/discovery/signals/parallel.py:2489 (propagate_source_enrichment)",
+    "imas_codex/discovery/signals/parallel.py:5401 (individualize_source_descriptions)"
+  ],
+  "completed_at": "2026-10-13T01:15:09.033Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "ssfms-embed-text-one-owner",
+      "recorded_at": "2026-10-13T01:14:58.882003+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T00:55:46Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "1753",
+      "severity": "follow-on",
+      "text": "signal_embed_text duplicates _default_embed_text (parallel.py:1536) \u2014 the writer derives its embed text via _default_embed_text while the census derives it via signal_embed_text; the two bodies are identical today so the census selects the sweep rows, but a future change to the embed-text decision applied to only one of them would make the census and the writer disagree about which rows are stale, and the docstring claim to be the one place the choice is expressed is not true."
+    },
+    {
+      "file": "tests/discovery/test_signal_embedding_sweep.py",
+      "line": "55",
+      "severity": "follow-on",
+      "text": "the tests exercise a hand-written _SweepGraph that parses the Cypher string and re-implements null semantics in _cypher_predicate_matches (line 42), so the real statement never runs \u2014 a syntax or arm-ordering regression in parallel.py write statements would leave all three tests green."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reembed-census.html",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "the done-when golden-harness non-regression measure (no lower beyond the 0.012 spread) was not produced \u2014 the current_tool arm refused on the unlabelled candidate jt-60sa:general/psc_cref3snu and no base arm was run, so the clause is unmeasured rather than shown to hold; carried for the fixture owner."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the writer empty-text arm is reached from write_signal_descriptions callers mark_signals_enriched (parallel.py:1931), mark_signals_underspecified (parallel.py:2019), propagate_source_enrichment (parallel.py:2489) and individualize_source_descriptions (parallel.py:5401); the new sweep and census functions have no production caller.",
+    "diff": "read 66a9b173d in full against base 3d351432: parallel.py +193/-3 (one predicate, the sweep and census functions, and the writer empty-text arm), a new 187-line test file, and two evidence fragments; all inside the declared scope.",
+    "done_when": "one predicate for the sweep and the census, description-only embed text, a zero-mismatch census naming concurrent writes, a null-hash test \u2014 all met (logs/gate_head.log 3 passed, logs/negative_control.log 3 failed, logs/sweep.log 61983->0); the harness non-regression clause is unmeasured (logs/harness_head_1.log refusal).",
+    "goal": "the node goal is to re-embed every FacilitySignal whose embedded_text_hash is missing or differs, at every facility, through the description writer; parallel.py:1830 selects those rows and rewrites each through write_signal_descriptions (parallel.py:1541), and parallel.py:1866 counts 0 mismatches after the sweep.",
+    "manifest": "read; commits 66a9b173d, tests record 3 passed on the gate and 3 failed on the mutation, census 61983->0; no baseline_suite/after_suite keys are present so no added-failure delta is stated.",
+    "write_paths": "git show --stat 66a9b173d lists exactly imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_embedding_sweep.py and the two docs/evidence fragments \u2014 the first four declared paths; no figure was added."
+  },
+  "justifications": {
+    "durability": "removing the IS NULL disjunct from _SIGNAL_HASH_MISMATCH_WHERE (parallel.py:1745) reddens all three tests (logs/negative_control.log EXIT=1), so the guard fires; but the tests drive a hand-written Python model of the Cypher (test file line 55), not the real statement.",
+    "evidence": "the gate tests/discovery/test_signal_embedding_sweep.py ran 3 passed at head (logs/gate_head.log) and 3 failed under the null-blind mutation (logs/negative_control.log), but the done-when golden-harness non-regression clause was never measured \u2014 the arm refused (logs/harness_head_1.log, EXIT=1) and no base arm was run.",
+    "fit": "the subject and body are conventional and mechanism-named and no plan/ticket/phase identifier appears in a symbol or filename, but the docstring at parallel.py:1758 cites the plan embed-text decision key by name.",
+    "goal_fidelity": "reembed_stale_signal_descriptions (parallel.py:1830) swept all 61,983 FacilitySignal nodes through write_signal_descriptions and census_signal_embeddings (parallel.py:1866) reads mismatch=0 afterwards (logs/sweep.log).",
+    "reuse": "parallel.py:1753 signal_embed_text is byte-identical to the existing _default_embed_text (parallel.py:1536) that write_signal_descriptions already derives from, forking the embed-text derivation rather than extending its owner.",
+    "scope_discipline": "git show 66a9b173d touches exactly the four paths declared in the manifest orientation_write_paths and no other file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to re-embed every FacilitySignal whose embedded_text_hash is missing or differs, at every facility, through the description writer; parallel.py:1830 reembed_stale_signal_descriptions selects those rows and rewrites each through write_signal_descriptions (parallel.py:1541), and the census at parallel.py:1866 reads 0 mismatches after it.\nVERDICT done_when: the fence names one predicate for the sweep and the census, the description-only embed text, a zero-mismatch census naming any concurrent write, a test showing a null-hash row counted and cleared, and a head-vs-base golden-harness arm comparison; every clause is met except the harness comparison (logs/sweep.log before n=61983 mismatch=61983, after n=61983 mismatch=0; logs/gate_head.log 3 passed; logs/negative_control.log EXIT=1 3 failed).\nVERDICT write_paths: declared imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_embedding_sweep.py, docs/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html and ssfms-reembed-census.html, and a docs/figures/ directory; the diff touches exactly the first four files and nothing else.\nVERDICT manifest: read; it records the gate 3 passed, the golden-harness arm 1 failed (refusal), the census 61983->0, negative_control EXIT=1 3 failed; all reconcile with logs/, but the manifest carries no baseline_suite or after_suite keys, so no added-failure delta is stated.\nVERDICT diff: one commit 66a9b173d against base 3d351432 touches four files \u2014 parallel.py +193/-3 (predicate _SIGNAL_HASH_MISMATCH_WHERE, the sweep and census, and a writer empty-text arm), a new 187-line test file, and two evidence fragments; reviewed commit-by-commit.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:1931 (mark_signals_enriched), imas_codex/discovery/signals/parallel.py:2019 (mark_signals_underspecified), imas_codex/discovery/signals/parallel.py:2489 (propagate_source_enrichment), imas_codex/discovery/signals/parallel.py:5401 (individualize_source_descriptions)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: reembed_stale_signal_descriptions (parallel.py:1830) swept all 61,983 FacilitySignal nodes through write_signal_descriptions and census_signal_embeddings (parallel.py:1866) reads mismatch=0 afterwards (logs/sweep.log).\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate tests/discovery/test_signal_embedding_sweep.py ran 3 passed at head (logs/gate_head.log) and 3 failed under the null-blind mutation (logs/negative_control.log), but the done-when golden-harness non-regression clause was never measured \u2014 the arm refused (logs/harness_head_1.log, EXIT=1) and no base arm was run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show 66a9b173d touches exactly the four paths declared in the manifest orientation_write_paths and no other file.\nSCORE durability: 15\nJUSTIFICATION durability: removing the IS NULL disjunct from _SIGNAL_HASH_MISMATCH_WHERE (parallel.py:1745) reddens all three tests (logs/negative_control.log EXIT=1), so the guard fires; but the tests drive a hand-written Python model of the Cypher (test file line 55), not the real statement.\nSCORE fit: 17\nJUSTIFICATION fit: the subject and body are conventional and mechanism-named and no plan/ticket/phase identifier appears in a symbol or filename, but the docstring at parallel.py:1758 cites the plan embed-text decision key by name.\nSCORE reuse: 5\nJUSTIFICATION reuse: parallel.py:1753 signal_embed_text is byte-identical to the existing _default_embed_text (parallel.py:1536) that write_signal_descriptions already derives from, forking the embed-text derivation rather than extending its owner.\nFINDING imas_codex/discovery/signals/parallel.py:1753 follow-on: signal_embed_text duplicates _default_embed_text (parallel.py:1536) \u2014 the writer derives its embed text via _default_embed_text while the census derives it via signal_embed_text; the two bodies are identical today so the census selects the sweep's rows, but a future change to the embed-text decision applied to only one of them would make the census and the writer disagree about which rows are stale, and the docstring claim to be the one place the choice is expressed is not true.\nFINDING tests/discovery/test_signal_embedding_sweep.py:55 follow-on: the tests exercise a hand-written _SweepGraph that parses the Cypher string and re-implements null semantics in _cypher_predicate_matches (line 42), so the real statement never runs \u2014 a syntax or arm-ordering regression in parallel.py write statements would leave all three tests green.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reembed-census.html:21 follow-on: the done-when golden-harness non-regression measure (no lower beyond the 0.012 spread) was not produced \u2014 the current_tool arm refused on the unlabelled candidate jt-60sa:general/psc_cref3snu and no base arm was run, so the clause is unmeasured rather than shown to hold; carried for the fixture owner.",
+  "review_run_id": "r-20261013T005535203102-review-of-ssfms-reembed-census-66a9b173da9d",
+  "reviewed_base_sha": "3d351432bcaef565a938faf1b6deb4d1a7b7eefc",
+  "reviewed_head_sha": "66a9b173da9de62f2ab642a58fb021231d2b8361",
+  "reviewed_run_id": "r-20261013T002012798972-ssfms-reembed-census",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:14:52+00:00",
+  "total": 90
+}
