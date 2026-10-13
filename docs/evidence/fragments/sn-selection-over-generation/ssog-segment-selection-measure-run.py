@@ -9,12 +9,20 @@ source, and reports the figures the plan fixes before the run: exact-name match,
 per-slot accuracy, family agreement, the composer's figures, cost per name, and
 the composer-against-Jev disagreement AUC with its bootstrap interval.
 
-Every reported metric comes from :mod:`imas_codex.discovery.base.evaluation`;
-this driver adds no metric of its own.  Nothing here writes graph state.
+Metrics drawn from :mod:`imas_codex.discovery.base.evaluation`:
+``load_labelled_fixture`` (the golden A cohort), ``paired_auc`` and
+``bootstrap_interval`` (the cross-check separation), and
+``cost_latency_summary`` (cost and latency).  The remaining figures are
+driver-local helpers: exact-name match and per-slot accuracy
+(:func:`_figures`, :func:`_slot_accuracy`), family agreement
+(:func:`_family_agreement`), and the composer's agreement and per-slot accuracy
+(:func:`_aggregate`).  Nothing here writes graph state.
 
 Usage::
 
     python ssog-segment-selection-measure-run.py --out <results.json> [--limit N] [--pilot]
+    python ssog-segment-selection-measure-run.py --out <results.json> --figure-only \
+        --figure-out <svg>
 """
 
 from __future__ import annotations
@@ -210,9 +218,13 @@ async def measure(limit: int | None, pilot: bool, out_path: str) -> dict[str, An
         try:
             prior = json.loads(Path(out_path).read_text())
             pr = prior.get("records", [])
-            # The artifact omits derived per-record fields, so a compact file
-            # cannot seed a resume that needs them.
-            if pr and "slot_match" in pr[0]:
+            # A written record carries ``jev_chosen``; the artifact omits the
+            # derived ``gold``/``slot_match``/``composer_segments``, so a resume
+            # re-derives them from the written ``target`` and ``composer`` rather
+            # than re-paying for the selection.
+            if pr and "jev_chosen" in pr[0]:
+                for r in pr:
+                    _rederive_record(r)
                 done_targets = {r["target"] for r in pr}
                 records.extend(pr)
                 calls.extend(prior.get("_calls", []))
@@ -270,6 +282,26 @@ async def measure(limit: int | None, pilot: bool, out_path: str) -> dict[str, An
     payload["_calls"] = calls
     _write_results(payload, out_path)
     return payload
+
+
+def _rederive_record(r: dict[str, Any]) -> dict[str, Any]:
+    """Reconstruct a written record's derived fields in place.
+
+    The artifact keeps only the measured fields; ``gold``, ``slot_match`` and
+    ``composer_segments`` are re-derived here from the written ``target``,
+    ``jev_chosen`` and ``composer`` so a resumed run needs no further paid call.
+    """
+    gold = _gold_segments(r["target"])
+    chosen = r.get("jev_chosen")
+    r["gold"] = gold
+    r["composer_segments"] = (
+        _gold_segments(r["composer"]) if r.get("composer") else None
+    )
+    r["slot_match"] = {
+        s: (chosen.get(s) if chosen else None) == (gold.get(s) if gold else None)
+        for s in SLOTS
+    }
+    return r
 
 
 def _slot_accuracy(records: list[dict[str, Any]]) -> dict[str, float]:
@@ -457,16 +489,90 @@ def _write_results(result: dict[str, Any], out_path: str) -> None:
     Path(out_path).write_text(json.dumps(slim, separators=(",", ":"), default=str))
 
 
+def _write_figure(results_path: str, out_path: str) -> None:
+    """Render the per-slot accuracy figure from a written results JSON.
+
+    Reads the committed artifact, so the SVG regenerates without re-running any
+    selection.  One grouped bar per grammar slot: Jev on the golden positives,
+    Jev on the edit targets, and the composer on the same 174 edit targets.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    plt.style.use("data-ink")
+    d = json.loads(Path(results_path).read_text())
+    jev_pos = [d["jev_exact_match_positives"]["slot_accuracy"][s] for s in SLOTS]
+    jev_edt = [d["jev_exact_match_edits"]["slot_accuracy"][s] for s in SLOTS]
+    cmp_edt = [d["composer_exact_match_edits"]["slot_accuracy"][s] for s in SLOTS]
+    labels = ["physical\nbase", "subject", "component", "operator", "locus", "process"]
+    series = (
+        (jev_pos, "#3b6ea5", "Jev, golden A positives"),
+        (jev_edt, "#8fb0d4", "Jev, human-edit targets"),
+        (cmp_edt, "#c1663f", "composer, human-edit targets (n=174)"),
+    )
+    x = np.arange(len(SLOTS))
+    w = 0.27
+    fig, ax = plt.subplots(figsize=(14, 6.4), dpi=100)
+    for i, (vals, colour, label) in enumerate(series):
+        bars = ax.bar(x + (i - 1) * w, vals, w, color=colour, label=label)
+        for bar in bars:
+            ax.annotate(
+                f"{bar.get_height():.2f}",
+                (bar.get_x() + bar.get_width() / 2, bar.get_height()),
+                xytext=(0, 2),
+                textcoords="offset points",
+                fontsize=9,
+                ha="center",
+                va="bottom",
+            )
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.set_ylabel("per-slot accuracy")
+    ax.set_ylim(0, 1.05)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.legend(
+        frameon=False,
+        fontsize=12,
+        loc="upper center",
+        ncol=3,
+        bbox_to_anchor=(0.5, 1.14),
+    )
+    fig.tight_layout()
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--pilot", action="store_true")
+    ap.add_argument("--figure-out", default=None)
+    ap.add_argument(
+        "--figure-only",
+        action="store_true",
+        help="render --figure-out from the existing --out and skip Jev entirely",
+    )
     args = ap.parse_args()
+
+    if args.figure_only:
+        if not args.figure_out:
+            ap.error("--figure-only requires --figure-out")
+        _write_figure(args.out, args.figure_out)
+        print("WROTE", args.figure_out)
+        return 0
 
     result = asyncio.run(measure(args.limit, args.pilot, args.out))
     _write_results(result, args.out)
     print("WROTE", args.out)
+    if args.figure_out:
+        _write_figure(args.out, args.figure_out)
+        print("WROTE", args.figure_out)
     print(
         json.dumps(
             {k: v for k, v in result.items() if k != "records"}, indent=2, default=str

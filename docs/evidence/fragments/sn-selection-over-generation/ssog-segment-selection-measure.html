@@ -10,10 +10,17 @@
     <code>select_segments</code> was run once per DD source over golden A
     (<code>golden-name-acceptable.json</code>) and the human <code>sn edit</code>
     rename targets. Each source's name is compared slot by slot against the
-    target spelling; every figure below is a metric function from
-    <code>imas_codex/discovery/base/evaluation.py</code>
-    (<code>cost_latency_summary</code>, <code>paired_auc</code>,
-    <code>bootstrap_interval</code>), and the driver adds none of its own.
+    target spelling. <strong>Two figures come from
+    <code>imas_codex/discovery/base/evaluation.py</code></strong>: the
+    cross-check separation (<code>paired_auc</code>, <code>bootstrap_interval</code>)
+    and cost and latency (<code>cost_latency_summary</code>); the golden A cohort
+    is loaded with <code>load_labelled_fixture</code>. <strong>The remaining
+    figures are computed by driver-local helpers, not by
+    <code>evaluation.py</code></strong>: exact-name match and per-slot accuracy
+    and the composer's agreement and per-slot accuracy
+    (<code>_figures</code>, <code>_slot_accuracy</code>, <code>_aggregate</code>),
+    and family agreement (<code>_family_agreement</code>), all in
+    <code>ssog-segment-selection-measure-run.py</code>.
   </p>
 
   <h3 id="ssog-segment-selection-measure-cohort-heading">Cohort and exclusions</h3>
@@ -48,6 +55,11 @@
   </table>
   <img src="/imas-codex/figures/sn-selection-over-generation/ssog-segment-selection-measure/per-slot-accuracy.svg"
        alt="Per-slot accuracy for Jev on golden A positives, Jev on human-edit targets, and the composer on human-edit targets, over the six grammar slots"/>
+  <p id="ssog-segment-selection-measure-figure-note">
+    The SVG is rendered by the driver's <code>--figure-only</code> mode from the
+    committed results JSON (<code>plt.style.use("data-ink")</code>), so it
+    regenerates without re-running any selection.
+  </p>
   <p id="ssog-segment-selection-measure-composer-note">
     <strong>The composer's figures use its recorded spelling, not a fresh
     compose</strong> (no persist-nothing compose call path was used). For golden
