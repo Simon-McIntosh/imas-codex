@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="76">
+<meta name="plan-version" content="77">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -328,6 +328,9 @@
 </div>
 <div class="r-comment" data-section="s23" data-id="c-run-r-20261013T003307089530-review-of-sib-retired-successor-conflict-24c2dc4b8aa8" data-who="reckon-build" data-when="2026-10-13T00:45:14.824Z">
     <div class="r-comment-body"><p>landing: reviewed r-20261013T000651907655-sib-retired-successor-conflict at base 0ba9048f5965f077dbfb956ababf60098f6daece head 24c2dc4b8aa8eced0e7e38989011c4bd341d009e; total 109 (goal_fidelity 19, evidence 16, scope_discipline 20, durability 17, fit 19, reuse 18), 4 follow-on findings, added_failure_count 0; record stored at both the run-keyed and head-keyed review paths</p></div>
+</div>
+<div class="r-comment" data-section="s23" data-id="c-run-r-20261013T000651907655-sib-retired-successor-conflict" data-who="reckon-build" data-when="2026-10-13T00:32:01.000Z">
+    <div class="r-comment-body"><p>landing: classify a live-predecessor/retired-successor row as the sibling named SourceRetiredSuccessorConflictError naming the source, the live holder and the retired holder with its stage; compose withholds it through the same consumer with no attempt spent; the dd: source-id rule now appears once (workers.py:974); the gate adds zero failures over base (344 passed base, 345 passed after)</p></div>
 </div>
 <div class="r-comment" data-section="s20" data-id="c-run-sib-signed-supersede-edge" data-who="reckon-build" data-when="2026-10-12T20:30:00Z">
     <div class="r-comment-body"><p>The signed supersede writes a receipt-stamped successor edge and requires it (merge <code>0d94713db</code>); review 112/120. §20 stays open until the postcondition counts every successor edge rather than grouping by receipt. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s20-edge">evidence</a></p></div>
