@@ -661,6 +661,71 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "0e3b5c8244fb6992d8e4211d19bcb6bc1148c1a9",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 10529,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261013T163838654785-ssog-rerank-held-out-acceptance",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 10529,
+        "path": "/tmp/reckon-crew-scratch/r-20261013T163838654785-ssog-rerank-held-out-acceptance"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "0e3b5c8244fb6992d8e4211d19bcb6bc1148c1a9",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-rerank-held-out-acceptance",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-13T18:11:41.389Z",
+            "session_id": "01b52b49-4bed-4387-a568-a5f25c8acfd1",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-rerank-held-out-acceptance"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01b52b49-4bed-4387-a568-a5f25c8acfd1"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-13T18:11:41.389Z",
+      "session_id": "01b52b49-4bed-4387-a568-a5f25c8acfd1",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-rerank-held-out-acceptance"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 01b52b49-4bed-4387-a568-a5f25c8acfd1"
+  },
   "resume_waiver": {
     "reason": "the node cannot proceed until the harness compose call completes; that repair is its own node, and the re-run is a fresh dispatch on the repaired head reusing this committed driver",
     "session_id": "01b52b49-4bed-4387-a568-a5f25c8acfd1",
