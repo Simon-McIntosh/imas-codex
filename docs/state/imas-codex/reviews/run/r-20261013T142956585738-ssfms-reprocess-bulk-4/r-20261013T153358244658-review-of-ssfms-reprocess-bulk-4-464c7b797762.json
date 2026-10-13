@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate arms: its manifest and classification.json carry baseline_suite null and after_suite null, because the node's write paths hold no test file and it ran no suite. With no arm recorded there is no head-to-base delta to compute, so the added-failure count is zero on the absence of arms rather than on a measured green run.",
+  "after_suite": null,
+  "backend": "clive",
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T15:56:29.529Z",
+  "dispatched_at": "2026-10-13T15:34:35Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html",
+      "line": "44",
+      "severity": "follow-on",
+      "text": "follow-on: the probe row's enrichment seconds read 279.2 while the scope's own record gives 224.2 (reprocess-progress-bulk-4.json:52 enrichment.seconds and logs/probe-psc.log \"Time: 224.2s\"), so the table's four rows sum to 1861.6 against the 1806.6 total it states at line 61 and the fragment cannot be reconciled with the JSON it renders."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json",
+      "line": "122",
+      "severity": "follow-on",
+      "text": "follow-on: the a048717-subset scope declares ids 700 at line 119 but its post-reset control census totals 713, because the reset focus (scratch/chunk-b.json, logs/chunkB-reset.log) named 13 b260008 signals while the scope's final census (n_ids 700) omits them, so the zero-discovered tally and its own control measure different populations and the 13 remain at discovered (scratch/discovered_now.json)."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: the probe scope's post_reset_census is null although logs/probe-psc.log records \"Reset 120 FacilitySignal nodes\", so the node's declared control covers only three of its four scopes and 120 of the 2597 finished signals pass with no evidence the reset ran before enrichment."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html",
+      "line": "72",
+      "severity": "follow-on",
+      "text": "follow-on: the control paragraph states the DCSV scope read \"751 of 753 signals at discovered with described=0\", but its own census (census-chunkD-postreset.json and reprocess-progress-bulk-4.json:88) records described 2, so the fragment overstates what the reset cleared."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "VERDICT call_sites: no production runtime code reaches the change; the progress JSON is read by the plan page and by the sibling evidence fragments signal-search-finds-the-measured-signal/reprocess.html, ssfms-reprocess-bulk-1.html and ssfms-reprocess-bulk-2.html, none of which is runtime production code.",
+    "diff": "VERDICT diff: read commit by commit against base e44c9048: 464c7b79 adds only docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json (174 lines) and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html (91 lines), 265 insertions and no deletions, with no file outside the declared scope.",
+    "done_when": "VERDICT done_when: the done_when requires every reset scope finished with no signal at discovered, each carrying a description and a matching embedding hash as the census reports, a scope reset only when the measured rate allows, no reset after 40 minutes, and the progress file listing finished scopes and unreset categories; the worker's per-scope census_ids.py gate is recorded (census-*-final.json: discovered 0, described=total, hash_mismatch 0, since_start=total) and each reset landed inside the window (probe 14:39:47Z, chunkA 14:47Z, chunkD 14:56Z, chunkB 15:07:41Z, all before 15:10Z), but the facility census census_signal_embeddings(facility='jt-60sa') the measure names was never run, the probe scope carries no post-reset control, and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html:44 states the probe enriched in 279.2s against 224.2s in docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json and logs/probe-psc.log.",
+    "goal": "VERDICT goal: the node goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; the landed pair docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html records four finished scopes over 2597 signals with every final census at discovered 0.",
+    "manifest": "VERDICT manifest: read; status complete, commit 464c7b79, the tests line and four test_logs paths are present and reconcile with the census records, but baseline_suite and after_suite are both null, as expected for a node whose write paths hold no test file.",
+    "write_paths": "VERDICT write_paths: the manifest declares docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html and the figures directory docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4; the base..head diff touches the first two and nothing else, and the granted figures directory is unused."
+  },
+  "justifications": {
+    "durability": "no test exists (the diff is docs-only); the declared control is a manual resp-read of the post-reset census and is absent for the probe scope at docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json:30, so a reset that silently skipped would be caught only where that census was taken.",
+    "evidence": "the census finals at docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json:42-160 report discovered 0, described=total, hash_mismatch 0 and since_start=total via the repository's find_signal_hash_mismatches predicate, but the measure's facility census was not run, the probe has post_reset_census null at docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json:30, and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html:44 gives 279.2s where logs/probe-psc.log gives 224.2s.",
+    "fit": "the fragment follows the sibling ssfms-reprocess-bulk-1/2/3 fragments' idiom, every element id is prefixed with the node id, and no plan label or version suffix appears in a path or identifier across docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html.",
+    "goal_fidelity": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json records 2597 finished ids across four scopes at discovered 0 with since_start=total, but the a048717-subset reset focus named 713 ids (scratch/chunk-b.json, logs/chunkB-reset.log) whose 13 b260008 members are still at discovered in scratch/discovered_now.json, so not every scope it reset is finished.",
+    "reuse": "the diff adds no definition; the measurement reuses the owned hash predicate find_signal_hash_mismatches (imas_codex/discovery/signals/parallel.py:1794) rather than re-deriving it, and a search for census owners found census_signal_embeddings (parallel.py:1867) is facility-scoped while the node needed an id-scoped census, a capability the repository does not own.",
+    "scope_discipline": "git diff --stat e44c9048..464c7b79 touches only the two declared paths, with the granted figures directory left empty and nothing written outside the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; the landed pair docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html records four finished scopes over 2597 signals with every final census at discovered 0.\nVERDICT done_when: the done_when requires every reset scope finished with no signal at discovered, each carrying a description and a matching embedding hash as the census reports, a scope reset only when the measured rate allows, no reset after 40 minutes, and the progress file listing finished scopes and unreset categories; the worker's per-scope census_ids.py gate is recorded (census-*-final.json: discovered 0, described=total, hash_mismatch 0, since_start=total) and each reset landed inside the window (probe 14:39:47Z, chunkA 14:47Z, chunkD 14:56Z, chunkB 15:07:41Z, all before 15:10Z), but the facility census census_signal_embeddings(facility='jt-60sa') the measure names was never run, the probe scope carries no post-reset control, and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html:44 states the probe enriched in 279.2s against 224.2s in docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json and logs/probe-psc.log.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html and the figures directory docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4; the base..head diff touches the first two and nothing else, and the granted figures directory is unused.\nVERDICT manifest: read; status complete, commit 464c7b79, the tests line and four test_logs paths are present and reconcile with the census records, but baseline_suite and after_suite are both null, as expected for a node whose write paths hold no test file.\nVERDICT diff: read commit by commit against base e44c9048: 464c7b79 adds only docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json (174 lines) and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html (91 lines), 265 insertions and no deletions, with no file outside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json records 2597 finished ids across four scopes at discovered 0 with since_start=total, but the a048717-subset reset focus named 713 ids (scratch/chunk-b.json, logs/chunkB-reset.log) whose 13 b260008 members are still at discovered in scratch/discovered_now.json, so not every scope it reset is finished.\nSCORE evidence: 13\nJUSTIFICATION evidence: the census finals at docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json:42-160 report discovered 0, described=total, hash_mismatch 0 and since_start=total via the repository's find_signal_hash_mismatches predicate, but the measure's facility census was not run, the probe has post_reset_census null at docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json:30, and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html:44 gives 279.2s where logs/probe-psc.log gives 224.2s.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat e44c9048..464c7b79 touches only the two declared paths, with the granted figures directory left empty and nothing written outside the fence.\nSCORE durability: 10\nJUSTIFICATION durability: no test exists (the diff is docs-only); the declared control is a manual resp-read of the post-reset census and is absent for the probe scope at docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json:30, so a reset that silently skipped would be caught only where that census was taken.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment follows the sibling ssfms-reprocess-bulk-1/2/3 fragments' idiom, every element id is prefixed with the node id, and no plan label or version suffix appears in a path or identifier across docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html.\nSCORE reuse: 18\nJUSTIFICATION reuse: the diff adds no definition; the measurement reuses the owned hash predicate find_signal_hash_mismatches (imas_codex/discovery/signals/parallel.py:1794) rather than re-deriving it, and a search for census owners found census_signal_embeddings (parallel.py:1867) is facility-scoped while the node needed an id-scoped census, a capability the repository does not own.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html:44 follow-on: the probe row's enrichment seconds read 279.2 while the scope's own record gives 224.2 (reprocess-progress-bulk-4.json:52 enrichment.seconds and logs/probe-psc.log \"Time: 224.2s\"), so the table's four rows sum to 1861.6 against the 1806.6 total it states at line 61 and the fragment cannot be reconciled with the JSON it renders.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json:122 follow-on: the a048717-subset scope declares ids 700 at line 119 but its post-reset control census totals 713, because the reset focus (scratch/chunk-b.json, logs/chunkB-reset.log) named 13 b260008 signals while the scope's final census (n_ids 700) omits them, so the zero-discovered tally and its own control measure different populations and the 13 remain at discovered (scratch/discovered_now.json).\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-4.json:30 follow-on: the probe scope's post_reset_census is null although logs/probe-psc.log records \"Reset 120 FacilitySignal nodes\", so the node's declared control covers only three of its four scopes and 120 of the 2597 finished signals pass with no evidence the reset ran before enrichment.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-4.html:72 follow-on: the control paragraph states the DCSV scope read \"751 of 753 signals at discovered with described=0\", but its own census (census-chunkD-postreset.json and reprocess-progress-bulk-4.json:88) records described 2, so the fragment overstates what the reset cleared.",
+  "review_run_id": "r-20261013T153358244658-review-of-ssfms-reprocess-bulk-4-464c7b797762",
+  "reviewed_base_sha": "e44c9048f7c98d6104a27ee6b0371fd298160174",
+  "reviewed_head_sha": "464c7b7977625ccdedf7dd6b559c45741feb6896",
+  "reviewed_run_id": "r-20261013T142956585738-ssfms-reprocess-bulk-4",
+  "scores": {
+    "durability": 10,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T15:58:00Z",
+  "total": 94,
+  "verdict": "SOUND WITH FINDINGS"
+}
