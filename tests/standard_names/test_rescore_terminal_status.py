@@ -17,8 +17,8 @@ class _GuardedGraph:
         self.node = {
             "name_stage": stage,
             "status": status,
-            "superseded_by": successor,
         }
+        self.successor = successor
 
     def __enter__(self) -> _GuardedGraph:
         return self
@@ -64,7 +64,7 @@ class _GuardedGraph:
                 {
                     "stage": self.node["name_stage"],
                     "status": self.node["status"],
-                    "successor": self.node["superseded_by"],
+                    "successor": self.successor,
                 }
             ]
         raise AssertionError(f"unexpected query: {cypher}")
@@ -95,7 +95,6 @@ def test_draft_status_still_rescores() -> None:
     assert graph.node == {
         "name_stage": "drafted",
         "status": "draft",
-        "superseded_by": None,
     }
 
 

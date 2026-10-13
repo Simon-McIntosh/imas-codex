@@ -15,6 +15,7 @@ from neo4j import GraphDatabase
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.profiles import resolve_neo4j
 from imas_codex.standard_names.signed_manifest import (
+    _change_id,
     apply_signed_manifest,
     signed_payload_sha256,
 )
@@ -229,20 +230,29 @@ def test_signed_supersede_writes_successor_receipt_and_replays_without_writes(
           operation: $operation,
           manifest_sha256: $manifest_sha256
         })
+        MATCH (predecessor)-[edge:HAS_SUCCESSOR]->
+              (successor:StandardName {id: $successor})
         RETURN predecessor.name_stage AS name_stage,
                predecessor.status AS status,
-               predecessor.superseded_by AS superseded_by,
+               successor.id AS successor_id,
+               edge.receipt_id AS edge_receipt_id,
+               edge.signed_at IS NOT NULL AS edge_stamped,
+               receipt.id AS receipt_id,
                receipt.from_name AS from_name,
                receipt.to_name AS to_name
         """,
         predecessor=_PREDECESSOR,
+        successor=_SUCCESSOR,
         operation=_OPERATION,
         manifest_sha256=preview["manifest_sha256"],
     ) == [
         {
             "name_stage": "superseded",
             "status": "superseded",
-            "superseded_by": _SUCCESSOR,
+            "successor_id": _SUCCESSOR,
+            "edge_receipt_id": _change_id(preview["manifest_sha256"], _ROW_ID),
+            "edge_stamped": True,
+            "receipt_id": _change_id(preview["manifest_sha256"], _ROW_ID),
             "from_name": _PREDECESSOR,
             "to_name": _SUCCESSOR,
         }

@@ -2091,17 +2091,11 @@ def _fold_tombstone_target_reason(
     refuses and names the tip of the lineage as the identity holding the
     live meaning to fold into instead.
 
-    The successor is resolved from the REFINED_FROM edges rather than from
-    the ``superseded_by`` summary, because the edges carry the relation for
-    the whole population while the scalar is written for a small fraction of
-    it. The scalar is still consulted, but only after the walk and only to
-    refuse: a recorded successor that no lineage carries is the graph
-    disagreeing with itself about whether the spelling is dead, and a guard
-    resolves that disagreement by refusing rather than by admitting.
+    The successor is resolved from the REFINED_FROM edges. A live descendant
+    keeps the target identity occupied and the fold is refused.
 
     Returns ``(reason, closing_straight_chain)``.
     """
-    target_properties = snapshot["target_properties"]
     lineage = _fold_lineage_walk(transaction, snapshot, old, into)
     if lineage.over_depth:
         return f"target {into!r} successor lineage exceeds walk depth", False
@@ -2110,13 +2104,6 @@ def _fold_tombstone_target_reason(
             f"target {into!r} is superseded and has successor lineage: "
             + ", ".join(lineage.successors)
             + " — fold into the successor instead"
-        ), False
-    successor = target_properties.get("superseded_by")
-    if successor:
-        return (
-            f"target {into!r} is superseded and records successor {successor!r} "
-            "that no successor lineage carries — repair the lineage, or fold "
-            "into the recorded successor instead"
         ), False
     closing_straight_chain = lineage.closes_on_old
     target_sources = _fold_source_rows(snapshot, into)

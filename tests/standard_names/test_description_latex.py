@@ -113,7 +113,6 @@ class TestGraphDictNormalizesDescription:
         entry.constraints = None
         entry.status = None
         entry.deprecates = None
-        entry.superseded_by = None
 
         # Grammar decomposition needs the ISN grammar; stub to isolate the
         # description-normalization behaviour under test.

@@ -2,7 +2,7 @@
 
 A superseded name with no successor, no sources and no parent or child edge is
 a free identity: the spelling is dead and the fold may re-occupy it. Anything
-that still reads the spelling — a recorded successor, a successor lineage edge,
+that still reads the spelling — a successor lineage edge,
 a bound source, a parent or a child — keeps the fold refused, and a target in a
 live stage other than ``accepted`` stays refused as before.
 """
@@ -33,7 +33,6 @@ def _tombstone_state(
     state = _state(**kwargs)
     state.nodes[_TARGET]["name_stage"] = "superseded"
     state.nodes[_TARGET]["superseded_from_stage"] = target_predecessor_stage
-    state.nodes[_TARGET]["superseded_by"] = None
     return state
 
 
@@ -132,14 +131,6 @@ def test_free_tombstone_target_is_occupied_by_the_fold() -> None:
 
 
 def test_tombstone_target_holding_a_successor_is_refused() -> None:
-    recorded = _Graph(_tombstone_state())
-    recorded.state.nodes[_TARGET]["superseded_by"] = "electron_number_density"
-    result = _run(recorded)
-    assert result["ok"] is False
-    assert "records successor 'electron_number_density'" in result["reason"]
-    assert recorded.commits == 0
-    assert recorded.state.nodes[_OLD]["name_stage"] == "accepted"
-
     lineage = _Graph(_tombstone_state())
     lineage.state.nodes["electron_number_density"] = _node(
         "electron_number_density", stage="accepted"

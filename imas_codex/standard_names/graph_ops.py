@@ -3110,7 +3110,7 @@ def _write_standard_name_edges(
     - ``HAS_ERROR``: uncertainty siblings — direction inverted relative to
       the derivation (inner → uncertainty form).
     - ``HAS_PREDECESSOR``: from ``predecessor`` or ``deprecates`` field.
-    - ``HAS_SUCCESSOR``: from ``successor`` or ``superseded_by`` field.
+    - Successor edges are written by signed supersede mutations.
     - ``IN_CLUSTER``: from ``primary_cluster_id`` field.
     - ``HAS_PHYSICS_DOMAIN``: from ``physics_domain`` field.
 
@@ -3191,7 +3191,6 @@ def _write_standard_name_edges(
     endpoint_ids.update(row["from_name"] for row in geo_batch if row.get("from_name"))
 
     pred_batch: list[dict[str, str]] = []
-    succ_batch: list[dict[str, str]] = []
     for n in names:
         name_id = n.get("id")
         if not name_id:
@@ -3200,10 +3199,6 @@ def _write_standard_name_edges(
         if predecessor:
             pred_batch.append({"from_name": name_id, "to_name": predecessor})
             endpoint_ids.add(predecessor)
-        successor = n.get("successor") or n.get("superseded_by")
-        if successor:
-            succ_batch.append({"from_name": name_id, "to_name": successor})
-            endpoint_ids.add(successor)
 
     discovered = list(
         gc.query(
@@ -3264,12 +3259,6 @@ def _write_standard_name_edges(
         for row in pred_batch
         if row["from_name"] in authorized_ids and row["to_name"] in authorized_ids
     ]
-    succ_batch = [
-        row
-        for row in succ_batch
-        if row["from_name"] in authorized_ids and row["to_name"] in authorized_ids
-    ]
-
     # Reconcile (NOT accrete) each processed child's structural HAS_PARENT
     # edges to EXACTLY the current admitted derivation. ``derive_edges`` is a
     # deterministic function of the child name, but the rule that computes the
@@ -3356,9 +3345,8 @@ def _write_standard_name_edges(
             batch=geo_batch,
         )
 
-    # --- HAS_PREDECESSOR / HAS_SUCCESSOR ---
-    # Support both 'predecessor'/'successor' (pipeline) and
-    # 'deprecates'/'superseded_by' (catalog import).
+    # --- HAS_PREDECESSOR ---
+    # The predecessor projection accepts pipeline and catalog payloads.
     if pred_batch:
         gc.query(
             """
@@ -3368,17 +3356,6 @@ def _write_standard_name_edges(
             MERGE (src)-[:HAS_PREDECESSOR]->(tgt)
             """,
             batch=pred_batch,
-        )
-
-    if succ_batch:
-        gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (src:StandardName {id: b.from_name})
-            MATCH (tgt:StandardName {id: b.to_name})
-            MERGE (src)-[:HAS_SUCCESSOR]->(tgt)
-            """,
-            batch=succ_batch,
         )
 
     # --- IN_CLUSTER ---
@@ -3426,7 +3403,7 @@ def _write_standard_name_edges(
         )
 
     candidate_name_ids = {n["id"] for n in names if n.get("id")}
-    for batch in (co_batch, he_batch, pred_batch, succ_batch):
+    for batch in (co_batch, he_batch, pred_batch):
         for row in batch:
             candidate_name_ids.update((row["from_name"], row["to_name"]))
     candidate_name_ids.update(
@@ -24558,7 +24535,7 @@ def stage_name_for_rescore(
                 """MATCH (sn:StandardName {id: $id})
                 OPTIONAL MATCH (sn)-[:HAS_SUCCESSOR]->(next:StandardName)
                 RETURN sn.name_stage AS stage, sn.status AS status,
-                       coalesce(next.id, sn.superseded_by) AS successor""",
+                       next.id AS successor""",
                 id=sn_id,
             )
             if not current:

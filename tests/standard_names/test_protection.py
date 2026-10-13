@@ -202,7 +202,6 @@ class TestProtectedFieldsConstant:
             "links",
             "status",
             "deprecates",
-            "superseded_by",
             "validity_domain",
             "constraints",
         }

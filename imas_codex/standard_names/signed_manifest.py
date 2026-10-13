@@ -2368,9 +2368,8 @@ def _supersede_successor_edge_write(successor_id: str | None) -> str:
     """Cypher fragment that mints the signed successor edge.
 
     The edge carries the minting receipt's id in ``receipt_id``, so a signed
-    edge is distinguishable from one a scalar-derived rebuild creates, which
-    has no such property. A missing successor leaves the edge unwritten; the
-    supersede postcondition then refuses the row.
+    edge is distinguishable from an unstamped edge. A mutation without a signed
+    successor leaves the edge unwritten.
     """
     if successor_id is None:
         return ""
@@ -4177,15 +4176,13 @@ def _verify_postconditions(
                 state = query.query(
                     """
                     MATCH (node:StandardName {id: $id})
-                    RETURN node.name_stage AS name_stage, node.status AS status,
-                           node.superseded_by AS superseded_by
+                    RETURN node.name_stage AS name_stage, node.status AS status
                     """,
                     id=participant["id"],
                 )
                 expected = {
                     "name_stage": "superseded",
                     "status": "superseded",
-                    "superseded_by": successor_id,
                 }
                 if not state or state[0] != expected:
                     raise SignedManifestConflict(
@@ -4198,6 +4195,7 @@ def _verify_postconditions(
                         OPTIONAL MATCH (node)-[relationship:HAS_SUCCESSOR]->
                               (successor:StandardName)
                         RETURN collect(relationship.receipt_id) AS receipt_ids,
+                               collect(successor.id) AS successor_ids,
                                count(relationship) AS count
                         """,
                         id=participant["id"],
@@ -4207,6 +4205,7 @@ def _verify_postconditions(
                         not successor_edge
                         or int(successor_edge[0].get("count") or 0) != 1
                         or successor_edge[0].get("receipt_ids") != [expected_receipt_id]
+                        or successor_edge[0].get("successor_ids") != [successor_id]
                     ):
                         raise SignedManifestConflict(
                             "recorded signed-manifest repair lost its successor edge"
@@ -4819,11 +4818,6 @@ def _apply_mutation(query: _Query, action: dict[str, Any], manifest_sha256: str)
                 else "target.source_paths = [],"
             )
             successor_id = _signed_supersede_successor(mutation)
-            successor_update = (
-                "target.superseded_by = $successor_id,"
-                if successor_id is not None
-                else ""
-            )
             successor_edge_update = _supersede_successor_edge_write(successor_id)
             result = query.query(
                 f"""
@@ -4833,7 +4827,6 @@ def _apply_mutation(query: _Query, action: dict[str, Any], manifest_sha256: str)
                       target.superseded_from_stage, target.name_stage),
                     target.name_stage = 'superseded',
                     target.status = 'superseded',
-                    {successor_update}
                     {source_path_update}
                     target.claimed_at = null,
                     target.claim_token = null

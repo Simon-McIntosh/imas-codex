@@ -108,7 +108,7 @@ identify an existing `StandardName`.
 
 | Schema class | Slots that reference `StandardName` |
 |---|---|
-| `StandardName` | `StandardName.deprecates`, `StandardName.superseded_by`; `StandardName.links`; `StandardName.refine_collision_name`; `StandardName.references`, `StandardName.parents`, `StandardName.magnitudes`, `StandardName.error_siblings`, `StandardName.predecessor`, `StandardName.successor`, `StandardName.refined_from` |
+| `StandardName` | `StandardName.deprecates`; `StandardName.links`; `StandardName.refine_collision_name`; `StandardName.references`, `StandardName.parents`, `StandardName.magnitudes`, `StandardName.error_siblings`, `StandardName.predecessor`, `StandardName.successor`, `StandardName.refined_from` |
 | `DocsReviewAdmission` | `DocsReviewAdmission.target_id` |
 | `DocsRevision` | `DocsRevision.standard_name_id` |
 | `StandardNameChange` | `StandardNameChange.to_name` when it is the linked name rather than another changed value |
