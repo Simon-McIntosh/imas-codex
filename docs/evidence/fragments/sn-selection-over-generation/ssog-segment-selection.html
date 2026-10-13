@@ -1,0 +1,92 @@
+<!-- Segment selection: Jev answers one Choice per grammar slot over the slot's closed
+     ISN vocabulary, and code renders the chosen tokens through ISN. This fragment records
+     the slot-to-IR mapping the module states, the tree structure the vocabularies carry,
+     the two smoke selections with the decisions cost the run booked, and the negative
+     controls for the grammar refusal and the beam. Module:
+     imas_codex/standard_names/segment_selection.py. Test:
+     tests/standard_names/test_segment_selection.py. -->
+<section id="ssog-segment-selection" data-reckon="evidence">
+  <h2 id="ssog-segment-selection-heading">Segment selection — Jev chooses each slot from the closed ISN vocabulary</h2>
+
+  <p id="ssog-segment-selection-intro">
+    Where the composer <em>generates</em> a name and the grammar judges it, this module
+    <em>selects</em>. For a DD source (path, documentation, enriched description) Jev answers
+    one Choice per grammar slot over that slot's closed ISN vocabulary, and code renders the
+    chosen tokens through ISN's own renderer. Two properties follow from that order rather
+    than from a post-hoc filter: the result can never hold a token the grammar lacks (every
+    option offered is a vocabulary token, and an empty slot is <code>none</code>), and the
+    same answer yields the same name (nothing between the answer and the name invents a
+    segment). Every vocabulary is read live from ISN through
+    <code>grammar_tokens_by_segment</code>; the module holds no snapshot.
+  </p>
+
+  <h3 id="ssog-segment-selection-mapping-heading">Slot → ISN vocabulary → IR</h3>
+  <table id="ssog-segment-selection-mapping-table">
+    <caption>Each plan slot, the ISN vocabulary it draws from, and the <code>StandardNameIR</code> field it fills</caption>
+    <thead>
+      <tr><th>Slot</th><th>ISN vocabulary</th><th>IR field</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>physical_base</code></td><td><code>SEGMENT_TOKEN_MAP['physical_base']</code></td><td><code>base</code> (<code>BaseKind.QUANTITY</code>)</td></tr>
+      <tr><td><code>subject</code></td><td><code>SEGMENT_TOKEN_MAP['subject']</code></td><td><code>qualifiers</code> (<code>Qualifier</code>)</td></tr>
+      <tr><td><code>component</code></td><td><code>SEGMENT_TOKEN_MAP['component']</code></td><td><code>projection</code> (<code>AxisProjection</code>)</td></tr>
+      <tr><td><code>operator</code></td><td>operator registry (<code>OPERATOR_SEGMENT</code>)</td><td><code>operators</code> (<code>OperatorApplication</code>)</td></tr>
+      <tr><tr><td><code>locus</code></td><td>locus registry (its <code>type</code> field)</td><td><code>locus</code> (<code>LocusRef</code>)</td></tr>
+      <tr><td><code>process</code></td><td><code>SEGMENT_TOKEN_MAP['process']</code></td><td><code>mechanism</code> (<code>Process</code>)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="ssog-segment-selection-tree-heading">Large vocabularies walked as a tree</h3>
+  <p id="ssog-segment-selection-tree-body">
+    A slot whose vocabulary ISN keeps as one flat enum is offered as a single Choice plus
+    <code>none</code>. A slot whose vocabulary ISN already partitions is walked as a tree:
+    the operator registry by <code>kind</code> (unary prefix / unary postfix / binary), the
+    locus registry by <code>type</code> (entity / position / region / geometry). The tree is
+    built from structure the vocabulary carries; nothing here authors a taxonomy over an
+    unpartitioned enum. A path is scored by the geometric mean of its per-level choice
+    probabilities, and a beam of three keeps the best paths at each level.
+  </p>
+
+  <h3 id="ssog-segment-selection-smoke-heading">Live smoke — two DD sources</h3>
+  <p id="ssog-segment-selection-smoke-body">
+    Two sources, one call each through <code>decide_batch</code> under the
+    <code>electron_density</code>-family seats. Both rendered a name ISN accepts; the whole
+    run booked <strong>USD 0.00122</strong> of decisions cost.
+  </p>
+  <table id="ssog-segment-selection-smoke-table">
+    <caption>Chosen tokens, the geometric-mean path score per slot, and the rendered name</caption>
+    <thead>
+      <tr><th>Source path</th><th>Chosen tokens</th><th>Rendered name</th></tr>
+    </thead>
+    <tbody>
+      <tr id="ssog-segment-selection-smoke-edge">
+        <td><code>edge_profiles/profiles_1d/electrons/density</code></td>
+        <td><code>number_density</code> · <code>electron</code> · <code>radial</code> · <code>–</code> · <code>edge_region</code> · <code>–</code></td>
+        <td><code>radial_electron_number_density_over_edge_region</code></td>
+      </tr>
+      <tr id="ssog-segment-selection-smoke-interf">
+        <td><code>interferometer/channel/n_e_line/data</code></td>
+        <td><code>density</code> · <code>electron</code> · <code>–</code> · <code>line_integrated</code> · <code>beam_path</code> · <code>–</code></td>
+        <td><code>line_integrated_electron_density_of_beam_path</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="ssog-segment-selection-smoke-scores">
+    Per-slot geometric-mean scores, source 1: base 0.79, subject 0.96, component 0.90,
+    operator 0.68, locus 0.53, process 0.78. Source 2: base 0.45, subject 0.76, component
+    0.86, operator 0.81, locus 0.60, process 0.96. The edge locus is region-typed, so the IR
+    relation is <code>over</code>; the interferometer locus is position-typed, so it is
+    <code>of</code> — both read from ISN's own relation matrix, not from the registry's
+    <code>allowed_relations</code>.
+  </p>
+
+  <h3 id="ssog-segment-selection-controls-heading">Negative controls</h3>
+  <p id="ssog-segment-selection-controls-body">
+    The declared control — <em>remove the grammar refusal or the beam pruning and its unit
+    test fails</em> — holds for both mechanisms. Setting <code>SS_SEGMENT_MUTATION=no-beam-prune</code>
+    keeps every path, and the beam test fails (<code>EXIT=1</code>); setting
+    <code>no-grammar-refusal</code> renders without ISN's strict parse, and the refusal test
+    fails (<code>EXIT=1</code>). At the head arm all three tests pass (<code>EXIT=0</code>).
+    Logs are named in the node manifest.
+  </p>
+</section>
