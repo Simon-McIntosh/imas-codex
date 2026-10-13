@@ -3580,7 +3580,10 @@ def _batch_create_path_nodes(
                 path.data_type = p.data_type,
                 path.ndim = p.ndim,
                 path.node_type = p.node_type,
-                path.physics_domain = p.physics_domain,
+                path.physics_domain = CASE
+                    WHEN path.domain_source IS NULL THEN p.physics_domain
+                    ELSE path.physics_domain
+                END,
                 path.maxoccur = p.maxoccur,
                 path.ids = p.ids_name,
                 path.depth = p.depth,

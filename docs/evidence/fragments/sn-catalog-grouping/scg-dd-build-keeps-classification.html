@@ -1,0 +1,54 @@
+<article id="scg-dd-build-keeps-classification">
+  <h3>DD path rebuild preserves classified domains</h3>
+  <p>
+    The path upsert in <code>imas_codex/graph/build_dd.py</code> now assigns the IDS
+    default only when <code>path.domain_source IS NULL</code>. A path with a
+    classification source retains its <code>physics_domain</code> and its domain
+    provenance through the rebuild. No graph data was written by this node.
+  </p>
+  <table>
+    <thead><tr><th>IMASNode domain site</th><th>Build-path verdict</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>build_dd._batch_create_path_nodes</code></td>
+        <td>Previously assigned the IDS default on every merge. The conditional
+          assignment now keeps a classified path's stored domain.</td>
+      </tr>
+      <tr>
+        <td><code>dd_graph_ops.mark_paths_enriched</code></td>
+        <td>Its <code>coalesce(item.physics_domain, p.physics_domain)</code> can assign
+          an explicitly supplied domain. The DD build's only caller is
+          <code>dd_workers._batch_update_enrichments_with_graph</code>; every
+          update assembled by <code>dd_workers._enrich_batch</code> (template,
+          hash match, or LLM) omits <code>physics_domain</code>, so this build
+          call preserves the stored value.</td>
+      </tr>
+      <tr>
+        <td><code>dd_workers</code> enrichment and refinement</td>
+        <td>No direct IMASNode domain assignment. Its domain values in IDS reads
+          and stream display are context or presentation, and its update
+          dictionaries omit the property.</td>
+      </tr>
+      <tr>
+        <td><code>dd_graph_ops.reset_imas_nodes</code></td>
+        <td>An explicit reset can clear <code>physics_domain</code> and
+          <code>domain_source</code> together to request reclassification. The
+          DD build does not call this operation.</td>
+      </tr>
+      <tr>
+        <td><code>dd_domain_classifier</code></td>
+        <td>The intended classification writer sets both the domain and its
+          source. It is separate from the DD build and was not changed.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    The recording-client test changed a classified path from
+    <code>core_plasma_physics</code> to <code>transport</code> against the base
+    upsert (one failed test, exit 1). With the conditional upsert it keeps the
+    classified path unchanged and writes <code>transport</code> to an
+    unclassified path. The exact modified Cypher produced an EXPLAIN plan
+    (<code>ProduceResults@neo4j</code>). The selected importer and Cypher property
+    gate passed 277 tests at base and 278 at head, with zero added failures.
+  </p>
+</article>
