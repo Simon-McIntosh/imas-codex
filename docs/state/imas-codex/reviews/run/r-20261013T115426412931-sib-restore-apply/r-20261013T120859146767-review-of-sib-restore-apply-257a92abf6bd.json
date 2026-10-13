@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. Base arm restore-baseline.log (revision 75a4bde76c7b0043b28d9b0794401a4fe2c3f1b0): 44 passed, EXIT=0. Head arm restore-after.log (revision 257a92abf6bde8854b7f1d791a34b5d03d0612bc): 44 passed, EXIT=0. Neither arm has a failing id, so the delta is zero. The reviewed manifest carries empty baseline_suite and after_suite objects, so the delta is derived from the two gate logs it names under test_logs.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-restore-apply uv run pytest -p no:cacheprovider tests/standard_names/test_archive_reconstruction.py tests/standard_names/test_archive_reconstruction_entry_point.py tests/standard_names/test_archive_parity_receipt.py tests/standard_names/test_restore_receipt_parity.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T115426412931-sib-restore-apply/restore-after.log",
+    "revision": "257a92abf6bde8854b7f1d791a34b5d03d0612bc"
+  },
+  "backend": "local",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-restore-apply uv run pytest -p no:cacheprovider tests/standard_names/test_archive_reconstruction.py tests/standard_names/test_archive_reconstruction_entry_point.py tests/standard_names/test_archive_parity_receipt.py tests/standard_names/test_restore_receipt_parity.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T115426412931-sib-restore-apply/restore-baseline.log",
+    "revision": "75a4bde76c7b0043b28d9b0794401a4fe2c3f1b0"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T12:17:41.984Z",
+  "dispatched_at": "2026-10-13T12:09:15Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "follow-on: the brief's named positive control power_due_to_radiation was absent at read time and the node substituted the etendue identity, so the positive control is weaker than specified and the disappearance of a previously live identity is an outside-node graph anomaly the coordinator should triage."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html",
+      "line": "135",
+      "severity": "follow-on",
+      "text": "follow-on: the restored identities are recorded only as text and no test or gate re-asserts their presence, so a later loss of the graph state would redden nothing and durability rests on the record alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "VERDICT call_sites: the diff is docs-only; searching the worktree for a caller of the fragment (grep for sib-restore-apply, fragment validators, evidence-fragment meta) found none, so no production call site reaches this change.",
+    "diff": "VERDICT diff: read commit by commit against the base; e7b90fe7 creates the fragment with the etendue negative control and fusion parity, 257a92abf adds the plasma section and the graph verification section.",
+    "done_when": "VERDICT done_when: the done_when names four restore test files plus per-identity preview, apply, post-apply read and orphan evidence; the manifest records 44 passed EXIT=0 at base and head and the fragment carries the parity blocks, the bounded post-apply reads and TARGET_ORPHANS [].",
+    "goal": "VERDICT goal: the node goal is to reinstate power_due_to_fusion and plasma_energy on the live graph through the signed restore adapter; docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html records both applies as admitted 1 refused 0 with post-apply exact-id reads showing origin=pipeline.",
+    "manifest": "VERDICT manifest: read; it records status complete, commits e7b90fe7 and 257a92abf, 44 passed base and head, names restore-baseline.log and restore-after.log, and carries empty baseline_suite and after_suite objects.",
+    "write_paths": "VERDICT write_paths: the manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html and docs/figures/sn-integrity-backlog/sib-restore-apply; the base..head diff touches only the fragment (146 insertions), inside the declared scope."
+  },
+  "justifications": {
+    "durability": "no test in the diff or the repository asserts that power_due_to_fusion or plasma_energy is present, so deleting the fragment or losing the graph identities reddens nothing.",
+    "evidence": "the manifest's gate result is recorded in restore-baseline.log (44 passed, EXIT=0) and restore-after.log (44 passed, EXIT=0), but those tests exercise the restore machinery and never read the live graph the done_when asserts.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html:4 carries the reckon-type/plan-slug/node-id meta and the section-per-identity shape of the evidence-fragment idiom its siblings use.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html:26 records the fusion applied receipt as admitted 1 refused 0 with the PRODUCED_NAME parity expected 1 observed 1, which is the node goal; the live graph itself was not independently re-read within this review's bound.",
+    "reuse": "the diff adds no function, class or module; a search for an existing evidence-fragment owner or validator found none, so nothing duplicates a repository capability.",
+    "scope_discipline": "the base..head diff modifies only docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html, the declared write path."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to reinstate power_due_to_fusion and plasma_energy on the live graph through the signed restore adapter; docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html:60 records both applies as admitted 1 refused 0 with the post-apply exact-id reads at line 135 showing origin=pipeline.\nVERDICT done_when: the brief's done_when names four restore test files plus per-identity preview, apply, post-apply read and orphan evidence; the manifest records 44 passed EXIT=0 at base and head, and the fragment carries the parity blocks, the bounded post-apply reads and TARGET_ORPHANS [].\nVERDICT write_paths: the manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html and docs/figures/sn-integrity-backlog/sib-restore-apply; the base..head diff touches only the fragment (146 insertions), so every changed path is inside the declared scope.\nVERDICT manifest: read; it records status complete, commits e7b90fe7 and 257a92abf, tests 44 passed base and head, names restore-baseline.log and restore-after.log, and carries empty baseline_suite and after_suite objects.\nVERDICT diff: read commit by commit against the base; e7b90fe7 creates the fragment with the etendue negative control and the fusion preview/apply parity plus its post-apply read, and 257a92abf adds the plasma section and the plasma parity block and the graph verification section.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html:26 records the fusion applied receipt as admitted 1 refused 0 with the PRODUCED_NAME parity expected 1 observed 1, which is the node goal; the live graph itself was not independently re-read within this review's bound.\nSCORE evidence: 16\nJUSTIFICATION evidence: the manifest's gate result is recorded in restore-baseline.log (44 passed, EXIT=0) and restore-after.log (44 passed, EXIT=0), but those tests exercise the restore machinery and never read the live graph the done_when asserts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the base..head diff modifies only docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html, the declared write path.\nSCORE durability: 5\nJUSTIFICATION durability: no test in the diff or the repository asserts that power_due_to_fusion or plasma_energy is present, so deleting the fragment or losing the graph identities reddens nothing.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html:4 carries the reckon-type/plan-slug/node-id meta and section-per-identity shape of the evidence-fragment idiom its siblings use.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module; a search for an existing evidence-fragment owner or validator found none, so nothing duplicates a repository capability.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html:13 follow-on: the brief's named positive control power_due_to_radiation was absent at read time and the node substituted the etendue identity, so the positive control is weaker than specified and the disappearance of a previously live identity is an outside-node graph anomaly the coordinator should triage.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-apply.html:135 follow-on: the restored identities are recorded only as text and no test or gate re-asserts their presence, so a later loss of the graph state would redden nothing and durability rests on the record alone.\n",
+  "review_run_id": "r-20261013T120859146767-review-of-sib-restore-apply-257a92abf6bd",
+  "reviewed_base_sha": "75a4bde76c7b0043b28d9b0794401a4fe2c3f1b0",
+  "reviewed_head_sha": "257a92abf6bde8854b7f1d791a34b5d03d0612bc",
+  "reviewed_run_id": "r-20261013T115426412931-sib-restore-apply",
+  "scores": {
+    "durability": 5,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T12:20:00+00:00",
+  "total": 96,
+  "verdict": "SOUND WITH FINDINGS"
+}
