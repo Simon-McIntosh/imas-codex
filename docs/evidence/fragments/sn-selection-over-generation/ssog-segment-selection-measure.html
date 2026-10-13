@@ -32,18 +32,18 @@
 
   <h3 id="ssog-segment-selection-measure-figures-heading">Exact-name match and per-slot accuracy</h3>
   <table id="ssog-segment-selection-measure-figures-table">
-    <caption>Exact-name match and per-slot accuracy, Jev against the composer's recorded spelling (n = measured rows)</caption>
+    <caption>Exact-name match and per-slot accuracy. All three columns run over the full 174 edit targets (167 positives for Jev's positives column); the composer column includes the 126 of 174 whose pre-rename spelling does not parse, counted as per-slot mismatches.</caption>
     <thead>
       <tr><th>Metric</th><th>Jev, positives (n=167)</th><th>Jev, edit targets (n=174)</th><th>Composer, edit targets (n=174)</th></tr>
     </thead>
     <tbody>
       <tr><td>Exact-name match</td><td>0.0299</td><td>0.0287</td><td>0.0000</td></tr>
-      <tr><td><code>physical_base</code></td><td>0.515</td><td>0.506</td><td>0.708</td></tr>
-      <tr><td><code>subject</code></td><td>0.605</td><td>0.535</td><td>0.813</td></tr>
-      <tr><td><code>component</code></td><td>0.563</td><td>0.563</td><td>0.958</td></tr>
-      <tr><td><code>operator</code></td><td>0.665</td><td>0.575</td><td>0.958</td></tr>
-      <tr><td><code>locus</code></td><td>0.503</td><td>0.477</td><td>0.688</td></tr>
-      <tr><td><code>process</code></td><td>0.784</td><td>0.805</td><td>0.896</td></tr>
+      <tr><td><code>physical_base</code></td><td>0.515</td><td>0.506</td><td>0.195</td></tr>
+      <tr><td><code>subject</code></td><td>0.605</td><td>0.535</td><td>0.540</td></tr>
+      <tr><td><code>component</code></td><td>0.563</td><td>0.563</td><td>0.776</td></tr>
+      <tr><td><code>operator</code></td><td>0.665</td><td>0.575</td><td>0.672</td></tr>
+      <tr><td><code>locus</code></td><td>0.503</td><td>0.477</td><td>0.425</td></tr>
+      <tr><td><code>process</code></td><td>0.784</td><td>0.805</td><td>0.885</td></tr>
     </tbody>
   </table>
   <img src="/imas-codex/figures/sn-selection-over-generation/ssog-segment-selection-measure/per-slot-accuracy.svg"
@@ -57,10 +57,22 @@
     a fair comparator, and only Jev's positives column is reported above. For the
     edit targets the composer's recorded spelling is the pre-rename
     <code>from_name</code>: the human renamed it because the spelling was wrong,
-    so its exact-name match is 0.0 by construction too. The informative composer
-    number for the edit targets is the per-slot accuracy, which measures how far
-    the composer's segments sat from the human's target: component and operator
-    0.96, subject 0.81, process 0.90, base 0.71, locus 0.69.
+    so its exact-name match is 0.0 by construction too.
+  </p>
+  <p id="ssog-segment-selection-measure-composer-denominator">
+    <strong>The composer column runs over all 174 edit targets — the same
+    sources Jev selects over.</strong> A recorded spelling that does not parse
+    canonically supplies no segment, so it matches no slot and stays in the
+    denominator; <strong>126 of the 174 do not parse</strong> and are counted as
+    per-slot mismatches, not dropped. The table's composer row is that full-set
+    figure. Restricted to the <strong>48 targets whose pre-rename spelling does
+    parse</strong>, the composer's per-slot accuracy is much higher — base 0.708,
+    subject 0.813, component 0.958, operator 0.958, locus 0.688, process 0.896
+    (<code>slot_accuracy_parsable</code> in the results JSON) — and that is the
+    like-for-like figure for a reader asking how near the composer sat when its
+    output was a parseable name at all. The full-set figures are lower precisely
+    because three quarters of the composer's pre-rename spellings were not
+    parseable canonical names, which is why a human renamed them.
   </p>
 
   <h3 id="ssog-segment-selection-measure-family-heading">Family agreement</h3>

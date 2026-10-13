@@ -392,19 +392,19 @@ def _aggregate(
     edits = [r for r in records if r["kind"] == "edit"]
     cost = cost_latency_summary(calls)
 
+    # The composer comparator runs over the SAME edit targets Jev selects over.
+    # A composer spelling that does not parse canonically supplies no segment,
+    # so it matches no slot: those rows stay in the denominator rather than
+    # being dropped, and the parsable subset is reported beside the full set.
     composer_edits = []
+    composer_edits_parsable = []
     for r in edits:
         cs = r["composer_segments"]
-        if cs is None:
-            continue
-        composer_edits.append(
-            {
-                **r,
-                "slot_match": {
-                    s: (cs.get(s) if cs else None) == r["gold"].get(s) for s in SLOTS
-                },
-            }
-        )
+        matched = {s: (cs.get(s) if cs else None) == r["gold"].get(s) for s in SLOTS}
+        row = {**r, "slot_match": matched}
+        composer_edits.append(row)
+        if cs is not None:
+            composer_edits_parsable.append(row)
 
     return {
         "cohort_size": cohort_size,
@@ -421,6 +421,9 @@ def _aggregate(
             if edits
             else 0.0,
             "slot_accuracy": _slot_accuracy(composer_edits),
+            "n_parsed": len(composer_edits_parsable),
+            "n_unparsed": len(edits) - len(composer_edits_parsable),
+            "slot_accuracy_parsable": _slot_accuracy(composer_edits_parsable),
         },
         "family_agreement": _family_agreement(records),
         "cross_check": _cross_check(records),
