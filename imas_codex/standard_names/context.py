@@ -1078,7 +1078,7 @@ async def rerank_name_comparators(
     model: str | None = None,
     concurrency: int = _COMPARATOR_RERANK_CONCURRENCY,
     budget_seconds: float | None = _COMPARATOR_RERANK_BUDGET_SECONDS,
-) -> tuple[list[Mapping[str, Any]], float]:
+) -> tuple[list[Mapping[str, Any]], float, str]:
     """Reorder a batch's nearby-name comparators by their judged relevance.
 
     The comparators arrive in the retrieval's embedding order. Each batch item
@@ -1102,12 +1102,14 @@ async def rerank_name_comparators(
         budget_seconds: Wall-time budget per item's rerank.
 
     Returns:
-        ``(ordered, cost)``. ``cost`` is the summed reported decision cost,
-        ``0.0`` when no call was made or every call failed.
+        ``(ordered, cost, seat)``. ``cost`` is the summed reported decision cost,
+        ``0.0`` when no call was made or every call failed. ``seat`` is the model
+        the call was billed under, empty when no call was made, so a caller can
+        charge the spend to the seat that raised it.
     """
     pool = list(comparators)
     if not pool or not items:
-        return pool, 0.0
+        return pool, 0.0, ""
 
     from imas_codex.discovery.base.judgment import rerank_pool
     from imas_codex.settings import get_model
@@ -1147,4 +1149,4 @@ async def rerank_name_comparators(
         return (mean, index)
 
     order = sorted(range(len(pool)), key=_sort_key)
-    return [pool[index] for index in order], cost
+    return [pool[index] for index in order], cost, model
