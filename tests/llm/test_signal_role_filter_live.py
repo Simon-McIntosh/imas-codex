@@ -168,3 +168,25 @@ def test_unfiltered_control_holds_a_grade2_command_or_reference():
         f"{TOP_N} holds a graded-2 command or reference, so the filter removes "
         "nothing this run measured"
     )
+
+
+@pytest.mark.graph
+def test_filtered_arm_returns_rows_including_a_grade3_measurement():
+    """Every filtered top 5 is non-empty and the arm reaches a graded-3 signal.
+
+    A role predicate that returned no signals would satisfy the two claims above
+    vacuously — both offender lists would be empty and the suite green — so the
+    filtered arm is also shown to return rows: every question's filtered top
+    :data:`TOP_N` holds at least one candidate, and across the questions the
+    filtered calls return at least one signal the fixture grades 3, a
+    measurement of the queried quantity.
+    """
+    table = _live_table()
+    empty = [entry["id"] for entry in table if not entry["filtered"]]
+    assert not empty, f"filtered search returned no signals for: {empty}"
+
+    grade3 = sum(1 for entry in table for row in entry["filtered"] if row["grade"] == 3)
+    assert grade3 >= 1, (
+        "filtered search returned no graded-3 measurement on any of the "
+        f"{len(table)} questions, so it is not reaching the signals it should"
+    )
