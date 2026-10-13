@@ -212,7 +212,11 @@
         "jt-60sa:general/mag_mhdp16": 2,
         "jt-60sa:general/mag_mhdp04": 2,
         "jt-60sa:general/mag_mhdp07": 2,
-        "jt-60sa:general/dcsv_pprwmc10ff": 0
+        "jt-60sa:general/dcsv_pprwmc10ff": 0,
+        "jt-60sa:general/dcsv_pprwmc2fb": 0,
+        "jt-60sa:general/dcsv_ppefcc8ff": 0,
+        "jt-60sa:general/dcsv_pprwmc6ff": 0,
+        "jt-60sa:general/dcsv_ppefcc2ff": 0
       }
     },
     {
@@ -449,7 +453,10 @@
         "jt-60sa:general/tcud_temdu7": 2,
         "jt-60sa:general/tcud_temdu8": 2,
         "jt-60sa:general/tcud_temdu9": 2,
-        "jt-60sa:general/dhc_reftgttemp": 2
+        "jt-60sa:general/dhc_reftgttemp": 2,
+        "jt-60sa:general/dcsv_pptgttemp": 2,
+        "jt-60sa:general/cam_irmp06roi9": 3,
+        "jt-60sa:general/cam_irmp06roi5": 3
       }
     },
     {
@@ -1175,7 +1182,8 @@
         "jt-60sa:general/tcud_temdu20": 0,
         "jt-60sa:general/tcud_temdu4": 0,
         "jt-60sa:general/tcud_temdu6": 0,
-        "jt-60sa:general/vv_temhp12c": 0
+        "jt-60sa:general/vv_temhp12c": 0,
+        "jt-60sa:general/n2gas_teminleta": 1
       }
     },
     {
@@ -1222,7 +1230,8 @@
         "jt-60sa:general/vv_temhp12c": 0,
         "jt-60sa:general/vv_temlop01a": 0,
         "jt-60sa:general/vv_temlop07a": 0,
-        "jt-60sa:general/vv_temlop07b": 0
+        "jt-60sa:general/vv_temlop07b": 0,
+        "jt-60sa:general/n2gas_flwinletd": 0
       }
     },
     {
@@ -1366,7 +1375,10 @@
         "jt-60sa:general/psc_tfvol": 1,
         "jt-60sa:general/psc_volef6": 1,
         "jt-60sa:general/psrc_curcs2": 0,
-        "jt-60sa:general/psrc_curcs3": 0
+        "jt-60sa:general/psrc_curcs3": 0,
+        "jt-60sa:general/psrc_calbr4": 0,
+        "jt-60sa:general/psrc_calbr3": 0,
+        "jt-60sa:general/dcsv_ppef2vol": 1
       }
     },
     {
@@ -1413,7 +1425,8 @@
         "jt-60sa:general/psc_cef6cur": 2,
         "jt-60sa:general/psrc_curcs2": 3,
         "jt-60sa:general/tf16_tfgs1602a": 0,
-        "jt-60sa:general/tf16_tfgs1604a": 0
+        "jt-60sa:general/tf16_tfgs1604a": 0,
+        "jt-60sa:general/psc_cefcc1cr": 1
       }
     },
     {
@@ -1565,7 +1578,13 @@
         "jt-60sa:general/cryoctb_mb5dt5": 3,
         "jt-60sa:general/cryoctb_mb5et1": 1,
         "jt-60sa:general/cryoctb_mb5ft1": 1,
-        "jt-60sa:general/cryoctb_mb5ft3": 3
+        "jt-60sa:general/cryoctb_mb5ft3": 3,
+        "jt-60sa:general/cryohrs_ctsh735": 1,
+        "jt-60sa:general/cryohrs_ctsh715": 1,
+        "jt-60sa:general/cryohrs_ctsh745": 1,
+        "jt-60sa:general/cryohrs_ctsh725": 1,
+        "jt-60sa:general/cryohrs_ctsh183": 1,
+        "jt-60sa:general/cryoil_m1e6nhq": 1
       }
     },
     {
@@ -1728,7 +1747,8 @@
         "jt-60sa:general/psc_cef4cur": 1,
         "jt-60sa:general/psrc_curcs2": 1,
         "jt-60sa:general/psrc_curcs3": 1,
-        "jt-60sa:general/tf_tfts07b": 0
+        "jt-60sa:general/tf_tfts07b": 0,
+        "jt-60sa:general/mdac_oef3cur": 1
       }
     },
     {
@@ -1791,7 +1811,8 @@
         "jt-60sa:general/psc_ctfcur": 1,
         "jt-60sa:general/psc_oef6vol": 1,
         "jt-60sa:general/psc_tfcur": 1,
-        "jt-60sa:general/psc_volef6": 1
+        "jt-60sa:general/psc_volef6": 1,
+        "jt-60sa:general/psc_cefcc10cr": 0
       }
     },
     {
@@ -1865,7 +1886,9 @@
         "jt-60sa:general/psc_cefcc10cr": 1,
         "jt-60sa:general/psc_cefcc12cr": 1,
         "jt-60sa:general/psc_crwmc8vl": 2,
-        "jt-60sa:general/psscfst_refvcefc2": 2
+        "jt-60sa:general/psscfst_refvcefc2": 2,
+        "jt-60sa:general/psc_cefcc18cr": 1,
+        "jt-60sa:general/psc_cref3snu": 1
       }
     },
     {
@@ -1900,7 +1923,10 @@
         "jt-60sa:general/cryomag_m1c01cv": 1,
         "jt-60sa:general/cryomag_m1c02cv": 1,
         "jt-60sa:general/cryomag_m1c03cv": 1,
-        "jt-60sa:general/cryomag_m1c04cv": 1
+        "jt-60sa:general/cryomag_m1c04cv": 1,
+        "jt-60sa:general/cryoctb_m1e4nhv": 1,
+        "jt-60sa:general/cryoctb_m2e6phv": 1,
+        "jt-60sa:general/cryoctb_mt08nfv": 1
       }
     }
   ]
