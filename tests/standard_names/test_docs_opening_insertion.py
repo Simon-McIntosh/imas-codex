@@ -18,6 +18,7 @@ _CANONICAL_AVERAGE = (
 _SUBSCRIPTED_AVERAGE = (
     r"$$\langle n\rangle_S = \oint n\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|$$"
 )
+_LINE_AVERAGE = r"$$\langle n\rangle = \oint n\,dl/B \,/\, \oint dl/B$$"
 
 
 def _persisted_documentation(name: str, documentation: str, writer: str) -> str:
@@ -90,15 +91,16 @@ def test_required_registry_equation_is_written(writer: str) -> None:
     assert r"$$\kappa = (Z_{\max} - Z_{\min})/(R_{\max} - R_{\min})$$" in persisted
 
 
-def test_noncanonical_optional_equation_is_replaced() -> None:
+@pytest.mark.parametrize("equation", [_SUBSCRIPTED_AVERAGE, _LINE_AVERAGE])
+def test_noncanonical_optional_equation_is_replaced(equation: str) -> None:
     persisted = _persisted_documentation(
         _AVERAGED,
-        f"The model describes the argon average.\n\n{_SUBSCRIPTED_AVERAGE}",
+        f"The model describes the argon average.\n\n{equation}",
         "generate",
     )
 
     assert _CANONICAL_AVERAGE in persisted
-    assert _SUBSCRIPTED_AVERAGE not in persisted
+    assert equation not in persisted
 
 
 def test_optional_equation_is_not_added_when_absent() -> None:
@@ -111,18 +113,20 @@ def test_optional_equation_is_not_added_when_absent() -> None:
     assert "$$" not in persisted
 
 
-def test_unfillable_template_keeps_model_opening() -> None:
+@pytest.mark.parametrize("writer", ["generate", "refine"])
+def test_unfillable_template_keeps_model_opening(writer: str) -> None:
     document = "The model describes electron temperature in this plasma."
 
-    persisted = _persisted_documentation("electron_temperature", document, "generate")
+    persisted = _persisted_documentation("electron_temperature", document, writer)
 
     assert persisted == document
     assert "{" not in persisted
 
 
-def test_name_without_selected_template_keeps_model_opening() -> None:
+@pytest.mark.parametrize("writer", ["generate", "refine"])
+def test_name_without_selected_template_keeps_model_opening(writer: str) -> None:
     document = "The model describes the magnetic field in this plasma."
 
-    persisted = _persisted_documentation("magnetic_field", document, "generate")
+    persisted = _persisted_documentation("magnetic_field", document, writer)
 
     assert persisted == document
