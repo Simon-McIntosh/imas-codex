@@ -70,18 +70,48 @@ unit test makes the postcondition refuse when the edge is absent.</p>
 <li><code>stale-yaml-refusal.log</code>: <code>UnknownCatalogKeyError</code> for the retired key, <code>EXIT=0</code>.</li>
 </ul>
 
-<h2 id="sib-retire-successor-scalar-migration-hold">Graph removal held</h2>
-<p>The read-only cohort instrument in <code>orphan-read-final.log</code>
-observed 21 names carrying the property at 2026-10-13 17:17 UTC, rather
-than the required 18. One, <code>cross_section_of_flux_surface</code>, has
-neither a direct <code>HAS_SUCCESSOR</code> edge nor an incoming
-<code>REFINED_FROM</code> edge from the successor named by its property.
-<code>orphan-detail.log</code> shows an incoming lineage edge from
-<code>area_of_flux_surface</code>, a different intermediate name. The
-required zero-orphan, 18-row precondition is unmet. No removal authority
-was authored or previewed, and no graph property was cleared. The live
-cohort and this successor route need an authority decision before the
-coordinator can apply a removal.</p>
+<h2 id="sib-retire-successor-scalar-migration-preview">Signed graph authorities</h2>
+<p>The first live read found 21 scalar holders and one without a direct
+successor route: <code>cross_section_of_flux_surface</code>. The three rows
+above the older 18-row census are the two
+<code>derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</code>
+and
+<code>derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>,
+plus
+<code>etendue_of_spectrometer_channel</code>, signed on code that still wrote
+the scalar. Their receipt-stamped edges were already present. The
+cross-section spelling had a lineage path through <code>area_of_flux_surface</code>
+to the successor named by its scalar. The coordinator authorised a direct
+signed edge to that same successor.</p>
+<p><code>edge-before.log</code> reproduced zero direct edges. The committed
+<code>sib-retire-successor-scalar-edge-authority.json</code> then previewed
+one admitted row with zero refusals. Applying it under manifest digest
+<code>900e190c595bc56d1548891629235819ad4159857ad260351a7d53fc4b54b605</code>
+returned <code>changed: 1</code>, <code>receipt_rows: 1</code>,
+<code>persistent_writes: 2</code> and zero refusals. The readback in
+<code>orphan-read-after.log</code> found exactly one direct edge to
+<code>poloidal_plane_cross_sectional_area_of_flux_surface</code>, stamped
+<code>2026-10-13T17:29:41.303Z</code> with receipt id
+<code>sn-change:signed-manifest:900e190c595bc56d1548891629235819ad4159857ad260351a7d53fc4b54b605:730f1e60d64fc9c0a29d86b2</code>.
+The same read counted 21 scalar holders and <strong>zero orphans</strong>.
+<code>x_direction_unit_vector_of_sensor</code> and
+<code>z_direction_unit_vector_of_sensor</code> each have one incoming
+<code>REFINED_FROM</code> from their named successor, so neither needs a
+direct successor edge.</p>
+<p>The committed <code>sib-retire-successor-scalar-authority.json</code>
+contains one signed <code>set_properties</code> row per scalar holder,
+setting only that property to null. Its preview returned
+<code>would_apply</code>, <strong>21 admitted and 0 refused</strong>, under
+manifest digest
+<code>9824d632fe6da863af37287059db9a3a1a9b6da20892c8cab4a701cc185e4c40</code>.
+Its file SHA-256 is
+<code>930f817490e23be4af4af7c13088262036b94cc9ada036691cc6589e82dea507</code>
+and its payload SHA-256 is
+<code>ca6818003082fe95805f8451044c9c4e9ba32a2017b8454bc2278d983ed74750</code>.
+It was <strong>not applied</strong>. <code>preview-rollback-read.log</code>
+still counts 21 properties and zero removal receipts. The coordinator can
+apply this authority only after the code that no longer reads the property
+lands.</p>
 
 </main>
 </body>
