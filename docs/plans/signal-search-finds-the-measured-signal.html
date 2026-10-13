@@ -349,7 +349,9 @@
       module's command. The node also makes two harness fixes. The frozen additive rule breaks score ties by signal id,
       so its order no longer depends on set iteration. The arm-table test asserts the fused tool stays above the frozen
       additive rule on mean nDCG@10, a regression floor beside the random control. And a test with the switch on and
-      <code>k</code> of 10 asserts the rerank receives a pool of 60.
+      <code>k</code> of 10 asserts the rerank receives a pool of 60. The labelling node checked the pool with a script
+      kept outside the repository, so the harness's rerank arms refuse an unlabelled candidate anywhere in their pool
+      of 60, not only in their top 10, and a test that removes one pool label shows the refusal naming it.
     </p>
     <p>
       <strong>Done when</strong> no candidate in RRF's top 60 on any question is unlabelled, and the harness reports the
