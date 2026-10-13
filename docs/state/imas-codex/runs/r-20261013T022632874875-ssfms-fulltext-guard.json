@@ -1,0 +1,2623 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "3c41db53d21d813e79d3ef1e8e71465aa302448c",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 2210861,
+      "input_tokens_cumulative": 2210861,
+      "output_tokens": 8751,
+      "output_tokens_cumulative": 8751,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 97,
+    "files": 3,
+    "removed": 3
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 126,
+        "name": "test_transient_lock_only_write_is_exempt",
+        "path": "tests/graph/test_updated_at_coverage.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1272
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 548,
+        "name": "test_late_failure_rolls_back_materialized_parent",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1272
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "_seed_signed_live_rows",
+        "path": "tests/standard_names/test_stale_source_detach.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1272
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1272
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 463,
+        "name": "test_concurrent_authority_drift_invalidates_apply",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1272
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 1264,
+        "name": "_fetch_wiki_page",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1267
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 126,
+        "name": "test_transient_lock_only_write_is_exempt",
+        "path": "tests/graph/test_updated_at_coverage.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1354
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 548,
+        "name": "test_late_failure_rolls_back_materialized_parent",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1354
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "_seed_signed_live_rows",
+        "path": "tests/standard_names/test_stale_source_detach.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1354
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1354
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 463,
+        "name": "test_concurrent_authority_drift_invalidates_apply",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1354
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 1347,
+        "name": "_fetch_wiki_document",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1350
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 126,
+        "name": "test_transient_lock_only_write_is_exempt",
+        "path": "tests/graph/test_updated_at_coverage.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1405
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 548,
+        "name": "test_late_failure_rolls_back_materialized_parent",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1405
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "_seed_signed_live_rows",
+        "path": "tests/standard_names/test_stale_source_detach.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1405
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1405
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 463,
+        "name": "test_concurrent_authority_drift_invalidates_apply",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1405
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_fetch_code_file",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1401
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 126,
+        "name": "test_transient_lock_only_write_is_exempt",
+        "path": "tests/graph/test_updated_at_coverage.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1462
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 548,
+        "name": "test_late_failure_rolls_back_materialized_parent",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1462
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "_seed_signed_live_rows",
+        "path": "tests/standard_names/test_stale_source_detach.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1462
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1462
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 463,
+        "name": "test_concurrent_authority_drift_invalidates_apply",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1462
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 1452,
+        "name": "_fetch_image",
+        "path": "imas_codex/llm/search_tools.py"
+      },
+      "window_line": 1455
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "e2639df98438394a5323221835d1e93b7a5a7dcf",
+    "329e8e230cd0edf0d34140ea7aa585cf2818f0cc",
+    "fb6b0935efa5092c9c5c16b909111d0c695f9cf0"
+  ],
+  "completed_at": "2026-10-13T02:50:46.575Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-13T02:26:52Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "schema_context_data.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_NO_SYNC=1 uv run pytest tests/graph/test_signal_fulltext_fields.py tests/llm/test_search_tools.py -p no:cacheprovider",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T022632874875-ssfms-fulltext-guard/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5454545454545454,
+    "plan": "signal-search-finds-the-measured-signal",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-13T02:56:33.489407+00:00",
+    "horizon_seconds": 1800,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-13T02:26:33Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 25,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 10,
+    "mean_context": 160000,
+    "observed_at": "2026-10-13T02:26:11Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 25,
+      "aggregate_tokens_per_second": 231.208,
+      "detail": "",
+      "mean_tokens_per_second": 96.337,
+      "observed_at": "2026-10-13T02:26:11Z",
+      "runs": 2.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-13T02:50:46.575Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T022632874875-ssfms-fulltext-guard/manifest.md",
+  "member": "disposable-r-20261013T022632874875-ssfms-fulltext-guard",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/graph/test_signal_fulltext_fields.py::test_schema_index_covers_searchable_fields"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/graph/test_signal_fulltext_fields.py::test_schema_index_covers_searchable_fields"
+    ],
+    "declaration": "removing keywords from the schema annotation in a scratch copy must fail the new test",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T022632874875-ssfms-fulltext-guard/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T022632874875-ssfms-fulltext-guard/negative-control.log",
+    "test_paths": [
+      "tests/graph/test_signal_fulltext_fields.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "ssfms-fulltext-guard",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1405,
+          "cached_input_tokens": 784386,
+          "input_tokens": 785793,
+          "output_tokens": 1419,
+          "reasoning_output_tokens": 275,
+          "total_tokens": 787212,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+      "session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf"
+    },
+    "done_when": "a test that needs no graph reads the facility_signal_text definition from the schema and asserts it carries name, description, node_path, keywords, aliases, unit and source_description; the _text_search_signals docstring in imas_codex/llm/search_tools.py names those fields; tests/llm/test_search_tools.py and the new test pass",
+    "estimated_hours": null,
+    "goal": "guard the widened signal full-text index definition with a test, and bring the text search docstring in line with it",
+    "id": "ssfms-fulltext-guard",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-13T02:26:33Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 25,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 10,
+      "mean_context": 160000,
+      "observed_at": "2026-10-13T02:26:11Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 25,
+        "aggregate_tokens_per_second": 231.208,
+        "detail": "",
+        "mean_tokens_per_second": 96.337,
+        "observed_at": "2026-10-13T02:26:11Z",
+        "runs": 2.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T022632874875-ssfms-fulltext-guard/manifest.md",
+    "negative_control": "removing keywords from the schema annotation in a scratch copy must fail the new test",
+    "plan": "signal-search-finds-the-measured-signal",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/graph/test_signal_fulltext_fields.py",
+      "imas_codex/llm/search_tools.py",
+      "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-fulltext-guard.html",
+      "docs/figures/signal-search-finds-the-measured-signal/ssfms-fulltext-guard"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3011855.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "ssfms-fulltext-guard",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-13T02:26:44.074593+00:00",
+    "score": 0.49375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "review waived: the plan's only unreviewed change is section 7 wording; this node is section 6. Folds the durability-8 finding on the full-text run; unit tests only",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.591,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "signal-search-finds-the-measured-signal",
+  "plan_impl_at_dispatch": 0.5454545454545454,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "fb6b0935efa5092c9c5c16b909111d0c695f9cf0",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "3c41db53d21d813e79d3ef1e8e71465aa302448c",
+    "reviewed_head_sha": "fb6b0935efa5092c9c5c16b909111d0c695f9cf0",
+    "scores": {
+      "durability": 17,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 113
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261013T022632874875-ssfms-fulltext-guard",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+  "session_harness": "claude",
+  "session_id": "c378b45b-2621-4cb3-b6b7-152748063095",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 2,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 6968558,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 302.302,
+    "generated_tokens": 31034,
+    "generation_seconds": 102.706,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 70.7,
+    "machine_seconds": 199.596,
+    "peak_input_tokens": 162778,
+    "tokens_per_second": 302.16,
+    "wall_tokens_per_second": 102.66
+  },
+  "time_budget": "30m",
+  "tool_steps": 46.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1434,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-13T02:50:53Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-13T02:45:37Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261013T022632874875-ssfms-fulltext-guard",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6081,
+    "worker_pid": 3656942
+  },
+  "worker_seconds": 1391,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
