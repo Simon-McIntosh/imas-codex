@@ -1,0 +1,21 @@
+<section id="ssfms-fulltext-guard-node" data-reckon="signal-fulltext-index-guard-node">
+  <h2 id="ssfms-fulltext-guard-node-title">Guard the widened signal full-text index definition, and align the search docstring</h2>
+
+  <p id="ssfms-fulltext-guard-node-what">
+    The widened <code>facility_signal_text</code> definition is now held by a test that reads it
+    straight from the schema — <code>tests/graph/test_signal_fulltext_fields.py</code> loads the
+    <code>FacilitySignal.fulltext_index</code> annotation from
+    <code>imas_codex/schemas/facility.yaml</code> with no graph and requires the index to carry
+    <code>name</code>, <code>description</code>, <code>node_path</code>, <code>keywords</code>,
+    <code>aliases</code>, <code>unit</code> and <code>source_description</code>. The
+    <code>_text_search_signals</code> docstring in <code>imas_codex/llm/search_tools.py</code> now
+    names those seven fields and states that the CONTAINS fallback covers only
+    <code>name</code>, <code>description</code> and <code>node_path</code>, replacing its stale
+    three-field description.
+  </p>
+
+  <ul id="ssfms-fulltext-guard-node-measure">
+    <li id="ssfms-fulltext-guard-node-measure-gate">Gate — <code>pytest tests/graph/test_signal_fulltext_fields.py tests/llm/test_search_tools.py</code> — reads <strong>107 passed, 8 skipped</strong>, exit 0, at the revision that carries both changes.</li>
+    <li id="ssfms-fulltext-guard-node-measure-control">Declared negative control — removing <code>keywords</code> from the annotation in a scratch copy — fails the new test: exit 1, <code>AssertionError: facility_signal_text index is missing indexed fields: ['keywords']</code>, an id the head arm passes. Log: <code>negative-control.log</code>.</li>
+  </ul>
+</section>
