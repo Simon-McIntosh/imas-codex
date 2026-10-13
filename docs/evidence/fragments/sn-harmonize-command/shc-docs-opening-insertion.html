@@ -21,10 +21,13 @@
   </p>
   <p id="shc-docs-opening-insertion-measure">
     In <code>tests/standard_names/test_docs_opening_insertion.py</code>, model and
-    graph effects are stubbed. Without insertion, the generated opening assertion
-    received “A model-written opening about argon.” where it expected
-    “Number density of argon”; the red run recorded 5 failed, 3 passed,
-    <code>EXIT=1</code>. At the final source revision all 11 tests pass,
+    graph effects are stubbed. Without insertion at the committed head, the
+    generated opening assertion received “A model-written opening about argon.”
+    where it expected “Number density of argon”; that run recorded 6 failed,
+    5 passed, <code>EXIT=1</code>. Bypassing the missing-placeholder,
+    untemplated-name and optional-equation safeguards made the other 5 tests
+    fail, with 6 passing and <code>EXIT=1</code>. At the final source revision
+    all 11 tests pass,
     including both write sites, required restatement, optional-equation rewrite,
     unfillable placeholders, and untemplated names. The documentation-axis gate
     changed from 4 failed, 672 passed and 3 setup errors at base to 4 failed,
