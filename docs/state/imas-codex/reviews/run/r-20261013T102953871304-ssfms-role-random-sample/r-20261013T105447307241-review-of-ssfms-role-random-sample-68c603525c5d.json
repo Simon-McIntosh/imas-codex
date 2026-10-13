@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T11:07:45.045Z",
+  "dispatched_at": "2026-10-13T10:55:01Z",
+  "findings": [
+    {
+      "file": "tests/llm/measure_signal_role.py",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: repointing FIXTURE to signal_role_random_labels.json orphans tests/llm/fixtures/signal_role_labels.json, which no code references at 68c603525 (git grep finds only the file itself), so a dead 300-signal fixture is retained, most likely a separate node's supersession scope because this node was fenced out of deleting it."
+    },
+    {
+      "file": "tests/discovery/test_signal_role.py",
+      "line": "61",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion's expected role strings are the same role literals fake_decision returns at lines 47-50, so it guards pass-through routing, row order and cost summation but cannot redden on a role-label regression, leaving the guard real but partial."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read revision by revision over 29229121..68c603525; b765bde5 freezes the 200-signal fixture, f189eae9 replaces the two self-referential assertions and rewrites the measurement, c5d552c corrects two labels, d0247236 records the results fragment, and 68c603525 dates the freeze, across four files all inside the declared scope.",
+    "done_when": "the done-when names tests/llm/fixtures/signal_role_random_labels.json (200 distinct signals under seed 20261013, labels frozen before the judge), python -m tests.llm.measure_signal_role, and signal-role-random.html; the manifest records the paid run (200 judged, EXIT=0), the focused suite (3 passed, EXIT=0), and a receipt that reconciles 200 unique judgments to USD 0.005284272.",
+    "goal": "the goal is to measure the role judge's agreement on 200 signals drawn at random from the eligible population; docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html records 194/200 (97.0%) from a seeded uniform draw of 200 of 14312 eligible JT-60SA signals, so the goal is met.",
+    "manifest": "read; status complete, five revisions, records baseline_suite (3 passed) and after_suite (3 passed), the paid run's 200 judgments, negative_control_log negative-role.log and the landing line.",
+    "write_paths": "the manifest declares six paths; a stat over 29229121..68c603525 lists four changed files and every one is inside the fence, while the ssfms-role-random-sample fragment and the docs/figures directory received no file."
+  },
+  "justifications": {
+    "durability": "negative-role.log shows forcing every accepted role to measured reddens tests/discovery/test_signal_role.py:61 with EXIT=1, and the criteria assertion at line 30 now compares against an independently written literal set, but the accuracy measurement itself has no test that reddens on a regression and the expected role literals at :61 are the same strings the in-test mock returns.",
+    "evidence": "baseline-role.log and after-role-final.log:1 each record 3 passed with EXIT=0 and role-receipt.jsonl reconciles 200 unique judgments to USD 0.005284272, matching the fragment's 194/200 and the manifest landing line, though the uniform-draw clause rests on the fixture's recorded method and seed rather than an independent rerun.",
+    "fit": "every element id in docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html begins with the node id and the module keeps the tests/llm/measure_*.py idiom with no plan label, version suffix or ticket reference.",
+    "goal_fidelity": "docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html:4 records a seeded uniform draw of 200 of 14312 eligible signals and 194/200 agreement.",
+    "reuse": "the change extends the existing owners tests/llm/measure_signal_role.py and imas_codex/discovery/signals/role.py in place, and a search over tests/llm/ and imas_codex/ for another judge-agreement measurement found only this module.",
+    "scope_discipline": "a stat of the reviewed diff lists only tests/discovery/test_signal_role.py, tests/llm/fixtures/signal_role_random_labels.json, tests/llm/measure_signal_role.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html, each inside the six declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to measure the role judge's agreement on 200 signals drawn at random from the eligible population; docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html records 194/200 (97.0%) from a seeded uniform draw of 200 of 14312 eligible JT-60SA signals, so the goal is met.\nVERDICT done_when: the done-when names tests/llm/fixtures/signal_role_random_labels.json (200 distinct signals under seed 20261013, labels frozen before the judge), python -m tests.llm.measure_signal_role, and signal-role-random.html; the manifest records the paid run (200 judged, EXIT=0), the focused suite (3 passed, EXIT=0), and a receipt that reconciles 200 unique judgments to USD 0.005284272.\nVERDICT write_paths: the manifest declares six paths; a stat over 29229121..68c603525 lists four changed files and every one is inside the fence, while the ssfms-role-random-sample fragment and the docs/figures directory received no file.\nVERDICT manifest: read; status complete, five revisions, records baseline_suite (3 passed) and after_suite (3 passed), the paid run's 200 judgments, negative_control_log negative-role.log and the landing line.\nVERDICT diff: read revision by revision over 29229121..68c603525; b765bde5 freezes the 200-signal fixture, f189eae9 replaces the two self-referential assertions and rewrites the measurement, c5d552c corrects two labels, d0247236 records the results fragment, and 68c603525 dates the freeze, across four files all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html:4 records a seeded uniform draw of 200 of 14312 eligible signals and 194/200 agreement.\nSCORE evidence: 18\nJUSTIFICATION evidence: baseline-role.log and after-role-final.log:1 each record 3 passed with EXIT=0 and role-receipt.jsonl reconciles 200 unique judgments to USD 0.005284272, matching the fragment's 194/200 and the manifest landing line, though the uniform-draw clause rests on the fixture's recorded method and seed rather than an independent rerun.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: a stat of the reviewed diff lists only tests/discovery/test_signal_role.py, tests/llm/fixtures/signal_role_random_labels.json, tests/llm/measure_signal_role.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html, each inside the six declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: negative-role.log shows forcing every accepted role to measured reddens tests/discovery/test_signal_role.py:61 with EXIT=1, and the criteria assertion at line 30 now compares against an independently written literal set, but the accuracy measurement itself has no test that reddens on a regression and the expected role literals at :61 are the same strings the in-test mock returns.\nSCORE fit: 18\nJUSTIFICATION fit: every element id in docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html begins with the node id and the module keeps the tests/llm/measure_*.py idiom with no plan label, version suffix or ticket reference.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing owners tests/llm/measure_signal_role.py and imas_codex/discovery/signals/role.py in place, and a search over tests/llm/ and imas_codex/ for another judge-agreement measurement found only this module.\nFINDING tests/llm/measure_signal_role.py:19 follow-on: repointing FIXTURE to signal_role_random_labels.json orphans tests/llm/fixtures/signal_role_labels.json, which no code references at 68c603525 (git grep finds only the file itself), so a dead 300-signal fixture is retained, most likely a separate node's supersession scope because this node was fenced out of deleting it.\nFINDING tests/discovery/test_signal_role.py:61 follow-on: the assertion's expected role strings are the same role literals fake_decision returns at lines 47-50, so it guards pass-through routing, row order and cost summation but cannot redden on a role-label regression, leaving the guard real but partial.\n",
+  "review_run_id": "r-20261013T105447307241-review-of-ssfms-role-random-sample-68c603525c5d",
+  "reviewed_base_sha": "29229121a92fea535cd9adda6eac147b432dab40",
+  "reviewed_head_sha": "68c603525c5d175ee0dc66ca44d8ec90984dace6",
+  "reviewed_run_id": "r-20261013T102953871304-ssfms-role-random-sample",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T11:09:58.701428+00:00",
+  "total": 113
+}
