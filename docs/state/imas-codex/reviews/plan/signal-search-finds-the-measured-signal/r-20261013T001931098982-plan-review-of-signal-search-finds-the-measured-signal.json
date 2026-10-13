@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T00:30:27.332Z",
+  "dispatched_at": "2026-10-13T00:19:44Z",
+  "findings": [],
+  "plan_fingerprint": "0f8876b1e8f3e92a79eaa54045df0509274a7a06202d58efbb3db2ba7538da33",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 44,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T001931098982-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "3f7cb0c92d6177eb5b8369ed8bc32f61e6cf2cfb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every \u00a74 anchor resolves: `imas_codex/search/fusion.py` (exports `rrf_fuse`, `RRF_K`), `_rank_signals`/`_search_docs`/`_search_code` in `search_tools.py`, `_hybrid_ids` in `slot_context.py:59`, `_find_signals_semantic` in `domain_queries.py:155`, `queries.json` and `labels.json` under `search-rerank-prototype/`, and `search-rerank.html:61` holding the cited 0.4821; the extensionless href to `discovery-judgments-through-jev` resolves as `.html` per the house convention, and its \"ranks 159 to 181\" claim is at `search-rerank.html:133`.",
+    "done_when": "pass \u2014 each \u00a74 node carries a declared control: node 1's \"the old rule must fail the same test\", landed at `tests/search/test_fusion.py:57` (`test_rank_one_vector_outranks_rank_five_text`, whose frozen additive arm puts the BM25-14 text hit first at line 97), and node 2's frozen additive-rule arm, the baseline the fused tool must beat on both mean nDCG@10 and grade-3 precision@5.",
+    "evidence_paths": "pass \u2014 \u00a74's table is declared at `docs/evidence/fragments/signal-search-finds-the-measured-signal/fusion.html`, a durable in-repo path beside the sibling section fragments (`goldens.html`, `embeddings.html`), not a scratch or node-local path.",
+    "naming": "pass \u2014 \u00a74 names no plan labels, stage names, ticket numbers or version tags; the retired rule is named by its mechanism (`score * 0.7 + text_score * 0.3 + 0.1`) and the moved definition by what it does (`rrf_fuse`, `RRF_K`).",
+    "reasoning": "pass \u2014 all three checks hold on \u00a74. (a) The stated root cause matches \u00a71's cited measurement: a raw BM25 score of 5\u201314 added to a cosine that never exceeds 1, per the HTS-lead question's 13.86 top BM25 score. (b) The mechanism produces the done-when: replacing the additive rule with rank fusion is what lets the fused tool beat the frozen additive arm the section measures against. (c) The mechanism runs on the real code path and the caller is named: `_rank_signals`, called by `_search_signals` at `search_tools.py:258`, with `_hybrid_ids` reached from `slot_context.py:144\u2013198`. The changed sentence \u2014 \"Signal search over-fetches 100 vector candidates and a full-text stream before fusing \u2026 `_text_search_signals` returns up to twice its argument, so it carries up to 100 rows in the product and the harness alike\" \u2014 is correct as written: the product passes `SIGNAL_VECTOR_POOL = 100` (`search_tools.py:75`) and `SIGNAL_TEXT_POOL = 50`\u2192`LIMIT $limit` at `k*2` (`search_tools.py:698`), and the harness passes the same 100/50 (`test_signal_search_goldens.py:56-57,246,248`). The section's reaffirmed claims also verify: `rrf_fuse`/`RRF_K` are now defined in `search/fusion.py` with `standard_names/search.py` importing them; `_vector_search_signals` and `_find_signals_semantic` both call the single owner `signal_vector_search_block` (`domain_queries.py:116`, called at `:182` and `search_tools.py:656`); and `HybridSearchStrategy`/`HybridSearchEngine`/`SearchService` are constructed nowhere in non-test code, so leaving them is sound.",
+    "single_goal": "pass \u2014 \u00a74 is two nodes; node 1 lands the fusion and node 2 measures it, each one deliverable, and the section's done-when closes on a single verdict pair.",
+    "wiring": "pass \u2014 \u00a74 sits between \u00a73 and \u00a77 as the followup `f-ssfms-001` orders (\"\u00a74 and \u00a75 touch different files and can run in parallel once \u00a73 lands \u2026 \u00a77 follows \u00a74\"); its done-when consumes \u00a73's pooled labels and the frozen additive arm \u00a73 lands, and it claims no other node's deliverable."
+  },
+  "section_digests": {
+    "_document": "6696124ebd584b8301282dba9ed1faa4ea8816e65a64a881eaaa5dc88d764ffe",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "5a77efb737bcf64e7fd5b30aaa71ed3ff5a27b6c8e7b4d33023f03292a98fb15",
+    "s4": "31e1b80d34ee0473acbbff8894edb94dee236159b67ee202ce8891143f015e9a",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "62129c4513b7e17583d1210b2596dd537cdefdbbd8fddb81f175d1e6358fd0bf",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "7165b405c14beb619d4147fc90940215d3b3765d4cca655d11c2a63ef8396936"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:31:23.637554+00:00"
+}
