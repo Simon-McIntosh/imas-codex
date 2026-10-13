@@ -46,6 +46,7 @@ from __future__ import annotations
 import json
 import math
 import random
+import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timezone
 from pathlib import Path
@@ -402,6 +403,7 @@ def _rerank_arm(arm: str, question: Question, pool: list[str], ctx) -> list[str]
     else:
         levels = _RERANK_QUESTION["relevance_grade"]["criteria"]
         instructions = _RERANK_QUESTION["relevance_grade"]["instructions"]
+    started = time.perf_counter()
     ordered, _note, _cost = _run_batch(
         rerank_pool(
             question.query,
@@ -414,6 +416,8 @@ def _rerank_arm(arm: str, question: Question, pool: list[str], ctx) -> list[str]
             budget_seconds=5.0,
         )
     )
+    ctx.rerank_pool = len(candidates)
+    ctx.rerank_seconds.append(time.perf_counter() - started)
     return [c["id"] for c in ordered]
 
 
@@ -456,6 +460,8 @@ class ArmContext:
     eligible: set[str] = field(default_factory=set)
     spend_jev: bool = False
     rerank_applied: bool = False
+    rerank_pool: int = 0
+    rerank_seconds: list[float] = field(default_factory=list)
     _embeddings: dict[str, list[float]] = field(default_factory=dict)
 
     def embedding_for(self, question: Question) -> list[float]:
@@ -827,3 +833,19 @@ def test_the_frozen_additive_rule_ranks_fixed_streams_by_its_formula() -> None:
         "sig:v1",
         "sig:v2",
     ]
+
+
+def test_the_frozen_additive_rule_breaks_score_ties_by_signal_id() -> None:
+    """Equal scores order by signal id, so the arm is a function of its inputs.
+
+    The rule reduces its candidates through a ``set``, so a score-only sort
+    would leave tied candidates in that set's iteration order, which a
+    per-process hash seed varies between runs. Breaking the tie by id removes
+    that dependence, and made the arm reproducible across the measurement
+    passes. Twelve candidates share one score: if the tie-break is dropped the
+    result is a permutation of the set, which matches the id order only by
+    coincidence (1 in 12!).
+    """
+    ids = [f"sig:tie{i:02d}" for i in range(12)]
+    ranked = _additive_rank(ids, dict.fromkeys(ids, 0.5), [], k=len(ids))
+    assert ranked == sorted(ids)

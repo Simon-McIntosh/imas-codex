@@ -1,0 +1,47 @@
+<section id="ssfms-rerank-score-node" data-reckon="fragment">
+  <h2 id="ssfms-rerank-score-node-title">Set the signal rerank switch from the three-pass measurement</h2>
+
+  <p id="ssfms-rerank-score-node-what">
+    This node ran <code>python -m tests.llm.measure_search_rankings 3 --section signal</code> over
+    the 2 224-label fixture and set the signal rerank switch. The role-aware arm beat fusion alone on
+    both mean nDCG@10 (0.9128 against 0.7949) and mean grade-3 precision@5 (0.8818 against 0.7182),
+    its worst pass (0.9100) stayed above fusion, and its p95 wall time (4.722 s) stayed within the
+    5 s budget, so the switch ships on: <code>_rerank_signals</code> in
+    <code>imas_codex/llm/server.py</code> now follows the server mode as <code>_rerank_dd_paths</code>
+    does, <code>not (self.read_only or self.dd_only)</code>. The role-aware and generic arms both beat
+    fusion; the role-aware arm beats the generic one on both metrics.
+  </p>
+
+  <p id="ssfms-rerank-score-node-table">
+    The arms table, the per-question wins (16) and losses (2) against fusion, the per-pass figures
+    and the p95 are recorded in <code>rerank.html</code> beside this fragment; the run totalled
+    <strong>$0.177618</strong> on the discovery-relevance seat.
+  </p>
+
+  <figure id="ssfms-rerank-score-node-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-rerank-score/arms-vs-fusion.svg"
+         alt="Mean nDCG@10 and grade-3 precision@5 by arm, per-pass nDCG@10, and p95 rerank wall time against the 5 s budget: both rerank arms above fusion on every pass, the role-aware arm above the generic one.">
+    <figcaption>
+      The three-pass measurement: both rerank arms beat fusion alone on both metrics, and the
+      role-aware arm beats the generic one; p95 stays under the 5 s budget. Full table and
+      per-question wins and losses are in <code>rerank.html</code>.
+    </figcaption>
+  </figure>
+
+  <p id="ssfms-rerank-score-node-harness">
+    <strong>Harness and module.</strong> <code>measure_search_rankings.py</code> now records each
+    rerank call's wall time and each question's per-arm nDCG@10, so the run reports per-pass figures,
+    the p95 at pool 60 and the per-question wins and losses. A test in
+    <code>test_signal_search_goldens.py</code> pins <code>_additive_rank</code>'s score tie-break to
+    the signal id; reverting it to a score-only sort leaves tied candidates in the set's iteration
+    order, which that test fails on. A test in <code>test_search_tools.py</code> asserts
+    <code>_rerank_signals</code> follows the server mode.
+  </p>
+
+  <p id="ssfms-rerank-score-node-control">
+    <strong>Declared negative control.</strong> With the measurement's switch left off
+    (<code>_rerank_signals = False</code>), <code>test_a_full_server_reranks_signals</code> fails
+    (<code>assert False is True</code>, <code>EXIT=1</code>); at head the same test passes and the
+    focused gate over the two changed test files is green.
+  </p>
+</section>

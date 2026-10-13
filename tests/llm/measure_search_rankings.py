@@ -64,6 +64,39 @@ def _harness():
     return harness
 
 
+def _label_count() -> int:
+    """Total labels the golden fixture carries, over every question."""
+    harness = _harness()
+    return sum(len(q.relevant) for q in harness.QUESTIONS)
+
+
+def compare_role_to_fusion(
+    rows_by_arm: dict[str, list[dict]], role_arm: str = "rrf_rerank_role",
+    base_arm: str = "rrf"
+) -> dict:
+    """Per-question role-aware-versus-fusion comparison on mean nDCG@10.
+
+    Each arm's per-question figure is its mean over the passes, so a question
+    the rerank wins on one pass and loses on the next reads as a tie rather
+    than as a coin flip. A win or a loss is a strict inequality; a loss is what
+    would pull the section's decision the other way.
+    """
+    role = _per_question_mean(rows_by_arm[role_arm], "ndcg@10")
+    base = _per_question_mean(rows_by_arm[base_arm], "ndcg@10")
+    wins = sorted(q for q in base if role.get(q, 0) > base[q])
+    losses = sorted(q for q in base if role.get(q, 0) < base[q])
+    ties = sorted(q for q in base if role.get(q, 0) == base[q])
+    return {
+        "wins": wins,
+        "losses": losses,
+        "ties": ties,
+        "per_question": {
+            q: {"rrf": round(base[q], 4), role_arm: round(role.get(q, 0.0), 4)}
+            for q in sorted(base)
+        },
+    }
+
+
 # ---------------------------------------------------------------------------
 # response-usage spend recorder
 # ---------------------------------------------------------------------------
@@ -116,28 +149,56 @@ class SpendRecorder:
 # ---------------------------------------------------------------------------
 
 
-def _score_arm(arm: str, ctx, questions) -> tuple[list[dict], list[str]]:
+def _score_arm(
+    arm: str, ctx, questions, pass_index: int
+) -> tuple[list[dict], list[str]]:
     """Score one arm, returning its rows and the questions it refused.
 
     A refusal is a question whose arm could not be scored because it lifted a
     candidate the fixture does not label; it is recorded rather than raised so
-    the remaining questions are still measured.
+    the remaining questions are still measured. A rerank arm records the wall
+    time of its one rerank call per question, so the run's p95 is the rerank's
+    own latency rather than the retrieval that precedes it.
     """
     harness = _harness()
     rows: list[dict] = []
     refused: list[str] = []
     for question in questions:
         ctx.embedding = ctx.embedding_for(question)
+        before = len(ctx.rerank_seconds)
         try:
             ranked = harness.arm_ranking(question, ctx)
             harness.require_labelled(arm, question, ranked)
         except harness.UnlabelledCandidates:
             refused.append(question.id)
             continue
-        row = {"arm": arm, "question": question.id, "held_out": question.held_out}
+        row = {
+            "arm": arm,
+            "question": question.id,
+            "held_out": question.held_out,
+            "pass": pass_index,
+        }
         row.update(harness.score_ranking(question, ranked))
+        if len(ctx.rerank_seconds) > before:
+            row["wall_seconds"] = ctx.rerank_seconds[-1]
+            row["pool"] = ctx.rerank_pool
         rows.append(row)
     return rows, refused
+
+
+def _p95(values: list[float]) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    idx = max(0, math.ceil(0.95 * len(ordered)) - 1)
+    return round(ordered[idx], 3)
+
+
+def _per_question_mean(rows: list[dict], key: str) -> dict[str, float]:
+    by_q: dict[str, list[float]] = {}
+    for row in rows:
+        by_q.setdefault(row["question"], []).append(row[key])
+    return {q: sum(v) / len(v) for q, v in by_q.items()}
 
 
 def measure_signal_arms(passes: int) -> dict:
@@ -153,14 +214,16 @@ def measure_signal_arms(passes: int) -> dict:
 
     spend = SpendRecorder()
     table: dict[str, dict] = {}
+    rows_by_arm: dict[str, list[dict]] = {}
     for arm in ["rrf", *harness.JEV_ARMS]:
         spend.reset()
         spend.install()
         per_pass_ndcg: list[float] = []
         per_pass_prec: list[float] = []
+        rows_all: list[dict] = []
         refused: list[str] = []
         try:
-            for _ in range(passes):
+            for pass_index in range(passes):
                 ctx = harness.ArmContext(
                     gc=gc,
                     encoder=encoder,
@@ -168,11 +231,17 @@ def measure_signal_arms(passes: int) -> dict:
                     eligible=eligible,
                     spend_jev=arm in harness.JEV_ARMS,
                 )
-                rows, refused = _score_arm(arm, ctx, harness.QUESTIONS)
+                rows, refused = _score_arm(
+                    arm, ctx, harness.QUESTIONS, pass_index
+                )
+                rows_all.extend(rows)
                 per_pass_ndcg.append(harness.mean(rows, "ndcg@10"))
                 per_pass_prec.append(harness.mean(rows, "grade3_precision@5"))
         finally:
             spend.restore()
+        walls = [r["wall_seconds"] for r in rows_all if "wall_seconds" in r]
+        pools = {r.get("pool") for r in rows_all if "pool" in r}
+        rows_by_arm[arm] = rows_all
         table[arm] = {
             "passes": passes,
             "mean_ndcg@10": round(sum(per_pass_ndcg) / len(per_pass_ndcg), 4)
@@ -185,11 +254,20 @@ def measure_signal_arms(passes: int) -> dict:
             if per_pass_ndcg
             else None,
             "per_pass_ndcg@10": [round(v, 4) for v in per_pass_ndcg],
+            "per_pass_grade3_precision@5": [round(v, 4) for v in per_pass_prec],
+            "p95_wall_seconds": _p95(walls),
+            "mean_wall_seconds": round(sum(walls) / len(walls), 3) if walls else None,
+            "rerank_pools": sorted(p for p in pools if p is not None),
             "refused_questions": refused,
             "jev_calls": spend.calls,
             "jev_usd": round(spend.usd, 6),
         }
-    return table
+    return {
+        "label_count": _label_count(),
+        "arms": table,
+        "role_vs_fusion": compare_role_to_fusion(rows_by_arm),
+        "rows": rows_by_arm,
+    }
 
 
 # ---------------------------------------------------------------------------
