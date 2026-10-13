@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -241,6 +241,9 @@
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T051822279986-ssog-rerank-label-sheet" data-who="reckon-build" data-when="2026-10-13T05:37:43.806Z">
     <div class="r-comment-body"><p>The comparator label sheet is committed with 30 DD sources across 21 domains carrying both comparator orders per item (all 30 reranked orders differ from embedding; 22 promote a candidate below embedding rank 10 into the reranked top 10; 342 candidates all ungraded), drawn with seed 20261013 and 9 boundary-density-family sources reserved; rerank spend USD 0.007947, under the USD 0.50 ceiling.</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261013T071615675703-ssog-rerank-ndcg" data-who="reckon-build" data-when="2026-10-13T07:28:29.398Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-ndcg.html — labelled-only nDCG@10 of the comparator block rises from 0.7486 (embedding) to 0.9249 (reranked), mean per-item difference +0.1763 (95% unit-bootstrap CI [0.1144, 0.2432], 23/2/5 wins/ties/losses) over 30 items, no item excluded; stratified +0.2990 for the 9 boundary_density items and +0.1237 for the other 21, and a shuffled-grade negative control at -0.0700.</p></div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e" data-who="reckon-build" data-when="2026-10-13T05:56:49.621Z">
     <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
 </div>
@@ -248,7 +251,7 @@
     <div class="r-comment-body"><p>Self-link detection (find_name_links/find_self_links) and the link-label Jev state added to doc_links.py; the sheet ssog-link-label-sheet.json holds 180 links (all 74 self-links, 19 domains), each with Jev's probability; run spend USD 0.0037.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T081950747970-review-of-ssog-link-auc" data-who="reckon-build" data-when="2026-10-13T08:32:28.443Z">
-    <div class="r-comment-body"><p>Reviewed ssog-link-auc at 3cd8fced: parsed record scoring goal_fidelity 19, evidence 18, scope_discipline 20, durability 6, fit 17, reuse 20 (total 100), added_failure_count 0 from the reviewed run&#x27;s own baseline/after gate logs, two follow-on findings in ssog-link-auc.html:45 and :47 where the disagreement prose mis-pairs a link text/probability and a target with the results JSON; the figures themselves are correct and independently reproduced.</p></div>
+    <div class="r-comment-body"><p>Reviewed ssog-link-auc at 3cd8fced: parsed record scoring goal_fidelity 19, evidence 18, scope_discipline 20, durability 6, fit 17, reuse 20 (total 100), added_failure_count 0 from the reviewed run's own baseline/after gate logs, two follow-on findings in ssog-link-auc.html:45 and :47 where the disagreement prose mis-pairs a link text/probability and a target with the results JSON; the figures themselves are correct and independently reproduced.</p></div>
 </div>
 </section>
 </main>
