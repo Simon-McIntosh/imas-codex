@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-maintenance-test-asserts">
+<title>The edits-scoped maintenance test now observes both seams it names</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-maintenance-test-asserts-title">The edits-scoped maintenance test now observes both seams it names</h1>
+
+<table id="sib-maintenance-test-asserts-header">
+<tbody>
+<tr><th>Base revision</th><td><code>57726eec9523e6e95579518f7c132571526914eb</code></td></tr>
+<tr><th>Test</th><td><code>tests/standard_names/test_edit_scope_skips_maintenance.py</code></td></tr>
+<tr><th>Decision</th><td>Drive the run through the real <code>sn run</code> command. The product already skips the CLI's graph-wide startup steps when <code>--skip-global-maintenance</code> is set (<code>sn_run</code>, the <code>if not skip_global_maintenance:</code> guard before <code>_auto_sync_grammar</code>/<code>_note_pipeline_version_drift</code>), so the assertions were kept rather than removed.</td></tr>
+</tbody>
+</table>
+
+<p id="sib-maintenance-test-asserts-summary">
+Previously the test called <code>_run_sn_cmd</code> directly. That function never
+invokes <code>_auto_sync_grammar</code> or <code>_note_pipeline_version_drift</code>
+— they live in <code>sn_run</code> — so both
+<code>assert_not_called()</code> assertions passed unconditionally. The test now
+invokes <code>CliRunner().invoke(sn, ["run", ...])</code> with the pools stubbed
+as before, so the startup-step assertions observe the real guard and the
+forwarding assertions still observe <code>run_sn_pools</code>.
+</p>
+
+<table id="sib-maintenance-test-asserts-controls">
+<caption>Negative controls (scratch copy of the package under
+$TMPDIR, <code>module_under_test</code> resolved to the scratch tree) &mdash; each
+mutation reddens the assertion it names.</caption>
+<thead><tr><th>Mutation</th><th>Assertion reddened</th><th>EXIT</th><th>Log</th></tr></thead>
+<tbody>
+<tr><td>Remove the <code>if not skip_global_maintenance:</code> startup guard (calls run unconditionally)</td><td><code>grammar_sync.assert_not_called()</code> &mdash; <code>Expected '_auto_sync_grammar' to not have been called. Called 1 times.</code></td><td>1</td><td><code>logs/neg_startup_guard.log</code></td></tr>
+<tr><td>Drop <code>scope_run_id</code> from the <code>run_sn_pools</code> call</td><td><code>kwargs["scope_run_id"]</code></td><td>1</td><td><code>logs/neg_scope_run_id_forward.log</code></td></tr>
+<tr><td>Drop <code>edits_only</code> from the <code>run_sn_pools</code> call</td><td><code>kwargs["edits_only"]</code></td><td>1</td><td><code>logs/neg_edits_only_forward.log</code></td></tr>
+<tr><td>Drop <code>skip_global_maintenance</code> from the <code>run_sn_pools</code> call</td><td><code>kwargs["skip_global_maintenance"]</code></td><td>1</td><td><code>logs/neg_skip_forward.log</code></td></tr>
+</tbody>
+</table>
+
+<table id="sib-maintenance-test-asserts-gates">
+<caption>Gate and head-arm runs.</caption>
+<thead><tr><th>Arm</th><th>Command</th><th>Result</th><th>Log</th></tr></thead>
+<tbody>
+<tr><td>Base (worktree 57726eec9, pre-change)</td><td><code>uv run pytest</code> over the maintenance test and the 36 <code>sn_run</code>/<code>_run_sn_cmd</code> CLI files</td><td>525 passed, 42 deselected, <code>EXIT=0</code></td><td><code>base_cli.log</code></td></tr>
+<tr><td>Head (modified test)</td><td>same selection</td><td>525 passed, 42 deselected, <code>EXIT=0</code> &mdash; no added failures</td><td><code>after_cli.log</code></td></tr>
+<tr><td>Scratch head arm (pristine product copy)</td><td>maintenance test in scratch tree</td><td>1 passed, <code>EXIT=0</code></td><td><code>logs/scratch_head.log</code></td></tr>
+</tbody>
+</table>
+
+</main>
+</body>
+</html>

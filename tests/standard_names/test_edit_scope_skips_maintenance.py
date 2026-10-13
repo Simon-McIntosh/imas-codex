@@ -3,16 +3,19 @@
 ``sn run`` accepts ``--skip-global-maintenance`` only for a run already bounded
 by ``--focus/--batch``, ``--name`` or ``--scope-run-id`` — the case it was
 written for is a run scoped to an edit's own run id, whose edits must not
-escalate into a graph-wide reconcile pass.  The flag is carried by
-``_run_sn_cmd``: it suppresses the CLI's own graph-wide startup steps and is
-forwarded to ``run_sn_pools``, which is where the mutating maintenance set is
-silenced.
+escalate into a graph-wide reconcile pass.
 
-The hop pinned here is the forwarding inside ``_run_sn_cmd`` — the CLI's
-``--scope-run-id`` wiring into ``_run_sn_cmd`` is covered elsewhere, and the
-loop's handling of ``skip_global_maintenance`` is covered by the scoped
-maintenance suite.  Removing the forwarding leaves ``run_sn_pools`` on the
-default ``False`` and this test fails on a known-present control.
+The bypass is judged at two seams and this test observes both by driving the
+real ``sn run`` command:
+
+* ``sn_run`` owns the CLI's graph-wide startup steps and gates them on
+  ``skip_global_maintenance``; the command runs them only when the flag is
+  unset.
+* ``_run_sn_cmd`` forwards the flag to ``run_sn_pools``, where the mutating
+  maintenance set is silenced.
+
+Removing either behaviour turns its assertion red: the startup steps run
+unconditionally, or ``run_sn_pools`` falls back to the default ``False``.
 """
 
 from __future__ import annotations
@@ -20,7 +23,9 @@ from __future__ import annotations
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from imas_codex.cli.sn import _run_sn_cmd
+from click.testing import CliRunner
+
+from imas_codex.cli.sn import sn
 
 _EDIT_RUN_ID = "sn-edit-scope-probe"
 
@@ -58,24 +63,26 @@ def test_edits_scoped_run_skips_global_maintenance() -> None:
             return_value={"stop_reason": "completed"},
         ),
     ):
-        row = _run_sn_cmd(
-            cost_limit=5.0,
-            per_domain_limit=None,
-            dry_run=False,
-            quiet=True,
-            source="dd",
-            scope_run_id=_EDIT_RUN_ID,
-            edits_only=True,
-            skip_global_maintenance=True,
+        result = CliRunner().invoke(
+            sn,
+            [
+                "run",
+                "--scope-run-id",
+                _EDIT_RUN_ID,
+                "--edits",
+                "--skip-global-maintenance",
+                "--quiet",
+            ],
         )
 
-    assert row == {"stop_reason": "completed"}
+    assert result.exit_code == 0, result.output
     # The CLI's own graph-wide startup steps are the first maintenance a scoped
-    # run must skip; they run only when the flag is unset.
+    # run must skip; sn_run runs them only when the flag is unset.
     grammar_sync.assert_not_called()
     drift_note.assert_not_called()
-    # Known-present controls: the recorder reached the orchestrator seam with
-    # the edit's scope before the bypass is judged.
+    # Known-present controls: the run reached the orchestrator seam carrying
+    # the edit's scope, the bypass, and the edits predicate, before the skip
+    # can be judged.
     pools.assert_awaited_once()
     kwargs = pools.await_args.kwargs
     assert kwargs["scope_run_id"] == _EDIT_RUN_ID
