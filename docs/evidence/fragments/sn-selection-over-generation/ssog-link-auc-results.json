@@ -1,0 +1,230 @@
+{
+  "baseline_self_link": {
+    "auc": 0.7992995689655172,
+    "level": 0.95,
+    "lower": 0.7388307983911551,
+    "n_resamples": 1000,
+    "point": 0.7992995689655172,
+    "seed": 123,
+    "upper": 0.8622866206494072
+  },
+  "copy_group_field": "documenting_name",
+  "disagreement_prose": "The results JSON lists up to 10 rows of each kind. The highest-probability label-0 row, a link he would let through, is &#8220;poloidal neutral species convection velocity&#8221; at 0.94, pointing at <code>poloidal_neutral_state_convection_velocity</code> from <code>poloidal_neutral_state_convection_velocity</code>; the lowest-probability label-1 row, a good link he would block, is &#8220;fast_particle_critical_energy&#8221; at 0.30, pointing at <code>fast_ion_critical_energy</code> from <code>fast_ion_critical_energy</code>.",
+  "disagreements": {
+    "label_0_highest_probability": [
+      {
+        "documenting_name": "poloidal_neutral_state_convection_velocity",
+        "is_self_link": true,
+        "jev_probability": 0.94,
+        "link_text": "poloidal neutral species convection velocity",
+        "target_name": "poloidal_neutral_state_convection_velocity"
+      },
+      {
+        "documenting_name": "voltage_of_toroidal_field_coil",
+        "is_self_link": false,
+        "jev_probability": 0.93,
+        "link_text": "resistance",
+        "target_name": "resistance_of_toroidal_field_coil"
+      },
+      {
+        "documenting_name": "toroidal_co_passing_fast_current_density",
+        "is_self_link": true,
+        "jev_probability": 0.92,
+        "link_text": "toroidal co-passing current density",
+        "target_name": "toroidal_co_passing_fast_current_density"
+      },
+      {
+        "documenting_name": "launched_power_of_ion_cyclotron_heating_antenna",
+        "is_self_link": true,
+        "jev_probability": 0.91,
+        "link_text": "power of an ion-cyclotron heating antenna",
+        "target_name": "launched_power_of_ion_cyclotron_heating_antenna"
+      },
+      {
+        "documenting_name": "toroidal_torque_density_due_to_diamagnetic_drift",
+        "is_self_link": true,
+        "jev_probability": 0.88,
+        "link_text": "torque density due to diamagnetic drift",
+        "target_name": "toroidal_torque_density_due_to_diamagnetic_drift"
+      },
+      {
+        "documenting_name": "area_of_neutral_beam_injector",
+        "is_self_link": false,
+        "jev_probability": 0.88,
+        "link_text": "neutral-beam aperture width",
+        "target_name": "first_local_tangential_width_of_aperture"
+      },
+      {
+        "documenting_name": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+        "is_self_link": true,
+        "jev_probability": 0.87,
+        "link_text": "flux-surface-averaged deuterium-tritium density",
+        "target_name": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+      },
+      {
+        "documenting_name": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+        "is_self_link": true,
+        "jev_probability": 0.87,
+        "link_text": "deuterium-tritium density at the plasma boundary",
+        "target_name": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+      },
+      {
+        "documenting_name": "parallel_edge_plasma_momentum_diffusivity",
+        "is_self_link": true,
+        "jev_probability": 0.87,
+        "link_text": "parallel momentum diffusivity",
+        "target_name": "parallel_edge_plasma_momentum_diffusivity"
+      },
+      {
+        "documenting_name": "radial_perturbed_vacuum_magnetic_field",
+        "is_self_link": false,
+        "jev_probability": 0.86,
+        "link_text": "real radial component",
+        "target_name": "radial_perturbed_vacuum_magnetic_field_real_part"
+      }
+    ],
+    "label_1_lowest_probability": [
+      {
+        "documenting_name": "fast_ion_critical_energy",
+        "is_self_link": true,
+        "jev_probability": 0.3,
+        "link_text": "fast_particle_critical_energy",
+        "target_name": "fast_ion_critical_energy"
+      },
+      {
+        "documenting_name": "parallel_normalized_perturbed_vector_potential_amplitude",
+        "is_self_link": false,
+        "jev_probability": 0.35,
+        "link_text": "parallel normalized perturbed vector potential",
+        "target_name": "parallel_normalized_perturbed_vector_potential"
+      },
+      {
+        "documenting_name": "normalized_atomic_count_of_pellet",
+        "is_self_link": false,
+        "jev_probability": 0.41,
+        "link_text": "atomic count of pellet",
+        "target_name": "atomic_count_of_pellet"
+      },
+      {
+        "documenting_name": "perturbed_vector_potential",
+        "is_self_link": false,
+        "jev_probability": 0.46,
+        "link_text": "normalized_perturbed_vector_potential",
+        "target_name": "normalized_perturbed_vector_potential"
+      },
+      {
+        "documenting_name": "maximum_power_at_outer_divertor_target",
+        "is_self_link": false,
+        "jev_probability": 0.5,
+        "link_text": "power at the outer divertor target",
+        "target_name": "power_at_outer_divertor_target"
+      },
+      {
+        "documenting_name": "total_electron_deposited_power",
+        "is_self_link": true,
+        "jev_probability": 0.55,
+        "link_text": "electron_deposited_power",
+        "target_name": "total_electron_deposited_power"
+      },
+      {
+        "documenting_name": "ratio_of_coolant_mass_to_time",
+        "is_self_link": false,
+        "jev_probability": 0.55,
+        "link_text": "coolant mass",
+        "target_name": "coolant_mass"
+      },
+      {
+        "documenting_name": "x_first_measurement_direction_unit_vector_of_strain_gauge",
+        "is_self_link": false,
+        "jev_probability": 0.58,
+        "link_text": "x coordinate of the sensor attachment point",
+        "target_name": "x_coordinate_of_sensor_attachment_point"
+      },
+      {
+        "documenting_name": "toroidal_angle_of_toroidal_field_coil",
+        "is_self_link": true,
+        "jev_probability": 0.6,
+        "link_text": "toroidal_angle_of_conductor_cross_section",
+        "target_name": "toroidal_angle_of_toroidal_field_coil"
+      },
+      {
+        "documenting_name": "total_neutral_particle_flux_at_wall_due_to_surface_emission",
+        "is_self_link": true,
+        "jev_probability": 0.6,
+        "link_text": "neutral_particle_source_rate_at_wall_due_to_surface_emission",
+        "target_name": "total_neutral_particle_flux_at_wall_due_to_surface_emission"
+      }
+    ]
+  },
+  "jev": {
+    "all": {
+      "auc": 0.7566675646551725,
+      "defined": true,
+      "level": 0.95,
+      "lower": 0.6792801647629075,
+      "n": 180,
+      "n_resamples": 1000,
+      "negatives": 64,
+      "point": 0.7566675646551725,
+      "positives": 116,
+      "seed": 123,
+      "upper": 0.8230223331408557
+    },
+    "non_self_links": {
+      "auc": 0.7593052109181141,
+      "defined": true,
+      "level": 0.95,
+      "lower": 0.6070396505376344,
+      "n": 106,
+      "n_resamples": 1000,
+      "negatives": 13,
+      "point": 0.7593052109181141,
+      "positives": 93,
+      "seed": 123,
+      "upper": 0.891721944531223
+    },
+    "self_links": {
+      "auc": 0.6594202898550724,
+      "defined": true,
+      "level": 0.95,
+      "lower": 0.5132772070881924,
+      "n": 74,
+      "n_resamples": 1000,
+      "negatives": 51,
+      "point": 0.6594202898550724,
+      "positives": 23,
+      "seed": 123,
+      "upper": 0.7797266076241817
+    }
+  },
+  "labels_commit": "9867930cd",
+  "level": 0.95,
+  "n_copy_groups": 168,
+  "n_excluded_null_probability": 0,
+  "n_resamples": 1000,
+  "n_rows": 180,
+  "n_scored": 180,
+  "negative_control_shuffled_label": {
+    "auc": 0.48807920258620685,
+    "contains_0_5": true,
+    "level": 0.95,
+    "lower": 0.39147272985214526,
+    "n_resamples": 1000,
+    "point": 0.48807920258620685,
+    "seed": 123,
+    "upper": 0.5828264093588799
+  },
+  "paired_difference_jev_minus_baseline": {
+    "auc_baseline": 0.7992995689655172,
+    "auc_jev": 0.7566675646551725,
+    "difference": -0.04263200431034475,
+    "level": 0.95,
+    "lower": -0.13297534483822418,
+    "n_resamples": 1000,
+    "point": -0.04263200431034475,
+    "seed": 123,
+    "upper": 0.041043368940529644
+  },
+  "seed": 123,
+  "sheet": "ssog-link-label-sheet.json"
+}
