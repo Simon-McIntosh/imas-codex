@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-13T10:39:22.180Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-13T10:25:45Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-domain-diagnosis.html",
+      "line": 45,
+      "severity": "follow-on",
+      "text": "the fragment measures spend against an \"authorised USD 2.25 total ceiling\" that no brief the node carries states (brief.md and prompt.txt both read \"Cap the spend at USD 2\"); the raise lives only in the run-directory resume-1-advice.txt, so a reader of the committed fragment alone reads the USD 2.048175 spend as exceeding its own cap."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-domain-diagnosis.html",
+      "line": 17,
+      "severity": "follow-on",
+      "text": "the cause is evidenced through run-directory logs named in the fragment (live-domain-census.log, classification-cohorts.log, prompt-vocabulary.log) but none is committed; only results.json is in-repo, so the fragment's cause cannot be re-derived from the repository, the driver reproducing the accuracies only."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the node changes no runtime code and its only executable artefact is a standalone evidence driver that no production module imports.",
+    "diff": "read commit by commit against base 5af30bd9452b0a5529ac69c05010cd710083a2a2; eight additive commits (9455 insertions, 0 deletions) create the driver, the results JSON and the fragment under docs/evidence/fragments/sn-catalog-grouping/, importing pick_primary_domain, gather_classification_context and classify_tier1_llm from their owners, and touch nothing under imas_codex/.",
+    "done_when": "the done-when asks for the fragment naming the cause, a driver writing results.json with three accuracies and the spend, two logged runs, a before/after no-property-changed count, and the tests/graph/test_dd_domain_classifier.py gate (plus test_cypher_property_check.py for any Cypher); the manifest records base 114 passed EXIT=0 and head 118 passed EXIT=0, and the committed results.json holds 170 rows, 856 paths, USD 2.048175 and an identical before/after digest.",
+    "goal": "the goal is to diagnose why the DD per-path physics_domain echoes its IDS and to measure stored/fresh/derived domain accuracy against the labelled names; scg-dd-domain-diagnosis.html:14-17 names the cause (build_dd.py:3495 and :3583 overwrite the path domain, dd_domain_classifier.py:1022 skips it) and :60-61 report all three accuracies for both cohorts.",
+    "manifest": "read at the run directory; status complete; eight commits; changed_paths names the three fragment files; test_logs names base-gate.log and final-head-gate.log, both present; baseline_suite and after_suite are empty (unarmed) but the two gate logs are readable and give the delta.",
+    "write_paths": "the brief's Write scope lists scg-dd-domain-diagnosis-run.py, scg-dd-domain-diagnosis-results.json and scg-dd-domain-diagnosis.html; git diff --stat 5af30bd9..5b31377c is exactly those three files, all inside the grant."
+  },
+  "justifications": {
+    "durability": "scg-dd-domain-diagnosis-run.py:44 (positive control), :121 (spend reserve) and :230 (before != after read-only guard) are live guards that raise on regression, but no committed test fails if the driver regresses and no red-log negative control demonstrates a guard firing.",
+    "evidence": "base-gate.log (114 passed EXIT=0) and final-head-gate.log (118 passed EXIT=0) record the named gate and results.json plus replay-comparison.log record the accuracies, rows, spend and equal before/after digest, but the named gate exercises the untouched classifier, not the diagnosis, so it is a regression baseline rather than a measure of the accuracy figures.",
+    "fit": "scg-dd-domain-diagnosis.html is a well-formed section fragment and scg-dd-domain-diagnoses-run.py:1 follows the module-docstring, argparse and print-receipt idiom of its peer fragment scripts, with no plan or ticket label in any content symbol.",
+    "goal_fidelity": "scg-dd-domain-diagnosis.html:14-17 pins the cause to build_dd.py:3495 and :3583 with dd_domain_classifier.py:1022 (all three confirmed present and matching the text) and :60-61 report stored/fresh/derived accuracies identical to results.json.",
+    "reuse": "scg-dd-domain-diagnosis-run.py:18-20 imports pick_primary_domain, gather_classification_context and classify_tier1_llm from their owners, and the local _read_sources/_snapshot/_score helpers have no repository owner (a search over imas_codex for a label-versus-prediction confusion scorer and a graph-property digest found only unrelated benchmark and prompt-cache utilities).",
+    "scope_discipline": "git diff --name-only 5af30bd9..5b31377c lists exactly the three granted fragment paths and no file under imas_codex/ is modified."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to diagnose why the DD per-path physics_domain echoes its IDS and to measure stored/fresh/derived domain accuracy against the labelled names; docs/evidence/fragments/sn-catalog-grouping/scg-dd-domain-diagnosis.html:14-17 names the cause (build_dd.py:3495 and :3583 overwrite the path domain, dd_domain_classifier.py:1022 skips it) and :60-61 report all three accuracies for both cohorts.\nVERDICT done_when: the done-when asks for the fragment naming the cause, a driver writing results.json with three accuracies and the spend, two logged runs, a before/after no-property-changed count, and the tests/graph/test_dd_domain_classifier.py gate (plus test_cypher_property_check.py for any Cypher); the manifest records base 114 passed EXIT=0 and head 118 passed EXIT=0, and the committed results.json holds 170 rows, 856 paths, USD 2.048175 and an identical before/after digest.\nVERDICT write_paths: the brief's Write scope lists scg-dd-domain-diagnosis-run.py, scg-dd-domain-diagnosis-results.json and scg-dd-domain-diagnosis.html; git diff --stat 5af30bd9..5b31377c is exactly those three files, all inside the grant.\nVERDICT manifest: read at the run directory; status complete; eight commits; changed_paths names the three fragment files; test_logs names base-gate.log and final-head-gate.log, both present; baseline_suite and after_suite are empty (unarmed) but the two gate logs are readable and give the delta.\nVERDICT diff: read commit by commit against base 5af30bd9452b0a5529ac69c05010cd710083a2a2; eight additive commits (9455 insertions, 0 deletions) create the driver, the results JSON and the fragment under docs/evidence/fragments/sn-catalog-grouping/, importing pick_primary_domain, gather_classification_context and classify_tier1_llm from their owners, and touch nothing under imas_codex/.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scg-dd-domain-diagnosis.html:14-17 pins the cause to build_dd.py:3495 and :3583 with dd_domain_classifier.py:1022 (all three confirmed present and matching the text) and :60-61 report stored/fresh/derived accuracies identical to results.json.\nSCORE evidence: 17\nJUSTIFICATION evidence: base-gate.log (114 passed EXIT=0) and final-head-gate.log (118 passed EXIT=0) record the named gate and results.json plus replay-comparison.log record the accuracies, rows, spend and equal before/after digest, but the named gate exercises the untouched classifier, not the diagnosis, so it is a regression baseline rather than a measure of the accuracy figures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 5af30bd9..5b31377c lists exactly the three granted fragment paths and no file under imas_codex/ is modified.\nSCORE durability: 12\nJUSTIFICATION durability: scg-dd-domain-diagnosis-run.py:44 (positive control), :121 (spend reserve) and :230 (before != after read-only guard) are live guards that raise on regression, but no committed test fails if the driver regresses and no red-log negative control demonstrates a guard firing.\nSCORE fit: 19\nJUSTIFICATION fit: scg-dd-domain-diagnosis.html is a well-formed section fragment and scg-dd-domain-diagnosis-run.py:1 follows the module-docstring, argparse and print-receipt idiom of its peer fragment scripts, with no plan or ticket label in any content symbol.\nSCORE reuse: 19\nJUSTIFICATION reuse: scg-dd-domain-diagnosis-run.py:18-20 imports pick_primary_domain, gather_classification_context and classify_tier1_llm from their owners, and the local _read_sources/_snapshot/_score helpers have no repository owner (a search over imas_codex for a label-versus-prediction confusion scorer and a graph-property digest found only unrelated benchmark and prompt-cache utilities).\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-domain-diagnosis.html:45 follow-on: the fragment measures spend against an \"authorised USD 2.25 total ceiling\" that no brief the node carries states (brief.md and prompt.txt both read \"Cap the spend at USD 2\"); the raise lives only in the run-directory resume-1-advice.txt, so a reader of the committed fragment alone reads the USD 2.048175 spend as exceeding its own cap.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-domain-diagnosis.html:17 follow-on: the cause is evidenced through run-directory logs named in the fragment (live-domain-census.log, classification-cohorts.log, prompt-vocabulary.log) but none is committed; only results.json is in-repo, so the fragment's cause cannot be re-derived from the repository, the driver reproducing the accuracies only.\n",
+  "review_run_id": "r-20261013T102530580106-review-of-scg-dd-domain-diagnosis-5b31377c7995",
+  "reviewed_base_sha": "5af30bd9452b0a5529ac69c05010cd710083a2a2",
+  "reviewed_head_sha": "5b31377c7995e95641f841d07eac3c2b5a9cbe19",
+  "reviewed_run_id": "r-20261013T083739793998-scg-dd-domain-diagnosis",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:37:22.627758+00:00",
+  "total": 107
+}
