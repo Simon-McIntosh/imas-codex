@@ -227,5 +227,14 @@
     "jt-60sa:general/uddb_3590ua202",
     "jt-60sa:equilibrium/g_eqdsk_chease_cocos",
     "jt-60sa:equilibrium/eqdb_selene_nsr"
-  ]
+  ],
+  "reprocess_start": "2026-10-13T11:53:35Z",
+  "reset_command": "imas-codex discover run jt-60sa --only signals --scan-only --reset-to discovered --focus reprocess-sample-ids.json",
+  "post_reset_census": {
+    "status_counts": {
+      "discovered": 202
+    },
+    "with_description": 0,
+    "census_utc": "2026-10-13T11:54:27Z"
+  }
 }
