@@ -4,8 +4,8 @@
   <p id="ssfms-post-reembed-harness-section-what">
     After every <code>jt-60sa</code> signal's stored vector was re-embedded, the four-arm table on §3's harness
     refused to score: the new vectors place candidates in an arm's top 10 that the fixture does not label. All
-    28 such candidates are read against their question's <code>intent</code> and graded into
-    <code>tests/llm/fixtures/signal_search_questions.json</code> (1,675 labels become 1,703). The table test then
+    29 such candidates are read against their question's <code>intent</code> and graded into
+    <code>tests/llm/fixtures/signal_search_questions.json</code> (1,675 labels become 1,704). The table test then
     scores every arm, in two runs back to back at <code>93b083114</code>.
   </p>
 
@@ -27,7 +27,7 @@
     <strong>The fused product arm is 0.0147 lower than the 0.7920 measured before the re-embed.</strong> That is
     0.0027 beyond the 0.012 run-to-run spread §3 records, so the "no lower beyond the spread" criterion is
     <strong>not met</strong>. The cause is the graph and not the labels: scoring the same current_tool rankings
-    against the fixture as it stood before this node gives the same 0.7773, because none of the 28 new labels
+    against the fixture as it stood before this node gives the same 0.7773, because none of the 29 new labels
     sits in current_tool's or rrf's top 10. The re-embedded graph's RRF score also lands on §5's in-memory
     description-only measurement (0.7773 stored against 0.7761 in memory), where §3's stale stored vectors
     scored 0.7963 against that same in-memory 0.7761. This reads as the stale vectors having been favoured by
@@ -36,7 +36,7 @@
   </p>
 
   <table id="ssfms-post-reembed-harness-section-labels">
-    <caption>Labelling log: 28 candidates graded, by question (grade 3 measured, 2 reference or adjacent, 1 related hardware, 0 different quantity)</caption>
+    <caption>Labelling log: 29 candidates graded, by question (grade 3 measured, 2 reference or adjacent, 1 related hardware, 0 different quantity)</caption>
     <thead>
       <tr><th>Question</th><th>Candidates (grade)</th><th>Placed by</th></tr>
     </thead>
