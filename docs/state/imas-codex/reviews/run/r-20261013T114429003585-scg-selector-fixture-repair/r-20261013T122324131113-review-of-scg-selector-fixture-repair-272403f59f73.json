@@ -1,0 +1,53 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. baseline_suite (gate-base.log, revision ef9f7126130a20680aea80208a762bd3ddadc74f, completed true, failure_count 131) and after_suite (gate-head.log, revision 1a3ac300a80bf82ae04a7be0162d68482e24d308, completed true, failure_count 131). Id-set difference ids-head minus ids-base is empty, so added failures are 0; both arms carry 131 failure/error ids (errors from the git-archive base tree lacking .env and a git repo, per the manifest note).",
+  "backend": "local",
+  "base_log_revision": "ef9f7126130a20680aea80208a762bd3ddadc74f",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T12:35:07.431Z",
+  "dispatched_at": "2026-10-13T12:23:39Z",
+  "findings": [
+    "tests/standard_names/test_metadata_invariants.py:21 follow-on: the _DOMAIN_REPLACEMENTS map and valid_domain_names fixture repeat tests/standard_names/test_graph_ops.py:16-29 verbatim instead of extending the owner of the shared sample fixture, tests/standard_names/conftest.py, so any future IDS-name value added to the shared fixture must be mapped in two places and one can be missed.",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T114429003585-scg-selector-fixture-repair/gate-head.log:1 follow-on: the head arm's recorded revision is 1a3ac300a, the selector's head rather than the landed repair head 272403f59, because the shard run preceded the commit; the measured content is the repaired tree (the twelve ids are absent from ids-head.txt) but a reader cannot bind the log to the revision it exercised."
+  ],
+  "head_log_revision": "1a3ac300a80bf82ae04a7be0162d68482e24d308",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read 1a3ac300a..272403f59; the single commit 272403f59 changes exactly four files, all inside the declared scope.",
+    "done_when": "head-12.log records '104 passed, 1 deselected' EXIT=0 for the three files, and the manifest baseline_suite (ef9f71261) and after_suite (1a3ac300a) both completed true with failure_count 131, yielding added_failure_ids [], which ids-head.txt minus ids-base.txt reproduces as empty.",
+    "goal": "tests/standard_names/test_graph_ops.py:24 and tests/standard_names/test_metadata_invariants.py:29 add valid_domain_names mapping core_profiles->core_plasma_physics and magnetics->magnetic_field_diagnostics, tests/standard_names/test_review_pipeline.py:96 changes the inline literal, and docs/evidence/fragments/sn-catalog-grouping/scg-selector-fixture-repair.html enumerates the fixtures and the production callers.",
+    "manifest": "read; status complete, tests.three_repaired_files '104 passed' at head-12.log, tests.negative_control the expected ValueError at negative-control.log, follow_ons records that conftest.py still carries the IDS-name values.",
+    "write_paths": "the manifest declares the three test files and the fragment; every path in 1a3ac300a..272403f59 is inside that set."
+  },
+  "justifications": {
+    "durability": "the repair is falsifiable and the guard is the pre-existing selector refusal, shown by negative-control.log where reinstating the IDS-name value reddens the write-path test with 'ValueError: Unknown physics domain: [core_profiles]' at graph_ops.py:5753.",
+    "evidence": "head-12.log records '104 passed' EXIT=0 for the three named files and the two-arm set difference between ids-head.txt and ids-base.txt is empty, but gate-head.log:1 records the head arm's revision as 1a3ac300a (the parent) rather than the landed head 272403f59.",
+    "fit": "the fixture and comment idiom match the surrounding conftest pattern and no plan, sprint, ticket or author label appears, docked because tests/standard_names/conftest.py owns sample_standard_names while the identical fixture is defined twice.",
+    "goal_fidelity": "tests/standard_names/test_graph_ops.py:21-29 and tests/standard_names/test_metadata_invariants.py:21-29 map exactly the two IDS names the shared fixture carries (tests/standard_names/conftest.py 'core_profiles' and 'magnetics') to valid members, and tests/standard_names/test_review_pipeline.py:96 fixes the one inline literal.",
+    "reuse": "the added fixture consumes tests/standard_names/conftest.py:sample_standard_names rather than forking an owned capability, but the same _DOMAIN_REPLACEMENTS map and valid_domain_names fixture are duplicated verbatim across two modules the fence prevented consolidating.",
+    "scope_discipline": "every path in 1a3ac300a..272403f59 is one of the four declared write paths, and the only extra beyond the fixture edit is a docstring changelog-reference removal in tests/standard_names/test_metadata_invariants.py:2-6 that stays inside a written file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to repair the fixtures that hand select_primary_domain an IDS name where a PhysicsDomain belongs so the three named test files pass at the selector's head, and to list the production callers; tests/standard_names/test_graph_ops.py:24 adds a valid_domain_names fixture mapping core_profiles->core_plasma_physics and magnetics->magnetic_field_diagnostics, tests/standard_names/test_metadata_invariants.py:29 adds the same fixture, and tests/standard_names/test_review_pipeline.py:96 changes one inline literal, and docs/evidence/fragments/sn-catalog-grouping/scg-selector-fixture-repair.html enumerates the changed fixtures and the callers.\nVERDICT done_when: the done_when requires the three files pass at head and tests/standard_names at head against base ef9f71261 shows zero added failures by the consumer-gate method; head-12.log records '104 passed, 1 deselected' EXIT=0 for the three files, and the manifest baseline_suite (ef9f71261, completed true, failure_count 131) and after_suite (1a3ac300a, completed true, failure_count 131) yield added_failure_ids [], which ids-head.txt minus ids-base.txt reproduces as empty and the shard logs corroborate with none of the twelve target ids failing at head.\nVERDICT write_paths: the manifest declares tests/standard_names/test_graph_ops.py, test_metadata_invariants.py, test_review_pipeline.py and docs/evidence/fragments/sn-catalog-grouping/scg-selector-fixture-repair.html; every path in 1a3ac300a..272403f59 is inside that set.\nVERDICT manifest: read; status complete, after_suite records zero added failure ids, tests.three_repaired_files records '104 passed' at head-12.log, tests.negative_control records the expected ValueError at negative-control.log, and follow_ons records that tests/standard_names/conftest.py still carries the IDS-name values.\nVERDICT diff: read 1a3ac300a..272403f59 commit by commit; the single commit 272403f59 changes exactly four files inside the declared scope \u2014 a module-local valid_domain_names fixture plus the _DOMAIN_REPLACEMENTS map in two test modules, one inline literal in the third, and the new evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_graph_ops.py:21-29 and tests/standard_names/test_metadata_invariants.py:21-29 map exactly the two IDS names the shared fixture carries (tests/standard_names/conftest.py physics_domain 'core_profiles' and 'magnetics') to valid members, and tests/standard_names/test_review_pipeline.py:96 fixes the one inline literal.\nSCORE evidence: 17\nJUSTIFICATION evidence: head-12.log records '104 passed' EXIT=0 for the three named files and the two-arm set difference between ids-head.txt and ids-base.txt is empty, but gate-head.log:1 records the head arm's revision as 1a3ac300a (the parent) rather than the landed head 272403f59, so the log cannot be tied to the revision it measured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in 1a3ac300a..272403f59 is one of the four declared write paths, and the only extra beyond the fixture edit is a docstring changelog-reference removal in tests/standard_names/test_metadata_invariants.py:2-6 that stays inside a written file.\nSCORE durability: 18\nJUSTIFICATION durability: the repair is falsifiable and the guard is the pre-existing selector refusal, shown by negative-control.log where reinstating the IDS-name value reddens tests/standard_names/test_graph_ops.py::TestWriteStandardNames::test_dd_relationship_created with 'ValueError: Unknown physics domain: [core_profiles]' at graph_ops.py:5753; no value-echoing assertion is added.\nSCORE fit: 16\nJUSTIFICATION fit: the fixture and comment idiom match the surrounding conftest fixture pattern and no plan, sprint, ticket or author label appears, docked because tests/standard_names/conftest.py owns sample_standard_names while the identical valid_domain_names fixture is defined twice.\nSCORE reuse: 13\nJUSTIFICATION reuse: a capability search over tests/standard_names found the owner of the shared sample fixture to be tests/standard_names/conftest.py, whose sample_standard_names the new fixture consumes rather than replaces, so no repository capability is forked, but the same _DOMAIN_REPLACEMENTS map and valid_domain_names fixture are duplicated verbatim across two modules the fence prevented consolidating.\nFINDING tests/standard_names/test_metadata_invariants.py:21 follow-on: the _DOMAIN_REPLACEMENTS map and valid_domain_names fixture repeat tests/standard_names/test_graph_ops.py:16-29 verbatim instead of extending the owner of the shared sample fixture, tests/standard_names/conftest.py, so any future IDS-name value added to the shared fixture must be mapped in two places and one can be missed.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T114429003585-scg-selector-fixture-repair/gate-head.log:1 follow-on: the head arm's recorded revision is 1a3ac300a, the selector's head rather than the landed repair head 272403f59, because the shard run preceded the commit; the measured content is the repaired tree (the twelve ids are absent from ids-head.txt) but a reader cannot bind the log to the revision it exercised.",
+  "review_run_id": "r-20261013T122324131113-review-of-scg-selector-fixture-repair-272403f59f73",
+  "reviewed_base_sha": "1a3ac300a80bf82ae04a7be0162d68482e24d308",
+  "reviewed_head_sha": "272403f59f73aff10ab52e7081d1495b6db7e2c2",
+  "reviewed_run_id": "r-20261013T114429003585-scg-selector-fixture-repair",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T12:37:53.011848+00:00",
+  "total": 102
+}
