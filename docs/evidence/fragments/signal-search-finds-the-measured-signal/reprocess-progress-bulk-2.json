@@ -1,0 +1,67 @@
+{
+  "node": "ssfms-reprocess-bulk-2",
+  "run_id": "r-20261013T132648132380-ssfms-reprocess-bulk-2",
+  "reprocess_start": "2026-10-13T11:53:35Z",
+  "assigned_categories": ["b260008", "CryoHRS"],
+  "assigned_signals": 3663,
+  "resets_forbidden_after": "2026-10-13T14:07:05Z",
+  "categories_not_yet_reset": [],
+  "categories_reset_but_not_finished": ["b260008"],
+  "scopes_finished": [
+    {
+      "label": "cryohrs_probe",
+      "category": "CryoHRS",
+      "ids_file": "bulk-logs/scope1_probe.json",
+      "signals": 150,
+      "reset_log": "bulk-logs/scope1_reset.log",
+      "reset_count": 150,
+      "postreset_log": "bulk-logs/scope1_probe.postreset.log",
+      "postreset_discovered": 150,
+      "postreset_described": 0,
+      "enrich_log": "bulk-logs/scope1_enrich.log",
+      "final_log": "bulk-logs/scope1_probe.final.log",
+      "final_discovered": 0,
+      "final_described": 0,
+      "final_hash_mismatch": 0
+    },
+    {
+      "label": "cryohrs_rest",
+      "category": "CryoHRS",
+      "ids_file": "bulk-logs/scope2_cry_rest.json",
+      "signals": 554,
+      "reset_log": "bulk-logs/scope2_reset.log",
+      "reset_count": 554,
+      "enrich_log": "bulk-logs/scope2_enrich.log",
+      "final_log": "bulk-logs/cryohrs_full.final.log",
+      "final_discovered": 0,
+      "final_described": 704,
+      "final_hash_mismatch": 0,
+      "note": "full-category census over all 704 CryoHRS signals after both scopes"
+    }
+  ],
+  "scopes_unfinished": [
+    {
+      "label": "b260008_full",
+      "category": "b260008",
+      "ids_file": "bulk-logs/ids_b260008.json",
+      "signals": 2959,
+      "reset_log": "bulk-logs/b260008_reset.log",
+      "reset_count": 2959,
+      "reset_at": "2026-10-13T13:52:36Z",
+      "postreset_log": "bulk-logs/b260008.postreset.log",
+      "postreset_discovered": 2959,
+      "postreset_described": 0,
+      "enrich_logs": ["bulk-logs/b260008_enrich.log", "bulk-logs/b260008_enrich2.log"],
+      "final_log": "bulk-logs/final_census_b260008.log",
+      "final_total": 2959,
+      "final_discovered": 13,
+      "final_underspecified": 11,
+      "final_enriched_or_checked": 2935,
+      "final_described": 2946,
+      "final_hash_mismatch": 13,
+      "residue_reason": "The 13 signals still at discovered are the members of six LCDB zeff SignalSources whose representative was classified underspecified (zeff.s002_metafile, s002_xfitdata, s002_cst1, s002_ifunc, s002_used_fitdata_index, s005_topics_xfitdata). individualize_source_descriptions selects only SignalSource{status:'enriched'} (imas_codex/discovery/signals/parallel.py:5453), so members of an underspecified source are never individualized and never leave discovered. Closing this requires a pipeline change outside this node's write scope, and the run's 40-minute reset fence (14:07:05Z) had passed, so no further reset was permitted.",
+      "next_action": "A later node should target the 13 ids in bulk-logs/ids_b260008_residue.json and resolve the underspecified-source individualization gap before resetting them; the reset is cheap (the seed half calls no model)."
+    }
+  ],
+  "uncertain_float": null
+}
