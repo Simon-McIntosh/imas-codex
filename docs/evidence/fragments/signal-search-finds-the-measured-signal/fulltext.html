@@ -1,0 +1,137 @@
+<section id="ssfms-fulltext-fields-measure" data-reckon="signal-full-text-index-fields">
+  <h2 id="ssfms-fulltext-fields-title">Widening the signal full-text index to the words a searcher types</h2>
+
+  <p id="ssfms-fulltext-fields-what">
+    The Neo4j full-text index <code>facility_signal_text</code> backed only
+    <code>name</code>, <code>description</code> and <code>node_path</code>, so a query that
+    matched a signal through its alias code or a catalogue phrase found nothing — the JT-60SA
+    handbook writes <code>4451 A231</code> for the EF5 supply's DC voltage and no indexed field
+    carries that string. The index definition is the class-level <code>fulltext_index</code>
+    annotation on <code>FacilitySignal</code> in
+    <code>imas_codex/schemas/facility.yaml</code>; <code>SchemaIntrospector.fulltext_indexes()</code>
+    derives the property tuple from it and <code>GraphClient.ensure_fulltext_indexes()</code>
+    creates the index from that tuple. The definition now reads:
+
+    <code id="ssfms-fulltext-fields-definition">facility_signal_text:name,description,node_path,keywords,aliases,unit,source_description</code>
+
+    All seven are <code>FacilitySignal</code> attributes declared in the same schema
+    (<code>keywords</code>, <code>aliases</code>, <code>unit</code>, <code>source_description</code>
+    alongside the original three). The live index was dropped and rebuilt from the schema with
+    <code>ensure_fulltext_indexes()</code> and is <code>ONLINE</code> carrying the seven
+    properties. Every figure below was produced in the node worktree at revision
+    <code>9b092e8bd</code> against the live graph, facility <code>jt-60sa</code>.
+  </p>
+
+  <h3 id="ssfms-fulltext-fields-control-head">The control: a query only the new fields can match</h3>
+
+  <p id="ssfms-fulltext-fields-control-what">
+    The check is <code>check:alias-code-places-its-own-signal-in-the-search-top-10</code>. It
+    issues the raw index query <code>'4451 A231'</code> — the alias code the handbook uses, present
+    in no <code>name</code>, <code>description</code> or <code>node_path</code> — counts the index
+    hits, then runs the product search <code>_rank_signals</code> and requires the target
+    <code>jt-60sa:general/ef5_volpsdc</code> in the top 10.
+  </p>
+
+  <table id="ssfms-fulltext-fields-control-table">
+    <caption>
+      The declared mutation, run against the index before the rebuild and after it. Same query,
+      same target, same module; only the index property set differs.
+    </caption>
+    <thead>
+      <tr><th>Index state</th><th>index query <code>'4451 A231'</code></th><th>target in <code>_rank_signals</code> top 10</th><th>verdict</th></tr>
+    </thead>
+    <tbody>
+      <tr id="ssfms-fulltext-fields-control-before"><td>before — <code>name,description,node_path</code></td><td>0 hits</td><td>absent</td><td>FAIL, exit 1</td></tr>
+      <tr id="ssfms-fulltext-fields-control-after"><td>after — seven fields</td><td>3 hits, <code>ef5_volpsdc</code> scoring 6.821</td><td><strong>rank 1</strong></td><td>PASS, exit 0</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-fulltext-fields-control-read">
+    This is the negative control the plan declares — <em>the same alias query run against the index
+    before the rebuild must not place its target in the top 10</em> — and it reproduces exactly:
+    before the rebuild the query returns zero hits and the target is absent from the top 10
+    (the ten results are unrelated LCDB diagnostic names), the check fails with exit 1, log
+    <code>logs/alias_control_before.log</code>. After the rebuild the same query returns three
+    hits, the target ranks first, and the check passes with exit 0, log
+    <code>logs/alias_control_after.log</code>. Both runs are logged and both are reproduced by the
+    control script; the two logs are the evidence for the pair.
+  </p>
+
+  <h3 id="ssfms-fulltext-fields-arms-head">The four-arm table on the head</h3>
+
+  <p id="ssfms-fulltext-fields-arms-what">
+    The golden harness <code>tests/llm/test_signal_search_goldens.py</code> scores four arms over
+    the labelled questions — <code>current_tool</code> (the product <code>_rank_signals</code>),
+    <code>additive_rule</code> (the product's additive formula frozen), <code>vector_only</code>
+    (the vector pool alone) and <code>rrf</code> — against a seeded-permutation control. It grades
+    each arm's top 10 against the fixture labels and refuses with
+    <code>UnlabelledCandidates</code> if any arm's top 10 holds a candidate with no label.
+  </p>
+
+  <table id="ssfms-fulltext-fields-arms-table">
+    <caption>
+      Mean nDCG@10 by arm. The head was run twice back to back with the widened index and the
+      extended fixture; the like-for-like column restores the narrow index and runs the identical
+      fixture, so the only difference is the index property set. The dispatched-revision column is
+      the narrow index against the pre-widening fixture, the baseline the floor is stated against.
+    </caption>
+    <thead>
+      <tr><th>Arm</th><th>head — wide index (run 1 / run 2)</th><th>narrow index, same fixture</th><th>dispatched revision (narrow, old fixture)</th></tr>
+    </thead>
+    <tbody>
+      <tr id="ssfms-fulltext-fields-arms-current"><td><code>current_tool</code></td><td>0.792433149884323</td><td>0.7766524996942334</td><td>0.7772898848373337</td></tr>
+      <tr id="ssfms-fulltext-fields-arms-rrf"><td><code>rrf</code></td><td>0.7983365595049293</td><td>0.7766524996942334</td><td>0.7772898848373337</td></tr>
+      <tr id="ssfms-fulltext-fields-arms-additive"><td><code>additive_rule</code></td><td>0.5282433604870104</td><td>0.5796466996690345</td><td>0.5862567514366002</td></tr>
+      <tr id="ssfms-fulltext-fields-arms-vector"><td><code>vector_only</code></td><td>0.6858335410402933</td><td>0.6858335410402933</td><td>0.6858335410402933</td></tr>
+      <tr id="ssfms-fulltext-fields-arms-control"><td><code>random_control</code></td><td>0.4471357876572949</td><td>0.4471357876572949</td><td>0.4527285501230413</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-fulltext-fields-arms-read">
+    The floor is the dispatched revision's <code>current_tool</code> less the 0.012 spread:
+    <strong>0.7772898848373337 − 0.012 = 0.7653</strong>. The head's <code>current_tool</code> is
+    <strong>0.792433149884323</strong>, which is 0.0271 above the floor and 0.0158 above the
+    like-for-like narrow-index reading on the identical fixture — widening the index <em>raised</em>
+    the product arm rather than lowering it. The two back-to-back head runs agree to every printed
+    digit (spread 0.000), so the figure is stable at this head. <code>rrf</code> moves the same way
+    (0.7767 → 0.7983) because the product and the harness's <code>rrf</code> arm build the same
+    text pool, and it is that pool the widened index feeds. <code>vector_only</code> is unchanged
+    to every digit — it never consults the full-text index, which is the expected null: the change
+    reaches the text leg only. <code>additive_rule</code> falls (0.5863 → 0.5282); that arm is the
+    frozen formula the product no longer uses, and the plan's floor is stated on
+    <code>current_tool</code>, not on it. The control sits below every arm in every column.
+  </p>
+
+  <h3 id="ssfms-fulltext-fields-lifted-head">Every lifted candidate is labelled</h3>
+
+  <p id="ssfms-fulltext-fields-lifted-read">
+    The widened index lifts signals into an arm's top 10 that the narrow index never surfaced, and
+    the harness refuses to score an arm whose top 10 holds an unlabelled candidate — so every
+    lifted candidate had to be graded before the head would run. Grading follows the fixture's own
+    rule: <strong>3</strong> a measurement of the queried quantity, <strong>2</strong> a commanded,
+    reference or setpoint value of it or the same quantity at an adjacent point,
+    <strong>1</strong> related hardware, <strong>0</strong> read and judged irrelevant. A candidate
+    scan over three passes (the Neo4j vector search is approximate and drifts between calls, so a
+    single pass under-reports) confirmed every arm's top 10 labelled, and the head then ran green.
+    <strong>Fifty-six</strong> candidate labels were added across <strong>seventeen</strong>
+    questions, all in facility <code>jt-60sa</code>, all signals enriched at or after the
+    <code>2026-10-11T21:08:54Z</code> cutover. The additions, by the grade they were given:
+  </p>
+
+  <ul id="ssfms-fulltext-fields-lifted-list">
+    <li id="ssfms-fulltext-fields-lifted-grade3"><strong>grade 3 (a measurement of the queried quantity):</strong> <code>sxr_sxu</code>, <code>sxr_sxl</code>, <code>sxr_sxpin50</code>, <code>sxr_sxpin07</code> (soft-x-ray emission); <code>cs2_volpsdc</code> (booster power-supply output voltage); <code>psrc_curef1coil</code> (poloidal-field coil current); <code>psc_oef1vol</code> (coil-converter DC output voltage); <code>cryomag_me4tho1</code> (PF-coil helium outlet temperature); <code>cryoctb_m2e4nhv</code>, <code>cryoctb_me01nfv</code> (quench-detection voltages).</li>
+    <li id="ssfms-fulltext-fields-lifted-grade2"><strong>grade 2 (a commanded/reference/setpoint value, or the quantity at an adjacent point):</strong> <code>psc_refip</code>, <code>psrc_caliteddy</code> (plasma current); <code>tc_temp14hc8</code> (vacuum-vessel port temperature); <code>cryohrs_cpt750</code>, <code>cryohrs_cpt200</code> (cryostat vacuum pressure); <code>qms_preqmsp08hh2</code> (hydrogen-isotope partial pressure); <code>dcsv_ppef1cur</code> (PF coil current).</li>
+    <li id="ssfms-fulltext-fields-lifted-grade1"><strong>grade 1 (related hardware):</strong> <code>psrc_calrteddy</code>, <code>fame_psurf</code>, <code>dcsv_pprwmc6fb</code>, <code>spc_xexlvxics</code>, <code>spc_arxviiia1xics</code>, <code>spc_wlxvxics</code>, <code>psrc_calbz2</code>, <code>psrc_calbz4</code>, <code>psc_calbr2</code>, <code>fame_bpomp</code>, <code>cryohrs_ctt752</code>, <code>cryohrs_ctt225</code>, <code>cryohrs_ctt755</code>, <code>cryohrs_ctt756</code>, <code>cryoil_m2c1nhqs</code>, <code>cryoctb_m1e5nhv</code>, <code>cryoctb_m1e5phv</code>.</li>
+    <li id="ssfms-fulltext-fields-lifted-grade0"><strong>grade 0 (read and judged irrelevant):</strong> <code>dcsv_disreqs</code>, <code>dhc_refnumnbi1</code>, <code>dhc_comnumnbi3</code>, <code>fame_lu2</code>, and the eighteen-signal <code>vvgs_strain</code> strain-gauge family (<code>vvgs_strainvvgs01l</code> through <code>vvgs_strainvvgs17r</code>) that the deuterium-fuelling question lifts as a name collision.</li>
+  </ul>
+
+  <p id="ssfms-fulltext-fields-logs">
+    <strong>Logs.</strong> Four-arm, dispatched revision:
+    <code>logs/four_arm_before.log</code>. Four-arm, head run 1 and run 2:
+    <code>logs/four_arm_after_1.log</code>, <code>logs/four_arm_after_2.log</code>. Four-arm,
+    narrow index on the same fixture: <code>logs/four_arm_before_samefixture.log</code>. Control,
+    before the rebuild: <code>logs/alias_control_before.log</code>. Control, after the rebuild:
+    <code>logs/alias_control_after.log</code>. Model regeneration:
+    <code>logs/build_models.log</code>. Live index rebuild: <code>logs/rebuild_index.log</code>.
+  </p>
+</section>

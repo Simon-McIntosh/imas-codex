@@ -108,7 +108,11 @@
         "jt-60sa:general/psrc_curmms": 2,
         "jt-60sa:general/dcsv_ipexstrtms": 0,
         "jt-60sa:general/dcsv_seqfinmi": 0,
-        "jt-60sa:general/psc_comip": 2
+        "jt-60sa:general/psc_comip": 2,
+        "jt-60sa:general/psc_refip": 2,
+        "jt-60sa:general/psrc_caliteddy": 2,
+        "jt-60sa:general/psrc_calrteddy": 1,
+        "jt-60sa:general/dcsv_disreqs": 0
       }
     },
     {
@@ -175,7 +179,8 @@
         "jt-60sa:general/psrc_calndmagcor": 2,
         "jt-60sa:general/mdac_magatpl10": 1,
         "jt-60sa:general/psc_obsip": 0,
-        "jt-60sa:general/psrc_curmms": 0
+        "jt-60sa:general/psrc_curmms": 0,
+        "jt-60sa:general/fame_psurf": 1
       }
     },
     {
@@ -216,7 +221,10 @@
         "jt-60sa:general/dcsv_pprwmc2fb": 0,
         "jt-60sa:general/dcsv_ppefcc8ff": 0,
         "jt-60sa:general/dcsv_pprwmc6ff": 0,
-        "jt-60sa:general/dcsv_ppefcc2ff": 0
+        "jt-60sa:general/dcsv_ppefcc2ff": 0,
+        "jt-60sa:general/dhc_refnumnbi1": 0,
+        "jt-60sa:general/dhc_comnumnbi3": 0,
+        "jt-60sa:general/dcsv_pprwmc6fb": 1
       }
     },
     {
@@ -392,7 +400,15 @@
         "jt-60sa:general/psrc_comkappau": 0,
         "jt-60sa:general/psrc_rvs": 0,
         "jt-60sa:general/psrc_surfblwxp": 0,
-        "jt-60sa:general/sxr_sxlo": 3
+        "jt-60sa:general/sxr_sxlo": 3,
+        "jt-60sa:general/sxr_sxu": 3,
+        "jt-60sa:general/sxr_sxl": 3,
+        "jt-60sa:general/sxr_sxpin50": 3,
+        "jt-60sa:general/sxr_sxpin07": 3,
+        "jt-60sa:general/spc_xexlvxics": 1,
+        "jt-60sa:general/spc_arxviiia1xics": 1,
+        "jt-60sa:general/spc_wlxvxics": 1,
+        "jt-60sa:general/fame_lu2": 0
       }
     },
     {
@@ -633,7 +649,8 @@
         "jt-60sa:general/vv_temuvp14a": 3,
         "jt-60sa:general/vv_temuvp14c": 3,
         "jt-60sa:general/vv_temhp07b": 3,
-        "jt-60sa:general/vv_temhp12c": 3
+        "jt-60sa:general/vv_temhp12c": 3,
+        "jt-60sa:general/tc_temp14hc8": 2
       }
     },
     {
@@ -675,7 +692,9 @@
         "jt-60sa:general/cryohrs_cpt719": 2,
         "jt-60sa:general/cryohrs_cpt729": 2,
         "jt-60sa:general/cryohrs_ctt111a": 2,
-        "jt-60sa:general/cryohrs_ctt111b": 2
+        "jt-60sa:general/cryohrs_ctt111b": 2,
+        "jt-60sa:general/cryohrs_cpt750": 2,
+        "jt-60sa:general/cryohrs_cpt200": 2
       }
     },
     {
@@ -1141,7 +1160,8 @@
         "jt-60sa:general/vv_temhp07c": 0,
         "jt-60sa:general/vv_temhp12c": 0,
         "jt-60sa:general/vv_temlop12a": 0,
-        "jt-60sa:general/vv_temlop12b": 0
+        "jt-60sa:general/vv_temlop12b": 0,
+        "jt-60sa:general/qms_preqmsp08hh2": 2
       }
     },
     {
@@ -1231,7 +1251,25 @@
         "jt-60sa:general/vv_temlop01a": 0,
         "jt-60sa:general/vv_temlop07a": 0,
         "jt-60sa:general/vv_temlop07b": 0,
-        "jt-60sa:general/n2gas_flwinletd": 0
+        "jt-60sa:general/n2gas_flwinletd": 0,
+        "jt-60sa:general/vvgs_strainvvgs03l": 0,
+        "jt-60sa:general/vvgs_strainvvgs07l": 0,
+        "jt-60sa:general/vvgs_strainvvgs09l": 0,
+        "jt-60sa:general/vvgs_strainvvgs11l": 0,
+        "jt-60sa:general/vvgs_strainvvgs15l": 0,
+        "jt-60sa:general/vvgs_strainvvgs17l": 0,
+        "jt-60sa:general/vvgs_strainvvgs01l": 0,
+        "jt-60sa:general/vvgs_strainvvgs05l": 0,
+        "jt-60sa:general/vvgs_strainvvgs13l": 0,
+        "jt-60sa:general/vvgs_strainvvgs01r": 0,
+        "jt-60sa:general/vvgs_strainvvgs03r": 0,
+        "jt-60sa:general/vvgs_strainvvgs05r": 0,
+        "jt-60sa:general/vvgs_strainvvgs07r": 0,
+        "jt-60sa:general/vvgs_strainvvgs09r": 0,
+        "jt-60sa:general/vvgs_strainvvgs11r": 0,
+        "jt-60sa:general/vvgs_strainvvgs13r": 0,
+        "jt-60sa:general/vvgs_strainvvgs15r": 0,
+        "jt-60sa:general/vvgs_strainvvgs17r": 0
       }
     },
     {
@@ -1313,7 +1351,8 @@
         "jt-60sa:general/psscfst_refvolufppcc": 2,
         "jt-60sa:general/ech_powu5set": 0,
         "jt-60sa:general/psc_ccs4vol": 2,
-        "jt-60sa:general/psc_cef5vol": 2
+        "jt-60sa:general/psc_cef5vol": 2,
+        "jt-60sa:general/cs2_volpsdc": 3
       }
     },
     {
@@ -1379,7 +1418,11 @@
         "jt-60sa:general/psrc_calbr4": 0,
         "jt-60sa:general/psrc_calbr3": 0,
         "jt-60sa:general/dcsv_ppef2vol": 1,
-        "jt-60sa:general/psrc_calbr2": 0
+        "jt-60sa:general/psrc_calbr2": 0,
+        "jt-60sa:general/psrc_calbz2": 1,
+        "jt-60sa:general/psrc_calbz4": 1,
+        "jt-60sa:general/psc_calbr2": 1,
+        "jt-60sa:general/fame_bpomp": 1
       }
     },
     {
@@ -1427,7 +1470,9 @@
         "jt-60sa:general/psrc_curcs2": 3,
         "jt-60sa:general/tf16_tfgs1602a": 0,
         "jt-60sa:general/tf16_tfgs1604a": 0,
-        "jt-60sa:general/psc_cefcc1cr": 1
+        "jt-60sa:general/psc_cefcc1cr": 1,
+        "jt-60sa:general/psrc_curef1coil": 3,
+        "jt-60sa:general/dcsv_ppef1cur": 2
       }
     },
     {
@@ -1486,7 +1531,8 @@
         "jt-60sa:general/psc_ctfvol": 2,
         "jt-60sa:general/psc_volcs2": 2,
         "jt-60sa:general/psscfst_refvcefc2": 2,
-        "jt-60sa:general/psscfst_refvolef6bst": 2
+        "jt-60sa:general/psscfst_refvolef6bst": 2,
+        "jt-60sa:general/psc_oef1vol": 3
       }
     },
     {
@@ -1585,7 +1631,11 @@
         "jt-60sa:general/cryohrs_ctsh745": 1,
         "jt-60sa:general/cryohrs_ctsh725": 1,
         "jt-60sa:general/cryohrs_ctsh183": 1,
-        "jt-60sa:general/cryoil_m1e6nhq": 1
+        "jt-60sa:general/cryoil_m1e6nhq": 1,
+        "jt-60sa:general/cryohrs_ctt752": 1,
+        "jt-60sa:general/cryohrs_ctt225": 1,
+        "jt-60sa:general/cryohrs_ctt755": 1,
+        "jt-60sa:general/cryohrs_ctt756": 1
       }
     },
     {
@@ -1644,7 +1694,10 @@
         "jt-60sa:general/cryomag_m2e02cv": 3,
         "jt-60sa:general/cryomag_m2e03cv": 3,
         "jt-60sa:general/cryomag_m2e04cv": 3,
-        "jt-60sa:general/cryomag_m2e05cv": 3
+        "jt-60sa:general/cryomag_m2e05cv": 3,
+        "jt-60sa:general/cryoctb_m2e4nhv": 3,
+        "jt-60sa:general/cryoctb_me01nfv": 3,
+        "jt-60sa:general/cryoil_m2c1nhqs": 1
       }
     },
     {
@@ -1704,7 +1757,8 @@
         "jt-60sa:general/cryomag_mc1thi": 2,
         "jt-60sa:general/cryomag_mc2thi": 2,
         "jt-60sa:general/cryomag_mc3thi": 2,
-        "jt-60sa:general/cryomag_mc4thi": 2
+        "jt-60sa:general/cryomag_mc4thi": 2,
+        "jt-60sa:general/cryomag_me4tho1": 3
       }
     },
     {
@@ -1929,7 +1983,9 @@
         "jt-60sa:general/cryoctb_m2e6phv": 1,
         "jt-60sa:general/cryoctb_mt08nfv": 1,
         "jt-60sa:general/cryoctb_mt02nfv": 1,
-        "jt-60sa:general/cryoctb_mt14nfv": 1
+        "jt-60sa:general/cryoctb_mt14nfv": 1,
+        "jt-60sa:general/cryoctb_m1e5nhv": 1,
+        "jt-60sa:general/cryoctb_m1e5phv": 1
       }
     }
   ]
