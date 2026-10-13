@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s7&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-harmonize-command#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -62,7 +62,7 @@
     </p>
 
     <h2 id="s2">§2 — Grammar segments chosen from the vocabulary</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Given a DD path, its documentation and its enriched description, Jev answers one Choice
       per grammar slot over that slot's closed ISN vocabulary: physical base, subject, component,
@@ -210,6 +210,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261013T045451081313-review-of-ssog-segment-selection-measure-ab4eb5d6440d" data-who="reckon-build" data-when="2026-10-13T05:13:41.451Z">
     <div class="r-comment-body"><p>the review record is the deliverable, stored under both reviews-store keys (a reviews node lands no plan edit). docs/state/imas-codex/crew.json</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-13T05:22:00Z">
+    <div class="r-comment-body"><p>§2 closed with a negative result. Jev choosing each grammar segment from the closed vocabulary does not earn a deployment: 0.50 to 0.80 per slot, 0.03 of whole names, and a cross-check AUC of 0.480. By the fixed rule the recommendation is neither cross-check nor generator (merges <code>00a070a95</code>, <code>22e130c4a</code>, <code>dd9e0df53</code>; USD 0.59). The module stays on main, unwired, as the measured prototype. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s2-measured">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T012137597192-review-of-ssog-comparator-rerank-4a1e53c1c23b" data-who="reckon-build" data-when="2026-10-13T01:30:27.987Z">
     <div class="r-comment-body"><p>Review stored for r-20261013T005036802056-ssog-comparator-rerank at base c98a0d42d head 4a1e53c1c: goal_fidelity 19, evidence 14, scope_discipline 19, durability 16, fit 18, reuse 20 (total 106); 0 added failures (base 0 vs head 0); three follow-on findings, no blocking findings.</p></div>
