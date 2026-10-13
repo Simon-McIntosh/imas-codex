@@ -1,0 +1,106 @@
+<h2 id="sib-veto-exposure-gate">What the parent-admission probe now raising exposes</h2>
+
+<p>The superseded-parent veto closes a fail-open guard:
+<code>_filter_admissible_parents</code> used to log a failed topology probe and
+return every proposed parent edge; it now logs and re-raises, so a reconcile
+whose probe fails aborts. This measures whether any test in the standard-name
+suite was passing only because that guard switched itself off.</p>
+
+<p><strong>Answer: no.</strong> Running the whole <code>tests/standard_names/</code>
+directory plus <code>tests/graph/test_cypher_property_check.py</code> at the veto's
+base (<code>27a2b4299</code>) and head (<code>06e0451f2</code>) adds exactly two
+failures, and neither reaches the probe, the veto, or the reconcile. Both are
+<code>pytest-timeout</code> (<code>&gt;30.0s</code>) on a <code>git</code>
+subprocess in the release-notes path, and one of the two passes on a serial
+re-run. No test exercised a fake graph client that raises, so closing the guard
+exposed nothing that the green suite was resting on.</p>
+
+<h3 id="sib-veto-exposure-gate-totals">Totals</h3>
+<table>
+  <thead><tr><th>arm</th><th>revision</th><th>result</th><th>exit</th></tr></thead>
+  <tbody>
+    <tr><td>base</td><td>27a2b4299</td><td>27 failed, 7804 passed, 9 skipped, 330 deselected in 2858.38s</td><td>1</td></tr>
+    <tr><td>head</td><td>06e0451f2</td><td>25 failed, 7811 passed, 8 skipped, 330 deselected in 2896.42s</td><td>1</td></tr>
+  </tbody>
+</table>
+
+<p>Both arms ran the same command from their own tree, with
+<code>SOURCE_DATE_EPOCH=1760000000</code> and the same interpreter. The four extra
+collected items at the head (8174 vs 8170) are the superseded-veto regression
+test added by the head commit. The base arm ran from a <code>git archive</code>
+checkout, which has no <code>.git</code>; the archive isolation was asserted in
+the base shell (<code>imas_codex.__file__</code> resolved under the archive, else
+exit 98). Base and head therefore differ by the source change, and each arm's
+absolute failure count is timing-dependent on this node, which is why the
+added-failure diff across two arms rather than either absolute count is the
+instrument.</p>
+
+<h3 id="sib-veto-exposure-gate-added">Added failures (head and not base)</h3>
+<ol>
+  <li>
+    <code>tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_contained_in_main</code>
+    — <strong>unrelated.</strong> <code>Failed: Timeout (&gt;30.0s) from
+    pytest-timeout</code> inside <code>_run_git</code> called from
+    <code>release_notes.reviewing_guide_url</code> via
+    <code>_static_pr_body</code>. The traceback never leaves the release-notes
+    path. It still fails on a serial re-run, so it is a git-subprocess
+    environment timeout on this node, not a flake under parallel load — and not
+    the probe, since the failing frame is a <code>git rev-parse</code>.
+  </li>
+  <li>
+    <code>tests/standard_names/test_sn_approve_tag.py::TestApprovalCliTag::test_existing_rc_tag_does_not_block_approval</code>
+    — <strong>unrelated.</strong> Same <code>pytest-timeout</code> signature
+    inside <code>create_fold_back_tag</code>'s <code>git rev-parse</code>.
+    <strong>Passes</strong> when the two tests are re-run serially
+    (<code>head-refire.log</code>: 1 failed, 1 passed), so this one is a timeout
+    under the parallel-arm load, not a defect.
+  </li>
+</ol>
+
+<p>Neither added failure touches <code>_filter_admissible_parents</code>, the
+parent-admission probe, or any fake graph client. No failure has the
+superseded-veto signature (a parent the test expected being dropped).</p>
+
+<h3 id="sib-veto-exposure-gate-receded">Failures at the base and not the head</h3>
+
+<p>Four <code>test_review_release.py</code> ids fail at the base and pass at the
+head. They are <strong>not</strong> an artefact of the archive's absent
+<code>.git</code>: each of the four uses the <code>isnc_repo</code> fixture
+(<code>test_review_release.py:33</code>), which builds its own repository under
+<code>tmp_path</code>, and <code>base.log</code> records every one with the same
+<code>Failed: Timeout (&gt;30.0s) from pytest-timeout</code> signature as the two
+head-only failures — a load-induced timeout on the parallel arms, most of them
+landing inside <code>_run_git</code>. The archive's absent <code>.git</code> is
+not the cause, so the counts on this arm are timing-dependent rather than
+archive-dependent.</p>
+
+<p>A serial re-run of three of the four at the base
+(<code>base-refire.log</code>) settles it: two
+(<code>test_review_release_scopes_dd_caveats_to_batch_names</code>
+and <code>test_unavailable_dd_gap_read_is_visible_but_not_release_blocking</code>)
+<strong>pass</strong> alone, confirming the parallel-arm timeout. The third,
+<code>test_review_assembly_reproduces_and_closes_sparse_baseline_failure</code>,
+still fails serially, with the timeout inside the <code>yaml</code> parser
+(<code>compose_node</code>) rather than in <code>_run_git</code> — a slow path on
+this node, again unrelated to the probe and not the archive.</p>
+
+<h3 id="sib-veto-exposure-gate-callers">Callers reaching the probe</h3>
+
+<p><code>_filter_admissible_parents</code> has one in-source caller,
+<code>_write_standard_name_edges</code> (<code>graph_ops.py:3184</code>), and
+<code>_write_standard_name_edges</code> is reached from tests only inside
+<code>tests/standard_names/</code> (test_parent_admission, test_graph_edge_writers,
+test_ordered_*operator*_graph_projection, test_skeleton_placeholder_cleanup(+_graph),
+test_superseded_parent_veto, test_rename_cascade, test_protected_parent_edge_cleanup,
+test_protected_identity_exclusion, test_component_system, test_name_lifecycle).
+Every one of those files was collected and run by both arms. <strong>No caller
+outside <code>tests/standard_names/</code> reaches the probe, so there is no
+unexercised caller.</strong></p>
+
+<h3 id="sib-veto-exposure-gate-logs">Logs</h3>
+<ul>
+  <li>base: <code>r-20261013T110801737095-sib-veto-exposure-gate/base.log</code></li>
+  <li>head: <code>r-20261013T110801737095-sib-veto-exposure-gate/head.log</code></li>
+  <li>head serial re-fire of the two added failures: <code>r-20261013T110801737095-sib-veto-exposure-gate/head-refire.log</code></li>
+  <li>base serial re-fire of three base-only failures: <code>r-20261013T110801737095-sib-veto-exposure-gate/base-refire.log</code></li>
+</ul>
