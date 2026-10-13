@@ -1,0 +1,1817 @@
+{
+  "eligibility": {
+    "facility": "jt-60sa",
+    "enriched_at_cutover": "2026-10-11T21:08:54Z"
+  },
+  "signals": [
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o003_jbrt",
+      "name": "OFMC Beam-Driven Toroidal Current Density JBRT (h-series output 80296/003)",
+      "description": "Toroidal component of the NBI beam-driven current density JBRT computed by the OFMC fast ion analysis code, from h-series output channel 80296/003.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:40:24.395000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o006_mds",
+      "name": "OFMC o80296/006 MDS",
+      "description": "Metadata field MDS from the OFMC fast-ion analysis dataset, output group o80296/006, storing dataset descriptor or mapping information as provenance metadata.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:56:04.364000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/ech_powu4omode",
+      "name": "ECH Unit 4 O-Mode Power",
+      "description": "Electron cyclotron heating (ECH) power delivered by unit 4 in O-mode polarization. Time series of the injected microwave power used for electron heating and current drive.",
+      "unit": "MW",
+      "enriched_at": "2026-10-11T21:52:59.190000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_d240034_test.s999_nexpdata",
+      "name": "Test Data NEXPDATA",
+      "description": "Test data entry in the JT-60SA experiment database. This is a placeholder/test signal used for database validation, not a physics measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:35:21.118000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/mag_mhdp04",
+      "name": "MHDp04 Magnetic Fluctuation",
+      "description": "Magnetic field fluctuation measured by MHD probe 04, expressed as time derivative of the magnetic field (T/s). Magnetic fluctuation for MHD P04 (18). Mirnov-type probe signal used to detect and characterize MHD instabilities.",
+      "unit": "T/s",
+      "enriched_at": "2026-10-11T21:38:27.811000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b240064_ate.s003_rec_abel_setting_params_float_n",
+      "name": "Abel Inversion Float Parameter Count ate.s101173/003/240064 (b-series)",
+      "description": "Setting parameters for the Abel inversion reconstruction used in the ATE diagnostic analysis for dataset ate.s101173/003/240064. Stores configuration values controlling the inversion of line-integrated measurements into spatial profiles.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:16:13.831000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o008_e_torque_density",
+      "name": "OFMC Electron Torque Density, Output Series 39689/008",
+      "description": "Torque density on electrons computed by the OFMC orbit-following Monte Carlo code for output series 39689/008, describing the momentum transfer to the electron population from fast particles and heating sources.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:26:50.679000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/cryomag_m1tab21",
+      "name": "TF/CS Structure Inlet/Outlet Temperature 21",
+      "description": "Temperature of the supercritical helium coolant in the TF/CS structure cooling circuit: TF ST 01 outlet temperature.",
+      "unit": "K",
+      "enriched_at": "2026-10-11T21:39:28.705000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ate.s002_nexpadd",
+      "name": "ATE Electron Temperature Profile Additional Experimental Data Block NEXPADD 75000/002/260008",
+      "description": "Additional experimental data block (NEXPADD) from the electron temperature analysis dataset member 75000/002/260008. Contains supplementary measured electron temperature data used in profile analysis, part of the ADAM/TOPICS analysis framework.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:42:45.806000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o005_tijb",
+      "name": "OFMC TIJB Fast-Ion Distribution Quantity (ofmc.o80296/005)",
+      "description": "Quantity TIJB from the OFMC (Orbit Following Monte Carlo) fast-ion analysis for dataset ofmc.o80296/005. OFMC computes fast-ion and NBI-related distributions including beam-driven current and fast ion density profiles.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:52:52.677000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o004_tirjb",
+      "name": "OFMC Ion JxB Torque Density o80296/004",
+      "description": "Ion JxB torque density (TIRJB) in N\u00b7m/m\u00b3 from the OFMC analysis, dataset member o80296/004, describing the toroidal torque deposited on ions by NBI-driven fast ions.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:36:13.185000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/mdac_cursdlc11",
+      "name": "curSdlC11 Saddle Coil Current",
+      "description": "Current measured by saddle coil number 11, in amperes. Saddle Coil (11). Saddle coils measure poloidal magnetic flux or non-axisymmetric field components for equilibrium reconstruction and MHD mode detection.",
+      "unit": "A",
+      "enriched_at": "2026-10-11T21:21:45.604000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s011_fit_rhotype",
+      "name": "ATE Fit Rho Type (ate.s011)",
+      "description": "Parameter specifying the radial coordinate type (rho) used in the fitting of the electron temperature profile in the ate analysis dataset slice s011. Determines the flux-coordinate basis for the fit.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:49:10.587000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_ctt202c",
+      "name": "CryoHRS Temperature Transmitter 202",
+      "description": "Temperature measurement from HX202A Bloc temperature C in the CryoHRS cryogenic helium refrigeration system, in degrees Celsius.",
+      "unit": "K",
+      "enriched_at": "2026-10-11T21:45:22.778000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/tf03_tfgs0303b",
+      "name": "TF Coil Strain Gauge 03/0303 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 03/0303, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:22:09.738000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/mdac_oef1cur",
+      "name": "EF1 Coil Current Observation",
+      "description": "Measured current in the EF1 equilibrium field coil, in kA. Part of the poloidal field coil system used to shape and position the plasma.",
+      "unit": "kA",
+      "enriched_at": "2026-10-11T21:26:01.119000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_arad.s010_topics_xfitdata",
+      "name": "ARAD TOPICS X-Fit Data s80296/010",
+      "description": "Radiated power data from the arad analysis, series s80296/010, processed through the TOPICS XFIT framework; represents the total radiated power derived from bolometric measurements.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:32:10.607000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/tf12_tfgs1205a",
+      "name": "TF Coil Strain Gauge 12/1205 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 12/1205, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:43:06.443000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s001_nfit",
+      "name": "ATE Electron Temperature Profile Number of Fit Points NFIT 80729/001",
+      "description": "Number of fit points parameter from the electron temperature analysis dataset member 80729/001. This controls the fitting procedure used to reconstruct the electron temperature profile from diagnostic measurements.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:45:08.754000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/cryoil_m1e4phqs",
+      "name": "EF04P HTS Quench Detection Switch",
+      "description": "Status parameter of the quench detection switch for the EF04P high-temperature superconducting coil. It is part of the cryogenic and superconducting magnet protection system, monitoring whether quench detection is active for this coil circuit.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:29:35.921000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m1tac07",
+      "name": "CryoCTB CS HTS Cold End Inlet Temperature 07",
+      "description": "Temperature at the cold end inlet of the HTS current lead for CS 04 HTS cold end inlet temperature, part of the JT-60SA cryogenic system monitoring, measured in Kelvin.",
+      "unit": "K",
+      "enriched_at": "2026-10-11T21:50:11.445000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a042181_ate.s003_yexperr1",
+      "name": "ATE Electron Temperature Upper Error YEXPERR1 (a-series) 75000/003/042181",
+      "description": "Upper error bar associated with the electron temperature profile from the 'ate' analysis dataset 75000/003/042181. The YEXPERR1 component stores the first (upper) uncertainty estimate of the fitted electron temperature profile, used to quantify the confidence interval of the fit.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:33:31.169000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/mdac_nep10camh",
+      "name": "Neutron Yield P10 Camera (H)",
+      "description": "Neutron yield measured by the P10 detector channel using the H (hydrogen) camera, recorded as a time series in counts per second. This diagnostic monitors the time evolution of neutron emission from the plasma.",
+      "unit": "cps",
+      "enriched_at": "2026-10-11T21:20:29.422000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/n2gas_flwinletg",
+      "name": "Vacuum Vessel Inlet Flow (Nitrogen Gas)",
+      "description": "Volumetric flow rate of nitrogen gas injected at the vacuum vessel inlet on JT-60SA. This parameter is part of the N2 gas injection system used for wall conditioning and vacuum vessel pressure control.",
+      "unit": "m3/s",
+      "enriched_at": "2026-10-11T21:30:15.489000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_c260058_ate.s001_xtype",
+      "name": "ATE XTYPE",
+      "description": "Metadata field specifying the type of x-axis data for the electron temperature (ate) analysis dataset. This is a dataset bookkeeping quantity rather than a plasma measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:39:28.642000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/tcud_temdu28",
+      "name": "Upper Divertor Temperature DU28",
+      "description": "Temperature at upper divertor location DU28, monitoring the thermal load on the divertor structure, in degrees Celsius.",
+      "unit": "degreeC",
+      "enriched_at": "2026-10-11T21:29:32.542000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_zeff.s002_expadd_err_flg",
+      "name": "Zeff Analysis Experimental Additional Error Flag 41698/002",
+      "description": "Error flag for the effective charge (Zeff) analysis dataset zeff.s41698/002. Indicates whether an error occurred during the Zeff computation from visible bremsstrahlung or impurity line measurements.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:26:31.545000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/cryomag_me2si01",
+      "name": "EF ST 02 TF 01 Tension Rod Inside Strain",
+      "description": "Strain measurement on the inside of the tension rod connecting EF structure ST 02 to TF coil 01. EF ST 02 TF 01 tension rod inside strain",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:41:43.247000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s003_eslicever",
+      "name": "ATE eSLICE Version 101013/003/048717",
+      "description": "Version identifier (ESLICEVER) for the electron temperature profile analysis (ate) slice ate.s101013/003/048717 stored in the LCDB analysis database. This is metadata describing the analysis software version used to generate the profile, not a plasma measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:30:10.418000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o001_forb",
+      "name": "OFMC Fast Ion Orbit FORB 80729/001",
+      "description": "Fast ion orbit data output from the OFMC (Orbit Following Monte Carlo) analysis code, dataset ofmc.o80729/001. FORB contains computed fast-ion guiding-center orbits used to evaluate fast particle confinement and losses.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:16:13.866000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/dcsv_dayny146",
+      "name": "Daily Neutron Yield Storage 146",
+      "description": "Neutron yield accumulated per day, stored in channel 146 (Daily Neutron Yield Storage 146) of the daily neutron yield record. Used for tracking neutron production and machine activation on a daily basis.",
+      "unit": "n/day",
+      "enriched_at": "2026-10-11T21:26:01.145000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/fame_newxp",
+      "name": "Distance Between X-point and Old Divertor Tile",
+      "description": "Distance in meters between the magnetic X-point and the lowest point of the old divertor tile, computed by the FAME equilibrium analysis system. This geometric quantity characterizes the divertor configuration and X-point height relative to the target.",
+      "unit": "m",
+      "enriched_at": "2026-10-11T21:46:51.296000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o005_jfp",
+      "name": "OFMC Fast-Ion Parallel Current Density JFP (b-series output 80296/005)",
+      "description": "Fast-ion (beam) driven current density JFP from the OFMC NBI heating analysis code, from b-series output channel 80296/005.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:14:53.088000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o010_e_power_density",
+      "name": "OFMC Electron Heating Power Density o39689/010",
+      "description": "Electron heating power density distribution computed by the OFMC NBI analysis code for dataset ofmc.o39689/010, describing the spatial deposition of beam power to electrons as a profile over the plasma cross-section.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:35:14.216000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/ois_oisrs01b",
+      "name": "OIS Radial Sensor 01 (100 Hz)",
+      "description": "Radial displacement measurement from sensor 01 (RADIAL_SENSOR_OIS_01_(100_HZ)) of the OIS (Optical Interferometric Sensor?) system, sampled at 100 Hz. This parameter monitors the radial position of a machine component with millimeter resolution. The OIS system provides structural or component position monitoring.",
+      "unit": "mm",
+      "enriched_at": "2026-10-11T21:30:22.948000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppctrgas3",
+      "name": "Gas Injection Group 3 Control Method Reference",
+      "description": "Reference to the control method number used for gas injection group 3. This non-waveform payload identifies the control scheme applied to the gas fuelling system during operation.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:27:20.630000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cpt321",
+      "name": "CryoHRS Pressure Transmitter 321",
+      "description": "Pressure measured at Turbine 320 brake pressure of the cryogenic helium refrigerator system, in MPa.",
+      "unit": "MPaG",
+      "enriched_at": "2026-10-11T21:40:33.334000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/dcsv_dayny298",
+      "name": "Daily Neutron Yield Storage 298",
+      "description": "Neutron yield accumulated per day, stored in channel 298 (Daily Neutron Yield Storage 298) of the daily neutron yield record. Used for tracking neutron production and machine activation on a daily basis.",
+      "unit": "n/day",
+      "enriched_at": "2026-10-11T21:26:01.145000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o011_jbrp",
+      "name": "OFMC Beam-Driven Parallel Current Density JBRP (h-series output 80296/011)",
+      "description": "Parallel component of the NBI beam-driven current density JBRP computed by the OFMC code, from h-series output channel 80296/011.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:27:24.739000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o011_tirjb",
+      "name": "OFMC Ion JxB Torque Density o80296/011",
+      "description": "Ion JxB torque density (TIRJB) in N\u00b7m/m\u00b3 from the OFMC analysis, dataset member o80296/011, describing the toroidal torque deposited on ions by NBI-driven fast ions.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:36:13.185000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ane.s001_rec_map_setting_irdm_s",
+      "name": "ane Reconstruction Map Setting (IRDM_S)",
+      "description": "Reconstruction map setting parameter for the ane (electron density) analysis, controlling the radial grid resolution used in the profile reconstruction. This is a configuration/metadata quantity rather than a physical measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:25:51.950000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/dhc_nstopfact",
+      "name": "N-Stop Factor",
+      "description": "N-Stop factor parameter from the JT-60SA DHC (Discharge Control) system. This is a control parameter used in the discharge sequence, likely related to the number of stops or a stopping condition in the plasma control logic.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:50:11.142000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ane.s002_yfitdata",
+      "name": "ANE Y Fit Data",
+      "description": "YFITDATA field from the ane.s002 electron density analysis dataset. It holds the fitted density profile data produced by the ANE analysis for the electron density fit.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:52:05.005000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o002_ters",
+      "name": "OFMC TERS Quantity 80729/002",
+      "description": "TERS output quantity from the OFMC NBI heating and slowing-down analysis, describing fast-ion slowing-down and driven current distributions, for output dataset ofmc.o80729/002.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:25:49.531000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/psc_currwmc16",
+      "name": "RWMC16 Current Reference",
+      "description": "Reference current waveform for resistive wall mode control coil RWMC16, an in-vessel coil on the stabilizing plate used for active control of resistive wall modes. Reference of RWMC16 Current",
+      "unit": "kA",
+      "enriched_at": "2026-10-11T21:57:16.088000000+00:00",
+      "glossary": [],
+      "hand_label": "reference_or_setpoint"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b240064_ate.s003_abel_flg",
+      "name": "ATE Abel Inversion Flag 101173/003/240064",
+      "description": "Flag indicating whether Abel inversion was applied in the reconstruction of the electron temperature profile for dataset ate.s101173/003/240064.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:47:30.644000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ane.s001_fit_rhotype",
+      "name": "ANE Fit Radial Coordinate Type (Shot 75000/001/260008)",
+      "description": "Metadata field specifying the radial coordinate type (rho grid) used for electron density profile fitting in the ANE analysis code for shot 75000/001/260008. Defines the parameterization grid for the density profile fitting.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:36:13.095000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ate.s002_topics_rhotype",
+      "name": "ATE TOPICS_RHOTYPE 75000/002/260008",
+      "description": "Flag specifying the radial coordinate (rho) type used when exchanging data between the ATE analysis and the TOPICS transport code, member 75000/002/260008.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:25:52.081000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/psc_refrp10",
+      "name": "P10 Reference Point (RP10)",
+      "description": "Reference point RP10 used by the plasma control system, given in meters. This is a control reference coordinate (likely a radial position) used in the plasma position/shape control loop.",
+      "unit": "m",
+      "enriched_at": "2026-10-11T21:47:30.527000000+00:00",
+      "glossary": [],
+      "hand_label": "reference_or_setpoint"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o011_jbrt",
+      "name": "OFMC Beam-Driven Toroidal Current Density JBRT (h-series output 80296/011)",
+      "description": "Toroidal component of the NBI beam-driven current density JBRT computed by the OFMC fast ion analysis code, from h-series output channel 80296/011.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:40:24.511000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ane.s001_shoteq",
+      "name": "ANE Equilibrium Shot Reference 101173/001/250062",
+      "description": "Reference to the equilibrium shot/analysis (SHOTEQ) used by the ANE density fitting analysis for dataset member 101173/001/250062, linking the density reconstruction to its corresponding equilibrium data set.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:34:10.984000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/n2gas_teminleta",
+      "name": "Vacuum Vessel Inlet Temperature (A)",
+      "description": "Inlet temperature of the vacuum vessel cooling circuit (channel A), measured in degrees Celsius. Part of the N2 gas / vacuum vessel thermal management system monitoring.",
+      "unit": "degreeC",
+      "enriched_at": "2026-10-11T21:56:57.832000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/mdac_magflxlp27",
+      "name": "magFlxLp27 Differential Magnetic Flux",
+      "description": "Differential magnetic flux measured between flux loop 27 and reference loop 7, in webers. Flux Loop (27-7). Used for equilibrium reconstruction and magnetic flux measurements.",
+      "unit": "Wb",
+      "enriched_at": "2026-10-11T21:24:21.449000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o007_th_th_d_d_neutron_density",
+      "name": "OFMC Thermal-Thermal D-D Neutron Density (ofmc.o39689/007)",
+      "description": "Neutron density from thermal-thermal deuterium-deuterium fusion reactions, computed by the OFMC NBI heating analysis code for dataset ofmc.o39689/007. Represents the neutron production from thermal D-D reactions in the plasma.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:33:05.482000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/qms_mz40acur",
+      "name": "QMS Ion Current m/z=40 (a)",
+      "description": "Ion current measured by the quadrupole mass spectrometer (QMS) at mass-to-charge ratio m/z=40, corresponding to hydrogen ions. This diagnostic monitors the partial pressure of hydrogen in the vacuum vessel or cryogenic system.",
+      "unit": "A",
+      "enriched_at": "2026-10-11T21:50:11.207000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s002_shtno",
+      "name": "ATE Shot Number (Debug)",
+      "description": "Shot number field (SHTNO) from the ATE electron temperature analysis dataset. It is an internal bookkeeping parameter identifying the discharge associated with the analysis, not a physical measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T22:00:11.085000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_zeff.s003_ifitcnt",
+      "name": "Zeff Analysis Fit Counter 75000/003",
+      "description": "Fit counter (IFITCNT) associated with the Zeff analysis dataset zeff.s75000/003, tracking the number of fitting iterations or fit index used in the Zeff analysis. Internal bookkeeping data rather than a physical measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:45:58.450000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o008_forb",
+      "name": "OFMC Output FORB 80296/008",
+      "description": "Output quantity FORB from the OFMC (NBI heating analysis) code series, dataset ofmc.o80296/008. OFMC computes NBI beam deposition, fast-ion distributions, and related quantities; FORB is one of its computed outputs.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:41:34.502000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o008_hds",
+      "name": "OFMC Fast Ion Heat Deposition HDS (b-series run 80296/008)",
+      "description": "Heat deposition rate HDS from NBI fast ions to the thermal ion population, computed by the OFMC code as the collisional energy transfer from beam-injected fast ions to the bulk thermal ions, for run 80296/008.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:43:37.530000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o001_fst",
+      "name": "OFMC Fast Ion Distribution FST (b-series run 80729/001)",
+      "description": "Fast-ion distribution quantity FST computed by the OFMC NBI heating analysis code, modelling beam-injected fast ion slowing-down in the toroidal field ripple, for run 80729/001.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:37:43.229000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o006_npnbi",
+      "name": "OFMC NPNBI Beam Particle Source o80296/006",
+      "description": "Output quantity NPNBI from the OFMC NBI analysis code, output group o80296/006, part of the EDASDB b-series analysis database. OFMC computes NBI fast-ion and beam-driven current profiles; NPNBI denotes a beam-related density or particle quantity.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:35:46.413000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s009_yfitdata",
+      "name": "Fitted Electron Temperature Profile Data (ate.s75000/009/250062)",
+      "description": "Stored electron temperature profile fit result (YFITDATA) from the ATE analysis, dataset ate.s75000/009/250062, giving fitted electron temperature values as a function of the profile coordinate.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:51:44.994000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s002_eqdb_name",
+      "name": "ATE Equilibrium Database Name 101013/002/048717",
+      "description": "Metadata field EQDB_NAME from the 'ate' dataset slice ate.s101013/002/048717, identifying the name of the equilibrium database entry associated with the analysis. Part of the JT-60SA EDAS analysis database used to track equilibrium reconstruction provenance.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:31:57.525000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/psc_1625_a005",
+      "name": "Ip Damping Phase Transition Factor",
+      "description": "Factor describing the phase transition of the plasma current damping during the discharge, used in the plasma control system. Relevant for current ramp-down and disruption mitigation studies.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:32:10.956000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/qms_mz20ccur",
+      "name": "QMS Ion Current m/z=20 (c)",
+      "description": "Quadrupole mass spectrometer (QMS) signal measuring the ion current (in A) at mass-to-charge ratio m/z=20, corresponding to atomic hydrogen. This monitors the partial pressure of hydrogen isotopes in the vacuum vessel and is used for gas composition analysis. It is a machine/vacuum diagnostic parameter.",
+      "unit": "A",
+      "enriched_at": "2026-10-11T21:39:24.900000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o013_nbt",
+      "name": "OFMC NBT Beam-Thermal Neutron Rate o013",
+      "description": "Beam-thermal neutron production rate NBT computed by the OFMC fast-ion/neutral-beam analysis code for output group o013, part of the EDASDB a-series analysis database. NBT denotes neutrons from reactions between beam-injected fast ions and thermal plasma ions, providing a measure of fast-ion confinement and beam-plasma interaction.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:55:32.031000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m1evg30",
+      "name": "300K Return Valve 30 Opening",
+      "description": "Opening fraction of the 300 K return valve 30 for the cryogenic cooling circuit, expressed as a percentage of full valve opening. EF 05N 300K return valve opening",
+      "unit": "%",
+      "enriched_at": "2026-10-11T21:32:10.548000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/tf11_tfgs1102c",
+      "name": "TF Coil Strain Gauge 11/1102",
+      "description": "Strain gauge measurement from a Toroidal Field coil, sampled at 10 kHz, in microstrain, monitoring mechanical stress on the TF coil structure. STRAIN_GAUGE_TF_11_02_(10_KHZ)",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:30:47.129000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/dcsv_dayny97",
+      "name": "Daily Neutron Yield Storage 97",
+      "description": "Neutron yield accumulated per day, stored in channel 97 (Daily Neutron Yield Storage 97) of the daily neutron yield record. Used for tracking neutron production and machine activation on a daily basis.",
+      "unit": "n/day",
+      "enriched_at": "2026-10-11T21:26:01.145000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s002_rec_map_setting_izdm_s",
+      "name": "PRAD Reconstruction Map Setting IZDM_S",
+      "description": "Reconstruction map setting (REC_MAP_SETTING_IZDM_S) associated with the radiated power (prad) dataset in the LCDB analysis database. It is a data-management/configuration quantity defining how the radiated power data is mapped or reconstructed, not a direct plasma measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:56:10.162000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ate.s003_crmin",
+      "name": "ATE Minimum Radial Coordinate 75000/003/260008",
+      "description": "Minimum radial coordinate (CRMIN) of the fitting range used for the electron temperature profile dataset ate.s75000/003/260008.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:55:07.721000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/spc_oiiivuvdiv",
+      "name": "OIII VUV Divertor Line Intensity",
+      "description": "Vacuum ultraviolet (VUV) line intensity of the OIII (doubly ionized oxygen impurity. The 'div' suffix indicates the measurement is localized to the divertor region, providing a monitor of oxygen impurity content and divertor radiation.",
+      "unit": "au",
+      "enriched_at": "2026-10-11T21:42:46.281000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_arad.s003_topics_yfitdata",
+      "name": "ARAD TOPICS Y-Fit Data s80296/003",
+      "description": "Radiated power from the arad analysis series s80296/003, stored with the TOPICS_YFITDATA label; derived from bolometric measurements and processed through a fitting procedure within the TOPICS analysis framework.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:39:55.969000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/cryomag_mc2tho",
+      "name": "CS 02 Helium Outlet Pipe Temperature",
+      "description": "Temperature of the helium coolant in the outlet pipe of the CS 02 central solenoid cooling circuit. Monitors the cryogenic coolant temperature to ensure proper thermal management of the superconducting magnet.",
+      "unit": "K",
+      "enriched_at": "2026-10-11T21:46:39.637000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o001_npnbi",
+      "name": "OFMC NPNBI NBI Particle Source o80729/001",
+      "description": "Neutral beam injection particle source distribution NPNBI computed by the OFMC code for output group o80729/001, part of the EDASDB h-series analysis database. Represents the spatial deposition profile of beam particles/neutrals from NBI, used in heating and fast-ion analyses.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:35:30.512000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o008_imp_para_momentum_sol1",
+      "name": "OFMC Impurity Parallel Momentum SOL (Run 008)",
+      "description": "Parallel momentum of impurities in the scrape-off layer (SOL1) from OFMC fast ion/impurity transport code run 008, describing momentum transport of impurity ions along magnetic field lines in the SOL region.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:54:01.471000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/psc_otfvol",
+      "name": "TF Coil Voltage",
+      "description": "Time-series observation of the toroidal field (TF) coil voltage in kilovolts. This monitors the electrical behavior of the JT-60SA superconducting TF coil system during operation.",
+      "unit": "kV",
+      "enriched_at": "2026-10-11T21:48:55.094000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cpt290",
+      "name": "CryoHRS Pressure Transmitter 290",
+      "description": "Pressure measured at 20K adsorber inlet pressure of the cryogenic helium refrigerator system, in MPa.",
+      "unit": "MPaG",
+      "enriched_at": "2026-10-11T21:40:33.334000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o008_imp_jxb_torque_density1",
+      "name": "OFMC NBI Impurity JxB Toroidal Torque Density (Run 008)",
+      "description": "Toroidal torque density on impurity ions due to the JxB force from neutral beam injection, calculated by OFMC analysis run 008; describes the momentum input to impurity species from NBI-driven currents.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:13:32.691000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o004_mkrs",
+      "name": "OFMC MKRS Ion Momentum Source o80296/004",
+      "description": "Ion momentum source distribution MKRS from the OFMC analysis output group o80296/004, part of the EDASDB b-series analysis database. The wiki documentation identifies MKR/MIRS as the ion momentum source term used in NBI heating and current drive modeling.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:22:31.639000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o011_fast_ion_current",
+      "name": "OFMC NBI Fast-Ion Current, Output Series 011",
+      "description": "Current carried by fast ions from NBI heating, computed by the OFMC (Orbit Following Monte Carlo) code for output series 011. The fast-ion current contributes to the total plasma current and is important for current-drive analysis.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:46:51.439000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_mjtcorq",
+      "name": "Cryo Nominal Operation Request",
+      "description": "Parameter indicating the cryogenic nominal operation request status for the CryoHRS system. It is a plant/machine operation parameter rather than a plasma measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:49:14.963000000+00:00",
+      "glossary": [],
+      "hand_label": "commanded"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o008_bm_th_d_d_neutron_sol",
+      "name": "OFMC Beam-Thermal D-D Neutron SOL Rate 39689/008",
+      "description": "Neutron production rate from beam-thermal D-D reactions in the scrape-off layer (SOL), computed by the OFMC analysis code for output ofmc.o39689/008. Estimates neutron emission from D-D fusion reactions involving beam ions and thermal plasma in the SOL region.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:51:33.564000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_prad.s002_rec_abel_setting_abeltype",
+      "name": "Abel Inversion Setting Type (Prad)",
+      "description": "Configuration parameter specifying the Abel inversion type used in the radiated power (prad) analysis. Determines the inversion algorithm applied to bolometry data.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:27:24.626000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o005_hks",
+      "name": "OFMC HKS Fast-Ion Parameter 80296/005",
+      "description": "HKS analysis configuration/output parameter from the OFMC heating and current drive code, dataset ofmc.o80296/005. OFMC computes NBI heating, current drive, and fast ion slowing-down distributions; HKS is a parameter within this analysis.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:48:55.209000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/dcsv_dayny33",
+      "name": "Daily Neutron Yield Storage 33",
+      "description": "Neutron yield accumulated per day, stored in channel 33 (Daily Neutron Yield Storage 33) of the daily neutron yield record. Used for tracking neutron production and machine activation on a daily basis.",
+      "unit": "n/day",
+      "enriched_at": "2026-10-11T21:26:01.145000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o014_fast_ion_store_energy_sol1",
+      "name": "OFMC Fast Ion Stored Energy SOL 63632/014",
+      "description": "Stored energy of fast ions in scrape-off layer region 1, from the OFMC analysis output series o63632/014. Tracks the fast-ion energy content in the SOL, relevant for fast-ion loss and wall interaction studies.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:42:46.394000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_mc01pfv",
+      "name": "CryoCTB CS Feeder Quench Voltage 01",
+      "description": "Voltage signal monitoring the quench protection circuit of the CS 01P feeder quench voltage on the central solenoid superconducting magnet system.",
+      "unit": "V",
+      "enriched_at": "2026-10-11T21:39:28.642000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ate.s011_pid_tab_kind",
+      "name": "PID Table Kind Metadata ate.s41698/011/260008 (b-series)",
+      "description": "Identifier for the PID (profile ID) table kind used in the ate.s41698/011/260008 electron temperature analysis. This metadata field selects which profile table configuration is applied during the analysis. [DEBUG] comment",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:25:52.069000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/psrc_calfp2",
+      "name": "P2 Poloidal Flux (FP2)",
+      "description": "Poloidal magnetic flux at reference point P2, associated with the lower fast plasma position control coil (FPPCC, LFP). This time-series signal in webers provides the flux measurement used for real-time plasma position and shape control, contributing to the feedback loop that maintains the plasma equilibrium.",
+      "unit": "Wb",
+      "enriched_at": "2026-10-11T21:23:28.009000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/qms_mz47acur",
+      "name": "QMS Ion Current m/z=47 (a)",
+      "description": "Ion current measured by the quadrupole mass spectrometer (QMS) at mass-to-charge ratio m/z=47, corresponding to hydrogen ions. This diagnostic monitors the partial pressure of hydrogen in the vacuum vessel or cryogenic system.",
+      "unit": "A",
+      "enriched_at": "2026-10-11T21:50:11.207000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_mc02phc",
+      "name": "CryoCTB CS Heater Voltage 02",
+      "description": "Voltage applied to the heater circuit of the CS 02P heater voltage (central solenoid) coil, a plant system monitoring parameter for magnet thermal management.",
+      "unit": "V",
+      "enriched_at": "2026-10-11T21:41:00.699000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ate.s003_out_rmaj",
+      "name": "ATE Electron Temperature Profile Maximum Major Radius OUT_RMAJ 75000/003/260008",
+      "description": "Maximum major radius (R) coordinate of the separatrix surface for ATE electron temperature profile dataset member 75000/003/260008, computed from the equilibrium reconstruction. This parameter characterizes the outer extent of the plasma boundary.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:24:47.593000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/gau_p0pngdo",
+      "name": "Total Pressure at Outer Pumping Slot",
+      "description": "Total neutral gas pressure measured at the outer divertor pumping slot, in Pa. This time-series signal characterizes the divertor neutral pressure and pumping performance, relevant to particle exhaust and detachment control.",
+      "unit": "Pa",
+      "enriched_at": "2026-10-11T21:13:38.083000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s006_device",
+      "name": "ATE Device Name 75000/006/250062",
+      "description": "Device identifier metadata associated with the electron temperature analysis dataset ate.s75000/006/250062.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:26:31.645000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/ef5_volpsdc",
+      "name": "EF5 Power Supply DC Voltage",
+      "description": "DC voltage of the EF5 equilibrium field coil power supply, measured as a time series. Used for monitoring and control of the poloidal field coil power supply system.",
+      "unit": "V",
+      "enriched_at": "2026-10-11T21:15:24.641000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/uddb_2641ua001",
+      "name": "Soft X-Ray Emission 101173/2641/001",
+      "description": "Soft X-ray emission measurement 101173/2641/001 () from the JT-60SA UDDB diagnostic system, measuring line-integrated radiation from the plasma core.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:36:34.399000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/tf01_tfgs0106c",
+      "name": "TF Coil Strain Gauge 01/0106",
+      "description": "Strain gauge measurement from a Toroidal Field coil, sampled at 10 kHz, in microstrain, monitoring mechanical stress on the TF coil structure. STRAIN_GAUGE_TF_01_06_(10_KHZ)",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:30:47.129000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/tf12_tfgs1206b",
+      "name": "TF Coil Strain Gauge 12/1206 (100 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 12/1206, sampled at 100 Hz, monitoring mechanical stress and deformation of the TF coil structure.",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:22:09.738000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ane.s002_topics_errflg",
+      "name": "TOPICS Error Flag (ane.s002)",
+      "description": "Error flag from the TOPICS integrated transport analysis code for the electron density (ane) dataset. Indicates whether the analysis run completed successfully or encountered an error condition.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:22:31.402000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cev310",
+      "name": "CryoHRS Valve EV310 Status",
+      "description": "Status/control signal for valve EV310 (Input turbine 310 fast close valve) in the JT-60SA cryogenic helium refrigerator system, used to isolate equipment during fault conditions.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:52:16.391000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_zeff.s002_xtype",
+      "name": "Zeff Analysis XTYPE",
+      "description": "Type selector (XTYPE) from the Zeff (effective charge) analysis data set zeff.s002. This parameter selects the analysis mode for the Zeff spectroscopic diagnostic on JT-60SA.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:15:10.353000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o008_nrho",
+      "name": "OFMC NRHO Radial Grid Points o80296/008",
+      "description": "Number of radial (rho) grid points NRHO used in the OFMC (Orbit Following Monte Carlo) NBI heating and fast ion analysis for output group o80296/008, part of the EDASDB b-series analysis database. Defines the spatial resolution of the fast ion distribution function calculation.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:36:36.962000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/cryoil_m1c03qs",
+      "name": "CS Coil 03 Quench Detection Switch",
+      "description": "Quench detection switch status for central solenoid coil 03 (CS 03 quench detection switch(1)) of the JT-60SA superconducting magnet system.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:35:46.336000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o012_mis",
+      "name": "OFMC Ion Momentum Source MIS o012",
+      "description": "Ion momentum source distribution MIS from the OFMC fast-ion/NBI analysis, output instance o012. Represents the momentum transferred to the plasma ions by neutral beam injection, used in transport and rotation studies.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:56:32.036000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/mmsys_curef3hite",
+      "name": "EF3 Coil Current (HiTec)",
+      "description": "Current in the Equilibrium Field (EF3) coil, measured by the HiTec acquisition chain. This time-series signal provides the coil current used for plasma shaping and position control, and is the chain mapped to pf_active coil currents for equilibrium reconstruction.",
+      "unit": "A",
+      "enriched_at": "2026-10-11T21:24:22.620000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cev337",
+      "name": "CryoHRS Valve EV337 Status",
+      "description": "Status/control signal for valve EV337 (Turbine 330 safety discharge inlet valve) in the JT-60SA cryogenic helium refrigerator system, used to isolate equipment during fault conditions.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:52:16.436000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a042181_ate.s003_fit_rhotype",
+      "name": "ATE Electron Temperature Fit Radial Coordinate Type 75000/003/042181",
+      "description": "Radial coordinate type (FIT_RHOTYPE) used when fitting the electron temperature profile in ATE analysis slice s75000/003/042181, specifying the radial coordinate definition (e.g., normalized radius rho) for the profile fitting procedure.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:34:37.146000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o012_fe",
+      "name": "OFMC Fast Ion Energy 012",
+      "description": "Fast ion energy quantity FE from the OFMC (orbit-following Monte Carlo) dataset, output series o012. Relates to fast particle physics analysis, characterizing the energy distribution of fast ions produced by neutral beam injection or other heating systems.",
+      "unit": "",
+      "enriched_at": "2026-10-12T05:55:31.337000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/dcsv_ppech3num",
+      "name": "ECH Group 3 Number of Units Reference",
+      "description": "Reference index specifying the number of electron cyclotron heating units to be used in ECH group 3. This is a discharge configuration parameter selecting the ECH unit count rather than a measured quantity.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:21:39.105000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o011_e_power_ratio",
+      "name": "OFMC Electron Heating Power Ratio o39689/011",
+      "description": "Ratio of electron heating power computed by the OFMC (Orbit Following Monte Carlo) fast ion analysis code for dataset ofmc.o39689/011, describing the fraction of fast-ion power transferred to electrons through Coulomb collisions during slowing down.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:16:13.855000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/tf06_tfgs0607a",
+      "name": "TF Coil Strain Gauge 06/0607 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 06/0607, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:43:06.443000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o007_bm_th_t_d_neutron_density",
+      "name": "OFMC Beam-Thermal T-D Neutron Density o39689/007",
+      "description": "Neutron density from beam-thermal reactions between tritium beam ions and deuterium thermal plasma (BM_TH_T_D) computed by the OFMC NBI analysis code for output dataset o39689/007. Characterizes the neutron production rate from beam-thermal fusion reactions.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:30:10.390000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/ois_oisrs11b",
+      "name": "OIS Radial Sensor 11 (100 Hz)",
+      "description": "Radial displacement measurement from sensor 11 (RADIAL_SENSOR_OIS_11_(100_HZ)) of the OIS (Optical Interferometric Sensor?) system, sampled at 100 Hz. This parameter monitors the radial position of a machine component with millimeter resolution. The OIS system provides structural or component position monitoring.",
+      "unit": "mm",
+      "enriched_at": "2026-10-11T21:30:23.028000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/dcsv_dayny58",
+      "name": "Daily Neutron Yield Storage 58",
+      "description": "Neutron yield accumulated per day, stored in channel 58 (Daily Neutron Yield Storage 58) of the daily neutron yield record. Used for tracking neutron production and machine activation on a daily basis.",
+      "unit": "n/day",
+      "enriched_at": "2026-10-11T21:26:01.145000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/qms_mz44c",
+      "name": "QMS Partial Pressure m/z=44 (c)",
+      "description": "Partial pressure measurement at mass-to-charge ratio m/z=44 from the quadrupole mass spectrometer. Used to monitor hydrogen isotope partial pressures in the vacuum vessel and gas handling system.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:29:35.978000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_prad.s011_rec_map_setting_ivdm_s",
+      "name": "PRAD Map Setting IVDM_S",
+      "description": "Map setting parameter (IVDM_S) for the PRAD radiated power analysis, defining the spatial grid dimensions used in the radiated power reconstruction.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:58:27.204000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s003_rec_map_setting_ivdm_s",
+      "name": "Reconstruction Map Setting IVDM_S ate.s75000/003/250062 (b-series)",
+      "description": "Reconstruction map setting parameter (IVDM_S) controlling the spatial mapping used in the electron temperature reconstruction from dataset ate.s75000/003/250062. This configuration parameter defines how measurement channels are mapped to spatial coordinates for the Te profile.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:48:14.029000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ane.s002_psi",
+      "name": "PSI Poloidal Magnetic Flux 75000/002/260008",
+      "description": "Poloidal magnetic flux (PSI) associated with the ane.s75000/002/260008 electron density dataset. Provides the flux coordinate mapping used to relate the density profile to the equilibrium magnetic geometry.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:46:39.785000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/qms_mz33drat",
+      "name": "QMS Partial Pressure Ratio m/z=33",
+      "description": "Partial pressure ratio for m/z=33 Partial Pressure Ratio measured by the quadrupole mass spectrometer (QMS), characterizing the relative abundance of that species in the vacuum vessel gas composition.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:24:38.188000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/tf08_tfgs0804c",
+      "name": "TF Coil Strain Gauge 08/0804",
+      "description": "Strain gauge measurement from a Toroidal Field coil, sampled at 10 kHz, in microstrain, monitoring mechanical stress on the TF coil structure. STRAIN_GAUGE_TF_08_04_(10_KHZ)",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:30:47.129000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/psc_otfcur",
+      "name": "TF Coil Current Observation",
+      "description": "Observed current in the toroidal field (TF) coil system, monitored by the PSC (Power Supply Control) system. This is a machine operation parameter measuring the actual current flowing through the TF coils. Units are kA.",
+      "unit": "kA",
+      "enriched_at": "2026-10-11T21:37:11.735000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/dcsv_dayny45",
+      "name": "Daily Neutron Yield Storage 45",
+      "description": "Neutron yield accumulated per day, stored in channel 45 (Daily Neutron Yield Storage 45) of the daily neutron yield record. Used for tracking neutron production and machine activation on a daily basis.",
+      "unit": "n/day",
+      "enriched_at": "2026-10-11T21:26:01.145000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/tf_tfrs08c",
+      "name": "TF Coil Radial Sensor 08",
+      "description": "Radial displacement measurement from sensor 08 on the toroidal field coil system, sampled at 10 kHz, in millimeters, used for structural monitoring of the TF coils. RADIAL_SENSOR_TF_08_(10_KHZ)",
+      "unit": "mm",
+      "enriched_at": "2026-10-11T21:20:15.502000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o008_imp_para_momentum1",
+      "name": "OFMC Impurity Parallel Momentum Source (Run 008)",
+      "description": "Parallel momentum source/contribution associated with impurity ions from OFMC NBI analysis run 008, in the OFMC fast-ion and momentum balance computation.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:35:46.430000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/cryomag_m1e6d01",
+      "name": "EF06-TF Structure Radial Displacement No.1 01",
+      "description": "Radial displacement measurement (No.1) of the EF 06-TF structural support, in millimetres: EF 06-TF ST 01 displacement radial No.1.",
+      "unit": "mm",
+      "enriched_at": "2026-10-11T21:34:37.737000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s011_eqseq",
+      "name": "Radiated Power Equilibrium Sequence",
+      "description": "Equilibrium sequence identifier (EQSEQ) used in the radiated power (prad) analysis. This metadata parameter links the bolometric radiated power analysis to a specific equilibrium reconstruction sequence.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:38:23.006000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o016_fast_ion_density1",
+      "name": "OFMC Fast-Ion Density Distribution, Output Series 63632/016",
+      "description": "Fast ion density distribution computed by the OFMC orbit-following Monte Carlo code for output series 63632/016. Represents the spatial density of fast ions (e.g., from NBI) in the plasma, used for fast-ion and heating studies.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:35:30.487000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s002_nexpadd",
+      "name": "Radiated Power Extra Points",
+      "description": "Number of extra points (NEXPADD) used in the radiated power (prad) analysis. Part of the bolometric radiated power profile reconstruction metadata.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:36:54.083000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_prad.s002_device",
+      "name": "Radiated Power Analysis Dataset (prad.s002, DEVICE)",
+      "description": "Device identifier or configuration data from the radiated power analysis dataset prad.s002. The 'prad' label denotes radiated power, and this block contains device-related metadata for the radiation analysis.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:42:45.691000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o005_fk",
+      "name": "OFMC Fast Ion Distribution FK 80296/005",
+      "description": "Fast-ion related distribution or rate quantity (FK) output from the OFMC NBI heating and fast-ion analysis code, dataset ofmc.o80296/005. OFMC models fast-ion slowing down and beam deposition, and FK represents a fast-ion distribution function or associated rate.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:51:14.244000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o008_fast_ion_current_para",
+      "name": "OFMC Parallel Fast-Ion Driven Current, Output Series 008",
+      "description": "Parallel component of the fast-ion driven current from the OFMC (Orbit Following Monte Carlo) analysis dataset for output series 008. Represents the current carried by NBI-generated fast ions along the magnetic field lines, a key quantity for NBI current drive studies.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:45:57.118000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o012_fast_ion_current_density",
+      "name": "OFMC Fast-Ion Current Density Profile, Output Series 012",
+      "description": "Fast ion current density profile computed by the OFMC (Orbit Following Monte Carlo) code for output series 012. Represents the toroidal current density carried by NBI-generated fast ions, an important contribution to the total plasma current and current profile in beam-heated plasmas.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:45:41.367000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/cryoctb_m1eva03",
+      "name": "TF Feeder Inlet Valve 03 Opening",
+      "description": "Opening percentage of the TF feeder inlet valve 03 in the cryogenic system, monitoring the cryogenic coolant flow to the toroidal field coil feeder during operation. TF 08-13 feeder inlet valve opening",
+      "unit": "%",
+      "enriched_at": "2026-10-11T21:46:16.753000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/mdac_curspltrc3",
+      "name": "Stabilization Plate Rogowski Coil 3 Current",
+      "description": "Current measured by Rogowski coil 3 mounted on the stabilization plate, in amperes. This time-series signal monitors the current flowing in the stabilizing plate structure, relevant to error field and MHD stability studies.",
+      "unit": "A",
+      "enriched_at": "2026-10-11T21:24:50.663000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o004_nttr",
+      "name": "OFMC Thermal-Thermal Neutron Rate NTTR 80296/004",
+      "description": "Neutron production rate (NTTR) from thermal-thermal (bulk plasma) fusion reactions, computed by the OFMC code for output instance 80296/004. This represents the neutron yield from D-D reactions between thermal ions.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:26:50.716000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/tf18_tfgs1808a",
+      "name": "TF Coil Strain Gauge 18/1808 (1 Hz)",
+      "description": "Strain gauge measurement on toroidal field coil 18/1808, sampled at 1 Hz, monitoring mechanical strain in the TF coil structure.",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:43:06.443000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/ech_modtmgu1",
+      "name": "ECH Unit 1 Modulation Timing Signal",
+      "description": "Modulation timing signal for ECH unit 1, defining the on/off modulation pattern applied to the electron cyclotron heating power. Used for power modulation experiments and control of the EC heating waveform.",
+      "unit": "-",
+      "enriched_at": "2026-10-11T21:30:10.390000000+00:00",
+      "glossary": [],
+      "hand_label": "commanded"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s002_eqtime",
+      "name": "ATE Equilibrium Time",
+      "description": "Time point of the equilibrium reconstruction used as input for the ATE electron temperature profile analysis. Links the temperature profile to the corresponding MHD equilibrium state.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:35:59.925000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/qms_mz25a",
+      "name": "QMS Signal m/z=25 (a)",
+      "description": "Quadrupole mass spectrometer signal for mass-to-charge ratio m/z=25, corresponding to atomic hydrogen (or deuterium). Used to monitor the partial pressure of hydrogen isotopes in the vacuum vessel.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:58:02.102000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o007_bm_th_d_t_neutron_density",
+      "name": "OFMC Beam-Thermal D-T Neutron Density o39689/007",
+      "description": "Neutron density from D-T fusion reactions computed by the OFMC analysis code for output dataset o39689/007. Represents the spatial distribution of neutrons produced by thermal D-T reactions, used for neutronics and fast particle studies.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:50:40.337000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/psc_volefcc4",
+      "name": "EFCC4 Reference Voltage",
+      "description": "Reference voltage of the error field correction coil 4 (EFCC4), one of the in-vessel coils mounted on the stabilizing plate. This time series monitors the power supply voltage applied to the error field correction coil used to control non-axisymmetric error fields.",
+      "unit": "kV",
+      "enriched_at": "2026-10-11T21:41:37.637000000+00:00",
+      "glossary": [],
+      "hand_label": "reference_or_setpoint"
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_czsl119b",
+      "name": "CryoHRS Limit Switch Close cZSL119B",
+      "description": "Limit switch status indicating the closed position of cryogenic valve (Limit Switch close XV119B) in the CryoHRS cryogenic helium refrigeration system.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:56:31.959000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o015_tirs",
+      "name": "OFMC NBI Toroidal Ion Rotation Source o63632/015",
+      "description": "Toroidal ion rotation source (TIRS) from NBI heating computed by the OFMC analysis, dataset member o63632/015, representing the torque/source term driving toroidal rotation of ions.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:33:43.518000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/psc_calfp2",
+      "name": "P2 Poloidal Flux Calibration (FP2)",
+      "description": "Calibrated poloidal flux measurement for the FP2 (fast plasma position control coil) circuit, in Webers. This signal provides the magnetic flux linked by the lower fast plasma position control coil, used for equilibrium reconstruction and plasma position control.",
+      "unit": "Wb",
+      "enriched_at": "2026-10-11T21:56:10.162000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s002_topics_xfitdata",
+      "name": "ATE TOPICS_XFITDATA 80296/002",
+      "description": "Fitted X-axis data array (TOPICS_XFITDATA) from the TOPICS transport analysis dataset, member 80296/002, holding the abscissa values of fitted profiles.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:41:43.376000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s009_fit_ref_eqshot",
+      "name": "ATE Electron Temperature Fit Reference Equilibrium Shot 75000/009/250062",
+      "description": "Reference equilibrium shot number used by the ATE electron temperature profile analysis for slice s75000/009/250062, linking the profile fit to the equilibrium reconstruction used for mapping temperature data to flux coordinates.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:49:15.091000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/psrc_magfluxlp27",
+      "name": "Flux Loop 27 Magnetic Flux",
+      "description": "Magnetic flux measured by differential flux loop pair (27-7), used in the flux loop array for equilibrium reconstruction and plasma position control. Observation of Flux Loop (27-7)",
+      "unit": "Wb",
+      "enriched_at": "2026-10-11T21:20:15.454000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/cryots_mstts12ta",
+      "name": "TCTS Sector A Sensor 12 Temperature",
+      "description": "Temperature measurement from the TCTS (Thermal Control and Temperature System) sector A, sensor TCTS sectorA (TE12C1A). Monitors the thermal state of the cryogenic system component in sector A.",
+      "unit": "K",
+      "enriched_at": "2026-10-11T21:46:39.736000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o004_mir",
+      "name": "OFMC Ion Momentum Source MIR o80296/004",
+      "description": "Ion momentum source distribution MIR from the OFMC (Orbit Following Monte Carlo) NBI analysis, output instance o80296/004. Represents the momentum transferred to bulk ions by the fast-ion population from neutral beam injection, as a function of spatial position.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:26:14.750000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o008_bulk_ion_charge_number",
+      "name": "OFMC Bulk Ion Charge Number o008",
+      "description": "Effective charge number of the bulk (thermal) ion species computed by the OFMC analysis code for output dataset o008. Characterizes the average ionization state of the main plasma ions and is used in transport and radiation calculations.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:45:17.653000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s001_dname",
+      "name": "ATE Dataset Name 80729/001",
+      "description": "Dataset name field (DNAME) from the LCDB ate.s80729/001 electron temperature analysis dataset. This is a metadata/identifier string rather than a plasma measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-12T05:56:12.661000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b240064_ate.s003_phiexpdata",
+      "name": "Equilibrium Data ate.s101173/003/240064 (PHIEXPDATA, b-series)",
+      "description": "Equilibrium data from the ate.s101173/003/240064 analysis dataset, stored under the PHIEXPDATA category. Contains flux surface or equilibrium-related data from the SELENE equilibrium reconstruction.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:35:58.715000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o009_hirs",
+      "name": "OFMC HIRS Parameter (a-series run 009)",
+      "description": "Parameter HIRS from the OFMC neutral beam injection analysis code, a code-level output quantity from the beam analysis of fast-ion slowing-down, beam-driven current and heating profiles, for run 009.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:59:46.317000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s002_date",
+      "name": "Date (prad.s002)",
+      "description": "Date metadata associated with the prad (radiated power) analysis output. Records the date of the analysis run or data acquisition.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:23:50.687000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o011_ion_jxb_torque_density1",
+      "name": "Ion JxB Torque Density (OFMC) 39689/011",
+      "description": "Ion JxB torque density for ion species/channel 39689/011 from the OFMC analysis, representing the toroidal torque density exerted on ions via the JxB force. It is relevant to momentum transport and plasma rotation studies driven by NBI fast ions.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:52:05.179000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_c260058_ate.s001_rec_map_setting_irdm_s",
+      "name": "Electron Temperature Reconstruction Map Setting (ate.s001)",
+      "description": "Reconstruction map setting parameter (IRDM_S) for the electron temperature analysis series s001. This is a configuration parameter for the spatial mapping used in the temperature profile reconstruction.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:28:24.418000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ane.s002_topics_rhotype",
+      "name": "ANE TOPICS Radial Coordinate Type 101173/002/250062",
+      "description": "Radial coordinate type parameter (TOPICS_RHOTYPE) for the electron density profile dataset ane.s101173/002/250062, specifying the flux-surface radial coordinate convention used by the TOPICS transport code.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:33:27.350000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o007_imp_jxb_torque_sol1",
+      "name": "OFMC Impurity JxB Toroidal Torque SOL (Run 39689/007)",
+      "description": "Toroidal JxB torque on impurity ions at the scrape-off layer from OFMC NBI heating and fast-ion analysis run 39689/007, part of the momentum source terms used in transport analysis of NBI-driven rotation.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:28:55.010000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_ofmc.o009_jbrt",
+      "name": "OFMC Beam-Driven Toroidal Current Density JBRT (b-series output 80296/009)",
+      "description": "Toroidal component of the NBI beam-driven current density JBRT computed by the OFMC analysis code, from b-series output channel 80296/009.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:31:59.204000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s007_rec_map_setting_njdb",
+      "name": "ATE Reconstruction Map Setting NJDB 75000/007/250062",
+      "description": "Configuration setting (NJDB) controlling how electron temperature profile data is mapped and reconstructed in the analysis database, member 75000/007/250062. This is a metadata/configuration parameter rather than a physical measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:56:21.812000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/tcud_temdu9",
+      "name": "Upper Divertor Temperature 9",
+      "description": "Temperature measured at position 9 on the upper divertor. This thermocouple/thermometer reading monitors the thermal load on the divertor target, relevant for power exhaust and plasma-wall interaction studies. Units are degrees Celsius.",
+      "unit": "degreeC",
+      "enriched_at": "2026-10-11T21:14:52.932000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/cryohrs_cpt280b",
+      "name": "80K Adsorber V280B Inlet Pressure",
+      "description": "Inlet pressure of the 80K adsorber V280B in the cryogenic helium refrigeration system (CryoHRS). This is a plant operation parameter monitoring the cryoplant gas circuit, measured in MPa gauge.",
+      "unit": "MPaG",
+      "enriched_at": "2026-10-11T21:45:17.517000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s002_exseq",
+      "name": "PRAD EXSEQ (Debug)",
+      "description": "Debug output parameter (EXSEQ) from the radiated power (prad) analysis. This is an internal sequence or execution parameter used in the radiated power calculation procedure.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:37:14.869000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o008_imp_heat_momentum1",
+      "name": "OFMC Impurity Heat and Momentum Source 008",
+      "description": "Impurity heat and momentum source term (IMP_HEAT_MOMENTUM1) computed by the OFMC analysis code, dataset ofmc.o008. Describes the heat and momentum deposition from impurity ions in the plasma.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:34:55.595000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o004_jbp",
+      "name": "OFMC NBI Beam-Driven Current JBP (a-series, channel 004)",
+      "description": "NBI beam-driven current parallel to the magnetic field lines (JBP), computed by the OFMC analysis code for channel 004. Represents the current density driven by neutral beam injection, a key quantity for understanding current drive efficiency and fast ion physics.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:36:34.384000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/qms_v02dqopen",
+      "name": "QMASS D Orifice Valve V02DQ Open Status",
+      "description": "Status parameter indicating the open/closed state of the V02DQ orifice (QMASS_D_Orif._V02DQ_Open) of the quadrupole mass spectrometer (QMS) deuterium gas sampling line. Used for gas composition monitoring in the vacuum/gas system.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:26:50.623000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a042181_ate.s003_iyexperr",
+      "name": "ATE Electron Temperature Fit Error Indicator 75000/003/042181",
+      "description": "Validity/error indicator (IYEXPERR) for the ATE electron temperature profile fit in analysis slice s75000/003/042181, recording whether the experimental fit succeeded or encountered an error condition.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:51:10.100000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a042181_ate.s003_xfitdata",
+      "name": "ATE Fitted Electron Temperature Profile XFITDATA (a-series) 75000/003/042181",
+      "description": "Fitted electron temperature profile from the JT-60SA LCDB analysis database series 75000/003/042181. The XFITDATA field contains the spatially resolved electron temperature as a function of the abscissa (in metres), derived from fitting measured data.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:41:34.408000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s003_t1",
+      "name": "ATE T1 75000/003/250062",
+      "description": "Time base array (T1) for the ATE electron temperature profile dataset, member 75000/003/250062, providing the time coordinate for the Te measurements.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:50:11.245000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ofmc.o010_hdrs",
+      "name": "OFMC Header Metadata HDRS (a-series run 010)",
+      "description": "Header metadata HDRS from the OFMC fast ion analysis dataset, containing configuration and run parameters such as grid dimensions, time steps and beam source settings, for run 010.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:42:26.274000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/tcud_temdu25",
+      "name": "Upper Divertor Temperature DU25",
+      "description": "Temperature at upper divertor location DU25, monitoring the thermal load on the divertor structure, in degrees Celsius.",
+      "unit": "degreeC",
+      "enriched_at": "2026-10-11T21:29:32.542000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/tf17_tfgs1702c",
+      "name": "TF Coil Strain Gauge 17/1702",
+      "description": "Strain gauge measurement from a Toroidal Field coil, sampled at 10 kHz, in microstrain, monitoring mechanical stress on the TF coil structure. STRAIN_GAUGE_TF_17_02_(10_KHZ)",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:30:47.129000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/tf03_tfgs0307c",
+      "name": "TF Coil Strain Gauge 03/0307",
+      "description": "Strain gauge measurement from a Toroidal Field coil, sampled at 10 kHz, in microstrain, monitoring mechanical stress on the TF coil structure. STRAIN_GAUGE_TF_03_07_(10_KHZ)",
+      "unit": "uST",
+      "enriched_at": "2026-10-11T21:30:47.129000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ati.s001_nfit",
+      "name": "Ion Temperature Fit Point Count (ati.s80729/001)",
+      "description": "Number of data points (NFIT) used in the ion temperature profile fitting from the ATI analysis, dataset ati.s80729/001, indicating the amount of data available for reconstructing the ion temperature profile.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:54:06.026000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ati.s005_nfit",
+      "name": "Ion Temperature Fit Point Count (ati.s80296/005)",
+      "description": "Number of fit points (NFIT) for the ion temperature profile dataset ati.s80296/005, indicating how many radial points were used in fitting the measured ion temperature profile.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:25:25.976000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/psc_cef2cur",
+      "name": "EF2 Coil Current Command",
+      "description": "Command waveform (in kA) for the EF2 equilibrium field coil current, issued by the plasma control system. This reference signal drives the EF2 power supply to shape the poloidal field during a discharge. It is a control reference rather than a measured plasma quantity.",
+      "unit": "kA",
+      "enriched_at": "2026-10-11T21:35:30.353000000+00:00",
+      "glossary": [],
+      "hand_label": "commanded"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o010_jbp",
+      "name": "OFMC NBI Beam-Driven Current JBP (h-series, channel 80296/010)",
+      "description": "NBI beam-driven current density parallel to the magnetic field, computed by the OFMC code for channel 80296/010. Used to quantify NBI current drive efficiency and the spatial profile of the driven current.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:56:57.942000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_prad.s002_iyexperr",
+      "name": "PRAD Fit Experimental Error Flag",
+      "description": "Error flag (IYEXPERR) indicating the type of experimental error data used in the PRAD radiated power profile fit. The flag distinguishes whether no data, symmetric, or asymmetric upper/lower error values are provided for the experimental data points.",
+      "unit": "",
+      "enriched_at": "2026-10-12T05:56:29.050000000+00:00",
+      "glossary": [],
+      "hand_label": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s005_exdb",
+      "name": "ATE EXDB Metadata 75000/005/048717",
+      "description": "Data-management metadata entry (EXDB) for analysis slice ate.s75000/005/048717 of the ATE electron temperature profile dataset. It is a database reference or configuration parameter rather than a physical measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:42:46.308000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/mdac_ncrp10plsh",
+      "name": "NFM P10 Neutron Counting Rate (Pulse-H)",
+      "description": "Neutron counting rate from the NFM (Neutron Flux Monitor) detector P10, measured in counts per second in pulse-height mode. Provides time-resolved measurement of the total neutron emission rate from the plasma.",
+      "unit": "cps",
+      "enriched_at": "2026-10-11T21:23:50.687000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/dhc_1623_a014",
+      "name": "NBI Unit 3 Stop Timing",
+      "description": "Timing signal indicating the stop time of neutral beam injection from NBI unit #3. This parameter defines when the beam is turned off during a discharge.",
+      "unit": "ms",
+      "enriched_at": "2026-10-11T21:38:38.919000000+00:00",
+      "glossary": [],
+      "hand_label": "commanded"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_zeff.s005_fit_ref_eqshot",
+      "name": "Zeff Analysis Fit Reference Equilibrium Shot 41698/005",
+      "description": "Reference equilibrium shot identifier used in the Zeff effective charge fitting analysis dataset zeff.s41698/005. Links the Zeff analysis to the specific equilibrium reconstruction used as input.",
+      "unit": "",
+      "enriched_at": "2026-10-12T05:55:51.922000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/psrc_refdivu",
+      "name": "Upper Divertor Control PT (DIV_U)",
+      "description": "Time series of the upper divertor control reference point DIV_U used in JT-60SA plasma control. Defines the target position for the upper divertor configuration control.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:24:45.423000000+00:00",
+      "glossary": [],
+      "hand_label": "reference_or_setpoint"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b250062_ate.s003_eqdb",
+      "name": "ATE Equilibrium Reference 75000/003/250062",
+      "description": "Reference to the equilibrium database entry associated with the 'ate' dataset slice ate.s75000/003/250062. Links profile data to the corresponding MHD equilibrium reconstruction (e.g., from SELENE or FAME) for integrated analysis.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:31:35.676000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s002_out_rmaj",
+      "name": "ATE Output Major Radius RMAJ",
+      "description": "Output major radius coordinate (OUT_RMAJ) from the ATE electron temperature analysis dataset. Provides spatial coordinate information for the temperature profile mapping.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:51:14.143000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_c260058_ate.s001_cst1_ini",
+      "name": "ATE Fit Initial Constant (CST1_INI)",
+      "description": "Initial value of a constant parameter (CST1_INI) used in the electron temperature (ate) fitting procedure. This is a numerical configuration setting for the fit, not a direct plasma measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:57:52.215000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/vvgs_strainvvgs03l",
+      "name": "Vacuum Vessel Gravity Support 03 Left Strain",
+      "description": "Strain on the left side of vacuum vessel gravity support 03. Vacuum Vessel Gravity Support 03 Left Strain. Monitors mechanical stress in the gravity support structure that bears the weight of the vacuum vessel.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:53:06.184000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/psrc_calbetapcor",
+      "name": "Corrected Poloidal Beta",
+      "description": "Poloidal beta (betap) after correction, a dimensionless measure of the plasma pressure relative to the poloidal magnetic field pressure. This time-series quantity is derived from magnetic diagnostics and used in equilibrium reconstruction and plasma control.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:20:24.720000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_zeff.s002_shoteq",
+      "name": "Zeff Shot Equilibrium Reference",
+      "description": "Shot/equilibrium reference (SHOTEQ) from the effective charge (Zeff) analysis 'zeff.s002'. Identifies the equilibrium data used as input for the Zeff calculation.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:34:55.490000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o007_thermalized_ion_power_ratio",
+      "name": "OFMC Thermalized Ion Power Ratio 007",
+      "description": "Ratio of thermalized ion power from the OFMC fast-ion/NBI analysis, describing the fraction of NBI power transferred to thermal ions through slowing-down, for output dataset ofmc.o007.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:36:54.083000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ate.s012_nfit",
+      "name": "ATE Electron Temperature Profile Number of Fit Points NFIT 80296/012",
+      "description": "Number of fit points (NFIT) used in the fitting procedure for the electron temperature profile dataset member 80296/012. This scalar configuration parameter indicates the resolution of the fit applied to the electron temperature profile data, not a physical measurement itself.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:59:32.374000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/ef2_volpsdc",
+      "name": "EF2 Power Supply DC Voltage",
+      "description": "DC voltage of the EF2 power supply, in kilovolts. This is a machine power supply measurement associated with the equilibrium field coil system, used to monitor and control the coil energization during a discharge.",
+      "unit": "V",
+      "enriched_at": "2026-10-11T21:39:06.880000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ane.s002_rec_map_setting_ndnel",
+      "name": "Electron Density Reconstruction Map Setting (NDNEL)",
+      "description": "Bookkeeping/configuration field from the electron density analysis dataset s002, recording the mapping settings used during density profile reconstruction. The NDNEL parameter defines the number of density channels or grid points used in the reconstruction mapping.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:39:56.165000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ofmc.o002_hds",
+      "name": "OFMC Bulk Ion Heat Momentum HDS (h-series run 80729/002)",
+      "description": "Bulk ion heat momentum source term HDS produced by NBI heating, from the OFMC fast-ion/NBI slowing-down and heating analysis, for run 80729/002.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:51:59.125000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s002_rec_map_setting_ndf3",
+      "name": "Electron Temperature Reconstruction Map Setting (NDF3)",
+      "description": "Reconstruction map setting parameter for the ate (electron temperature) analysis dataset. This is a configuration/debug field controlling the spatial mapping used in the electron temperature reconstruction rather than a physical measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:52:59.190000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b240064_ate.s003_raxis",
+      "name": "Magnetic Axis Major Radius RAXIS ate.s101173/003/240064 (b-series)",
+      "description": "Major radius of the magnetic axis (RAXIS) from the electron temperature profile analysis dataset ate.s101173/003/240064. Provides the radial location of the magnetic axis used in profile mapping and equilibrium analysis.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:58:34.104000000+00:00",
+      "glossary": [],
+      "hand_label": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/ef4_temsnur11",
+      "name": "EF4 SNU Resistor R11 Temperature",
+      "description": "Temperature of resistor R11 in the EF4 switching network unit (SNU), a resistor bank in the equilibrium field coil power supply used to apply a high loop voltage across the coil at plasma breakdown. Recorded as a time series in degrees Celsius to monitor thermal loading of the resistor. EF4 SNU resistor R11 temperature",
+      "unit": "deg. C",
+      "enriched_at": "2026-10-12T20:03:20.882000000+00:00",
+      "glossary": [],
+      "hand_label": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a042181_ate.s001_rec_map_setting_mxrotp",
+      "name": "ATE Reconstruction Map Setting MXROTP 101173/001/042181",
+      "description": "Configuration/setting record (REC_MAP_SETTING_MXROTP) controlling the reconstruction mapping used for the ATE electron temperature profile dataset member 101173/001/042181. It stores analysis setup parameters rather than a plasma measurement, defining how the reconstruction grid or mapping is applied.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:46:27.034000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_a048717_ane.s002_nexpadd",
+      "name": "Additional Experiment Number (ane.s002)",
+      "description": "Administrative metadata field NEXPADD from the ane.s002 analysis dataset, recording an additional experiment/pulse identifier associated with an analysis run. It is bookkeeping data rather than a plasma measurement.",
+      "unit": "",
+      "enriched_at": "2026-10-11T21:29:35.921000000+00:00",
+      "glossary": [],
+      "hand_label": "configuration_parameter"
+    }
+  ],
+  "description": "Uniform random sample of eligible JT-60SA signals. Hand labels were assigned from the stored name and description under the six-role prototype rule before the paid judge ran.",
+  "label_rule": "Measured = direct observation, including plant sensing; commanded = control demand sent to equipment; reference_or_setpoint = target or programmed reference; status_or_flag = discrete state, alarm, or validity; configuration_parameter = setting, identifier, metadata, or analysis setup; derived_or_computed = calculation, fit, reconstruction, simulation, or aggregate.",
+  "labelled_at": "2026-10-13T10:34:54.851993+00:00",
+  "selection": {
+    "method": "random.Random(seed).sample(sorted(eligible_ids), 200)",
+    "seed": 20261013,
+    "population_size": 14312,
+    "known_present": "jt-60sa:general/dhc_obsip"
+  }
+}
