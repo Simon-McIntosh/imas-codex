@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite 'logs/baseline-gate.txt' reports 96 passed; after_suite 'logs/gate.txt' reports 103 passed; both EXIT=0 per the reviewed manifest; zero added failures",
+  "backend": "local",
+  "base_log_revision": "logs/baseline-gate.txt",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T10:22:00.636Z",
+  "dispatched_at": "2026-10-13T10:03:59Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/segment_selection.py",
+      "line": 266,
+      "severity": "follow-on",
+      "text": "_vocabulary_definitions re-derives the physical-base and geometry-carrier token-to-definition map that imas_codex/standard_names/workers.py:8495 _closed_vocabulary_definitions already owns, using the same two loaders (load_physical_bases, load_geometry_carriers), so it duplicates rather than wraps the owner; it extends the capability only by adding the locus registry to the union."
+    },
+    {
+      "file": "tests/standard_names/test_segment_selection.py",
+      "line": 173,
+      "severity": "follow-on",
+      "text": "the autouse fixture teardown calls ss._build_tree.cache_clear() before monkeypatch restores the original, so the base-offers-none and no-optional-none mutations (which replace _build_tree with a plain lambda) raise AttributeError at teardown for every test; the guard still fires, but each of those two mutation logs conjoins twelve ERROR entries with the real failure (logs/mutation-base-offers-none.txt reads '2 failed, 10 passed, 12 errors')."
+    },
+    {
+      "file": "tests/standard_names/test_segment_selection.py",
+      "line": 245,
+      "severity": "follow-on",
+      "text": "assert leaf.description == ss.option_text(leaf.key) compares the tree's own description, which _leaf_nodes built by calling option_text, against a fresh call to the same function, so both sides move together and the assertion cannot fail while option_text is deterministic; the load-bearing, independent guard is line 244 (assert leaf.description != leaf.key)."
+    },
+    {
+      "file": "logs/gate.txt",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "the done_when requires each guarded mechanism to fail with its mechanism removed '(log with EXIT=)', but none of logs/gate.txt, logs/baseline-gate.txt or the seven logs/mutation-*.txt carries an EXIT= line; each log ends at its pytest summary, so the sentinel the done_when names is absent from the stored evidence even though the pass/fail outcome is readable from the summary."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit against the base: 500ccca23 rewrites the selection mechanism in imas_codex/standard_names/segment_selection.py (571 lines) and its test file (432), and e2ac984ed adds the 164-line evidence fragment; no other file is touched.",
+    "done_when": "The done_when names five unit behaviours (mandatory base, meaning-bearing options, shortlisted base with membership recorded, grammar-valid later slots, optional 'none'), the surviving empty-beam failure test, and a live smoke under a cost ceiling, each guarded by a test that fails with its mechanism removed (log with EXIT=); tests at tests/standard_names/test_segment_selection.py:186, :221, :282, :337, :377 cover the five behaviours and the seven SS_SEGMENT_MUTATION logs demonstrate each guard fires, but the '(log with EXIT=)' sentinel is absent from every gate and mutation log.",
+    "goal": "The goal is to rebuild segment selection so the base slot is mandatory, every option carries its meaning, the base is offered over an embedding shortlist of the source's nearest tokens, and each later slot offers only tokens that compose with those already chosen, keeping the entry point's shape: imas_codex/standard_names/segment_selection.py:1160 SLOT_ORDER and :939 _select_sequence implement all four, and :1095 render_name routes the selection through compose_canonical_ir.",
+    "manifest": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T061818212780-ssog-segment-arm2/manifest.md: status complete, commits 500ccca23 and e2ac984ed, changed_paths matching the diff, baseline_suite 96 passed EXIT=0 and after_suite 103 passed EXIT=0, smoke cost USD 0.00280).",
+    "write_paths": "The declared write paths are imas_codex/standard_names/segment_selection.py, tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-arm2.html; git diff --stat aa25ca574e960cca4767187efadb83e7eb56970c e2ac984ede000752b825cbc79554314f36974d7a touches exactly those three files and nothing outside the fence."
+  },
+  "justifications": {
+    "durability": "Each of the seven rules is guarded by a test that fails when SS_SEGMENT_MUTATION removes its mechanism (tests/standard_names/test_segment_selection.py:124 autouse fixture, demonstrated by the seven logs/mutation-*.txt), so the guards are independent of the feature being present; the score is held below 20 by the tautological assertion at :245 and by the fixture teardown bug at :173 that makes two mutation logs report ERRORs alongside the failure they exist to show.",
+    "evidence": "The gate logs record the measures the done_when names (logs/gate.txt '103 passed', logs/baseline-gate.txt '96 passed', smoke USD 0.00280 against a USD 0.10 ceiling), but the required '(log with EXIT=)' sentinel is absent from the gate logs and from all seven mutation logs, and the mutation logs for base-offers-none and no-optional-none additionally carry twelve teardown ERRORs that conflate a real failure with a fixture crash.",
+    "fit": "The module follows the repository's conventions: it reuses compose_canonical_ir from the grammar adapter rather than re-implementing composition, takes its encoder from imas_codex.embeddings.embed.get_encoder, reads the closed ISN vocabulary through the public loaders, and exposes a small delegate-shaped entry point consistent with the first arm; held below 20 only by the duplicated definition map noted at segment_selection.py:266.",
+    "goal_fidelity": "Implements all four stated constraints at imas_codex/standard_names/segment_selection.py:1160 (SLOT_ORDER with physical_base first and no 'none' for mandatory slots), :351 option_text (token plus meaning from ISN loaders), :861 base_shortlists (embedding top-20) and :939 _select_sequence (composition-filtered later slots), one point short of 20 only because the smoke at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-arm2.html:139-155 shows the chosen base is often not the target's own spelling, which the goal's accuracy claim does not yet reach.",
+    "reuse": "Most capabilities are reused from their owners (compose_canonical_ir, get_encoder, grammar token helpers, the ISN loaders), but the added _vocabulary_definitions at imas_codex/standard_names/segment_selection.py:266 re-implements the bases-and-carriers definition map that imas_codex/standard_names/workers.py:8495 _closed_vocabulary_definitions already owns, duplicating it rather than extending the owner, which caps this dimension at 5 per the brief's rule.",
+    "scope_discipline": "git diff --stat aa25ca574e960cca4767187efadb83e7eb56970c e2ac984ede000752b825cbc79554314f36974d7a lists exactly the three declared paths and no fourth file, so no production caller, config or unrelated module was touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal is to rebuild segment selection so the base slot is mandatory, every option carries its meaning, the base is offered over an embedding shortlist of the source's nearest tokens, and each later slot offers only tokens that compose with those already chosen, keeping the entry point's shape: imas_codex/standard_names/segment_selection.py:1160 SLOT_ORDER and :939 _select_sequence implement all four, and :1095 render_name routes the selection through compose_canonical_ir.\nVERDICT done_when: The done_when names five unit behaviours (mandatory base, meaning-bearing options, shortlisted base with membership recorded, grammar-valid later slots, optional 'none'), the surviving empty-beam failure test, and a live smoke under a cost ceiling, each guarded by a test that fails with its mechanism removed (log with EXIT=); tests at tests/standard_names/test_segment_selection.py:186, :221, :282, :337, :377 cover the five behaviours and the seven SS_SEGMENT_MUTATION logs demonstrate each guard fires, but the '(log with EXIT=)' sentinel is absent from every gate and mutation log.\nVERDICT write_paths: The declared write paths are imas_codex/standard_names/segment_selection.py, tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-arm2.html; git diff --stat aa25ca574e960cca4767187efadb83e7eb56970c e2ac984ede000752b825cbc79554314f36974d7a touches exactly those three files and nothing outside the fence.\nVERDICT manifest: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T061818212780-ssog-segment-arm2/manifest.md: status complete, commits 500ccca23 and e2ac984ed, changed_paths matching the diff, baseline_suite 96 passed EXIT=0 and after_suite 103 passed EXIT=0, smoke cost USD 0.00280.\nVERDICT diff: Read commit by commit against the base: 500ccca23 rewrites the selection mechanism in imas_codex/standard_names/segment_selection.py (571 lines) and its test file (432), and e2ac984ed adds the 164-line evidence fragment; no other file is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: Implements all four stated constraints at imas_codex/standard_names/segment_selection.py:1160 (SLOT_ORDER with physical_base first and no 'none' for mandatory slots), :351 option_text (token plus meaning from ISN loaders), :861 base_shortlists (embedding top-20) and :939.\nSCORE evidence: 14\nJUSTIFICATION evidence: The gate logs record the measures the done_when names (logs/gate.txt '103 passed', logs/baseline-gate.txt '96 passed', smoke USD 0.00280 against a USD 0.10 ceiling), but the required '(log with EXIT=)' sentinel is absent from the gate logs and from all seven mutation logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat aa25ca574e960cca4767187efadb83e7eb56970c e2ac984ede000752b825cbc79554314f36974d7a lists exactly the three declared paths and no fourth file, so no production caller, config or unrelated module was touched.\nSCORE durability: 18\nJUSTIFICATION durability: Each of the seven rules is guarded by a test that fails when SS_SEGMENT_MUTATION removes its mechanism (tests/standard_names/test_segment_selection.py:124 autouse fixture, demonstrated by the seven logs/mutation-*.txt), held below 20 by the tautological assertion at :245 and the fixture teardown bug at :173.\nSCORE fit: 19\nJUSTIFICATION fit: The module reuses compose_canonical_ir from the grammar adapter, takes its encoder from imas_codex.embeddings.embed.get_encoder, reads the closed ISN vocabulary through the public loaders, and exposes a delegate-shaped entry point consistent with the first arm.\nSCORE reuse: 5\nJUSTIFICATION reuse: Most capabilities are reused from their owners (compose_canonical_ir, get_encoder, grammar token helpers, the ISN loaders), but the added _vocabulary_definitions at imas_codex/standard_names/segment_selection.py:266 re-implements the bases-and-carriers definition map that imas_codex/standard_names/workers.py:8495 _closed_vocabulary_definitions already owns, duplicating it rather than extending the owner.\nFINDING imas_codex/standard_names/segment_selection.py:266 follow-on: _vocabulary_definitions re-derives the physical-base and geometry-carrier token-to-definition map that imas_codex/standard_names/workers.py:8495 _closed_vocabulary_definitions already owns, using the same two loaders (load_physical_bases, load_geometry_carriers), so it duplicates rather than wraps the owner; it extends the capability only by adding the locus registry to the union.\nFINDING tests/standard_names/test_segment_selection.py:173 follow-on: the autouse fixture teardown calls ss._build_tree.cache_clear() before monkeypatch restores the original, so the base-offers-none and no-optional-none mutations (which replace _build_tree with a plain lambda) raise AttributeError at teardown for every test; the guard still fires, but those two mutation logs conjoin twelve ERROR entries with the real failure (logs/mutation-base-offers-none.txt reads '2 failed, 10 passed, 12 errors').\nFINDING tests/standard_names/test_segment_selection.py:245 follow-on: assert leaf.description == ss.option_text(leaf.key) compares the tree's own description, which _leaf_nodes built by calling option_text, against a fresh call to the same function, so both sides move together and the assertion cannot fail while option_text is deterministic; the load-bearing, independent guard is line 244 (assert leaf.description != leaf.key).\nFINDING logs/gate.txt:1 follow-on: the done_when requires each guarded mechanism to fail with its mechanism removed '(log with EXIT=)', but none of logs/gate.txt, logs/baseline-gate.txt or the seven logs/mutation-*.txt carries an EXIT= line; each log ends at its pytest summary, so the sentinel the done_when names is absent from the stored evidence even though the pass/fail outcome is readable from the summary.",
+  "review_run_id": "r-20261013T100344199683-review-of-ssog-segment-arm2-e2ac984ede00",
+  "reviewed_base_sha": "aa25ca574e960cca4767187efadb83e7eb56970c",
+  "reviewed_head_sha": "e2ac984ede000752b825cbc79554314f36974d7a",
+  "reviewed_run_id": "r-20261013T061818212780-ssog-segment-arm2",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:17:17Z",
+  "total": 95
+}
