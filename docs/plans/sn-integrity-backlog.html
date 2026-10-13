@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="124">
+<meta name="plan-version" content="126">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -421,6 +421,12 @@
 </div>
 <div class="r-comment" data-section="s21" data-id="c-close-s21" data-who="reckon-build" data-when="2026-10-13T17:00:00Z">
     <div class="r-comment-body"><p>§21 closed. All three names whose only successor pointer was the scalar now carry a receipt-stamped successor edge, and the instrument lists none (backfill head <code>5af0b0913</code>, review 103/120). Following the lead's ruling, <code>area_of_flux_surface</code> lost its children first and now points to <code>poloidal_plane_cross_sectional_area_of_flux_surface</code>; its two superseded derivatives point to their named replacements. §16, retiring the scalar, is now unblocked. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s21-backfill-complete">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s21" data-id="c-run-r-20261013T163820728842-review-of-sib-scalar-only-backfill-5af0b0913c63" data-who="reckon-build" data-when="2026-10-13T16:53:56.642Z">
+    <div class="r-comment-body"><p>stored a parsed independent review for r-20261012T212141763974-sib-scalar-only-backfill at reviewed_base_sha 6ab4a19911ea0b928502187ad668c45057be9a02, reviewed_head_sha 5af0b0913c6336d7b10833ed197783408b79e35d; six dimensions scored 0..20 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 8, fit 18, reuse 20; total 103), added_failure_count 0, added_failure_ids [], two follow-on findings and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s21" data-id="c-run-r-20261012T212141763974-sib-scalar-only-backfill" data-who="reckon-build" data-when="2026-10-13T16:16:52.747Z">
+    <div class="r-comment-body"><p>wrote a receipt-stamped HAS_SUCCESSOR edge for each of the 3 scalar-only superseded names through the signed supersede path. apply_signed_manifest reported applied, changed 3, refused 0, persistent_writes 6, manifest_sha256 f579546898673b6a446f92ee338c2120d96d08ccfc01c8b6457d954b3df8be1e. Each edge reads back one-per-name with a receipt_id equal to a minted change id and a signed_at stamp. The instrument that listed the 3 before the apply now lists none</p></div>
 </div>
 <div class="r-comment" data-section="s25" data-id="c-close-s25" data-who="reckon-build" data-when="2026-10-12T22:16:00Z">
     <div class="r-comment-body"><p>§25 landed: the fifteen export and catalog tests were stale fixtures missing producer topology, repaired in fixtures only; the eight files pass 60 of 60 (merge <code>f15f55e47</code>); review 108/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s25">evidence</a></p></div>
