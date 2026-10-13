@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite: base-arm.log ends '11 passed' at c3266f36f, head-arm.log ends '14 passed' at e5aa326f8, both EXIT=0 with no FAILED id, so added_failure_count is 0 and added_failure_ids is empty.",
+  "backend": "clive",
+  "base_log_revision": "c3266f36fc06761122dbd99bf377fe8bce5ee493",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T05:49:22.138Z",
+  "dispatched_at": "2026-10-13T05:38:19Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet-run.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the driver, its test and its fragment carry the plan-slug token \"ssog\" (ssog-rerank-label-sheet-run.py, ssog-rerank-label-sheet.html, and the test's module id ssog_rerank_label_sheet_run in tests/standard_names/test_rerank_label_sheet.py:34), and the repository naming rule bans plan labels in filenames; the brief's write scope fixed these exact paths so the node could not rename them, but a reader cannot recover what \"ssog\" stands for once the plan closes."
+    },
+    {
+      "file": "tests/standard_names/test_rerank_label_sheet.py",
+      "line": "89",
+      "severity": "follow-on",
+      "text": "follow-on: test_build_sheet_writes_no_graph_state's docstring claims the builder \"writes no graph state\" but its only assertion (line 112, assert opened == []) checks that no GraphClient was constructed; a graph write reaching the store through an already-open or module-level handle would not redden it, so the guard is a proxy for, not a measurement of, the property it names."
+    }
+  ],
+  "head_log_revision": "e5aa326f89de7b349f736709087de785a7963623",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none; the landed change is a docs evidence fragment, a standalone driver script under docs/evidence/fragments/ and one test file, and no runtime module imports the driver, so there is no production call site to name. The driver itself depends on two production functions I opened to confirm its calls match: imas_codex/standard_names/workers.py:1900 _collect_nearby_name_comparators and imas_codex/standard_names/context.py:1074 rerank_name_comparators.",
+    "diff": "read commit by commit from base c3266f36f to head e5aa326f8: f62ae9dc0 adds the driver, the test and the 30-item sheet JSON; e5aa326f8 lands the HTML fragment. The stat shows exactly the four declared paths and no product source, and the sheet JSON matches the fragment's claims (30 items, 30/30 reranked orders differing from embedding, 22 promoting a below-10 candidate, 9 boundary-density items, 342 ungraded candidates).",
+    "done_when": "the source done_when (brief.md:30-39) asks the sheet committed with 30 items carrying both orders and a fragment stating the draw, seed and spend (stop above USD 0.50), a test with the rerank stubbed recording both orders and writing no graph state that fails with the rerank call removed (log with EXIT=), and the named gate with baseline_suite and after_suite recorded; the sheet holds 30 items with both orders at rerank_cost_usd 0.50 ceiling, the fragment states draw/seed/spend, negative-control.log ends '1 failed' EXIT=1, and both arms are recorded.",
+    "goal": "the source goal (brief.md:11-28) is a driver that for 30 drawn DD sources records the comparator block both ways and writes nothing to the graph; docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet-run.py:184 calls rerank_name_comparators and records the embedding-ordered and reranked top tens."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_rerank_label_sheet.py:86 asserts len(row['candidates']) == 11 from a 12-item pool with name_11 promoted, which reddens if the driver fills the rerank column from the embedding order, and negative-control.log shows that test failing EXIT=1 with the rerank call removed.",
+    "evidence": "the manifest's baseline_suite and after_suite name base-arm.log (11 passed, EXIT=0, c3266f36f) and head-arm.log (14 passed, EXIT=0, e5aa326f8), and I re-derived the fragment's headline numbers (30/30 differing orders, 22 promotions, 9 boundary items) directly from the committed docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet.json.",
+    "fit": "the driver follows the evidence-script idiom (argparse, asyncio main, module docstring with a Run block) of its neighbour docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py, but the plan-slug token \"ssog\" in three filenames is a naming-rule leak the brief itself mandated.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet-run.py:184 calls rerank_name_comparators and records the reranked top ten beside the embedding top ten, and the committed sheet carries 30 items each with an empty grade.",
+    "reuse": "searched the repository for a capability building a both-orders labelled comparator sheet and found none; the driver reuses the owners rather than forking them, calling imas_codex/standard_names/context.py:1074 rerank_name_comparators (which wraps discovery/base/judgment.py:rerank_pool) and imas_codex/standard_names/workers.py:1900 _collect_nearby_name_comparators, adding only sheet-specific plumbing.",
+    "scope_discipline": "git diff --stat c3266f36f e5aa326f8 lists only the four paths the brief declares as write scope (brief.md:41-46) and no product source changed."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal (brief.md:11-28) is a driver that for 30 drawn DD sources records the comparator block both ways and writes nothing to the graph; docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet-run.py:184 calls rerank_name_comparators and records both the embedding-ordered top ten and the reranked top ten, and the committed sheet carries 30 items each with both orders and an empty grade.\nVERDICT done_when: the source done_when (brief.md:30-39) asks a committed 30-item sheet with both orders and a fragment stating draw, seed and spend, a rerank-stubbed test that records both orders, writes no graph state and fails with the rerank call removed (log with EXIT=), and the named gate with baseline_suite and after_suite; the sheet holds 30 items with both orders at rerank_cost_usd 0.007947, the fragment states draw/seed/spend, negative-control.log ends '1 failed' EXIT=1, and both arms are recorded.\nVERDICT write_paths: the brief declares four write paths (brief.md:41-46); git diff --stat c3266f36f e5aa326f8 touches exactly those four files and no other path, so the diff sits inside the fence.\nVERDICT manifest: read; it states status complete, commits f62ae9dc0 e5aa326f8, changed_paths the four files, parseable baseline_suite and after_suite JSON with failure_count 0 and completed:true at both arms, a negative_control_log path, retry_failures none, and follow_ons none.\nVERDICT diff: read commit by commit from base c3266f36f to head e5aa326f8; four files added and no product source, and the fragment's headline numbers re-derive from the committed sheet JSON.\nCALL_SITES: none\n\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet-run.py:184 calls rerank_name_comparators and records the reranked top ten beside the embedding top ten, and the committed sheet carries 30 items each with an empty grade.\nSCORE evidence: 19\nJUSTIFICATION evidence: base-arm.log '11 passed' EXIT=0 at c3266f36f and head-arm.log '14 passed' EXIT=0 at e5aa326f8 back the manifest's arms, and the fragment's 30/30 differing-order, 22-promotion and 9-boundary-item claims re-derive from the committed ssog-rerank-label-sheet.json.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat c3266f36f e5aa326f8 lists only the four paths the brief declares as write scope (brief.md:41-46).\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_rerank_label_sheet.py:86 asserts len(row['candidates']) == 11 from a 12-item pool with name_11 promoted, reddening if the rerank column is filled from the embedding order, and negative-control.log shows it failing EXIT=1 with the rerank call removed.\nSCORE fit: 16\nJUSTIFICATION fit: the driver follows the evidence-script idiom of docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py; the plan-slug token 'ssog' in three filenames is a naming-rule leak the brief mandated.\nSCORE reuse: 20\nJUSTIFICATION reuse: the driver reuses imas_codex/standard_names/context.py:1074 rerank_name_comparators and imas_codex/standard_names/workers.py:1900 _collect_nearby_name_comparators rather than forking them, and no owner of a both-orders labelled sheet exists.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet-run.py:1 follow-on: the plan-slug token 'ssog' appears in the driver, test and fragment filenames against the repository's ban on plan labels, though the brief fixed those exact paths.\nFINDING tests/standard_names/test_rerank_label_sheet.py:89 follow-on: the no-graph-state test asserts only that no GraphClient was constructed (line 112), a proxy for the property the docstring names.\n",
+  "review_run_id": "r-20261013T053805634143-review-of-ssog-rerank-label-sheet-e5aa326f89de",
+  "reviewed_base_sha": "c3266f36fc06761122dbd99bf377fe8bce5ee493",
+  "reviewed_head_sha": "e5aa326f89de7b349f736709087de785a7963623",
+  "reviewed_run_id": "r-20261013T051822279986-ssog-rerank-label-sheet",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T05:44:00Z",
+  "total": 112,
+  "verdict": "SOUND WITH FINDINGS"
+}
