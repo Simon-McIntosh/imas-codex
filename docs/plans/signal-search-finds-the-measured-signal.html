@@ -18,13 +18,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="89">
+<meta name="plan-version" content="90">
 <meta name="plan-modified" content="2026-10-13">
-<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47">
+<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47,68c603525,97eac4222,b97d4bdf4">
 </head>
 <body>
   <main class="plan-doc">
@@ -406,7 +406,7 @@
     </p>
 
     <h2 id="s9">§9 — Results an agent can read</h2>
-<section data-reckon="section" data-id="s9" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s9" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       Collapse rows that share a name template within one data-source category into one row. The template is the name
       with its digits removed, and the row shows the member list, such as <em>EF{1,2,5,6} Booster BPS Voltage</em>, and
@@ -728,6 +728,9 @@
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261013T105447307241-review-of-ssfms-role-random-sample-68c603525c5d" data-who="reckon-build" data-when="2026-10-13T11:07:45.045Z">
     <div class="r-comment-body"><p>Independent review of r-20261013T102953871304-ssfms-role-random-sample at reviewed head 68c603525 (base 29229121): the landed measurement is a seeded uniform draw of 200 of 14312 eligible signals giving 194/200 (97.0%) role agreement, recorded in docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html; a parsed record scoring six dimensions (goal 20, evidence 18, scope 20, durability 17, fit 18, reuse 20; total 113) with zero added failures and two follow-on findings was stored to the review store.</p></div>
 </div>
+<div class="r-comment" data-section="s8" data-id="c-20261013T1125-s8-random" data-who="reckon-build" data-when="2026-10-13T11:25:00Z">
+    <div class="r-comment-body"><p>Random-sample check landed (worker head <code>68c603525</code>): 200 of 14,312 eligible signals drawn under seed 20261013 agree with the judge on 194 (97.0%), above the lead's 90% threshold. The sample's mix is measured 60, derived 67, configuration 54, status 11, commanded 4 and reference or setpoint 4; five of six misses are configuration judged as derived. The prototype covers the rare roles the random draw barely holds. The two self-referential test assertions are rewritten. Review 113/120, no added failures. The role is now being wired into enrichment as <code>ssfms-role-enrichment</code>. Follow-on: the measurement module reads only the random fixture, so the prototype's fixture can no longer be re-measured; it should take the fixture as an argument.</p></div>
+</div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261013T091702235762-review-of-ssfms-result-rows-97eac4222c89" data-who="reckon-build" data-when="2026-10-13T09:35:36.429Z">
     <div class="r-comment-body"><p>independent review of r-20261013T085005496411-ssfms-result-rows stored at both granted review paths — 6 dimensions scored (goal_fidelity 19, evidence 18, scope_discipline 19, durability 18, fit 15, reuse 16; total 105), reviewed_base_sha 7f54df09dd95bd456d45f56b9b7676b6ef5867f4 / reviewed_head_sha 97eac4222c89103942f49538791b294ab9134abf, added_failure_count 0 / ids [] derived from the reviewed run's baseline_suite and after_suite arms, 2 follow-on findings.</p></div>
 </div>
@@ -741,7 +744,10 @@
     <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-result-rows-tests.html - independent review of run r-20261013T104222430294-ssfms-result-rows-tests stored at both granted review paths; 6 dimensions scored (goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 18, reuse 19; total 112), reviewed_base_sha 97eac4222c89103942f49538791b294ab9134abf / reviewed_head_sha b97d4bdf47f51ad9074cfad15370fef377c52d13, added_failure_count 0 / ids [] derived from the reviewed run's baseline_suite (1 failure) and after_suite (0 failures) arms, 1 follow-on finding.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261013T104222430294-ssfms-result-rows-tests" data-who="reckon-build" data-when="2026-10-13T11:00:48.542Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-result-rows-tests.html — a single-member row in format_signals_report now prints its own access call with placeholders filled through _interpolate_template so no {accessor} survives in it, while a multi-member row keeps one shared template plus its members&#x27; accessors; the single-signal formatter golden asserts the row&#x27;s fused rank (Rank: 1) instead of the retired 0.92 fused score; gate 119 passed, 8 skipped, 0 failed against one failure at base 97eac4222.</p></div>
+    <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-result-rows-tests.html — a single-member row in format_signals_report now prints its own access call with placeholders filled through _interpolate_template so no {accessor} survives in it, while a multi-member row keeps one shared template plus its members' accessors; the single-signal formatter golden asserts the row's fused rank (Rank: 1) instead of the retired 0.92 fused score; gate 119 passed, 8 skipped, 0 failed against one failure at base 97eac4222.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-close-s9" data-who="reckon-build" data-when="2026-10-13T11:25:00Z">
+    <div class="r-comment-body"><p>§9 landed (merge <code>dee9a759e</code>): signal reports collapse rows by name template within a category and show rank instead of the fused score. The booster report falls from 341 to 112 lines with all four booster voltages named; no golden question's report holds a duplicate template row; the harness is unchanged at 0.7890. The role column waits on §8. Follow-on: the single-member branch repeats layout lines the shared-template loop renders. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s9">evidence</a></p></div>
 </div>
 </section>
 </main>
