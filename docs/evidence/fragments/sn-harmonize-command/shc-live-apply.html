@@ -1,12 +1,18 @@
 <section>
-  <h2 id="shc-live-apply">The live apply over the boundary-averaged density family is refused by the recommended-name guard</h2>
+  <h2 id="shc-live-apply">The forced live apply over the boundary-averaged density family runs to completion and does not meet the harmonization gate</h2>
   <p id="shc-live-apply-scope">
     Runs the read-only report and the anchor-gated apply of
     <code>sn harmonize</code> over the 17-member boundary-averaged density
-    family on the live graph (&#167;3 of this plan). The apply is refused by the
-    recommended-name guard, so the after state, the acceptance of every member,
-    and the second-apply zero-calls check could not be produced. The node stops
-    at the refusal and does not pass <code>--force</code>, per its brief.
+    family on the live graph (&#167;3 of this plan). The first attempt was
+    refused by the recommended-name guard; the lead ruled on 2026-10-13 that
+    the apply proceed with <code>--force</code> because catalog PR #3 was a
+    release-machinery trial and the merged text predates the locked house
+    style. The forced apply ran to completion: all 17 members reached
+    documentation acceptance, but the run halted on a reintroduced ban, lint
+    did not fall to zero, the openings did not converge to one template, and a
+    second apply plans 17 calls rather than zero. The &#167;3 done-when is
+    therefore <strong>not met</strong>, and the numbers below are the
+    measured evidence for that conclusion.
   </p>
 
   <h3 id="shc-live-apply-before">Before state</h3>
@@ -37,44 +43,123 @@
     </tbody>
   </table>
 
-  <h3 id="shc-live-apply-dryrun">The dry run plans the apply and does not run the guard</h3>
-  <p id="shc-live-apply-dryrun-text">
-    <code>sn harmonize --family &hellip; --apply --dry-run</code> returns
-    <code>decision=apply anchor=flux_surface_averaged_iron_density_at_plasma_boundary
-    members=17 calls=17</code>, an estimated cost of $0.85, and writes nothing.
-    A dry run returns before <code>apply_families</code> is entered, and the
-    recommended-name guard lives inside <code>apply_families</code>, so a dry
-    run cannot surface a refusal: its <code>decision=apply</code> is not a
-    commitment that the real apply will proceed.
+  <h3 id="shc-live-apply-guard">The recommended-name guard refused the unforced apply</h3>
+  <p id="shc-live-apply-guard-text">
+    <code>sn harmonize --family &hellip; --apply --cost-limit 5</code> exited 1
+    with <code>Refused harmonize apply for names recommended into a catalog
+    pull request: flux_surface_averaged_electron_density_at_plasma_boundary</code>
+    &#8212; the electron member, alone of the 17, is a member of the open frozen
+    roster <code>v0.3.0rc1+west-task-2e.sn_names.yaml</code>
+    (<code>pr_number: 3</code>).
+    <code>refuse_recommended_members</code> runs before any member is marked,
+    so no documentation was changed and no snapshot was taken.
   </p>
 
-  <h3 id="shc-live-apply-refusal">The guard refuses one committed member</h3>
-  <p id="shc-live-apply-refusal-text">
-    <code>sn harmonize --family &hellip; --apply --cost-limit 5</code> exits 1
-    with:
+  <h3 id="shc-live-apply-dryrun">The forced dry run plans the apply with the electron member shown as forced</h3>
+  <p id="shc-live-apply-dryrun-text">
+    Re-run with <code>--force</code> and the ruling's reason recorded, the dry
+    run returns <code>decision=apply
+    anchor=flux_surface_averaged_electron_density_at_plasma_boundary
+    members=17 calls=17</code> and names the electron member as forced. The
+    forced dry run therefore plans the apply that the unforced run refused.
   </p>
-  <pre id="shc-live-apply-refusal-output">Error: Refused harmonize apply for names recommended into a catalog pull request: flux_surface_averaged_electron_density_at_plasma_boundary (candidate_request=https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3)</pre>
-  <p id="shc-live-apply-protection-text">
-    <code>refuse_recommended_members</code> runs before any family is marked
-    (<code>imas_codex/standard_names/harmonize.py</code>: the guard precedes the
-    batch loop), so no member was reset and no <code>DocsRevision</code>
-    snapshot was taken. A direct call to
-    <code>recommended_name_protections</code> over all 17 members returns
-    exactly one protected name &#8212; the electron member above &#8212; because
-    it is a member of the frozen roster
-    <code>v0.3.0rc1+west-task-2e.sn_names.yaml</code> (<code>pr_number: 3</code>).
-    The other 16 members carry no protection.
+
+  <h3 id="shc-live-apply-apply">The forced apply completes and stamps no family</h3>
+  <p id="shc-live-apply-output-text">
+    <code>sn harmonize --family &hellip; --apply --force --cost-limit 5</code>
+    runs to completion (exit 0). Its run id is
+    <code>a45824e1-795f-46fb-b4a7-8e242edc4063</code> and it spends
+    <strong>$2.712665</strong> of the $5.00 limit:
+  </p>
+  <pre id="shc-live-apply-apply-output">Run a45824e1-795f-46fb-b4a7-8e242edc4063
+stop_reason      no_eligible_work
+cost_spent       2.712665   (limit 5.0)
+names_composed   0
+names_enriched   16
+names_reviewed   16
+names_regenerated 0
+elapsed_s        816.94
+family density   anchor=flux_surface_averaged_electron_density_at_plasma_boundary
+batches=2        accepted=17/17
+halted: banned prose reintroduced in 1 doc(s) (cap 0):
+        flux_surface_averaged_neon_density_at_plasma_boundary
+apply: 1 family(ies) applied, 0 stamped.</pre>
+  <p id="shc-live-apply-apply-note">
+    Two batches ran under scope runs
+    <code>0eac4a7a-0f27-47b0-82a5-e611681ab91c</code> (anchor, 1 name; CLI run
+    <code>a4c801e9-61ec-4767-a3a6-372e3fcbc627</code>, $0.288439) and
+    <code>791df546-3ecc-4337-b235-e709795c804c</code> (16 members). The run
+    <strong>halted</strong> because the neon member&#8217;s regenerated
+    documentation reintroduced banned prose (the halt cap is 0), and it
+    <strong>stamped 0 families</strong> &#8212; the family did not reach the
+    stamping gate. The forced electron member&#8217;s pre-apply
+    <code>DocsRevision</code> snapshot is
+    <code>flux_surface_averaged_electron_density_at_plasma_boundary#rev-2</code>,
+    created <code>2026-10-13T06:26:52.087Z</code> (its rev-0 dates to
+    2026-07-20 and rev-1 to 2026-08-25).
+  </p>
+
+  <h3 id="shc-live-apply-after">After state, on the same measures</h3>
+  <p id="shc-live-apply-after-text">
+    The after state is measured from the live graph on the same scope. All 17
+    members reached <code>docs_stage=accepted</code>, but on every other
+    measure the family did not converge, and on the lint and equation axes it
+    moved only partly.
+  </p>
+  <table id="shc-live-apply-after-table">
+    <caption>Family <code>density</code> after the forced apply</caption>
+    <thead>
+      <tr><th>Measure</th><th>Before</th><th>After</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Description drift</td><td>0.5294</td><td>0.7647</td></tr>
+      <tr><td>Lint findings, total</td><td>62</td><td>41</td></tr>
+      <tr><td>&nbsp;&nbsp;<code>convention_violation</code></td><td>34</td><td>16</td></tr>
+      <tr><td>&nbsp;&nbsp;<code>link_dead_link</code></td><td>9</td><td>19</td></tr>
+      <tr><td>&nbsp;&nbsp;<code>link_missing_reverse</code></td><td>19</td><td>6</td></tr>
+      <tr><td>House-style <code>template_opening</code> findings</td><td>&#8212;</td><td>16 of 17 members</td></tr>
+      <tr><td>Distinct documentation openings</td><td>17</td><td>17</td></tr>
+      <tr><td>Distinct flux-surface-average equation forms</td><td>17</td><td>17</td></tr>
+      <tr><td><code>docs_stage=accepted</code></td><td>&#8212;</td><td>17 of 17</td></tr>
+      <tr><td>Second apply, planned calls</td><td>&#8212;</td><td>17</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-live-apply-after-note">
+    Of the 41 remaining lint findings, 16 are
+    <code>convention_violation</code> and all 16 are the house-style
+    <code>template_opening</code> finding: only the nitrogen member&#8217;s
+    opening follows a selected registry template, so the 17 openings did
+    <strong>not</strong> converge to one template. No
+    <code>forbidden_equation_variant</code> finding is raised, but 17 distinct
+    equation forms remain.
+  </p>
+
+  <h3 id="shc-live-apply-second">A second apply plans 17 calls, not zero</h3>
+  <p id="shc-live-apply-second-text">
+    A second dry run over the same scope returns
+    <code>decision=apply
+    anchor=flux_surface_averaged_xenon_density_at_plasma_boundary
+    members=17 calls=17</code> at an estimated $0.85. The zero-calls check
+    required by the done-when is therefore <strong>not</strong> satisfied: the
+    family is still short of its gate. The anchor reported by this plan (xenon)
+    differs from the anchor the apply actually used (electron) and from the
+    report&#8217;s anchor (iron) &#8212; see the follow-on below.
   </p>
 
   <h3 id="shc-live-apply-outcome">Outcome</h3>
   <p id="shc-live-apply-outcome-text">
-    No apply ran and no after state exists. The node is blocked: the coordinator
-    must decide whether to open <code>--force &lt;reason&gt;</code> (which would
-    rewrite text on a name a physicist is reviewing, and is forbidden by this
-    node's brief) or to wait until
-    <a href="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3">catalog PR #3</a>
-    merges or closes. Every count above is recorded from the live graph;
-    the report, measurement, dry run and refusal logs are held under the run
-    directory.
+    The forced apply executed and completed: all 17 members are accepted on the
+    documentation axis, which the forced electron member reached as well. The
+    &#167;3 done-when is <strong>not met</strong> on the other three axes &#8212;
+    lint did not fall to zero (41 remain), the openings did not converge to one
+    template (16 of 17 still fail <code>template_opening</code>), and a second
+    apply still plans 17 calls. No member failed documentation acceptance; the
+    one name that did not pass cleanly is
+    <code>flux_surface_averaged_neon_density_at_plasma_boundary</code>, named by
+    the halt reason because its regenerated documentation reintroduced banned
+    prose. Per the brief, the run was not repeated to chase the shortfall.
+    Follow-on: the family anchor is unstable across plans (report = iron, apply
+    = electron, second plan = xenon), a plausible reason the family never
+    stamps or converges.
   </p>
 </section>
