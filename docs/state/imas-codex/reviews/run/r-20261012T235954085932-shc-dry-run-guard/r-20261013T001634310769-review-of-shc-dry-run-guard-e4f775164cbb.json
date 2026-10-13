@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "cd8b059b02191fac13d7d13223949257a1356bcf",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6090 sn_harmonize the sn harmonize click command; its dry-run branch at :6103 calls preview_recommended_refusals",
+    "imas_codex/standard_names/harmonize.py:978 apply_families calls apply_guard_targets through refuse_recommended_members"
+  ],
+  "completed_at": "2026-10-13T00:30:35.560Z",
+  "dispatched_at": "2026-10-13T00:16:45Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T235954085932-shc-dry-run-guard/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's manifest tests: line carries the unsubstituted placeholder \"<7 gate files>\" where the manifest contract asks for the literal command that ran, so a reader of that line alone cannot reproduce the gate even though the full command is carried in baseline_suite and after_suite."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T235954085932-shc-dry-run-guard/head-gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the header reads \"revision: cd8b059b02191fac13d7d13223949257a1356bcf\" (the base) while the run measured the head worktree and collected the two new tests, so a reader reconciling that header against the change at e4f775164 finds a revision that does not match."
+    }
+  ],
+  "head_log_revision": "e4f775164cbb4406095a063d6a95ba102109b947",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against cd8b059b; the single commit e4f775164 extracts apply_guard_targets (imas_codex/standard_names/harmonize.py:825) so apply_families (imas_codex/standard_names/harmonize.py:978) and the new preview_recommended_refusals (imas_codex/standard_names/harmonize.py:842) derive the guarded set once, rewrites the dry-run branch in imas_codex/cli/sn.py:6103 to report refusals, and adds two tests and an evidence fragment.",
+    "done_when": "the done_when asks a fixture family with one protected member to print refused, name the member and its evidence, and exclude its calls, and forced with --force; tests/standard_names/test_harmonize_apply.py:351 test_dry_run_refuses_a_family_holding_a_recommended_member and tests/standard_names/test_harmonize_apply.py:375 test_dry_run_counts_calls_for_a_forced_recommended_member assert exactly that and manifest.md records base 71 passed EXIT=0 / head 73 passed EXIT=0 with the revision and command in each log header (base-suite.log, head-suite.log) plus negative-control.log EXIT=1, so the gate asserts the stated measure.",
+    "goal": "the node goal is that sn harmonize --apply --dry-run report the refusals the real apply raises; the landed dry-run branch imas_codex/cli/sn.py:6103 now calls preview_recommended_refusals and prints decision=refused/forced naming each protected member with its evidence, which is what the goal states.",
+    "manifest": "read; it records status complete, commit e4f775164cbb4406095a063d6a95ba102109b947, the four changed paths, the 71/73 EXIT=0 gate results, the negative control at negative-control.log and a checkpoint, and its stated claims (the extracted target computation, the single protection read, the two added tests) survive my own read of the diff and logs.",
+    "write_paths": "read; the manifest declares imas_codex/cli/sn.py, imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_apply.py and docs/evidence/fragments/sn-harmonize-command/shc-dry-run-guard.html, and the diff cd8b059b..e4f775164 touches exactly those four paths, every path inside the fence."
+  },
+  "justifications": {
+    "durability": "negative-control.log shows removing the preview_recommended_refusals call reverts the output to decision=apply calls=3 and fails test_dry_run_refuses_a_family_holding_a_recommended_member (tests/standard_names/test_harmonize_apply.py:366) with EXIT=1, so the assertion reddens on the reinstated regression.",
+    "evidence": "the gate is tests/standard_names/test_harmonize_apply.py:351 and :375, recorded as base 71 passed / head 73 passed EXIT=0 in base-suite.log and head-suite.log and as a red negative control at negative-control.log EXIT=1, though the sibling head-gate.log:1 header names the base revision cd8b059b while it measured the head worktree.",
+    "fit": "apply_guard_targets and preview_recommended_refusals at imas_codex/standard_names/harmonize.py:825-859 follow the module's helper style, name the mechanism, and introduce no plan, section or ticket label.",
+    "goal_fidelity": "imas_codex/cli/sn.py:6103-6113 reports decision=refused with its calls excluded and decision=forced with its calls kept, which is the deliverable the node goal names.",
+    "reuse": "preview_recommended_refusals (imas_codex/standard_names/harmonize.py:842) extends protection.recommended_name_protections (imas_codex/standard_names/protection.py:213) rather than forking it, and apply_guard_targets deduplicates the target selection apply_families already owned instead of a second copy.",
+    "scope_discipline": "the diff cd8b059b..e4f775164 lists only imas_codex/cli/sn.py, imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_apply.py and the declared evidence fragment, every path inside the fence."
+  },
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261012T235954085932-shc-dry-run-guard (imas-codex, plan sn-harmonize-command section 3, node shc-dry-run-guard) at base cd8b059b02191fac13d7d13223949257a1356bcf head e4f775164cbb4406095a063d6a95ba102109b947.\nreviewed_base_sha: cd8b059b02191fac13d7d13223949257a1356bcf\nreviewed_head_sha: e4f775164cbb4406095a063d6a95ba102109b947\nVERDICT goal: the node goal is that sn harmonize --apply --dry-run report the refusals the real apply raises; the landed dry-run branch imas_codex/cli/sn.py:6103 now calls preview_recommended_refusals and prints decision=refused/forced naming each protected member with its evidence, which is what the goal states.\nVERDICT done_when: the done_when asks a fixture family with one protected member to print refused, name the member and its evidence, and exclude its calls, and forced with --force; tests/standard_names/test_harmonize_apply.py:351 test_dry_run_refuses_a_family_holding_a_recommended_member and tests/standard_names/test_harmonize_apply.py:375 test_dry_run_counts_calls_for_a_forced_recommended_member assert exactly that and manifest.md records base 71 passed EXIT=0 / head 73 passed EXIT=0 with the revision and command in each log header (base-suite.log, head-suite.log) plus negative-control.log EXIT=1, so the gate asserts the stated measure.\nVERDICT write_paths: read; the manifest declares imas_codex/cli/sn.py, imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_apply.py and docs/evidence/fragments/sn-harmonize-command/shc-dry-run-guard.html, and the diff cd8b059b..e4f775164 touches exactly those four paths, every path inside the fence.\nVERDICT manifest: read; it records status complete, commit e4f775164cbb4406095a063d6a95ba102109b947, the four changed paths, the 71/73 EXIT=0 gate results, the negative control at negative-control.log and a checkpoint, and its stated claims (the extracted target computation, the single protection read, the two added tests) survive my own read of the diff and logs.\nVERDICT diff: read commit by commit against cd8b059b; the single commit e4f775164 extracts apply_guard_targets (imas_codex/standard_names/harmonize.py:825) so apply_families (imas_codex/standard_names/harmonize.py:978) and the new preview_recommended_refusals (imas_codex/standard_names/harmonize.py:842) derive the guarded set once, rewrites the dry-run branch in imas_codex/cli/sn.py:6103 to report refusals, and adds two tests and an evidence fragment.\nCALL_SITES: imas_codex/cli/sn.py:6090 sn_harmonize the sn harmonize click command; its dry-run branch at :6103 calls preview_recommended_refusals, imas_codex/standard_names/harmonize.py:978 apply_families calls apply_guard_targets through refuse_recommended_members\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/cli/sn.py:6103-6113 reports decision=refused with its calls excluded and decision=forced with its calls kept, which is the deliverable the node goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is tests/standard_names/test_harmonize_apply.py:351 and :375, recorded as base 71 passed / head 73 passed EXIT=0 in base-suite.log and head-suite.log and as a red negative control at negative-control.log EXIT=1, though the sibling head-gate.log:1 header names the base revision cd8b059b while it measured the head worktree.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff cd8b059b..e4f775164 lists only imas_codex/cli/sn.py, imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_apply.py and the declared evidence fragment, every path inside the fence.\nSCORE durability: 19\nJUSTIFICATION durability: negative-control.log shows removing the preview_recommended_refusals call reverts the output to decision=apply calls=3 and fails test_dry_run_refuses_a_family_holding_a_recommended_member (tests/standard_names/test_harmonize_apply.py:366) with EXIT=1, so the assertion reddens on the reinstated regression.\nSCORE fit: 19\nJUSTIFICATION fit: apply_guard_targets and preview_recommended_refusals at imas_codex/standard_names/harmonize.py:825-859 follow the module's helper style, name the mechanism, and introduce no plan, section or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: preview_recommended_refusals (imas_codex/standard_names/harmonize.py:842) extends protection.recommended_name_protections (imas_codex/standard_names/protection.py:213) rather than forking it, and apply_guard_targets deduplicates the target selection apply_families already owned instead of a second copy.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T235954085932-shc-dry-run-guard/manifest.md:15 follow-on: the reviewed run's manifest tests: line carries the unsubstituted placeholder \"<7 gate files>\" where the manifest contract asks for the literal command that ran, so a reader of that line alone cannot reproduce the gate even though the full command is carried in baseline_suite and after_suite.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T235954085932-shc-dry-run-guard/head-gate.log:1 follow-on: the header reads \"revision: cd8b059b02191fac13d7d13223949257a1356bcf\" (the base) while the run measured the head worktree and collected the two new tests, so a reader reconciling that header against the change at e4f775164 finds a revision that does not match.",
+  "review_run_id": "r-20261013T001634310769-review-of-shc-dry-run-guard-e4f775164cbb",
+  "reviewed_base_sha": "cd8b059b02191fac13d7d13223949257a1356bcf",
+  "reviewed_head_sha": "e4f775164cbb4406095a063d6a95ba102109b947",
+  "reviewed_run_id": "r-20261012T235954085932-shc-dry-run-guard",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:29:48.651083+00:00",
+  "total": 115
+}
