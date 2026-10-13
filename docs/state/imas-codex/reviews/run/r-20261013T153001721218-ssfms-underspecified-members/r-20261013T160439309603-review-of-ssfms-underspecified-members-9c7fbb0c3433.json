@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "f3539bd3d7771c34a5fbe6ae7052e61d26b0a895",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/cli/discover/sequence.py:123",
+    "imas_codex/cli/discover/__init__.py:146",
+    "imas_codex/cli/discover/signals.py:398",
+    "imas_codex/discovery/paths/progress.py:1481",
+    "imas_codex/discovery/signals/parallel.py:6454"
+  ],
+  "completed_at": "2026-10-13T16:26:47.524Z",
+  "dispatched_at": "2026-10-13T16:04:57Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T153001721218-ssfms-underspecified-members/parallel-head-committed.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the head gate arm header records revision=7d4967d269badbfc6ee896c74953c1cd8894af7b, the source commit, not the reviewed head 9c7fbb0c343359c0ad3a3438484073ed8c6baabf; the fragment's own commit is docs-only so the measured delta is unchanged, but the arm asserted as head predates the reviewed revision."
+    }
+  ],
+  "head_log_revision": "7d4967d269badbfc6ee896c74953c1cd8894af7b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit against f3539bd3; 7d4967d26 changes parallel.py (the enrich-claimable predicate at :489, the claim query at :1148 and the individualization representative guard at :5451) and adds the 108-line test, and 9c7fbb0 adds the 24-line fragment -- +145/-12 across three files, all inside scope.",
+    "done_when": "the done_when asks for a graph confirmation of which sources hold stranded members and their status, mocked tests showing a member leaving discovered with its own text, a live scoped run leaving none at discovered with description and hash-matched embedding, and no added failure against base; prelive.json records 13 rows each with source_status enriched and representative_status underspecified, tests/discovery/test_signal_underspecified_members.py covers the mocked path, postlive.json records discovered 0 with hash_matched 13, and the suite logs give 388 passed base and 390 passed head both EXIT=0.",
+    "goal": "the node goal is that a reset never strands a member of a SignalSource whose representative is underspecified; parallel.py:489-508 now admits such a member to enrichment, and the reviewed run's postlive.json records JT-60SA discovered 0 with all 13 former residues directly enriched, so the goal is met.",
+    "manifest": "read; it records status complete, commits 7d4967d26 and 9c7fbb0, the three changed paths, gate 388 passed base / 390 passed head both EXIT=0 with zero added failures, negative_control_log negative-control-committed.log, and the live metrics (13 to 0 discovered, spend USD 0.01 of USD 0.50).",
+    "write_paths": "the brief declares imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_underspecified_members.py and the fragment under docs/evidence/fragments/signal-search-finds-the-measured-signal/; git diff --name-only f3539bd3..9c7fbb0 lists exactly those three files and nothing outside them."
+  },
+  "justifications": {
+    "durability": "the negative control (negative-control-committed.log) reverts build_enrich_claimable_predicate to the representative-only form and test_underspecified_source_member_leaves_discovered_with_its_own_text fails at line 70 with EXIT=1, so the assertion reddens on the regression it guards.",
+    "evidence": "the mocked gate in tests/discovery/test_signal_underspecified_members.py and the live pair prelive.json/postlive.json record every element the done_when names, and the suite logs (parallel-base-complete.log, parallel-head-committed.log) give 388 base / 390 head both EXIT=0 with zero added failures.",
+    "fit": "the change extends the existing predicate helper at parallel.py:489 and its callers rather than adding a second predicate, follows the surrounding Cypher-with-placeholder idiom, and introduces no plan, sprint or ticket label.",
+    "goal_fidelity": "parallel.py:489-508 admits a member whose representative is underspecified, and postlive.json records discovered 0 for JT-60SA with all 13 former residues enriched with enrichment_source=direct.",
+    "reuse": "build_enrich_claimable_predicate (parallel.py:489) already owned the enrich-claimability predicate and has_pending_enrich_work:796, get_data_discovery_stats:881 and claim_signals_for_enrichment:1148 all share it, so the change extends that owner rather than forking a second predicate.",
+    "scope_discipline": "git diff --name-only f3539bd3..9c7fbb0 lists only parallel.py, the test and the fragment, each inside the brief's declared write paths, and no figure tree is touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that a reset never strands a member of a SignalSource whose representative is underspecified; parallel.py:489-508 now admits such a member to enrichment, and the reviewed run's postlive.json records JT-60SA discovered 0 with all 13 former residues directly enriched, so the goal is met.\nVERDICT done_when: the done_when asks for a graph confirmation of which sources hold stranded members and their status, mocked tests showing a member leaving discovered with its own text, a live scoped run leaving none at discovered with description and hash-matched embedding, and no added failure against base; prelive.json records 13 rows each with source_status enriched and representative_status underspecified, tests/discovery/test_signal_underspecified_members.py covers the mocked path, postlive.json records discovered 0 with hash_matched 13, and the suite logs give 388 passed base and 390 passed head both EXIT=0.\nVERDICT write_paths: the brief declares imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_underspecified_members.py and the fragment under docs/evidence/fragments/signal-search-finds-the-measured-signal/; git diff --name-only f3539bd3..9c7fbb0 lists exactly those three files and nothing outside them.\nVERDICT manifest: read; it records status complete, commits 7d4967d26 and 9c7fbb0, the three changed paths, gate 388 passed base / 390 passed head both EXIT=0 with zero added failures, negative_control_log negative-control-committed.log, and the live metrics (13 to 0 discovered, spend USD 0.01 of USD 0.50).\nVERDICT diff: read commit by commit against f3539bd3; 7d4967d26 changes parallel.py (the enrich-claimable predicate at :489, the claim query at :1148 and the individualization representative guard at :5451) and adds the 108-line test, and 9c7fbb0 adds the 24-line fragment -- +145/-12 across three files, all inside scope.\nCALL_SITES: imas_codex/cli/discover/sequence.py:123, imas_codex/cli/discover/__init__.py:146, imas_codex/cli/discover/signals.py:398, imas_codex/discovery/paths/progress.py:1481, imas_codex/discovery/signals/parallel.py:6454\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 18\nSCORE durability: 18\nSCORE fit: 18\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: parallel.py:489-508 admits a member whose representative is underspecified, and postlive.json records discovered 0 for JT-60SA with all 13 former residues enriched with enrichment_source=direct.\nJUSTIFICATION evidence: the mocked gate in tests/discovery/test_signal_underspecified_members.py and the live pair prelive.json/postlive.json record every element the done_when names, and the suite logs (parallel-base-complete.log, parallel-head-committed.log) give 388 base / 390 head both EXIT=0 with zero added failures.\nJUSTIFICATION scope_discipline: git diff --name-only f3539bd3..9c7fbb0 lists only parallel.py, the test and the fragment, each inside the brief's declared write paths, and no figure tree is touched.\nJUSTIFICATION durability: the negative control (negative-control-committed.log) reverts build_enrich_claimable_predicate to the representative-only form and test_underspecified_source_member_leaves_discovered_with_its_own_text fails at line 70 with EXIT=1, so the assertion reddens on the regression it guards.\nJUSTIFICATION fit: the change extends the existing predicate helper at parallel.py:489 and its callers rather than adding a second predicate, follows the surrounding Cypher-with-placeholder idiom, and introduces no plan, sprint or ticket label.\nJUSTIFICATION reuse: build_enrich_claimable_predicate (parallel.py:489) already owned the enrich-claimability predicate and has_pending_enrich_work:796, get_data_discovery_stats:881 and claim_signals_for_enrichment:1148 all share it, so the change extends that owner rather than forking a second predicate.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T153001721218-ssfms-underspecified-members/parallel-head-committed.log:1 follow-on: the head gate arm header records revision=7d4967d269badbfc6ee896c74953c1cd8894af7b, the source commit, not the reviewed head 9c7fbb0c343359c0ad3a3438484073ed8c6baabf; the fragment's own commit is docs-only so the measured delta is unchanged, but the arm asserted as head predates the reviewed revision.\nFINAL: SOUND WITH FINDINGS. The enrich-claimable predicate now admits a source member whose representative is underspecified, pending-work and claim selection share it, and individualization is guarded to an enriched/checked representative so a stale source status cannot overwrite a direct result; the mocked test reddens under the declared mutation, and the live scoped pass took JT-60SA from 13 discovered to 0 with every former residue described and hash-matched at USD 0.01 of a USD 0.50 cap. One non-blocking follow-on: the head arm ran at the source commit, not the docs-only fragment commit that is the reviewed head. Nothing blocks landing.",
+  "review_run_id": "r-20261013T160439309603-review-of-ssfms-underspecified-members-9c7fbb0c3433",
+  "reviewed_base_sha": "f3539bd3d7771c34a5fbe6ae7052e61d26b0a895",
+  "reviewed_head_sha": "9c7fbb0c343359c0ad3a3438484073ed8c6baabf",
+  "reviewed_run_id": "r-20261013T153001721218-ssfms-underspecified-members",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T16:29:02.504405+00:00",
+  "total": 111,
+  "verdict": "SOUND WITH FINDINGS"
+}
