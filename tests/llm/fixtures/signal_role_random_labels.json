@@ -1807,7 +1807,7 @@
   ],
   "description": "Uniform random sample of eligible JT-60SA signals. Hand labels were assigned from the stored name and description under the six-role prototype rule before the paid judge ran.",
   "label_rule": "Measured = direct observation, including plant sensing; commanded = control demand sent to equipment; reference_or_setpoint = target or programmed reference; status_or_flag = discrete state, alarm, or validity; configuration_parameter = setting, identifier, metadata, or analysis setup; derived_or_computed = calculation, fit, reconstruction, simulation, or aggregate.",
-  "labelled_at": "2026-10-13T10:34:54.851993+00:00",
+  "labelled_at": "2026-10-13T10:45:25+00:00",
   "selection": {
     "method": "random.Random(seed).sample(sorted(eligible_ids), 200)",
     "seed": 20261013,
