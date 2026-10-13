@@ -30,14 +30,18 @@
     <code>comparator_rerank_enabled()</code>, which is off unless
     <code>IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS</code> is set, and returns the
     block untouched with zero cost when off, so the composed prompt is identical
-    to a run without the rerank. The rerank's cost is returned and booked by each
-    site — to <code>state.compose_stats.cost</code> in <code>compose_worker</code>
-    and through a <code>BudgetManager</code> lease in <code>compose_batch</code> —
-    the way every other Jev call in these paths is booked.
+    to a run without the rerank. Both sites book the spend the way every other
+    Jev call in these paths is booked — through a <code>BudgetManager</code>
+    lease under the seat that billed it, so the rerank reduces the budget rather
+    than only reporting a cost. <code>compose_worker</code> reaches the block
+    through <code>_rerank_comparators_for_worker</code>, which books through the
+    same helper <code>compose_batch</code> uses and then adds the spend to
+    <code>state.compose_stats.cost</code> as well, so the two sites cannot drift
+    and the worker's reported cost carries the rerank.
   </p>
   <p id="ssog-comparator-rerank-booking">
     A rerank is billed by the judge seat, not by the compose model, and its
-    price is only known once it returns. So the batch site opens a floor lease
+    price is only known once it returns. So each site opens a floor lease
     <em>before</em> the call and charges the actual spend through the lease
     already held, naming the seat that billed it; a charge the provider has
     already made is never dropped for want of a reservation. A pool that cannot
@@ -51,6 +55,20 @@
     <code>get_model("sn-judge")</code> or a state builder keeps the embedding
     order instead of aborting the compose batch.
   </p>
+  <p id="ssog-comparator-rerank-worker-booking">
+    The worker path's booking is pinned twice, because charging is a wiring
+    fact as well as a behavioural one.
+    <code>test_the_worker_path_charges_the_rerank_to_a_lease</code> drives
+    <code>_rerank_comparators_for_worker</code> with a switch-on stub and asserts
+    the spend reaches a lease under the judge seat, the shortfall is recorded
+    against the exhausted pool, and the reported compose cost carries it too;
+    <code>test_compose_worker_books_through_the_charging_helper</code> asserts
+    the worker body reaches the booking helper rather than the unbooked one. A
+    scratch copy restored to the telemetry-only behaviour — the worker adding
+    the spend to <code>state.compose_stats.cost</code> and charging no lease —
+    fails both (<code>EXIT=1</code>, 2 failed against 9 passed,
+    <code>worker_path_control.log</code>).
+  </p>
   <table id="ssog-comparator-rerank-measure">
     <caption>Gate: the compose/context tests and <code>tests/discovery/test_judgment.py</code></caption>
     <thead><tr><th>arm</th><th>revision</th><th>command</th><th>result</th></tr></thead>
@@ -61,9 +79,9 @@
         <td>827 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
       </tr>
       <tr>
-        <td>head</td><td><code>9258a1ada</code></td>
+        <td>head</td><td><code>bb2508c70</code></td>
         <td><code>uv run pytest -p no:cacheprovider &lt;same files&gt; tests/standard_names/test_comparator_rerank.py tests/search/test_fusion.py</code></td>
-        <td>842 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
+        <td>845 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
       </tr>
     </tbody>
   </table>
@@ -77,7 +95,7 @@
     the test rather than passing on a call count. Removing the rerank call from
     <code>_rerank_comparators_for_compose</code> turns the on-arm reorder test
     red (<code>EXIT=1</code>, <code>test_switch_on_reorders_the_comparator_block_by_score</code>
-    and <code>test_comparator_rerank_merges_item_orders_by_mean_rank</code>), and
+    and <code>test_comparator_rerank_fuses_item_orders_by_reciprocal_rank</code>), and
     altering <code>_comparator_rerank_query</code> in a scratch copy so it drops
     the DD path turns it red on the query assertion alone
     (<code>EXIT=1</code>); the off-arm test stays green under both, which is what
