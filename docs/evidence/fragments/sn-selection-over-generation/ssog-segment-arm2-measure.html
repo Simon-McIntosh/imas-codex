@@ -1,0 +1,207 @@
+<!-- Measurement of the second segment-selection arm
+     (imas_codex/standard_names/segment_selection.py) against the first arm and
+     the composer, on golden A's positives and the human sn edit rename targets.
+     Driver: ssog-segment-arm2-measure-run.py; raw results:
+     ssog-segment-arm2-measure-results.json; first arm:
+     ssog-segment-selection-measure-results.json. -->
+<section id="ssog-segment-arm2-measure" data-reckon="evidence">
+  <h2 id="ssog-segment-arm2-measure-heading">The second segment-selection arm measured against the first arm and the composer on golden A</h2>
+
+  <p id="ssog-segment-arm2-measure-introduction">
+    The second arm is what <code>select_segments</code> now implements: a
+    mandatory base offered over an embedding shortlist of the source's most
+    similar base tokens, every option carrying its meaning, and each later slot
+    offered only tokens that compose with those already chosen. This node runs
+    the first arm's driver on it.
+  </p>
+
+  <h3 id="ssog-segment-arm2-measure-cohort-heading">Cohort and exclusions</h3>
+  <p id="ssog-segment-arm2-measure-cohort-body">
+    The cohort is every golden A row plus the distinct human <code>sn edit</code>
+    rename targets: <strong>1075</strong> rows. A row's DD source is resolved
+    through the name's <code>PRODUCED_NAME</code> provenance, one bounded
+    indexed read per batch of 200. <strong>620 rows carry no DD source</strong>
+    and are left out, and <strong>21 further rows' target spelling does not
+    parse canonically</strong>, leaving <strong>434 measured rows</strong>
+    (166 golden positives, 93 golden negatives, 175 edit targets).
+  </p>
+  <p id="ssog-segment-arm2-measure-cohort-difference">
+    <strong>The exclusions differ slightly from the first arm's.</strong> The
+    graph has grown since the first arm ran: its cohort was 1073 rows (618 with
+    no DD source) against 1075 (620) here, so this run measures 166 golden
+    positives against the first arm's 167 and 175 edit targets against its 174.
+    The DD-source resolution and the parse rule are the same; the fixture and
+    the rename log are not frozen.
+  </p>
+  <p id="ssog-segment-arm2-measure-resume-note">
+    <strong>One measurement repair, disclosed.</strong> The driver's resume path
+    skips rows whose <em>target</em> was already measured, so after the run was
+    interrupted and resumed it had recorded only 386 of the 434 rows — the 48
+    dropped rows were duplicate-target rows whose twin had already been measured
+    (39 edit rows, 9 golden). Since a row's selection is a function of its
+    target's DD source, which is a function of the target name alone, those
+    rows' measured fields are their twins' exactly; the full 434-row cohort was
+    restored by rebuilding each row from its target's representative before the
+    figures below were computed. The measurement cost is unchanged (no further
+    paid call). The defect is in the copied resume logic, not in the arm.
+  </p>
+
+  <h3 id="ssog-segment-arm2-measure-figures-heading">Exact-name match and per-slot accuracy</h3>
+  <table id="ssog-segment-arm2-measure-figures-table">
+    <caption>Exact-name match and per-slot accuracy on the human-edit targets (175 rows for arm 2 and the composer, 174 for arm 1; 166 golden positives for arm 2, 167 for arm 1). The composer column includes the 125 of 175 whose pre-rename spelling does not parse; such a spelling supplies no segment and is a per-slot mismatch on every slot.</caption>
+    <thead>
+      <tr><th>Metric</th><th>arm 2, positives (n=166)</th><th>arm 2, edits (n=175)</th><th>arm 1, edits (n=174)</th><th>composer, edits (n=175)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Exact-name match</td><td>0.0241</td><td>0.0057</td><td>0.0287</td><td>0.0000</td></tr>
+      <tr><td><code>physical_base</code></td><td>0.235</td><td>0.137</td><td>0.506</td><td>0.206</td></tr>
+      <tr><td><code>subject</code></td><td>0.602</td><td>0.531</td><td>0.535</td><td>0.223</td></tr>
+      <tr><td><code>component</code></td><td>0.663</td><td>0.737</td><td>0.563</td><td>0.274</td></tr>
+      <tr><td><code>operator</code></td><td>0.813</td><td>0.674</td><td>0.575</td><td>0.274</td></tr>
+      <tr><td><code>locus</code></td><td>0.530</td><td>0.463</td><td>0.477</td><td>0.200</td></tr>
+      <tr><td><code>process</code></td><td>0.807</td><td>0.811</td><td>0.805</td><td>0.257</td></tr>
+    </tbody>
+  </table>
+  <img src="/imas-codex/figures/sn-selection-over-generation/ssog-segment-arm2-measure/per-slot-accuracy.svg"
+       alt="Per-slot accuracy on the human-edit targets for the second arm, the first arm and the composer, over the six grammar slots"/>
+  <p id="ssog-segment-arm2-measure-figure-note">
+    The SVG is rendered by the driver's <code>--figure-only</code> mode from the
+    committed results JSON and the first arm's JSON
+    (<code>plt.style.use("data-ink")</code>), so it regenerates without re-running
+    any selection.
+  </p>
+
+  <h3 id="ssog-segment-arm2-measure-slots-heading">Where the second arm gains and loses, by slot</h3>
+  <p id="ssog-segment-arm2-measure-slots-body">
+    Against the first arm on the edit targets:
+  </p>
+  <ul id="ssog-segment-arm2-measure-slot-list">
+    <li><strong><code>physical_base</code> — a large loss.</strong> 0.137
+      against 0.506, a fall of 0.369, and the run's defining result. The base is
+      the one slot the second arm restricts to an embedding shortlist, and the
+      shortlist offered the target's own base in only <strong>117 of 434 rows</strong>
+      (<code>retrieval_hit_rate</code> 0.270) — so for 317 rows the correct base
+      was never on offer and could not be chosen. The loss is a retrieval
+      failure, not a judgement one, and the item's <code>base_in_shortlist</code>
+      flag is what separates them.</li>
+    <li><strong><code>component</code> — a gain.</strong> 0.737 against 0.563
+      (+0.174); on the positives 0.663 against 0.563.</li>
+    <li><strong><code>operator</code> — a gain.</strong> 0.674 against 0.575
+      (+0.100); on the positives 0.813 against 0.665 (+0.149), the second arm's
+      strongest slot.</li>
+    <li><strong><code>locus</code> — a small loss.</strong> 0.463 against 0.477
+      (−0.014); on the positives it gains slightly (0.530 against 0.503).</li>
+    <li><strong><code>subject</code> — flat.</strong> 0.531 against 0.535;
+      positives 0.602 against 0.605.</li>
+    <li><strong><code>process</code> — flat and the strongest slot.</strong>
+      0.811 against 0.805; positives 0.807 against 0.784.</li>
+  </ul>
+  <p id="ssog-segment-arm2-measure-slots-note">
+    The pattern is coherent with the design: the slots the second arm
+    <em>constrains</em> (component, operator, via grammar-valid composing
+    options) improve, and the one slot it <em>narrows</em> (the base, via the
+    shortlist) degrades so far that it costs more than those gains recover.
+  </p>
+
+  <h3 id="ssog-segment-arm2-measure-family-heading">Family agreement</h3>
+  <p id="ssog-segment-arm2-measure-family-body">
+    Family agreement groups records into species families (the target's slot
+    tokens with the subject removed) and asks whether every member of a
+    multi-member family receives a uniform <code>(physical_base, operator,
+    locus)</code> triple.
+  </p>
+  <ul id="ssog-segment-arm2-measure-family-cohorts">
+    <li><strong>Golden positives only — 166 records in 134 families.</strong>
+      15 families carry more than one member and 10 of those are uniform, an
+      agreement rate of <strong>0.667</strong>, against the first arm's 0.467. This
+      is the cohort the plan's generator rule reads.
+    </li>
+    <li><strong>Every label-positive record — 341 records in 183 families.</strong>
+      100 families carry more than one member and 91 are uniform, an agreement
+      rate of <strong>0.910</strong>, against the first arm's 0.802.</li>
+  </ul>
+  <p id="ssog-segment-arm2-measure-family-boundary">
+    The seventeen-member boundary-density family is the exception the plan names:
+    among the measured rows only <strong>8 of its 17 members carry a DD
+    source</strong>, and those 8 do <strong>not</strong> agree — the second arm
+    splits them across four combinations (<code>intensity</code>/none/none,
+    <code>li</code>/none/none, <code>number_density</code>/none/<code>separatrix</code>,
+    <code>number_density</code>/none/none). Its base loss is visible here: where
+    the first arm put three of the four on <code>number_density</code>, the
+    second arm puts two on bases (<code>intensity</code>, <code>li</code>) that
+    are neither the target's nor each other's. So the second arm's higher family
+    agreement is real on the whole cohort but does not extend to the family the
+    plan singles out.
+  </p>
+
+  <h3 id="ssog-segment-arm2-measure-crosscheck-heading">Cross-check separation</h3>
+  <p id="ssog-segment-arm2-measure-crosscheck-body">
+    The cross-check signal is the six-slot agreement between the selection and
+    the composer's recorded spelling. On golden A the composer's recorded
+    spelling is the very name the fixture labels, so this AUC measures only
+    whether the selection disagrees more with the rejected names than with the
+    accepted ones. Over the 259 golden rows that resolve to a DD source (166
+    positives, 93 negatives), flagging composer-against-selection
+    <em>disagreement</em> separates the negatives from the positives with
+    <strong>AUC 0.502</strong>, bootstrap 95% interval <strong>[0.424,
+    0.574]</strong> (<code>paired_auc</code>; <code>bootstrap_interval</code>
+    resamples by <code>copy_group</code>, 1000 draws, seed 123). A value at 0.5
+    is no separation at all — the second arm is indistinguishable from chance on
+    this signal, as the first arm was.
+  </p>
+
+  <h3 id="ssog-segment-arm2-measure-cost-heading">Cost</h3>
+  <p id="ssog-segment-arm2-measure-cost-body">
+    The call layer booked <strong>USD 0.211233</strong> across the 434 measured
+    names (13 batches), i.e. <strong>USD 0.000487 per name</strong>, against the
+    first arm's USD 0.261844 and USD 0.000603 per name. The node declared the
+    rule to stop if the 10-item pilot's extrapolation exceeded USD 1.00: the
+    pilot measured USD 0.002786 for the 5 of its 10 rows that had a DD source
+    (USD 0.000557 per name), extrapolating to about USD 0.24 for the full
+    cohort, under the ceiling, so the run proceeded. <strong>Total spend on this
+    node's measurement is USD 0.211233 of a measured run</strong> (plus USD
+    0.002786 of pilot), under the USD 1.00 ceiling.
+  </p>
+
+  <h3 id="ssog-segment-arm2-measure-recommendation-heading">Recommendation</h3>
+  <p id="ssog-segment-arm2-measure-recommendation-body">
+    The plan fixes the rule before the run, and it is applied mechanically here:
+  </p>
+  <blockquote id="ssog-segment-arm2-measure-rule">
+    <p><strong>Cross-check</strong> if flagging composer-against-Jev disagreement
+    separates golden A's negatives from its positives with AUC at or above 0.70,
+    and the interval's lower bound is above 0.60. <strong>Generator</strong> if
+    Jev's exact-name match on the positives is within 0.02 of the composer's, and
+    its family agreement is higher. <strong>Both</strong> if both conditions
+    hold; <strong>neither</strong> if neither does.</p>
+  </blockquote>
+  <p id="ssog-segment-arm2-measure-verdict">
+    <strong>neither.</strong> The cross-check condition fails: AUC 0.502 is below
+    0.70 and the interval's lower bound 0.424 is below 0.60 — the second arm's
+    disagreement with the composer does not separate the negatives from the
+    positives. The generator condition fails: the second arm's exact-name match
+    on the positives is 0.0241 against the composer's, which is 1.0 by
+    construction for those rows (the fixture's positives are composer output),
+    and 0.0241 is not within 0.02 of it. Family agreement is read on the
+    golden-positives cohort the rule names (0.667 on 166 records in 134
+    families), higher than the first arm's — but the generator's exact-name
+    conjunct already fails, so the verdict does not turn on it. Neither
+    deployment is supported on the second arm's evidence either.
+  </p>
+  <p id="ssog-segment-arm2-measure-conclusion">
+    <strong>Beside the first arm, the second arm trades a base for two slots.</strong>
+    It selects <code>component</code> and <code>operator</code> better and
+    <code>physical_base</code> far worse, and its exact-name match on the
+    positives falls rather than rises (0.0241 against 0.0299). The base loss is
+    traced to the shortlist: it offered the target's own base in only 27% of
+    rows. If the shortlist is widened or its ranking improved, the arm's base
+    figure is the number to watch — the mechanism, not the model, is what the
+    loss sits on.
+  </p>
+  <p id="ssog-segment-arm2-measure-caveat">
+    The controlling caveat is the same as the first arm's: 620 of 1075 rows have
+    no DD source and 21 more do not parse, so the measured 434 are the subset
+    whose names reached a source at all. The figures describe that subset, not
+    the whole fixture.
+  </p>
+</section>
