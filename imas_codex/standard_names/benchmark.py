@@ -52,6 +52,16 @@ class BenchmarkConfig:
     physics_judge: bool = False
     physics_judge_model: str | None = None
     gold_set_path: str | None = None
+    # Carry the production nearby-name comparator block into the harness
+    # compose prompt. Off by default so the rendered prompt is byte-identical
+    # to the base revision; when on, the block is built by the production
+    # helpers and reranked by the compose rerank switch exactly as the compose
+    # path does.
+    comparator_block: bool = False
+    # Explicit Data Dictionary source paths for a held-out batch. When set,
+    # extraction composes exactly these paths instead of the fixed reference
+    # set, so a benchmark can draw a source list it does not hard-code.
+    source_paths: list[str] | None = None
     # Legacy fields kept for backward-compatible deserialization
     source: str = "dd"
     ids_filter: str | None = None
@@ -1480,11 +1490,15 @@ def _extract_candidates(config: BenchmarkConfig) -> list[dict]:
     from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
     from imas_codex.standard_names.sources.dd import extract_dd_candidates
 
-    # Physics-correctness mode composes the fixed hard-case test set
-    # (research/physics_bench_paths.json) so the judge scores the failure
-    # classes the benchmark targets; otherwise compose the curated
-    # reference dataset for reproducible name/docs scoring.
-    if config.physics_judge:
+    # An explicit source list wins: a caller that names the paths to compose
+    # draws its own batch through the same extraction. Physics-correctness mode
+    # composes the fixed hard-case test set (research/physics_bench_paths.json)
+    # so the judge scores the failure classes the benchmark targets; otherwise
+    # compose the curated reference dataset for reproducible name/docs scoring.
+    if config.source_paths:
+        reference_paths = list(config.source_paths)
+        total_available = len(reference_paths)
+    elif config.physics_judge:
         from imas_codex.standard_names.physics_judge import load_bench_paths
 
         reference_paths = [p["path"] for p in load_bench_paths()]
@@ -1626,6 +1640,26 @@ async def _run_model(
                 "existing_names": sorted(existing)[:200],
                 "cluster_context": batch.get("context", ""),
             }
+
+            # Opt-in: carry the production nearby-name comparator block, built
+            # by the same helpers the compose path uses and reranked by the
+            # compose rerank switch, so the harness prompt sees the block
+            # exactly as production does. Any rerank spend is booked to this
+            # model result's compose cost.
+            if config.comparator_block:
+                from imas_codex.standard_names.workers import (
+                    _collect_nearby_name_comparators,
+                    _rerank_comparators_for_compose,
+                )
+
+                nearby = await asyncio.to_thread(
+                    _collect_nearby_name_comparators, items
+                )
+                nearby, rerank_cost, _seat = await _rerank_comparators_for_compose(
+                    items, nearby
+                )
+                result.total_cost += rerank_cost
+                user_context["nearby_existing_names"] = nearby
 
             try:
                 user_prompt = render_prompt(

@@ -1,0 +1,25 @@
+<section id="ssog-benchmark-comparator-arms-record">
+  <h3>The benchmark harness carries the production comparator block and draws a named source list</h3>
+  <p id="ssog-benchmark-comparator-arms-change">
+    <code>BenchmarkConfig</code> gains <code>comparator_block</code> (default
+    off) and <code>source_paths</code> (default unset) in
+    <code>imas_codex/standard_names/benchmark.py</code>. When
+    <code>comparator_block</code> is on, <code>_run_model</code> builds the
+    nearby-name block through the production helpers
+    <code>_collect_nearby_name_comparators</code> and
+    <code>_rerank_comparators_for_compose</code> in
+    <code>imas_codex/standard_names/workers.py</code>, and passes it as
+    <code>nearby_existing_names</code> the way production does, so the compose
+    rerank switch now moves the harness prompt. Any rerank spend is charged to
+    the model result's compose cost. When off, the rendered prompt is
+    byte-identical to the base revision. When <code>source_paths</code> is set,
+    <code>_extract_candidates</code> composes exactly those paths through the
+    existing extraction.
+  </p>
+  <p id="ssog-benchmark-comparator-arms-measure">
+    Gate at head: 130 passed, 0 failed (<code>EXIT=0</code>), against 126 passed
+    at base — the four added tests, no added failures. The block-on test fails
+    with the carry removed (<code>EXIT=1</code> red arm), so the pass is not
+    vacuous.
+  </p>
+</section>
