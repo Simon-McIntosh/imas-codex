@@ -1,0 +1,130 @@
+<section id="ssog-rerank-held-out-acceptance" data-node="ssog-rerank-held-out-acceptance">
+  <h2 id="ssog-rerank-held-out-acceptance-title">Held-out review acceptance, comparator rerank off vs on</h2>
+
+  <p id="ssog-rerank-held-out-acceptance-status">
+    <strong>Status: blocked — the measurement did not complete.</strong>
+    Neither arm produced a first-pass acceptance rate, so no paired difference
+    and no bootstrap interval are reported. The stop condition is confirmed:
+    a probe shows that a single-source compose call through the harness path
+    does not complete inside a 500 s bound. The held-out batch is fixed and the
+    driver is landed, so the run is reproducible the moment the compose seat
+    answers.
+  </p>
+
+  <h3 id="ssog-rerank-held-out-acceptance-question">Question</h3>
+  <p id="ssog-rerank-held-out-acceptance-question-body">
+    Does reordering the nearby-name comparator block by the judge seat (arm B)
+    change the first-pass review acceptance of composed names, against leaving
+    the block in embedding order (arm A)? Everything else is held constant:
+    the same held-out sources, the same compose seat
+    (<code>local/deepseek-v4.1-flash</code>), the same reviewer seat and the
+    same acceptance threshold (<code>DEFAULT_MIN_SCORE</code> = 0.85). The
+    rerank switch is the environment variable
+    <code>IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS</code>, read by
+    <code>comparator_rerank_enabled()</code> in
+    <code>imas_codex/standard_names/context.py</code> and off by default. The
+    harness is <code>imas_codex/standard_names/benchmark.py</code>
+    (<code>run_benchmark</code> / <code>score_with_reviewer</code>) with
+    <code>BenchmarkConfig.comparator_block=True</code>; it composes and scores
+    without writing the graph, and nothing here writes to the graph.
+  </p>
+
+  <h3 id="ssog-rerank-held-out-acceptance-draw">Held-out draw</h3>
+  <p id="ssog-rerank-held-out-acceptance-draw-body">
+    Seed <code>20261014</code>. Population 7692 DD sources; excluded 60 (the 30
+    sources of the comparator label sheet plus the 30 boundary-density sources
+    it reserves); drew 40, spread round-robin across physics domains. Eleven of
+    the 40 are not yet admitted as standard-name sources and so cannot compose —
+    recorded in the results JSON, not a benchmark defect. The full id list is in
+    <code>ssog-rerank-held-out-acceptance-results.json</code>; the draw
+    reproduces from the seed with
+    <code>ssog-rerank-held-out-acceptance-run.py --draw-only</code>.
+  </p>
+
+  <h3 id="ssog-rerank-held-out-acceptance-control">Positive control</h3>
+  <p id="ssog-rerank-held-out-acceptance-control-body">
+    The control renders the harness compose prompt for each batch with the
+    switch off (embedding order) and on (reranked), and requires at least one
+    batch to hash differently between arms. <strong>Not reached:</strong> the
+    compose/judge calls it depends on stalled before any batch hash was
+    produced, so <code>switch_changes_harness_compose_prompt</code> is
+    <code>null</code>. A standalone diagnostic probe of the same rerank path
+    (<code>_collect_nearby_name_comparators</code> then
+    <code>_rerank_comparators_for_compose</code>) did complete through the paid
+    judge seat (<code>typesafe/jev-1.13</code>, 0.7 s, cost 9.86e-05 USD) and
+    reordered the block, which is why the judge path is not the suspect.
+  </p>
+
+  <h3 id="ssog-rerank-held-out-acceptance-blocker">Blocker</h3>
+  <p id="ssog-rerank-held-out-acceptance-blocker-body">
+    The locally served compose seat does not answer inside the node's bound. A
+    probe ran one compose call through the same harness path
+    (<code>_run_model</code> with <code>comparator_block=True</code>) for a
+    <strong>single-source</strong> batch. Under a 500 s internal bound it raised
+    <code>TimeoutError</code> at wall 500.0 s; re-run under the stated
+    <strong>540 s</strong> bound it was killed by the timeout
+    (<code>EXIT=124</code>), last logged in flight at 526 s and still unfinished.
+    So a call of the smallest possible size does not fit inside one pass.
+    Completion-token counts are unavailable because the call never returned. The
+    probe logs are <code>acceptance-probe.log</code> and
+    <code>acceptance-probe-540.log</code>.
+  </p>
+  <p id="ssog-rerank-held-out-acceptance-shape">
+    The decisive shape fact: extraction emits <strong>29 single-item batches</strong>
+    (every batch has exactly one item), so the driver's batch size is already 1
+    and capping it cannot make a call fit a pass.
+  </p>
+  <p id="ssog-rerank-held-out-acceptance-lane">
+    The lane at the 540 s probe start read <code>running 8</code>,
+    <code>concurrent_requests 31</code>, <code>headroom 4</code>,
+    <code>waiting 0</code>, <code>admission.worker_slots 3</code> (basis
+    <code>measured</code>, <code>requests_per_run 0.625</code>): the lane had
+    headroom when the probe began, so the non-completion is not explained by
+    congestion at that moment alone. An earlier snapshot at the 500 s probe read
+    <code>headroom -5</code> with zero worker slots.
+    Snapshots: <code>lane-probe-1.json</code>, <code>lane-probe-2.json</code>,
+    <code>lane-probe-540.json</code>.
+  </p>
+  <p id="ssog-rerank-held-out-acceptance-lane-earlier">
+    An earlier lane snapshot read <code>running 12</code>,
+    <code>concurrent_requests 45</code>, <code>headroom -5</code>,
+    <code>waiting 0</code>, <code>admission.worker_slots 0</code> (basis
+    <code>measured</code>, <code>requests_per_run 0.516</code>): over the request
+    ceiling with no worker slots, which is congestion rather than a fault.
+    Snapshots: <code>lane-probe-1.json</code>, <code>lane-probe-2.json</code>.
+  </p>
+  <p id="ssog-rerank-held-out-acceptance-attempts-body">
+    Three earlier full-run attempts stalled the same way —
+    <code>LLM possible stall: 1 call(s) in flight, no completion for 151s /
+    166s — provider or governor</code> — with extraction completing every time
+    (29 of 40 sources admitted). The node's time fence expired before the run
+    could be brought back under a bounded retry.
+  </p>
+
+  <h3 id="ssog-rerank-held-out-acceptance-spend">Spend</h3>
+  <p id="ssog-rerank-held-out-acceptance-spend-body">
+    Ceiling USD 3.00 for the node. Incurred 0.00: no arm and no control call
+    completed, so no arm spend was incurred. The only recorded cost is the one
+    diagnostic rerank probe through the paid judge seat (USD 0.000099). Compose
+    and review run on the locally served (free) seat in both arms.
+  </p>
+
+  <h3 id="ssog-rerank-held-out-acceptance-next">Reproduction</h3>
+  <p id="ssog-rerank-held-out-acceptance-next-body">
+    Run the driver unchanged once the compose seat answers; it re-draws the same
+    fixed batch from seed <code>20261014</code>, runs the control, runs both
+    arms and writes rates, the paired difference and the
+    <code>bootstrap_interval</code> from
+    <code>imas_codex.discovery.base.evaluation</code>:
+  </p>
+  <pre id="ssog-rerank-held-out-acceptance-repro"><code>uv run python docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-held-out-acceptance-run.py \
+  --out docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-held-out-acceptance-results.json</code></pre>
+  <p id="ssog-rerank-held-out-acceptance-interval-note">
+    Note on the interval: the evaluation module's <code>bootstrap_interval</code>
+    is AUC-based (it reports a paired AUC difference when
+    <code>scores_b</code> is given). The driver reuses it over item-level
+    acceptance, so the interval it yields is a paired AUC difference over the
+    acceptance labelling, reported beside — not in place of — the raw acceptance
+    rates.
+  </p>
+</section>
