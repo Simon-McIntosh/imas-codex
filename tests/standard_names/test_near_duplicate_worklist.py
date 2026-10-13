@@ -120,3 +120,14 @@ def test_pairs_sharing_a_name_form_one_overlap():
     assert len(worklist["other"]) == 1
     assert len({pair["overlap"] for pair in pairs}) == 1
     assert all(pair["overlap_size"] == 3 for pair in pairs)
+
+
+def test_shared_name_does_not_merge_different_grammar_axes():
+    names = [
+        _name("neutral_density", "m^-3", [1, 0]),
+        _name("neutral_state_density", "m^-3", [1, 0]),
+        _name("poloidal_neutral_density", "m^-3", [1, 0]),
+    ]
+    pairs = build_worklist(names)["other"]
+    assert len(pairs) == 3
+    assert len({pair["overlap"] for pair in pairs}) == 3

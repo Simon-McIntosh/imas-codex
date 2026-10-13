@@ -60,33 +60,32 @@ def _overlap_key(changes: Mapping[str, Mapping[str, Any]]) -> str:
 
 
 def _group_overlaps(pairs: list[dict[str, Any]]) -> None:
-    """A shared name or grammar substitution puts pairs in one ruling group."""
-    parent = list(range(len(pairs)))
+    """Group one varying grammar axis without chaining unrelated axes."""
+    contexts: dict[str, list[dict[str, Any]]] = {}
+    for pair in pairs:
+        changes = pair["divergent_segments"]
+        first = _grammar_parts(pair["left"])
+        if "spelling" in changes:
+            context = json.dumps((pair["left"], pair["right"]))
+        else:
+            fixed = {
+                segment: value
+                for segment, value in first.items()
+                if segment not in changes
+            }
+            context = json.dumps((pair["unit"], sorted(changes), fixed), sort_keys=True)
+        pair["_context"] = context
+        contexts.setdefault(context, []).append(pair)
 
-    def root(index: int) -> int:
-        while parent[index] != index:
-            parent[index] = parent[parent[index]]
-            index = parent[index]
-        return index
-
-    def join(left: int, right: int) -> None:
-        parent[root(right)] = root(left)
-
-    name_owner: dict[str, int] = {}
-    substitution_owner: dict[str, int] = {}
-    for index, pair in enumerate(pairs):
-        for name in (pair["left"], pair["right"]):
-            if name in name_owner:
-                join(index, name_owner[name])
-            name_owner[name] = index
-        substitution = pair["overlap"]
-        if substitution in substitution_owner:
-            join(index, substitution_owner[substitution])
-        substitution_owner[substitution] = index
-
-    groups: dict[int, list[dict[str, Any]]] = {}
-    for index, pair in enumerate(pairs):
-        groups.setdefault(root(index), []).append(pair)
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for pair in pairs:
+        context = pair.pop("_context")
+        key = (
+            f"context:{context}"
+            if len(contexts[context]) > 1
+            else f"substitution:{pair['overlap']}"
+        )
+        groups.setdefault(key, []).append(pair)
     for members in groups.values():
         identities = sorted((pair["left"], pair["right"]) for pair in members)
         digest = hashlib.sha256(json.dumps(identities).encode()).hexdigest()[:12]
