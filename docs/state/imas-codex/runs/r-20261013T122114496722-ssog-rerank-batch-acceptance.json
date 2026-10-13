@@ -2943,6 +2943,64 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "e20d5b81db9216fef5fc323da56a362187d3eb4c",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 5024,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261013T122114496722-ssog-rerank-batch-acceptance",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5024,
+        "path": "/tmp/reckon-crew-scratch/r-20261013T122114496722-ssog-rerank-batch-acceptance"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "e20d5b81db9216fef5fc323da56a362187d3eb4c",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-rerank-batch-acceptance",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-13T12:35:42.745Z",
+            "session_id": "5ea17f23-8ce3-4b2d-8c02-31ac4bf0021f",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-rerank-batch-acceptance"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 5ea17f23-8ce3-4b2d-8c02-31ac4bf0021f"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "the session's worktree is based on d454cfc93, before the harness gains its comparator block; the measure reruns as a new node on the repaired harness, so this session has nothing left to continue",
     "session_id": "5ea17f23-8ce3-4b2d-8c02-31ac4bf0021f",
