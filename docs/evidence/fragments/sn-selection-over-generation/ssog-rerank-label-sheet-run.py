@@ -31,6 +31,7 @@ POOL_K = 20
 TOP_K = 10
 BOUNDARY_SUFFIX = "_density_at_plasma_boundary"
 BOUNDARY_RESERVE = 10
+BOUNDARY_FAMILY = "boundary_density"
 
 
 # ---------------------------------------------------------------------------
@@ -49,6 +50,7 @@ def load_population(gc: Any) -> list[dict[str, Any]]:
         """
         MATCH (s:StandardNameSource)
         WHERE s.source_id IS NOT NULL
+          AND s.source_id CONTAINS '/'
           AND s.description IS NOT NULL AND s.description <> ''
           AND s.physics_domain IS NOT NULL
         RETURN DISTINCT s.source_id AS path,
@@ -90,14 +92,13 @@ def draw_items(
     deterministic for a fixed population and seed.
     """
     by_path = {r["path"]: r for r in rows}
-    family = {"density", "boundary" + "_family"}
 
     chosen: list[dict[str, Any]] = []
     chosen_paths: set[str] = set()
     for path in boundary_paths[:boundary_reserve]:
         row = by_path.get(path)
         if row is not None and path not in chosen_paths:
-            chosen.append({**row, "family": family})
+            chosen.append({**row, "family": BOUNDARY_FAMILY})
             chosen_paths.add(path)
 
     by_domain: dict[str, list[dict[str, Any]]] = {}
