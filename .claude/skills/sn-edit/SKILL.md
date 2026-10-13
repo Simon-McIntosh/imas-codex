@@ -106,7 +106,11 @@ Attaching an edit does not score it — it just enters the queue.
 
 Eligible rename targets include names in terminal stages: a `superseded`
 name with **no successor** (an orphaned DD path) can be resurrected by a
-redesign edit.
+redesign edit. Renaming another name *onto* a tombstone's spelling is
+refused — the tombstone owns that id as history. To proceed, either rename
+the tombstone itself to a free spelling (the route above), or return it to
+`draft` with a signed transition and fold the other name into it with
+`sn supersede`.
 
 ## Worked example
 

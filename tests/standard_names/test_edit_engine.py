@@ -231,7 +231,15 @@ class FakeGraph:
             ]
 
         if "// EDIT_CHECK_COLLISION" in cypher:
-            return [{"n": 1 if params["id"] in self.nodes else 0}]
+            sn_id = params["id"]
+            if sn_id not in self.nodes:
+                return []
+            return [
+                {
+                    "occupant_stage": self.nodes[sn_id].get("name_stage"),
+                    "occupant_has_successor": self.has_successor(sn_id),
+                }
+            ]
 
         if "// EDIT_FETCH_PARENT_EDGES" in cypher:
             edges = self.edges_by_child.get(params["id"], [])
@@ -1026,6 +1034,90 @@ class TestRenameEligibility:
             )
         assert plan.blocked is not None
         assert "already exists" in plan.blocked
+
+    def test_collision_with_dead_tombstone_names_both_routes(self) -> None:
+        """Renaming onto a successor-less superseded spelling is refused, and
+        the refusal names both sanctioned routes: rename the tombstone itself
+        to a free spelling, or return it to draft with a signed transition and
+        fold into it."""
+        fake = FakeGraph()
+        fake.add_node("plasma_current", name_stage="accepted")
+        fake.add_node("toroidal_plasma_current", name_stage="superseded")
+        assert not fake.has_successor("toroidal_plasma_current")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert plan.applied is False
+        assert "superseded tombstone" in plan.blocked
+        assert "--rename" in plan.blocked
+        assert "signed_manifest" in plan.blocked
+        assert "sn supersede" in plan.blocked
+        # no write happened: the occupant survives untouched
+        assert fake.nodes["toroidal_plasma_current"]["name_stage"] == "superseded"
+        assert fake.nodes["plasma_current"]["name_stage"] == "accepted"
+
+    def test_collision_with_live_occupant_keeps_plain_message(self) -> None:
+        """A live occupant keeps today's bare id-uniqueness message — the
+        stage-aware routes are offered only for a successor-less tombstone."""
+        fake = FakeGraph()
+        fake.add_node("plasma_current", name_stage="accepted")
+        fake.add_node("toroidal_plasma_current", name_stage="accepted")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked == "a StandardName 'toroidal_plasma_current' already exists"
+        assert "superseded tombstone" not in plan.blocked
+        assert "signed_manifest" not in plan.blocked
+
+    def test_collision_with_tombstone_that_has_successor_keeps_plain_message(
+        self,
+    ) -> None:
+        """A superseded occupant that carries a successor keeps the plain
+        message — only a dead (successor-less) tombstone gets the routes."""
+        fake = FakeGraph()
+        fake.add_node("plasma_current", name_stage="accepted")
+        fake.add_node("toroidal_plasma_current", name_stage="superseded")
+        fake.add_node("ion_pressure", name_stage="accepted")
+        fake.refined_from["ion_pressure"] = "toroidal_plasma_current"
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked == "a StandardName 'toroidal_plasma_current' already exists"
+        assert "superseded" not in plan.blocked
+        assert "superseded tombstone" not in plan.blocked
+
+    def test_tombstone_renamed_onto_free_spelling_proceeds(self) -> None:
+        """The tombstone's own resurrection route still works: renaming a
+        successor-less superseded identity onto a free spelling proceeds."""
+        fake = FakeGraph()
+        fake.add_node("area_of_plasma_boundary", name_stage="superseded")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="area_of_plasma_boundary",
+                rename="poloidal_cross_section_of_plasma_boundary",
+                reason="resurrect with an explicit spelling",
+                gc=fake,
+            )
+        assert plan.blocked is None
+        assert plan.applied is True
+        assert "poloidal_cross_section_of_plasma_boundary" in fake.nodes
+        assert (
+            fake.nodes["poloidal_cross_section_of_plasma_boundary"]["name_stage"]
+            == "drafted"
+        )
 
     def test_dry_run_makes_zero_writes(self) -> None:
         fake = FakeGraph()
