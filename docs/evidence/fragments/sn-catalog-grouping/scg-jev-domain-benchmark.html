@@ -1,0 +1,273 @@
+<article id="scg-jev-domain-benchmark">
+  <h2 id="scg-jev-domain-benchmark-title">The typed-Choice domain classifier does not match the chat classifier: do not adopt</h2>
+
+  <p id="scg-jev-domain-benchmark-verdict">
+    <b>Verdict: do not adopt.</b> Under the fixed rule — adopt only when derived
+    name-domain accuracy is at least 0.597 <em>and</em> spend is below USD 2.66 —
+    the typed-Choice classifier (<code>typesafe/jev-1.13</code>) reaches
+    <b>0.560</b> (84/150), which is
+    0.037 under the 0.597 floor. Its spend of
+    USD 0.0506 for 856 paths clears the cost criterion by a wide
+    margin; the accuracy criterion fails, so the rule fails. Every one of the 856
+    paths was answered and nothing was written to the graph.
+  </p>
+
+  <p id="scg-jev-domain-benchmark-spend">
+    Pilot of 20 paths: USD 0.001172, an estimate of USD 0.0502 for 856 against
+    the node ceiling of USD 1.00. Full run: USD 0.050595, 856 of 856
+    answered at the first attempt, 20 paths per batch, one decision per path, eight in flight.
+  </p>
+
+  <table id="scg-jev-domain-benchmark-measures">
+    <thead><tr>
+<th>Measure</th>
+<th>Typed Choice</th>
+<th>Chat classifier (recorded)</th>
+<th>Chat classifier (this revision&#x27;s selector)</th>
+</tr></thead>
+    <tbody>
+      <tr><td>Derived name-domain accuracy, 150 coordinator-labelled names</td><td><b>0.560</b> (84/150)</td><td>0.627 (94/150)</td><td>0.620 (93/150)</td></tr>
+      <tr><td>Derived accuracy, 20 lead-labelled reference names</td><td>0.450 (9/20)</td><td>0.350 (7/20)</td><td>0.450 (9/20)</td></tr>
+      <tr><td>Source-set accuracy (label among the sources' domains), coordinator</td><td>0.600 (90/150)</td><td>0.647 (97/150)</td><td>same: set measure does not use the selector</td></tr>
+      <tr><td>Source-set accuracy, lead</td><td>0.750 (15/20)</td><td>0.700 (14/20)</td><td>same</td></tr>
+      <tr><td>Stored value in the graph (unchanged by this run), coordinator</td><td>0.420 (63/150)</td><td>0.420 (63/150)</td><td>same</td></tr>
+      <tr><td>Spend for 856 paths</td><td><b>USD 0.0506</b></td><td>USD 2.66</td><td></td></tr>
+      <tr><td>Paths classified / unanswered</td><td>856 / 0</td><td>856 / 0</td><td></td></tr>
+    </tbody>
+  </table>
+
+  <p id="scg-jev-domain-benchmark-selector-drift">
+    The recorded chat figure of 0.627 was derived with a domain selector that
+    ranks differently from the one at this revision. Scoring the recorded chat
+    answers through the present scorer reproduces the selector-independent
+    counts exactly (source-set 97/150 and 14/20, stored 63/150 and 11/20) and
+    moves the chat derived accuracy to 0.620
+    (93/150), with 21 names changing
+    primary. The verdict holds on either chat figure: 0.560 is below the
+    0.597 floor, and below the chat classifier's 0.620 at the same
+    selector.
+  </p>
+
+  <h3 id="scg-jev-domain-benchmark-per-domain">Per-domain accuracy</h3>
+  <figure id="scg-jev-domain-benchmark-per-domain-figure">
+    <img src="/imas-codex/figures/sn-catalog-grouping/scg-jev-domain-benchmark/per-domain-accuracy.svg"
+         alt="Per-domain derived accuracy of the typed-Choice and chat classifiers">
+    <figcaption>
+      Derived name-domain accuracy per labelled domain over the 150
+      coordinator-labelled names, chat classifier re-derived at this
+      revision's selector; the count in brackets is the names carrying that
+      label. Where only one dot shows, the two classifiers score the same.
+      The dotted line marks the 0.597 adoption floor.
+    </figcaption>
+  </figure>
+  <table id="scg-jev-domain-benchmark-per-domain-table">
+    <thead><tr>
+<th>Labelled domain</th>
+<th>Names</th>
+<th>Typed Choice correct</th>
+<th>Chat correct</th>
+</tr></thead>
+    <tbody>
+      <tr><td><code>equilibrium</code></td><td>16</td><td>9 (0.562)</td><td>9 (0.562)</td></tr>
+      <tr><td><code>radiation_measurement_diagnostics</code></td><td>16</td><td>13 (0.812)</td><td>13 (0.812)</td></tr>
+      <tr><td><code>core_plasma_physics</code></td><td>14</td><td>6 (0.429)</td><td>9 (0.643)</td></tr>
+      <tr><td><code>auxiliary_heating</code></td><td>11</td><td>8 (0.727)</td><td>8 (0.727)</td></tr>
+      <tr><td><code>plasma_wall_interactions</code></td><td>9</td><td>2 (0.222)</td><td>3 (0.333)</td></tr>
+      <tr><td><code>gyrokinetics</code></td><td>7</td><td>2 (0.286)</td><td>3 (0.429)</td></tr>
+      <tr><td><code>magnetic_field_systems</code></td><td>7</td><td>6 (0.857)</td><td>7 (1.000)</td></tr>
+      <tr><td><code>magnetohydrodynamics</code></td><td>7</td><td>2 (0.286)</td><td>2 (0.286)</td></tr>
+      <tr><td><code>neutronics</code></td><td>7</td><td>5 (0.714)</td><td>5 (0.714)</td></tr>
+      <tr><td><code>edge_plasma_physics</code></td><td>6</td><td>1 (0.167)</td><td>1 (0.167)</td></tr>
+      <tr><td><code>electromagnetic_wave_diagnostics</code></td><td>6</td><td>6 (1.000)</td><td>5 (0.833)</td></tr>
+      <tr><td><code>fueling</code></td><td>6</td><td>5 (0.833)</td><td>5 (0.833)</td></tr>
+      <tr><td><code>spectroscopy</code></td><td>6</td><td>6 (1.000)</td><td>6 (1.000)</td></tr>
+      <tr><td><code>fast_particles</code></td><td>5</td><td>2 (0.400)</td><td>3 (0.600)</td></tr>
+      <tr><td><code>current_drive</code></td><td>4</td><td>2 (0.500)</td><td>2 (0.500)</td></tr>
+      <tr><td><code>magnetic_field_diagnostics</code></td><td>4</td><td>3 (0.750)</td><td>4 (1.000)</td></tr>
+      <tr><td><code>particle_measurement_diagnostics</code></td><td>3</td><td>1 (0.333)</td><td>0 (0.000)</td></tr>
+      <tr><td><code>structural_components</code></td><td>3</td><td>0 (0.000)</td><td>2 (0.667)</td></tr>
+      <tr><td><code>plasma_measurement_diagnostics</code></td><td>2</td><td>0 (0.000)</td><td>0 (0.000)</td></tr>
+      <tr><td><code>transport</code></td><td>2</td><td>0 (0.000)</td><td>1 (0.500)</td></tr>
+      <tr><td><code>waves</code></td><td>2</td><td>2 (1.000)</td><td>2 (1.000)</td></tr>
+      <tr><td><code>divertor_physics</code></td><td>1</td><td>1 (1.000)</td><td>1 (1.000)</td></tr>
+      <tr><td><code>general</code></td><td>1</td><td>0 (0.000)</td><td>0 (0.000)</td></tr>
+      <tr><td><code>mechanical_measurement_diagnostics</code></td><td>1</td><td>0 (0.000)</td><td>0 (0.000)</td></tr>
+      <tr><td><code>plasma_control</code></td><td>1</td><td>0 (0.000)</td><td>0 (0.000)</td></tr>
+      <tr><td><code>plasma_initiation</code></td><td>1</td><td>1 (1.000)</td><td>1 (1.000)</td></tr>
+      <tr><td><code>runaway_electrons</code></td><td>1</td><td>1 (1.000)</td><td>1 (1.000)</td></tr>
+      <tr><td><code>turbulence</code></td><td>1</td><td>0 (0.000)</td><td>0 (0.000)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="scg-jev-domain-benchmark-confusion">Confusion</h3>
+  <p id="scg-jev-domain-benchmark-confusion-note">
+    Both classifiers share their largest error block: names with no live
+    source path (22 of 150) derive no domain at all. That block is the
+    <code>&lt;none&gt;</code> rows and is the same for both. Past it, the
+    typed Choice adds confusions that are not among the chat classifier's top twelve —
+    <code>equilibrium</code> names derived as <code>edge_plasma_physics</code>
+    or <code>computational_workflow</code>, and
+    <code>auxiliary_heating</code> names derived as <code>waves</code>.
+  </p>
+  <table id="scg-jev-domain-benchmark-confusion-table">
+    <thead><tr>
+<th>Typed Choice: label → derived (top 12)</th>
+<th>Chat classifier: label → derived (top 12)</th>
+</tr></thead>
+    <tbody>
+      <tr><td><code>magnetohydrodynamics</code> → <code>&lt;none&gt;</code> ×5</td><td><code>magnetohydrodynamics</code> → <code>&lt;none&gt;</code> ×5</td></tr>
+      <tr><td><code>gyrokinetics</code> → <code>&lt;none&gt;</code> ×4</td><td><code>gyrokinetics</code> → <code>&lt;none&gt;</code> ×4</td></tr>
+      <tr><td><code>auxiliary_heating</code> → <code>waves</code> ×3</td><td><code>radiation_measurement_diagnostics</code> → <code>spectroscopy</code> ×3</td></tr>
+      <tr><td><code>radiation_measurement_diagnostics</code> → <code>spectroscopy</code> ×3</td><td><code>equilibrium</code> → <code>magnetic_field_systems</code> ×3</td></tr>
+      <tr><td><code>current_drive</code> → <code>&lt;none&gt;</code> ×2</td><td><code>current_drive</code> → <code>&lt;none&gt;</code> ×2</td></tr>
+      <tr><td><code>equilibrium</code> → <code>&lt;none&gt;</code> ×2</td><td><code>auxiliary_heating</code> → <code>current_drive</code> ×2</td></tr>
+      <tr><td><code>equilibrium</code> → <code>edge_plasma_physics</code> ×2</td><td><code>equilibrium</code> → <code>&lt;none&gt;</code> ×2</td></tr>
+      <tr><td><code>equilibrium</code> → <code>computational_workflow</code> ×2</td><td><code>edge_plasma_physics</code> → <code>spectroscopy</code> ×2</td></tr>
+      <tr><td><code>edge_plasma_physics</code> → <code>spectroscopy</code> ×2</td><td><code>plasma_wall_interactions</code> → <code>&lt;none&gt;</code> ×2</td></tr>
+      <tr><td><code>plasma_wall_interactions</code> → <code>&lt;none&gt;</code> ×2</td><td><code>particle_measurement_diagnostics</code> → <code>mechanical_measurement_diagnostics</code> ×1</td></tr>
+      <tr><td><code>edge_plasma_physics</code> → <code>gyrokinetics</code> ×1</td><td><code>general</code> → <code>&lt;none&gt;</code> ×1</td></tr>
+      <tr><td><code>particle_measurement_diagnostics</code> → <code>plant_systems</code> ×1</td><td><code>core_plasma_physics</code> → <code>&lt;none&gt;</code> ×1</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="scg-jev-domain-benchmark-disagreements">Disagreements</h3>
+  <p id="scg-jev-domain-benchmark-disagreement-summary">
+    The two classifiers give different domains for 301 of 856 paths
+    (0.352), spread over 60 names; the median typed-Choice
+    probability on those paths is 0.62 and
+    74 of them are above 0.8.
+    Each path feeds one labelled name. On the disagreeing paths the typed
+    Choice's domain equals that name's label 93 times and the chat
+    classifier's 48 times, but the count is carried by a few names
+    with many source paths (<code>normalized_poloidal_flux_coordinate</code>
+    alone is 12 of the 93) while the five names with the most disagreeing
+    paths, 112 paths, are matched by the typed Choice once and by the chat classifier never. The rule weighs each name once,
+    and there the two derive different domains for 33 names: the typed
+    Choice is right on 8, the chat classifier on 17, neither
+    on 8. Of those 33 names, 21 have a single source path, so the
+    selector is not what separates them; the path answers themselves are.
+  </p>
+  <table id="scg-jev-domain-benchmark-path-pair-table">
+    <thead><tr>
+<th>Chat domain</th>
+<th>Typed Choice domain</th>
+<th>Paths</th>
+</tr></thead>
+    <tbody>
+      <tr><td><code>transport</code></td><td><code>equilibrium</code></td><td>33</td></tr>
+      <tr><td><code>fast_particles</code></td><td><code>core_plasma_physics</code></td><td>21</td></tr>
+      <tr><td><code>spectroscopy</code></td><td><code>radiation_measurement_diagnostics</code></td><td>16</td></tr>
+      <tr><td><code>core_plasma_physics</code></td><td><code>computational_workflow</code></td><td>12</td></tr>
+      <tr><td><code>fast_particles</code></td><td><code>computational_workflow</code></td><td>11</td></tr>
+      <tr><td><code>plasma_wall_interactions</code></td><td><code>edge_plasma_physics</code></td><td>10</td></tr>
+      <tr><td><code>magnetohydrodynamics</code></td><td><code>equilibrium</code></td><td>9</td></tr>
+      <tr><td><code>electromagnetic_wave_diagnostics</code></td><td><code>particle_measurement_diagnostics</code></td><td>8</td></tr>
+    </tbody>
+  </table>
+  <p id="scg-jev-domain-benchmark-name-disagreement-lead">Name-level disagreements, all 33:</p>
+  <table id="scg-jev-domain-benchmark-name-disagreement-table">
+    <thead><tr>
+<th>Name</th>
+<th>Label</th>
+<th>Chat</th>
+<th>Typed Choice</th>
+<th>Probability</th>
+<th>Correct</th>
+</tr></thead>
+    <tbody>
+      <tr><td><code>alpha_angle_of_plasma_filament</code></td><td><code>equilibrium</code></td><td><code>magnetic_field_systems</code></td><td><code>computational_workflow</code></td><td>0.54</td><td>neither</td></tr>
+      <tr><td><code>effective_charge</code></td><td><code>core_plasma_physics</code></td><td><code>magnetohydrodynamics</code></td><td><code>core_plasma_physics</code></td><td>0.98</td><td>typed Choice</td></tr>
+      <tr><td><code>electron_density_at_pellet_path</code></td><td><code>core_plasma_physics</code></td><td><code>core_plasma_physics</code></td><td><code>fueling</code></td><td>0.69</td><td>chat</td></tr>
+      <tr><td><code>electron_particle_flux_at_wall_due_to_pumping</code></td><td><code>plasma_wall_interactions</code></td><td><code>plasma_wall_interactions</code></td><td><code>edge_plasma_physics</code></td><td>0.55</td><td>chat</td></tr>
+      <tr><td><code>first_local_tangential_width_of_diagnostic_aperture</code></td><td><code>plasma_measurement_diagnostics</code></td><td><code>particle_measurement_diagnostics</code></td><td><code>radiation_measurement_diagnostics</code></td><td>0.99</td><td>neither</td></tr>
+      <tr><td><code>flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</code></td><td><code>gyrokinetics</code></td><td><code>gyrokinetics</code></td><td><code>turbulence</code></td><td>0.62</td><td>chat</td></tr>
+      <tr><td><code>height_of_plasma_filament</code></td><td><code>equilibrium</code></td><td><code>magnetic_field_systems</code></td><td><code>computational_workflow</code></td><td>0.72</td><td>neither</td></tr>
+      <tr><td><code>line_integrated_electron_number_density</code></td><td><code>electromagnetic_wave_diagnostics</code></td><td><code>equilibrium</code></td><td><code>electromagnetic_wave_diagnostics</code></td><td>0.99</td><td>typed Choice</td></tr>
+      <tr><td><code>major_length_of_plasma_filament</code></td><td><code>equilibrium</code></td><td><code>magnetic_field_systems</code></td><td><code>equilibrium</code></td><td>0.31</td><td>typed Choice</td></tr>
+      <tr><td><code>neutral_gas_pressure_of_gauge</code></td><td><code>particle_measurement_diagnostics</code></td><td><code>mechanical_measurement_diagnostics</code></td><td><code>plant_systems</code></td><td>0.92</td><td>neither</td></tr>
+      <tr><td><code>normalized_toroidal_flux_coordinate_at_beam_tracing_point</code></td><td><code>equilibrium</code></td><td><code>waves</code></td><td><code>equilibrium</code></td><td>0.83</td><td>typed Choice</td></tr>
+      <tr><td><code>nuclear_heating_power_of_limiter_tile</code></td><td><code>neutronics</code></td><td><code>neutronics</code></td><td><code>plasma_wall_interactions</code></td><td>0.75</td><td>chat</td></tr>
+      <tr><td><code>parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection</code></td><td><code>transport</code></td><td><code>transport</code></td><td><code>gyrokinetics</code></td><td>0.71</td><td>chat</td></tr>
+      <tr><td><code>parallel_electric_field</code></td><td><code>core_plasma_physics</code></td><td><code>core_plasma_physics</code></td><td><code>magnetohydrodynamics</code></td><td>0.60</td><td>chat</td></tr>
+      <tr><td><code>particle_source_rate_due_to_distribution_function_driven</code></td><td><code>fast_particles</code></td><td><code>fast_particles</code></td><td><code>core_plasma_physics</code></td><td>0.48</td><td>chat</td></tr>
+      <tr><td><code>radial_coordinate_of_thomson_scattering_laser</code></td><td><code>particle_measurement_diagnostics</code></td><td><code>electromagnetic_wave_diagnostics</code></td><td><code>particle_measurement_diagnostics</code></td><td>0.86</td><td>typed Choice</td></tr>
+      <tr><td><code>radial_outline_of_coil_conductor_element</code></td><td><code>magnetic_field_systems</code></td><td><code>magnetic_field_systems</code></td><td><code>equilibrium</code></td><td>0.39</td><td>chat</td></tr>
+      <tr><td><code>radial_outline_of_ferritic_element</code></td><td><code>structural_components</code></td><td><code>structural_components</code></td><td><code>equilibrium</code></td><td>0.54</td><td>chat</td></tr>
+      <tr><td><code>radius_of_neutron_detector</code></td><td><code>neutronics</code></td><td><code>magnetic_field_diagnostics</code></td><td><code>spectroscopy</code></td><td>0.90</td><td>neither</td></tr>
+      <tr><td><code>ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude</code></td><td><code>core_plasma_physics</code></td><td><code>core_plasma_physics</code></td><td><code>gyrokinetics</code></td><td>0.72</td><td>chat</td></tr>
+      <tr><td><code>ratio_of_vertical_vorticity_to_major_radius</code></td><td><code>edge_plasma_physics</code></td><td><code>edge_plasma_physics</code></td><td><code>gyrokinetics</code></td><td>0.60</td><td>chat</td></tr>
+      <tr><td><code>ratio_of_volume_averaged_carbon_density_to_volume_averaged_electron_density</code></td><td><code>core_plasma_physics</code></td><td><code>core_plasma_physics</code></td><td><code>data_management</code></td><td>0.41</td><td>chat</td></tr>
+      <tr><td><code>safety_factor_at_internal_transport_barrier</code></td><td><code>equilibrium</code></td><td><code>equilibrium</code></td><td><code>magnetohydrodynamics</code></td><td>0.62</td><td>chat</td></tr>
+      <tr><td><code>saturated_ion_current</code></td><td><code>particle_measurement_diagnostics</code></td><td><code>plasma_measurement_diagnostics</code></td><td><code>edge_plasma_physics</code></td><td>0.57</td><td>neither</td></tr>
+      <tr><td><code>surface_area_of_neutron_detector</code></td><td><code>neutronics</code></td><td><code>particle_measurement_diagnostics</code></td><td><code>neutronics</code></td><td>0.79</td><td>typed Choice</td></tr>
+      <tr><td><code>toroidal_launched_wave_index_of_lower_hybrid_antenna</code></td><td><code>auxiliary_heating</code></td><td><code>current_drive</code></td><td><code>waves</code></td><td>0.80</td><td>neither</td></tr>
+      <tr><td><code>toroidal_magnetic_field_at_pedestal_top</code></td><td><code>equilibrium</code></td><td><code>equilibrium</code></td><td><code>edge_plasma_physics</code></td><td>0.58</td><td>chat</td></tr>
+      <tr><td><code>total_absorbed_wave_power_at_inside_flux_surface</code></td><td><code>auxiliary_heating</code></td><td><code>auxiliary_heating</code></td><td><code>waves</code></td><td>0.66</td><td>chat</td></tr>
+      <tr><td><code>total_power_at_separatrix</code></td><td><code>edge_plasma_physics</code></td><td><code>transport</code></td><td><code>edge_plasma_physics</code></td><td>0.73</td><td>typed Choice</td></tr>
+      <tr><td><code>vertical_coordinate_of_lower_hybrid_antenna</code></td><td><code>auxiliary_heating</code></td><td><code>current_drive</code></td><td><code>auxiliary_heating</code></td><td>0.67</td><td>typed Choice</td></tr>
+      <tr><td><code>vertical_outline_of_fiber_optic_current_sensor</code></td><td><code>magnetic_field_diagnostics</code></td><td><code>magnetic_field_diagnostics</code></td><td><code>equilibrium</code></td><td>0.63</td><td>chat</td></tr>
+      <tr><td><code>y_coordinate_of_ferritic_element_centroid</code></td><td><code>structural_components</code></td><td><code>structural_components</code></td><td><code>plasma_control</code></td><td>0.17</td><td>chat</td></tr>
+      <tr><td><code>y_coordinate_of_sensor_attachment_point</code></td><td><code>mechanical_measurement_diagnostics</code></td><td><code>machine_operations</code></td><td><code>plasma_measurement_diagnostics</code></td><td>0.25</td><td>neither</td></tr>
+    </tbody>
+  </table>
+  <p id="scg-jev-domain-benchmark-path-disagreement-where">
+    All 301 path-level disagreements, with the typed Choice's
+    probability, are in <code>scg-jev-domain-benchmark-results.json</code> under
+    <code>path_disagreements</code>.
+  </p>
+
+  <h3 id="scg-jev-domain-benchmark-bands">Accuracy by probability</h3>
+  <p id="scg-jev-domain-benchmark-band-note">
+    A name's band is the probability of the source path that supplied its
+    derived domain; 22 names with no live source have none and
+    sit outside the bands. Above 0.8 the typed Choice is the more accurate of
+    the two on the same names; below 0.8 the chat classifier is. Taking the
+    typed Choice above 0.8 and the chat classifier elsewhere would score
+    97/150 (0.647) against the chat
+    classifier's 93/150 (0.620). That
+    split was read off these labels, so it is an in-sample observation for a
+    later run to test, not a result.
+  </p>
+  <table id="scg-jev-domain-benchmark-name-band-table">
+    <thead><tr>
+<th>Probability of the path that supplied the domain</th>
+<th>Names</th>
+<th>Typed Choice correct</th>
+<th>Chat correct on the same names</th>
+</tr></thead>
+    <tbody>
+      <tr><td>above 0.8</td><td>74</td><td>65 (0.878)</td><td>61 (0.824)</td></tr>
+      <tr><td>0.5 to 0.8</td><td>42</td><td>14 (0.333)</td><td>24 (0.571)</td></tr>
+      <tr><td>below 0.5</td><td>12</td><td>5 (0.417)</td><td>8 (0.667)</td></tr>
+    </tbody>
+  </table>
+  <p id="scg-jev-domain-benchmark-path-band-note">
+    At path level each source path is scored against the label of every name
+    it feeds, which penalises paths whose domain is correct for the quantity
+    but differs from the name's label; the ordering by probability is the
+    same.
+  </p>
+  <table id="scg-jev-domain-benchmark-path-band-table">
+    <thead><tr>
+<th>Path probability</th>
+<th>Paths</th>
+<th>Typed Choice domain equals the name&#x27;s label</th>
+</tr></thead>
+    <tbody>
+      <tr><td>above 0.8</td><td>397</td><td>224/397 (0.564)</td></tr>
+      <tr><td>0.5 to 0.8</td><td>316</td><td>85/316 (0.269)</td></tr>
+      <tr><td>below 0.5</td><td>143</td><td>24/143 (0.168)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="scg-jev-domain-benchmark-reproduction">Reproduction</h3>
+  <p id="scg-jev-domain-benchmark-reproduction-body">
+    The recorded answers sit in <code>scg-jev-domain-benchmark-results.json</code> under
+    <code>domains</code> and <code>probabilities</code> (probabilities rounded
+    to four places). A scoring pass over that file with no <code>--fresh</code>
+    flag makes no paid call and rewrites a byte-identical results file
+    (<code>scg-jev-domain-benchmark-run.py --cache scg-jev-domain-benchmark-results.json</code>); the scorer is
+    positive-controlled by scoring the recorded chat answers and requiring
+    the source-set and stored counts to equal the published ones.
+  </p>
+</article>
