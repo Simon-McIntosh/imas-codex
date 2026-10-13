@@ -387,6 +387,7 @@ def _search_signals(
         signal_ids, scores = _rank_signals(
             gc, embedding, query, facility, pool, diagnostic, physics_domain
         )
+        fused_ranks = {sid: rank for rank, sid in enumerate(signal_ids, 1)}
 
         # Step 1c: Filter by check outcome if requested
         rerank_note: str | None = None
@@ -402,6 +403,9 @@ def _search_signals(
 
         # Step 2: Enrich with graph traversals
         enriched = _enrich_signals(gc, signal_ids)
+        enriched.sort(
+            key=lambda sig: fused_ranks.get(sig.get("id"), len(signal_ids) + 1)
+        )
 
         # Step 2b: Add check details if requested
         if include_check_details:
@@ -428,7 +432,9 @@ def _search_signals(
             enriched = enriched[:k]
 
         # Step 5: Format
-        report = format_signals_report(enriched, data_node_results, scores)
+        report = format_signals_report(
+            enriched, data_node_results, scores, ranks=fused_ranks
+        )
         if rerank_note:
             report = f"{report}\n\n_{rerank_note}_"
         return report
@@ -889,6 +895,8 @@ def _enrich_signals(
                s.checked AS checked, s.example_shot AS example_shot,
                s.node_path AS node_path, s.accessor AS accessor,
                s.data_source_name AS data_source_name,
+               s.data_source_path AS data_source_path,
+               s.signal_role AS signal_role,
                su.symbol AS unit_symbol,
                head(diagnostic_names) AS diagnostic_name,
                diagnostic_category,

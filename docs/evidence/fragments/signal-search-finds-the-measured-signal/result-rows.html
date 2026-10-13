@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Signal result rows</title></head>
+<body>
+<main id="ssfms-result-rows-artifact">
+<h1 id="ssfms-result-rows-artifact-title">Signal result rows</h1>
+<p id="ssfms-result-rows-artifact-method">Live JT-60SA booster-power-supply-output-voltage search, <code>k=20</code>, from the dispatch base to the committed formatter. The same 20 signal ids appear in both reports. The graph harness scores members rather than display rows.</p>
+<table id="ssfms-result-rows-artifact-counts">
+<thead><tr><th>Measure</th><th>Dispatch base</th><th>Formatter head</th></tr></thead>
+<tbody>
+<tr><th>Report lines</th><td>341</td><td>112</td></tr>
+<tr><th>Signal rows</th><td>20</td><td>13</td></tr>
+<tr><th>Printed access templates</th><td>20</td><td>1</td></tr>
+<tr><th>Measured booster voltages named</th><td>4</td><td>4, grouped as EF{1,2,5,6} Booster BPS Voltage</td></tr>
+<tr><th>Golden <code>k=20</code> reports with duplicate template/category rows</th><td>not measured</td><td>0 of 22</td></tr>
+<tr><th>Current tool mean nDCG@10</th><td>0.7889953304713903</td><td>0.7889953304713903</td></tr>
+</tbody></table>
+<details id="ssfms-result-rows-artifact-before"><summary>Before: full booster report (341 lines)</summary><pre>## Signals (20 matches)
+
+### jt-60sa:general/psscfst_refvolef6bst (score: 0.03)
+  Reference voltage command for the EF6 booster power supply. Sets the target output voltage of the booster supply that drives the EF6 equilibrium field coil.
+  Domain: plant_systems | Unit: V
+  Keywords: EF6, booster, power supply, voltage reference, coil
+  Aliases: 4711 A696
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF6Bst&#x27;, t1, t2) (1 members) — Reference voltage command for the EF6 booster power supply. Sets the target output voltage of the booster supply that drives the EF6 equilibrium field coil.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF6Bst&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psscfst_refvolef2bst (score: 0.03)
+  Voltage reference (in V) for the EF2 booster power supply. Poloidal field coil power supply control signal.
+  Domain: machine_operations | Unit: V | Checked: shot 101173
+  Keywords: ef2, booster, power supply, voltage reference, pf coil
+  Aliases: 4711 A684
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF2Bst&#x27;, t1, t2) (1 members) — Voltage reference (in V) for the EF2 booster power supply. Poloidal field coil power supply control signal.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF2Bst&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psscfst_refcuref2bst (score: 0.03)
+  Reference current waveform for the EF2 booster power supply, in amperes. This is the commanded current setpoint used by the plasma control system to drive the EF2 poloidal field coil booster supply.
+  Domain: plasma_control | Unit: A
+  Keywords: ef2, booster, current reference, power supply, psc
+  Aliases: 4711 A682
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refcurEF2Bst&#x27;, t1, t2) (1 members) — Reference current waveform for the EF2 booster power supply, in amperes. This is the commanded current setpoint used by the plasma control system to drive the EF2 poloidal field coil booster supply.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refcurEF2Bst&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/mmsys_volef6bps (score: 0.03)
+  Voltage of the booster power supply (BPS) driving equilibrium field coil EF6. A power-supply electrical measurement supporting the EF6 coil current system.
+  Diagnostic: magnetics | Domain: magnetic_field_systems | Unit: V
+  Keywords: ef6, booster, power supply, voltage, pf coil
+  Aliases: 4760 A069
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF6BPS&#x27;, t1, t2) (1 members) — Voltage of the booster power supply (BPS) driving equilibrium field coil EF6. A power-supply electrical measurement supporting the EF6 coil current system.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF6BPS&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/mmsys_volef1bps (score: 0.03)
+  Voltage of the EF1 booster power supply (BPS) for the equilibrium field coil system, in volts. This is a magnet power supply system signal rather than a plasma measurement.
+  Domain: magnetic_field_systems | Unit: V
+  Keywords: EF1, booster power supply, equilibrium field coil, magnet system
+  Aliases: 4760 A051
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF1BPS&#x27;, t1, t2) (1 members) — Voltage of the EF1 booster power supply (BPS) for the equilibrium field coil system, in volts. This is a magnet power supply system signal rather than a plasma measurement.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF1BPS&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psscfst_refvolef1bst (score: 0.03)
+  Reference voltage for the EF1 booster power supply, in volts. This signal is part of the power supply control system for the equilibrium field coils, used to drive the coil currents required for plasma equilibrium.
+  Domain: plant_systems | Unit: V
+  Keywords: EF1, booster, power supply, voltage reference, equilibrium field
+  Aliases: 4711 A680
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF1Bst&#x27;, t1, t2) (1 members) — Reference voltage for the EF1 booster power supply, in volts. This signal is part of the power supply control system for the equilibrium field coils, used to drive the coil currents required for plasma equilibrium.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF1Bst&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psc_cef2vol (score: 0.03)
+  Command voltage for the EF2 poloidal field coil power supply. Time-series control signal specifying the requested voltage applied to the EF2 coil during discharge control.
+  Domain: plasma_control | Unit: kV | Checked: shot 101173
+  Keywords: EF2, coil voltage, command, power supply, control
+  Aliases: 1625 C216
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;cEF2Vol&#x27;, t1, t2) (1 members) — Command voltage for the EF2 poloidal field coil power supply. Time-series control signal specifying the requested voltage applied to the EF2 coil during discharge control.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;cEF2Vol&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/mmsys_volef2bps (score: 0.02)
+  Voltage of the booster power supply (BPS) for equilibrium field (EF) coil number 2, in volts. This time-series signal monitors the booster power supply output driving the EF2 poloidal field coil.
+  Diagnostic: magnetics | Domain: magnetic_field_systems | Unit: V
+  Keywords: ef coil, booster power supply, voltage, poloidal field
+  Aliases: 4760 A057
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF2BPS&#x27;, t1, t2) (1 members) — Voltage of the booster power supply (BPS) for equilibrium field (EF) coil number 2, in volts. This time-series signal monitors the booster power supply output driving the EF2 poloidal field coil.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF2BPS&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/mmsys_volef5bps (score: 0.02)
+  Voltage of the booster power supply (BPS) for equilibrium field coil 5. The booster supply provides additional voltage to drive the EF5 coil current for plasma equilibrium control.
+  Diagnostic: magnetics | Domain: magnetic_field_systems | Unit: V
+  Keywords: equilibrium field, EF5, booster, power supply, coil voltage
+  Aliases: 4760 A063
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF5BPS&#x27;, t1, t2) (1 members) — Voltage of the booster power supply (BPS) for equilibrium field coil 5. The booster supply provides additional voltage to drive the EF5 coil current for plasma equilibrium control.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF5BPS&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psscfst_refvolef1bse (score: 0.02)
+  Voltage reference (in volts) for the EF1 base power supply of JT-60SA. This is a plant-system control reference for the poloidal field coil power supply hardware.
+  Domain: plant_systems | Unit: V
+  Keywords: voltage reference, power supply, EF1, plant, PSSCfst
+  Aliases: 4711 A679
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF1Bse&#x27;, t1, t2) (1 members) — Voltage reference (in volts) for the EF1 base power supply of JT-60SA. This is a plant-system control reference for the poloidal field coil power supply hardware.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF1Bse&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/dcsv_ppcs4vol (score: 0.02)
+  Reference voltage setting for the CS4 central solenoid coil power supply. This is a non-waveform configuration value specifying the target voltage for the CS4 coil during a discharge.
+  Domain: plant_systems | Unit: KV
+  Keywords: CS4, central solenoid, voltage, power supply
+  Aliases: 1622RP208
+  Signal source: eddbreadBinary(&#x27;E101173&#x27;, &#x27;DCSV&#x27;, &#x27;ppCS4Vol&#x27;, 0) (1 members) — Reference voltage setting for the CS4 central solenoid coil power supply. This is a non-waveform configuration value specifying the target voltage for the CS4 coil during a discharge.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadBinary(&#x27;E101173&#x27;, &#x27;DCSV&#x27;, &#x27;ppCS4Vol&#x27;, 0)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psscfst_refvolef4bse (score: 0.02)
+  Reference voltage for the EF4 base power supply, part of the equilibrium field coil power supply system. This is a plant/power-supply signal rather than a plasma measurement.
+  Diagnostic: heating | Domain: plant_systems | Unit: V | Checked: shot 101173
+  Keywords: ef4, power supply, voltage reference, equilibrium field, plant
+  Aliases: 4711 A688
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF4Bse&#x27;, t1, t2) (1 members) — Reference voltage for the EF4 base power supply, part of the equilibrium field coil power supply system. This is a plant/power-supply signal rather than a plasma measurement.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF4Bse&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psscfst_refvolef5bst (score: 0.02)
+  Time-series reference voltage (in V) for the EF5 booster power supply of the JT-60SA equilibrium field coil system. It is the commanded reference used by the power supply control to drive the EF5 coil during the discharge.
+  Domain: plasma_control | Unit: V
+  Keywords: EF5, booster, power supply, voltage reference, equilibrium field
+  Aliases: 4711 A692
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF5Bst&#x27;, t1, t2) (1 members) — Time-series reference voltage (in V) for the EF5 booster power supply of the JT-60SA equilibrium field coil system. It is the commanded reference used by the power supply control to drive the EF5 coil during the discharge.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF5Bst&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psc_crwmc5vl (score: 0.02)
+  Voltage command for the RWMC5 (real-time magnetic control) power supply. Time-series reference signal used by the plasma control system to drive the RWMC5 coil circuit.
+  Domain: plasma_control | Unit: kV | Checked: shot 101173
+  Keywords: RWMC, voltage command, power supply, plasma control
+  Aliases: 1625 C279
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;cRWMC5Vl&#x27;, t1, t2) (1 members) — Voltage command for the RWMC5 (real-time magnetic control) power supply. Time-series reference signal used by the plasma control system to drive the RWMC5 coil circuit.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;cRWMC5Vl&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/dcsv_ppef3vol (score: 0.02)
+  Reference voltage for the EF3 equilibrium field coil power supply, in kilovolts. Non-waveform payload specifying the commanded coil voltage used for plasma equilibrium control.
+  Domain: magnetic_field_systems | Unit: KV
+  Keywords: ef3, equilibrium field coil, voltage, reference, power supply
+  Aliases: 1622RP217
+  Signal source: eddbreadBinary(&#x27;E101173&#x27;, &#x27;DCSV&#x27;, &#x27;ppEF3Vol&#x27;, 0) (1 members) — Reference voltage for the EF3 equilibrium field coil power supply, in kilovolts. Non-waveform payload specifying the commanded coil voltage used for plasma equilibrium control.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadBinary(&#x27;E101173&#x27;, &#x27;DCSV&#x27;, &#x27;ppEF3Vol&#x27;, 0)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/ef3_volpsdc (score: 0.02)
+  DC voltage of the EF3 (equilibrium field) power supply. Monitors the output voltage applied to the EF3 poloidal field coil for plasma equilibrium control.
+  Domain: magnetic_field_systems | Unit: V
+  Keywords: EF3, power supply, voltage, poloidal field, equilibrium coil
+  Aliases: 4431 A191
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;EF3&#x27;, &#x27;volPSDC&#x27;, t1, t2) (1 members) — DC voltage of the EF3 (equilibrium field) power supply. Monitors the output voltage applied to the EF3 poloidal field coil for plasma equilibrium control.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;EF3&#x27;, &#x27;volPSDC&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psc_comalef1 (score: 0.02)
+  Reference signal for the control algorithm number of the EF1 power supply. Indicates which control algorithm is active for the EF1 poloidal field coil power supply during the discharge.
+  Domain: plasma_control
+  Keywords: control algorithm, EF1, power supply, poloidal field, control
+  Aliases: 1625 C029
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;comAlEF1&#x27;, t1, t2) (1 members) — Reference signal for the control algorithm number of the EF1 power supply. Indicates which control algorithm is active for the EF1 poloidal field coil power supply during the discharge.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;comAlEF1&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psscfst_refvolcs3bse (score: 0.02)
+  Reference voltage (in volts) for the base power supply of the CS3 central solenoid coil. This time series provides the commanded or reference voltage used by the CS3 power supply control system.
+  Domain: plant_systems | Unit: V
+  Keywords: voltage reference, cs3, power supply, central solenoid, ps
+  Aliases: 4711 A674
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolCS3Bse&#x27;, t1, t2) (1 members) — Reference voltage (in volts) for the base power supply of the CS3 central solenoid coil. This time series provides the commanded or reference voltage used by the CS3 power supply control system.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolCS3Bse&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psscfst_refvolef2bse (score: 0.02)
+  Reference voltage for the base power supply of the EF2 poloidal field coil. This time-series signal provides the voltage setpoint/reference used by the EF2 coil power supply during the discharge.
+  Diagnostic: bolometry | Domain: plant_systems | Unit: V
+  Keywords: EF2, power supply, voltage, reference, poloidal field
+  Aliases: 4711 A683
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF2Bse&#x27;, t1, t2) (1 members) — Reference voltage for the base power supply of the EF2 poloidal field coil. This time-series signal provides the voltage setpoint/reference used by the EF2 coil power supply during the discharge.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF2Bse&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None
+
+### jt-60sa:general/psc_volef5 (score: 0.02)
+  Reference voltage for the EF5 (equilibrium field) coil power supply. This signal provides the commanded or reference voltage used to control the EF5 coil current.
+  Domain: plant_systems | Unit: kV | Checked: shot 101173
+  Keywords: EF5, voltage, reference, power supply, coil
+  Aliases: 1625 P219
+  Signal source: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;volEF5&#x27;, t1, t2) (1 members) — Reference voltage for the EF5 (equilibrium field) coil power supply. This signal provides the commanded or reference voltage used to control the EF5 coil current.
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+
+  **Data access** (local/edas):
+    import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+    ok, rtn = db.eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;volEF5&#x27;, t1, t2)
+data = rtn[&#x27;data&#x27;] if ok else None</pre></details>
+<details id="ssfms-result-rows-artifact-after"><summary>After: full booster report (112 lines)</summary><pre>## Signals (20 matches; 13 rows)
+
+### EF{2,5,6} Booster PS Voltage Reference (3 members)
+  Rank: 1 | Category: PSSCfst | Unit: V | Data class: time_series | Check status: 1 checked, 2 unchecked
+  Members: jt-60sa:general/psscfst_refvolef6bst, jt-60sa:general/psscfst_refvolef2bst, jt-60sa:general/psscfst_refvolef5bst
+  Accessors: EF6 Booster PS Voltage Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF6Bst&#x27;, t1, t2); EF2 Booster PS Voltage Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF2Bst&#x27;, t1, t2); EF5 Booster PS Voltage Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF5Bst&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### EF2 Booster PS Current Reference (1 member)
+  Rank: 3 | Category: PSSCfst | Unit: A | Data class: time_series | Check status: 0 checked, 1 unchecked
+  Reference current waveform for the EF2 booster power supply, in amperes. This is the commanded current setpoint used by the plasma control system to drive the EF2 poloidal field coil booster supply.
+  Members: jt-60sa:general/psscfst_refcuref2bst
+  Accessors: EF2 Booster PS Current Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refcurEF2Bst&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### EF{1,2,5,6} Booster BPS Voltage (4 members)
+  Rank: 4 | Category: MMSYS | Unit: V | Data class: time_series | Check status: 0 checked, 4 unchecked
+  Members: jt-60sa:general/mmsys_volef6bps, jt-60sa:general/mmsys_volef1bps, jt-60sa:general/mmsys_volef2bps, jt-60sa:general/mmsys_volef5bps
+  Accessors: EF6 Booster BPS Voltage: eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF6BPS&#x27;, t1, t2); EF1 Booster BPS Voltage: eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF1BPS&#x27;, t1, t2); EF2 Booster BPS Voltage: eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF2BPS&#x27;, t1, t2); EF5 Booster BPS Voltage: eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;volEF5BPS&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### EF1 Booster Power Supply Voltage Reference (1 member)
+  Rank: 6 | Category: PSSCfst | Unit: V | Data class: time_series | Check status: 0 checked, 1 unchecked
+  Reference voltage for the EF1 booster power supply, in volts. This signal is part of the power supply control system for the equilibrium field coils, used to drive the coil currents required for plasma equilibrium.
+  Members: jt-60sa:general/psscfst_refvolef1bst
+  Accessors: EF1 Booster Power Supply Voltage Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF1Bst&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### EF2 Voltage Command (1 member)
+  Rank: 7 | Category: PSC | Unit: kV | Data class: time_series | Check status: 1 checked, 0 unchecked
+  Command voltage for the EF2 poloidal field coil power supply. Time-series control signal specifying the requested voltage applied to the EF2 coil during discharge control.
+  Members: jt-60sa:general/psc_cef2vol
+  Accessors: EF2 Voltage Command: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;cEF2Vol&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### EF{1,2,4} Base Power Supply Voltage Reference (3 members)
+  Rank: 10 | Category: PSSCfst | Unit: V | Data class: time_series | Check status: 1 checked, 2 unchecked
+  Members: jt-60sa:general/psscfst_refvolef1bse, jt-60sa:general/psscfst_refvolef4bse, jt-60sa:general/psscfst_refvolef2bse
+  Accessors: EF1 Base Power Supply Voltage Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF1Bse&#x27;, t1, t2); EF4 Base Power Supply Voltage Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF4Bse&#x27;, t1, t2); EF2 Base Power Supply Voltage Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolEF2Bse&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### CS4 Voltage Reference (1 member)
+  Rank: 11 | Category: DCSV | Unit: KV | Data class: binary | Check status: 0 checked, 1 unchecked
+  Reference voltage setting for the CS4 central solenoid coil power supply. This is a non-waveform configuration value specifying the target voltage for the CS4 coil during a discharge.
+  Members: jt-60sa:general/dcsv_ppcs4vol
+  Accessors: CS4 Voltage Reference: eddbreadBinary(&#x27;E101173&#x27;, &#x27;DCSV&#x27;, &#x27;ppCS4Vol&#x27;, 0)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### RWMC5 Voltage Command (1 member)
+  Rank: 14 | Category: PSC | Unit: kV | Data class: time_series | Check status: 1 checked, 0 unchecked
+  Voltage command for the RWMC5 (real-time magnetic control) power supply. Time-series reference signal used by the plasma control system to drive the RWMC5 coil circuit.
+  Members: jt-60sa:general/psc_crwmc5vl
+  Accessors: RWMC5 Voltage Command: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;cRWMC5Vl&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### EF3 Coil Reference Voltage (1 member)
+  Rank: 15 | Category: DCSV | Unit: KV | Data class: binary | Check status: 0 checked, 1 unchecked
+  Reference voltage for the EF3 equilibrium field coil power supply, in kilovolts. Non-waveform payload specifying the commanded coil voltage used for plasma equilibrium control.
+  Members: jt-60sa:general/dcsv_ppef3vol
+  Accessors: EF3 Coil Reference Voltage: eddbreadBinary(&#x27;E101173&#x27;, &#x27;DCSV&#x27;, &#x27;ppEF3Vol&#x27;, 0)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### EF3 Power Supply DC Voltage (1 member)
+  Rank: 16 | Category: EF3 | Unit: V | Data class: time_series | Check status: 0 checked, 1 unchecked
+  DC voltage of the EF3 (equilibrium field) power supply. Monitors the output voltage applied to the EF3 poloidal field coil for plasma equilibrium control.
+  Members: jt-60sa:general/ef3_volpsdc
+  Accessors: EF3 Power Supply DC Voltage: eddbreadTime(&#x27;E101173&#x27;, &#x27;EF3&#x27;, &#x27;volPSDC&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### EF1 Power Supply Control Algorithm Reference (1 member)
+  Rank: 17 | Category: PSC | Unit: unknown | Data class: time_series | Check status: 0 checked, 1 unchecked
+  Reference signal for the control algorithm number of the EF1 power supply. Indicates which control algorithm is active for the EF1 poloidal field coil power supply during the discharge.
+  Members: jt-60sa:general/psc_comalef1
+  Accessors: EF1 Power Supply Control Algorithm Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;comAlEF1&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### CS3 Base Power Supply Voltage Reference (1 member)
+  Rank: 18 | Category: PSSCfst | Unit: V | Data class: time_series | Check status: 0 checked, 1 unchecked
+  Reference voltage (in volts) for the base power supply of the CS3 central solenoid coil. This time series provides the commanded or reference voltage used by the CS3 power supply control system.
+  Members: jt-60sa:general/psscfst_refvolcs3bse
+  Accessors: CS3 Base Power Supply Voltage Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSSCfst&#x27;, &#x27;refvolCS3Bse&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+### EF5 Voltage Reference (1 member)
+  Rank: 20 | Category: PSC | Unit: kV | Data class: time_series | Check status: 1 checked, 0 unchecked
+  Reference voltage for the EF5 (equilibrium field) coil power supply. This signal provides the commanded or reference voltage used to control the EF5 coil current.
+  Members: jt-60sa:general/psc_volef5
+  Accessors: EF5 Voltage Reference: eddbreadTime(&#x27;E101173&#x27;, &#x27;PSC&#x27;, &#x27;volEF5&#x27;, t1, t2)
+  Documented in: &quot;Category Information&quot; (jt-60sa:CategoryInformation)
+  Data access: template 1
+
+## Data access templates
+**Data access template 1** (local/edas):
+  import sys
+sys.path.insert(0, &#x27;/analysis/src/eddb&#x27;)
+from eddb_pwrapper import eddbWrapper
+db = eddbWrapper(&#x27;/analysis/lib/libeddb.so&#x27;)
+db.eddbOpen()
+  ok, rtn = db.{accessor}
+data = rtn[&#x27;data&#x27;] if ok else None</pre></details>
+</main></body></html>
