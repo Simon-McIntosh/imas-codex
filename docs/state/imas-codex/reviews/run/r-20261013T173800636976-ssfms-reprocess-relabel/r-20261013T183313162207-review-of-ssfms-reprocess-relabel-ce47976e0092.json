@@ -1,0 +1,95 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest carries no baseline_suite and no after_suite (both null on its live pointer; the node's role is implement), so there is no armed base/head pair to difference. Its single gate, the golden harness at tests/llm/test_signal_search_goldens.py, is recorded in logs/harness.log as 14 passed with EXIT=0, and logs/harness_table.log repeats the arm table at 14 passed; no gate log holds a failing id, so added_failure_count is 0 and added_failure_ids is empty.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T19:02:09.825Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "the one out-of-scope file, tests/llm/test_signal_search_goldens.py, holds the canonical cutover pin and the pre-cutover population test that the fixture's cutover move necessarily breaks; no concurrent node owns it, the fixture alone would leave main red, and the coordinator accepted the edit after reading the diff; the repair round's write scope includes the file",
+      "recorded_at": "2026-10-13T18:55:21.980343+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T18:33:47Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "720",
+      "severity": "blocking",
+      "text": "blocking: the edit lies outside the node's declared write paths, and `reckon crew check-manifest` on the reviewed run answers ok=false with \"changed paths outside the write scope: tests/llm/test_signal_search_goldens.py\", so the run cannot promote as delivered; the fence must be widened (the canonical cutover pin and the eligibility test live in this file and the done_when requires the harness to pass) or the harness hunk landed separately."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html",
+      "line": "94",
+      "severity": "blocking",
+      "text": "blocking: the consolidation deleted the grouped members' before/after description table while leaving its heading (line 94) and prose (lines 95-104) in place, and left the sample steps table at line 90 holding a caption and no rows, so the fragment describes evidence it no longer carries and destroys the sample node's before/after record that the plan states lives in this file."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html",
+      "line": "66",
+      "severity": "follow-on",
+      "text": "follow-on: the facility row's spend cell reads $0.20 while the node rows above it sum to about $0.696 (0.171 + 0.24 + 0.09 + 0.12 + 0.05 + 0.025), so the consolidated table's own total contradicts its rows."
+    },
+    {
+      "file": "tests/llm/fixtures/signal_search_questions.json",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: the node's declared measure requires every existing label whose signal's new description names a different quantity to be re-graded \"with the old and new grade listed\", and the diff carries zero such re-grades (0 removed and 0 changed across the 2,224 pre-existing labels, 690 added), so that clause of the done_when is unmet as delivered."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T173800636976-ssfms-reprocess-relabel/manifest.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: evidence_inputs reports the negative control as \"1416 rich text -> 0\" while the landed fragment reprocess.html and the node's own declared measure both state 1,441 -> 0, so the figure the coordinator carries for writeback disagrees with the artifact."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T173800636976-ssfms-reprocess-relabel/logs/harness_table.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log opens with the pytest banner rather than the revision, tree and command header the manifest contract requires of a gate log (harness.log:1 carries one; harness_table.log does not) and closes with the summary line and no EXIT=<n> line, so a reader cannot tell which revision the run measured nor that it completed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read commit by commit against base 9211903cc; fe031856a moves CANONICAL_ENRICHED_AT_CUTOVER to 2026-10-13T11:53:35Z, rewrites the eligibility test and adds 690 labels to the fixture, and ce47976e0 rewrites the two evidence fragments; four files changed, one of them outside the declared scope.",
+    "done_when": "the done_when names the fixture and the golden harness tests/llm/test_signal_search_goldens.py; the manifest records the harness gate at 14 passed, but its re-grade clause (every existing label whose signal's new description names a different quantity is re-graded, with the old and new grade listed) is declared unmet and the diff holds 0 changed grades.",
+    "goal": "the node's goal is to bring the golden fixture's labels and cutover in line with the reprocessed JT-60SA population; tests/llm/fixtures/signal_search_questions.json:6 now declares the reprocess-start cutover and the diff adds 690 labels, though the re-grade clause of the node's own measure is unmet.",
+    "manifest": "read; it reports 14 passed for the golden harness, names logs/harness.log and logs/negative_control.log, discloses the out-of-scope edit to tests/llm/test_signal_search_goldens.py, and discloses the unmet re-grade clause.",
+    "write_paths": "read the manifest's declared paths; the diff touches tests/llm/test_signal_search_goldens.py, which is not among them, and `reckon crew check-manifest` refuses the run for exactly that path."
+  },
+  "justifications": {
+    "durability": "test_the_cutover_admits_the_reprocessed_population_and_refuses_earlier (tests/llm/test_signal_search_goldens.py:720) asserts graph-derived facts (not rows, after in eligible, outside not in eligible) that would redden if the cutover or eligibility regressed, but no recorded control exercises its failure path.",
+    "evidence": "logs/harness.log records 14 passed for tests/llm/test_signal_search_goldens.py and logs/negative_control.log an EXIT=1 pin failure, but the control fires on the pin (test_signal_search_goldens.py:582) rather than on the population assertions it is meant to guard.",
+    "fit": "the new constant and test follow the file's existing idiom and the new fragment's element ids begin with the node id ssfms-reprocess-relabel, matching the prompt's element-id rule.",
+    "goal_fidelity": "tests/llm/fixtures/signal_search_questions.json:6 carries the new cutover and the diff adds 690 labels, but the measure's re-grade clause is unmet with 0 changed grades in the fixture.",
+    "reuse": "the diff adds no function, class or module; it reuses eligible_signal_ids, filter_eligible and _label_enrichment already in tests/llm/test_signal_search_goldens.py, so no capability is forked.",
+    "scope_discipline": "the diff edits tests/llm/test_signal_search_goldens.py, outside the manifest's declared write paths, and check-manifest refuses the run on exactly that path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to bring the golden fixture's labels and cutover in line with the reprocessed JT-60SA population; tests/llm/fixtures/signal_search_questions.json:6 now declares the reprocess-start cutover and the diff adds 690 labels, though the re-grade clause of the node's own measure is unmet.\nVERDICT done_when: the done_when names the fixture and the golden harness tests/llm/test_signal_search_goldens.py; the manifest records the harness gate at 14 passed, but its re-grade clause (every existing label whose signal's new description names a different quantity is re-graded, with the old and new grade listed) is declared unmet and the diff holds 0 changed grades.\nVERDICT write_paths: read the manifest's declared paths; the diff touches tests/llm/test_signal_search_goldens.py, which is not among them, and `reckon crew check-manifest` refuses the run for exactly that path.\nVERDICT manifest: read; it reports 14 passed for the golden harness, names logs/harness.log and logs/negative_control.log, discloses the out-of-scope edit to tests/llm/test_signal_search_goldens.py, and discloses the unmet re-grade clause.\nVERDICT diff: read commit by commit against base 9211903cc; fe031856a moves CANONICAL_ENRICHED_AT_CUTOVER to 2026-10-13T11:53:35Z, rewrites the eligibility test and adds 690 labels to the fixture, and ce47976e0 rewrites the two evidence fragments; four files changed, one of them outside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: tests/llm/fixtures/signal_search_questions.json:6 carries the new cutover and the diff adds 690 labels, but the measure's re-grade clause is unmet with 0 changed grades in the fixture.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/harness.log records 14 passed for tests/llm/test_signal_search_goldens.py and logs/negative_control.log an EXIT=1 pin failure, but the control fires on the pin (test_signal_search_goldens.py:582) rather than on the population assertions it is meant to guard.\nSCORE scope_discipline: 8\nJUSTIFICATION scope_discipline: the diff edits tests/llm/test_signal_search_goldens.py, outside the manifest's declared write paths, and check-manifest refuses the run on exactly that path.\nSCORE durability: 15\nJUSTIFICATION durability: test_the_cutover_admits_the_reprocessed_population_and_refuses_earlier (tests/llm/test_signal_search_goldens.py:720) asserts graph-derived facts (not rows, after in eligible, outside not in eligible) that would redden if the cutover or eligibility regressed, but no recorded control exercises its failure path.\nSCORE fit: 16\nJUSTIFICATION fit: the new constant and test follow the file's existing idiom and the new fragment's element ids begin with the node id ssfms-reprocess-relabel, matching the prompt's element-id rule.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module; it reuses eligible_signal_ids, filter_eligible and _label_enrichment already in tests/llm/test_signal_search_goldens.py, so no capability is forked.\nFINDING tests/llm/test_signal_search_goldens.py:720 blocking: the edit lies outside the node's declared write paths, and `reckon crew check-manifest` on the reviewed run answers ok=false with \"changed paths outside the write scope: tests/llm/test_signal_search_goldens.py\", so the run cannot promote as delivered; the fence must be widened (the canonical cutover pin and the eligibility test live in this file and the done_when requires the harness to pass) or the harness hunk landed separately.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html:94 blocking: the consolidation deleted the grouped members' before/after description table while leaving its heading (line 94) and prose (lines 95-104) in place, and left the sample steps table at line 90 holding a caption and no rows, so the fragment describes evidence it no longer carries and destroys the sample node's before/after record that the plan states lives in this file.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html:66 follow-on: the facility row's spend cell reads $0.20 while the node rows above it sum to about $0.696 (0.171 + 0.24 + 0.09 + 0.12 + 0.05 + 0.025), so the consolidated table's own total contradicts its rows.\nFINDING tests/llm/fixtures/signal_search_questions.json:1 blocking: the node's declared measure requires every existing label whose signal's new description names a different quantity to be re-graded \"with the old and new grade listed\", and the diff carries zero such re-grades (0 removed and 0 changed across the 2,224 pre-existing labels, 690 added), so that clause of the done_when is unmet as delivered.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T173800636976-ssfms-reprocess-relabel/manifest.md:16 follow-on: evidence_inputs reports the negative control as \"1416 rich text -> 0\" while the landed fragment reprocess.html and the node's own declared measure both state 1,441 -> 0, so the figure the coordinator carries for writeback disagrees with the artifact.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T173800636976-ssfms-reprocess-relabel/logs/harness_table.log:1 follow-on: the log opens with the pytest banner rather than the revision, tree and command header the manifest contract requires of a gate log (harness.log:1 carries one; harness_table.log does not) and closes with the summary line and no EXIT=<n> line, so a reader cannot tell which revision the run measured nor that it completed.",
+  "review_run_id": "r-20261013T183313162207-review-of-ssfms-reprocess-relabel-ce47976e0092",
+  "reviewed_base_sha": "9211903cce182eaa51cbe6cfbe98647d461de31d",
+  "reviewed_head_sha": "ce47976e0092a336b672328b3137cef34422a2cd",
+  "reviewed_run_id": "r-20261013T173800636976-ssfms-reprocess-relabel",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 8
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T19:03:35.283994+00:00",
+  "total": 86
+}
