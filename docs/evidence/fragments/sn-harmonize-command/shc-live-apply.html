@@ -124,6 +124,15 @@ apply: 1 family(ies) applied, 0 stamped.</pre>
       <tr><td>Second apply, planned calls</td><td>&#8212;</td><td>17</td></tr>
     </tbody>
   </table>
+  <figure id="shc-live-apply-figure">
+    <img src="/imas-codex/figures/sn-harmonize-command/shc-live-apply/lint-before-after.svg"
+         alt="Lint findings by class before and after the forced apply, with the zero target marked" />
+    <figcaption>Lint findings by class for the density family, before versus
+      after the forced apply. Total falls from 62 to 41; the zero target the
+      plan requires is marked. <code>convention_violation</code> falls (34 to
+      16) but <code>link_dead_link</code> rises (9 to 19), so the net move is
+      partial and the family is short of the gate.</figcaption>
+  </figure>
   <p id="shc-live-apply-after-note">
     Of the 41 remaining lint findings, 16 are
     <code>convention_violation</code> and all 16 are the house-style
