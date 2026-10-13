@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded baseline_suite: null and after_suite: null (manifest.md and classification.json manifest.data), so no armed suite pair exists to difference and zero added failures are attributable; its gate is gate_live.log (4 passed, EXIT=0) and its negative control is negative_control.log (1 failed, 3 passed, EXIT=1), both at rev be370b25b2c785e61252b7ee0e80519b7892d8e9.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/llm/server.py:2458"
+  ],
+  "completed_at": "2026-10-13T20:07:04.113Z",
+  "dispatched_at": "2026-10-13T19:50:40Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_signal_role_filter_live.py",
+      "line": "186",
+      "severity": "follow-on",
+      "text": "follow-on: the applied negative control forces the filtered arm empty (negative_control.log: '# NEGATIVE CONTROL: filtered call returns no rows (filtered = [])'), which does not match the declared mutation 'role=measured replaced by no role in the filtered call', so the log shows the new non-emptiness guard fires but does not demonstrate that the declared role-predicate swap reddens test_filtered_call_returns_only_measured_signals; the run documents the divergence only in negative_control_note."
+    },
+    {
+      "file": "tests/llm/test_signal_role_filter_live.py",
+      "line": "189",
+      "severity": "follow-on",
+      "text": "follow-on: assert grade3 >= 1 sums graded-3 hits across all 22 questions, so 21 questions may return no graded-3 measurement while it stays green, whereas the manifest claims every question reaches a graded-3; a per-question assertion would match the stated claim."
+    }
+  ],
+  "gate_log_revision": "be370b25b2c785e61252b7ee0e80519b7892d8e9",
+  "item_verdicts": {
+    "diff": "read all three commits against base ce47976e0: f13f1e582 adds the 170-line graph test, dd7e64c92 adds the 513-line fragment, be370b25b adds the 22-line non-emptiness and graded-3 guard; no product source is changed, consistent with a measurement node.",
+    "done_when": "the done_when names the graph-marked test file and the fragment; the manifest records gate_live.log (4 passed, EXIT=0) and negative_control.log (EXIT=1), the fragment is present with 22 filtered and 22 unfiltered tables, and recounting the committed html (0 filtered non-measured rows, 0 filtered graded-2 commands/references, 94 filtered graded-3 hits, 8 unfiltered graded-2 command/reference positions across 4 questions) reproduces the manifest headline.",
+    "goal": "the node goal is to show on the live graph that a role=measured signal search keeps every reference, command or setpoint out of each golden question's top 5; tests/llm/test_signal_role_filter_live.py:116 drives _search_signals with role='measured' and role=None over the 22 graded questions and the fragment docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-filter-live.html tabulates the result.",
+    "manifest": "read; status complete, commits f13f1e582/dd7e64c92/be370b25b, changed_paths matching the two committed paths, tests line naming the -m graph run (4 passed, EXIT=0), negative_control_log=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185402647619-ssfms-role-filter-live/negative_control.log; baseline_suite and after_suite are null.",
+    "write_paths": "the brief declares tests/llm/test_signal_role_filter_live.py, the fragment html and a docs/figures/.../ssfms-role-filter-live directory; all three commits touch only the test file and the fragment, each inside the declared set, and no figure was written."
+  },
+  "justifications": {
+    "durability": "negative_control.log reds test_filtered_arm_returns_rows_including_a_grade3_measurement (EXIT=1) on an empty filtered arm, closing the vacuous-pass hole, but the applied mutation is the empty arm rather than the declared role-predicate swap and the graded-3 guard is summed across all questions (tests/llm/test_signal_role_filter_live.py:189).",
+    "evidence": "the -m graph gate at tests/llm/test_signal_role_filter_live.py records 4 passed (gate_live.log, EXIT=0) and recounting the committed html reproduces the fragment's headline figures (0 non-measured filtered rows, 0 filtered graded-2 commands/references, 4 of 22 control questions).",
+    "fit": "the module follows the surrounding tests/llm idiom (pytest.mark.graph, autouse monkeypatch, mock.patch.object, module docstring) and its helpers _served_top/_row/_live_table are named by mechanism; the node-id abbreviation survives only in fragment element ids the contract mandates.",
+    "goal_fidelity": "tests/llm/test_signal_role_filter_live.py:140 runs each of the 22 questions through the served path with role='measured' and the filtered top 5 holds no graded-2 command or reference on any question.",
+    "reuse": "tests/llm/test_signal_role_filter_live.py:62 reuses the served path search_tools._search_signals and search_formatters.format_signals_report rather than re-deriving ranking, and adds no production capability; the formatter-spy capture parallels tests/llm/measure_search_rankings.py:283 but for signals and no owner claims the served signal-row read.",
+    "scope_discipline": "git show --stat ce47976e0..be370b25b lists only tests/llm/test_signal_role_filter_live.py and the fragment html, both inside the declared write paths; no product source or figure is touched."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261013T195022202482-review-of-ssfms-role-filter-live-be370b25b2c7",
+  "reviewed_base_sha": "ce47976e0092a336b672328b3137cef34422a2cd",
+  "reviewed_head_sha": "be370b25b2c785e61252b7ee0e80519b7892d8e9",
+  "reviewed_run_id": "r-20261013T185402647619-ssfms-role-filter-live",
+  "reviewer": {
+    "backend": "deepseek",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T20:00:00+00:00",
+  "total": 113
+}
