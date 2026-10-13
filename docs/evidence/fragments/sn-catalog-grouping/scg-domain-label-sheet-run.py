@@ -27,7 +27,7 @@ import yaml
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.families import pattern_signature
-from imas_codex.standard_names.judgment_goldens import _rank, _sample
+from imas_codex.standard_names.judgment_goldens import _sample, assign_group_splits
 
 FRAGMENTS = Path(__file__).resolve().parent
 ROOT = FRAGMENTS.parents[3]
@@ -50,20 +50,7 @@ SAMPLE_SIZE = 150
 #: A live name is one whose name pipeline reached a terminal good stage.
 LIVE_STAGES = ("accepted", "approved")
 
-#: Grammar segments read into every row, keyed by the variation axis a labeller
-#: reasons over. ``operator`` is the ISN ``transformation`` segment; ``locus``
-#: collects the ISN locus types that place one quantity somewhere.
-SEGMENT_FIELDS = (
-    "physical_base",
-    "geometric_base",
-    "subject",
-    "component",
-    "operator",
-    "locus",
-    "process",
-)
-
-#: The stored grammar columns that key a pattern family (plan families.py).
+#: The stored grammar columns that key a pattern family.
 _INVARIANT_FIELDS = (
     "physical_base",
     "geometric_base",
@@ -195,20 +182,6 @@ def sample_units(rows: list[dict[str, Any]], exclude: set[str]) -> list[dict[str
     return _sample(candidates, SAMPLE_SIZE)
 
 
-def assign_splits(sampled: list[dict[str, Any]]) -> dict[str, str]:
-    """One side per family, so every member of a family shares its split.
-
-    The alternation over the ``_rank``-ordered families is the split rule the
-    judgment fixtures use, keyed on the pattern family so a family's members
-    stay on one side.
-    """
-    families = sorted({row["pattern_family"] for row in sampled}, key=_rank)
-    return {
-        family: "calibration" if index % 2 == 0 else "validation"
-        for index, family in enumerate(families)
-    }
-
-
 def load_options() -> list[dict[str, str]]:
     """The ISN physics-domain values with descriptions, read from ISN."""
     import imas_standard_names
@@ -230,14 +203,16 @@ def load_options() -> list[dict[str, str]]:
     ]
 
 
-def build(graph: GraphClient) -> tuple[dict[str, Any], dict[str, Any]]:
-    """The sheet and the incumbent file as plain data."""
+def build(
+    graph: GraphClient,
+) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
+    """The sheet, incumbent domains and sampled families as plain data."""
     live = read_live(graph)
     by_name = {row["name"]: row for row in live}
 
     reference, absent = select_reference(live)
     sampled = sample_units(live, {row["name"] for row in reference})
-    splits = assign_splits(sampled)
+    splits = assign_group_splits(sampled, "pattern_family")
 
     reference_rows = []
     for row in reference:
@@ -268,7 +243,7 @@ def build(graph: GraphClient) -> tuple[dict[str, Any], dict[str, Any]]:
         }
         for row in reference + [by_name[choice["unit"]] for choice in sampled]
     }
-    return sheet, incumbent
+    return sheet, incumbent, sampled
 
 
 def check_blindness(sheet: dict[str, Any]) -> int:
@@ -295,16 +270,15 @@ def check_query_properties() -> list[str]:
     return [str(violation) for violation in report.violations]
 
 
-def _family_key(row: dict[str, Any]) -> str:
-    """A readable family key: the row's grammar segments by axis."""
-    return "|".join(row["segments"].get(field, "") for field in SEGMENT_FIELDS)
-
-
-def _counts(sheet: dict[str, Any], incumbent: dict[str, Any]) -> dict[str, Any]:
+def _counts(
+    sheet: dict[str, Any],
+    incumbent: dict[str, Any],
+    sampled: list[dict[str, Any]],
+) -> dict[str, Any]:
     """The sample's counts by family, incumbent domain and split."""
     sample = sheet["sample"]
     return {
-        "families": Counter(_family_key(row) for row in sample),
+        "families": Counter(row["pattern_family"] for row in sampled),
         "domains": Counter(
             (incumbent[row["name"]]["physics_domain"] or "(null)") for row in sample
         ),
@@ -325,9 +299,13 @@ def _table(headers: tuple[str, ...], items: list[tuple[str, int]]) -> str:
     return f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
 
 
-def render_fragment(sheet: dict[str, Any], incumbent: dict[str, Any]) -> str:
+def render_fragment(
+    sheet: dict[str, Any],
+    incumbent: dict[str, Any],
+    sampled: list[dict[str, Any]],
+) -> str:
     """The evidence fragment: rule, counts, blindness check and options."""
-    counts = _counts(sheet, incumbent)
+    counts = _counts(sheet, incumbent, sampled)
     picks = "".join(
         f"<li><code>{html.escape(row['name'])}</code> — "
         f"{html.escape(row['description'][:90])}</li>"
@@ -383,17 +361,40 @@ def write_json(path: Path, data: Any) -> None:
     )
 
 
+def preserve_annotations(sheet: dict[str, Any], path: Path) -> None:
+    """Keep hand labels and approval when regenerating the same name roster."""
+    if not path.exists():
+        return
+    prior = json.loads(path.read_text(encoding="utf-8"))
+    for block in ("reference", "sample"):
+        old_rows = prior[block]
+        new_rows = sheet[block]
+        if [row["name"] for row in old_rows] != [row["name"] for row in new_rows]:
+            raise ValueError(
+                f"{block} roster changed; inspect labels before rebuilding"
+            )
+        for old, new in zip(old_rows, new_rows, strict=True):
+            for field in ("label", "note", "label_source"):
+                if field in old:
+                    new[field] = old[field]
+    if "reference_approved" in prior:
+        sheet["reference_approved"] = prior["reference_approved"]
+
+
 def main() -> int:
     with GraphClient() as graph:
-        sheet, incumbent = build(graph)
+        sheet, incumbent, sampled = build(graph)
     rows = check_blindness(sheet)
     violations = check_query_properties()
     if violations:
         print("cypher property violations:", *violations, sep="\n")
         return 2
+    preserve_annotations(sheet, SHEET_PATH)
     write_json(SHEET_PATH, sheet)
     write_json(INCUMBENT_PATH, incumbent)
-    FRAGMENT_PATH.write_text(render_fragment(sheet, incumbent), encoding="utf-8")
+    FRAGMENT_PATH.write_text(
+        render_fragment(sheet, incumbent, sampled), encoding="utf-8"
+    )
     print(
         f"reference={len(sheet['reference'])} sample={len(sheet['sample'])} "
         f"options={len(sheet['options'])} rows={rows}"
