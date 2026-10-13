@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "f2b0a0109ddf6682fbc3ff97930a618e7d35494c",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6154"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T05:07:26Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T050709331171-shc-score-regression/negative_control.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the red-arm log opens at the pytest banner and carries no header naming the revision, tree or command (baseline.log and after.log both open with `revision=... tree=... command=...`), so a reader cannot tell which tree the failing arm measured; the arm is admissible on its own facts (EXIT=1 and test_apply_names_a_member_below_threshold FAILED)."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_apply.py",
+      "line": "642",
+      "severity": "follow-on",
+      "text": "follow-on: the CLI test asserts result.output contains \"0.900\"/\"0.600\", the exact before/after values the test itself injected into the stubbed apply_families return, so the assertion moves with its input and guards the CLI rendering only, not the comparison the node added."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "800",
+      "severity": "follow-on",
+      "text": "follow-on: the before score is captured from the plan's fetch_pattern_families rows rather than from the DocsRevision snapshot the brief named (\"build it on the snapshot and change-event record the campaign runner already writes\"); the value is equivalent and pre-reset so the result is correct, but the brief's stated source was not used."
+    }
+  ],
+  "head_log_revision": "c09accb74b9543138d1d762cf0d0192eb4af5127",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/cli/sn.py:6154 sn_harmonize --apply is the only production caller of apply_families; apply_families at imas_codex/standard_names/harmonize.py:1082-1084 is where docs_score_regressions runs. docs_score_regressions is exported in __all__ but has no other production caller.",
+    "diff": "read commit by commit against base f2b0a0109; two commits, four files, +374/-4 -- harmonize.py adds member_scores capture, docs_score_regressions and _family_docs_scores and attaches them in apply_families, sn.py prints below/fell members with their scores, the test adds four tests, and an 89-line evidence fragment is added.",
+    "done_when": "the done_when measures a stubbed-review fixture whose member drops 0.90->0.60, a no-fall family naming none, and the comparison's removal reddening the first test; tests/standard_names/test_harmonize_apply.py:551-558 asserts base_at_boundary in both classes with both scores, :569-571 asserts both lists empty for a clean family, and negative_control.log records EXIT=1 with test_apply_names_a_member_below_threshold FAILED.",
+    "goal": "the node's goal is for `sn harmonize --apply` to report, by name, every family member whose post-rewrite documentation score is below the acceptance threshold and every member whose score fell, with both scores; imas_codex/standard_names/harmonize.py:810 docs_score_regressions builds those two lists, imas_codex/cli/sn.py:6206 prints them per family and across the scope, and the JSON branch at imas_codex/cli/sn.py:6166 carries score_regressions per applied entry.",
+    "manifest": "read; it names the four changed paths, the negative-control mechanism and its log, and baseline_suite (144 passed, exit 0) / after_suite (148 passed, exit 0) JSON with revision, command, completed and empty failure_ids.",
+    "write_paths": "the manifest declares imas_codex/standard_names/harmonize.py, imas_codex/cli/sn.py, tests/standard_names/test_harmonize_apply.py, docs/evidence/fragments/sn-harmonize-command/shc-score-regression.html and an optional figures dir; git diff f2b0a0109..cec62409e touches exactly the first four and nothing outside them."
+  },
+  "justifications": {
+    "durability": "negative_control.log reds test_apply_names_a_member_below_threshold once docs_score_regressions returns empty, and the classification is pinned independently by test_score_comparison_reports_below_threshold_and_fall at tests/standard_names/test_harmonize_apply.py:578-590; the CLI test at :642-643 compares the exact values the test injected, so it guards rendering only.",
+    "evidence": "baseline.log names revision=f2b0a0109 and records \"144 passed ... EXIT=0\", after.log names revision=c09accb74 and records \"148 passed ... EXIT=0\", and negative_control.log records EXIT=1 with the below-threshold test FAILED, all cited in the manifest's baseline_suite/after_suite.",
+    "fit": "docs_score_regressions, _family_docs_scores, member_scores and score_regressions are named by mechanism with no plan or ticket label and follow harmonize.py's existing dict-returning helpers and the evidence fragment's table idiom.",
+    "goal_fidelity": "imas_codex/standard_names/harmonize.py:810-845 returns the below-threshold and fell members with before/after and imas_codex/cli/sn.py:6206-6214 prints them by name, so the goal is delivered; the before score is taken from the plan read at harmonize.py:800 rather than the DocsRevision snapshot the brief named (see the follow-on finding).",
+    "reuse": "the post-drain read reuses fetch_pattern_families at imas_codex/standard_names/families.py:715 rather than adding a query, and no repository owner of a before/after score-comparison exists (search over imas_codex/ for score_delta|score_regress|compare_scores found none), though the DocsRevision snapshot at imas_codex/standard_names/graph_ops.py:25663 already stores the same before score.",
+    "scope_discipline": "git diff f2b0a0109..cec62409e touches only imas_codex/standard_names/harmonize.py, imas_codex/cli/sn.py, tests/standard_names/test_harmonize_apply.py and docs/evidence/fragments/sn-harmonize-command/shc-score-regression.html, all inside the declared write paths."
+  },
+  "node": "review-of-shc-score-regression-cec62409e711",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is for `sn harmonize --apply` to report, by name, every family member whose post-rewrite documentation score is below the acceptance threshold and every member whose score fell, with both scores; imas_codex/standard_names/harmonize.py:810 docs_score_regressions builds those two lists, imas_codex/cli/sn.py:6206 prints them per family and across the scope, and the JSON branch at imas_codex/cli/sn.py:6166 carries score_regressions per applied entry.\nVERDICT done_when: the done_when measures a stubbed-review fixture whose member drops 0.90->0.60, a no-fall family naming none, and the comparison's removal reddening the first test; tests/standard_names/test_harmonize_apply.py:551-558 asserts base_at_boundary in both classes with both scores, :569-571 asserts both lists empty for a clean family, and negative_control.log records EXIT=1 with test_apply_names_a_member_below_threshold FAILED.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/harmonize.py, imas_codex/cli/sn.py, tests/standard_names/test_harmonize_apply.py, docs/evidence/fragments/sn-harmonize-command/shc-score-regression.html and an optional figures dir; git diff f2b0a0109..cec62409e touches exactly the first four and nothing outside them.\nVERDICT manifest: read; it names the four changed paths, the negative-control mechanism and its log, and baseline_suite (144 passed, exit 0) / after_suite (148 passed, exit 0) JSON with revision, command, completed and empty failure_ids.\nVERDICT diff: read commit by commit against base f2b0a0109; two commits, four files, +374/-4 -- harmonize.py adds member_scores capture, docs_score_regressions and _family_docs_scores and attaches them in apply_families, sn.py prints below/fell members with their scores, the test adds four tests, and an 89-line evidence fragment is added.\nCALL_SITES: imas_codex/cli/sn.py:6154 sn_harmonize --apply\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/harmonize.py:810-845 returns the below-threshold and fell members with before/after and imas_codex/cli/sn.py:6206-6214 prints them by name, so the goal is delivered.\nSCORE evidence: 18\nJUSTIFICATION evidence: baseline.log names revision=f2b0a0109 and records 144 passed EXIT=0, after.log names revision=c09accb74 and records 148 passed EXIT=0, and negative_control.log records EXIT=1 with the below-threshold test FAILED.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff f2b0a0109..cec62409e touches only imas_codex/standard_names/harmonize.py, imas_codex/cli/sn.py, tests/standard_names/test_harmonize_apply.py and the evidence fragment, all inside the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: negative_control.log reds test_apply_names_a_member_below_threshold once docs_score_regressions returns empty, and the classification is pinned independently at tests/standard_names/test_harmonize_apply.py:578-590.\nSCORE fit: 19\nJUSTIFICATION fit: docs_score_regressions, _family_docs_scores, member_scores and score_regressions are named by mechanism with no plan or ticket label and follow harmonize.py's existing dict-returning helpers.\nSCORE reuse: 18\nJUSTIFICATION reuse: the post-drain read reuses fetch_pattern_families at imas_codex/standard_names/families.py:715 rather than adding a query, and no repository owner of a before/after score-comparison exists.\nFINDING negative_control.log:1 follow-on: the red-arm log opens at the pytest banner and carries no header naming the revision, tree or command, so a reader cannot tell which tree the failing arm measured.\nFINDING tests/standard_names/test_harmonize_apply.py:642 follow-on: the CLI test asserts result.output contains the exact before/after values the test itself injected into the stubbed apply_families return, so it guards the CLI rendering only, not the comparison.\n",
+  "review_run_id": "legacy-44f6d933fb8d",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "f2b0a0109ddf6682fbc3ff97930a618e7d35494c",
+  "reviewed_head_sha": "cec62409e711078d3b2ef1eac91230a2363e4c43",
+  "reviewed_run_id": "r-20261013T050709331171-shc-score-regression",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-score-regression",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T06:45:00+00:00",
+  "total": 110
+}
