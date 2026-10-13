@@ -1,0 +1,109 @@
+<section id="ssfms-reprocess-remeasure" data-reckon="signal-rerank-remeasurement">
+  <h2 id="ssfms-reprocess-remeasure-title">Signal rerank after JT-60SA reprocessing</h2>
+
+  <p id="ssfms-reprocess-remeasure-method">
+    On 2026-10-13, <code>python -m tests.llm.measure_search_rankings 3 --section signal</code>
+    completed on <code>98dci4-clu-2002</code> at revision <code>f746278c4</code>.
+    The fixture has 2,914 labels across 22 questions, with eligibility beginning at
+    <code>2026-10-13T11:53:35Z</code>. All 15,111 JT-60SA signals were eligible. Fusion
+    and both Jev rerank arms scored all 22 questions in each of three passes (66 rows
+    per arm), with no refusal for an unlabelled candidate. Both rerank arms used a
+    pool of 60. The complete JSON receipt and <code>EXIT=0</code> are in
+    <code>measure_signal.log</code> in this node's crew run directory.
+  </p>
+
+  <table id="ssfms-reprocess-remeasure-arms">
+    <caption>Current result beside the earlier §7 result. nDCG and grade-3 precision
+      are at ranks 10 and 5 respectively; p95 is rerank wall time at pool 60.</caption>
+    <thead><tr><th>Arm</th><th>nDCG@10, passes</th><th>Mean nDCG@10, now / §7</th>
+      <th>Grade-3 precision@5, passes</th><th>Mean grade-3 precision@5, now / §7</th>
+      <th>Worst nDCG@10 pass, now / §7</th><th>p95 wall, now / §7</th></tr></thead>
+    <tbody>
+      <tr><td>Fusion alone</td><td>0.8473, 0.8473, 0.8473</td><td>0.8473 / 0.7949</td>
+        <td>0.8091, 0.8091, 0.8091</td><td>0.8091 / 0.7182</td>
+        <td>0.8473 / 0.7949</td><td>— / —</td></tr>
+      <tr><td>Generic rerank</td><td>0.9190, 0.9050, 0.9124</td><td>0.9121 / 0.9045</td>
+        <td>0.8818, 0.8727, 0.8636</td><td>0.8727 / 0.8788</td>
+        <td>0.9050 / 0.9009</td><td>5.022 s / 4.848 s</td></tr>
+      <tr><td>Role-aware rerank</td><td>0.9239, 0.9227, 0.9194</td><td>0.9220 / 0.9128</td>
+        <td>0.8909, 0.8909, 0.9000</td><td>0.8939 / 0.8818</td>
+        <td>0.9194 / 0.9100</td><td>5.022 s / 4.722 s</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-reprocess-remeasure-branch">
+    <strong>Ship rule: fails on latency; switch set to off.</strong> The role-aware arm
+    beats fusion on mean nDCG@10 (0.9220 &gt; 0.8473) and mean grade-3 precision@5
+    (0.8939 &gt; 0.8091), and its worst pass stays above fusion's mean nDCG@10
+    (0.9194 &gt; 0.8473). Its p95 is <strong>5.022 s</strong>, exceeding the 5 s limit
+    by 0.022 s. The same metric was 4.722 s in §7. Consequently
+    <code>_rerank_signals</code> in <code>imas_codex/llm/server.py</code> is
+    <code>False</code> for every server mode (commit <code>c5f4bc3bd</code>); signal
+    search keeps the fused order. The generic arm's p95 is also 5.022 s.
+  </p>
+
+  <table id="ssfms-reprocess-remeasure-questions">
+    <caption>Per-question mean nDCG@10 over three passes, role-aware rerank against fusion.
+      Strict comparisons give 11 wins, 6 losses and 5 ties; §7 recorded 16, 2 and 4.</caption>
+    <thead><tr><th>Question</th><th>Fusion</th><th>Role-aware</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>booster-power-supply-output-voltage</td><td>0.4992</td><td>0.8290</td><td>win</td></tr>
+      <tr><td>cryostat-vacuum-pressure</td><td>0.9119</td><td>0.8870</td><td>loss</td></tr>
+      <tr><td>deuterium-fuelling-flow-into-vessel</td><td>0.6898</td><td>0.9636</td><td>win</td></tr>
+      <tr><td>divertor-tile-surface-temperature</td><td>0.6536</td><td>0.9316</td><td>win</td></tr>
+      <tr><td>first-wall-surface-temperature</td><td>1.0000</td><td>1.0000</td><td>tie</td></tr>
+      <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td>1.0000</td><td>0.9494</td><td>loss</td></tr>
+      <tr><td>hydrogen-isotope-partial-pressure</td><td>0.6516</td><td>0.4843</td><td>loss</td></tr>
+      <tr><td>magnetic-fluctuation-toroidal-mode-one</td><td>0.7577</td><td>1.0000</td><td>win</td></tr>
+      <tr><td>measured-voltage-across-the-superconducting-poloidal-field-coils</td><td>0.8986</td><td>0.9184</td><td>win</td></tr>
+      <tr><td>nitrogen-seeding-flow-into-vessel</td><td>0.7952</td><td>0.9874</td><td>win</td></tr>
+      <tr><td>plasma-current-total</td><td>0.8002</td><td>1.0000</td><td>win</td></tr>
+      <tr><td>plasma-stored-energy-magnetic</td><td>0.7916</td><td>0.8325</td><td>win</td></tr>
+      <tr><td>poloidal-field-coil-current-measurement</td><td>1.0000</td><td>1.0000</td><td>tie</td></tr>
+      <tr><td>power-supply-dc-output-voltage-for-the-coil-converters</td><td>0.8777</td><td>1.0000</td><td>win</td></tr>
+      <tr><td>quench-detection-voltage-of-the-superconducting-coils</td><td>1.0000</td><td>1.0000</td><td>tie</td></tr>
+      <tr><td>quench-protection-circuit-dump-resistor-voltage</td><td>1.0000</td><td>1.0000</td><td>tie</td></tr>
+      <tr><td>soft-x-ray-emission</td><td>1.0000</td><td>1.0000</td><td>tie</td></tr>
+      <tr><td>switching-network-unit-terminal-voltage</td><td>0.9081</td><td>0.8805</td><td>loss</td></tr>
+      <tr><td>temperature-of-the-high-temperature-superconductor-current-leads</td><td>1.0000</td><td>0.6923</td><td>loss</td></tr>
+      <tr><td>toroidal-field-coil-current</td><td>0.7328</td><td>0.9536</td><td>win</td></tr>
+      <tr><td>toroidal-field-coil-voltage</td><td>0.6723</td><td>1.0000</td><td>win</td></tr>
+      <tr><td>vacuum-vessel-port-temperature</td><td>1.0000</td><td>0.9739</td><td>loss</td></tr>
+    </tbody>
+  </table>
+
+  <table id="ssfms-reprocess-remeasure-census">
+    <caption>JT-60SA graph census at measurement time. Each of the three temporal or
+      status absence checks is its own Cypher <code>count(s)</code> query on
+      <code>FacilitySignal</code> IDs beginning <code>jt-60sa:</code>.</caption>
+    <thead><tr><th>Check</th><th>Count</th><th>Instrument</th></tr></thead>
+    <tbody>
+      <tr><td>Signals at <code>discovered</code></td><td>0</td><td>Cypher count</td></tr>
+      <tr><td>Enriched before 2026-10-13T11:53:35Z</td><td>0</td><td>Cypher count</td></tr>
+      <tr><td>Enriched before 2026-10-11T21:16:46Z</td><td>0</td><td>Cypher count</td></tr>
+      <tr><td>Embedding mismatches</td><td>0</td><td><code>census_signal_embeddings(facility='jt-60sa')</code></td></tr>
+      <tr><td>Described signals missing a role</td><td>0</td><td><code>census_signal_roles(facility='jt-60sa')</code></td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-reprocess-remeasure-controls">
+    The zero counts have positive controls: Cypher counted 15,111 JT-60SA
+    <code>FacilitySignal</code> rows, all 15,111 with <code>status</code>,
+    <code>enriched_at</code> and <code>embedded_text_hash</code>. The embedding census
+    counted the same 15,111, with zero missing hashes and zero differing hashes.
+    The role census also counted 15,111 and found zero eligible rows missing a role;
+    14,901 rows have <code>signal_role</code>, and the other 210 are
+    <code>underspecified</code>, outside that census's described enriched/checked
+    predicate. The complete census is in <code>census.log</code> in the crew run.
+    A positive-control RRF pool of 60 was fully labelled; deleting the rank-60
+    candidate's label from an in-memory question copy caused
+    <code>UnlabelledCandidates</code> to name
+    <code>jt-60sa:general/mdac_oef1cur</code>, as <code>pool_refusal.log</code> records.
+  </p>
+
+  <p id="ssfms-reprocess-remeasure-spend">
+    Jev response usage reports 3,946 generic calls / USD 0.084568 and 3,946
+    role-aware calls / USD 0.093017: total <strong>USD 0.177585</strong> across
+    7,892 calls, below the USD 1 ceiling. Fusion spends nothing.
+  </p>
+</section>
