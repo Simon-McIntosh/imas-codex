@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="62">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48">
 </head>
@@ -630,6 +630,12 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261013T023618153382-review-of-ssfms-fulltext-guard-e2639df98438" data-who="reckon-build" data-when="2026-10-13T02:44:24.907Z">
     <div class="r-comment-body"><p>review of run r-20261013T022632874875-ssfms-fulltext-guard at head e2639df98438394a5323221835d1e93b7a5a7dcf scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 18, reuse 5 (total 99); two follow-on findings, no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261013T025132782061-review-of-ssfms-fulltext-guard-fb6b0935efa5" data-who="reckon-build" data-when="2026-10-13T02:59:46.715Z">
+    <div class="r-comment-body"><p>Independent review of ssfms-fulltext-guard at fb6b0935e stored; six dimensions scored (goal_fidelity 20, evidence 18, scope_discipline 20, durability 17, fit 18, reuse 20; total 113), reviewed_base_sha 3c41db53, reviewed_head_sha fb6b0935e, added_failure_count 0, added_failure_ids []; two follow-on findings (negative-control log header names the wrong revision; tests/graph package docstring now misdescribes its contents), no blocking defect.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261013T022632874875-ssfms-fulltext-guard" data-who="reckon-build" data-when="2026-10-13T02:50:46.575Z">
+    <div class="r-comment-body"><p>Guard at tests/graph/test_signal_fulltext_fields.py reads the facility_signal_text definition through GraphSchema.fulltext_indexes (LinkML schema) and through the generated FULLTEXT_INDEXES that GraphClient&#x27;s EXPECTED_FULLTEXT_INDEXES builds the live index from, requiring both to carry name, description, node_path, keywords, aliases, unit, source_description (no graph); the _text_search_signals docstring names those seven fields and marks the CONTAINS fallback as covering only name/description/node_path; gate = 108 passed, 8 skipped, exit 0; declared negative control (remove keywords from the annotation in a scratch copy) = exit 1, the schema test fails.</p></div>
 </div>
 </section>
 </main>
