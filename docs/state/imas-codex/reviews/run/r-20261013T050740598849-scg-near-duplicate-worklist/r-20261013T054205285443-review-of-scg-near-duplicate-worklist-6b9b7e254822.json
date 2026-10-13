@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite: baseline-suite.log ends '492 passed, 1 warning' at f2b0a0109, EXIT=0, no FAILED id; after-suite-current-head.log ends '497 passed, 1 warning' at d480b823e, EXIT=0, no FAILED id. The five extra passes are the new test file, so added_failure_count is 0 and added_failure_ids is empty.",
+  "backend": "clive",
+  "base_log_revision": "f2b0a0109ddf6682fbc3ff97930a618e7d35494c",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/standard_names/audits.py:3672",
+    "imas_codex/standard_names/audits.py:270"
+  ],
+  "completed_at": "2026-10-13T05:54:56.502Z",
+  "dispatched_at": "2026-10-13T05:42:18Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/near_duplicates.py",
+      "line": "127",
+      "severity": "follow-on",
+      "text": "follow-on: build_worklist here duplicates the public function name of build_worklist in imas_codex/standard_names/harmonize.py:308, in the same package, with an unrelated capability (family-drift grouping versus near-duplicate pairing). They live in different modules so no import collides, but a reader or dispatcher writing 'from imas_codex.standard_names import build_worklist' has two candidates and the name no longer identifies a capability; the near-duplicate builder should be named for what it returns."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-worklist-run.py",
+      "line": "69",
+      "severity": "follow-on",
+      "text": "follow-on: plan section 4 says the worklist excludes the section 5 vectors, and neither build_worklist nor the driver applies any such exclusion; the driver feeds the live embeddings straight through. The omission is defensible because section 5 already re-embedded those 38 names and embedding-census.log records a 2,528-name census with identical_vector_clusters=0, so no section 5 vector survives to exclude; but the code carries no guard that would keep them out if the wrong embeddings reappear, so it protects the criterion by circumstance rather than by construction."
+    },
+    {
+      "file": "tests/standard_names/test_near_duplicate_worklist.py",
+      "line": "51",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion 'assert len(states) == 2' inside the decide_batch stub compares the count of pairs the test itself passed to judge_worklist against the length of the state list judge_worklist builds from those pairs, so both sides move together and it holds however badly the state is built; it is a stub-interface sanity check, not a guard on the production transformation. The verdict and segment_judgments assertions on the same test are independent and carry this change's durability."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "synonym_check is reached at runtime by imas_codex/standard_names/audits.py:3672 (run_audits extends all_issues with synonym_check(candidate, existing_sns_in_domain or []) using the defaults the change preserves) and is named a critical check at imas_codex/standard_names/audits.py:270; near_duplicates.build_worklist and judge_worklist have no runtime caller in the shipped tree.",
+    "diff": "read commit by commit from f2b0a0109 to 6b9b7e254: 323795274 adds near_duplicates.py, the test file and the runner; 049139c75 the live census runner; a2f99018c/3c26d90d0/8e8043ae0/0390cddb7 group connected pairs, separate unconnected alternatives, keep one grammar axis per overlap, and resume saved batches; d480b823e grounds segment judgments in parsed values; 6b9b7e254 records the judged overlaps and the fragment. The stat shows exactly the six declared paths (audits.py +60/-14, near_duplicates.py +262, test +150, and the three evidence files) and no path outside them.",
+    "done_when": "the brief done_when names the audits tests (rg -l \"synonym_check\" tests/ = test_audits.py + test_near_duplicate_worklist.py) plus the new test file; both were the gate the manifest records (497 passed, EXIT=0), and negative-control.log shows test_worklist_filters_units_threshold_and_groups_overlaps reddening EXIT=1 with the unit filter removed.",
+    "goal": "the source goal (brief.md:1-5) is to build the near-duplicate worklist with Jev's per-pair verdicts for the coordinator to rule on, extending synonym_check and applying no ruling; the landed change does exactly this (fragment + rest-of-corpus JSON, 8 WEST pairs / 207 other pairs, verdicts and per-segment Noul, no ruling applied).",
+    "manifest": "read; it reports status complete, 497 passed, the baseline_suite/after_suite records, the negative control, the census (2,528 names, 0 identical-vector clusters) and USD 0.016569 spend, all of which reconcile with the logs I opened.",
+    "write_paths": "the brief declares imas_codex/standard_names/audits.py, imas_codex/standard_names/near_duplicates.py, tests/standard_names/test_near_duplicate_worklist.py and the three scg-near-duplicate-worklist evidence files; every path in the diff is inside them and none is outside."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_near_duplicate_worklist.py:120 (test_shared_name_does_not_merge_different_grammar_axes expects 3 distinct overlaps) and :140 (test_unconnected_alternatives_in_one_segment_stay_separate expects 2) redden if _group_overlaps chains a shared name across grammar axes, and negative-control.log shows the unit-filter test reddening EXIT=1 on 323795274+unit-filter-removed.",
+    "evidence": "the manifest's baseline_suite and after_suite name baseline-suite.log (492 passed at f2b0a0109) and after-suite-current-head.log (497 passed at d480b823e), both EXIT=0 on the matched gate files, and negative-control.log carries the red EXIT=1.",
+    "fit": "imas_codex/standard_names/near_duplicates.py:127 introduces build_worklist, colliding with the public build_worklist at imas_codex/standard_names/harmonize.py:308 in the same package; the module and test names otherwise describe their behaviour and carry no plan label.",
+    "goal_fidelity": "docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-worklist.html:17 renders the WEST worklist ordered by Jev's verdict with each pair's divergent segment and overlap, and scg-near-duplicate-worklist-run.py:188 writes the rest-of-corpus worklist, the goal fulfilled while applying no ruling.",
+    "reuse": "imas_codex/standard_names/near_duplicates.py:150 reuses _synonym_matches from imas_codex/standard_names/audits.py:1274 (the near-duplicate owner the change extends) instead of reimplementing cosine comparison, and :200 calls discovery/base/judgment.py decide_batch; fetch_review_neighbours (context.py:617) and nearest_registered_token are left untouched.",
+    "scope_discipline": "every path in the diff (audits.py, near_duplicates.py, the new test, and the three scg-near-duplicate-worklist evidence files) is inside the brief's declared write scope and nothing else was touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal (brief.md:1-5) is the near-duplicate worklist with Jev's per-pair verdicts, no ruling applied; docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-worklist.html:17 renders the WEST pairs ordered by verdict with divergent segment and overlap and imas_codex/standard_names/near_duplicates.py:127 builds them.\nVERDICT done_when: the done_when names the audits tests plus the new test file; the manifest records uv run pytest on tests/standard_names/test_audits.py + tests/standard_names/test_near_duplicate_worklist.py at 497 passed EXIT=0, and negative-control.log shows the unit-filter test failing EXIT=1.\nVERDICT write_paths: the brief declares six paths (audits.py, near_duplicates.py, the new test, and the three scg-near-duplicate-worklist evidence files); every path in the diff is inside them.\nVERDICT manifest: read; it reports 497 passed, the baseline_suite/after_suite records, the negative control and USD 0.016569 spend, all reconciling with the logs.\nVERDICT diff: read commit by commit from f2b0a0109 to 6b9b7e254; the six declared paths and nothing outside them.\nCALL_SITES: imas_codex/standard_names/audits.py:3672, imas_codex/standard_names/audits.py:270\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-worklist.html:17 and near_duplicates.py:127 produce the ordered worklist with per-pair divergence and no ruling.\nSCORE evidence: 17\nJUSTIFICATION evidence: baseline-suite.log (492 passed at f2b0a0109) and after-suite-current-head.log (497 passed at d480b823e) are the matched gate files, and negative-control.log carries the red EXIT=1.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff is inside the brief's declared write scope (audits.py, near_duplicates.py, the new test, and the three evidence files).\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_near_duplicate_worklist.py:120 and :140 guard the overlap grouping and negative-control.log shows the test reddening EXIT=1 with the unit filter removed.\nSCORE fit: 15\nJUSTIFICATION fit: imas_codex/standard_names/near_duplicates.py:127 introduces build_worklist, colliding with the public build_worklist at imas_codex/standard_names/harmonize.py:308 in the same package.\nSCORE reuse: 19\nJUSTIFICATION reuse: near_duplicates.py:150 reuses _synonym_matches from audits.py:1274 and :200 reuses discovery/base/judgment.py decide_batch rather than reimplementing them.\nFINDING imas_codex/standard_names/near_duplicates.py:127 follow-on: build_worklist duplicates the public name of harmonize.py:308 build_worklist in the same package with an unrelated capability, so the name no longer identifies a capability.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-near-duplicate-worklist-run.py:69 follow-on: plan section 4 says the worklist excludes the section 5 vectors but no exclusion is applied; the census (identical_vector_clusters=0) makes it moot, yet nothing guards it by construction.\nFINDING tests/standard_names/test_near_duplicate_worklist.py:51 follow-on: assert len(states)==2 compares the count of pairs passed in against the list the code builds from them, so it holds however badly the state is built.",
+  "review_run_id": "r-20261013T054205285443-review-of-scg-near-duplicate-worklist-6b9b7e254822",
+  "reviewed_base_sha": "f2b0a0109ddf6682fbc3ff97930a618e7d35494c",
+  "reviewed_head_sha": "6b9b7e25482208352538fcc8614d8c6b2c32aa4a",
+  "reviewed_run_id": "r-20261013T050740598849-scg-near-duplicate-worklist",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T05:55:00Z",
+  "total": 104,
+  "verdict": "SOUND WITH FINDINGS"
+}
