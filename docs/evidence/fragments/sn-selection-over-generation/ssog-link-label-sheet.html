@@ -1,0 +1,25 @@
+<!-- Landing record: self-link detection and the link-label judgement sheet, 2026-10-13.
+     Node ssog-link-label-sheet. Base revision c3266f36fc06761122dbd99bf377fe8bce5ee493. -->
+<section id="ssog-link-label-sheet" data-reckon="evidence">
+  <h2 id="ssog-link-label-sheet-heading">Link labels judged by Jev, and a sheet to label</h2>
+
+  <p id="ssog-link-label-sheet-summary">
+    <code>imas_codex/standard_names/doc_links.py</code> now reads documentation
+    links whose target names a standard name (<code>find_name_links</code>) and
+    flags the ones that point back at the documenting name
+    (<code>find_self_links</code>). <code>link_label_question</code> and
+    <code>link_judgement_state</code> carry one link's text, its target's name
+    and description, and the documenting name to a single Noul asked under the
+    <code>sn-judge</code> seat: does the link text describe the target's
+    description? The sheet at
+    <code>ssog-link-label-sheet.json</code> holds <strong>180</strong> rows —
+    all <strong>74</strong> self-links found across the live documentation,
+    plus a domain-spread of neighbours over <strong>19</strong> physics domains
+    — each carrying Jev's probability and an empty <code>label</code> field for
+    the coordinator. Jev judged 180/180 links; the run spent
+    <strong>USD 0.0037</strong>, against a pilot that projected USD 0.0041 for
+    200 calls. Each of the 5130 names' documentation was read; 3124 names carry
+    a <code>name:</code> link, 7272 such links in total, of which 74 are
+    self-links.
+  </p>
+</section>
