@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="64">
+<meta name="plan-version" content="65">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e">
 </head>
@@ -70,7 +70,7 @@
     <table>
       <thead><tr><th>Cause</th><th>Where</th><th>Evidence</th><th>Closed by</th></tr></thead>
       <tbody>
-        <tr><td>Hybrid scoring adds a raw BM25 score (5 to 14 here) to a cosine score that never exceeds 1, so any keyword match outranks every semantic match, and a text-only hit keeps its raw BM25 score</td><td><code>imas_codex/llm/search_tools.py</code> line 287; the same rule at lines 915 (docs) and 1667 (code) and in <code>imas_codex/ids/slot_context.py</code> <code>_hybrid_ids</code></td><td>HTS lead question: vector search alone puts 26 of 52 grade-3 signals in its top 30, the fused report none; its top BM25 score is 13.86</td><td>§4</td></tr>
+        <tr><td>Hybrid scoring adds a raw BM25 score (5 to 14 here) to a cosine score that never exceeds 1, so any keyword match outranks every semantic match, and a text-only hit keeps its raw BM25 score</td><td><code>imas_codex/llm/search_tools.py</code> line 287 before §4; the same rule at lines 915 (docs) and 1667 (code) and in <code>imas_codex/ids/slot_context.py</code> <code>_hybrid_ids</code></td><td>HTS lead question: vector search alone puts 26 of 52 grade-3 signals in its top 30, the fused report none; its top BM25 score is 13.86</td><td>§4</td></tr>
         <tr><td>The vector cut is taken at <code>k</code>, so there is no candidate pool for fusion or rerank to work on</td><td><code>_vector_search_signals</code></td><td>Pool 100 alone lifts recall@30 from 0.343 to 0.507</td><td>§4</td></tr>
         <tr><td>Stored embeddings lag the descriptions they claim to embed</td><td><code>GraphClient.create_nodes</code> embeds only on a node write that carries no embedding; descriptions rewritten by Cypher keep their old vector</td><td>235 of 612 labelled signals have cosine below 0.995 between the stored vector and a fresh embedding of the current description, the lowest 0.866</td><td>§5</td></tr>
         <tr><td>Nothing records whether a signal measures a quantity or commands it</td><td>FacilitySignal schema</td><td>For the booster question the generic rerank and the current tool both prefer references and commands</td><td>§7, §8</td></tr>
@@ -319,8 +319,9 @@
       and accessor. It also gets the role-aware question the harness keeps. The question's five levels run from "a
       different quantity" through "a commanded, reference or setpoint value" to "a measurement of exactly the quantity
       asked for". The pool is 60 and the budget 5 s. The seat is the existing discovery-relevance model on the
-      facility-discovery service. The switch follows the DD-path rerank: on for a full or facility server, off for a
-      read-only or DD-only server.
+      facility-discovery service. The switch is its own flag, off by default, not the DD-path rerank's server-mode flag. Once the
+      measurement passes, the third node sets it to follow the server mode as the DD-path rerank does: on for a full or
+      facility server, off for a read-only or DD-only server. If the measurement fails, the flag stays off.
     </p>
     <p>
       The prototype could not settle whether the rerank earns its place. On the draft labels it raised recall@30 and
