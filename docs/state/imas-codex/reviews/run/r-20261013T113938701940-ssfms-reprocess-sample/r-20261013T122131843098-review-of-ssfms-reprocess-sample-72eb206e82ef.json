@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T12:42:16.930Z",
+  "dispatched_at": "2026-10-13T12:21:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment says the sample was 'drawn at random within each source category', but the run's build_sample.py draws a deterministic stride (ids[::step]) from an id-sorted list, so the artifact misstates its own sampling method."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment says 'All 202 are grouped catalogue members' and reprocess-sample-ids.json records all_grouped_members true with grouped_members_in_sample 202 (any MEMBER_OF member), while reprocess.html:65 calls only the 17 whose source carries more than one member the 'grouped members'; one term carries two counts in one artifact, and the done-when's 'each sampled grouped member' is shown for 17, not 202."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: the declared negative control's receipt is asserted ('A census taken immediately after the reset found 202 of the sample's signals at discovered and 0 with a description') but no captured output records that census; the run's only captured census output is the post-enrichment one at 12:04:17Z."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html",
+      "line": "56",
+      "severity": "follow-on",
+      "text": "follow-on: the done-when requires reprocess.html to record the reprocess start, but the fragment only refers to 'the reprocess start' without the instant (2026-10-13T11:53:35Z), which lives only in the sibling JSON."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T113938701940-ssfms-reprocess-sample/manifest.md",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "follow-on: test_logs cites reset2.log and enrich1.log under the run directory, where neither file exists; the logs live only on node-local scratch (/tmp/reckon-crew-scratch/r-20261013T113938701940-ssfms-reprocess-sample/), which dies with the allocation, so a later reader cannot open the cited evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site reaches this change: the diff is two evidence HTML fragments and one evidence JSON under docs/, and no runtime code imports or executes it.",
+    "diff": "read commit by commit over the base..head range; the four commits add only the sample-manifest JSON and the two HTML fragments, touching no product source and no test.",
+    "done_when": "the done-when names reprocess.html, reprocess-sample-ids.json and a USD 2 ceiling; reprocess.html records Jev spend per signal ($0.00015371, $0.00084158) and rate (146.3/min, 26.7/min), the grouped before/after table, and the $2.32/$12.72 and 1.7 h/9.5 h projections, all reconciling with reset2.log and enrich1.log, while the reprocess-start instant it is required to record appears only in the JSON.",
+    "goal": "the goal is to reprocess a stratified ~200-signal JT-60SA sample through the current pipeline and project the facility's cost; docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html records a 202-signal stratified sample cleared once and re-enriched end to end, with the 15,111-signal projection.",
+    "manifest": "read; status complete, commits 1ffe6d883, fc70d3e45, fac759892 and 72eb206e8 each carry a conventional subject and a body, and its test_logs cite two paths that do not exist in the run directory.",
+    "write_paths": "the manifest declares four write paths; git diff 517e870a9..72eb206e8 changes three docs files (reprocess-sample-ids.json, reprocess.html, ssfms-reprocess-sample.html), every one inside the fence, and no figure was produced."
+  },
+  "justifications": {
+    "durability": "no test file is in scope, and the run's write_results.py writes the verification block as hardcoded constants, so nothing reddens if the record or the sample is later edited.",
+    "evidence": "reset2.log ('30222 scanned', $0.00) and enrich1.log ('1106 enriched', $0.17) substantiate the cost record, and the run stream's census and rolefill outputs reconcile with the JSON verification, but the manifest's test_logs name files that are absent and the negative control's census output is not captured.",
+    "fit": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html:5 sets data-reckon=\"evidence\" and every element id is prefixed ssfms-reprocess-sample-, matching the sibling fragments' convention.",
+    "goal_fidelity": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-sample-ids.json records 202 enriched signals with description, embedding hash and signal_role, and the projection_15111 block records the facility cost, matching the goal.",
+    "reuse": "a search of docs/evidence/fragments/signal-search-finds-the-measured-signal for a pre-existing reprocess artifact finds none (its siblings are descriptions/embeddings/fulltext/rerank/role fragments), and the change adds no definition that could fork a capability.",
+    "scope_discipline": "git diff 517e870a9..72eb206e8 lists exactly the three docs paths declared in the manifest's write-path fence and no product, test or figure path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to reprocess a stratified ~200-signal JT-60SA sample through the current pipeline and project the facility's cost; docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html records a 202-signal stratified sample cleared once and re-enriched end to end, with the 15,111-signal projection.\nVERDICT done_when: the done-when names reprocess.html, reprocess-sample-ids.json and a USD 2 ceiling; reprocess.html records Jev spend per signal ($0.00015371, $0.00084158) and rate (146.3/min, 26.7/min), the grouped before/after table, and the $2.32 / $12.72 and 1.7 h / 9.4 h projections, all reconciling with reset2.log and enrich1.log, while the reprocess-start instant it is required to record appears only in the JSON.\nVERDICT write_paths: the manifest declares four write paths; git diff 517e870a9ce9fd113e637691264be3c5a3bcb432..72eb206e82efc44849d4437c2ccda38571dffa32 changes three docs files (reprocess-sample-ids.json, reprocess.html, ssfms-reprocess-sample.html), every one inside the fence, and no figure was produced.\nVERDICT manifest: read; status complete, commits 1ffe6d883, fc70d3e45, fac759892 and 72eb206e8 each carry a conventional subject and a body, and its test_logs cite two paths that do not exist in the run directory.\nVERDICT diff: read commit by commit over the base..head range; the four commits add only the sample-manifest JSON and the two HTML fragments, touching no product source and no test.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-sample-ids.json records 202 enriched signals with description, embedding hash and signal_role, and the projection_15111 block records the facility cost, matching the goal.\nSCORE evidence: 15\nJUSTIFICATION evidence: reset2.log ('30222 scanned', $0.00) and enrich1.log ('1106 enriched', $0.17) substantiate the cost record, and the run stream's census output and rolefill output ('missing_role_after 0') reconcile with the JSON verification, but the manifest's test_logs name files that are absent and the negative control's census output is not captured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 517e870a9..72eb206e8 lists exactly the three docs paths declared in the manifest's write-path fence and no product, test or figure path.\nSCORE durability: 6\nJUSTIFICATION durability: no test file is in scope, and the run's write_results.py writes the verification block as hardcoded constants, so nothing reddens if the record or the sample is later edited.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html:5 sets data-reckon=\"evidence\" and every element id is prefixed ssfms-reprocess-sample-, matching the sibling fragments' convention.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of docs/evidence/fragments/signal-search-finds-the-measured-signal for a pre-existing reprocess artifact finds none (its siblings are descriptions/embeddings/fulltext/rerank/role fragments), and the change adds no definition that could fork a capability.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html:10 follow-on: the fragment says the sample was 'drawn at random within each source category', but the run's build_sample.py draws a deterministic stride (ids[::step]) from an id-sorted list, so the artifact misstates its own sampling method.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html:12 follow-on: the fragment says 'All 202 are grouped catalogue members' and reprocess-sample-ids.json records all_grouped_members true with grouped_members_in_sample 202 (any MEMBER_OF member), while reprocess.html:65 calls only the 17 whose source carries more than one member the 'grouped members'; one term carries two counts in one artifact, and the done-when's 'each sampled grouped member' is shown for 17, not 202.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html:22 follow-on: the declared negative control's receipt is asserted ('A census taken immediately after the reset found 202 of the sample's signals at discovered and 0 with a description') but no captured output records that census; the run's only captured census output is the post-enrichment one at 12:04:17Z.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html:56 follow-on: the done-when requires reprocess.html to record the reprocess start, but the fragment only refers to 'the reprocess start' without the instant (2026-10-13T11:53:35Z), which lives only in the sibling JSON.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T113938701940-ssfms-reprocess-sample/manifest.md:24 follow-on: test_logs cites reset2.log and enrich1.log under the run directory, where neither file exists; the logs live only on node-local scratch (/tmp/reckon-crew-scratch/r-20261013T113938701940-ssfms-reprocess-sample/), which dies with the allocation, so a later reader cannot open the cited evidence.\n",
+  "review_run_id": "r-20261013T122131843098-review-of-ssfms-reprocess-sample-72eb206e82ef",
+  "reviewed_base_sha": "517e870a9ce9fd113e637691264be3c5a3bcb432",
+  "reviewed_head_sha": "72eb206e82efc44849d4437c2ccda38571dffa32",
+  "reviewed_run_id": "r-20261013T113938701940-ssfms-reprocess-sample",
+  "scores": {
+    "durability": 6,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T12:43:50.725297+00:00",
+  "total": 97
+}
