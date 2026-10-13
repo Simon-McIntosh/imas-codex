@@ -69,6 +69,13 @@
       "finding": "anchors_resolve-1",
       "reason": "",
       "when": "2026-10-13T03:32:19.136198+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "the fusion arm is the explicit comparator, scored over the same passes, and the switch decision can fail against it; a separate mutation control would add nothing the comparison does not already show",
+      "when": "2026-10-13T03:32:26.459425+00:00"
     }
   ],
   "responses": {
@@ -77,6 +84,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-13T03:32:19.136198+00:00"
+    },
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the fusion arm is the explicit comparator, scored over the same passes, and the switch decision can fail against it; a separate mutation control would add nothing the comparison does not already show",
+      "when": "2026-10-13T03:32:26.459425+00:00"
     },
     "reasoning-1": {
       "action": "acted",
