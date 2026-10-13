@@ -22,9 +22,9 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="84">
+<meta name="plan-version" content="85">
 <meta name="plan-modified" content="2026-10-13">
-<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e">
+<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47">
 </head>
 <body>
   <main class="plan-doc">
@@ -719,11 +719,17 @@
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261013T084922135916-ssfms-role-prototype" data-who="reckon-build" data-when="2026-10-13T09:14:59Z">
     <div class="r-comment-body"><p>Role Choice prototype judged 300 frozen hand labels at 287/300 agreement (95.7%); response-usage spend USD 0.007922292, USD 0.00002640764 per signal; confusion and per-role results at docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-prototype.html; no signal_role graph write or backfill.</p></div>
 </div>
+<div class="r-comment" data-section="s8" data-id="c-20261013T1030-s8-prototype" data-who="reckon-build" data-when="2026-10-13T10:30:00Z">
+    <div class="r-comment-body"><p>Prototype landed (worker head <code>ef05cfa47</code>, merged into main): <code>imas_codex/discovery/signals/role.py</code> judges a signal's role through <code>judge_rows</code> as a Jev choice among the six roles, refusing any answer outside them. Against 300 hand labels it agrees on 287 (95.7%): measured 50/50, commanded 48/50, reference or setpoint 44/50, status or flag 49/50, configuration parameter 46/50, derived or computed 50/50. Cost is USD 0.0000264 per signal, about USD 0.40 for all of JT-60SA. The sample was picked by role words, 50 per role, so it is easier than the population; misses sit at control-method references against commands, timestamps, uncertainty flags and commanded positions. No role is stored. Independent review 107/120, no added failures. Lead decision, 2026-10-13: measure agreement on 200 signals drawn at random first; wire the role into enrichment if it reaches 90%, otherwise refine the criteria at the weak boundaries. That check is running as <code>ssfms-role-random-sample</code>.</p></div>
+</div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261013T091702235762-review-of-ssfms-result-rows-97eac4222c89" data-who="reckon-build" data-when="2026-10-13T09:35:36.429Z">
     <div class="r-comment-body"><p>independent review of r-20261013T085005496411-ssfms-result-rows stored at both granted review paths — 6 dimensions scored (goal_fidelity 19, evidence 18, scope_discipline 19, durability 18, fit 15, reuse 16; total 105), reviewed_base_sha 7f54df09dd95bd456d45f56b9b7676b6ef5867f4 / reviewed_head_sha 97eac4222c89103942f49538791b294ab9134abf, added_failure_count 0 / ids [] derived from the reviewed run's baseline_suite and after_suite arms, 2 follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261013T085005496411-ssfms-result-rows" data-who="reckon-build" data-when="2026-10-13T09:16:40Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-result-rows.html — booster report 341 to 112 lines, 20 to 13 rows, 20 to 1 access templates; 0 duplicate template/category rows over 22 golden questions; current_tool mean nDCG@10 0.7889953304713903 at both revisions.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-20261013T1030-s9-rows" data-who="reckon-build" data-when="2026-10-13T10:30:00Z">
+    <div class="r-comment-body"><p>Row collapse delivered and promoted (worker head <code>97eac4222</code>), not yet merged: the booster report falls from 341 to 112 lines, 20 rows to 13 and 20 access templates to 1, still naming all four booster voltages; no golden question's k=20 report holds two rows with one template in a category; the fused tool's nDCG@10 is 0.7890 at base and head. It left <code>test_basic_signal_formatting</code> asserting the old fused score, in a file outside its write paths, so a repair based on its head updates that test, revives <code>_interpolate_template</code> to print a resolved call for single-member rows, and merges with it. Independent review 105/120.</p></div>
 </div>
 </section>
 </main>
