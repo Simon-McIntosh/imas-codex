@@ -47,9 +47,22 @@
       "finding": "thin_wrapper-1",
       "reason": "section 2 is the unwired measurement that decides whether the composer's slot choice should be constrained: its rule, fixed before the run, selects cross-check (the composer stays sole producer, Jev only flags) or generator (Jev's per-slot choice replaces the composer's own); no parallel producer is deployed by this section",
       "when": "2026-10-13T00:31:06.943519+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "",
+      "when": "2026-10-13T00:31:08.890677+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-13T00:31:08.890677+00:00"
+    },
     "thin_wrapper-1": {
       "action": "declined",
       "by": "",
