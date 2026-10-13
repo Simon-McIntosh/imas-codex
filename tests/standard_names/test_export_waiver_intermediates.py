@@ -19,6 +19,7 @@ import pytest
 pytest.importorskip("imas_standard_names")
 
 from imas_codex.standard_names.export import (  # noqa: E402
+    _WAIVED_CHAIN_DEPTH_BOUND,
     _WAIVED_SOURCES_DECLARATION,
     WaivedSourceDeclarationError,
     _load_waived_source_paths,
@@ -34,6 +35,21 @@ _DECLARED_WAIVED = "equilibrium/time_slice/time"
 # deliberately distinct from the terminal so a terminal-only refusal misses it.
 _INTERMEDIATE_IDENTITY = "time_coordinate_of_equilibrium_slice"
 _TERMINAL_IDENTITY = "equilibrium_slice_time_terminal"
+
+# A chain with more members than the traversal bound can read. An exportable
+# identity sits past the bound (in the cut but beyond the truncated read) and the
+# terminal that follows it is not itself exported, so only the bound check can
+# catch the published identity, never the terminal path.
+_DEEP_PUBLISHED_IDENTITY = "replacement_intermediate_published_beyond_the_bound"
+
+
+def _over_long_chain() -> list[str]:
+    """A successor chain one link longer than the bound, ending in a passing terminal."""
+    bound = _WAIVED_CHAIN_DEPTH_BOUND
+    chain = [f"superseded_successor_{index}" for index in range(bound + 1)]
+    chain.append(_DEEP_PUBLISHED_IDENTITY)
+    chain.append(_TERMINAL_IDENTITY)
+    return chain
 
 
 def _waived_paths() -> frozenset[str]:
@@ -74,7 +90,16 @@ def test_a_waived_source_whose_chain_publishes_no_identity_stays_waived() -> Non
 
 
 class _ChainGraphClient:
-    """Answer the successor-chain lookup; every other query returns no rows."""
+    """Answer the successor-chain lookup; every other query returns no rows.
+
+    The chain is a fixture: an ordered identity list from the source's produced
+    name to the far end of its successor chain. The mock mirrors the bounded
+    traversal the export runs, so a fixture chain longer than the bound is
+    truncated to the members the graph would return, and the member at the mock
+    chain's bound is reported as the boundary identity when it still has an
+    outgoing successor. That is the fact the real query reads from the graph, so
+    a fixture reaching the bound exercises the same refusal the live read raises.
+    """
 
     def __init__(self, chains: dict[str, list[str]]) -> None:
         self._chains = chains
@@ -87,10 +112,27 @@ class _ChainGraphClient:
 
     def query(self, cypher: str, **params):
         if "HAS_SUCCESSOR" in cypher:
-            return [
-                {"source_path": path, "identities": self._chains.get(path, [])}
-                for path in params.get("paths", [])
-            ]
+            bound = _WAIVED_CHAIN_DEPTH_BOUND
+            rows = []
+            for path in params.get("paths", []):
+                chain = list(self._chains.get(path, []))
+                if len(chain) > bound + 1:
+                    rows.append(
+                        {
+                            "source_path": path,
+                            "identities": chain[: bound + 1],
+                            "boundary_identities": [chain[bound]],
+                        }
+                    )
+                else:
+                    rows.append(
+                        {
+                            "source_path": path,
+                            "identities": chain,
+                            "boundary_identities": [],
+                        }
+                    )
+            return rows
         return []
 
 
@@ -191,6 +233,48 @@ def test_the_cut_carries_a_waived_source_whose_chain_reached_nothing(
     """A waived source whose chain published no identity is recorded waived."""
     population = [_candidate("an_identity_from_an_unrelated_source")]
     chains = {_DECLARED_WAIVED: [_TERMINAL_IDENTITY]}
+
+    report = _run_fixture_export(
+        tmp_path,
+        population,
+        chains,
+        [_waived_manifest_row()],
+    )
+
+    records = {
+        record.source_path: record.disposition
+        for record in report.source_disposition_records
+    }
+    assert records == {_DECLARED_WAIVED: "waived"}
+
+
+def test_the_cut_refuses_a_waived_source_whose_chain_exceeds_the_bound(
+    tmp_path: Path,
+) -> None:
+    """A chain past the read bound refuses, naming the source and the bound identity."""
+    chain = _over_long_chain()
+    population = [
+        _candidate("an_identity_from_an_unrelated_source"),
+        _candidate(_DEEP_PUBLISHED_IDENTITY),
+    ]
+    chains = {_DECLARED_WAIVED: chain}
+
+    with pytest.raises(WaivedSourceDeclarationError) as excinfo:
+        _run_fixture_export(tmp_path, population, chains, [_waived_manifest_row()])
+
+    message = str(excinfo.value)
+    assert _DECLARED_WAIVED in message
+    assert chain[_WAIVED_CHAIN_DEPTH_BOUND] in message
+
+
+def test_the_cut_reads_a_chain_reaching_exactly_the_bound_without_refusing(
+    tmp_path: Path,
+) -> None:
+    """A chain that ends at the bound is read in full and leaves the source waived."""
+    bound = _WAIVED_CHAIN_DEPTH_BOUND
+    chain = [f"superseded_successor_{index}" for index in range(bound + 1)]
+    population = [_candidate("an_identity_from_an_unrelated_source")]
+    chains = {_DECLARED_WAIVED: chain}
 
     report = _run_fixture_export(
         tmp_path,
