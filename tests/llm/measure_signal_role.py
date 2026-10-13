@@ -119,6 +119,8 @@ def render(rows: list[dict], judged: list[dict], result: dict) -> str:
     return f"""<section id="ssfms-role-prototype-results" data-reckon="fragment">
   <h2 id="ssfms-role-prototype-results-title">Signal role Choice prototype</h2>
   <p id="ssfms-role-prototype-results-sample">300 eligible JT-60SA signals; 50 hand-reviewed labels per role, frozen before the judge ran. The judge read the fixture's stored name, description, unit and matching glossary entries. No graph property was written.</p>
+  <p id="ssfms-role-prototype-results-sampling">Candidate selection searched for role words and reviewers checked each text, so this balanced sample favours signals whose role is explicit. Agreement here estimates performance on that sample; it does not establish population-wide accuracy.</p>
+  <p id="ssfms-role-prototype-results-boundaries">Disagreements include control-method references and commands, timestamps, uncertainty flags, and commanded positions. Those boundaries need label review before a backfill decision.</p>
   <p id="ssfms-role-prototype-results-summary">Overall agreement: <strong>{result["correct"]}/300 ({result["agreement"]:.1%})</strong>. Jev response-usage spend: <strong>USD {result["cost_usd"]:.6f}</strong>, or USD {result["cost_per_signal_usd"]:.7f} per signal.</p>
   <h3 id="ssfms-role-prototype-results-per-role">Agreement by hand label</h3>
   <table><thead><tr><th>Role</th><th>Correct</th><th>Agreement</th></tr></thead><tbody>{role_rows}</tbody></table>
