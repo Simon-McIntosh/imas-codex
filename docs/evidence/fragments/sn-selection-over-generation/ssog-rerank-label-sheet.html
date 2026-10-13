@@ -1,0 +1,72 @@
+<section id="ssog-rerank-label-sheet" data-reckon="evidence">
+  <h2 id="ssog-rerank-label-sheet-heading">The comparator candidates for 30 items, both orders, for coordinator grading</h2>
+
+  <p id="ssog-rerank-label-sheet-body">
+    The compose comparator block reaches the prompt in the retrieval's
+    embedding order, and <code>rerank_name_comparators</code> can reorder it
+    behind the default-off switch. Measuring whether the rerank helps needs a
+    labelled set carrying both orders. The builder
+    (<code>ssog-rerank-label-sheet-run.py</code>) draws 30 DD sources
+    with a fixed seed (20261013) spread round-robin across domains, reserves
+    the boundary-density family's sources, and for each item records the
+    embedding-ordered top ten from <code>_collect_nearby_name_comparators</code>
+    and the reranked top ten from <code>rerank_name_comparators</code> (seat
+    <code>typesafe/jev-1.13</code>), unioned into one candidate list carrying
+    an empty <code>grade</code> field. It reads the graph and spends on the
+    judge seat; it writes no graph state. Total rerank spend:
+    <strong>USD 0.007947</strong>, under the USD 0.50
+    ceiling; a two-item pilot projected USD 0.011.
+  </p>
+
+  <p id="ssog-rerank-label-sheet-measure">
+    All 30 items carry both orders; in all 30 the reranked order differs from
+    the embedding order, and in 22 a candidate the embedding put below rank ten
+    is promoted into the reranked top ten. The sheet holds
+    342 candidates, every one
+    ungraded.
+  </p>
+
+  <table id="ssog-rerank-label-sheet-items">
+    <thead><tr><th>DD source</th><th>domain</th><th>family</th><th>candidates</th><th>spend USD</th></tr></thead>
+    <tbody>
+    <tr><td><code>summary/local/separatrix/n_e/value</code></td><td>edge_plasma_physics</td><td>boundary_density</td><td>13</td><td>0.000322</td></tr>
+    <tr><td><code>summary/local/separatrix/n_i/beryllium/value</code></td><td>general</td><td>boundary_density</td><td>14</td><td>0.000326</td></tr>
+    <tr><td><code>summary/local/separatrix/n_i/boron/value</code></td><td>edge_plasma_physics</td><td>boundary_density</td><td>12</td><td>0.000311</td></tr>
+    <tr><td><code>summary/local/separatrix/n_i/carbon/value</code></td><td>general</td><td>boundary_density</td><td>12</td><td>0.000245</td></tr>
+    <tr><td><code>summary/local/separatrix/n_i/deuterium/value</code></td><td>general</td><td>boundary_density</td><td>12</td><td>0.000249</td></tr>
+    <tr><td><code>summary/local/separatrix/n_i/deuterium_tritium/value</code></td><td>general</td><td>boundary_density</td><td>14</td><td>0.000394</td></tr>
+    <tr><td><code>summary/local/separatrix/n_i/helium_3/value</code></td><td>edge_plasma_physics</td><td>boundary_density</td><td>6</td><td>0.000119</td></tr>
+    <tr><td><code>summary/local/separatrix/n_i/helium_4/value</code></td><td>general</td><td>boundary_density</td><td>5</td><td>0.000098</td></tr>
+    <tr><td><code>summary/local/separatrix/n_i/hydrogen/value</code></td><td>edge_plasma_physics</td><td>boundary_density</td><td>13</td><td>0.000287</td></tr>
+    <tr><td><code>nbi/unit/beam_current_fraction</code></td><td>auxiliary_heating</td><td>&mdash;</td><td>7</td><td>0.000149</td></tr>
+    <tr><td><code>workflow/time_loop/time_end</code></td><td>computational_workflow</td><td>&mdash;</td><td>10</td><td>0.000200</td></tr>
+    <tr><td><code>dataset_description/simulation/time_restart</code></td><td>data_management</td><td>&mdash;</td><td>11</td><td>0.000222</td></tr>
+    <tr><td><code>divertors/divertor/target/two_point_model/n_e_target</code></td><td>divertor_physics</td><td>&mdash;</td><td>15</td><td>0.000342</td></tr>
+    <tr><td><code>edge_profiles/profiles_1d/electrons/pressure_thermal</code></td><td>edge_plasma_physics</td><td>&mdash;</td><td>14</td><td>0.000339</td></tr>
+    <tr><td><code>ece/channel/line_of_sight/first_point/r</code></td><td>electromagnetic_wave_diagnostics</td><td>&mdash;</td><td>13</td><td>0.000273</td></tr>
+    <tr><td><code>equilibrium/time_slice/ggd/psi/values</code></td><td>equilibrium</td><td>&mdash;</td><td>12</td><td>0.000287</td></tr>
+    <tr><td><code>summary/local/itb/n_i/argon/value</code></td><td>general</td><td>&mdash;</td><td>15</td><td>0.000378</td></tr>
+    <tr><td><code>plasma_initiation/global_quantities/b_field_perpendicular</code></td><td>machine_operations</td><td>&mdash;</td><td>10</td><td>0.000210</td></tr>
+    <tr><td><code>magnetics/bpol_probe/position/r</code></td><td>magnetic_field_diagnostics</td><td>&mdash;</td><td>13</td><td>0.000293</td></tr>
+    <tr><td><code>ferritic/object/time_slice/magnetic_moment_tor</code></td><td>magnetic_field_systems</td><td>&mdash;</td><td>13</td><td>0.000427</td></tr>
+    <tr><td><code>ntms/time_slice/mode/detailed_evolution/time_detailed</code></td><td>magnetohydrodynamics</td><td>&mdash;</td><td>12</td><td>0.000275</td></tr>
+    <tr><td><code>neutron_diagnostic/detectors/temperature_sensor/fall_time</code></td><td>mechanical_measurement_diagnostics</td><td>&mdash;</td><td>5</td><td>0.000102</td></tr>
+    <tr><td><code>neutron_diagnostic/detectors/mode/counting</code></td><td>particle_measurement_diagnostics</td><td>&mdash;</td><td>5</td><td>0.000104</td></tr>
+    <tr><td><code>spi/injector/fragment/velocity_z</code></td><td>plant_systems</td><td>&mdash;</td><td>13</td><td>0.000269</td></tr>
+    <tr><td><code>ec_launchers/latency</code></td><td>plasma_control</td><td>&mdash;</td><td>12</td><td>0.000273</td></tr>
+    <tr><td><code>wall/global_quantities/neutral/wall_inventory</code></td><td>plasma_wall_interactions</td><td>&mdash;</td><td>13</td><td>0.000333</td></tr>
+    <tr><td><code>camera_x_rays/camera/pixel_dimensions</code></td><td>radiation_measurement_diagnostics</td><td>&mdash;</td><td>11</td><td>0.000248</td></tr>
+    <tr><td><code>cryostat/description_2d/thermal_shield/unit/annular/thickness</code></td><td>structural_components</td><td>&mdash;</td><td>14</td><td>0.000350</td></tr>
+    <tr><td><code>core_transport/model/profiles_1d/momentum_tor/v</code></td><td>transport</td><td>&mdash;</td><td>14</td><td>0.000312</td></tr>
+    <tr><td><code>gyrokinetics_local/non_linear/fluxes_3d_k_x_sum_rotating_frame/particles_a_field_parallel</code></td><td>turbulence</td><td>&mdash;</td><td>9</td><td>0.000209</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssog-rerank-label-sheet-artifact">
+    Sheet: <code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet.json</code>.
+    Gate: <code>tests/standard_names/test_rerank_label_sheet.py</code> plus
+    <code>tests/standard_names/test_comparator_rerank.py</code> — 14 passed at
+    head against 11 passed at base, 0 added failures; the stubbed both-orders
+    test fails with the rerank call removed.
+  </p>
+</section>
