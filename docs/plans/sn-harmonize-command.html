@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-house-style#s4&quot;],&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -166,33 +166,22 @@
       not converge it, and a no-spend diagnosis
       (<a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-convergence-diagnosis.html">record</a>)
       found why: the template, the equation and the anchor all reached every prompt, but
-      nothing downstream enforces them. Four repairs follow, in the order the evidence ranks
-      them, before the family is applied again:
+      nothing downstream enforces them. The evidence ranks the repairs as:
     </p>
     <ol>
-      <li><strong>Report links resolve graph-wide.</strong> The report built its link-target
-        lookup from the scoped names only, so 19 valid references to names outside the family
-        counted as dead links. A target is dead only when no <code>StandardName</code> carries
-        it.</li>
-      <li><strong>Acceptance enforces the opening.</strong> The documentation axis accepts on
-        the review score alone; the house-style <code>template_opening</code> finding is a
-        warning nobody reads, so 16 of 17 non-conforming openings were accepted. A
-        documentation whose first line matches none of its selected templates is refined, not
-        accepted. The check runs on the documentation axis in
-        <code>imas_codex/standard_names/workers.py</code>, before
-        <code>persist_reviewed_docs</code>, and reuses the existing lint.</li>
-      <li><strong>The anchor is pinned for a run.</strong> <code>select_anchor</code> ranks
-        current accepted scores, so a partial run that reset the anchor let a replan pick
-        another member, and a score tie picked a third by id. A run records its anchor, and a
-        continuation of the same scope run reuses it.</li>
-      <li><strong>Members hold the anchor's equation.</strong> When the accepted anchor states
-        the flux-surface-average equation, a member is accepted only if its own display
-        equation for that concept is the anchor's, character for character; a member that
-        states none is unaffected.</li>
+      <li>insertion plus validation of the opening and the equation, together (§6);</li>
+      <li>graph-wide link resolution in the report (§5);</li>
+      <li>the run's anchor pinned (§7).</li>
     </ol>
     <p>
-      <strong>Done when:</strong> on the 17-member boundary-averaged density family, an apply
-      leaves zero lint errors, one opening template and one flux-surface-average equation.
+      Each is its own section with its own negative control. The family is applied again
+      only after all three land. This section keeps the apply mechanism and the outcome they
+      must produce together.
+    </p>
+    <p>
+      <strong>Done when:</strong> after §5, §6 and §7 have landed, an apply over the
+      17-member boundary-averaged density family converges in one pass: zero lint errors,
+      one opening template and one flux-surface-average equation.
       Every member stays accepted on the documentation axis. A second
       <code>--apply</code> over the same scope plans zero calls. An anchor deliberately
       failed in a test leaves its members untouched. A family containing one member of an open
@@ -218,6 +207,18 @@
       rewritten documentation scores below threshold is reported by name, so an unchanged
       column passes only because nothing fell.
     </p>
+
+    <h2 id="s5">§5 — The report resolves link targets against the whole graph</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>The §2 report built its link-target lookup from the scoped names only. On the 17-member family, 19 valid references to names outside the family counted as dead links (<a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-convergence-diagnosis.html">diagnosis</a>). A target is dead only when no <code>StandardName</code> anywhere carries it. The lookup in <code>imas_codex/standard_names/review/audits.py</code> reads the graph-wide name set, and the scoped set stays the scope of what is reported. This is a report-surface fix, so it belongs beside §2; no write path can repair a counting defect in the report.</p><p><strong>Done when:</strong> a test with a two-member scope linking to a third name outside it reports no dead link when the graph carries the third name, and one dead link when it does not. The test fails with the graph-wide set ignored, and that red run is recorded as the negative control.</p>
+
+    <h2 id="s6">§6 — The opening and the equation are written, then checked</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p>The documentation axis accepts on the review score alone. The house-style <code>template_opening</code> finding is only a warning, so 16 of 17 non-conforming openings were accepted. Generation also runs with <code>restates_equation=False</code>, which leaves the flux-surface-average equation free in all 17 members. The diagnosis ranks one repair first, opening and equation together: insertion plus validation. A refusal alone prevents a false acceptance but cannot give a one-pass result.</p><ul><li><strong>Insertion.</strong> The selected template is instantiated with the member's subject and written as the documentation's first line by construction. When the accepted anchor states the flux-surface-average equation, that equation goes into the member's documentation in one fixed form, character for character. A member whose concept has no such equation is unaffected.</li><li><strong>Validation.</strong> Before <code>persist_reviewed_docs</code> in <code>imas_codex/standard_names/workers.py</code>, a document whose first line matches none of its selected templates, or whose display equation for that concept differs from the anchor's, is refined, not accepted. The check reuses the existing <code>template_opening</code> lint.</li></ul><p><strong>Done when:</strong> with the model call stubbed:</p><ul><li>a generated document with a wrong first line is persisted with the instantiated opening;</li><li>a member whose generated equation differs from the anchor's is persisted with the anchor's form;</li><li>a document that still fails either check after insertion is routed to refinement, with the finding as its reason, even at a review score of 1.0;</li><li>a name with no selected template is accepted on score.</li></ul><p>Each test fails with its mechanism removed, and each red run is recorded as a negative control.</p>
+
+    <h2 id="s7">§7 — A run keeps the anchor it chose</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p><code>select_anchor</code> ranks current accepted scores. A partial run that reset the anchor let a replan pick another member, and a score tie picked a third by id. A run records the anchor it chose against its scope run id, in <code>imas_codex/standard_names/harmonize.py</code>, and a continuation of the same scope run reuses it. A new scope run selects normally. Score ranking stays the rule for the first choice.</p><p><strong>Done when:</strong> with the graph stubbed, a recorded anchor is reused after it is reset and another member outscores it, and a family with no recorded anchor selects normally. The reuse test fails with the pin removed, and that red run is recorded as the negative control.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
