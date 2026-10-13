@@ -556,6 +556,63 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "f3539bd3d7771c34a5fbe6ae7052e61d26b0a895",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5043,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261013T154405884559-review-of-scg-jev-domain-benchmark-29b23a81be8c",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5043,
+        "path": "/tmp/reckon-crew-scratch/r-20261013T154405884559-review-of-scg-jev-domain-benchmark-29b23a81be8c"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 1,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "dirty",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [
+            "?? manifest.md"
+          ],
+          "head": "f3539bd3d7771c34a5fbe6ae7052e61d26b0a895",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-scg-jev-domain-benchmark-29b23a81be8c",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:48aada3f9dbce607ecdd1e35b4bbf912190321ee428cba6c909add13209c1639",
+          "status_entries": [
+            {
+              "code": "??",
+              "path": "manifest.md"
+            }
+          ],
+          "withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
