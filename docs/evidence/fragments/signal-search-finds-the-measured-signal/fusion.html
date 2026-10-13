@@ -98,4 +98,18 @@
     <strong>Logs.</strong> Signal arms: <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/signal-fusion-measure/signal_arms.log</code>.
     Docs and code, fused: <code>.../docs_code_pool60.log</code>. Negative control (additive restored): <code>.../negative_control_docs_code_additive.log</code>.
   </p>
+
+  <p id="ssfms-rerank-measure-module-docs-code-command">
+    <strong>The ported measurement re-runs this figure as a module.</strong> The docs and code
+    table above is reproduced by
+    <code>tests/llm/measure_search_rankings.py</code>, which retrieves and reranks the 18 questions
+    in <code>tests/llm/fixtures/docs_code_search_questions.json</code> live and reports the same
+    labelled-only nDCG@10 at pool 60. Run from a worktree, reusing the main checkout's environment:
+
+    <code>UV_PROJECT_ENVIRONMENT=&lt;main&gt;/.venv PYTHONPATH=$PWD uv run --no-sync python -m tests.llm.measure_search_rankings 1 --section docs_code</code>
+
+    Two passes land at 0.5345 and 0.5303 against section 4's 0.5136, and the embedding order under
+    the same labels lands at 0.4627 in both — exactly section 4's 0.4627 — so the fixture and the
+    label rule reproduce the figure and the residual is the judge's ordering, not the measurement.
+  </p>
 </section>

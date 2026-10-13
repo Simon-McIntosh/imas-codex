@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="360" viewBox="0 0 1400 360" font-family="sans-serif">
+  <!-- Axis: one scale, despined. Plot x 300..1300 maps 0..0.6. -->
+  <line x1="300" y1="300" x2="1300" y2="300" stroke="#333" stroke-width="1.2"/>
+  <g font-size="20" fill="#333">
+    <text x="300" y="326">0</text>
+    <text x="633" y="326">0.2</text>
+    <text x="966" y="326">0.4</text>
+    <text x="1283" y="326">0.6</text>
+  </g>
+  <text x="800" y="352" font-size="22" fill="#333" text-anchor="middle">labelled-only nDCG@10 at pool 60</text>
+
+  <!-- ±0.02 band about the recorded 0.5136: 0.4936..0.5336 -> x 1123..1189 -->
+  <rect x="1123" y="60" width="66" height="230" fill="#e8eef6"/>
+  <text x="1156" y="52" font-size="18" fill="#3a6ea5" text-anchor="middle">±0.02 of 0.5136</text>
+
+  <!-- rows: label, bar, value -->
+  <g font-size="20">
+    <text x="290" y="100" text-anchor="end" fill="#333">embedding order</text>
+    <rect x="300" y="83" width="771" height="34" fill="#9aa3ad"/>
+    <text x="1081" y="106" fill="#333">0.4627</text>
+
+    <text x="290" y="160" text-anchor="end" fill="#333">rerank, section 4 recorded</text>
+    <rect x="300" y="143" width="856" height="34" fill="#9aa3ad"/>
+    <text x="1166" y="166" fill="#333">0.5136</text>
+
+    <text x="290" y="220" text-anchor="end" fill="#333">rerank, module pass 2</text>
+    <rect x="300" y="203" width="884" height="34" fill="#3a6ea5"/>
+    <text x="1194" y="226" fill="#3a6ea5">0.5303</text>
+
+    <text x="290" y="280" text-anchor="end" fill="#333">rerank, module pass 1</text>
+    <rect x="300" y="263" width="891" height="34" fill="#3a6ea5"/>
+    <text x="1201" y="286" fill="#3a6ea5">0.5345</text>
+  </g>
+</svg>

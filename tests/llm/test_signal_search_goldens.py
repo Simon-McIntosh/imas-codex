@@ -204,8 +204,21 @@ def unlabelled_in_top_k(question: Question, ranked_ids: list[str], k: int) -> li
 
 
 def require_labelled(arm: str, question: Question, ranked_ids: list[str]) -> None:
-    """Refuse an arm whose top ``k`` holds an unlabelled candidate, naming it."""
+    """Refuse an arm whose top ``k`` holds an arm-unlabelled candidate, naming it."""
     missing = unlabelled_in_top_k(question, ranked_ids, TOP_K)
+    if missing:
+        raise UnlabelledCandidates(arm, question.id, missing)
+
+
+def require_labelled_pool(arm: str, question: Question, pool_ids: list[str]) -> None:
+    """Refuse an arm whose whole pool holds an unlabelled candidate, naming it.
+
+    A rerank arm can lift any of its ``RERANK_POOL`` candidates into its top 10,
+    so its pool is the set of candidates it must have a label for, not the top
+    10 it happens to return. The check names the candidate, so a fixture gap is
+    read as a gap rather than scored as a miss.
+    """
+    missing = unlabelled_in_top_k(question, pool_ids, RERANK_POOL)
     if missing:
         raise UnlabelledCandidates(arm, question.id, missing)
 
@@ -254,10 +267,11 @@ def _additive_rank(
 
     A signal found by both streams takes ``0.7`` of its cosine plus ``0.3`` of
     its text score plus ``0.1``; a text-only signal takes its text score alone
-    and is appended. The result is a stable sort by descending score, so ties
-    keep the vector order first and the text-only appends after, cut at ``k``.
-    Freezing the rule here is what lets the arm keep measuring the pre-fusion
-    additive order after the product ranking moved to rank fusion.
+    and is appended. Ties in the score break by signal id, so the arm's order is
+    a function of its inputs alone rather than of the set's iteration order,
+    which a per-process hash seed would otherwise vary. Freezing the rule here is
+    what lets the arm keep measuring the pre-fusion additive order after the
+    product ranking moved to rank fusion.
     """
     scores = dict(vector_scores)
     signal_ids = list(vector_ids)
@@ -269,7 +283,7 @@ def _additive_rank(
         else:
             scores[sid] = text_score
             signal_ids.append(sid)
-    return sorted(set(signal_ids), key=lambda sid: scores.get(sid, 0), reverse=True)[:k]
+    return sorted(set(signal_ids), key=lambda sid: (-scores.get(sid, 0), sid))[:k]
 
 
 def _additive_streams(gc, embedding, question: Question, k: int):
@@ -349,6 +363,9 @@ def arm_ranking(question: Question, ctx) -> list[str]:
         return keep(fused)[:K]
     if arm in JEV_ARMS:
         pool = keep(fused)[:RERANK_POOL]
+        # The rerank may lift any pool member into its top 10, so the whole
+        # pool must be labelled before the arm is scored, not only the top 10.
+        require_labelled_pool(arm, question, pool)
         if not ctx.spend_jev:
             # No Jev spent: return the pool order and record that the rerank
             # permutation was not applied.
@@ -362,21 +379,23 @@ def arm_ranking(question: Question, ctx) -> list[str]:
 def _rerank_arm(arm: str, question: Question, pool: list[str], ctx) -> list[str]:
     """Reorder ``pool`` with a Jev relevance score (spends on the Jev seat).
 
-    The role-aware arm uses the five-level role question; the generic arm uses
-    the product's existing ``_RERANK_QUESTION`` levels, so the two are measured
-    beside each other on the same pool and query.
+    Both rerank arms judge each candidate through the product's signal state
+    builder, so the switch is decided on the state that ships rather than the
+    generic document state the prototype used. The role-aware arm uses the
+    five-level role question; the generic arm uses the product's existing
+    ``_RERANK_QUESTION`` levels, so the two are measured beside each other on
+    the same pool and query.
     """
     from imas_codex.discovery.base.judgment import rerank_pool
     from imas_codex.llm.search_tools import (
         _RERANK_QUESTION,
         _RERANK_SERVICE,
-        _rerank_state,
         _run_batch,
+        _signal_rerank_state,
     )
     from imas_codex.settings import get_model
 
-    briefs = _signal_texts(ctx.gc, pool)
-    candidates = [{"id": sid, "text": briefs.get(sid, ""), "path": sid} for sid in pool]
+    candidates = _signal_candidates(ctx.gc, pool)
     if arm == "rrf_rerank_role":
         levels = _ROLE_RERANK_LEVELS
         instructions = _ROLE_RERANK_INSTRUCTIONS
@@ -387,7 +406,7 @@ def _rerank_arm(arm: str, question: Question, pool: list[str], ctx) -> list[str]
         rerank_pool(
             question.query,
             candidates,
-            state_for=_rerank_state,
+            state_for=_signal_rerank_state,
             levels=levels,
             instructions=instructions,
             model=get_model("discovery-relevance"),
@@ -398,7 +417,23 @@ def _rerank_arm(arm: str, question: Question, pool: list[str], ctx) -> list[str]
     return [c["id"] for c in ordered]
 
 
-def _signal_texts(gc, ids: list[str]) -> dict[str, str]:
+def _signal_candidates(gc, ids: list[str]) -> list[dict[str, str]]:
+    """The catalogue rows the signal state builder reads, in ``ids`` order."""
+    rows = _signal_rows(gc, ids)
+    return [
+        {
+            "id": sid,
+            "name": rows.get(sid, {}).get("name", ""),
+            "description": rows.get(sid, {}).get("description", ""),
+            "unit": rows.get(sid, {}).get("unit", ""),
+            "data_class": rows.get(sid, {}).get("data_class", ""),
+            "accessor": rows.get(sid, {}).get("accessor", ""),
+        }
+        for sid in ids
+    ]
+
+
+def _signal_rows(gc, ids: list[str]) -> dict[str, dict[str, str]]:
     if not ids:
         return {}
     cypher = """
@@ -406,13 +441,11 @@ def _signal_texts(gc, ids: list[str]) -> dict[str, str]:
         MATCH (s:FacilitySignal {id: sid})
         RETURN s.id AS id, coalesce(s.name, '') AS name,
                coalesce(s.description, '') AS description,
-               coalesce(s.unit, '') AS unit
+               coalesce(s.unit, '') AS unit,
+               coalesce(s.data_class, '') AS data_class,
+               coalesce(s.accessor, '') AS accessor
     """
-    rows = gc.query(cypher, ids=ids)
-    return {
-        r["id"]: " ".join(p for p in (r["name"], r["description"], r["unit"]) if p)
-        for r in rows
-    }
+    return {r["id"]: r for r in gc.query(cypher, ids=ids)}
 
 
 @dataclass
@@ -623,6 +656,36 @@ def test_an_unlabelled_candidate_refuses_the_arm_and_names_it() -> None:
     assert "current_tool" in str(excinfo.value)
 
 
+def _pool_of_sixty() -> tuple[Question, list[str]]:
+    """A toy question whose labels cover a full rerank pool of ``RERANK_POOL``."""
+    pool = [f"sig:{i:02d}" for i in range(RERANK_POOL)]
+    graded = {sid: (3 if i < TOP_K else 1) for i, sid in enumerate(pool)}
+    return Question("toy60", "the quantity", False, graded), pool
+
+
+def test_a_fully_labelled_rerank_pool_is_not_refused() -> None:
+    """Positive control: a pool whose labels are complete is accepted."""
+    q, pool = _pool_of_sixty()
+    require_labelled_pool("rrf_rerank_role", q, pool)
+
+
+def test_a_rerank_arm_refuses_an_unlabelled_candidate_anywhere_in_its_pool() -> None:
+    """A label removed past the top 10 refuses the pool, naming the candidate.
+
+    The rerank may lift any of its 60 candidates into the top 10, so the whole
+    pool must be labelled. This is the mutation the node declares: narrow the
+    refusal back to the top 10 and, with the missing label sitting outside it,
+    the pool checks pass and this test fails.
+    """
+    q, pool = _pool_of_sixty()
+    removed = pool[-1]
+    del q.relevant[removed]
+    with pytest.raises(UnlabelledCandidates) as excinfo:
+        require_labelled_pool("rrf_rerank_role", q, pool)
+    assert removed in excinfo.value.candidates
+    assert "rrf_rerank_role" in str(excinfo.value)
+
+
 # ---------------------------------------------------------------------------
 # The eligible population
 # ---------------------------------------------------------------------------
@@ -704,9 +767,10 @@ def test_four_arm_table_matches_the_control_below_every_arm() -> None:
     """Four-arm table on pooled labels; the control sits below every arm.
 
     Scores the four deterministic arms and the control and asserts the control
-    is below each arm on mean nDCG@10. An unlabelled candidate in any arm's top
-    10 fails the test, naming it, rather than skipping: a skipped table would
-    read as a pass.
+    is below each arm on mean nDCG@10, and that the fused tool stays above the
+    frozen additive rule on mean nDCG@10. An unlabelled candidate in any arm's
+    top 10 fails the test, naming it, rather than skipping: a skipped table
+    would read as a pass.
     """
     arms = ["current_tool", "additive_rule", "vector_only", "rrf"]
     eligible = eligible_signal_ids()
@@ -722,6 +786,14 @@ def test_four_arm_table_matches_the_control_below_every_arm() -> None:
     control = table["random_control"]
     for arm in arms:
         assert table[arm] > control, (arm, table[arm], control)
+    # A regression floor beside the control: fusion is what the product ships,
+    # and the rule it replaced must not catch up to it on the pooled labels.
+    assert table["rrf"] > table["additive_rule"], (
+        "rrf",
+        table["rrf"],
+        "additive_rule",
+        table["additive_rule"],
+    )
 
 
 # ---------------------------------------------------------------------------

@@ -591,6 +591,46 @@ class TestSignalRerankSwitch:
         # The report follows the order the rerank returned.
         assert report.index("tcv:magnetics/bpol") < report.index("tcv:magnetics/ip")
 
+    def test_switch_on_with_k_of_ten_reranks_a_pool_of_sixty(
+        self, mock_gc, mock_encoder, monkeypatch
+    ):
+        """The rerank scores a pool of ``RERANK_POOL`` even when k is 10.
+
+        A signal the fused order places below k can still be lifted into the
+        report, so the pool the rerank judges is not cut at k.
+        """
+        from imas_codex.llm import search_tools
+
+        pool_ids = [f"tcv:pool/{i}" for i in range(2 * RERANK_POOL)]
+        monkeypatch.setattr(
+            search_tools,
+            "_rank_signals",
+            lambda gc, emb, query, facility, k, *a, **kw: (pool_ids[:k], {}),
+        )
+        monkeypatch.setattr(
+            search_tools,
+            "_enrich_signals",
+            lambda gc, ids: [{"id": sid, "name": sid} for sid in ids],
+        )
+        seen: dict[str, int] = {}
+
+        def spy(query, candidates, **kwargs):
+            seen["pool"] = len(candidates)
+            return list(candidates), None
+
+        monkeypatch.setattr(search_tools, "rerank_candidates", spy)
+
+        _search_signals(
+            query="plasma current",
+            facility="tcv",
+            k=10,
+            rerank=True,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+
+        assert seen["pool"] == RERANK_POOL
+
 
 class TestSignalRerankState:
     """The signal state carries the catalogue row the role question reads."""
