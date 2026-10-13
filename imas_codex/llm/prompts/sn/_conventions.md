@@ -6,7 +6,7 @@ Use these entries from the conventions registry for this item.
 ### Concept: {{ concept.phrase }} (`{{ concept.token }}`)
 - Definition: {{ concept.definition }}
 - Canonical equation: `{{ concept.equation }}`
-- Equation placement: {% if concept.restates_equation %}write this equation in the documentation{% else %}name the concept; do not restate its equation unless needed to define this quantity{% endif %}
+- Equation placement: {% if concept.restates_equation %}write this equation in the documentation{% else %}name the concept and link to it; write no display equation for it, in any form, and do not restate it in prose{% endif %}
 {% for symbol in concept.symbols %}- `{{ symbol.symbol }}`: {{ symbol.meaning }}
 {% endfor %}{% if concept.forbidden_variants %}- Forbidden variants: {{ concept.forbidden_variants | join('; ') }}
 {% endif %}

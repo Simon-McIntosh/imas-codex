@@ -518,6 +518,7 @@ class HouseStyleFindingClass(StrEnum):
     FORBIDDEN_SYMBOL_SPELLING = "forbidden_symbol_spelling"
     FORBIDDEN_LOCUS_GLOSS = "forbidden_locus_gloss"
     TEMPLATE_OPENING = "template_opening"
+    RESTATED_EQUATION = "restated_equation"
 
 
 @dataclass(frozen=True)
@@ -601,6 +602,124 @@ def _forbidden_variant_findings(
     return findings
 
 
+_LATEX_COMMAND_RE = re.compile(r"\\([A-Za-z]+)")
+
+# Commands that size, space or decorate an expression rather than name an
+# operation, so two spellings of one equation differ only in them.
+_LATEX_LAYOUT_COMMANDS = frozenset(
+    {
+        "left",
+        "right",
+        "big",
+        "Big",
+        "bigg",
+        "Bigg",
+        "displaystyle",
+        "frac",
+        "dfrac",
+        "tfrac",
+        "mathrm",
+        "mathbf",
+        "mathcal",
+        "mathit",
+        "text",
+        "operatorname",
+        "bar",
+        "hat",
+        "tilde",
+        "vec",
+        "overline",
+        "quad",
+        "qquad",
+        "lvert",
+        "rvert",
+        "cdot",
+        "times",
+    }
+)
+_LATEX_COMMAND_ALIASES = {"oint": "int", "oiint": "int", "iint": "int"}
+
+
+def _equation_operation_commands(equation: str, symbols: set[str]) -> set[str]:
+    """Name the operations a LaTeX expression performs, spelling aside.
+
+    A command that is part of a declared symbol, or that only lays the
+    expression out, is not an operation.
+    """
+
+    return {
+        _LATEX_COMMAND_ALIASES.get(command, command)
+        for command in _LATEX_COMMAND_RE.findall(equation)
+        if command not in symbols and command not in _LATEX_LAYOUT_COMMANDS
+    }
+
+
+_LATEX_SPACING_RE = re.compile(r"\\[,;:!]|\\(?:left|right|displaystyle)\b|\s+")
+
+
+def _spacing_free(equation: str) -> str:
+    return _LATEX_SPACING_RE.sub("", equation)
+
+
+def _concept_equation_signature(concept: Any) -> set[str]:
+    """Return the operation commands that identify an equation of a concept.
+
+    The left-hand side names the operator being applied, so it identifies the
+    concept in whatever form the right-hand side is written. A concept whose
+    left-hand side carries no operation command is identified by its whole
+    canonical equation.
+    """
+
+    symbols: set[str] = set()
+    for symbol in concept.symbols:
+        symbols.update(_LATEX_COMMAND_RE.findall(symbol.symbol))
+    left, _, _ = concept.equation.partition("=")
+    signature = _equation_operation_commands(left, symbols)
+    if signature:
+        return signature
+    return _equation_operation_commands(concept.equation, symbols)
+
+
+def _restated_equation_findings(
+    concepts: tuple[Any, ...],
+    text: str,
+) -> list[HouseStyleFinding]:
+    """Flag a display equation written for a concept that is named, not restated.
+
+    A concept whose entry does not restate its equation is applied by a name and
+    linked to; a display equation performing its operation is a restatement
+    whatever its spelling, the registry's canonical form included.
+    """
+
+    findings: list[HouseStyleFinding] = []
+    for concept in concepts:
+        if concept.restates_equation:
+            continue
+        signature = _concept_equation_signature(concept)
+        symbols = {
+            command
+            for symbol in concept.symbols
+            for command in _LATEX_COMMAND_RE.findall(symbol.symbol)
+        }
+        canonical = _spacing_free(concept.equation)
+        for equation in _DISPLAY_MATH_RE.findall(text):
+            commands = _equation_operation_commands(equation, symbols)
+            performs_operation = bool(signature) and signature <= commands
+            if performs_operation or canonical in _spacing_free(equation):
+                findings.append(
+                    HouseStyleFinding(
+                        finding_class=HouseStyleFindingClass.RESTATED_EQUATION,
+                        registry_entry=f"concept:{concept.token}",
+                        detail=(
+                            f"a display equation restates '{concept.phrase}', "
+                            "which is named and linked, not restated"
+                        ),
+                    )
+                )
+                break
+    return findings
+
+
 def _forbidden_symbol_findings(
     notation: tuple[Any, ...],
     text: str,
@@ -677,6 +796,7 @@ def house_style_findings(
         *_forbidden_variant_findings(conventions.concepts, prose),
         *_forbidden_symbol_findings(conventions.notation, prose),
         *_template_opening_findings(conventions.templates, documentation),
+        *_restated_equation_findings(conventions.concepts, prose),
     ]
 
 

@@ -10572,6 +10572,50 @@ async def _release_docs_review_claim(item: dict[str, Any]) -> None:
     )
 
 
+def _documentation_conformance_note(item: dict[str, Any]) -> str | None:
+    """Name the registry findings that bar a reviewed document from acceptance.
+
+    A review score judges the prose; it does not check the opening against the
+    selected template, a forbidden equation variant, or an equation written for
+    a concept the registry says is named and linked. Those are decided here, on
+    the same findings the audit report carries. A name the grammar cannot parse
+    selects no registry entry and so carries no finding.
+    """
+    from imas_standard_names.grammar.parser import ParseError
+
+    from imas_codex.standard_names.docs_gates import (
+        HouseStyleFindingClass,
+        conformance_findings,
+    )
+
+    barring = {
+        HouseStyleFindingClass.TEMPLATE_OPENING,
+        HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT,
+        HouseStyleFindingClass.FORBIDDEN_LOCUS_GLOSS,
+        HouseStyleFindingClass.RESTATED_EQUATION,
+    }
+    try:
+        findings = conformance_findings(
+            item["id"],
+            description=item.get("description") or "",
+            documentation=item.get("documentation") or "",
+        )
+    except ParseError:
+        logger.debug("review_docs: no registry selection for %s", item["id"])
+        return None
+    details = [
+        f"{finding.finding_class.value}: {finding.detail} [{finding.registry_entry}]"
+        for finding in findings
+        if finding.finding_class in barring
+    ]
+    if not details:
+        return None
+    return (
+        "documentation does not conform to the conventions registry — "
+        "correct each finding: " + "; ".join(details)
+    )
+
+
 async def process_review_docs_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -10642,15 +10686,36 @@ async def process_review_docs_batch(
             from imas_codex.standard_names.graph_ops import write_reviews
 
             await _asyncio.to_thread(write_reviews, quorum["records"])
+            score = quorum["winning_score"]
+            comments = quorum["winning_comments"]
+            comments_per_dim = quorum["winning_comments_per_dim"]
+            conformance_note = _documentation_conformance_note(item)
+            if conformance_note is not None:
+                # Clamp below the accept threshold so the document is routed
+                # to refinement as a below-threshold score is, carrying the
+                # finding as the reason the refiner reads.
+                score = min(score, DEFAULT_MIN_SCORE - 0.001)
+                comments = (
+                    f"{comments}\n{conformance_note}" if comments else conformance_note
+                )
+                comments_per_dim = {
+                    **(comments_per_dim or {}),
+                    "registry_conformance": conformance_note,
+                }
+                logger.info(
+                    "review_docs: %s held from acceptance — %s",
+                    sn_id,
+                    conformance_note,
+                )
             new_stage = await _asyncio.to_thread(
                 persist_reviewed_docs,
                 sn_id=sn_id,
                 claim_token=claim_token,
                 claim_seq=item.get("claim_seq"),
-                score=quorum["winning_score"],
+                score=score,
                 scores=quorum["winning_scores"],
-                comments=quorum["winning_comments"],
-                comments_per_dim=quorum["winning_comments_per_dim"],
+                comments=comments,
+                comments_per_dim=comments_per_dim,
                 model=quorum["canonical_model"],
                 min_score=DEFAULT_MIN_SCORE,
                 rotation_cap=DEFAULT_REFINE_ROTATIONS,
