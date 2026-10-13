@@ -1,0 +1,164 @@
+<!-- The second selection arm: a mandatory base, options that carry their
+     meaning, a shortlisted base Choice, and later slots offered only tokens that
+     compose with those already chosen. Constrains the mechanism design only; it
+     makes no claim about which arm selects tokens more accurately.
+     Module: imas_codex/standard_names/segment_selection.py.
+     Tests: tests/standard_names/test_segment_selection.py. -->
+<section id="ssog-segment-arm2" data-reckon="evidence">
+  <h2 id="ssog-segment-arm2-heading">Segment selection, second arm: meaning-bearing options and grammar-valid slots</h2>
+
+  <p id="ssog-segment-arm2-body">
+    The first arm asked six independent Choices over each slot's whole vocabulary
+    and let the grammar judge the result. This arm constrains what a Choice is
+    offered. The base slot offers no <code>none</code>, so a source can never
+    come back without a base. Every option is the token plus its meaning — read
+    at call time from ISN's public loaders for physical bases, geometry carriers
+    and the locus registry, falling through to the concept registry and to the
+    token's registered aliases. The base is offered over an embedding shortlist
+    of the source's most similar base tokens rather than the full enum, and the
+    item records whether its expected base survived retrieval. Each later slot is
+    asked only after the base is chosen, and is offered only tokens that
+    <em>compose</em> with the tokens already chosen, checked through
+    <code>compose_canonical_ir</code>. Optional slots keep <code>none</code>, and
+    their question says most names leave the slot empty.
+  </p>
+
+  <p id="ssog-segment-arm2-coverage">
+    <strong>What meaning the vocabulary actually carries.</strong>
+    <code>definition_coverage()</code> reports, per slot, how many offered tokens
+    carry a definition from any of those sources. The count is the honest one: a
+    token whose only meaning is its registered aliases reports zero, because an
+    alias is a second spelling rather than a definition. Measured at head:
+  </p>
+
+  <table id="ssog-segment-arm2-coverage-table">
+    <caption>Tokens carrying a definition, per slot</caption>
+    <thead>
+      <tr><th>Slot</th><th>With definition</th><th>Offered</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>physical_base</td><td>30</td><td>179</td></tr>
+      <tr><td>component</td><td>3</td><td>23</td></tr>
+      <tr><td>subject</td><td>2</td><td>56</td></tr>
+      <tr><td>locus</td><td>187</td><td>187</td></tr>
+      <tr><td>process</td><td>2</td><td>82</td></tr>
+      <tr><td>operator</td><td>14</td><td>48</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssog-segment-arm2-mechanisms">
+    <strong>Each rule is guarded by a test that fails when the rule is removed.</strong>
+    <code>SS_SEGMENT_MUTATION</code> names one rule; the test that guards it must
+    fail with that mutation set and pass without it. The gate is
+    <code>tests/standard_names/test_segment_selection.py</code> plus the
+    grammar-adapter tests that reference <code>compose_canonical_ir</code>
+    (<code>test_lossless_grammar_adapter.py</code>,
+    <code>test_operator_compose_round_trip.py</code>).
+  </p>
+
+  <table id="ssog-segment-arm2-mutation-table">
+    <caption>Each rule, and the tests that fail when it is disabled in
+      <code>SS_SEGMENT_MUTATION</code>, with no mutation set at all.</caption>
+    <thead>
+      <tr><th>Mutation</th><th>Rule it removes</th><th>Tests that fail</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>base-offers-none</code></td>
+        <td>the base slot offers no <code>none</code></td>
+        <td><code>test_base_choice_offers_no_none</code>,
+            <code>test_base_is_asked_over_the_shortlist_and_membership_is_recorded</code></td>
+      </tr>
+      <tr>
+        <td><code>bare-option-text</code></td>
+        <td>each option carries its meaning</td>
+        <td><code>test_every_offered_option_carries_its_meaning</code></td>
+      </tr>
+      <tr>
+        <td><code>no-shortlist</code></td>
+        <td>the base is offered over an embedding shortlist</td>
+        <td><code>test_base_shortlist_ranks_by_similarity</code>,
+            <code>test_base_is_asked_over_the_shortlist_and_membership_is_recorded</code></td>
+      </tr>
+      <tr>
+        <td><code>no-grammar-filter</code></td>
+        <td>later slots offer only composing tokens</td>
+        <td><code>test_later_slot_offers_only_tokens_that_compose</code></td>
+      </tr>
+      <tr>
+        <td><code>no-optional-none</code></td>
+        <td>optional slots keep <code>none</code></td>
+        <td><code>test_later_slot_offers_only_tokens_that_compose</code>,
+            <code>test_optional_slot_can_be_left_empty</code>,
+            <code>test_grammar_refusal_is_recorded_and_not_repaired</code>,
+            <code>test_beam_keeps_the_three_best_paths_by_geometric_mean</code>,
+            <code>test_a_slot_with_no_surviving_path_is_that_items_failure</code></td>
+      </tr>
+      <tr>
+        <td><code>no-beam-prune</code></td>
+        <td>the beam keeps the three best paths</td>
+        <td><code>test_beam_keeps_the_three_best_paths_by_geometric_mean</code></td>
+      </tr>
+      <tr>
+        <td><code>no-grammar-refusal</code></td>
+        <td>a grammar refusal is recorded, not repaired</td>
+        <td>seven tests, including
+            <code>test_grammar_refusal_is_recorded_and_not_repaired</code> and
+            <code>test_an_unknown_expected_base_is_not_taken_as_a_miss</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="ssog-segment-arm2-smoke-heading">Live smoke — five sources</h3>
+  <p id="ssog-segment-arm2-smoke-body">
+    Five sources chosen to exercise the near-synonym distinctions the lead named
+    — <code>density</code>/<code>number_density</code>,
+    <code>vertical_coordinate</code>/<code>height</code>,
+    <code>toroidal_angle</code>/<code>angle</code> — run once through
+    <code>select_segments</code>. The whole run booked
+    <strong>USD 0.00280</strong> of decisions cost, under the USD 0.10 ceiling.
+    Every item returned a base: the first row's failure is a grammar refusal with
+    a base already chosen, not an absent base — the distinction the mandatory
+    base exists to draw, and the first arm's largest loss (68 of 434 items). The
+    chosen token is not always the target's own spelling; which arm selects more
+    accurately is the measurement node's question, not this one's.
+  </p>
+  <table id="ssog-segment-arm2-smoke-table">
+    <caption>Chosen tokens and the rendered name, per source</caption>
+    <thead>
+      <tr><th>Target</th><th>Source path</th><th>Chosen tokens</th><th>Rendered name</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>electron_density</code></td>
+        <td><code>spectrometer_visible/channel/polarization_spectroscopy/n_e</code></td>
+        <td><code>number_density</code></td>
+        <td><em>grammar refused: generic base needs qualification</em></td>
+      </tr>
+      <tr>
+        <td><code>line_integrated_electron_number_density</code></td>
+        <td><code>equilibrium/time_slice/constraints/n_e_line/reconstructed</code></td>
+        <td><code>grating_line_density</code> · <code>electron</code></td>
+        <td><code>electron_grating_line_density</code></td>
+      </tr>
+      <tr>
+        <td><code>height_of_poloidal_field_coil</code></td>
+        <td><code>pf_active/coil/element/geometry/rectangle/height</code></td>
+        <td><code>elongation</code> · <code>vertical</code></td>
+        <td><code>vertical_elongation</code></td>
+      </tr>
+      <tr>
+        <td><code>toroidal_angle_of_measurement_position</code></td>
+        <td><code>summary/heating_current_drive/nbi/position/phi/value</code></td>
+        <td><code>phase</code> · <code>toroidal</code> · <code>neutral_beam_injection</code></td>
+        <td><code>toroidal_phase_due_to_neutral_beam_injection</code></td>
+      </tr>
+      <tr>
+        <td><code>saturated_ion_current_density</code></td>
+        <td><code>langmuir_probes/embedded/j_i_saturation</code></td>
+        <td><code>current_density</code></td>
+        <td><code>current_density</code></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
