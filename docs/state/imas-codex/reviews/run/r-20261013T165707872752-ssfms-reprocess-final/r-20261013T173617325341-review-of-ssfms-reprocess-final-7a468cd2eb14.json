@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite gate logs. The reviewed manifest carries neither arm (both fields empty): its declared write paths are two docs fragments and a figure under docs/figures/, they reach no test path, and the node ran no pytest gate. There is therefore no head arm to diff and no added failure ids are derivable. The node's measure is a live graph census, recorded under the run directory in logs/first-census.log, logs/census-after-enrich.log and logs/final-census.log.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T17:44:35.325Z",
+  "dispatched_at": "2026-10-13T17:36:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-final.html",
+      "line": 8,
+      "severity": "follow-on",
+      "text": "the fragment states that \"The 128 were enriched with imas-codex discover run jt-60sa --only signals --flush --focus focus-128.json\", but the gate log it cites records a different number: logs/enrich-128.log:865 reads '0 scanned, 1694 enriched, 0 checked' and the log never mentions the focus file or the figure 128. The record's enrichment.focused_signals=128 (reprocess-progress-final.json:22) thus understates the population actually pushed through the pipeline by 1566 signals. The final census is unaffected (it reads discovered=0 and mismatch=0), so this does not hold the node, but the \u00a712 accounting that records signals-per-minute and spend-per-signal is built on the wrong denominator."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-final.html",
+      "line": 51,
+      "severity": "follow-on",
+      "text": "the negative-control paragraph presents the enriched-before-the-fix count as a control, but it reads 0 at both the first census and the final census, so it is a value that does not move at this node and cannot fail; the record does disclose this (\"recorded here at 0 against the sample node's starting 1441\"), and the node's own moving control is the first census's non-zero discovered=128/described_no_role=6911, so the disclosure is accurate, but the table row 'enriched before 2026-10-11T21:16:46Z 0 0' invites a reader to read a control where none can fire."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read against base e01a93fff; the single commit 7a468cd2e adds only the fragment HTML (62 lines), reprocess-progress-final.json (63 lines) and docs/figures/.../final-census.svg (1348 lines), all inside the declared scope.",
+    "done_when": "the done_when's measures are census_signal_embeddings(facility='jt-60sa')=15111/no mismatch, no signal at discovered, every signal enriched_at >= 2026-10-13T11:53:35Z, and 0 enriched before 2026-10-11T21:16:46Z; logs/final-census.log records all four (n=15111 mismatch=0, discovered=0, at_or_after_start=15111, before_fix=0).",
+    "goal": "the node goal is to finish the JT-60SA reprocess so the facility census reads clean; the landed record and the three census logs it cites read discovered=0, roles missing=0 and embedding mismatch=0 over 15111 signals, so the census is clean.",
+    "manifest": "read; status complete, one commit 7a468cd2eb14decd565048efddbe22a76186b0b7, the five census/enrich/backfill logs recorded under the run dir, declared negative control (first census must be non-zero) met at discovered=128/described_no_role=6911, spend $0.224 of $2.00, and no suite arm because the write paths reach no test path.",
+    "write_paths": "the manifest declares the fragment HTML, reprocess-progress-final.json and the figures dir docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-final; git show --stat 7a468cd2e lists exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "no test or assertion is added by the documentation-only diff, so nothing fails if the pipeline that produced these counts regresses; the only guard is the manual negative-control check recorded in reprocess-progress-final.json:51 (first census must read non-zero), which did fire at 128/6911 but is not itself executable.",
+    "evidence": "the three census logs corroborate the done-what: first-census reads discovered=128/described_no_role=6911, final reads 0/0, so the gate is independent live measurements; but logs/enrich-128.log:865 reads '0 scanned, 1694 enriched' while ssfms-reprocess-final.html:8 and reprocess-progress-final.json:22 report only the 128 focused signals, so the record understates the enriched population.",
+    "fit": "the fragment follows the evidence-fragment convention (section data-reckon ids, a live-read table, a figure) and final-census.svg follows the plotting style (14in at dpi=100, despined, no grid, direct count labels, neutral grey vs muted teal).",
+    "goal_fidelity": "logs/final-census.log reads total=15111, discovered=0, roles missing=0, embeddings mismatch=0 and at_or_after_start=15111, which is the clean facility_census the goal names.",
+    "reuse": "the diff adds no definition and forks no capability; the measurement reused the owners \u2014 census_signal_roles, census_signal_embeddings and backfill_signal_roles in imas_codex/discovery/signals/parallel.py:2005,1866,2033 \u2014 rather than reimplementing them, so there is no duplicate to name a competitor for.",
+    "scope_discipline": "git show --stat 7a468cd2e lists only the fragment HTML, reprocess-progress-final.json and final-census.svg, each inside the declared fence grant and summing to 1473 insertions with no deletions elsewhere."
+  },
+  "node": "review-of-ssfms-reprocess-final-7a468cd2eb14",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to finish the JT-60SA reprocess so the facility census reads clean; logs/final-census.log reads total=15111, discovered=0, roles missing=0, embeddings mismatch=0, which is that clean census.\nVERDICT done_when: the done_when's measures are census_signal_embeddings(facility='jt-60sa')=15111/no mismatch, no signal at discovered, every signal enriched_at >= 2026-10-13T11:53:35Z, and 0 enriched before 2026-10-11T21:16:46Z; logs/final-census.log records all four (n=15111 mismatch=0, discovered=0, at_or_after_start=15111, before_fix=0).\nVERDICT write_paths: the manifest declares the fragment HTML, reprocess-progress-final.json and the figures dir docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-final; git show --stat 7a468cd2e lists exactly those three files and nothing else.\nVERDICT manifest: read; status complete, one commit 7a468cd2eb14decd565048efddbe22a76186b0b7, the five census/enrich/backfill logs recorded under the run dir, declared negative control met at discovered=128/described_no_role=6911, spend $0.224 of $2.00, and no suite arm because the write paths reach no test path.\nVERDICT diff: read against base e01a93fff; the single commit 7a468cd2e adds only the fragment HTML (62 lines), reprocess-progress-final.json (63 lines) and docs/figures/.../final-census.svg (1348 lines), all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: logs/final-census.log reads total=15111, discovered=0, roles missing=0, embeddings mismatch=0 and at_or_after_start=15111, which is the clean facility census the goal names.\nSCORE evidence: 15\nJUSTIFICATION evidence: the three census logs corroborate the done-what (first 128/6911, final 0/0) as independent live reads, but logs/enrich-128.log:865 reads '0 scanned, 1694 enriched' while ssfms-reprocess-final.html:8 and reprocess-progress-final.json:22 report only the 128 focused signals, so the record understates the enriched population.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 7a468cd2e lists only the fragment HTML, reprocess-progress-final.json and final-census.svg, each inside the declared fence grant.\nSCORE durability: 9\nJUSTIFICATION durability: the documentation-only diff adds no test or assertion, so nothing fails on a pipeline regression; the only guard is the manual negative-control check at reprocess-progress-final.json:51, which fired (128/6911) but is not itself executable.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment follows the evidence-fragment convention and final-census.svg follows the plotting style (14in, despined, no grid, direct count labels), though the figure carries its colours as module constants rather than through a repo style sheet.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition; the measurement reused the owners census_signal_roles/census_signal_embeddings/backfill_signal_roles at imas_codex/discovery/signals/parallel.py:2005,1866,2033 rather than forking them.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-final.html:8 follow-on: the fragment says the 128 were enriched with \"--focus focus-128.json\", but its gate log logs/enrich-128.log:865 reads '0 scanned, 1694 enriched' and never mentions the focus file or 128, so the record understates the enriched population by 1566 signals and the \u00a712 per-signal accounting rests on the wrong denominator; the final census is unaffected so it does not hold the node.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-final.html:51 follow-on: the negative-control paragraph presents the enriched-before-the-fix count as the control, but it reads 0 at both censuses so it is a value that cannot move at this node; the disclosure is accurate and the node's real moving control is the first census's 128/6911, so this is a clarity defect, not a correctness one.",
+  "review_run_id": "r-20261013T173617325341-review-of-ssfms-reprocess-final-7a468cd2eb14",
+  "reviewed_base_sha": "e01a93fff02001e42f84622ba165fd0a65827c94",
+  "reviewed_head_sha": "7a468cd2eb14decd565048efddbe22a76186b0b7",
+  "reviewed_run_id": "r-20261013T165707872752-ssfms-reprocess-final",
+  "reviewer_run_id": "r-20261013T173617325341-review-of-ssfms-reprocess-final-7a468cd2eb14",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T165707872752-ssfms-reprocess-final/logs/first-census.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T165707872752-ssfms-reprocess-final/logs/census-after-enrich.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T165707872752-ssfms-reprocess-final/logs/enrich-128.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T165707872752-ssfms-reprocess-final/logs/role-backfill.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T165707872752-ssfms-reprocess-final/logs/final-census.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T17:50:00+00:00",
+  "total": 100
+}
