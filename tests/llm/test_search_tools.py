@@ -31,6 +31,7 @@ from imas_codex.llm.search_tools import (
     _ROLE_RERANK_QUESTION,
     _SIGNAL_RERANK_DESCRIPTION_CHARS,
     RERANK_POOL,
+    SIGNAL_ROLES,
     SIGNAL_VECTOR_POOL,
     _enrich_code_chunks,
     _enrich_wiki_chunks,
@@ -496,6 +497,130 @@ class TestSearchSignals:
 
 
 # ---------------------------------------------------------------------------
+# Signal role filter
+# ---------------------------------------------------------------------------
+
+
+class _RoleAwareSignalClient:
+    """Signal client that honours the role predicate written into the Cypher.
+
+    Every stream returns the same three signals, one a reference and two
+    measurements. Whether the reference leaks into the result depends on
+    reading the role predicate out of the query text and applying it, so a
+    query that drops the predicate returns it. The bound ``$role`` parameter
+    alone does not narrow the result here, because that is not what the graph
+    does either.
+    """
+
+    _ROLES = {
+        "jt-60sa:mag/ip": "measured",
+        "jt-60sa:mag/bpol": "measured",
+        "jt-60sa:ps/refip": "reference_or_setpoint",
+    }
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, dict[str, Any]]] = []
+
+    def query(self, query: str, **params: Any) -> list[dict[str, Any]]:
+        self.calls.append((query, params))
+        ids = list(self._ROLES)
+        if "signal_role = $role" in query:
+            ids = [i for i in ids if self._ROLES[i] == params.get("role")]
+        limit = params.get("limit")
+        if isinstance(limit, int):
+            ids = ids[:limit]
+        return [{"id": i, "score": 0.9} for i in ids]
+
+
+class TestSignalRoleFilter:
+    """role= keeps only signals carrying that stored role, in both streams.
+
+    The predicate is applied inside the vector and full-text branches, before
+    the rank fusion cut, so the reference is dropped from both and a
+    role-filtered search still draws its hits from the fused pool.
+    """
+
+    def test_role_search_returns_only_signals_of_that_role(self):
+        gc = _RoleAwareSignalClient()
+
+        ids, _ = _rank_signals(
+            gc, [0.1] * 1024, "plasma current", "jt-60sa", 10, role="measured"
+        )
+
+        assert ids == ["jt-60sa:mag/ip", "jt-60sa:mag/bpol"]
+        assert "jt-60sa:ps/refip" not in ids
+
+    def test_role_search_narrows_the_vector_and_fulltext_streams(self):
+        gc = _RoleAwareSignalClient()
+
+        _rank_signals(
+            gc, [0.1] * 1024, "plasma current", "jt-60sa", 10, role="measured"
+        )
+
+        vector_queries = [
+            q for q in gc.calls if "facility_signal_desc_embedding" in q[0]
+        ]
+        text_queries = [q for q in gc.calls if "facility_signal_text" in q[0]]
+        assert vector_queries, "no vector stream query"
+        assert text_queries, "no text stream query"
+        for query, params in vector_queries + text_queries:
+            assert "signal_role = $role" in query
+            assert params["role"] == "measured"
+
+    def test_unfiltered_search_keeps_every_role(self):
+        gc = _RoleAwareSignalClient()
+
+        ids, _ = _rank_signals(gc, [0.1] * 1024, "plasma current", "jt-60sa", 10)
+
+        assert "jt-60sa:ps/refip" in ids
+
+    def test_role_filter_widens_the_ann_cut(self):
+        gc = _RoleAwareSignalClient()
+
+        _rank_signals(
+            gc, [0.1] * 1024, "plasma current", "jt-60sa", 10, role="measured"
+        )
+
+        vector_queries = [
+            (query, params)
+            for query, params in gc.calls
+            if "facility_signal_desc_embedding" in query
+        ]
+        assert vector_queries, "no vector stream query"
+        _, params = vector_queries[0]
+        assert params["k"] == max(SIGNAL_VECTOR_POOL * 2, 50)
+        assert params["limit"] == SIGNAL_VECTOR_POOL
+
+    def test_role_outside_the_six_is_refused_naming_the_set(self):
+        mock_gc = MagicMock()
+        mock_gc.query = MagicMock(side_effect=_route_query({}))
+
+        result = _search_signals(
+            query="plasma current",
+            facility="jt-60sa",
+            role="not_a_role",
+            gc=mock_gc,
+        )
+
+        assert "not_a_role" in result
+        for role in SIGNAL_ROLES:
+            assert role in result
+        # The refusal happens before any graph work.
+        assert mock_gc.query.call_count == 0
+
+    def test_each_of_the_six_roles_is_accepted(self):
+        for role in SIGNAL_ROLES:
+            gc = _RoleAwareSignalClient()
+            ids, _ = _rank_signals(
+                gc, [0.1] * 1024, "plasma current", "jt-60sa", 10, role=role
+            )
+            expected = [
+                i for i, r in _RoleAwareSignalClient._ROLES.items() if r == role
+            ]
+            assert ids == expected
+
+
+# ---------------------------------------------------------------------------
 # Formatter unit tests
 # ---------------------------------------------------------------------------
 
@@ -710,6 +835,18 @@ class TestSignalRerankState:
             "data_class": "",
             "accessor": "",
         }
+
+    def test_state_carries_the_stored_role_when_present(self):
+        candidate = {"name": "ip", "signal_role": "measured"}
+
+        state = _signal_rerank_state("plasma current", candidate)
+
+        assert state["candidate"]["role"] == "measured"
+
+    def test_state_omits_the_role_when_the_signal_carries_none(self):
+        state = _signal_rerank_state("q", {"name": "ip", "signal_role": None})
+
+        assert "role" not in state["candidate"]
 
 
 class TestFormatSignalsReport:

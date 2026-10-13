@@ -21,6 +21,7 @@ from neo4j.exceptions import ClientError, DatabaseError, ServiceUnavailable
 from imas_codex.embeddings.encoder import EmbeddingBackendError, Encoder
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.domain_queries import signal_vector_search_block
+from imas_codex.graph.models import SignalRole
 from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.graph.vector_search import build_vector_search
 from imas_codex.llm.search_formatters import (
@@ -89,6 +90,16 @@ _RERANK_CONCURRENCY = 32
 
 # The seat the code-relevance judgements already use; the rerank adds no seat.
 _RERANK_SERVICE = "facility-discovery"
+
+# The six physical roles a signal's stored ``signal_role`` may take, in the
+# schema's own order. A ``role=`` search accepts one of these and refuses
+# anything else, naming the set, rather than returning an empty report that
+# reads as "no such signal".
+SIGNAL_ROLES = tuple(role.value for role in SignalRole)
+
+_SIGNAL_ROLE_REFUSAL = (
+    "Unknown role {role!r}. A signal role is one of: " + ", ".join(SIGNAL_ROLES) + "."
+)
 
 _RERANK_QUESTION = {
     "relevance_grade": {
@@ -195,20 +206,22 @@ def _signal_rerank_state(query: str, candidate: dict[str, Any]) -> dict[str, Any
     name, its description, its unit and its data class, plus the accessor that
     says how the value is read. The role-aware question turns on the data
     class, so a commanded or reference value is told apart from a measurement
-    of the same quantity.
+    of the same quantity. When the signal carries a stored role, the state
+    includes it so the judgement sees the measured role beside the raw fields.
     """
-    return {
-        "query": query,
-        "candidate": {
-            "name": candidate.get("name") or "",
-            "description": (candidate.get("description") or "")[
-                :_SIGNAL_RERANK_DESCRIPTION_CHARS
-            ],
-            "unit": candidate.get("unit") or "",
-            "data_class": candidate.get("data_class") or "",
-            "accessor": candidate.get("accessor") or "",
-        },
+    candidate_state = {
+        "name": candidate.get("name") or "",
+        "description": (candidate.get("description") or "")[
+            :_SIGNAL_RERANK_DESCRIPTION_CHARS
+        ],
+        "unit": candidate.get("unit") or "",
+        "data_class": candidate.get("data_class") or "",
+        "accessor": candidate.get("accessor") or "",
     }
+    role = candidate.get("signal_role")
+    if role:
+        candidate_state["role"] = role
+    return {"query": query, "candidate": candidate_state}
 
 
 def _run_batch(coro: Any) -> Any:
@@ -312,18 +325,22 @@ def _rank_signals(
     k: int,
     diagnostic: str | None = None,
     physics_domain: str | None = None,
+    role: str | None = None,
 ) -> tuple[list[str], dict[str, float]]:
     """Rank facility signals by reciprocal rank fusion; return (ordered ids, scores).
 
     The vector stream over signal descriptions and the full-text keyword stream
     are fused by rank. Each stream is over-fetched before the fusion and the
     fused order is cut at ``k``. The fused mass is the returned score.
+
+    ``diagnostic``, ``physics_domain`` and ``role`` narrow both streams before
+    the fusion cut, so a filtered search still draws up to ``k`` signals.
     """
     signal_ids, _ = _vector_search_signals(
-        gc, embedding, facility, SIGNAL_VECTOR_POOL, diagnostic, physics_domain
+        gc, embedding, facility, SIGNAL_VECTOR_POOL, diagnostic, physics_domain, role
     )
 
-    text_signals = _text_search_signals(gc, query, facility, SIGNAL_TEXT_POOL)
+    text_signals = _text_search_signals(gc, query, facility, SIGNAL_TEXT_POOL, role)
 
     fused = rrf_fuse([signal_ids, text_signals])
     ranked = [sid for sid, _ in fused][:k]
@@ -337,6 +354,7 @@ def _search_signals(
     *,
     diagnostic: str | None = None,
     physics_domain: str | None = None,
+    role: str | None = None,
     check_status: str | None = None,
     error_type: str | None = None,
     include_check_details: bool = False,
@@ -351,6 +369,11 @@ def _search_signals(
     DataAccess, Diagnostic, SignalNode, and IMASNode traversals,
     then formats the result.
 
+    ``role`` keeps only signals whose stored ``signal_role`` is that role, one
+    of :data:`SIGNAL_ROLES`; the predicate narrows both the vector and keyword
+    streams before the fusion cut, so a role-filtered search still returns up
+    to ``k`` signals. A role outside the six is refused, naming the set.
+
     ``rerank`` reorders the fused pool through the shared Jev relevance rerank
     on the role-aware signal question, spending on the discovery-relevance
     seat. A direct caller leaves it off, and the server passes the server's own
@@ -362,6 +385,9 @@ def _search_signals(
         error_type: filter by error classification (e.g. "not_available_for_shot")
         include_check_details: include CHECKED_WITH relationship data in results
     """
+    if role is not None and role not in SIGNAL_ROLES:
+        return _SIGNAL_ROLE_REFUSAL.format(role=role)
+
     try:
         if gc is None:
             gc = GraphClient()
@@ -385,7 +411,7 @@ def _search_signals(
 
         # Step 1: Rank signals by the tool's own hybrid rule
         signal_ids, scores = _rank_signals(
-            gc, embedding, query, facility, pool, diagnostic, physics_domain
+            gc, embedding, query, facility, pool, diagnostic, physics_domain, role
         )
         fused_ranks = {sid: rank for rank, sid in enumerate(signal_ids, 1)}
 
@@ -723,14 +749,15 @@ def _vector_search_signals(
     k: int,
     diagnostic: str | None,
     physics_domain: str | None,
+    role: str | None = None,
 ) -> tuple[list[str], dict[str, float]]:
     """Vector search on facility_signal_desc_embedding index.
 
     The facility predicate is pushed inside SEARCH as an in-index pre-filter by
-    :func:`signal_vector_search_block`, which owns the query; ``diagnostic`` and
-    ``physics_domain`` stay as post-filters, so the ANN limit is widened to
-    ``max(k*2, 50)`` when either is present and the cut is the requested ``k``
-    otherwise.
+    :func:`signal_vector_search_block`, which owns the query; ``diagnostic``,
+    ``physics_domain`` and ``role`` stay as post-filters, so the ANN limit is
+    widened to ``max(k*2, 50)`` when any is present and the cut is the requested
+    ``k`` otherwise.
     """
     params: dict[str, Any] = {
         "k": k,
@@ -743,17 +770,20 @@ def _vector_search_signals(
         params["diagnostic"] = diagnostic
     if physics_domain is not None:
         params["physics_domain"] = physics_domain
+    if role is not None:
+        params["role"] = role
 
-    # diagnostic/physics_domain discard rows after the ANN cut, so the cut is
-    # widened to keep the requested k reachable; with no such post-filter the
+    # diagnostic/physics_domain/role discard rows after the ANN cut, so the cut
+    # is widened to keep the requested k reachable; with no such post-filter the
     # facility pre-filter alone bounds the cut and the over-fetch is retired.
-    if diagnostic is not None or physics_domain is not None:
+    if diagnostic is not None or physics_domain is not None or role is not None:
         params["k"] = max(k * 2, 50)
 
     cypher = (
         signal_vector_search_block(
             diagnostic=diagnostic is not None,
             physics_domain=physics_domain is not None,
+            role=role is not None,
             node_alias="s",
         )
         + "\n"
@@ -778,6 +808,7 @@ def _text_search_signals(
     query: str,
     facility: str,
     k: int,
+    role: str | None = None,
 ) -> list[dict[str, Any]]:
     """Text-based search on signals by the words a searcher types.
 
@@ -786,17 +817,30 @@ def _text_search_signals(
     ``source_description``, so a catalogue phrase or an alias code matches. Uses
     the index for BM25 scoring when available and falls back to a CONTAINS scan
     over ``name``, ``description`` and ``node_path`` otherwise.
+
+    A ``role`` predicate is applied inside each branch, before the branch's own
+    cut, so a role-filtered search draws its hits from the fulltext/CONTAINS
+    matches rather than losing them to the cut.
     """
+    role_clause = "          AND s.signal_role = $role\n" if role is not None else ""
+    role_param = {"role": role} if role is not None else {}
+
     # Try fulltext index first (BM25 scoring)
     try:
-        cypher = """
+        cypher = f"""
             CALL db.index.fulltext.queryNodes('facility_signal_text', $search_query)
             YIELD node AS s, score
             WHERE s.facility_id = $facility
-            RETURN s.id AS id, score
+{role_clause}            RETURN s.id AS id, score
             LIMIT $limit
         """
-        results = gc.query(cypher, search_query=query, facility=facility, limit=k * 2)
+        results = gc.query(
+            cypher,
+            search_query=query,
+            facility=facility,
+            limit=k * 2,
+            **role_param,
+        )
         if results:
             return results
     except (ClientError, DatabaseError):
@@ -807,10 +851,10 @@ def _text_search_signals(
 
     # Fallback: CONTAINS with fixed score
     query_lower = query.lower()
-    cypher = """
+    cypher = f"""
         MATCH (s:FacilitySignal)
         WHERE s.facility_id = $facility
-          AND (
+{role_clause}          AND (
             toLower(s.name) CONTAINS $query_lower
             OR toLower(s.description) CONTAINS $query_lower
             OR toLower(s.node_path) CONTAINS $query_lower
@@ -818,7 +862,13 @@ def _text_search_signals(
         RETURN s.id AS id, 0.6 AS score
         LIMIT $limit
     """
-    return gc.query(cypher, facility=facility, query_lower=query_lower, limit=k * 2)
+    return gc.query(
+        cypher,
+        facility=facility,
+        query_lower=query_lower,
+        limit=k * 2,
+        **role_param,
+    )
 
 
 def _signal_briefs(

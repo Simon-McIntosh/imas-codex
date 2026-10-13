@@ -118,6 +118,7 @@ def signal_vector_search_block(
     diagnostic: bool = False,
     physics_domain: bool = False,
     has_data: bool = False,
+    role: bool = False,
     k: str = "$k",
     node_alias: str = "s",
     score_alias: str = "score",
@@ -128,9 +129,11 @@ def signal_vector_search_block(
     facility predicate renders inside ``SEARCH`` as an in-index pre-filter
     (``facility_id`` is a registered index property), so the ANN cut is taken
     over the facility's own signals rather than a global candidate set. The
-    ``diagnostic``/``physics_domain``/``has_data`` predicates are not index
-    properties and stay as post-filters over the returned signals. Callers
-    append their own ``RETURN`` clause and supply the matching parameters.
+    ``diagnostic``/``physics_domain``/``has_data``/``role`` predicates are not
+    index properties and stay as post-filters over the returned signals, so a
+    selective one loses its matches to the ANN cut unless the caller widens
+    ``k``. Callers append their own ``RETURN`` clause and supply the matching
+    parameters.
     """
     prefilter_clauses = [f"{node_alias}.facility_id = $facility"]
     where_clauses: list[str] = []
@@ -140,6 +143,8 @@ def signal_vector_search_block(
         where_clauses.append(f"{node_alias}.physics_domain = $physics_domain")
     if has_data:
         where_clauses.append(f"{node_alias}.checked = $has_data")
+    if role:
+        where_clauses.append(f"{node_alias}.signal_role = $role")
 
     return build_vector_search(
         "facility_signal_desc_embedding",
