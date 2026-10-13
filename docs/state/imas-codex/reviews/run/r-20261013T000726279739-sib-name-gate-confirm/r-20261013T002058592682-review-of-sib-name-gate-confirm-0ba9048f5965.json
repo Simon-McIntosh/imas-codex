@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:8630 (process_review_name_batch builds the review gate's name-side text through semantic_gate_name_text)",
+    "imas_codex/standard_names/audits.py:3737 (semantic_similarity_check is the audit boundary the substitution feeds)"
+  ],
+  "completed_at": "2026-10-13T00:31:36.701Z",
+  "dispatched_at": "2026-10-13T00:21:09Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-name-gate-confirm.html",
+      "line": "43",
+      "severity": "follow-on",
+      "text": "follow-on: property 2 is mapped only to substitution-boundary tests that assert a rejected or undefined token keeps the identifier text, not that semantic_similarity_check refuses it end to end, so section 10's second done-when property is proved weaker than stated; the report discloses this at its caveat line 64, so the mapping is honest but incomplete."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T000726279739-sib-name-gate-confirm/negative_control.log",
+      "line": "7",
+      "severity": "follow-on",
+      "text": "follow-on: the negative-control log's stored header carries a post-capture repair_note and a re-taken mutation_receipt, so the log as stored is not the byte-for-byte capture; the original is preserved at negative_control.log.original, but an edited gate log cannot be told apart from one that was never intact without that sibling."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-name-gate-confirm.html",
+      "line": "110",
+      "severity": "follow-on",
+      "text": "follow-on: a mistyped receipt probe created /home/ITER/mcintos/Code/imas-codex-fake/.venv outside the declared write scope; it was inspected and removed so no residue remains, but the excursion itself is a scope defect the run records."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read against base 0ba9048f5; the reviewed worktree is checked out at 0ba9048f5 with an empty status listing and an empty diff 0ba9048f5965..HEAD, so the diff is empty and the node is a test node that wrote nothing into the repository, consistent with its brief.",
+    "done_when": "the done_when asks the report to map each of the three properties to a named test or state none covers it, the test file to pass at head with EXIT recorded, and the negative-control run to record its EXIT and failing tests; head_arm.log records 13 passed EXIT=0 and negative_control.log records 8 failed 5 passed EXIT=1 with the eight failing node ids listed, so the gate asserts the stated measure.",
+    "goal": "the goal is to map each property of the one-word-anchor name gate to the existing test that proves it under a negative control; the report's property table (/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-name-gate-confirm.html lines 30-55) maps all three properties to named tests and the negative control is recorded at lines 76-100, so the deliverable is produced.",
+    "manifest": "read; manifest.md records status complete, commits none, changed_paths = the report only, the gate command and its result, measurement_module/measurement_cwd for the scratch negative-control arm, and baseline_suite/after_suite both pointing at head_arm.log with completed true and zero failures, and every stated claim survives my own reads of head_arm.log, negative_control.log and probe_grammar.json.",
+    "write_paths": "the manifest declares orientation_write_paths = the single report HTML, and the reviewed worktree .../sib-name-gate-confirm reports no modified paths at 0ba9048f5 with an empty diff 0ba9048f5..HEAD, so no repository path was written, matching the declaration."
+  },
+  "justifications": {
+    "durability": "the node adds no code, so durability rests on the pre-existing tests/standard_names/test_name_gate_definition_floor.py, which negative_control.log shows reddening 8 of 13 items when the substitution at imas_codex/standard_names/workers.py:8385 is stubbed to return the name.",
+    "evidence": "head_arm.log records \"13 passed, 1 warning ... EXIT=0\" and negative_control.log records \"8 failed, 5 passed ... EXIT=1\" with the failing node ids listed and module_under_test pointing at the scratch tree, so the gate measures the stated measure.",
+    "fit": "the report is an HTML evidence fragment written to the declared reports path and introduces no code symbol, so the repository naming rules are unexercised; its section labels are the plan-facing references the brief names.",
+    "goal_fidelity": "the report's property table (/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-name-gate-confirm.html lines 30-55) maps all three done-when properties to named tests, which is the mapping the goal names.",
+    "reuse": "the diff adds no definition (the reviewed worktree at 0ba9048f5 is a test node) so nothing is forked from an existing owner and no capability is duplicated.",
+    "scope_discipline": "the manifest declares only the report path and the repository diff 0ba9048f5..HEAD is empty, but the disclosed mistyped probe created /home/ITER/mcintos/Code/imas-codex-fake/.venv outside that scope (report line 110) before its removal."
+  },
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261013T000726279739-sib-name-gate-confirm (imas-codex, plan sn-integrity-backlog section 10, node sib-name-gate-confirm) at base 0ba9048f5965f077dbfb956ababf60098f6daece head 0ba9048f5965f077dbfb956ababf60098f6daece.\nreviewed_base_sha: 0ba9048f5965f077dbfb956ababf60098f6daece\nreviewed_head_sha: 0ba9048f5965f077dbfb956ababf60098f6daece\nVERDICT goal: the goal is to map each property of the one-word-anchor name gate to the existing test that proves it under a negative control; the report's property table (/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-name-gate-confirm.html lines 30-55) maps all three properties to named tests and the negative control is recorded at lines 76-100, so the deliverable is produced.\nVERDICT done_when: the done_when asks the report to map each of the three properties to a named test or state none covers it, the test file to pass at head with EXIT recorded, and the negative-control run to record its EXIT and failing tests; head_arm.log records \"13 passed ... EXIT=0\" and negative_control.log records \"8 failed, 5 passed ... EXIT=1\" with the eight failing node ids listed, so the gate asserts the stated measure.\nVERDICT write_paths: the manifest declares orientation_write_paths = the single report HTML, and the reviewed worktree /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-name-gate-confirm reports no modified paths at 0ba9048f5 with an empty diff 0ba9048f5..HEAD, so no repository path was written, matching the declaration.\nVERDICT manifest: read; manifest.md records status complete, \"commits: none\", changed_paths = the report only, the gate command and its result, measurement_module/measurement_cwd for the scratch negative-control arm, and baseline_suite/after_suite both pointing at head_arm.log with completed true and zero failures, and every stated claim survives my own reads of head_arm.log, negative_control.log and probe_grammar.json.\nVERDICT diff: read against base 0ba9048f5; the reviewed worktree is checked out at 0ba9048f5 with an empty status listing and an empty diff 0ba9048f5965..HEAD, so the diff is empty and the node is a test node that wrote nothing into the repository, consistent with its brief.\nCALL_SITES: imas_codex/standard_names/workers.py:8630 (process_review_name_batch builds the review gate's name-side text through semantic_gate_name_text), imas_codex/standard_names/audits.py:3737 (semantic_similarity_check is the audit boundary the substitution feeds)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the report's property table (/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-name-gate-confirm.html lines 30-55) maps all three done-when properties to named tests, which is the mapping the goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: head_arm.log records \"13 passed, 1 warning ... EXIT=0\" and negative_control.log records \"8 failed, 5 passed ... EXIT=1\" with the failing node ids listed and module_under_test pointing at the scratch tree, so the gate measures the stated measure.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: the manifest declares only the report path and the repository diff 0ba9048f5..HEAD is empty, but the disclosed mistyped probe created /home/ITER/mcintos/Code/imas-codex-fake/.venv outside that scope (report line 110) before its removal.\nSCORE durability: 17\nJUSTIFICATION durability: the node adds no code, so durability rests on the pre-existing tests/standard_names/test_name_gate_definition_floor.py, which negative_control.log shows reddening 8 of 13 items when the substitution at imas_codex/standard_names/workers.py:8385 is stubbed to return the name.\nSCORE fit: 18\nJUSTIFICATION fit: the report is an HTML evidence fragment written to the declared reports path and introduces no code symbol, so the repository naming rules are unexercised; its section labels are the plan-facing references the brief names.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition \u2014 the reviewed worktree at 0ba9048f5 is a test node \u2014 so nothing is forked from an existing owner and no capability is duplicated.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-name-gate-confirm.html:43 follow-on: property 2 is mapped only to substitution-boundary tests that assert a rejected or undefined token keeps the identifier text, not that semantic_similarity_check refuses it end to end, so section 10's second done-when property is proved weaker than stated; the report discloses this at its caveat line 64, so the mapping is honest but incomplete.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T000726279739-sib-name-gate-confirm/negative_control.log:7 follow-on: the negative-control log's stored header carries a post-capture repair_note and a re-taken mutation_receipt, so the log as stored is not the byte-for-byte capture; the original is preserved at negative_control.log.original, but an edited gate log cannot be told apart from one that was never intact without that sibling.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-name-gate-confirm.html:110 follow-on: a mistyped receipt probe created /home/ITER/mcintos/Code/imas-codex-fake/.venv outside the declared write scope; it was inspected and removed so no residue remains, but the excursion itself is a scope defect the run records.\n",
+  "review_run_id": "r-20261013T002058592682-review-of-sib-name-gate-confirm-0ba9048f5965",
+  "reviewed_base_sha": "0ba9048f5965f077dbfb956ababf60098f6daece",
+  "reviewed_head_sha": "0ba9048f5965f077dbfb956ababf60098f6daece",
+  "reviewed_run_id": "r-20261013T000726279739-sib-name-gate-confirm",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:30:01.008102+00:00",
+  "total": 106
+}
