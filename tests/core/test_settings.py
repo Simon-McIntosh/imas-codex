@@ -513,7 +513,6 @@ class TestMapRunModelSeat:
             dd_version=None,
             cost_limit=0.0,
             dry_run=True,
-            no_activate=True,
             clear=False,
             deadline=None,
             verbose=False,
