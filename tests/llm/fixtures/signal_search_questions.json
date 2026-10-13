@@ -1378,7 +1378,8 @@
         "jt-60sa:general/psrc_curcs3": 0,
         "jt-60sa:general/psrc_calbr4": 0,
         "jt-60sa:general/psrc_calbr3": 0,
-        "jt-60sa:general/dcsv_ppef2vol": 1
+        "jt-60sa:general/dcsv_ppef2vol": 1,
+        "jt-60sa:general/psrc_calbr2": 0
       }
     },
     {
@@ -1926,7 +1927,9 @@
         "jt-60sa:general/cryomag_m1c04cv": 1,
         "jt-60sa:general/cryoctb_m1e4nhv": 1,
         "jt-60sa:general/cryoctb_m2e6phv": 1,
-        "jt-60sa:general/cryoctb_mt08nfv": 1
+        "jt-60sa:general/cryoctb_mt08nfv": 1,
+        "jt-60sa:general/cryoctb_mt02nfv": 1,
+        "jt-60sa:general/cryoctb_mt14nfv": 1
       }
     }
   ]
