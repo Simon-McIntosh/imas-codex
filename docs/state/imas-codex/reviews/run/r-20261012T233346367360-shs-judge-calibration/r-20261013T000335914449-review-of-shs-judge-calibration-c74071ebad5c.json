@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "base_suite and after_suite both carry completed true, failure_count 0 and failure_ids [], so the added-failure count is 0 derived from the reviewed run's own gate-base.log and gate-after.log.",
+  "base_log_revision": "21686efc6edca75ed1d1c9a876a4d7be73879829",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/review/pipeline.py:595 (enrich_review_worker calls judge_review_stage)",
+    "imas_codex/standard_names/review/pipeline.py:1698 (enrich_review_worker wired into the review pipeline)",
+    "imas_codex/cli/sn.py:6384 (the review CLI sets skip_audit into the state the changed branch reads)"
+  ],
+  "completed_at": "2026-10-13T00:16:56.241Z",
+  "dispatched_at": "2026-10-13T00:03:47Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/judge_stage.py",
+      "line": "110-115",
+      "severity": "follow-on",
+      "text": "follow-on: the canonical boundary option permits naming the plasma boundary by its diverted-configuration name as a synonym for the last closed flux surface, departing from the mandated framing (docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.py criterion lcfs_only = \"without calling it the separatrix\") and from the registry comment that the separatrix is a different surface; a doc naming the boundary \"the separatrix\" alongside the LCFS is judged canonical by the stage while docs_gates._forbidden_variant_findings still flags \"the separatrix\" as forbidden, so the two checks disagree on the same text."
+    }
+  ],
+  "head_log_revision": "c74071ebad5cb6b5ae2dd948676394bd2b73a17e",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against 21686efc6edca75ed1d1c9a876a4d7be73879829; one commit c74071ebad5cb6b5ae2dd948676394bd2b73a17e changes six files, all inside the declared scope.",
+    "done_when": "the done_when names the gate files (tests/standard_names/test_judge_stage.py, the review-pipeline tests, tests/discovery/test_judgment.py), a live run of at most eight calls over the four boundary fixtures, and baseline_suite/after_suite; the manifest records all of these and gate-after.log ends 264 passed EXIT=0.",
+    "goal": "the node goal is to rebuild the judge stage's Choice so its options describe forms in words rather than registry regexes and to make --skip-audit skip only the deterministic audits; imas_codex/standard_names/review/judge_stage.py:68 authors the word-form vocabulary (_CONCEPT_FORMS) and imas_codex/standard_names/review/pipeline.py:592 runs the stage unconditionally, so both halves land.",
+    "manifest": "read; status complete, commits [c74071ebad5cb6b5ae2dd948676394bd2b73a17e], baseline 262 passed / after 264 passed, live run 8 calls booked USD 0.000306, negative control red, and its numeric claims reconcile with the logs on disk.",
+    "write_paths": "the declared scope is judge_stage.py, pipeline.py, test_judge_stage.py and three evidence fragments under docs/evidence/fragments/sn-house-style/; every path in the diff is inside it."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_judge_stage.py:295 fails if a registry pattern reaches the option text and test_judge_stage.py:227 fails if the stage is re-gated on skip_audit, the first shown red under the declared mutation.",
+    "evidence": "the after_suite command in the manifest runs tests/standard_names/test_judge_stage.py and the review-pipeline tests and its result (264 passed EXIT=0) is recorded in gate-after.log, and the eight-call live run is recorded in shs-judge-calibration-decisions.json.",
+    "fit": "judge_stage.py:64-130 follows the module's existing QUESTION_NAME/criteria idiom and introduces no plan, sprint or ticket label in any symbol or comment.",
+    "goal_fidelity": "imas_codex/standard_names/review/judge_stage.py:68-130 authors word-form options with a verdict map and pipeline.py:592 removes the skip_audit gate, so both halves of the goal land, though one boundary option departs from the mandated framing.",
+    "reuse": "no existing owner of an authored per-concept form vocabulary exists (the registry at imas_standard_names/grammar/vocabularies/conventions/concepts.yml holds only regex forbidden_variants) and the addition still routes every call through imas_codex/discovery/base/judgment.decide_batch.",
+    "scope_discipline": "the single commit touches only the six files inside the declared write scope (three source/test, three evidence fragments) and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to rebuild the judge stage's Choice so its options describe forms in words rather than registry regexes and to make --skip-audit skip only the deterministic audits; imas_codex/standard_names/review/judge_stage.py:68 authors the word-form vocabulary (_CONCEPT_FORMS) and imas_codex/standard_names/review/pipeline.py:592 runs the stage unconditionally, so both halves land.\nVERDICT done_when: the done_when names the gate files (tests/standard_names/test_judge_stage.py, the review-pipeline tests, tests/discovery/test_judgment.py), a live run of at most eight calls over the four boundary fixtures, and baseline_suite/after_suite; the manifest records all of these and gate-after.log ends 264 passed EXIT=0.\nVERDICT write_paths: the declared scope is judge_stage.py, pipeline.py, test_judge_stage.py and three evidence fragments under docs/evidence/fragments/sn-house-style/; every path in the diff is inside it.\nVERDICT manifest: read; status complete, commits [c74071ebad5cb6b5ae2dd948676394bd2b73a17e], baseline 262 passed / after 264 passed, live run 8 calls booked USD 0.000306, negative control red, and its numeric claims reconcile with the logs on disk.\nVERDICT diff: read commit by commit against 21686efc6edca75ed1d1c9a876a4d7be73879829; one commit c74071ebad5cb6b5ae2dd948676394bd2b73a17e changes six files, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/review/pipeline.py:595 (enrich_review_worker calls judge_review_stage), imas_codex/standard_names/review/pipeline.py:1698 (enrich_review_worker wired into the review pipeline), imas_codex/cli/sn.py:6384 (the review CLI sets skip_audit into the state the changed branch reads)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/judge_stage.py:68-130 authors word-form options with a verdict map and pipeline.py:592 removes the skip_audit gate, so both halves of the goal land, though one boundary option departs from the mandated framing.\nSCORE evidence: 18\nJUSTIFICATION evidence: the after_suite command in the manifest runs tests/standard_names/test_judge_stage.py and the review-pipeline tests and its result (264 passed EXIT=0) is recorded in gate-after.log, and the eight-call live run is recorded in shs-judge-calibration-decisions.json.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the single commit touches only the six files inside the declared write scope (three source/test, three evidence fragments) and nothing else.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_judge_stage.py:295 fails if a registry pattern reaches the option text and test_judge_stage.py:227 fails if the stage is re-gated on skip_audit, the first shown red under the declared mutation.\nSCORE fit: 19\nJUSTIFICATION fit: judge_stage.py:64-130 follows the module's existing QUESTION_NAME/criteria idiom and introduces no plan, sprint or ticket label in any symbol or comment.\nSCORE reuse: 20\nJUSTIFICATION reuse: no existing owner of an authored per-concept form vocabulary exists (the registry at imas_standard_names/grammar/vocabularies/conventions/concepts.yml holds only regex forbidden_variants) and the addition still routes every call through imas_codex/discovery/base/judgment.decide_batch.\nFINDING imas_codex/standard_names/review/judge_stage.py:110-115 follow-on: the canonical boundary option permits naming the plasma boundary by its diverted-configuration name as a synonym for the last closed flux surface, departing from the mandated framing (docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.py criterion lcfs_only = \"without calling it the separatrix\") and from the registry comment that the separatrix is a different surface; a doc naming the boundary \"the separatrix\" alongside the LCFS is judged canonical by the stage while docs_gates._forbidden_variant_findings still flags \"the separatrix\" as forbidden, so the two checks disagree on the same text.\n",
+  "review_run_id": "r-20261013T000335914449-review-of-shs-judge-calibration-c74071ebad5c",
+  "reviewed_base_sha": "21686efc6edca75ed1d1c9a876a4d7be73879829",
+  "reviewed_head_sha": "c74071ebad5cb6b5ae2dd948676394bd2b73a17e",
+  "reviewed_run_id": "r-20261012T233346367360-shs-judge-calibration",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:14:30.320700+00:00",
+  "total": 111
+}
