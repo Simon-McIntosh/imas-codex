@@ -57,14 +57,17 @@
 
   <h3 id="ssog-rerank-held-out-acceptance-blocker">Blocker</h3>
   <p id="ssog-rerank-held-out-acceptance-blocker-body">
-    The locally served compose seat does not answer. A probe ran one compose call
-    through the same harness path (<code>_run_model</code> with
-    <code>comparator_block=True</code>) for a <strong>single-source</strong>
-    batch under a 500 s bound; it returned
-    <code>TimeoutError</code> at wall 500.0 s, so a call of the smallest possible
-    size does not fit inside one pass. Completion-token counts are unavailable
-    because the call never returned. The probe log is
-    <code>acceptance-probe.log</code>.
+    The locally served compose seat does not answer inside the node's bound. A
+    probe ran one compose call through the same harness path
+    (<code>_run_model</code> with <code>comparator_block=True</code>) for a
+    <strong>single-source</strong> batch. Under a 500 s internal bound it raised
+    <code>TimeoutError</code> at wall 500.0 s; re-run under the stated
+    <strong>540 s</strong> bound it was killed by the timeout
+    (<code>EXIT=124</code>), last logged in flight at 526 s and still unfinished.
+    So a call of the smallest possible size does not fit inside one pass.
+    Completion-token counts are unavailable because the call never returned. The
+    probe logs are <code>acceptance-probe.log</code> and
+    <code>acceptance-probe-540.log</code>.
   </p>
   <p id="ssog-rerank-held-out-acceptance-shape">
     The decisive shape fact: extraction emits <strong>29 single-item batches</strong>
@@ -72,7 +75,18 @@
     and capping it cannot make a call fit a pass.
   </p>
   <p id="ssog-rerank-held-out-acceptance-lane">
-    The lane at the probe moment read <code>running 12</code>,
+    The lane at the 540 s probe start read <code>running 8</code>,
+    <code>concurrent_requests 31</code>, <code>headroom 4</code>,
+    <code>waiting 0</code>, <code>admission.worker_slots 3</code> (basis
+    <code>measured</code>, <code>requests_per_run 0.625</code>): the lane had
+    headroom when the probe began, so the non-completion is not explained by
+    congestion at that moment alone. An earlier snapshot at the 500 s probe read
+    <code>headroom -5</code> with zero worker slots.
+    Snapshots: <code>lane-probe-1.json</code>, <code>lane-probe-2.json</code>,
+    <code>lane-probe-540.json</code>.
+  </p>
+  <p id="ssog-rerank-held-out-acceptance-lane-earlier">
+    An earlier lane snapshot read <code>running 12</code>,
     <code>concurrent_requests 45</code>, <code>headroom -5</code>,
     <code>waiting 0</code>, <code>admission.worker_slots 0</code> (basis
     <code>measured</code>, <code>requests_per_run 0.516</code>): over the request

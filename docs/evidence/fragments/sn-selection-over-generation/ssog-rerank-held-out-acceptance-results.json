@@ -1,6 +1,6 @@
 {
   "status": "blocked",
-  "reason": "the locally served compose seat did not answer: a single-source compose call, run through the harness path under a 500 s bound, timed out (wall 500.0 s, TimeoutError), so neither the positive control nor either arm could complete",
+  "reason": "the locally served compose seat did not answer within the node's stated bound: a single-source call run through the harness path under an outer 540 s timeout was killed at that bound (EXIT=124) still in flight at 526 s, so neither the positive control nor either arm could complete",
   "seed": 20261014,
   "switch_env": "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS",
   "compose_seat": "local/deepseek-v4.1-flash",
@@ -101,8 +101,8 @@
   "next_action": "re-run the landed driver unchanged when the local compose seat answers; the seed-20261014 draw is fixed and reproduces. The probe shows a single call exceeds 500 s while the lane is over ceiling, so the run should start when admission headroom is positive. Incremental per-batch persistence was not implemented because the one-source call did not complete, which is the stop condition.",
   "probe": {
     "shape": "one compose call through the harness path (_run_model with comparator_block=True), mode=one, item count 1",
-    "wall_seconds": 500.0,
-    "outcome": "TimeoutError (asyncio.wait_for at 500 s)",
+    "wall_seconds": 540.0,
+    "outcome": "did not complete within 540 s (outer timeout, EXIT=124)",
     "completion_tokens": null,
     "note": "reported token counts are unavailable because the call never returned",
     "extraction_batch_shape": {
@@ -122,10 +122,34 @@
       "admission_requests_per_run": 0.516,
       "finding": "the lane is over its request ceiling (headroom -5) with zero worker slots, consistent with a congested local seat rather than a fault"
     },
-    "probe_log": "acceptance-probe.log",
+    "probe_log": "acceptance-probe.log (500 s bound) and acceptance-probe-540.log (540 s bound, EXIT=124)",
     "lane_snapshots": [
       "lane-probe-1.json",
-      "lane-probe-2.json"
-    ]
+      "lane-probe-2.json",
+      "lane-probe-540.json"
+    ],
+    "runs": [
+      {
+        "bound_seconds": 500,
+        "outcome": "TimeoutError at wall 500.0 s (internal asyncio.wait_for bound)",
+        "completed": false
+      },
+      {
+        "bound_seconds": 540,
+        "outcome": "killed by the outer 540 s timeout, EXIT=124, last stall line at 526 s in flight",
+        "completed": false
+      }
+    ],
+    "lane_at_540_probe": {
+      "observed_at": "2026-10-13T17:57:42Z",
+      "running": 8,
+      "concurrent_requests": 31,
+      "headroom": 4,
+      "waiting": 0,
+      "admission_worker_slots": 3,
+      "admission_worker_slots_basis": "measured",
+      "admission_requests_per_run": 0.625,
+      "finding": "the lane had headroom 4 and 3 worker slots at the start of the 540 s probe, so the non-completion is not explained by congestion at that moment alone"
+    }
   }
 }
