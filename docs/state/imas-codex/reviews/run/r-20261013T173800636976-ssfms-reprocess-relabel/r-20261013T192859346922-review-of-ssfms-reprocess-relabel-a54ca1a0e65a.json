@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest carries no baseline_suite and no after_suite (both null on its live pointer; the node's role is implement), so there is no armed base/head pair to difference. Its only gate for the gained commit is the golden harness, recorded in logs/harness-regrade.log (14 passed, 1 warning) and logs/harness-regrade-table.log (14 passed, arm table printed); no gate log holds a failing id, so added_failure_count is 0 and added_failure_ids is empty.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T19:44:24.226Z",
+  "dispatched_at": "2026-10-13T19:29:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-relabel.html",
+      "line": "66",
+      "severity": "blocking",
+      "text": "blocking: the re-grade table's rows sum to 725 (145+2+126+8+51+68+33+29+35+228) while its own total row and the prose state 1,220 moved (683 up, 537 down); the fixture diff against ce47976e0 shows 12 old-to-new pairs and the table lists 10, omitting exactly (0->2, 357) and (1->2, 138), so 495 of the 1,220 moved labels are absent from the listing and the stated 683 up-count cannot be read off the table, which shows 188 up."
+    },
+    {
+      "file": "tests/llm/fixtures/signal_search_questions.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: no committed test fails if the re-grade regresses; test_four_arm_table_matches_the_control_below_every_arm (tests/llm/test_signal_search_goldens.py:772) asserts only relative arm order, which passes under both the pre-regrade (logs/harness_table.log) and re-graded (logs/harness-regrade-table.log) value sets, so the 1,220 moved grades are unguarded."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T173800636976-ssfms-reprocess-relabel/manifest.md",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest names only fe031856a and ce47976e0 and lists only harness.log/harness_table.log, so the gained commit a54ca1a0e65a and its gate logs are unreported and the record reads as no work past the second commit."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T173800636976-ssfms-reprocess-relabel/logs/harness-regrade.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log opens with the pytest banner rather than the revision, tree and command header the manifest contract requires and closes with the summary line and no EXIT=<n> line, so a reader cannot tell which revision it measured nor that it completed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read commit by commit against base ce47976e0; three files change - reprocess.html restores the sample-steps and grouped-members tables (verified equal to the pre-consolidation revision), ssfms-reprocess-relabel.html adds the re-grade section and updates the arm table to the re-graded values, and the fixture moves 1,220 grade values.",
+    "done_when": "the done_when's re-grade clause is substantially met by the gained diff's 1,220 moved values and their old-to-new table, but the table lists only 10 of the 12 old-to-new pairs present, and the harness result for this commit is recorded only in logs/harness-regrade.log, not in the manifest.",
+    "goal": "the node's goal is to bring the golden fixture's labels and cutover in line with the reprocessed JT-60SA population; the gained commit a54ca1a0e re-grades the 2,224 pre-existing labels against the reprocessed text (1,220 moved, verified against tests/llm/fixtures/signal_search_questions.json) and restores two evidence tables, while the cutover move itself was in the earlier commit fe031856a outside this window.",
+    "manifest": "read; it lists only fe031856a and ce47976e0 and names only harness.log/harness_table.log, so it does not report the gained commit a54ca1a0e65a nor its gate logs.",
+    "write_paths": "every path the gained commit touches (reprocess.html, ssfms-reprocess-relabel.html, signal_search_questions.json) is inside the manifest's declared write paths; the earlier out-of-scope edit to tests/llm/test_signal_search_goldens.py is not part of this commit."
+  },
+  "justifications": {
+    "durability": "test_four_arm_table_matches_the_control_below_every_arm (tests/llm/test_signal_search_goldens.py:772) asserts only arm order, which holds under both the pre-regrade and post-regrade grade sets, so no test reddens if the re-grade regresses.",
+    "evidence": "logs/harness-regrade.log records 14 passed for the re-graded population, but the re-grade table at ssfms-reprocess-relabel.html:66 states a total (1,220) that its rows (725) contradict.",
+    "fit": "the new fragment section and table ids (ssfms-reprocess-relabel-regrade-*) follow the file's existing id convention and the node-id prefix rule.",
+    "goal_fidelity": "tests/llm/fixtures/signal_search_questions.json carries the 1,220 re-graded labels and the fragment lists their pairs, but the listing omits two pair-types so the goal's \"old and new grade listed\" is only partly delivered.",
+    "reuse": "the diff adds no function, class or module; it reuses the fixture and the harness's decide_batch path, so no capability is forked.",
+    "scope_discipline": "every path the gained commit touches lies inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to bring the golden fixture's labels and cutover in line with the reprocessed JT-60SA population; the gained commit a54ca1a0e re-grades the 2,224 pre-existing labels against the reprocessed text (1,220 moved, verified against tests/llm/fixtures/signal_search_questions.json) and restores two evidence tables, while the cutover move itself was in the earlier commit fe031856a outside this window.\nVERDICT done_when: the done_when's re-grade clause (every pre-existing label whose signal's new description names a different quantity is re-graded, with the old and new grade listed) is substantially met by the gained diff's 1,220 moved values and their old-to-new table, but the table lists only 10 of the 12 old-to-new pairs actually present, and the harness result for this commit is recorded only in logs/harness-regrade.log, not in the manifest.\nVERDICT write_paths: read the manifest's declared paths; every path the gained commit touches (reprocess.html, ssfms-reprocess-relabel.html, signal_search_questions.json) is inside them, and the earlier out-of-scope edit to tests/llm/test_signal_search_goldens.py is not part of this commit.\nVERDICT manifest: read; it lists only fe031856a and ce47976e0c and names only harness.log/harness_table.log, so it does not report the gained commit a54ca1a0e65a nor its gate logs logs/harness-regrade.log and logs/harness-regrade-table.log.\nVERDICT diff: read commit by commit against base ce47976e0; three files change - reprocess.html restores the sample-steps and grouped-members tables (verified equal to the pre-consolidation revision), ssfms-reprocess-relabel.html adds the re-grade section and updates the arm table, and the fixture moves 1,220 grade values.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: tests/llm/fixtures/signal_search_questions.json carries the 1,220 re-graded labels and the fragment lists their pairs, but the listing omits two pair-types so the goal's \"old and new grade listed\" is only partly delivered.\nSCORE evidence: 12\nJUSTIFICATION evidence: logs/harness-regrade.log records 14 passed for the re-graded population, but the re-grade table at ssfms-reprocess-relabel.html:66 states a total (1,220) that its rows (725) contradict, so the evidence fragment does not reconcile with itself.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path the gained commit touches lies inside the manifest's declared write paths.\nSCORE durability: 5\nJUSTIFICATION durability: no committed test reddens if the re-grade regresses; test_four_arm_table_matches_the_control_below_every_arm (tests/llm/test_signal_search_goldens.py:772) asserts only arm order, which holds under both the pre-regrade (logs/harness_table.log) and post-regrade (logs/harness-regrade-table.log) value sets.\nSCORE fit: 17\nJUSTIFICATION fit: the new fragment section and table ids (ssfms-reprocess-relabel-regrade-*) follow the file's existing id convention and the node-id prefix rule.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module; it reuses the fixture and the harness's decide_batch path, so no capability is forked.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-relabel.html:66 blocking: the re-grade table's rows sum to 725 (145+2+126+8+51+68+33+29+35+228) while its own total row and the prose state 1,220 moved (683 up, 537 down); the fixture diff against ce47976e0 shows 12 old-to-new pairs and the table lists 10, omitting exactly (0->2, 357) and (1->2, 138), so 495 of the 1,220 moved labels are absent from the listing and the stated 683 up-count cannot be read off the table, which shows 188 up.\nFINDING tests/llm/fixtures/signal_search_questions.json:1 follow-on: no committed test fails if the re-grade regresses; test_four_arm_table_matches_the_control_below_every_arm (tests/llm/test_signal_search_goldens.py:772) asserts only relative arm order, which passes under both the pre-regrade (logs/harness_table.log) and re-graded (logs/harness-regrade-table.log) value sets, so the 1,220 moved grades are unguarded.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T173800636976-ssfms-reprocess-relabel/manifest.md:5 follow-on: the manifest names only fe031856a and ce47976e0 and lists only harness.log/harness_table.log, so the gained commit a54ca1a0e65a and its gate logs are unreported and the record reads as no work past the second commit.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T173800636976-ssfms-reprocess-relabel/logs/harness-regrade.log:1 follow-on: the log opens with the pytest banner rather than the revision, tree and command header the manifest contract requires and closes with the summary line and no EXIT=<n> line, so a reader cannot tell which revision it measured nor that it completed.",
+  "review_run_id": "r-20261013T192859346922-review-of-ssfms-reprocess-relabel-a54ca1a0e65a",
+  "reviewed_base_sha": "ce47976e0092a336b672328b3137cef34422a2cd",
+  "reviewed_head_sha": "a54ca1a0e65a6baf50bd868212409559877aff9c",
+  "reviewed_run_id": "r-20261013T173800636976-ssfms-reprocess-relabel",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 5,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T19:46:29.449774+00:00",
+  "total": 90
+}
