@@ -16,7 +16,8 @@ protection. <code>parents.superseded_parent_names</code> supplies the lifecycle
 lookup. The ordinary edge writer reuses its existing target projection in
 <code>_filter_admissible_parents</code>; the signed lifecycle-less-stub admission
 site queries through the same helper before
-<code>is_admissible_parent_name</code>.</p>
+<code>is_admissible_parent_name</code>. A failed topology query aborts the
+reconcile instead of admitting unchecked targets.</p>
 <p id="sib-superseded-parent-veto-reconcile">The signed structural reconcile
 calls <code>_write_standard_name_edges</code> for the requested child. That writer
 deletes a derived <code>HAS_PARENT</code> edge when its target is absent from the
@@ -25,9 +26,10 @@ new admitted set. A fake-graph test starts with
 edge is gone after reconcile; no separate deletion was added.</p>
 <p id="sib-superseded-parent-veto-measure">The two new tests failed against
 the base code (<code>EXIT=1</code>): legacy protection retained the superseded
-target, and reconcile retained its edge. The gate went from 148 passed at base
-to 151 passed at head, with zero added failures; the Cypher property check
-passed in both arms.</p>
+target, and reconcile retained its edge. A separate failure-path test reproduced
+the earlier fail-open behavior (<code>EXIT=1</code>) before the query-error change.
+The gate went from 148 passed at base to 152 passed at head, with zero added
+failures; the Cypher property check passed in both arms.</p>
 </main>
 </body>
 </html>
