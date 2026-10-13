@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's own manifest.md carries no baseline_suite and no after_suite line (grep -nE 'baseline_suite|after_suite' over the reviewed manifest returns nothing; classification.json shows both null), and its evidence fence required no arms because the node's write paths reach no test path; its own recorded gate is the single after-arm log test_gate.log at revision ecf73f22e (115 passed, 8 skipped, EXIT=0). added_failure_count 0 is derived from that recorded log together with the diff: ecf73f22e changes no code line (6 insertions, 5 deletions, every changed line inside a docstring at search_tools.py:356-358 or a comment at search_tools.py:418-419), so no test outcome can move and 0 failures were added.",
+  "base_log_revision": "76de8174e01fe2e9af7e87f646a254107fd5b3f4",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/llm/server.py:2463 (search_signals MCP tool passing rerank=_rerank_signals into _search_signals)",
+    "imas_codex/llm/server.py:1898 (_rerank_signals = not (self.read_only or self.dd_only), the value the docstring now describes)"
+  ],
+  "completed_at": "2026-10-13T08:01:34.165Z",
+  "dispatched_at": "2026-10-13T07:47:03Z",
+  "findings": [
+    {
+      "file": "imas_codex/llm/search_tools.py",
+      "line": "357",
+      "severity": "follow-on",
+      "text": "the docstring and step comment this node refreshed are guarded only by the done_when's manual grep; no test asserts their text, and the only behaviour test (tests/llm/test_search_tools.py:635) does not read the docstring, so a later edit that reintroduces a stale 'no mode turns on' line would pass the whole suite. The change is comment-only and cannot alter behaviour, so this does not hold the node."
+    }
+  ],
+  "head_log_revision": "ecf73f22e04fe0a9bc8916332d4e50c662c144f3",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read ecf73f22e against its parent 76de8174e commit by commit; one commit, one file, two hunks, six insertions and five deletions, all inside the _search_signals docstring (356-358) and the rerank step comment (418-419), no code line changed.",
+    "done_when": "the done_when requires the docstring and comment to say the server's switch follows the server mode (on for a full or facility server, off for a read-only or DD-only one, direct caller off), the stale grep to return nothing, no code line changed, and tests/llm/test_search_tools.py to pass; I verified each: grep -nE 'no mode turns on|The switch is off' over git show ecf73f22e:imas_codex/llm/search_tools.py returns nothing while the same grep over the reviewed base returns both lines, the diff changes no code line, and test_gate.log records 115 passed, 8 skipped, EXIT=0 at revision ecf73f22e.",
+    "goal": "the node goal is to make the signal-rerank docstring and step comment in imas_codex/llm/search_tools.py describe the switch as it now runs; at the reviewed head the docstring (imas_codex/llm/search_tools.py:356-358) and the step comment (imas_codex/llm/search_tools.py:418-419) both state the switch follows the server mode, so the goal is met.",
+    "manifest": "read; it states status complete, one commit [ecf73f22e], tests 'tests/llm/test_search_tools.py -> EXIT=0, 115 passed, 8 skipped', names test_logs test_gate.log, and leaves baseline_suite and after_suite absent as a docs node with no test write path should.",
+    "write_paths": "declared write paths are imas_codex/llm/search_tools.py, the fragment docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-rerank-comments.html and the figures directory; the diff touches only imas_codex/llm/search_tools.py, and the node is small (11 changed lines, under the 50-line threshold) so its own landing contract forbids writing the fragment or a figure, which are correctly absent."
+  },
+  "justifications": {
+    "durability": "no test fails if the docstring or comment regresses to stale text - the only guard is the done_when's manual grep, and tests/llm/test_search_tools.py:635 (TestSignalRerankFollowsServerMode) asserts the switch's behaviour, not its documentation, so a re-introduced 'no mode turns on' line would keep the suite green.",
+    "evidence": "the gate is recorded and independently re-checked - test_gate.log records the revision, the command and 115 passed / 8 skipped / EXIT=0, and I re-ran the done_when's grep over git show ecf73f22e:imas_codex/llm/search_tools.py myself and found no stale line, so the recorded result is not merely claimed.",
+    "fit": "the new phrasing mirrors the repository's own idiom for the same expression at imas_codex/llm/server.py:178 ('on for a full or facility server, off for a read-only or DD-only server'), and the diff introduces no new name, version suffix or ticket reference.",
+    "goal_fidelity": "imas_codex/llm/search_tools.py:356-358 and :418-419 now describe the switch exactly as imas_codex/llm/server.py:1898 sets it (_rerank_signals = not (self.read_only or self.dd_only)), so the docstring and comment describe the switch as it now runs.",
+    "reuse": "the diff adds no function, class or module, so it forks no capability; for the reuse judgement I searched imas_codex/llm/ for an existing mechanism documenting the switch and found the node's text extends the description already carried by server.py:178 and server.py:183-187 rather than duplicating a new one.",
+    "scope_discipline": "every changed line in the ecf73f22e diff lies in imas_codex/llm/search_tools.py, the sole source path the node declared, and the small-node landing rule (<=50 changed lines) is what justifies its absent fragment and figure."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make the signal-rerank docstring and step comment in imas_codex/llm/search_tools.py describe the switch as it now runs; at the reviewed head the docstring (imas_codex/llm/search_tools.py:356-358) and the step comment (imas_codex/llm/search_tools.py:418-419) both state the switch follows the server mode, so the goal is met.\nVERDICT done_when: the done_when requires the docstring and comment to describe the switch by the server mode, the stale grep to return nothing, no code line changed, and tests/llm/test_search_tools.py to pass; I confirmed each: grep -nE 'no mode turns on|The switch is off' over git show ecf73f22e:imas_codex/llm/search_tools.py returns nothing while the same grep over the reviewed base returns both lines, the diff changes no code line, and test_gate.log records 115 passed, 8 skipped, EXIT=0 at revision ecf73f22e.\nVERDICT write_paths: declared paths are imas_codex/llm/search_tools.py, the fragment docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-rerank-comments.html and the figures directory; the diff touches only imas_codex/llm/search_tools.py, and the node is small (11 changed lines) so its own landing contract forbids writing the fragment or a figure, which are correctly absent.\nVERDICT manifest: read; it states status complete, one commit [ecf73f22e], tests 'tests/llm/test_search_tools.py -> EXIT=0, 115 passed, 8 skipped', names test_logs test_gate.log, and leaves baseline_suite and after_suite absent as a docs node with no test write path should.\nVERDICT diff: read ecf73f22e against its parent 76de8174e commit by commit; one commit, one file, two hunks, six insertions and five deletions, all inside the _search_signals docstring (356-358) and the rerank step comment (418-419), no code line changed.\nCALL_SITES: imas_codex/llm/server.py:2463 (search_signals MCP tool passing rerank=_rerank_signals into _search_signals), imas_codex/llm/server.py:1898 (_rerank_signals set from the server mode)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/llm/search_tools.py:356-358 and :418-419 now describe the switch exactly as imas_codex/llm/server.py:1898 sets it (_rerank_signals = not (self.read_only or self.dd_only)), so the docstring and comment describe the switch as it now runs.\nSCORE evidence: 19\nJUSTIFICATION evidence: test_gate.log records revision ecf73f22e with 115 passed, 8 skipped, EXIT=0, and I re-ran the done_when's grep over git show ecf73f22e:imas_codex/llm/search_tools.py myself and found no stale line, so the recorded result is not merely claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed line in the ecf73f22e diff lies in imas_codex/llm/search_tools.py, the sole source path the node declared, and the small-node landing rule is what justifies its absent fragment and figure.\nSCORE durability: 13\nJUSTIFICATION durability: no test fails if the docstring or comment regresses to stale text - the only guard is the done_when's manual grep, and tests/llm/test_search_tools.py:635 (TestSignalRerankFollowsServerMode) asserts the switch's behaviour, not its documentation, so a re-introduced 'no mode turns on' line would keep the suite green.\nSCORE fit: 20\nJUSTIFICATION fit: the new phrasing mirrors the repository's own idiom for the same expression at imas_codex/llm/server.py:178, and the diff introduces no new name, version suffix or ticket reference.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, so it forks no capability; I searched imas_codex/llm/ for existing documentation of the switch and found the node's text extends server.py:178 and server.py:183-187 rather than duplicating a new one.\nFINDING imas_codex/llm/search_tools.py:357 follow-on: the docstring and step comment this node refreshed are guarded only by the done_when's manual grep; no test asserts their text and tests/llm/test_search_tools.py:635 does not read the docstring, so a later edit reintroducing a stale 'no mode turns on' line would pass the whole suite; the change is comment-only so this does not hold the node.",
+  "review_run_id": "r-20261013T074647364909-review-of-ssfms-rerank-comments-ecf73f22e04f",
+  "reviewed_base_sha": "76de8174e01fe2e9af7e87f646a254107fd5b3f4",
+  "reviewed_head_sha": "ecf73f22e04fe0a9bc8916332d4e50c662c144f3",
+  "reviewed_run_id": "r-20261013T073928506860-ssfms-rerank-comments",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 13,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T07:58:00+00:00",
+  "total": 112
+}

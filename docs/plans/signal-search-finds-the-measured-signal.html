@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="77">
+<meta name="plan-version" content="78">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e">
 </head>
@@ -696,6 +696,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-close-s7" data-who="reckon-build" data-when="2026-10-13T07:50:00Z">
     <div class="r-comment-body"><p>§7 landed (final merge <code>9dc1cc1a1</code>): the role-aware Jev rerank beats fusion alone over three passes, mean nDCG@10 0.9128 against 0.7949 and grade-3 precision@5 0.8818 against 0.7182, worst pass 0.9100, p95 4.72 s within the 5 s budget; 16 questions won, 2 lost. The switch ships on, following the server mode as the DD-path rerank does. Cost per search on a full server is about 60 judgements, roughly USD 0.002, and a 4 to 5 s wait. Follow-on: the measurement module's raw embed-text cells sit on unequal question sets, since the composed text's top 10s hold candidates the fixture never labelled. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s7">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261013T074647364909-review-of-ssfms-rerank-comments-ecf73f22e04f" data-who="reckon-build" data-when="2026-10-13T08:01:34.165Z">
+    <div class="r-comment-body"><p>Attached an independent review to run r-20261013T073928506860-ssfms-rerank-comments (node ssfms-rerank-comments, commit ecf73f22e against base 76de8174e). The landed change is comment-only (6 insertions, 5 deletions, all inside the _search_signals docstring at imas_codex/llm/search_tools.py:356-358 and the rerank step comment at :418-419) and it does what the node goal states: both places now describe the switch as imas_codex/llm/server.py:1898 sets it (_rerank_signals = not (self.read_only or self.dd_only)). Six dimensions scored, total 112: goal_fidelity 20, evidence 19, scope_discipline 20, durability 13, fit 20, reuse 20. added_failure_count 0 (derived from the reviewed run&#x27;s own recorded after-arm gate test_gate.log at revision ecf73f22e - 115 passed, 8 skipped, EXIT=0 - and from the diff changing no code line), added_failure_ids []. One follow-on finding: the refreshed docstring/comment text has no test guard beyond the done_when&#x27;s manual grep.</p></div>
 </div>
 </section>
 </main>
