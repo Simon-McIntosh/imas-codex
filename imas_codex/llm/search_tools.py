@@ -681,10 +681,13 @@ def _text_search_signals(
     facility: str,
     k: int,
 ) -> list[dict[str, Any]]:
-    """Text-based search on signals by name, node_path, and description.
+    """Text-based search on signals by the words a searcher types.
 
-    Uses fulltext index for BM25 scoring when available, falls back to
-    CONTAINS with hardcoded scores otherwise.
+    The ``facility_signal_text`` fulltext index covers ``name``, ``description``,
+    ``node_path``, ``keywords``, ``aliases``, ``unit`` and
+    ``source_description``, so a catalogue phrase or an alias code matches. Uses
+    the index for BM25 scoring when available and falls back to a CONTAINS scan
+    over ``name``, ``description`` and ``node_path`` otherwise.
     """
     # Try fulltext index first (BM25 scoring)
     try:
