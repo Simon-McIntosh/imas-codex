@@ -10576,9 +10576,10 @@ def _documentation_conformance_note(item: dict[str, Any]) -> str | None:
     """Name the registry findings that bar a reviewed document from acceptance.
 
     A review score judges the prose; it does not check the opening against the
-    selected template, a forbidden equation variant, or an equation written for
-    a concept the registry says is named and linked. Those are decided here, on
-    the same findings the audit report carries. A name the grammar cannot parse
+    selected template, a forbidden equation variant, or an equation for a
+    registered concept written other than in its canonical form. Those are
+    decided here, on the same findings the audit report carries. A canonical
+    equation is the converged statement and is accepted. A name the grammar cannot parse
     selects no registry entry and so carries no finding.
     """
     from imas_standard_names.grammar.parser import ParseError
@@ -10592,7 +10593,7 @@ def _documentation_conformance_note(item: dict[str, Any]) -> str | None:
         HouseStyleFindingClass.TEMPLATE_OPENING,
         HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT,
         HouseStyleFindingClass.FORBIDDEN_LOCUS_GLOSS,
-        HouseStyleFindingClass.RESTATED_EQUATION,
+        HouseStyleFindingClass.NON_CANONICAL_EQUATION,
     }
     try:
         findings = conformance_findings(

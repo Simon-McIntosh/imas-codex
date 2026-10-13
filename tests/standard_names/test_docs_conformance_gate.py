@@ -1,8 +1,9 @@
 """Reviewed documentation is accepted only if it conforms to the registry.
 
 The review score judges prose and cannot see an opening that follows none of
-its selected templates, a forbidden equation variant, or an equation written
-for a concept the registry says is named and linked. Each test drives the
+its selected templates, a forbidden equation variant, or an equation for a
+registered concept written other than in that concept's canonical form. The
+canonical form is the converged statement and is accepted. Each test drives the
 documentation-review worker with the model and graph calls stubbed and a
 review score of 1.0, so the only thing that can change the outcome is the
 conformance check before acceptance.
@@ -41,6 +42,9 @@ _CANONICAL_EQUATION = (
     r"$$\langle n\rangle = \oint n\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|$$"
 )
 _LINE_FORM_EQUATION = r"$$\langle n\rangle = \oint n\,dl/B \,/\, \oint dl/B$$"
+_SUBSCRIPTED_EQUATION = (
+    r"$$\langle n\rangle_S = \oint n\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|$$"
+)
 _FRACTION_EQUATION = (
     r"$$\left\langle n_{\mathrm{Ar}} \right\rangle_S = "
     r"\frac{\oint_S n_{\mathrm{Ar}}\,dS/\lvert\nabla\psi\rvert}"
@@ -132,6 +136,16 @@ def test_conforming_documentation_is_accepted_on_score() -> None:
     assert not _routed_to_refinement(persisted)
 
 
+def test_canonical_statement_of_a_registered_concept_is_accepted() -> None:
+    documentation = _documentation(equation=_CANONICAL_EQUATION)
+    assert conformance_findings(_AVERAGED, documentation=documentation) == []
+
+    persisted = _review(_AVERAGED, documentation)
+
+    assert persisted["score"] == 1.0
+    assert not _routed_to_refinement(persisted)
+
+
 def test_off_template_opening_is_refined_at_a_perfect_score() -> None:
     documentation = _documentation(opening="The argon density at the boundary.")
     findings = conformance_findings(_AVERAGED, documentation=documentation)
@@ -152,7 +166,7 @@ def test_forbidden_variant_equation_is_refined_at_a_perfect_score() -> None:
         f.finding_class
         for f in conformance_findings(_AVERAGED, documentation=documentation)
     }
-    assert HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT in classes
+    assert classes == {HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT}
 
     persisted = _review(_AVERAGED, documentation)
 
@@ -160,28 +174,22 @@ def test_forbidden_variant_equation_is_refined_at_a_perfect_score() -> None:
     assert "forbidden_equation_variant" in persisted["comments"]
 
 
-def test_canonical_restatement_of_a_named_concept_is_refined() -> None:
-    documentation = _documentation(equation=_CANONICAL_EQUATION)
+@pytest.mark.parametrize("equation", [_FRACTION_EQUATION, _SUBSCRIPTED_EQUATION])
+def test_non_canonical_statement_of_a_registered_concept_is_refined(
+    equation: str,
+) -> None:
+    documentation = _documentation(equation=equation)
     classes = {
         f.finding_class
         for f in conformance_findings(_AVERAGED, documentation=documentation)
     }
-    assert classes == {HouseStyleFindingClass.RESTATED_EQUATION}
+    assert classes == {HouseStyleFindingClass.NON_CANONICAL_EQUATION}
 
     persisted = _review(_AVERAGED, documentation)
 
     assert _routed_to_refinement(persisted)
-    assert "restated_equation" in persisted["comments"]
+    assert "non_canonical_equation" in persisted["comments"]
     assert "flux-surface average" in persisted["comments"]
-
-
-def test_any_written_form_of_a_named_concept_is_a_restatement() -> None:
-    documentation = _documentation(equation=_FRACTION_EQUATION)
-
-    persisted = _review(_AVERAGED, documentation)
-
-    assert _routed_to_refinement(persisted)
-    assert "restated_equation" in persisted["comments"]
 
 
 def test_name_without_selected_template_is_accepted_on_score() -> None:
@@ -206,7 +214,7 @@ def test_name_the_grammar_cannot_parse_is_accepted_on_score() -> None:
     assert not _routed_to_refinement(persisted)
 
 
-def test_equation_the_registry_requires_is_not_a_restatement() -> None:
+def test_canonical_equation_of_a_required_restatement_is_accepted() -> None:
     documentation = (
         "Elongation of the plasma boundary.\n\n"
         r"$$\kappa = (Z_{\max} - Z_{\min})/(R_{\max} - R_{\min})$$"
@@ -218,7 +226,7 @@ def test_equation_the_registry_requires_is_not_a_restatement() -> None:
         )
     }
 
-    assert HouseStyleFindingClass.RESTATED_EQUATION not in classes
+    assert HouseStyleFindingClass.NON_CANONICAL_EQUATION not in classes
 
 
 def test_below_threshold_score_is_not_raised_by_the_conformance_check() -> None:
@@ -228,21 +236,38 @@ def test_below_threshold_score_is_not_raised_by_the_conformance_check() -> None:
     assert _routed_to_refinement(persisted)
 
 
+def test_finding_names_the_concept_entry_and_its_canonical_form() -> None:
+    findings = conformance_findings(
+        _AVERAGED, documentation=_documentation(equation=_FRACTION_EQUATION)
+    )
+
+    [finding] = findings
+    assert finding.registry_entry == "concept:flux_surface_averaged"
+    assert r"\langle f\rangle = \oint f\,dS/|\nabla\psi|" in finding.detail
+
+
+def test_review_note_is_serialisable_as_per_dimension_comment() -> None:
+    persisted = _review(_AVERAGED, _documentation(equation=_FRACTION_EQUATION))
+
+    assert json.loads(json.dumps(persisted["comments_per_dim"]))["registry_conformance"]
+
+
 def _equation_placement(rendered: str) -> list[str]:
     return [line for line in rendered.splitlines() if "Equation placement" in line]
 
 
-def test_conventions_block_allows_no_restatement_of_a_named_concept() -> None:
-    rendered = render_prompt(
-        "sn/_conventions", {"conventions": conventions_context_for(_AVERAGED)}
-    )
+def test_conventions_block_allows_only_the_canonical_form_of_a_named_concept() -> None:
+    context = conventions_context_for(_AVERAGED)
+    rendered = render_prompt("sn/_conventions", {"conventions": context})
 
     placements = _equation_placement(rendered)
     assert len(placements) == 2
     for line in placements:
         assert "unless needed" not in line
         assert "name the concept and link to it" in line
+        assert "canonical equation above, written exactly that way" in line
     assert "unless needed" not in rendered
+    assert context["concepts"][0]["equation"] in rendered
 
 
 def test_conventions_block_still_asks_for_a_required_equation() -> None:
@@ -259,26 +284,3 @@ def test_conventions_block_still_asks_for_a_required_equation() -> None:
     )
     assert "write this equation in the documentation" in by_concept["elongation"]
     assert "unless needed" not in by_concept["plasma_boundary"]
-
-
-def test_review_note_is_serialisable_as_per_dimension_comment() -> None:
-    persisted = _review(_AVERAGED, _documentation(equation=_CANONICAL_EQUATION))
-
-    assert json.loads(json.dumps(persisted["comments_per_dim"]))["registry_conformance"]
-
-
-@pytest.mark.parametrize(
-    "equation",
-    [_CANONICAL_EQUATION, _FRACTION_EQUATION],
-)
-def test_finding_names_the_concept_entry(equation: str) -> None:
-    findings = conformance_findings(
-        _AVERAGED, documentation=_documentation(equation=equation)
-    )
-
-    restated = [
-        f
-        for f in findings
-        if f.finding_class is HouseStyleFindingClass.RESTATED_EQUATION
-    ]
-    assert [f.registry_entry for f in restated] == ["concept:flux_surface_averaged"]

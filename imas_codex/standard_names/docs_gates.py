@@ -518,7 +518,7 @@ class HouseStyleFindingClass(StrEnum):
     FORBIDDEN_SYMBOL_SPELLING = "forbidden_symbol_spelling"
     FORBIDDEN_LOCUS_GLOSS = "forbidden_locus_gloss"
     TEMPLATE_OPENING = "template_opening"
-    RESTATED_EQUATION = "restated_equation"
+    NON_CANONICAL_EQUATION = "non_canonical_equation"
 
 
 @dataclass(frozen=True)
@@ -654,18 +654,69 @@ def _equation_operation_commands(equation: str, symbols: set[str]) -> set[str]:
     }
 
 
-_LATEX_SPACING_RE = re.compile(r"\\[,;:!]|\\(?:left|right|displaystyle)\b|\s+")
+_LATEX_TOKEN_RE = re.compile(r"\\[A-Za-z]+|\\.|\S")
+_LATEX_SPACING_TOKENS = frozenset(
+    {"\\,", "\\;", "\\:", "\\!", "\\ ", "\\left", "\\right", "\\displaystyle"}
+)
+_TOKEN_END = "\x1f"
 
 
-def _spacing_free(equation: str) -> str:
-    return _LATEX_SPACING_RE.sub("", equation)
+def _equation_tokens(equation: str) -> list[str]:
+    """Split LaTeX into tokens, dropping whitespace and spacing or sizing commands."""
+
+    return [
+        token
+        for token in _LATEX_TOKEN_RE.findall(equation)
+        if token not in _LATEX_SPACING_TOKENS
+    ]
+
+
+def _canonical_equation_pattern(concept: Any) -> re.Pattern[str]:
+    """Compile a concept's canonical equation into a pattern over its tokens.
+
+    The canonical equation fixes every operator, delimiter and ordering; the
+    symbols the registry declares for it stand for the quantity being written
+    about, so each matches any run of tokens. Spacing and sizing commands do
+    not take part.
+    """
+
+    symbol_tokens = [
+        tuple(_equation_tokens(symbol.symbol))
+        for symbol in concept.symbols
+        if symbol.symbol.strip()
+    ]
+    tokens = _equation_tokens(concept.equation)
+    pieces: list[str] = []
+    index = 0
+    while index < len(tokens):
+        matched = next(
+            (
+                symbol
+                for symbol in sorted(symbol_tokens, key=len, reverse=True)
+                if symbol and tuple(tokens[index : index + len(symbol)]) == symbol
+            ),
+            None,
+        )
+        if matched is not None:
+            pieces.append(f"(?:[^{_TOKEN_END}]+{_TOKEN_END})+?")
+            index += len(matched)
+            continue
+        pieces.append(re.escape(tokens[index]) + _TOKEN_END)
+        index += 1
+    return re.compile("".join(pieces))
+
+
+def _is_canonical_equation(concept: Any, equation: str) -> bool:
+    tokens = _equation_tokens(equation.strip().rstrip(".,;"))
+    joined = "".join(token + _TOKEN_END for token in tokens)
+    return _canonical_equation_pattern(concept).fullmatch(joined) is not None
 
 
 def _concept_equation_signature(concept: Any) -> set[str]:
     """Return the operation commands that identify an equation of a concept.
 
     The left-hand side names the operator being applied, so it identifies the
-    concept in whatever form the right-hand side is written. A concept whose
+    concept whatever form the right-hand side is written in. A concept whose
     left-hand side carries no operation command is identified by its whole
     canonical equation.
     """
@@ -680,44 +731,58 @@ def _concept_equation_signature(concept: Any) -> set[str]:
     return _equation_operation_commands(concept.equation, symbols)
 
 
-def _restated_equation_findings(
+def _non_canonical_equation_findings(
     concepts: tuple[Any, ...],
     text: str,
 ) -> list[HouseStyleFinding]:
-    """Flag a display equation written for a concept that is named, not restated.
+    """Flag a display equation for a concept written other than canonically.
 
-    A concept whose entry does not restate its equation is applied by a name and
-    linked to; a display equation performing its operation is a restatement
-    whatever its spelling, the registry's canonical form included.
+    A concept has one canonical equation, so a display equation performing its
+    operation in any other form is a second form of it. The canonical form is
+    the converged statement and is never reported, whatever the entry's
+    ``restates_equation`` value. An equation a forbidden variant already
+    matches is reported as that variant and not a second time.
     """
 
     findings: list[HouseStyleFinding] = []
     for concept in concepts:
-        if concept.restates_equation:
-            continue
         signature = _concept_equation_signature(concept)
+        if not signature:
+            continue
         symbols = {
             command
             for symbol in concept.symbols
             for command in _LATEX_COMMAND_RE.findall(symbol.symbol)
         }
-        canonical = _spacing_free(concept.equation)
         for equation in _DISPLAY_MATH_RE.findall(text):
-            commands = _equation_operation_commands(equation, symbols)
-            performs_operation = bool(signature) and signature <= commands
-            if performs_operation or canonical in _spacing_free(equation):
-                findings.append(
-                    HouseStyleFinding(
-                        finding_class=HouseStyleFindingClass.RESTATED_EQUATION,
-                        registry_entry=f"concept:{concept.token}",
-                        detail=(
-                            f"a display equation restates '{concept.phrase}', "
-                            "which is named and linked, not restated"
-                        ),
-                    )
+            if not signature <= _equation_operation_commands(equation, symbols):
+                continue
+            if _is_canonical_equation(concept, equation):
+                continue
+            if any(
+                _variant_matches(pattern, f"$${equation}$$")
+                for pattern in concept.forbidden_variants
+            ):
+                continue
+            findings.append(
+                HouseStyleFinding(
+                    finding_class=HouseStyleFindingClass.NON_CANONICAL_EQUATION,
+                    registry_entry=f"concept:{concept.token}",
+                    detail=(
+                        f"a display equation for '{concept.phrase}' is not "
+                        f"written in its canonical form '{concept.equation}'"
+                    ),
                 )
-                break
+            )
+            break
     return findings
+
+
+def _variant_matches(pattern: str, text: str) -> bool:
+    try:
+        return re.search(pattern, text, re.IGNORECASE) is not None
+    except re.error:
+        return False
 
 
 def _forbidden_symbol_findings(
@@ -796,7 +861,7 @@ def house_style_findings(
         *_forbidden_variant_findings(conventions.concepts, prose),
         *_forbidden_symbol_findings(conventions.notation, prose),
         *_template_opening_findings(conventions.templates, documentation),
-        *_restated_equation_findings(conventions.concepts, prose),
+        *_non_canonical_equation_findings(conventions.concepts, prose),
     ]
 
 
