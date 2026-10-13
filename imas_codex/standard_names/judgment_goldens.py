@@ -577,6 +577,229 @@ def build_near_duplicate(graph: GraphClient) -> list[dict[str, Any]]:
     return _finish(rows, graph)
 
 
+DOCUMENTATION_SHEET = OUTPUT / "golden-documentation-acceptable-sheet.json"
+DD_DOCUMENTATION_CHARS = 600
+LIVE_NAME_ROWS = 6000
+_CONVENTIONS: Any = None
+
+
+def _live_documentation_names(graph: GraphClient) -> list[dict[str, Any]]:
+    """Accepted or approved names carrying non-empty documentation.
+
+    ``source_paths`` is the name's DD binding list; a derived name carries
+    none and still belongs on the sheet, so the read never requires it.
+    """
+    return graph.query(
+        "MATCH (sn:StandardName) "
+        "WHERE sn.name_stage IN ['accepted','approved'] "
+        "AND sn.documentation IS NOT NULL AND trim(sn.documentation) <> '' "
+        "RETURN sn.id AS name, sn.description AS description, "
+        "sn.documentation AS documentation, sn.unit AS unit, "
+        "sn.physics_domain AS physics_domain, sn.source_paths AS source_paths "
+        "ORDER BY sn.id LIMIT $limit",
+        limit=LIVE_NAME_ROWS,
+    )
+
+
+def _unit_symbols(graph: GraphClient, units: list[str]) -> dict[str, str]:
+    """The notation symbol behind each name's unit id."""
+    wanted = sorted({unit for unit in units if unit})
+    if not wanted:
+        return {}
+    rows = graph.query(
+        "UNWIND $units AS unit_id MATCH (unit:Unit {id:unit_id}) "
+        "RETURN unit_id AS id, unit.symbol AS symbol LIMIT $limit",
+        units=wanted,
+        limit=LIVE_NAME_ROWS,
+    )
+    return {row["id"]: row["symbol"] for row in rows}
+
+
+def _dd_path_documentation(graph: GraphClient, paths: list[str]) -> dict[str, str]:
+    """The DD documentation body behind each IMAS path."""
+    wanted = sorted({path for path in paths if path})
+    if not wanted:
+        return {}
+    rows = graph.query(
+        "UNWIND $paths AS path MATCH (dd:IMASNode {id:path}) "
+        "RETURN path AS path, dd.documentation AS documentation LIMIT $limit",
+        paths=wanted,
+        limit=LIVE_NAME_ROWS,
+    )
+    return {row["path"]: row["documentation"] or "" for row in rows}
+
+
+def _conventions_registry() -> Any:
+    """Load the registry entries once; ``select_conventions`` reloads per call."""
+    global _CONVENTIONS
+    if _CONVENTIONS is None:
+        from imas_standard_names.grammar.terms import load_conventions
+
+        _CONVENTIONS = load_conventions()
+    return _CONVENTIONS
+
+
+def _applied_conventions(name: str, registry: Any = None) -> dict[str, Any]:
+    """The registry conventions a name selects, or an empty refused record.
+
+    ``select_conventions`` parses the name with the strict public grammar and
+    raises for a legacy id or one whose vocabulary this checkout has not
+    reached.  That name still belongs on the sheet: it is recorded with empty
+    convention lists and ``parse_refused`` true.  The registry is loaded once
+    and passed in, because a per-call load re-reads the convention files.
+    """
+    from imas_standard_names.grammar.parser import ParseError
+    from imas_standard_names.grammar.terms import select_conventions
+
+    try:
+        applied = select_conventions(name, registry=registry or _conventions_registry())
+    except ParseError:
+        return {"parse_refused": True, "concepts": [], "notation": [], "templates": []}
+    return {
+        "parse_refused": False,
+        "concepts": [
+            {
+                "token": entry.token,
+                "phrase": entry.phrase,
+                "definition": entry.definition,
+                "equation": entry.equation,
+                "symbols": [
+                    {"symbol": entry_symbol.symbol, "meaning": entry_symbol.meaning}
+                    for entry_symbol in entry.symbols
+                ],
+            }
+            for entry in applied.concepts
+        ],
+        "notation": [
+            {"token": entry.token, "symbol": entry.symbol} for entry in applied.notation
+        ],
+        "templates": [
+            {
+                "base": entry.base,
+                "segments": list(entry.segments),
+                "opening": entry.documentation,
+            }
+            for entry in applied.templates
+        ],
+    }
+
+
+def build_documentation_sheet(
+    graph: GraphClient,
+    count: int = 400,
+    reserve: int = 200,
+    lead_overlap: int = 50,
+) -> list[dict[str, Any]]:
+    """The blind documentation-acceptability sheet the coordinator labels.
+
+    Draws ``count + reserve`` live documented names with the shared stratified
+    sampler, numbers each row's ``draw_rank`` from 1 in draw order, and marks
+    ``lead_overlap`` sheet rows for the lead's independent labelling.  No
+    incumbent review score, comment or verdict is carried: every ``label`` is
+    null and the only provenance is ``label_source = 'coordinator'``.
+    """
+    candidates = [
+        {
+            "unit": item["name"],
+            "physics_domain": item.get("physics_domain")
+            or _domain(
+                (item.get("source_paths") or [""])[0].removeprefix("dd:"), item["name"]
+            ),
+            "pattern_family": _family(item["name"]),
+            "item": item,
+        }
+        for item in _live_documentation_names(graph)
+        if item.get("name") and item.get("documentation")
+    ]
+    drawn = _sample(candidates, count + reserve)
+    registry = _conventions_registry()
+    symbols = _unit_symbols(graph, [item["item"].get("unit") for item in drawn])
+    dd_docs = _dd_path_documentation(
+        graph,
+        [
+            raw.removeprefix("dd:")
+            for item in drawn
+            for raw in (item["item"].get("source_paths") or [])[:2]
+        ],
+    )
+    rows: list[dict[str, Any]] = []
+    for draw_rank, candidate in enumerate(drawn, 1):
+        item = candidate["item"]
+        documentation = item["documentation"]
+        row = _row(
+            item["name"],
+            None,
+            "coordinator",
+            hashlib.sha256(documentation.encode()).hexdigest(),
+            name=item["name"],
+            group=candidate["pattern_family"],
+            domain=candidate["physics_domain"],
+            canonical=item["name"],
+        )
+        row["draw_rank"] = draw_rank
+        row["description"] = item.get("description") or ""
+        row["documentation"] = documentation
+        row["unit_symbol"] = symbols.get(item.get("unit")) or item.get("unit") or ""
+        row["dd_sources"] = [
+            {
+                "path": path,
+                "documentation": dd_docs.get(path, "")[:DD_DOCUMENTATION_CHARS],
+            }
+            for path in [
+                raw.removeprefix("dd:") for raw in (item.get("source_paths") or [])[:2]
+            ]
+        ]
+        row["conventions"] = _applied_conventions(item["name"], registry)
+        rows.append(row)
+    finished = _finish(rows, graph)
+    for row in finished:
+        row.pop("incumbent_review", None)
+        row["physics_domain"] = row.pop("domain")
+        row["pattern_family"] = row.pop("pattern")
+        row["lead_overlap"] = False
+    sheet = sorted(
+        (row for row in finished if row["draw_rank"] <= count),
+        key=lambda row: _rank(row["unit"]),
+    )
+    if lead_overlap:
+        step = len(sheet) / lead_overlap
+        for index in range(lead_overlap):
+            sheet[min(int(index * step), len(sheet) - 1)]["lead_overlap"] = True
+    return sorted(finished, key=lambda row: row["draw_rank"])
+
+
+def write_sheet(path: Path, rows: list[dict[str, Any]], count: int) -> dict[str, Any]:
+    """Persist an unlabelled sheet and return its composition.
+
+    Separate from :func:`write_fixture` because a sheet row carries a null
+    label and reading context the labelled fixtures do not: the composition
+    reports the sheet/reserve partition rather than label counts, and the
+    labelled writer's contract is left untouched.
+    """
+    encoded = ",\n".join(
+        json.dumps(row, ensure_ascii=False, separators=(",", ":")) for row in rows
+    )
+    path.write_text("[\n" + encoded + "\n]\n")
+    return {
+        "path": str(path),
+        "rows": len(rows),
+        "sheet": count,
+        "reserve": len(rows) - count,
+        "lead_overlap": sum(row["lead_overlap"] for row in rows),
+        "domains": dict(sorted(Counter(row["physics_domain"] for row in rows).items())),
+        "families": dict(
+            sorted(Counter(row["pattern_family"] for row in rows).items())
+        ),
+        "splits": dict(Counter(row["split"] for row in rows)),
+        "parse_refused": sum(row["conventions"]["parse_refused"] for row in rows),
+        "largest_row_bytes": max(
+            len(json.dumps(row, ensure_ascii=False, separators=(",", ":")).encode())
+            for row in rows
+        ),
+        "bytes": path.stat().st_size,
+    }
+
+
 def write_fixture(path: Path, rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Persist rows and return a compact composition record for the evidence fragment."""
     encoded = ",\n".join(
@@ -603,6 +826,11 @@ def main() -> None:
         )
         for filename, builder in builders:
             print(json.dumps(write_fixture(OUTPUT / filename, builder(graph))))
+        print(
+            json.dumps(
+                write_sheet(DOCUMENTATION_SHEET, build_documentation_sheet(graph), 400)
+            )
+        )
 
 
 if __name__ == "__main__":
