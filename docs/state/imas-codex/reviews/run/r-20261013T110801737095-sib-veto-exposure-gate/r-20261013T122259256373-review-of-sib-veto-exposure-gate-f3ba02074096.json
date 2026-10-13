@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_contained_in_main",
+    "tests/standard_names/test_sn_approve_tag.py::TestApprovalCliTag::test_existing_rc_tag_does_not_block_approval"
+  ],
+  "completed_at": "2026-10-13T12:43:31.229Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-13T12:23:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html",
+      "line": "63",
+      "severity": "blocking",
+      "text": "blocking: the four base-only failures are attributed to the archive's absent .git, but base.log records each as a pytest-timeout inside _run_git and all four use the self-contained isnc_repo fixture (test_review_release.py:33), which builds its own .git under tmp_path -- the stated cause is unsupported by the cited log, and its real signature (a git-subprocess timeout) is the same one used to explain the two head-only failures."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html",
+      "line": "77",
+      "severity": "follow-on",
+      "text": "follow-on: \"Every one of those files was collected and run by both arms\" is not accurate; the default addopts (-m \"not slow and not graph\", pyproject.toml:1044) deselected 330 items including test_skeleton_placeholder_cleanup_graph.py (pytestmark graph) and eleven graph-marked tests in test_name_lifecycle.py; the conclusion holds because those mock the probe (test_skeleton_placeholder_cleanup_graph.py:211), but the unexercised set the brief asked for is not empty."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the landed artifact is a docs fragment no runtime code reaches; for the code it measures, _filter_admissible_parents has its sole in-source caller at imas_codex/standard_names/graph_ops.py:3184, reached from graph_ops.py:3543 and :5912 and imas_codex/standard_names/signed_manifest.py:369.",
+    "diff": "one commit, one file, +86 lines -- the evidence fragment and nothing else; the added-failure arithmetic reconciles with the logs' own FAILED lines.",
+    "done_when": "the done_when asks for two logged runs each ending in a pytest totals line and EXIT=; base.log:1647-1648 and head.log:1649-1650 both end with their totals and EXIT=1, both logs named in the manifest test_logs.",
+    "goal": "the node's goal is a measurement of what the fail-open parent-admission probe exposes; sib-veto-exposure-gate.html:9 states the base (27 failed/7804 passed, 27a2b4299) and head (25 failed/7811 passed, 06e0451f2) totals and answers \"no\", and :70-77 lists the callers reaching the probe.",
+    "manifest": "read; status complete, commits f3ba02074, baseline_suite completed:true with 27 failures and after_suite completed:true with 25, added_failure_count 2 with the two ids.",
+    "write_paths": "the manifest declares the fragment html plus a figures directory, and git diff --stat 06e0451f2 f3ba02074 lists only docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html, inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion and no test, so nothing reddens if the fragment's recorded numbers or classifications drift from the logs it cites.",
+    "evidence": "base.log:1647-1648 and head.log:1649-1651 carry the totals the fragment quotes, and the head-not-base FAILED set computed from those logs is exactly the two ids the reviewers own",
+    "fit": "the fragment follows the two-column idiom of docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html with section headings, code markup and a logs list.",
+    "goal_fidelity": "sib-veto-exposure-gate.html:9 and :70 answer the brief's two questions directly, but :63-66 misattributes the four base-only failures.",
+    "reuse": "the diff defines no function, class or module, so no existing capability is forked.",
+    "scope_discipline": "git diff --stat 06e0451f2 f3ba02074 lists exactly docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html, inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a measurement of what the fail-open parent-admission probe exposes; sib-veto-exposure-gate.html:9 states the base (27 failed/7804 passed, 27a2b4299) and head (25 failed/7811 passed, 06e0451f2) totals and answers \"no\", and :70-77 lists the callers reaching the probe.\nVERDICT done_when: the done_when asks for two logged runs each ending in a pytest totals line and EXIT=; base.log:1647-1648 and head.log:1649-1650 both end with their totals and EXIT=1, both logs named in the manifest test_logs.\nVERDICT write_paths: the manifest declares the fragment html plus a figures directory, and git diff --stat 06e0451f2 f3ba02074 lists only docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html, inside the declared scope.\nVERDICT manifest: read; status complete, commits f3ba02074, baseline_suite completed:true with 27 failures and after_suite completed:true with 25, added_failure_count 2 with the two ids, negative_control_log the bare \"none: ...\" form.\nVERDICT diff: one commit, one file, +86 lines -- the evidence fragment and nothing else; the added-failure arithmetic (27-25 with two head-only ids and four base-only ids) reconciles with the logs' own FAILED lines.\nCALL_SITES: none -- the landed artifact is a docs fragment no runtime code reaches; for the code it measures, the node's own caller list is correct: _filter_admissible_parents has its sole in-source caller at imas_codex/standard_names/graph_ops.py:3184 (_write_standard_name_edges), reached from graph_ops.py:3543 and :5912 and imas_codex/standard_names/signed_manifest.py:369, and no test outside tests/standard_names/ reaches it.\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: sib-veto-exposure-gate.html:9 and :70 answer the brief's two questions directly, but :63-66 misattributes the four base-only failures.\nSCORE evidence: 17\nJUSTIFICATION evidence: base.log:1647-1648 and head.log:1649-1650 carry the totals the fragment quotes, and the head-not-base FAILED set computed from those logs is exactly the two ids the manifest records.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 06e0451f2 f3ba02074 lists exactly docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html, inside the declared write paths.\nSCORE durability: 6\nJUSTIFICATION durability: the diff adds no assertion and no test, so nothing reddens if the fragment's recorded numbers or classifications drift from the logs it cites.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the sibling idiom of docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html with section headings, code markup and a logs list.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff defines no function, class or module, so no existing capability is forked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html:63 blocking: the four base-only failures are attributed to the archive's absent .git, but base.log records each as \"Failed: Timeout (>30.0s) from pytest-timeout\" inside _run_git and all four use the self-contained isnc_repo fixture (test_review_release.py:33), which builds its own .git under tmp_path -- the stated cause is unsupported by the log the fragment cites, and the real signature (a git-subprocess timeout) is the same one the fragment uses to explain the two head-only failures, so one environmental phenomenon is reported as two.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-veto-exposure-gate.html:77 follow-on: \"Every one of those files was collected and run by both arms\" is not accurate -- the repo default addopts (-m \"not slow and not graph\", pyproject.toml:1044) deselected 330 items, including all of tests/standard_names/test_skeleton_placeholder_cleanup_graph.py (pytestmark graph) and the eleven graph-marked tests in test_name_lifecycle.py, so files the fragment lists as reaching the probe did not run; the conclusion is unaffected because those deselected tests mock the probe (test_skeleton_placeholder_cleanup_graph.py:211) or reach a different helper, but the unexercised set the brief asked for is not empty.",
+  "review_run_id": "r-20261013T122259256373-review-of-sib-veto-exposure-gate-f3ba02074096",
+  "reviewed_base_sha": "06e0451f28948e5f0e3306f637224a7e8110df46",
+  "reviewed_head_sha": "f3ba020740967623f1990c78cf50f3d56536d54a",
+  "reviewed_run_id": "r-20261013T110801737095-sib-veto-exposure-gate",
+  "scores": {
+    "durability": 6,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T12:38:40.239460+00:00",
+  "total": 97
+}
