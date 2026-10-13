@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="78">
+<meta name="plan-version" content="79">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e">
 </head>
@@ -489,24 +489,24 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="search-unit" data-choice="" data-by="" data-when="" data-recommended="signal-row-template-collapse" data-recommended-by="coordinator">
+<div class="r-dec" data-key="search-unit" data-choice="signal-row-template-collapse" data-by="" data-when="2026-10-13T08:25:16+00:00" data-recommended="signal-row-template-collapse" data-recommended-by="coordinator">
     <p class="r-dec-q">What is one row of a signal search result?</p>
     <p class="r-dec-ctx">JT-60SA&#x27;s 15,111 signals sit in 5,172 SignalSource families, mostly singletons, because each coil&#x27;s channel is its own source. So searching families would not merge the six EF coil voltages a physicist thinks of as one row. The SignalSource vector index exists but holds no embeddings. JET&#x27;s families reach 2,366 members, where per-signal rows would flood any report.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="signal-row-template-collapse">A signal row, with rows sharing a name template collapsed for display</button>
+      <button class="r-opt chosen" data-value="signal-row-template-collapse">A signal row, with rows sharing a name template collapsed for display</button>
       <button class="r-opt" data-value="signal-source-family">A SignalSource family, searched through its own embedded index</button>
       <button class="r-opt" data-value="signal-row-uncollapsed">A signal row, as today</button>
       </p>
-    <p class="r-dec-rat">Recommended: collapse by name template for display while scoring individual signals. It merges per-coil channels that SignalSource keeps apart, folds JET&#x27;s large families, needs no new index, and leaves the harness scoring the signals a physicist would read.</p>
+    <p class="r-dec-rat">Lead decision, 2026-10-13: collapse rows that share a name template within one data-source category for display, while the harness keeps scoring individual signals. It merges the per-coil channels SignalSource keeps apart, folds JET&#x27;s large families, and needs no new index. §9 is written for this choice.</p>
     </div>
-<div class="r-dec" data-key="signal-role" data-choice="" data-by="" data-when="" data-recommended="stored-at-enrichment" data-recommended-by="coordinator">
+<div class="r-dec" data-key="signal-role" data-choice="stored-at-enrichment" data-by="" data-when="2026-10-13T08:25:16+00:00" data-recommended="stored-at-enrichment" data-recommended-by="coordinator">
     <p class="r-dec-q">Where is a signal&#x27;s measurement role judged?</p>
     <p class="r-dec-ctx">The ripple search&#x27;s central failure was ranking references and commands above measurements. A stored role can filter a search, feed the rerank, and tell the mapping stage a pulse_schedule reference from a measured home. A query-time judgment costs nothing until a search runs, but it is re-paid on every query and helps no other reader.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="stored-at-enrichment">Store a Jev role judgment on each signal at enrichment</button>
+      <button class="r-opt chosen" data-value="stored-at-enrichment">Store a Jev role judgment on each signal at enrichment</button>
       <button class="r-opt" data-value="query-time-only">Judge role only inside the search rerank</button>
       </p>
-    <p class="r-dec-rat">Recommended: store it at enrichment, after §8&#x27;s 300-signal prototype records agreement and cost. One judgment per signal serves search, rerank and mapping, and the role becomes a facet anyone can query.</p>
+    <p class="r-dec-rat">Lead decision, 2026-10-13: judge each signal&#x27;s role once at enrichment and store it as signal_role, after §8&#x27;s 300-signal prototype records agreement and cost. §7 measured the role-aware rerank question at 0.913 nDCG@10 against the generic question&#x27;s 0.905, so the stored role&#x27;s main value is the role= filter and the mapping stage rather than ranking.</p>
     </div>
 <div class="r-dec" data-key="embed-text" data-choice="description-only" data-by="reckon-build (measured)" data-when="2026-10-13T00:10:57+00:00">
     <p class="r-dec-q">What text does a signal&#x27;s embedding encode?</p>
@@ -558,6 +558,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-12T23:15:00Z">
     <div class="r-comment-body"><p>§3 landed (final merge <code>12a6d84e6</code>): 22 questions, 11 held out, 1,551 eligible labels; on mean nDCG@10 RRF scores 0.796, vector only 0.685, the current tool and the frozen additive rule 0.563, and the random control 0.522. Every arm is scored on the eligible population and refuses on an unlabelled candidate. The rerank arms moved to §7. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s3">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261013T0830-s3-cutover-decision" data-who="reckon-build" data-when="2026-10-13T08:30:00Z">
+    <div class="r-comment-body"><p>Lead decision, 2026-10-13, on the eligibility cutover: move it past the member-individualisation fix <code>0a8d3ed85</code> (21:16:46Z) and reprocess, rather than drop the 626 signals enriched between the two fixes. The lead added that all JT-60SA signals may be reprocessed if that improves graph quality. The scope (the 626-signal window, or every JT-60SA signal), its cost, and the re-check of fixture labels on signals whose descriptions change are to be set by a new section before any re-enrichment runs.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20261012T1958-s11-cutover" data-who="reckon-build" data-when="2026-10-12T19:58:00Z">
     <div class="r-comment-body"><p>Gate <code>g-ssfms-1</code> states its cutover as 2026-10-11T19:08:21Z, which is two hours early. The cutover is 2026-10-11T21:08:54Z, the start of the first run with <code>93bfb7e9d</code> loaded (§3 gives the derivation). Count JET re-enrichment against 21:08:54Z when closing the gate; reckon offers no op to rewrite a declared gate's measure.</p></div>
@@ -698,7 +701,10 @@
     <div class="r-comment-body"><p>§7 landed (final merge <code>9dc1cc1a1</code>): the role-aware Jev rerank beats fusion alone over three passes, mean nDCG@10 0.9128 against 0.7949 and grade-3 precision@5 0.8818 against 0.7182, worst pass 0.9100, p95 4.72 s within the 5 s budget; 16 questions won, 2 lost. The switch ships on, following the server mode as the DD-path rerank does. Cost per search on a full server is about 60 judgements, roughly USD 0.002, and a 4 to 5 s wait. Follow-on: the measurement module's raw embed-text cells sit on unequal question sets, since the composed text's top 10s hold candidates the fixture never labelled. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s7">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261013T074647364909-review-of-ssfms-rerank-comments-ecf73f22e04f" data-who="reckon-build" data-when="2026-10-13T08:01:34.165Z">
-    <div class="r-comment-body"><p>Attached an independent review to run r-20261013T073928506860-ssfms-rerank-comments (node ssfms-rerank-comments, commit ecf73f22e against base 76de8174e). The landed change is comment-only (6 insertions, 5 deletions, all inside the _search_signals docstring at imas_codex/llm/search_tools.py:356-358 and the rerank step comment at :418-419) and it does what the node goal states: both places now describe the switch as imas_codex/llm/server.py:1898 sets it (_rerank_signals = not (self.read_only or self.dd_only)). Six dimensions scored, total 112: goal_fidelity 20, evidence 19, scope_discipline 20, durability 13, fit 20, reuse 20. added_failure_count 0 (derived from the reviewed run&#x27;s own recorded after-arm gate test_gate.log at revision ecf73f22e - 115 passed, 8 skipped, EXIT=0 - and from the diff changing no code line), added_failure_ids []. One follow-on finding: the refreshed docstring/comment text has no test guard beyond the done_when&#x27;s manual grep.</p></div>
+    <div class="r-comment-body"><p>Attached an independent review to run r-20261013T073928506860-ssfms-rerank-comments (node ssfms-rerank-comments, commit ecf73f22e against base 76de8174e). The landed change is comment-only (6 insertions, 5 deletions, all inside the _search_signals docstring at imas_codex/llm/search_tools.py:356-358 and the rerank step comment at :418-419) and it does what the node goal states: both places now describe the switch as imas_codex/llm/server.py:1898 sets it (_rerank_signals = not (self.read_only or self.dd_only)). Six dimensions scored, total 112: goal_fidelity 20, evidence 19, scope_discipline 20, durability 13, fit 20, reuse 20. added_failure_count 0 (derived from the reviewed run's own recorded after-arm gate test_gate.log at revision ecf73f22e - 115 passed, 8 skipped, EXIT=0 - and from the diff changing no code line), added_failure_ids []. One follow-on finding: the refreshed docstring/comment text has no test guard beyond the done_when's manual grep.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20261013T0830-s7-judgement-calls" data-who="reckon-build" data-when="2026-10-13T08:30:00Z">
+    <div class="r-comment-body"><p>Lead accepted, 2026-10-13, the three near-miss calls: §4's docs and code ±0.02 band judged met; §5's fused tool at 0.7773 against 0.7920, 0.0027 beyond the spread, accepted as the fresh vectors' own ranking; and §7's first reproduction of §4's figure at 0.5345, 0.0009 outside the band, judged met as rerank variance.</p></div>
 </div>
 </section>
 </main>
