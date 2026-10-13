@@ -31,7 +31,13 @@ _ANCHOR = "base_at_axis"
 _MEMBERS = ["base_at_boundary", "base_of_probe"]
 
 
-def _node(node_id: str, docs_stage: str, score: float | None) -> dict[str, Any]:
+def _node(
+    node_id: str,
+    docs_stage: str,
+    score: float | None = None,
+    *,
+    name_stage: str = "drafted",
+) -> dict[str, Any]:
     return {
         "id": node_id,
         "physical_base": "base",
@@ -39,6 +45,7 @@ def _node(node_id: str, docs_stage: str, score: float | None) -> dict[str, Any]:
         "documentation": f"The base quantity documented for {node_id}.",
         "docs_stage": docs_stage,
         "reviewer_score_docs": score,
+        "name_stage": name_stage,
         "harmonized_group_signature": None,
     }
 
@@ -78,6 +85,13 @@ class _FamilyGraph:
 
     def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
         self.queries.append(cypher)
+        if "sn.name_stage AS name_stage" in cypher:
+            names = set(params.get("names") or [])
+            return [
+                {"id": n["id"], "name_stage": n.get("name_stage")}
+                for n in self.nodes
+                if n["id"] in names
+            ]
         if "RETURN m.id AS id" in cypher and "members" not in cypher:
             return [{"id": n["id"]} for n in self.nodes]
         groups: dict[tuple[str, ...], list[dict[str, Any]]] = {}
@@ -316,5 +330,65 @@ def test_dry_run_prints_the_plan_and_writes_nothing(monkeypatch: Any) -> None:
     assert result.exit_code == 0, result.output
     assert "planned call(s)" in result.output
     assert "estimated cost" in result.output
+    assert graph.writes() == []
+    assert pipeline.revisions == {}
+
+
+def _invoke_dry_run(
+    monkeypatch: Any, graph: _FamilyGraph, pipeline: _DocsPipeline, *extra: str
+):
+    """Run ``harmonize --family <anchor> --apply --dry-run`` against the fixture."""
+    from imas_codex.cli.sn import sn
+    from imas_codex.graph import client as graph_client
+
+    _install_docs_pipeline(monkeypatch, pipeline)
+    monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
+    return CliRunner().invoke(
+        sn, ["harmonize", "--family", _ANCHOR, "--apply", "--dry-run", *extra]
+    )
+
+
+def test_dry_run_refuses_a_family_holding_a_recommended_member(
+    monkeypatch: Any,
+) -> None:
+    """A protected member refuses its family and drops its calls from the total.
+
+    Names it and its evidence, writes nothing.
+    """
+    nodes = _family_nodes()
+    nodes[1]["name_stage"] = "approved"  # the first non-anchor member
+    pipeline = _DocsPipeline(nodes)
+    graph = _FamilyGraph(nodes)
+
+    result = _invoke_dry_run(monkeypatch, graph, pipeline)
+
+    assert result.exit_code == 0, result.output
+    assert "decision=refused" in result.output
+    assert _MEMBERS[0] in result.output
+    assert "name_stage=approved" in result.output
+    # The refused family's calls are excluded: 3 members, 0 planned calls.
+    assert "0 planned call(s)" in result.output
+    assert graph.writes() == []
+    assert pipeline.revisions == {}
+
+
+def test_dry_run_counts_calls_for_a_forced_recommended_member(
+    monkeypatch: Any,
+) -> None:
+    """With --force the protected family is kept and its calls are counted."""
+    nodes = _family_nodes()
+    nodes[1]["name_stage"] = "approved"
+    pipeline = _DocsPipeline(nodes)
+    graph = _FamilyGraph(nodes)
+
+    result = _invoke_dry_run(
+        monkeypatch, graph, pipeline, "--force", "lead authorised the density family"
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "decision=forced" in result.output
+    assert _MEMBERS[0] in result.output
+    assert "name_stage=approved" in result.output
+    assert "3 planned call(s)" in result.output
     assert graph.writes() == []
     assert pipeline.revisions == {}
