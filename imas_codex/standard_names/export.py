@@ -2786,6 +2786,39 @@ def _refuse_waiver_that_reached_a_name(
     )
 
 
+# Every traversal in this module is bounded, so the successor-chain lookup runs
+# to a known maximum cost. The bound is not a truncation: a chain that reaches it
+# is longer than the read can see, so its published identities cannot be read in
+# full and the export refuses rather than deciding a waiver on a partial set.
+_WAIVED_CHAIN_DEPTH_BOUND = 25
+
+
+def _refuse_waiver_chain_beyond_bound(
+    source_path: str,
+    boundary_identities: Iterable[str],
+) -> None:
+    """Refuse a waived source whose successor chain reaches the traversal bound.
+
+    The chain lookup is depth-bounded, and a chain that reaches the bound is
+    either exactly that long or longer. The read cannot tell the two apart from
+    the truncated set alone, so it reports the member at the bound that still
+    carries an outgoing successor: that member proves the chain continues past
+    the cut, and an identity published beyond the cut would otherwise be absent
+    from the refusal's input and let the waiver fail open at its own boundary.
+    The refusal names the waived source and the identity at the bound, and takes
+    the waiver refusal path so the CLI reports it the same way.
+    """
+    identities = sorted(set(boundary_identities))
+    rendered = ", ".join(repr(identity) for identity in identities)
+    raise WaivedSourceDeclarationError(
+        f"waived-source declaration waives source {source_path!r}, whose "
+        f"successor chain is longer than the {_WAIVED_CHAIN_DEPTH_BOUND}-link "
+        f"traversal bound: the chain still continues from {rendered} at the "
+        "bound. The published identities cannot be read in full, so this cut "
+        "cannot be staged until the chain is shortened or the bound is raised."
+    )
+
+
 def _fetch_waived_source_chain_identities(
     source_paths: Iterable[str],
     waived_paths: frozenset[str],
@@ -2798,7 +2831,10 @@ def _fetch_waived_source_chain_identities(
     from the graph: the source's produced name and every name reachable from it
     along ``HAS_SUCCESSOR``. The row set is the waived manifest sources, so the
     lookup is index-anchored on ``StandardNameSource`` and bounded by the
-    successor depth rather than scanning the identity population.
+    successor depth rather than scanning the identity population. A chain that
+    reaches the depth bound is refused here, naming the identity at the bound,
+    rather than returned truncated, so an identity published beyond the cut can
+    never evade the waiver decision.
     """
     waived_in_manifest = sorted(
         {str(path) for path in source_paths if str(path) in waived_paths}
@@ -2810,24 +2846,41 @@ def _fetch_waived_source_chain_identities(
 
     with GraphClient() as gc:
         rows = gc.query(
-            """
+            f"""
             UNWIND $paths AS path
-            MATCH (source:StandardNameSource {id: 'dd:' + path})
+            MATCH (source:StandardNameSource {{id: 'dd:' + path}})
             OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(seed:StandardName)
-            OPTIONAL MATCH (seed)-[:HAS_SUCCESSOR*0..25]->(member:StandardName)
+            OPTIONAL MATCH trail = (seed)-[:HAS_SUCCESSOR*0..{_WAIVED_CHAIN_DEPTH_BOUND}]->(member:StandardName)
+            WITH path, seed, member,
+                 length(trail) AS depth,
+                 CASE WHEN member IS NOT NULL
+                       AND EXISTS((member)-[:HAS_SUCCESSOR]->())
+                      THEN member.id END AS boundary_identity
             RETURN path AS source_path,
-                   collect(DISTINCT coalesce(member.id, seed.id)) AS identities
+                   collect(DISTINCT coalesce(member.id, seed.id)) AS identities,
+                   collect(
+                       DISTINCT CASE WHEN depth = {_WAIVED_CHAIN_DEPTH_BOUND}
+                                     THEN boundary_identity END
+                   ) AS boundary_identities
             """,
             paths=waived_in_manifest,
         )
 
     by_path: dict[str, set[str]] = {}
     for row in rows or []:
+        source_path = str(row["source_path"])
+        boundary_identities = [
+            str(identity)
+            for identity in (row.get("boundary_identities") or [])
+            if identity
+        ]
+        if boundary_identities:
+            _refuse_waiver_chain_beyond_bound(source_path, boundary_identities)
         identities = {
             str(identity) for identity in (row.get("identities") or []) if identity
         }
         if identities:
-            by_path[str(row["source_path"])] = identities
+            by_path[source_path] = identities
     return by_path
 
 
