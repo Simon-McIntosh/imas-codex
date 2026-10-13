@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sje-docs-label-sheet uv run pytest -p no:cacheprovider tests/standard_names/test_judgment_goldens.py tests/graph/test_cypher_property_check.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T065809061523-sje-docs-label-sheet/gate-head.log",
+    "note": "the head arm ran against the worktree before its commit; its header names the base revision plus worktree changes, and the reviewed manifest ties the log to the landed commit 3ff5e128f",
+    "revision": "3ff5e128f753834ede878b7defcf5021ddcd4b0a"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sje-docs-label-sheet uv run pytest -p no:cacheprovider tests/standard_names/test_judgment_goldens.py tests/graph/test_cypher_property_check.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T065809061523-sje-docs-label-sheet/gate-base.log",
+    "revision": "5710e3c4bee0425ffae222c30651be1acce79672"
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/standard_names/judgment_goldens.py:820 main()"
+  ],
+  "completed_at": "2026-10-13T10:21:34.249Z",
+  "dispatched_at": "2026-10-13T10:04:53Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/judgment_goldens.py",
+      "line": "642",
+      "severity": "follow-on",
+      "text": "follow-on: _applied_conventions re-implements the select_conventions-to-{concepts,notation,templates} projection with ParseError swallowed that imas_codex/standard_names/context.py:30 conventions_context_for already owns, so a change to the projection shape drifts from the copy; the brief names select_conventions as the owner and the node wraps it but does not reuse the existing helper."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T065809061523-sje-docs-label-sheet/gate-head.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the head-arm gate log's revision header names the base revision plus worktree changes rather than the landed commit 3ff5e128f, so the head result cannot be tied to the promoted revision from the log alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read commit by commit against base 5710e3c4b; the single commit 3ff5e128f is four files, +1052/-1, adding _live_documentation_names/_unit_symbols/_dd_path_documentation/_applied_conventions, build_documentation_sheet:687 and write_sheet:771, six tests, and the sheet and fragment artefacts.",
+    "done_when": "the done-when asks for a four-property unit test, a live 600-row sheet with counts, and the gate at base and head; gate-base.log and gate-head.log read 14 passed and 20 passed EXIT=0, live-build.log records 600/400/200/50/6, and negative-control.log shows the four sheet mechanisms red (4 failed, EXIT=1), though the head-arm log header names the base revision plus worktree changes rather than the landed commit.",
+    "goal": "the goal is a blind documentation-acceptability label sheet for golden B; imas_codex/standard_names/judgment_goldens.py:687 build_documentation_sheet draws accepted/approved documented StandardName nodes with the module's own _sample, numbers draw_rank from 1, and emits rows carrying the reading context with a null label and label_source coordinator.",
+    "manifest": "read; status complete, commit 3ff5e128f, landing present, tests line records the base gate at 14 passed and the head gate at 20 passed, test_logs names gate-base.log, gate-head.log and live-build.log (all present on disk), and follow_ons records the 1,397,932-byte sheet against a 300,000-byte data-file ceiling.",
+    "write_paths": "git diff --stat 5710e3c4b..3ff5e128f lists exactly four changed paths, all inside the brief's declared scope: imas_codex/standard_names/judgment_goldens.py, tests/standard_names/test_judgment_goldens.py, docs/evidence/fragments/sn-judgment-evaluation/golden-documentation-acceptable-sheet.json and docs/evidence/fragments/sn-judgment-evaluation/sje-docs-label-sheet.html."
+  },
+  "justifications": {
+    "durability": "negative-control.log shows test_documentation_sheet_draws_deterministic_rank_order, marks_exact_lead_overlap, carries_no_incumbent_field and keeps_family_on_one_split each red at EXIT=1 with their mechanism removed.",
+    "evidence": "gate-base.log and gate-head.log read 14 passed and 20 passed EXIT=0 and live-build.log records 600/400/200/50/6, but gate-head.log:2 names the base revision plus worktree changes rather than the landed head.",
+    "fit": "judgment_goldens.py:642 _applied_conventions follows the module's helper idiom and no added symbol carries a plan, version or ticket label.",
+    "goal_fidelity": "judgment_goldens.py:687 build_documentation_sheet reuses _sample/_rank/_family/_domain/_row/_finish and the stored 600-row artefact carries exactly the fields the brief names.",
+    "reuse": "build_documentation_sheet:687 extends the module's _sample/_finish/_row owners, but _applied_conventions:642 re-implements the ParseError-swallowing select_conventions projection that imas_codex/standard_names/context.py:30 already owns.",
+    "scope_discipline": "git diff --stat 5710e3c4b..3ff5e128f lists exactly the four declared files and no path outside the brief's scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a blind documentation-acceptability label sheet for golden B; imas_codex/standard_names/judgment_goldens.py:687 build_documentation_sheet draws accepted/approved documented StandardName nodes with the module's own _sample, numbers draw_rank from 1, and emits rows carrying the reading context with a null label and label_source coordinator.\nVERDICT done_when: the done-when asks for a four-property unit test, a live 600-row sheet with counts, and the gate at base and head; gate-base.log and gate-head.log read 14 passed and 20 passed EXIT=0, live-build.log records 600/400/200/50/6, and negative-control.log shows the four sheet mechanisms red (4 failed, EXIT=1), though the head-arm log header names the base revision plus worktree changes rather than the landed commit.\nVERDICT write_paths: git diff --stat 5710e3c4b..3ff5e128f lists exactly four changed paths, all inside the brief's declared scope: imas_codex/standard_names/judgment_goldens.py, tests/standard_names/test_judgment_goldens.py, docs/evidence/fragments/sn-judgment-evaluation/golden-documentation-acceptable-sheet.json and docs/evidence/fragments/sn-judgment-evaluation/sje-docs-label-sheet.html.\nVERDICT manifest: read; status complete, commit 3ff5e128f, landing present, tests line records the base gate at 14 passed and the head gate at 20 passed, test_logs names gate-base.log, gate-head.log and live-build.log (all present on disk), and follow_ons records the 1,397,932-byte sheet against a 300,000-byte data-file ceiling.\nVERDICT diff: read commit by commit against base 5710e3c4b; the single commit 3ff5e128f is four files, +1052/-1, adding _live_documentation_names/_unit_symbols/_dd_path_documentation/_applied_conventions, build_documentation_sheet:687 and write_sheet:771, six tests, and the sheet and fragment artefacts.\nCALL_SITES: imas_codex/standard_names/judgment_goldens.py:820 main()\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: judgment_goldens.py:687 build_documentation_sheet reuses _sample/_rank/_family/_domain/_row/_finish and the stored 600-row artefact carries exactly the fields the brief names.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-base.log and gate-head.log read 14 passed and 20 passed EXIT=0 and live-build.log records 600/400/200/50/6, but gate-head.log:2 names the base revision plus worktree changes rather than the landed head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 5710e3c4b..3ff5e128f lists exactly the four declared files and no path outside the brief's scope.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control.log shows test_documentation_sheet_draws_deterministic_rank_order, marks_exact_lead_overlap, carries_no_incumbent_field and keeps_family_on_one_split each red at EXIT=1 with their mechanism removed.\nSCORE fit: 17\nJUSTIFICATION fit: judgment_goldens.py:642 _applied_conventions follows the module's helper idiom and no added symbol carries a plan, version or ticket label.\nSCORE reuse: 14\nJUSTIFICATION reuse: build_documentation_sheet:687 extends the module's _sample/_finish/_row owners, but _applied_conventions:642 re-implements the ParseError-swallowing select_conventions projection that imas_codex/standard_names/context.py:30 already owns.\nFINDING imas_codex/standard_names/judgment_goldens.py:642 follow-on: _applied_conventions re-implements the select_conventions-to-{concepts,notation,templates} projection with ParseError swallowed that imas_codex/standard_names/context.py:30 conventions_context_for already owns, so a change to the projection shape drifts from the copy; the brief names select_conventions as the owner and the node wraps it but does not reuse the existing helper.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T065809061523-sje-docs-label-sheet/gate-head.log:2 follow-on: the head-arm gate log's revision header names the base revision plus worktree changes rather than the landed commit 3ff5e128f, so the head result cannot be tied to the promoted revision from the log alone.",
+  "review_run_id": "r-20261013T100435648752-review-of-sje-docs-label-sheet-3ff5e128f753",
+  "reviewed_base_sha": "5710e3c4bee0425ffae222c30651be1acce79672",
+  "reviewed_head_sha": "3ff5e128f753834ede878b7defcf5021ddcd4b0a",
+  "reviewed_run_id": "r-20261013T065809061523-sje-docs-label-sheet",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:19:19.922105+00:00",
+  "total": 102
+}
