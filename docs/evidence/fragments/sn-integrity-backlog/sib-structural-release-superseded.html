@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-structural-release-superseded">
+<title>Signed structural release of an edge to a superseded parent</title>
+</head>
+<body>
+<main>
+<h1 id="sib-structural-release-superseded-title">The signed release can drop an edge to a superseded parent</h1>
+<p id="sib-structural-release-superseded-rule">The release still removes exactly
+one named <code>HAS_PARENT</code> edge and creates nothing. Its admission now
+classifies the child and the old parent separately
+(<code>_structural_release_lifecycle</code>). The exact relationship id and
+properties, the one-parent count, the closure digest, the receipt and the
+parentless postcondition are unchanged. This node changes admission only; the
+graph was not written, and whether a superseded child's other edges or successor
+change stays open.</p>
+<table id="sib-structural-release-superseded-table">
+<caption>Admission before and after, by child (rows) and old parent (columns)</caption>
+<thead>
+<tr><th>child \ old parent</th><th>accepted</th><th>superseded</th><th>deprecated</th></tr>
+</thead>
+<tbody>
+<tr><th>accepted, valid</th><td>admitted → admitted</td><td>refused → admitted (needs a live producing source)</td><td>refused → refused, names the deprecated parent</td></tr>
+<tr><th>accepted, invalid</th><td>refused → refused, names the invalid child</td><td>refused → refused, names the invalid child</td><td>refused → refused</td></tr>
+<tr><th>superseded</th><td>refused → refused, names the live parent requirement</td><td>refused → admitted (no producer check)</td><td>refused → refused, names the deprecated parent</td></tr>
+<tr><th>deprecated</th><td>refused → refused, names the deprecated child</td><td>refused → refused, names the deprecated child</td><td>refused → refused</td></tr>
+</tbody>
+</table>
+<p id="sib-structural-release-superseded-postcondition">The postcondition keeps
+every check it had: the child has no parent edge, and the child's properties and
+producing sources equal the signed state. It adds one: the child and the old
+parent must still be in the supersession class they were admitted in, so a
+release that leaves a revived parent or child behind is refused.</p>
+<p id="sib-structural-release-superseded-measure">The new test file has 26 tests
+over a faked graph, in
+<code>tests/standard_names/test_structural_release_superseded.py</code>. With the
+admission reverted to accepted-only, 24 of the 26 fail (<code>EXIT=1</code>): each
+admission, each named refusal and each postcondition test. The gate went from 96
+passed at base to 122 passed at head with zero added failures, and the Cypher
+property check passed in both arms. The graph-marked release tests were deselected
+in both arms because no disposable graph was configured.</p>
+</main>
+</body>
+</html>
