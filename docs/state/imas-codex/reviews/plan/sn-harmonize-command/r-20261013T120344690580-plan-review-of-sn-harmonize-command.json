@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T12:14:12.731Z",
+  "dispatched_at": "2026-10-13T12:04:00Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-harmonize-command.html:177",
+      "id": "reasoning-1",
+      "reason": "the done-when demands the one-pass result (\"one opening template and one flux-surface-average equation\" after an apply), which the evidence says refinement without deterministic insertion cannot produce, so a node could complete every listed repair and still re-plan calls instead of converging.",
+      "text": "\u00a73's repairs 2 and 4 enforce the opening and the equation by refusal/refine at acceptance only; the citation they rest on, `shc-convergence-diagnosis.html` (\"Smallest deterministic route to one converged apply\"), pairs validation with insertion \u2014 \"Instantiate the selected density template with the member's subject and place the canonical flux-surface-average equation in one fixed form\" \u2014 and states plainly that \"A refusal alone prevents a false acceptance but cannot guarantee a one-pass result; deterministic insertion plus validation supplies it\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-harmonize-command.html:194",
+      "id": "done_when-1",
+      "reason": "three of the four repairs are the whole point of the redesign and each is invisible to the stated measure, so the node cannot show its new guards fire \u2014 the same defect the earlier review raised against \u00a74's done-when and which \u00a73 now reproduces with new guards.",
+      "text": "the done-when's controls cover the anchor-first ordering (a deliberately failed anchor), the recommended-name guard (the refusal test fails when the guard is removed) and the snapshot, but nothing makes the new enforcement happen: no test shows a non-conforming opening is refused/refined (repair 2), a member with a divergent equation is refused (repair 4), a cross-family target is no longer counted dead (repair 2/1), or a continuation reuses a recorded anchor (repair 3), so a uniform after-column of \"one opening / one equation / zero dead links\" passes whether those guards fire or are absent",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-harmonize-command.html:114",
+      "id": "single_goal-1",
+      "reason": "a single review verdict cannot close an apply mechanism plus four enforcement changes across three modules, and repair 1 belongs to \u00a72's report surface, so leaving it under \u00a73's goal mixes the section that a review can close with one it cannot.",
+      "text": "\u00a73's one goal (\"Apply: the anchor first, the members from the anchor\") now carries four independent repairs whose write surfaces diverge: repair 1 changes the \u00a72 report's link scoping in `review/audits.py:405` (a report-only fix the diagnosis even says \"cannot repair this scoped-report counting defect\" from the write side), repair 2 changes the documentation acceptance path in `workers.py`, repair 3 persists the anchor in the plan/run path, repair 4 adds an equation-equality gate",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-harmonize-command.html:170",
+      "id": "reasoning-2",
+      "reason": "all four repairs land regardless and their order is a sequencing preference, not a redirect, so only the sentence's claim about the citation is wrong.",
+      "text": "\u00a73 says the repairs follow \"in the order the evidence ranks them\", but the cited ranking orders opening+equation enforcement first and graph-wide link resolution second, while the plan places link resolution first and splits the evidence's single top-ranked item (opening and equation together) into repairs 2 and 4",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "0ae3b7b85b3da45eacd81a793196a36198be9d8184f8d14551874816e778ca13",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 38,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T120344690580-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "881bd58d9d26b175d7314f9cb993b9c4bea70281",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `protection.py`, `harmonize.py`, `workers.py`, `audits.py`, `families.py` and `standard_names/manifests/reviews/` all resolve, and the cited `shc-convergence-diagnosis.html` href (extensionless, resolved as `.html`) exists.",
+    "done_when": "a finding \u2014 \u00a73's done-when names negative controls for the anchor-first ordering, the recommended-name guard and the pre-reset snapshot, but none for any of the four convergence repairs, so openings, equations and link scoping can stay unenforced and the done-when still passes.",
+    "evidence_paths": "pass \u2014 \u00a73's gate evidence sits in the plan's evidence tree (`docs/evidence/fragments/sn-harmonize-command/`), not in a session scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or role attributions reach \u00a73's code-facing names; the guard test's \"lead ruled\" seam was already scrubbed.",
+    "reasoning": "a finding \u2014 the stated root cause matches the cited diagnosis, but the four repairs adopt only the evidence's enforcement half and drop the deterministic-insertion half the evidence names as what supplies a one-pass converged result.",
+    "single_goal": "a finding \u2014 \u00a73's single done-when now closes over the apply mechanism, the recommended-name guard and four independent enforcement repairs in `audits.py`, `workers.py`, `families.py` and `harmonize.py`, so no one verdict can close the node.",
+    "wiring": "pass \u2014 \u00a73's declared `depends-on` (`sn-house-style#s4`, `sn-catalog-grouping#s2`) both resolve to sections that exist, and the repairs reuse the `template_opening` lint those sections own rather than introducing a new dependency."
+  },
+  "section_digests": {
+    "_document": "2b2341966256ecbb7712a1f4b7cd7aee827ae18b22b02b9e28b53fd1e773b1c0",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s2": "767a2fe2b092486b6f4c5277a919edca224cd3a5f242f4bf747c1657bda4d5af",
+    "s3": "4d49e2ae1e5385f610e8ee1eb1a278fb4a7fd7161cb35544b9522f026915af2d",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T13:44:31.514786+00:00"
+}
