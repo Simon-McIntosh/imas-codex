@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T00:33:23.201Z",
+  "dispatched_at": "2026-10-13T00:20:22Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-house-style.html:272",
+      "id": "done_when-1",
+      "reason": "the done-when is the node's actionable acceptance, and as written it can pass without the one change the section says remains.",
+      "text": "`\u00a712`'s done-when is \"a live run over the same four fixtures \u2026 classifies the beryllium and electron boundary glosses as canonical and the carbon and argon equation forms as forbidden; a test shows no option text contains a regular expression from the registry; a test shows --skip-audit leaves the judge stage running\", but that live run has already been made and passed (shs-judge-calibration.html: all eight calls meet exactly these expectations) and neither named test carries a fail-condition, so the gate is already satisfied and no negative control is declared; a node dispatched to close `\u00a712` can mark it done without doing the criterion fix the section's own landing comment names as the reason it stays open",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:272",
+      "id": "reasoning-1",
+      "reason": "the section's stated mechanism contradicts a locked decision the section claims to honour, and it is declared `implementable`, so the wrong criterion would be built.",
+      "text": "`\u00a712` says it rebuilds the boundary question \"on the smoke read's framing\" and closes by asserting the classification \"is correct on all four fixtures\", but its rebuilt canonical criterion (`_CONCEPT_FORMS[\"plasma_boundary\"].criteria[\"last_closed_flux_surface\"]`: \"It may also give the diverted-configuration name for that same surface as a synonym\") accepts an entry that names the boundary by `separatrix`, whereas the locked `plasma-boundary-gloss` decision (docs/plans/sn-house-style.html:299) rules that \"the separatrix is named only where a quantity is defined for a diverted configuration\"; the mechanism therefore does not produce the ruling the section says it is built on, so an implementer reading `\u00a712` as specified builds a criterion the lead's decision forbids",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:318",
+      "id": "wiring-1",
+      "reason": "the followup is the plan's durable next-step pointer and it names completed work rather than `\u00a73`, the only section that remains unbuilt.",
+      "text": "the plan's only open followup `f-shs-001` declares `data-recommends-skill=\"/reckon-build sn-house-style \u00a72\"` and narrates the sequence \"\u00a72 \u2026 \u00a74 adds the checks \u2026 \u00a75 follows once the WEST entries exist\", but `\u00a72` (c-close-s2), `\u00a74` (c-close-s4) and `\u00a75` (c-close-s5) have all landed, leaving only `\u00a73`; the declared next step points at a node that is already done",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "66c7c5e1d8027b4b69f8846e76bbe75854e0c49a22b68ede8bbf1e590c70f865",
+  "plan_slug": "sn-house-style",
+  "plan_version": 42,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T002010806821-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "5153ff4b017646433fdfd170737eec302de70229",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `\u00a712`'s citations resolve: `docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.html` exists with its script beside it, `docs/evidence/archive/sn-house-style-landed.html#s12-judge-calibration` exists, and every module `\u00a712` names resolves.",
+    "done_when": "a finding \u2014 `\u00a712`'s done-when states no negative control and its live-run expectation is already satisfied by the landed calibration, so the gate cannot fail against the section's remaining work.",
+    "evidence_paths": "pass \u2014 `\u00a712`'s record, driver and raw decisions sit under `docs/evidence/fragments/sn-house-style/` (durable, committed), not a scratch or node-local path.",
+    "naming": "pass \u2014 the judge stage's authored form vocabulary (`last_closed_flux_surface`, `line_poloidal`, `diverted_name_alone`) carries no plan label, stage name or ticket number.",
+    "reasoning": "a finding \u2014 `\u00a712`'s rebuilt canonical boundary criterion admits `separatrix` as a synonym, contradicting the locked plasma-boundary-gloss decision the section claims to rebuild on.",
+    "single_goal": "pass \u2014 `\u00a712` carries one deliverable (the judge stage's calibrated question); the `--skip-audit` decoupling is part of the same stage, not a second one.",
+    "wiring": "a finding \u2014 the plan's only open followup `f-shs-001` declares `/reckon-build sn-house-style \u00a72` as its recommended node, but `\u00a72` has landed."
+  },
+  "section_digests": {
+    "_document": "0660315b123869f3a3ffcd53c048a07eb7b9cd3bd3fdc0135b8cd86eb88a45f7",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s10": "56c8e08b66e65b8ece8e4714fa4b9f9089b83585768885aea771dfba922b2975",
+    "s11": "40dbcfa9b353fecf593a6d891775677b873bb98529073f97a916054f9528cfbd",
+    "s12": "e6eb4d8f2c193a9476db93b99f5512264202b1205e73bcd661346bf08b7b70ae",
+    "s2": "a68b18b0a4122caff66d27ab77f0d6f94f3c046d2a034c6ef489ffc38f438ddb",
+    "s3": "50e289cff8fb10f82f4114f3e51de9e7d184bd4777b80c4f5ee7e617bbdd3c56",
+    "s4": "dca02964189096d0d6a3fb9f0ee3c9931308addf7be8f667cad98d98ca36d3a7",
+    "s5": "de1246fd734195b238de2d370de129477d7b7977b048d533e4044874a80187cd",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78",
+    "s7": "5be478ef6ae9f348a0e617cfdb5bc8b20b3a18fd8c8e652a1d97e2393f5681c3",
+    "s8": "91c69e8a7ada6945ec08807258d2ee9be051f27dd4bc9939d6da7046c479741a",
+    "s9": "e80c85c856bfde4820702edd9280d989ec350bede9a5f566bd19d06d32026f51"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:34:17.913696+00:00"
+}
