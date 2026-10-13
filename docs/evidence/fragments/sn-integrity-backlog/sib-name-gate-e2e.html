@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-name-gate-e2e">
+<title>Landing record — sib-name-gate-e2e</title>
+</head>
+<body>
+<main>
+<h1 id="sib-name-gate-e2e-landing-title">Landing record: a rejected or undefined one-word token fails the semantic name gate end to end</h1>
+
+<p id="sib-name-gate-e2e-landing-change">
+Added a parametrised test at the audit boundary:
+<code>test_name_gate_definition_floor.py::test_unresolved_one_word_token_fails_the_gate</code>
+drives a strict-parse reject (<code>quux</code>) and a parseable but undefined
+token (<code>capacitance</code>) through <code>semantic_gate_name_text</code>
+and then <code>semantic_similarity_check</code>, showing each keeps its
+identifier text, scores below the unchanged <code>0.55</code> floor, and returns
+its issues. Head: <strong>15 passed</strong> (was 13) at revision
+<code>57726eec9</code>. With the gate text forced to return a definition for every
+token, both new ids fail: <strong>5 failed, 10 passed</strong>, <code>EXIT=1</code>.
+</p>
+</main>
+</body>
+</html>

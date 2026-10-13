@@ -164,3 +164,51 @@ def test_gate_embeds_the_definition_and_clears_the_floor(monkeypatch) -> None:
     assert definition_sim == pytest.approx(1.0, abs=1e-6)
     assert definition_sim >= SEMANTIC_SIM_CRITICAL
     assert not definition_issues
+
+
+# One-word tokens the substitution must not admit: a strict-parse reject and a
+# token the vocabulary leaves undefined each keep the identifier text and are
+# scored against the unchanged floor at the audit boundary.
+UNRESOLVED_ONE_WORD_TOKENS = ("quux", "capacitance")
+
+
+@pytest.mark.parametrize("token", UNRESOLVED_ONE_WORD_TOKENS)
+def test_unresolved_one_word_token_fails_the_gate(token: str, monkeypatch) -> None:
+    """A rejected or undefined one-word token never clears the floor.
+
+    Drives the token through the gate's own text builder into the audit, with
+    the same stand-in embedder as the clearing test. The identifier text does
+    not agree with the description, so the score stays below the unchanged
+    floor and the gate returns its issue.
+    """
+    description = "A quantity that has no vocabulary definition."
+    name_text = semantic_gate_name_text(token)
+
+    # The fall-through is what keeps the token scored as itself; a gate that
+    # synthesised definition prose for every token would not reach this state.
+    assert name_text == token
+
+    embedded: list[str] = []
+    vectors = {
+        token: [1.0, 0.0, 0.0],
+        description: [0.0, 1.0, 0.0],
+    }
+
+    def fake_embed(items, text_field="_text"):
+        for item in items:
+            text = item[text_field]
+            embedded.append(text)
+            item["embedding"] = np.asarray(
+                vectors.get(text, [1.0, 0.0, 0.0]), dtype=np.float32
+            )
+
+    monkeypatch.setattr(
+        "imas_codex.embeddings.description.embed_descriptions_batch", fake_embed
+    )
+
+    sim, issues = semantic_similarity_check(name_text, description)
+
+    assert name_text in embedded
+    assert sim is not None
+    assert sim < SEMANTIC_SIM_CRITICAL
+    assert issues
