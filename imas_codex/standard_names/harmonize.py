@@ -21,6 +21,7 @@ from typing import Any
 
 from imas_codex.graph.models import NameStage
 from imas_codex.standard_names.context import DOCUMENTATION_FAMILY_OPERATOR_KINDS
+from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 
 # The family-enumeration query is owned by families.py; re-exported so the
 # worklist test can compare the query build_worklist issues against it.
@@ -793,9 +794,75 @@ def plan_family_applies(
                 "decision": decision,
                 "batches": batches,
                 "planned_calls": sum(len(b) for b in batches),
+                # The pre-reset documentation-axis score per member, captured
+                # from the same read that planned the family. The apply
+                # compares each member's post-drain score against it.
+                "member_scores": {
+                    m.get("id"): m.get("reviewer_score_docs")
+                    for m in members
+                    if m.get("id")
+                },
             }
         )
     return plans
+
+
+def docs_score_regressions(
+    before: dict[str, float | None],
+    after: dict[str, float | None],
+    *,
+    threshold: float = DEFAULT_MIN_SCORE,
+) -> dict[str, list[dict[str, Any]]]:
+    """Compare documentation-axis scores before and after an apply.
+
+    ``before``/``after`` each map a member's id to its ``reviewer_score_docs``
+    (``None`` when the name carries no stored score — never reviewed). Returns
+    two name-keyed lists, each entry ``{"id", "before", "after"}``:
+
+    * ``below_threshold`` — a member whose after score is present and below
+      *threshold* (the acceptance score the review pipeline accepts on);
+    * ``fell`` — a member whose after score is present and lower than a
+      present before score.
+
+    A member is reported only on an after score it actually carries: a name
+    whose rerun did not reach review is neither below threshold nor a fall, so
+    the two lists answer "did making them agree make any worse" without
+    inventing a score for a name that has none.
+    """
+    below: list[dict[str, Any]] = []
+    fell: list[dict[str, Any]] = []
+    for member_id in sorted(set(before) | set(after)):
+        after_score = after.get(member_id)
+        if after_score is None:
+            continue
+        before_score = before.get(member_id)
+        if after_score < threshold:
+            below.append(
+                {"id": member_id, "before": before_score, "after": after_score}
+            )
+        if before_score is not None and after_score < before_score:
+            fell.append({"id": member_id, "before": before_score, "after": after_score})
+    return {"below_threshold": below, "fell": fell}
+
+
+def _family_docs_scores(gc: Any, member_ids: list[str]) -> dict[str, float | None]:
+    """Post-drain documentation-axis score per member of the family.
+
+    Re-reads the family through the same pattern-family query the plan uses,
+    so the comparison adds no new query shape. A member absent from the read
+    is omitted, which :func:`docs_score_regressions` treats as an unscored
+    name rather than a fall.
+    """
+    if not member_ids:
+        return {}
+    families = fetch_pattern_families(gc, seeds=list(member_ids[:1]))
+    if not families:
+        return {}
+    return {
+        m.get("id"): m.get("reviewer_score_docs")
+        for m in families[0]["members"]
+        if m.get("id")
+    }
 
 
 def _stamp_applied_family(gc: Any, anchor_id: str) -> bool:
@@ -1012,8 +1079,19 @@ def apply_families(
             stamped = False
             if not result.halted:
                 stamped = _stamp_applied_family(resolved_gc, fam_plan["anchor"])
+            after_scores = _family_docs_scores(resolved_gc, fam_plan["members"])
+            regressions = docs_score_regressions(
+                fam_plan.get("member_scores") or {}, after_scores
+            )
             applied.append(
-                {**fam_plan, "applied": True, "result": result, "stamped": stamped}
+                {
+                    **fam_plan,
+                    "applied": True,
+                    "result": result,
+                    "stamped": stamped,
+                    "scores_after": after_scores,
+                    "score_regressions": regressions,
+                }
             )
     finally:
         _close_if_owned(resolved_gc, own_gc)
@@ -1041,6 +1119,7 @@ __all__ = [
     "ESTIMATED_DOC_CALL_COST_USD",
     "plan_family_applies",
     "apply_families",
+    "docs_score_regressions",
     "apply_guard_targets",
     "preview_recommended_refusals",
     "refuse_recommended_members",
