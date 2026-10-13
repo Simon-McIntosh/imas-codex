@@ -1,0 +1,56 @@
+<section id="shs-boundary-criterion-landing">
+<h2>The judge stage's boundary criterion follows the gloss ruling</h2>
+
+<p id="shs-boundary-criterion-change">
+The judged <code>plasma_boundary</code> concept offered a canonical form whose
+criterion described the boundary as the last closed flux surface and then
+admitted <em>the separatrix as a synonym for that same surface</em>. The lead's
+gloss ruling makes the plasma boundary the last closed flux surface and names
+the separatrix only where a quantity is defined for a diverted configuration,
+and the registry lists the separatrix as a forbidden variant of the boundary. An
+entry that glosses the boundary correctly and also calls it the separatrix was
+therefore judged canonical where the ruling makes it non-conforming.
+</p>
+
+<p id="shs-boundary-criterion-fix">
+The canonical criterion now describes the boundary as the last closed flux
+surface <em>without</em> offering the diverted-configuration name as an allowed
+alternative, and a new option <code>separatrix_equated</code> — an entry that
+calls the plasma boundary the separatrix, whether as a synonym beside the last
+closed flux surface or as the only name given for it — maps to the forbidden
+verdict. Only the criteria text and that option's verdict entry change; the
+stage's structure, the verdict map's canonical and absent entries, and the
+absent case are unchanged.
+</p>
+
+<p id="shs-boundary-criterion-test">
+A unit test asserts the canonical criterion's text admits no separatrix synonym
+and that the equated-separatrix option maps to the forbidden verdict. Applying
+the declared mutation — restoring the synonym clause — fails that test id
+(<code>EXIT=1</code>); the head arm passes it. Log:
+<code>negative-control.log</code>.
+</p>
+
+<p id="shs-boundary-criterion-live-run">
+A live run drives the stage over §12's four boundary fixtures read from the
+graph plus one authored fixture that glosses the boundary as the last closed
+flux surface and also calls it the separatrix. Ten calls (five names × two
+concepts), the pre-declared ceiling. Booked cost: USD 0.000358. The four
+fixtures' flux-surface-average equation verdicts are unchanged from the earlier
+calibration — carbon <code>line_total_field</code> and argon
+<code>line_poloidal</code> forbidden, beryllium and electron
+<code>surface</code> canonical. On the boundary every fixture returns
+<code>separatrix_equated</code> and is forbidden, because every one of the five
+entries calls the plasma boundary the separatrix; the authored fixture is
+forbidden on the boundary, which exercises the forbid path. Driver and raw
+decisions: <code>shs-boundary-criterion-run.py</code> and
+<code>shs-boundary-criterion-decisions.json</code>.
+</p>
+
+<p id="shs-boundary-criterion-gate">
+Review-pipeline gate (the file list the calibration node ran): 264 passed at
+base (<code>c98a0d42</code>, scratch extraction), 265 passed after — one added
+test, zero added failures. Logs <code>gate-base.log</code>,
+<code>gate-after.log</code>.
+</p>
+</section>

@@ -30,7 +30,12 @@ from imas_codex.discovery.base.progress import WorkerStats
 from imas_codex.discovery.base.supervision import PipelinePhase
 from imas_codex.standard_names.context import conventions_context_for
 from imas_codex.standard_names.review import pipeline as pl
-from imas_codex.standard_names.review.judge_stage import QUESTION_NAME
+from imas_codex.standard_names.review.judge_stage import (
+    _CONCEPT_FORMS,
+    FORBIDDEN,
+    QUESTION_NAME,
+    _verdict,
+)
 
 # A carbon boundary entry writes the forbidden line form of the flux-surface
 # average and calls the boundary the separatrix; a beryllium entry writes the
@@ -67,7 +72,7 @@ def _judge_answer(state: dict) -> dict:
             choice = "surface"
     elif concept == "plasma_boundary":
         choice = (
-            "diverted_name_alone" if "separatrix" in doc else "last_closed_flux_surface"
+            "separatrix_equated" if "separatrix" in doc else "last_closed_flux_surface"
         )
     else:  # pragma: no cover - the registry holds no other forbidden concept yet
         choice = "none"
@@ -295,3 +300,29 @@ async def test_no_option_text_carries_a_registry_forbidden_pattern(
             assert pattern not in payload, (
                 f"registry forbidden pattern {pattern!r} reached the model"
             )
+
+
+def test_canonical_boundary_criterion_admits_no_separatrix_synonym() -> None:
+    """The canonical boundary criterion admits no separatrix synonym.
+
+    The registry lists the diverted-configuration name as a forbidden variant
+    of the plasma boundary, so the canonical form must describe the boundary as
+    the last closed flux surface without offering that name as an allowed
+    alternative. The option for an entry that equates the boundary with the
+    diverted name must map to the forbidden verdict. Restoring the clause that
+    admitted the synonym as canonical fails this test.
+    """
+    spec = _CONCEPT_FORMS["plasma_boundary"]
+    canonical = spec["criteria"]["last_closed_flux_surface"].lower()
+    forbidden_form = spec["criteria"]["separatrix_equated"].lower()
+    # The canonical form must not admit the diverted name as a synonym: the
+    # clause "may also give ... as a synonym" is the defect this guards.
+    assert "synonym" not in canonical
+    assert "may also give" not in canonical
+    # It still names the boundary as the last closed flux surface.
+    assert "last closed flux surface" in canonical
+    # The option that equates the boundary with the separated name is
+    # forbidden, so an equated entry is judged non-conforming, not canonical.
+    assert "synonym" in forbidden_form
+    assert spec["verdicts"]["separatrix_equated"] == FORBIDDEN
+    assert _verdict("plasma_boundary", "separatrix_equated") == FORBIDDEN
