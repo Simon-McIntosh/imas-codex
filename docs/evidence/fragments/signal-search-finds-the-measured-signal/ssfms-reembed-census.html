@@ -1,0 +1,30 @@
+<!-- Landing record for node ssfms-reembed-census, plan
+     signal-search-finds-the-measured-signal §5. One predicate selects the rows
+     a sweep re-embeds and the rows a census counts; the sweep cleared all
+     61,983 signals. Census before and after: embeddings.html.
+     docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reembed-census.html -->
+<section id="ssfms-reembed-census-landing" data-reckon="evidence">
+  <h2 id="ssfms-reembed-census-landing-heading">Every FacilitySignal re-embedded to its current text</h2>
+  <p id="ssfms-reembed-census-landing-what">
+    <code>imas_codex/discovery/signals/parallel.py</code> gains one predicate,
+    <code>_SIGNAL_HASH_MISMATCH_WHERE</code>, that decides whether a signal's stored vector still
+    describes its text: a null hash or a hash that differs from the hash of the current embed text. It is
+    rendered as a Cypher <code>WHERE</code> over an <code>UNWIND</code> of each row's id and expected
+    hash. <code>reembed_stale_signal_descriptions</code> selects its rows with it and rewrites each through
+    <code>write_signal_descriptions</code> with the description-only embed text the
+    <code>embed-text</code> decision locked; <code>census_signal_embeddings</code> counts the same
+    population through the same predicate, so the sweep and the census cannot disagree about a missing
+    hash. The writer now also records a textless signal's empty text hash without a vector, so a
+    <code>skipped</code> signal with no description stops reading as a hash merely missing.
+  </p>
+  <p id="ssfms-reembed-census-landing-measure">
+    <strong>Measure.</strong> A census over all 61,983 <code>FacilitySignal</code> nodes read 61,983
+    mismatches before the sweep (all missing) -> 0 after it; the sweep wrote 61,983 rows in 514.9&nbsp;s.
+    <code>tests/discovery/test_signal_embedding_sweep.py</code> shows the predicate counts a null-hash row
+    and the sweep clears it, that the census names a row whose description changed after the sweep, and
+    that a textless row records its empty hash with no vector: 3 passed at head. The negative control
+    (predicate mutated to a lone <code>&lt;&gt;</code>, null-blind) is <code>EXIT=1</code>, 3 failed.
+    Evidence:
+    <a href="/imas-codex/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html#ssfms-reembed-census-section-title">embeddings.html</a>.
+  </p>
+</section>
