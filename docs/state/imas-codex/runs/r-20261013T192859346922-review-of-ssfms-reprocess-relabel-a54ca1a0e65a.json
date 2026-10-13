@@ -584,6 +584,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "dbc4ebcb072d0aa95a035227ab5f88f3473718e8",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5042,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261013T192859346922-review-of-ssfms-reprocess-relabel-a54ca1a0e65a",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5042,
+        "path": "/tmp/reckon-crew-scratch/r-20261013T192859346922-review-of-ssfms-reprocess-relabel-a54ca1a0e65a"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/0ba4e093-6897-47fa-b875-003d44d07ddf/review-of-ssfms-reprocess-relabel-a54ca1a0e65a",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
