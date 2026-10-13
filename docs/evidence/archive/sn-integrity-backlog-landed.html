@@ -130,6 +130,11 @@
     <p><code>stage_name_for_rescore</code> in <code>imas_codex/standard_names/graph_ops.py</code> now carries <code>coalesce(sn.status, '') NOT IN ['deprecated', 'superseded']</code> in the same compare-and-set as its stage guard. A name whose catalog status is terminal is therefore refused and left unchanged, where it was previously moved to <code>drafted</code> while staying unpublishable. A refusal names the axis that refused, points to the signed transition in <code>imas_codex/standard_names/signed_manifest.py</code> for a terminal status or a superseded stage, and cites a successor only when one exists (merge <code>8010960fc</code>). Four tests in <code>tests/standard_names/test_rescore_terminal_status.py</code>; with the status guard removed, the terminal-status test fails. Gate: 268 passed at base and head, both with the same three pre-existing <code>test_sn_approve</code> setup errors (§27); none added. Review 114/120.</p><p>For §16: the refusal's successor lookup falls back to <code>sn.superseded_by</code>, a new reader of the scalar that §16 retires. §16's done-when (<code>rg -n superseded_by</code> finds only the migration) will catch it. The lookup also names one successor arbitrarily when there are several.</p>
   </section>
 
+  <section id="s29-maintenance-asserts">
+    <h2>§29 — the edits-scoped maintenance test observes what it asserts</h2>
+    <p><code>tests/standard_names/test_edit_scope_skips_maintenance.py</code> now drives the real <code>sn run</code> command through Click's <code>CliRunner</code>. Its assertions that a scoped run skips <code>_auto_sync_grammar</code> and <code>_note_pipeline_version_drift</code> therefore observe <code>sn_run</code>'s own skip guard, where they previously patched helpers the tested path never called. Its forwarding assertions on the pool call are unchanged. Removing each of the four named behaviours in a scratch copy fails its assertion (EXIT=1 each). The 36-file <code>sn run</code> gate passes 525 at base and head (merge <code>442f5ac26</code>). Independent review 115/120. Its note: the two startup-step assertions overlap <code>tests/standard_names/test_scoped_global_maintenance.py</code>, which already drives <code>--skip-global-maintenance</code> through the CLI.</p>
+  </section>
+
 </main>
 </body>
 </html>
