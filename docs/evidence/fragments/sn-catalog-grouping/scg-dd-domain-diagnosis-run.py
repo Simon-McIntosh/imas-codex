@@ -118,7 +118,7 @@ async def _fresh(
         if context_ids != {p["id"] for p in pending}:
             raise RuntimeError("classification context missed live source paths")
     for start in range(0, len(pending), 20):
-        if cache["spend_usd"] >= 1.90:
+        if cache["spend_usd"] >= 2.15:
             raise RuntimeError("spend reserve reached before all paths were classified")
         chunk = pending[start : start + 20]
         charges = []
@@ -126,13 +126,13 @@ async def _fresh(
             gc, chunk, model=model, on_cost=charges.append
         )
         result_ids = {item["id"] for item in result}
-        if result_ids != {item["id"] for item in chunk}:
+        if len(result) != len(chunk) or result_ids != {item["id"] for item in chunk}:
             raise RuntimeError("classifier omitted or duplicated a source path")
         cost = sum(charges)
         cache["spend_usd"] += cost
-        if cache["spend_usd"] > 2.0:
+        if cache["spend_usd"] > 2.25:
             raise RuntimeError(
-                f"USD 2 spend ceiling exceeded: {cache['spend_usd']:.6f}"
+                f"USD 2.25 spend ceiling exceeded: {cache['spend_usd']:.6f}"
             )
         domains.update({item["id"]: item["physics_domain"] for item in result})
         cache_path.write_text(json.dumps(cache, sort_keys=True, indent=2) + "\n")
