@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="92">
+<meta name="plan-version" content="93">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -445,6 +445,9 @@
 </div>
 <div class="r-comment" data-section="s29" data-id="c-close-s29" data-who="reckon-build" data-when="2026-10-13T01:58:00Z">
     <div class="r-comment-body"><p>§29 closed. Every assertion in the edits-scoped maintenance test now observes the behaviour it names, each proved by its own negative control (merge <code>442f5ac26</code>); review 115/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s29-maintenance-asserts">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s29" data-id="c-run-r-20261013T014729066371-review-of-sib-maintenance-test-asserts-3055f17da457" data-who="reckon-build" data-when="2026-10-13T01:57:50.970Z">
+    <div class="r-comment-body"><p>Reviewed r-20261013T003700617029-sib-maintenance-test-asserts (plan imas-codex:sn-integrity-backlog §29, node sib-maintenance-test-asserts, base 57726eec9523e6e95579518f7c132571526914eb, head 3055f17da45729d040fc853f9190d28f7380d125). Verdict SOUND WITH FINDINGS, total 115/120 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 20, reuse 17). The rewrite does what §29 asked: the two assert_not_called() lines that ran against _run_sn_cmd (which never calls the startup steps) now drive the real `sn run` command, so they observe sn_run&#x27;s guard at imas_codex/cli/sn.py:2467, and the four scratch-copy mutations each redden the assertion they name (EXIT=1) while base and head gate arms both read 525 passed. One follow-on finding: the startup-step assertions now duplicate tests/standard_names/test_scoped_global_maintenance.py:492-493, which already owns that coverage; this file&#x27;s distinct value is the _run_sn_cmd-to-run_sn_pools forwarding. No blocking findings.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

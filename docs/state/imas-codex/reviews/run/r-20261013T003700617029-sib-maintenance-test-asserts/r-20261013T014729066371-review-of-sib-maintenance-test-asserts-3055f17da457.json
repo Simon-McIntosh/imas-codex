@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "57726eec9523e6e95579518f7c132571526914eb",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/sn.py:sn_run",
+    "imas_codex/cli/sn.py:_run_sn_cmd"
+  ],
+  "completed_at": "2026-10-13T01:57:50.970Z",
+  "dispatched_at": "2026-10-13T01:47:46Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_edit_scope_skips_maintenance.py",
+      "line": "81",
+      "severity": "follow-on",
+      "text": "follow-on: the two startup-step assertions re-armed here (tests/standard_names/test_edit_scope_skips_maintenance.py:81-82) duplicate tests/standard_names/test_scoped_global_maintenance.py:492-493, which already drives `sn run --skip-global-maintenance` through CliRunner and asserts the same _auto_sync_grammar/_note_pipeline_version_drift non-calls; this file's additive value is the _run_sn_cmd-to-run_sn_pools forwarding asserted at :88-90, so the startup assertions could fall back to the existing owner rather than be re-pinned here."
+    }
+  ],
+  "head_log_revision": "3055f17da45729d040fc853f9190d28f7380d125",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two production seams reach the landed test: imas_codex/cli/sn.py:sn_run owns the startup guard the assertions observe, and imas_codex/cli/sn.py:_run_sn_cmd forwards the flags the forwarding assertions read; no production code calls into a test file.",
+    "diff": "read commit by commit; the single commit 3055f17da replaces the direct _run_sn_cmd(...) call with CliRunner().invoke(sn, [\"run\", \"--scope-run-id\", ... , \"--skip-global-maintenance\", \"--quiet\"]) and adds the evidence fragment, and no product source changed.",
+    "done_when": "the done_when requires every remaining assertion to fail when the behaviour it names is removed, each shown by a scratch-copy mutation with EXIT= logged, plus no added failure against base; the manifest records four EXIT=1 controls (logs/neg_startup_guard.log, neg_scope_run_id_forward.log, neg_edits_only_forward.log, neg_skip_forward.log), a scratch head arm EXIT=0, and base_cli.log/after_cli.log at 525 passed each, and I reproduced the head content passing (1 passed, EXIT=0).",
+    "goal": "the node goal is that the edits-scoped maintenance test asserts only what it observes; the landed test now drives the real `sn run` command through CliRunner (tests/standard_names/test_edit_scope_skips_maintenance.py:66) instead of calling _run_sn_cmd directly, so its two assert_not_called() lines observe sn_run's `if not skip_global_maintenance:` guard at imas_codex/cli/sn.py:2467.",
+    "manifest": "read; it records status complete, commit 3055f17da, the four negative controls with their logs, measurement_module and measurement_cwd on the scratch package copy, and baseline_suite/after_suite each carrying revision, command, exit_status 0, completed true and zero failures.",
+    "write_paths": "the fence is tests/standard_names/test_edit_scope_skips_maintenance.py and docs/evidence/fragments/sn-integrity-backlog/sib-maintenance-test-asserts.html; git diff 57726eec9523e6e95579518f7c132571526914eb..3055f17da45729d040fc853f9190d28f7380d125 touches only those two files, both inside it."
+  },
+  "justifications": {
+    "durability": "removing the startup guard reddens grammar_sync.assert_not_called() at tests/standard_names/test_edit_scope_skips_maintenance.py:81 (logs/neg_startup_guard.log, EXIT=1) and each forwarding drop reddens its kwargs assertion at :88-90 (EXIT=1 each), so the assertions fail on regression rather than passing unconditionally; the small deduction is that the guard's non-use depends on a long inline patch set, so an unrelated change to sn_run's startup sequence can redden it.",
+    "evidence": "the manifest's four controls (logs/neg_startup_guard.log carries \"Expected '_auto_sync_grammar' to not have been called. Called 1 times.\" with EXIT=1) and base_cli.log/after_cli.log (525 passed, EXIT=0 each) substantiate the done_when, and my rerun of the head content passed (1 passed, EXIT=0).",
+    "fit": "the rewritten test uses the repository's CliRunner idiom and its name and docstring (tests/standard_names/test_*_maintenance.py:38, :1-17) state the mechanism with no plan, gate, ticket or author label.",
+    "goal_fidelity": "tests/standard_names/test_edit_scope_skips_maintenance.py:66 drives the actual `sn run` command whose startup guard sits at imas_codex/cli/sn.py:2467, so the goal's requirement that the assertions observe the real startup skip is met.",
+    "reuse": "the change adds no new definition, but the two startup-step assertions it re-arms at tests/standard_names/test_edit_scope_skips_maintenance.py:81-82 re-implement coverage that tests/standard_names/test_scoped_global_maintenance.py:492-493 already owns, so this file's marginal contribution narrows to the run_sn_pools forwarding asserted at :88-90.",
+    "scope_discipline": "git diff 57726eec9523e6e95579518f7c132571526914eb..3055f17da45729d040fc853f9190d28f7380d125 touches only tests/standard_names/test_edit_scope_skips_maintenance.py and docs/evidence/fragments/sn-integrity-backlog/sib-maintenance-test-asserts.html, both inside the declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261013T003700617029-sib-maintenance-test-asserts (imas-codex, plan sn-integrity-backlog section 29, node sib-maintenance-test-asserts), covering the single commit gained since the base, base 57726eec9523e6e95579518f7c132571526914eb, head 3055f17da45729d040fc853f9190d28f7380d125.\nreviewed_base_sha: 57726eec9523e6e95579518f7c132571526914eb\nreviewed_head_sha: 3055f17da45729d040fc853f9190d28f7380d125\nVERDICT goal: the node goal is that the edits-scoped maintenance test asserts only what it observes; the landed test now drives the real `sn run` command through CliRunner (tests/standard_names/test_edit_scope_skips_maintenance.py:66) instead of calling _run_sn_cmd directly, so its two assert_not_called() lines observe sn_run's `if not skip_global_maintenance:` guard at imas_codex/cli/sn.py:2467.\nVERDICT done_when: the done_when requires every remaining assertion to fail when the behaviour it names is removed, each shown by a scratch-copy mutation with EXIT= logged, plus no added failure against base; the manifest records four EXIT=1 controls (logs/neg_startup_guard.log, neg_scope_run_id_forward.log, neg_edits_only_forward.log, neg_skip_forward.log), a scratch head arm EXIT=0, and base_cli.log/after_cli.log at 525 passed each, and I reproduced the head content passing (1 passed, EXIT=0).\nVERDICT write_paths: the fence is tests/standard_names/test_edit_scope_skips_maintenance.py and docs/evidence/fragments/sn-integrity-backlog/sib-maintenance-test-asserts.html; git diff 57726eec9523e6e95579518f7c132571526914eb..3055f17da45729d040fc853f9190d28f7380d125 touches only those two files, both inside it.\nVERDICT manifest: read; it records status complete, commit 3055f17da, the four negative controls with their logs, measurement_module and measurement_cwd on the scratch package copy, and baseline_suite/after_suite each carrying revision, command, exit_status 0, completed true and zero failures.\nVERDICT diff: read commit by commit; the single commit 3055f17da replaces the direct _run_sn_cmd(...) call with CliRunner().invoke(sn, [\"run\", \"--scope-run-id\", ..., \"--skip-global-maintenance\", \"--quiet\"]) and adds the evidence fragment, and no product source changed.\nCALL_SITES: imas_codex/cli/sn.py:sn_run, imas_codex/cli/sn.py:_run_sn_cmd\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/standard_names/test_edit_scope_skips_maintenance.py:66 drives the actual `sn run` command whose startup guard sits at imas_codex/cli/sn.py:2467, so the goal's requirement that the assertions observe the real startup skip is met.\nSCORE evidence: 19\nJUSTIFICATION evidence: the manifest's four controls (logs/neg_startup_guard.log carries \"Expected '_auto_sync_grammar' to not have been called. Called 1 times.\" with EXIT=1) and base_cli.log/after_cli.log (525 passed, EXIT=0 each) substantiate the done_when, and my rerun of the head content passed (1 passed, EXIT=0).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 57726eec9523e6e95579518f7c132571526914eb..3055f17da45729d040fc853f9190d28f7380d125 touches only tests/standard_names/test_edit_scope_skips_maintenance.py and docs/evidence/fragments/sn-integrity-backlog/sib-maintenance-test-asserts.html, both inside the declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: removing the startup guard reddens grammar_sync.assert_not_called() at tests/standard_names/test_edit_scope_skips_maintenance.py:81 (logs/neg_startup_guard.log, EXIT=1) and each forwarding drop reddens its kwargs assertion at :88-90 (EXIT=1 each), so the assertions fail on regression rather than passing unconditionally; the small deduction is that the guard's non-use depends on a long inline patch set, so an unrelated change to sn_run's startup sequence can redden it.\nSCORE fit: 20\nJUSTIFICATION fit: the rewritten test uses the repository's CliRunner idiom and its name and docstring (tests/standard_names/test_edit_scope_skips_maintenance.py:38, :1-17) state the mechanism with no plan, gate, ticket or author label.\nSCORE reuse: 17\nJUSTIFICATION reuse: the change adds no new definition, but the two startup-step assertions it re-arms at tests/standard_names/test_edit_scope_skips_maintenance.py:81-82 re-implement coverage that tests/standard_names/test_scoped_global_maintenance.py:492-493 already owns, so this file's marginal contribution narrows to the run_sn_pools forwarding asserted at :88-90.\nFINDING tests/standard_names/test_edit_scope_skips_maintenance.py:81 follow-on: the two startup-step assertions re-armed here duplicate tests/standard_names/test_scoped_global_maintenance.py:492-493, which already drives `sn run --skip-global-maintenance` through CliRunner and asserts the same _auto_sync_grammar/_note_pipeline_version_drift non-calls; this file's additive value is the _run_sn_cmd-to-run_sn_pools forwarding asserted at :88-90, so the startup assertions could fall back to the existing owner rather than be re-pinned here.\nFINAL: SOUND WITH FINDINGS. The rewrite does what section 29 asked: the two assert_not_called() lines that previously ran against _run_sn_cmd, which never calls the startup steps, now drive the real `sn run` command so they observe sn_run's guard, and the four scratch-copy mutations each redden the assertion they name (EXIT=1) while the base and head gate arms both read 525 passed. Scope is two files, both inside the fence, and no product source changed. The one recorded gap is redundancy, not a defect: the startup-step assertions now duplicate the older test_scoped_global_maintenance.py, whose same two non-call assertions already exercise the flag through CliRunner, so this file's distinct value is the run_sn_pools forwarding it alone reaches.",
+  "review_run_id": "r-20261013T014729066371-review-of-sib-maintenance-test-asserts-3055f17da457",
+  "reviewed_base_sha": "57726eec9523e6e95579518f7c132571526914eb",
+  "reviewed_head_sha": "3055f17da45729d040fc853f9190d28f7380d125",
+  "reviewed_run_id": "r-20261013T003700617029-sib-maintenance-test-asserts",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:55:36.000000+00:00",
+  "total": 115,
+  "verdict": "SOUND WITH FINDINGS"
+}
