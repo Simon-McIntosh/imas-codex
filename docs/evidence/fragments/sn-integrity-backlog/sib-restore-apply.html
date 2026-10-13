@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-restore-apply">
+<title>Signed restoration of reviewed Standard Names</title>
+</head>
+<body>
+<main>
+<h1 id="sib-restore-apply-title">Signed restore evidence</h1>
+<p id="sib-restore-apply-baseline">At revision <code>75a4bde76c7b0043b28d9b0794401a4fe2c3f1b0</code>, the four named restore test files passed 44 tests (EXIT=0; <code>restore-baseline.log</code>). Both signed authority file hashes matched the dispatch values. Before apply, exact-id reads found both targets absent and <code>etendue_of_soft_xray_detector</code> present with <code>origin=pipeline</code>. The requested <code>power_due_to_radiation</code> control was absent; a bounded prefix read also found no matching id, so the corrected etendue identity served as the live positive control. The queried graph URI was <code>bolt://98dci4-gpu-0002:7687</code>.</p>
+<p id="sib-restore-apply-negative-control">A single preview of the etendue authority, without <code>--apply</code>, refused the missing archived spectral counterpart and the differing live DD counterpart. The intentional correction to <code>etendue_of_soft_xray_detector</code> was left intact.</p>
+<h3 id="sib-restore-apply-etendue-negative-control">Etendue Negative Control</h3>
+<pre>refused: nodes 1 admitted 0 refused 2
+  refused etendue_of_spectrometer_channel: archived counterpart is neither live nor included: spectral_etendue_of_spectrometer_channel
+  refused etendue_of_spectrometer_channel: existing counterpart differs from signed reconstruction state
+manifest_sha256 34bb54be6096a1225bdc23ae14e70e46696ce7cca1f1b1d993a398747d97915f
+Usage: imas-codex sn restore apply [OPTIONS] AUTHORITY
+Try &#x27;imas-codex sn restore apply --help&#x27; for help.
+
+Error: the archive reconstruction withheld an identity it could not reinstate exactly
+
+EXIT=2
+</pre>
+<section id="sib-restore-apply-fusion">
+<h2 id="sib-restore-apply-fusion-title">power_due_to_fusion</h2>
+<p id="sib-restore-apply-fusion-authority">Authority SHA-256 <code>e5c525c97c8badb91621219864c782fa27a254f1390af96531235c13dbab0e2a</code>. Transactional preview: <code>would_apply</code>, admitted 1, refused 0. Preview digest: <code>942aae991aa6c4aa67528191a6eb74fd56d8b2912ab0f1d9d6e9bce587b9fc8d</code>. Apply with that digest: <code>applied</code>, admitted 1, refused 0. The preview emitted no parity lines; the applied receipt below enumerates every parity role.</p>
+<p id="sib-restore-apply-fusion-read">Bounded post-apply read: <code>{"id":"power_due_to_fusion","origin":"pipeline","sources":[{"id":"derived:power_due_to_fusion","produced_sn_id":"power_due_to_fusion"}],"reviews":8,"docs_revisions":2}</code>. The source has the <code>PRODUCED_NAME</code> edge to this identity.</p>
+<h3 id="sib-restore-apply-fusion-preview">Fusion Preview</h3>
+<pre>would_apply: nodes 1 admitted 1 refused 0
+manifest_sha256 942aae991aa6c4aa67528191a6eb74fd56d8b2912ab0f1d9d6e9bce587b9fc8d
+re-run with --apply --manifest-sha256 942aae991aa6c4aa67528191a6eb74fd56d8b2912ab0f1d9d6e9bce587b9fc8d to commit
+
+EXIT=0
+</pre>
+<h3 id="sib-restore-apply-fusion-apply-parity">Fusion Apply Parity</h3>
+<pre>applied: nodes 1 admitted 1 refused 0
+  parity power_due_to_fusion DOCS_REVISION_OF: expected 2 source archive_census observed 2
+  parity power_due_to_fusion ENTAILED_FROM_CHILD: expected unestablished source neither observed 0
+  parity power_due_to_fusion EVIDENCED_BY: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_AGGREGATION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_COCOS: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_COMPONENT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_COORDINATE: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_DEVICE: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_DOCS_REVIEW_ADMISSION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_ERROR: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_GEOMETRIC_BASE: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_INTERNAL_CHANGE: expected 1 source archive_census observed 1
+  parity power_due_to_fusion HAS_LOCUS: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_ORBIT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PARENT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PHYSICAL_BASE: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PHYSICS_DOMAIN: expected 1 source archive_census observed 1
+  parity power_due_to_fusion HAS_POPULATION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_POSITION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PREDECESSOR: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_PROCESS: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_REGION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_REVIEW: expected 8 source archive_census observed 8
+  parity power_due_to_fusion HAS_SEGMENT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_STANDARD_NAME: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_STRUCTURAL_AUTHORITY: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_SUBJECT: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_SUCCESSOR: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_TRANSFORMATION: expected unestablished source neither observed 0
+  parity power_due_to_fusion HAS_UNIT: expected 1 source archive_census observed 1
+  parity power_due_to_fusion IN_CLUSTER: expected unestablished source neither observed 0
+  parity power_due_to_fusion MAGNITUDE_OF: expected unestablished source neither observed 0
+  parity power_due_to_fusion PRODUCED_NAME: expected 1 source archive_census observed 1
+  parity power_due_to_fusion REFERENCES: expected unestablished source neither observed 0
+  parity power_due_to_fusion REFINED_FROM: expected unestablished source neither observed 0
+manifest_sha256 942aae991aa6c4aa67528191a6eb74fd56d8b2912ab0f1d9d6e9bce587b9fc8d
+
+EXIT=0
+</pre>
+</section>
+</main>
+</body>
+</html>
