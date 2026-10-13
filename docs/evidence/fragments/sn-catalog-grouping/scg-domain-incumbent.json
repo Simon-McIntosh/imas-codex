@@ -1,0 +1,1002 @@
+{
+  "electron_temperature": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "electron_density": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "safety_factor": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "plasma_current": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium",
+      "magnetic_field_diagnostics"
+    ]
+  },
+  "poloidal_magnetic_flux": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium",
+      "magnetohydrodynamics",
+      "plasma_wall_interactions",
+      "edge_plasma_physics"
+    ]
+  },
+  "atomic_count": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport",
+      "machine_operations",
+      "plasma_wall_interactions"
+    ]
+  },
+  "atomic_mass": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport",
+      "plasma_wall_interactions",
+      "plasma_control",
+      "auxiliary_heating"
+    ]
+  },
+  "radial_coordinate_of_line_of_sight": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "vertical_coordinate_of_line_of_sight": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics",
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "atomic_number": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport",
+      "plant_systems"
+    ]
+  },
+  "ion_charge": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "ion_state_maximum_charge_number": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "normalized_poloidal_flux_coordinate": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "transport",
+      "electromagnetic_wave_diagnostics",
+      "magnetohydrodynamics",
+      "auxiliary_heating"
+    ]
+  },
+  "poloidal_magnetic_flux_at_plasma_boundary": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "toroidal_angle_of_measurement_position": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium",
+      "particle_measurement_diagnostics",
+      "electromagnetic_wave_diagnostics",
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "normalized_toroidal_flux_coordinate": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium",
+      "transport",
+      "radiation_measurement_diagnostics",
+      "electromagnetic_wave_diagnostics",
+      "particle_measurement_diagnostics",
+      "magnetohydrodynamics",
+      "auxiliary_heating",
+      "edge_plasma_physics"
+    ]
+  },
+  "area_of_diagnostic_aperture": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "volume_of_flux_surface": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "toroidal_flux_coordinate": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "reference_major_radius": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "poloidal_angle_of_plasma_boundary_gap": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "poloidal_magnetic_flux_at_pellet_path": {
+    "physics_domain": "plant_systems",
+    "source_domains": [
+      "plant_systems"
+    ]
+  },
+  "ratio_of_vertical_vorticity_to_major_radius": {
+    "physics_domain": "edge_plasma_physics",
+    "source_domains": [
+      "edge_plasma_physics"
+    ]
+  },
+  "total_absorbed_wave_power_at_inside_flux_surface": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "plasma_mass_density_real_part": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "toroidal_coordinate_of_soft_xray_detector": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": []
+  },
+  "wave_curvature_of_electron_cyclotron_beam": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "volume_averaged_runaway_electron_kinetic_energy_density": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "current_density_due_to_non_inductive_current_drive": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "wave_voltage_amplitude": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics"
+    ]
+  },
+  "radius_of_bragg_crystal": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "vertical_coordinate_of_lower_hybrid_antenna": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "normalized_poloidal_flux_coordinate_at_minimum_absolute_safety_factor": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "poloidal_suprathermal_electron_angle_perturbed_at_ece_channel_emission_position": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics"
+    ]
+  },
+  "second_local_tangential_coordinate_of_hard_xray_detector": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "power_due_to_first_orbit_loss": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "magnetic_field_magnitude": {
+    "physics_domain": "edge_plasma_physics",
+    "source_domains": [
+      "radiation_measurement_diagnostics",
+      "edge_plasma_physics"
+    ]
+  },
+  "total_plasma_radiated_power": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "neutral_gas_pressure_of_gauge": {
+    "physics_domain": "mechanical_measurement_diagnostics",
+    "source_domains": [
+      "mechanical_measurement_diagnostics"
+    ]
+  },
+  "poloidal_perturbed_vacuum_magnetic_field": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "time": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics",
+      "mechanical_measurement_diagnostics",
+      "turbulence"
+    ]
+  },
+  "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "parallel_electric_field": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "beryllium_density": {
+    "physics_domain": "particle_measurement_diagnostics",
+    "source_domains": [
+      "particle_measurement_diagnostics"
+    ]
+  },
+  "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "toroidal_magnetic_field_at_pedestal_top": {
+    "physics_domain": "edge_plasma_physics",
+    "source_domains": [
+      "edge_plasma_physics"
+    ]
+  },
+  "volume_averaged_ion_charge_state_average_charge_number": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "flux_surface_averaged_toroidal_current_density": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "area_of_toroidal_field_coil": {
+    "physics_domain": "magnetic_field_systems",
+    "source_domains": [
+      "magnetic_field_systems"
+    ]
+  },
+  "volume_of_pellet_fragment": {
+    "physics_domain": "plant_systems",
+    "source_domains": [
+      "plant_systems"
+    ]
+  },
+  "perpendicular_normalized_perturbed_pressure_bessel_1": {
+    "physics_domain": "turbulence",
+    "source_domains": [
+      "turbulence"
+    ]
+  },
+  "height_of_plasma_filament": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "viewing_efficiency_of_spectrometer_channel": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "vertical_coordinate_of_ion_cyclotron_heating_antenna": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "line_integrated_electron_number_density": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics"
+    ]
+  },
+  "nuclear_heating_power_of_breeder_blanket_layer": {
+    "physics_domain": "structural_components",
+    "source_domains": [
+      "structural_components"
+    ]
+  },
+  "electrostatic_potential_amplitude": {
+    "physics_domain": "turbulence",
+    "source_domains": [
+      "turbulence"
+    ]
+  },
+  "first_local_tangential_width_of_diagnostic_aperture": {
+    "physics_domain": "particle_measurement_diagnostics",
+    "source_domains": [
+      "particle_measurement_diagnostics"
+    ]
+  },
+  "first_local_tangential_coordinate_of_soft_xray_detector": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "alfven_frequency_imaginary_part": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "electrostatic_potential_real_part": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "total_thermal_coolant_absorbed_power_at_wall": {
+    "physics_domain": "plant_systems",
+    "source_domains": [
+      "plant_systems"
+    ]
+  },
+  "poloidal_gyrocenter_frequency": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "parallel_refractive_index": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics"
+    ]
+  },
+  "incident_energy_flux_at_wall_due_to_eddy_current": {
+    "physics_domain": "plasma_wall_interactions",
+    "source_domains": [
+      "plasma_wall_interactions"
+    ]
+  },
+  "etendue_of_soft_xray_detector": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "diameter_of_diagnostic_aperture": {
+    "physics_domain": "particle_measurement_diagnostics",
+    "source_domains": [
+      "particle_measurement_diagnostics"
+    ]
+  },
+  "source_rate_due_to_injection": {
+    "physics_domain": "plant_systems",
+    "source_domains": [
+      "plant_systems"
+    ]
+  },
+  "initial_polarization_ellipticity_of_polarimeter_beam": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics"
+    ]
+  },
+  "volume_averaged_total_ion_temperature": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "fast_ion_charge_state_power_density": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "temperature_of_coil_conductor": {
+    "physics_domain": "magnetic_field_systems",
+    "source_domains": [
+      "magnetic_field_systems"
+    ]
+  },
+  "nuclear_heating_power_of_limiter_tile": {
+    "physics_domain": "structural_components",
+    "source_domains": [
+      "structural_components"
+    ]
+  },
+  "poloidal_ion_velocity_at_charge_exchange_channel": {
+    "physics_domain": "particle_measurement_diagnostics",
+    "source_domains": [
+      "particle_measurement_diagnostics"
+    ]
+  },
+  "current_due_to_fusion_reactions": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "safety_factor_at_internal_transport_barrier": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "total_neutron_rate": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "maximum_of_back_surface_neutron_flux": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "radial_coordinate_of_active_wall_point": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "intensity_at_spectral_line": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "square_of_toroidal_flux_coordinate_gradient_magnitude": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "radial_outline_of_coil_conductor_element": {
+    "physics_domain": "magnetic_field_systems",
+    "source_domains": [
+      "magnetic_field_systems"
+    ]
+  },
+  "toroidal_angle_of_active_limiter_point": {
+    "physics_domain": "edge_plasma_physics",
+    "source_domains": [
+      "edge_plasma_physics"
+    ]
+  },
+  "ratio_of_ion_density_to_electron_density": {
+    "physics_domain": "particle_measurement_diagnostics",
+    "source_domains": [
+      "particle_measurement_diagnostics"
+    ]
+  },
+  "y_coordinate_of_ferritic_element_centroid": {
+    "physics_domain": "structural_components",
+    "source_domains": [
+      "structural_components"
+    ]
+  },
+  "radius_of_neutral_beam_injector": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "torque_due_to_collisions": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "vertical_velocity_at_current_center": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "toroidal_rotation_frequency_due_to_e_cross_b_drift": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "shattered_pellet_species_number_density_of_pellet_fragment": {
+    "physics_domain": "plant_systems",
+    "source_domains": [
+      "plant_systems"
+    ]
+  },
+  "temperature_of_soft_xray_detector": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "resistance_of_toroidal_field_coil": {
+    "physics_domain": "magnetic_field_systems",
+    "source_domains": [
+      "magnetic_field_systems"
+    ]
+  },
+  "toroidal_launched_wave_index_of_lower_hybrid_antenna": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "vertical_displacement_of_beamlet_group": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "radial_outline_of_ferritic_element": {
+    "physics_domain": "magnetic_field_systems",
+    "source_domains": [
+      "magnetic_field_systems"
+    ]
+  },
+  "derivative_of_logarithm_of_density_with_respect_to_normalized_minor_radius": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "radial_length_of_divertor_target": {
+    "physics_domain": "divertor_physics",
+    "source_domains": [
+      "divertor_physics"
+    ]
+  },
+  "core_atomic_count_of_pellet": {
+    "physics_domain": "plant_systems",
+    "source_domains": [
+      "plant_systems"
+    ]
+  },
+  "surface_area_of_neutron_detector": {
+    "physics_domain": "particle_measurement_diagnostics",
+    "source_domains": [
+      "particle_measurement_diagnostics"
+    ]
+  },
+  "current_due_to_lower_hybrid_current_drive": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "nuclear_power_density_of_limiter_tile": {
+    "physics_domain": "structural_components",
+    "source_domains": [
+      "structural_components"
+    ]
+  },
+  "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection": {
+    "physics_domain": "plant_systems",
+    "source_domains": [
+      "plant_systems"
+    ]
+  },
+  "time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "ratio_of_volume_averaged_carbon_density_to_volume_averaged_electron_density": {
+    "physics_domain": "plasma_wall_interactions",
+    "source_domains": [
+      "plasma_wall_interactions"
+    ]
+  },
+  "mhd_mode_reference_phase": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "radius_of_neutron_detector": {
+    "physics_domain": "particle_measurement_diagnostics",
+    "source_domains": [
+      "particle_measurement_diagnostics"
+    ]
+  },
+  "reference_frequency_of_wave_beam": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics"
+    ]
+  },
+  "second_local_tangential_coordinate_of_soft_xray_detector": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "plasma_temperature_imaginary_part": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "turn_count_of_toroidal_magnetic_field_probe": {
+    "physics_domain": "magnetic_field_diagnostics",
+    "source_domains": [
+      "magnetic_field_diagnostics"
+    ]
+  },
+  "vertical_coordinate_of_polarizer": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "saturated_ion_current": {
+    "physics_domain": "particle_measurement_diagnostics",
+    "source_domains": [
+      "particle_measurement_diagnostics"
+    ]
+  },
+  "voltage_of_shunt": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential": {
+    "physics_domain": "turbulence",
+    "source_domains": [
+      "turbulence"
+    ]
+  },
+  "normalized_toroidal_flux_coordinate_of_neoclassical_tearing_mode_center": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "resistance_of_ion_cyclotron_heating_antenna": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "flux_surface_averaged_parallel_electric_field_at_separatrix": {
+    "physics_domain": "edge_plasma_physics",
+    "source_domains": [
+      "edge_plasma_physics"
+    ]
+  },
+  "second_local_tangential_coordinate_of_filter": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "toroidal_angle_of_grating": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "particle_source_rate_due_to_distribution_function_driven": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "vertical_outline_of_fiber_optic_current_sensor": {
+    "physics_domain": "magnetic_field_diagnostics",
+    "source_domains": [
+      "magnetic_field_diagnostics"
+    ]
+  },
+  "spectral_efficiency_of_hard_xray_detector": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "hot_neutral_velocity": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "total_plasma_mass_density": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "y_coordinate_of_divertor_target": {
+    "physics_domain": "plasma_wall_interactions",
+    "source_domains": [
+      "plasma_wall_interactions"
+    ]
+  },
+  "flux_at_limiter": {
+    "physics_domain": "plasma_wall_interactions",
+    "source_domains": [
+      "plasma_wall_interactions"
+    ]
+  },
+  "toroidal_coordinate_of_filter_window": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "vertical_coordinate_of_antenna_strap": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "effective_charge": {
+    "physics_domain": "magnetohydrodynamics",
+    "source_domains": [
+      "magnetohydrodynamics"
+    ]
+  },
+  "momentum_flux_normalized_due_to_e_cross_b_drift": {
+    "physics_domain": "turbulence",
+    "source_domains": [
+      "turbulence"
+    ]
+  },
+  "total_electron_count": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics"
+    ]
+  },
+  "radial_coordinate_of_coil_conductor_element": {
+    "physics_domain": "magnetic_field_systems",
+    "source_domains": [
+      "magnetic_field_systems"
+    ]
+  },
+  "upper_wavelength_of_filter": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "toroidal_thermal_ion_torque_density_due_to_thermalization": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "radius_of_filter_window": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "alpha_angle_of_passive_loop_element": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "incident_neutral_particle_flux_at_wall_due_to_recombination": {
+    "physics_domain": "plasma_wall_interactions",
+    "source_domains": [
+      "plasma_wall_interactions"
+    ]
+  },
+  "ion_charge_state_lower_bound_charge": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "radial_current_density_due_to_ion_neutral_friction": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "beryllium_source_rate_due_to_gas_injection": {
+    "physics_domain": "plant_systems",
+    "source_domains": [
+      "plant_systems"
+    ]
+  },
+  "vertical_front_surface_radius_of_optical_element": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "electron_density_at_pellet_path": {
+    "physics_domain": "plant_systems",
+    "source_domains": [
+      "plant_systems"
+    ]
+  },
+  "normalized_toroidal_flux_coordinate_at_beam_tracing_point": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics"
+    ]
+  },
+  "normalized_perturbed_parallel_magnetic_field_magnitude": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "perpendicular_wave_vector_of_ion_cyclotron_heating_antenna": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "radius_of_detector": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "radius_of_coil_conductor_element": {
+    "physics_domain": "magnetic_field_systems",
+    "source_domains": [
+      "magnetic_field_systems"
+    ]
+  },
+  "flux_surface_averaged_current_density_due_to_wave_driven_current_drive": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "current_density_due_to_fast_ion": {
+    "physics_domain": "transport",
+    "source_domains": [
+      "transport"
+    ]
+  },
+  "electron_particle_flux_at_wall_due_to_pumping": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "current_of_rogowski_coil": {
+    "physics_domain": "magnetic_field_diagnostics",
+    "source_domains": [
+      "magnetic_field_diagnostics"
+    ]
+  },
+  "major_length_of_plasma_filament": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "normalized_poloidal_flux_coordinate_of_pedestal": {
+    "physics_domain": "edge_plasma_physics",
+    "source_domains": [
+      "edge_plasma_physics",
+      "general"
+    ]
+  },
+  "resistance_of_poloidal_field_coil": {
+    "physics_domain": "magnetic_field_systems",
+    "source_domains": [
+      "magnetic_field_systems"
+    ]
+  },
+  "breakdown_magnetic_field": {
+    "physics_domain": "magnetic_field_diagnostics",
+    "source_domains": [
+      "magnetic_field_diagnostics"
+    ]
+  },
+  "spectral_calibration_factor_at_line_of_sight": {
+    "physics_domain": "electromagnetic_wave_diagnostics",
+    "source_domains": [
+      "electromagnetic_wave_diagnostics"
+    ]
+  },
+  "thickness_of_bragg_crystal": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "first_local_tangential_coordinate_of_optical_element": {
+    "physics_domain": "radiation_measurement_diagnostics",
+    "source_domains": [
+      "radiation_measurement_diagnostics"
+    ]
+  },
+  "power_of_divertor_due_to_ohmic_dissipation": {
+    "physics_domain": "divertor_physics",
+    "source_domains": [
+      "divertor_physics"
+    ]
+  },
+  "y_coordinate_of_sensor_attachment_point": {
+    "physics_domain": "mechanical_measurement_diagnostics",
+    "source_domains": [
+      "mechanical_measurement_diagnostics"
+    ]
+  },
+  "second_local_tangential_width_of_filter_window": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "total_power_at_separatrix": {
+    "physics_domain": "edge_plasma_physics",
+    "source_domains": [
+      "edge_plasma_physics"
+    ]
+  },
+  "radial_offset_of_beamlet_group": {
+    "physics_domain": "auxiliary_heating",
+    "source_domains": [
+      "auxiliary_heating"
+    ]
+  },
+  "radial_coordinate_of_thomson_scattering_laser": {
+    "physics_domain": "particle_measurement_diagnostics",
+    "source_domains": [
+      "particle_measurement_diagnostics"
+    ]
+  },
+  "minor_radius_of_plasma_boundary": {
+    "physics_domain": "equilibrium",
+    "source_domains": [
+      "equilibrium"
+    ]
+  },
+  "parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection": {
+    "physics_domain": null,
+    "source_domains": []
+  },
+  "alpha_angle_of_plasma_filament": {
+    "physics_domain": null,
+    "source_domains": []
+  }
+}
