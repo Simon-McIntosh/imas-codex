@@ -1611,6 +1611,12 @@ def write_signal_descriptions(
     # rewritten description marks the row for the re-embed sweep.
     embedded = [item for item in payload if item.get("embedding") is not None]
     unembedded = [item for item in payload if item.get("embedding") is None]
+    # A row whose embed text is empty has nothing to vectorise, so no vector
+    # will ever arrive for it and no later sweep should keep re-requesting one.
+    # Its empty text's hash is recorded with its description, so a signal with
+    # no text stops reading as a row whose hash is merely missing.
+    empty_text = [item for item in unembedded if not item["embed_text"].strip()]
+    unembedded = [item for item in unembedded if item["embed_text"].strip()]
     if unembedded:
         logger.warning(
             "Left %d of %d signal descriptions without a fresh embedding: the "
@@ -1651,10 +1657,17 @@ def write_signal_descriptions(
     if gc is None:
         with GraphClient() as client:
             return _write_description_arms(
-                client, match, where, extra_clause, embedded, unembedded, _params
+                client,
+                match,
+                where,
+                extra_clause,
+                embedded,
+                unembedded,
+                empty_text,
+                _params,
             )
     return _write_description_arms(
-        gc, match, where, extra_clause, embedded, unembedded, _params
+        gc, match, where, extra_clause, embedded, unembedded, empty_text, _params
     )
 
 
@@ -1665,9 +1678,17 @@ def _write_description_arms(
     extra_clause: str,
     embedded: list[dict[str, Any]],
     unembedded: list[dict[str, Any]],
+    empty_text: list[dict[str, Any]],
     params_for: Callable[[list[dict[str, Any]]], dict[str, Any]],
 ) -> int:
-    """Write the embedded and unembedded arms, summing the rows they touch."""
+    """Write each arm, summing the rows they touch.
+
+    ``embedded`` items carry a fresh vector and get it with their text and
+    hash. ``empty_text`` items have no text to embed, so they record their
+    (empty) text's hash without a vector. ``unembedded`` items hold text the
+    embedding service did not answer for, so only the description is written
+    and the row stays marked for re-embedding.
+    """
     written = 0
     if embedded:
         statement = f"""
@@ -1680,6 +1701,15 @@ def _write_description_arms(
             RETURN count(s) AS updated
         """
         written += _run_description_write(gc, statement, params_for(embedded))
+    if empty_text:
+        statement = f"""
+            UNWIND $items AS item
+            {match}{where}
+            SET s.description = item.description,
+                s.embedded_text_hash = item.embedded_text_hash{extra_clause}
+            RETURN count(s) AS updated
+        """
+        written += _run_description_write(gc, statement, params_for(empty_text))
     if unembedded:
         statement = f"""
             UNWIND $items AS item
@@ -1701,6 +1731,166 @@ def _run_description_write(
     if rows and isinstance(rows[0], dict) and "updated" in rows[0]:
         return rows[0]["updated"]
     return len(params["items"])
+
+
+# The one predicate that decides whether a signal's stored vector still
+# describes its text. Rendered as a Cypher ``WHERE`` over an ``UNWIND $rows``
+# whose each row carries the id and the ``expected_hash`` of that signal's
+# current embed text, it selects both the rows the re-embed sweep rewrites and
+# the rows the census counts, so the two can never disagree about a missing
+# hash. A missing hash is a mismatch: a signal the writer has never stamped is
+# selected. Written as a lone ``s.embedded_text_hash <> row.expected_hash`` the
+# predicate would drop every null-hash row, because Cypher compares a null
+# against a hash to null rather than to true.
+_SIGNAL_HASH_MISMATCH_WHERE = (
+    "s.embedded_text_hash IS NULL OR s.embedded_text_hash <> row.expected_hash"
+)
+
+# Rows per Cypher round-trip when a sweep or census evaluates the predicate.
+_SIGNAL_EMBED_ROW_CHUNK = 2000
+
+
+def signal_embed_text(row: dict[str, Any]) -> str:
+    """The text a signal's embedding encodes: its description alone.
+
+    Decision ``embed-text`` measured the description alone against a composed
+    name, description and unit on the golden harness and kept the description,
+    so this is the one place the choice is expressed for the sweep and census.
+    A signal with no description has an empty embed text.
+    """
+    return row.get("description") or ""
+
+
+def _embed_text_hash(text: str) -> str:
+    """The SHA-256 the writer stores alongside a signal's vector."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _chunks(rows: list[Any], size: int) -> list[list[Any]]:
+    return [rows[i : i + size] for i in range(0, len(rows), size)]
+
+
+def fetch_signal_embed_state(
+    gc: GraphClient | None = None, facility: str | None = None
+) -> list[dict[str, Any]]:
+    """Every FacilitySignal's id, description and stored embed text hash.
+
+    ``facility`` restricts the population to one facility id; omitted, every
+    facility is read, which is the population the census counts over.
+    """
+    where = "WHERE s.facility_id = $facility" if facility else ""
+    query = (
+        "MATCH (s:FacilitySignal) "
+        f"{where}"
+        "RETURN s.id AS id, s.description AS description, "
+        "s.embedded_text_hash AS embedded_text_hash, "
+        "s.facility_id AS facility_id"
+    )
+    if gc is None:
+        with GraphClient() as client:
+            return list(client.query(query, facility=facility))
+    return list(gc.query(query, facility=facility))
+
+
+def find_signal_hash_mismatches(
+    rows: list[dict[str, Any]], gc: GraphClient | None = None
+) -> list[str]:
+    """The ids whose ``embedded_text_hash`` is missing or stale.
+
+    Applies ``_SIGNAL_HASH_MISMATCH_WHERE`` against each row's recomputed
+    expected hash. This is the predicate both the sweep and the census use, so
+    a row the sweep rewrites is exactly a row the census had counted.
+    """
+    if not rows:
+        return []
+    params = [
+        {"id": row["id"], "expected_hash": _embed_text_hash(signal_embed_text(row))}
+        for row in rows
+    ]
+    statement = (
+        "UNWIND $rows AS row "
+        "MATCH (s:FacilitySignal {id: row.id}) "
+        f"WHERE {_SIGNAL_HASH_MISMATCH_WHERE} "
+        "RETURN s.id AS id"
+    )
+    mismatches: list[str] = []
+
+    def _run(client: GraphClient) -> None:
+        for chunk in _chunks(params, _SIGNAL_EMBED_ROW_CHUNK):
+            mismatches.extend(r["id"] for r in client.query(statement, rows=chunk))
+
+    if gc is None:
+        with GraphClient() as client:
+            _run(client)
+    else:
+        _run(gc)
+    return mismatches
+
+
+def reembed_stale_signal_descriptions(
+    *,
+    facility: str | None = None,
+    gc: GraphClient | None = None,
+    batch_size: int = 512,
+) -> dict[str, int]:
+    """Re-embed every signal whose stored hash is missing or differs.
+
+    Selects its rows with the census's own predicate, then rewrites each
+    through :func:`write_signal_descriptions` with the description-only embed
+    text, so the stored vector, its hash and its description move together.
+    ``facility=None`` sweeps every facility. Returns the population size, the
+    number the predicate selected and the number of nodes written.
+    """
+    own_client = gc is None
+    client = GraphClient() if gc is None else gc
+    try:
+        rows = fetch_signal_embed_state(client, facility)
+        by_id = {row["id"]: row for row in rows}
+        mismatches = find_signal_hash_mismatches(rows, client)
+        items = [
+            {"id": sid, "description": by_id[sid]["description"]} for sid in mismatches
+        ]
+        written = 0
+        for chunk in _chunks(items, batch_size):
+            written += write_signal_descriptions(chunk, gc=client)
+        return {
+            "population": len(rows),
+            "mismatches": len(mismatches),
+            "written": written,
+        }
+    finally:
+        if own_client:
+            client.close()
+
+
+def census_signal_embeddings(
+    *, facility: str | None = None, gc: GraphClient | None = None
+) -> dict[str, Any]:
+    """Count every FacilitySignal whose hash is missing or stale.
+
+    Uses the same predicate the sweep rewrites against, so a census taken
+    after a sweep reads zero exactly when the sweep left nothing behind. A
+    signal written by a concurrent pipeline is named in ``mismatch_ids``
+    rather than hidden in a count.
+    """
+    own_client = gc is None
+    client = GraphClient() if gc is None else gc
+    try:
+        rows = fetch_signal_embed_state(client, facility)
+        stored = {row["id"]: row["embedded_text_hash"] for row in rows}
+        mismatches = find_signal_hash_mismatches(rows, client)
+        missing = [sid for sid in mismatches if stored.get(sid) is None]
+        differing = [sid for sid in mismatches if stored.get(sid) is not None]
+        return {
+            "n": len(rows),
+            "mismatch": len(mismatches),
+            "missing_hash": len(missing),
+            "differing": len(differing),
+            "mismatch_ids": sorted(mismatches),
+        }
+    finally:
+        if own_client:
+            client.close()
 
 
 def mark_signals_enriched(

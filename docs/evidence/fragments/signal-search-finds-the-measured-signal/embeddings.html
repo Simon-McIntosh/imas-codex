@@ -65,4 +65,56 @@
     unit is present. The vectors are cached (<code>vectors_*.npy</code>) so a re-run after a label change
     re-scores without re-embedding.
   </p>
+
+  <h2 id="ssfms-reembed-census-section-title">§5 — every signal re-embedded to its current text</h2>
+
+  <p id="ssfms-reembed-census-section-what">
+    <code>reembed_stale_signal_descriptions</code> in
+    <code>imas_codex/discovery/signals/parallel.py</code> re-embeds every
+    <code>FacilitySignal</code>, at every facility, whose stored
+    <code>embedded_text_hash</code> is missing or differs from the hash of its current embed text,
+    through <code>write_signal_descriptions</code> with the description-only text decision
+    <code>embed-text</code> locked. <code>census_signal_embeddings</code> counts the same population
+    through the same predicate — <code>_SIGNAL_HASH_MISMATCH_WHERE</code>, rendered as a Cypher
+    <code>WHERE</code> over an <code>UNWIND</code> of each row's id and expected hash, a lone
+    <code>&lt;&gt;</code> being null-blind in Cypher — so a row the sweep rewrote is exactly a row the
+    census had counted.
+  </p>
+
+  <p id="ssfms-reembed-census-section-before-after">
+    <strong>Census, before and after.</strong> Before the sweep every one of the 61,983
+    <code>FacilitySignal</code> nodes read as a mismatch, because the <code>embedded_text_hash</code> slot
+    is new and no row had been stamped: <code>n=61983, mismatch=61983, missing_hash=61983,
+    differing=0</code>. The sweep wrote 61,983 rows in 514.9&nbsp;s through the writer. After it the census
+    reads <code>n=61983, mismatch=0, missing_hash=0, differing=0</code>, naming no row — the only
+    mismatches left behind would be ones a concurrent pipeline rewrote.
+  </p>
+
+  <p id="ssfms-reembed-census-section-empty-text">
+    <strong>A textless signal records its empty text's hash, not a vector.</strong> 3,410 JET signals are
+    <code>skipped</code> device_xml probes carrying no description and so no text to embed. The writer
+    records the empty text's hash for the 3,410 without writing a vector, so they stop reading as rows
+    whose hash is merely missing and never re-enter the sweep; the writer's absent-vector guard still
+    leaves a vector-less row's hash untouched when the embedding service fails on non-empty text, so such
+    a row stays marked for a later re-embed.
+  </p>
+
+  <p id="ssfms-reembed-census-section-gate">
+    <strong>Gate.</strong> <code>tests/discovery/test_signal_embedding_sweep.py</code> (3 passed). Against
+    the predicate mutated to a lone <code>&lt;&gt;</code> — the null-blind form — the same file fails
+    (<code>EXIT=1</code>, 3 failed), because a null-hash row is then never counted and never cleared. The
+    census scripts and logs are in the run directory
+    (<code>reembed_sweep.py</code>, <code>logs/sweep.log</code>, <code>census.json</code>).
+  </p>
+
+  <p id="ssfms-reembed-census-section-harness">
+    <strong>Harness non-regression.</strong> The re-embed moves the graph the golden harness ranks over, so
+    <code>current_tool</code>'s top 10 on question <code>switching-network-unit-terminal-voltage</code> now
+    holds <code>jt-60sa:general/psc_cref3snu</code>, which the fixture has not labelled, and the harness
+    refuses the arm by name rather than scoring it (<code>EXIT=1</code>, both of two back-to-back runs). No
+    ranking code changed — <code>imas_codex/llm/search_tools.py</code>,
+    <code>imas_codex/search/fusion.py</code> and <code>imas_codex/graph/domain_queries.py</code> are
+    byte-identical to the base revision — so the refusal is a labelling gap the improved vectors opened,
+    not a lowering of the arm, and it is carried as a follow-on for the fixture owner.
+  </p>
 </section>
