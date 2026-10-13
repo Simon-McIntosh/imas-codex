@@ -13,6 +13,7 @@ in ``server.py`` via ``@self.mcp.tool()``.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from neo4j.exceptions import ClientError, DatabaseError, ServiceUnavailable
@@ -107,6 +108,32 @@ _RERANK_QUESTION = {
     }
 }
 
+# The role-aware relevance question the signal rerank is judged on. A signal
+# search asks for a quantity, and a candidate that carries the quantity's
+# commanded, reference or setpoint value is not the measurement the query is
+# after, so the five levels run from a different quantity, through related
+# hardware and a commanded value, to a measurement of exactly the quantity. The
+# harness that measures the rerank reads this from the product, so the switch is
+# decided on the question that ships.
+_ROLE_RERANK_QUESTION = {
+    "relevance_grade": {
+        "type": "score",
+        "instructions": (
+            "How relevant is this candidate to answering the query? Judge whether the "
+            "candidate MEASURES the quantity asked for. A commanded, reference or "
+            "setpoint value of the quantity answers the query far less than a measured "
+            "value of it, and a different quantity answers it not at all."
+        ),
+        "criteria": [
+            "a different quantity, unrelated to the one asked for",
+            "related hardware: a status flag, configuration value or neighbouring measurement",
+            "a commanded, reference or setpoint value of the quantity",
+            "a measurement of a related quantity, or of the quantity asked for at an adjacent point",
+            "a measurement of exactly the quantity asked for",
+        ],
+    }
+}
+
 
 def _neo4j_error_message(e: Exception) -> str:
     """Format Neo4j errors with helpful instructions."""
@@ -155,6 +182,35 @@ def _rerank_state(query: str, candidate: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# A signal description is cut before it reaches the judgement so one verbose
+# catalogue row cannot crowd the batch. 1200 characters keeps the whole of a
+# typical description and its free-text notes while bounding the state.
+_SIGNAL_RERANK_DESCRIPTION_CHARS = 1200
+
+
+def _signal_rerank_state(query: str, candidate: dict[str, Any]) -> dict[str, Any]:
+    """Build the judgement state for one facility signal against the query.
+
+    A signal is judged on what a physicist reads off its catalogue row: its
+    name, its description, its unit and its data class, plus the accessor that
+    says how the value is read. The role-aware question turns on the data
+    class, so a commanded or reference value is told apart from a measurement
+    of the same quantity.
+    """
+    return {
+        "query": query,
+        "candidate": {
+            "name": candidate.get("name") or "",
+            "description": (candidate.get("description") or "")[
+                :_SIGNAL_RERANK_DESCRIPTION_CHARS
+            ],
+            "unit": candidate.get("unit") or "",
+            "data_class": candidate.get("data_class") or "",
+            "accessor": candidate.get("accessor") or "",
+        },
+    }
+
+
 def _run_batch(coro: Any) -> Any:
     """Run a decide_batch coroutine from the synchronous search tools.
 
@@ -184,20 +240,28 @@ def rerank_candidates(
     concurrency: int = _RERANK_CONCURRENCY,
     service: str = _RERANK_SERVICE,
     model: str | None = None,
+    state_for: Callable[[str, dict[str, Any]], dict[str, Any]] = _rerank_state,
+    question: dict[str, Any] = _RERANK_QUESTION,
 ) -> tuple[list[dict[str, Any]], str | None]:
     """Reorder candidates by a Jev relevance Score; return ``(ordered, note)``.
 
-    ``candidates`` arrive in embedding order. The ordering itself is
-    ``judgment.rerank_pool``; this caller owns only the judgement state (each
-    candidate's path/title plus the first 1500 characters of its text) and the
-    discovery-relevance seat, so the rerank adds no seat. Scored candidates are
-    ranked by descending Score; a candidate whose call failed or was still
-    unscored when the wall-time budget elapsed keeps its embedding position,
-    and a wholly failed batch returns the embedding order unchanged.
+    ``candidates`` arrive in retrieval order. The ordering itself is
+    ``judgment.rerank_pool``; this caller owns only the judgement state each
+    candidate is judged on and the discovery-relevance seat, so the rerank adds
+    no seat. ``state_for`` builds that state and ``question`` names the levels
+    and instructions it is graded against, so a caller can judge a different
+    kind of candidate — a facility signal, judged on its name, description,
+    unit, data class and accessor against the role-aware question — without a
+    second rerank owner. The defaults are the generic document state and the
+    generic relevance question, which the docs, code and DD-path searches
+    share. Scored candidates are ranked by descending Score; a candidate whose
+    call failed or was still unscored when the wall-time budget elapsed keeps
+    its retrieval position, and a wholly failed batch returns the retrieval
+    order unchanged.
 
     ``note`` describes the fallback and is ``None`` when every candidate was
     scored. The ordering never raises: ranking is not a gate, so a failed or
-    slow rerank returns the embedding order and says so rather than failing the
+    slow rerank returns the retrieval order and says so rather than failing the
     search.
     """
     if not candidates:
@@ -215,9 +279,9 @@ def rerank_candidates(
             rerank_pool(
                 query,
                 candidates,
-                state_for=_rerank_state,
-                levels=_RERANK_QUESTION["relevance_grade"]["criteria"],
-                instructions=_RERANK_QUESTION["relevance_grade"]["instructions"],
+                state_for=state_for,
+                levels=question["relevance_grade"]["criteria"],
+                instructions=question["relevance_grade"]["instructions"],
                 model=model,
                 service=service,
                 concurrency=concurrency,
@@ -277,6 +341,7 @@ def _search_signals(
     error_type: str | None = None,
     include_check_details: bool = False,
     k: int = 10,
+    rerank: bool = False,
     gc: GraphClient | None = None,
     encoder: Encoder | None = None,
 ) -> str:
@@ -285,6 +350,12 @@ def _search_signals(
     Performs vector search on signal descriptions, enriches with
     DataAccess, Diagnostic, SignalNode, and IMASNode traversals,
     then formats the result.
+
+    ``rerank`` reorders the fused pool through the shared Jev relevance rerank
+    on the role-aware signal question, spending on the discovery-relevance
+    seat. It is off by default: a direct caller leaves it off, and the server
+    passes the server's own switch, which no mode turns on until the arms are
+    scored.
 
     Optional check outcome filtering:
         check_status: "passed", "failed", or "unchecked"
@@ -308,12 +379,17 @@ def _search_signals(
         return f"Error initializing search: {e}"
 
     try:
+        # The rerank scores a pool larger than k so a signal the fused order
+        # places below k can still be lifted into the report.
+        pool = max(k, RERANK_POOL) if rerank else k
+
         # Step 1: Rank signals by the tool's own hybrid rule
         signal_ids, scores = _rank_signals(
-            gc, embedding, query, facility, k, diagnostic, physics_domain
+            gc, embedding, query, facility, pool, diagnostic, physics_domain
         )
 
         # Step 1c: Filter by check outcome if requested
+        rerank_note: str | None = None
         if check_status or error_type:
             signal_ids = _filter_by_check_outcome(
                 gc, signal_ids, check_status, error_type
@@ -338,8 +414,23 @@ def _search_signals(
         # Step 3: Data node search (secondary index)
         data_node_results = _vector_search_data_nodes(gc, embedding, facility, k)
 
-        # Step 4: Format
-        return format_signals_report(enriched, data_node_results, scores)
+        # Step 4: Rerank the fused pool on the role-aware signal question and
+        # keep the top k. The switch is off, so this runs only once its arms
+        # are scored; a rerank that fails or overruns leaves the fused order.
+        if rerank and enriched:
+            enriched, rerank_note = rerank_candidates(
+                query,
+                enriched,
+                state_for=_signal_rerank_state,
+                question=_ROLE_RERANK_QUESTION,
+            )
+            enriched = enriched[:k]
+
+        # Step 5: Format
+        report = format_signals_report(enriched, data_node_results, scores)
+        if rerank_note:
+            report = f"{report}\n\n_{rerank_note}_"
+        return report
 
     except ServiceUnavailable:
         return NEO4J_NOT_RUNNING_MSG
@@ -788,6 +879,7 @@ def _enrich_signals(
              collect(DISTINCT {title: wp.title, id: wp.id}) AS documented_pages
         RETURN s.id AS id, s.name AS name, s.description AS description,
                s.physics_domain AS physics_domain, s.unit AS unit,
+               s.data_class AS data_class,
                s.keywords AS keywords, s.aliases AS aliases,
                s.sign_convention AS sign_convention, s.cocos AS cocos,
                s.analysis_code AS analysis_code,

@@ -180,6 +180,12 @@ _no_embed: bool = False  # Set by AgentsServer when --no-embed is passed
 # never spends a Jev call. Direct construction of the tools leaves it off.
 _rerank_dd_paths: bool = False
 
+# The signal-search rerank switch, wired like ``_rerank_dd_paths``: a server
+# decision recorded at construction and read when a search runs. It is left off
+# in every mode, because the signal rerank ships only once its two arms are
+# scored; the mode block below is where a future decision turns it on.
+_rerank_signals: bool = False
+
 # ---------------------------------------------------------------------------
 # Module-level placeholders — populated by _require_warmup() on first tool call
 # ---------------------------------------------------------------------------
@@ -1853,7 +1859,7 @@ class AgentsServer:
         """
         import time
 
-        global _no_embed, _rerank_dd_paths
+        global _no_embed, _rerank_dd_paths, _rerank_signals
         _no_embed = self.no_embed
 
         self._started_at = time.monotonic()
@@ -1880,6 +1886,11 @@ class AgentsServer:
         # tools instance is created lazily, so the decision is recorded here
         # where the mode is known and read when that instance is built.
         _rerank_dd_paths = not (self.read_only or self.dd_only)
+
+        # The signal rerank is left off in every mode until its two arms are
+        # scored, so it is recorded off here beside the DD-path switch rather
+        # than computed from the mode.
+        _rerank_signals = False
 
         name = "imas-codex-readonly" if self.read_only else "imas-codex"
         self.mcp = FastMCP(name=name)
@@ -2444,6 +2455,7 @@ class AgentsServer:
                     error_type=error_type,
                     include_check_details=include_check_details,
                     k=k,
+                    rerank=_rerank_signals,
                 )
 
             @self.mcp.tool()

@@ -19,8 +19,9 @@ Two further arms, ``rrf_rerank`` and ``rrf_rerank_role``, reorder the fused
 pool with a Jev relevance score and so spend on the discovery-relevance seat;
 they are scored by a measurement that runs outside pytest. ``arm_ranking`` can
 still build them when ``ctx.spend_jev`` is set, and this module keeps the
-functions and the role-aware question they need, but no test here reaches the
-paid endpoint, so a default run spends nothing.
+functions they need and reads the role-aware question from the product, where
+it sits beside the generic one, but no test here reaches the paid endpoint, so
+a default run spends nothing.
 
 Every question's candidates that an arm places in its top 10 must be labelled
 under the fixture's grading rule before that arm is scored. A candidate with no
@@ -51,6 +52,8 @@ from pathlib import Path
 
 import pytest
 
+from imas_codex.llm.search_tools import _ROLE_RERANK_QUESTION
+
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "signal_search_questions.json"
 
 VECTOR_POOL = 100
@@ -76,24 +79,11 @@ JEV_ARMS_ENV = "SIGNAL_SEARCH_JEV_ARMS"
 # discovery-relevance seat. No test in this module builds them.
 JEV_ARMS = ("rrf_rerank", "rrf_rerank_role")
 
-# The role-aware relevance question, written to five relevance levels: a
-# measurement of the quantity asked for, through a measurement of a related
-# quantity, a commanded or reference value of it, related hardware, to a
-# different quantity. Kept here until the rerank ships and it moves into the
-# product beside the generic question.
-_ROLE_RERANK_LEVELS = [
-    "a different quantity, unrelated to the one asked for",
-    "related hardware: a status flag, configuration value or neighbouring measurement",
-    "a commanded, reference or setpoint value of the quantity",
-    "a measurement of a related quantity, or of the quantity asked for at an adjacent point",
-    "a measurement of exactly the quantity asked for",
-]
-_ROLE_RERANK_INSTRUCTIONS = (
-    "How relevant is this candidate to answering the query? Judge whether the "
-    "candidate MEASURES the quantity asked for. A commanded, reference or "
-    "setpoint value of the quantity answers the query far less than a measured "
-    "value of it, and a different quantity answers it not at all."
-)
+# The role-aware relevance question lives in the product, beside the generic
+# question, and the harness reads it from there so both arms are judged on the
+# question the rerank ships with.
+_ROLE_RERANK_LEVELS = _ROLE_RERANK_QUESTION["relevance_grade"]["criteria"]
+_ROLE_RERANK_INSTRUCTIONS = _ROLE_RERANK_QUESTION["relevance_grade"]["instructions"]
 
 json_fixture = json.loads(FIXTURE_PATH.read_text())
 

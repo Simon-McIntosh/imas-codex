@@ -28,6 +28,8 @@ from imas_codex.llm.search_formatters import (
 )
 from imas_codex.llm.search_tools import (
     _CHUNK_DOCUMENTS_CAP,
+    _ROLE_RERANK_QUESTION,
+    _SIGNAL_RERANK_DESCRIPTION_CHARS,
     RERANK_POOL,
     SIGNAL_VECTOR_POOL,
     _enrich_code_chunks,
@@ -38,6 +40,7 @@ from imas_codex.llm.search_tools import (
     _search_code,
     _search_docs,
     _search_signals,
+    _signal_rerank_state,
     _text_search_code_chunks,
     _text_search_signals,
     _text_search_wiki_chunks,
@@ -76,6 +79,7 @@ _SIGNAL_ENRICHMENT_IP = {
     "description": "Plasma current",
     "physics_domain": "magnetics",
     "unit": "A",
+    "data_class": "one_point",
     "checked": True,
     "example_shot": 84000,
     "node_path": "\\RESULTS::I_P",
@@ -103,6 +107,7 @@ _SIGNAL_ENRICHMENT_BPOL = {
     "description": "Poloidal magnetic field",
     "physics_domain": "magnetics",
     "unit": "T",
+    "data_class": "one_point",
     "checked": False,
     "example_shot": None,
     "node_path": None,
@@ -493,6 +498,142 @@ class TestSearchSignals:
 # ---------------------------------------------------------------------------
 # Formatter unit tests
 # ---------------------------------------------------------------------------
+
+
+class TestSignalRerankSwitch:
+    """The signal rerank sits behind a switch that is off by default.
+
+    Off, the fused order is untouched and the shared rerank is never called.
+    On, the shared rerank is called once for the search, with the signal state
+    builder and the role-aware question, and the report follows its order. The
+    rerank is replaced in these tests, so no judgement reaches the paid
+    endpoint.
+    """
+
+    @pytest.fixture()
+    def mock_gc(self):
+        gc = MagicMock()
+        gc.query = MagicMock(
+            side_effect=_route_query(
+                {
+                    "facility_signal_desc_embedding": _SIGNAL_VECTOR_RESULTS,
+                    "UNWIND $signal_ids": [
+                        _SIGNAL_ENRICHMENT_IP,
+                        _SIGNAL_ENRICHMENT_BPOL,
+                    ],
+                    "signal_node_desc_embedding": [],
+                }
+            )
+        )
+        return gc
+
+    @pytest.fixture()
+    def mock_encoder(self):
+        enc = MagicMock()
+        enc.embed_texts = MagicMock(return_value=[[0.1] * 1024])
+        return enc
+
+    def test_switch_off_leaves_the_fused_order_and_never_reranks(
+        self, mock_gc, mock_encoder, monkeypatch
+    ):
+        from imas_codex.llm import search_tools
+
+        calls: list[tuple[str, list[dict[str, Any]], dict[str, Any]]] = []
+
+        def spy(query, candidates, **kwargs):
+            calls.append((query, candidates, kwargs))
+            return list(reversed(candidates)), None
+
+        monkeypatch.setattr(search_tools, "rerank_candidates", spy)
+
+        report = _search_signals(
+            query="plasma current",
+            facility="tcv",
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+
+        assert calls == []
+        assert report.index("tcv:magnetics/ip") < report.index("tcv:magnetics/bpol")
+
+    def test_switch_on_calls_the_shared_rerank_once_with_the_signal_state(
+        self, mock_gc, mock_encoder, monkeypatch
+    ):
+        from imas_codex.llm import search_tools
+
+        calls: list[dict[str, Any]] = []
+
+        def spy(query, candidates, **kwargs):
+            calls.append({"candidates": list(candidates), **kwargs})
+            return list(reversed(candidates)), None
+
+        monkeypatch.setattr(search_tools, "rerank_candidates", spy)
+
+        report = _search_signals(
+            query="plasma current",
+            facility="tcv",
+            rerank=True,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+
+        assert len(calls) == 1
+        call = calls[0]
+        assert call["question"] is _ROLE_RERANK_QUESTION
+        assert call["state_for"] is _signal_rerank_state
+
+        # The state the rerank judges carries the signal's unit and data class,
+        # which the generic document state does not.
+        state = call["state_for"]("plasma current", call["candidates"][0])
+        assert state["candidate"]["unit"] == "A"
+        assert state["candidate"]["data_class"] == "one_point"
+
+        # The report follows the order the rerank returned.
+        assert report.index("tcv:magnetics/bpol") < report.index("tcv:magnetics/ip")
+
+
+class TestSignalRerankState:
+    """The signal state carries the catalogue row the role question reads."""
+
+    def test_state_carries_name_description_unit_class_and_accessor(self):
+        candidate = {
+            "name": "ip",
+            "description": "Plasma current",
+            "unit": "A",
+            "data_class": "one_point",
+            "accessor": "MDSplus",
+        }
+
+        state = _signal_rerank_state("plasma current", candidate)
+
+        assert state["query"] == "plasma current"
+        assert state["candidate"] == {
+            "name": "ip",
+            "description": "Plasma current",
+            "unit": "A",
+            "data_class": "one_point",
+            "accessor": "MDSplus",
+        }
+
+    def test_state_bounds_the_description_at_the_signal_cut(self):
+        candidate = {"name": "ip", "description": "x" * 5000}
+
+        state = _signal_rerank_state("q", candidate)
+
+        assert len(state["candidate"]["description"]) == (
+            _SIGNAL_RERANK_DESCRIPTION_CHARS
+        )
+
+    def test_state_fills_absent_fields_with_empty_strings(self):
+        state = _signal_rerank_state("q", {"id": "tcv:x"})
+
+        assert state["candidate"] == {
+            "name": "",
+            "description": "",
+            "unit": "",
+            "data_class": "",
+            "accessor": "",
+        }
 
 
 class TestFormatSignalsReport:
