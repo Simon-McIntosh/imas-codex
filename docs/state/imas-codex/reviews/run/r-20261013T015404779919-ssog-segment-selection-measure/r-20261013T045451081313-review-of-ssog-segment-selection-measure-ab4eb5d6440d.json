@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from gate-base.log and gate-head.log: both arms report 4 passed, EXIT=0, and no FAILED id, so the run added none; the manifest's own baseline_suite and after_suite name the same two logs.",
+  "backend": "clive",
+  "base_log_revision": "f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T05:13:41.451Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "a measurement driver lives beside its evidence as a script and adds no product test by brief; the measured module is pinned by tests/standard_names/test_segment_selection.py",
+      "recorded_at": "2026-10-13T05:14:52.669116+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T04:55:04Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py",
+      "line": "336",
+      "severity": "follow-on",
+      "text": "follow-on: exact-name match (_figures) and family agreement (_family_agreement) are driver-local while the node's brief said to report the figures from metric functions in evaluation.py and none of your own; no evaluation.py owner exists for either capability, so this is a deviation from the brief wording rather than a forked capability, and the fragment discloses it at ssog-segment-selection-measure.html:12-27."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py",
+      "line": "303",
+      "severity": "follow-on",
+      "text": "follow-on: the sentinel that makes an absent composer prediction a mismatch on every slot is guarded by no committed test; the manifest's negative_control_round4 is an uncommitted /tmp script, so nothing reddens if the fix regresses and the composer column is inflated again."
+    }
+  ],
+  "head_log_revision": "ab4eb5d6440df2495fb73305d41be2e6dcdb0a45",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the driver docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py is a standalone script; no runtime module imports it, so there are no production call sites.",
+    "diff": "read commit by commit from f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7 to ab4eb5d6440df2495fb73305d41be2e6dcdb0a45; ccf88e706 adds the driver, artifact, fragment and SVG, the four fix commits trim the artifact, fix the resume guard and the composer denominator, state provenance and add --figure-only, and report both family cohorts, 9caf8d76 forwards an absent composer prediction as a sentinel mismatch, and ab4eb5d64 adds the verdict note, all inside the declared write paths.",
+    "done_when": "the source done_when names tests/standard_names/test_segment_selection.py for baseline_suite and after_suite and requires one data-ink SVG; the manifest records both arms green (4 passed, EXIT=0) in gate-base.log and gate-head.log and the committed SVG is in the diff, but that suite exercises the unchanged selection module and cannot redden on the driver this node wrote.",
+    "goal": "the node goal is to measure Jev's closed-vocabulary segment selection against the composer on golden A's positives and the human sn edit rename targets and report the figures with a rule-derived recommendation; docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:31-204 reports every figure, the item counts, the quoted plan rule and the verdict \"neither\", so the deliverable is present.",
+    "manifest": "read; it states complete, names the seven commits, both gate logs, both revisions and parseable single-line baseline_suite/after_suite JSON, and records negative controls for the round-3 and round-4 repairs; its composer per-slot figures now match the artifact.",
+    "write_paths": "the manifest declares the fragment, driver, results JSON and the figure directory; git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..ab4eb5d6440df2495fb73305d41be2e6dcdb0a45 touches exactly those four files (measure.html, measure-run.py, measure-results.json, per-slot-accuracy.svg) and no product file."
+  },
+  "justifications": {
+    "durability": "the node commits no test and its write scope excludes one, so the composer-handling fix at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:303-333 is guarded only by an uncommitted /tmp control and a regression would silently re-inflate the composer column.",
+    "evidence": "the gate the source done_when names is tests/standard_names/test_segment_selection.py, green at both arms but never exercising the driver; the driver's correctness is shown instead by the re-derivation control the manifest records, whose with_fix figures I reproduced independently against docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-results.json.",
+    "fit": "the driver's helpers at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:299-417 are mechanism-named with no plan or gate label, and the composer comparator comment at lines 468-473 now matches the code.",
+    "goal_fidelity": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:44-204 carries every figure the plan names, the quoted rule and the verdict \"neither\", though the composer column and the cross-check AUC are self-referential and only the fragment's prose disclose that.",
+    "reuse": "docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:319-332 delegates the slot comparison to imas_codex/standard_names/benchmark_roles.py:259 and imports paired_auc, bootstrap_interval and cost_latency_summary from imas_codex/discovery/base/evaluation.py, so no owned capability is forked.",
+    "scope_discipline": "git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..ab4eb5d6440df2495fb73305d41be2e6dcdb0a45 touches only the four declared write paths and no product file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to measure Jev's closed-vocabulary segment selection against the composer on golden A's positives and the human sn edit rename targets and report the figures with a rule-derived recommendation; docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:31-204 reports the cohort and exclusions, exact-name match and per-slot accuracy, family agreement, the composer figures, cost per name, the cross-check AUC with its interval, and the quoted rule with the verdict \"neither\", so the deliverable is present.\nVERDICT done_when: the source done_when names tests/standard_names/test_segment_selection.py for baseline_suite and after_suite and requires one data-ink SVG; the manifest records both arms green (4 passed, EXIT=0) in gate-base.log and gate-head.log and the committed SVG is in the diff, but that suite exercises the unchanged selection module and cannot redden on the driver this node wrote.\nVERDICT write_paths: the manifest declares the fragment, driver, results JSON and the figure directory; git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..ab4eb5d6440df2495fb73305d41be2e6dcdb0a45 touches exactly those four files (measure.html, measure-run.py, measure-results.json, per-slot-accuracy.svg) and no product file.\nVERDICT manifest: read; it states complete, names the seven commits, both gate logs, both revisions and parseable single-line baseline_suite/after_suite JSON, and records negative controls for the round-3 and round-4 repairs; its composer per-slot figures now match the artifact.\nVERDICT diff: read commit by commit from f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7 to ab4eb5d6440df2495fb73305d41be2e6dcdb0a45; ccf88e706 adds the driver, artifact, fragment and SVG, the four fix commits trim the artifact, fix the resume guard and the composer denominator, state provenance and add --figure-only, and report both family cohorts, 9caf8d76 forwards an absent composer prediction as a sentinel mismatch, and ab4eb5d64 adds the verdict note, all inside the declared write paths.\nCALL_SITES: none\n\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure.html:44-204 carries every figure the plan names, the quoted rule and the verdict \"neither\", though the composer column and the cross-check AUC are self-referential and only the fragment's prose discloses that.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate the source done_when names is tests/standard_names/test_segment_selection.py, green at both arms but never exercising the driver; the driver's correctness is shown instead by the re-derivation control the manifest records, whose with_fix figures I reproduced independently against docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-results.json.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7..ab4eb5d6440df2495fb73305d41be2e6dcdb0a45 touches only the four declared write paths and no product file.\nSCORE durability: 9\nJUSTIFICATION durability: the node commits no test and its write scope excludes one, so the composer-handling fix at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:303-333 is guarded only by an uncommitted /tmp control and a regression would silently re-inflate the composer column.\nSCORE fit: 19\nJUSTIFICATION fit: the driver's helpers at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:299-417 are mechanism-named with no plan or gate label, and the composer comparator comment at lines 468-473 now matches the code.\nSCORE reuse: 18\nJUSTIFICATION reuse: docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:319-332 delegates the slot comparison to imas_codex/standard_names/benchmark_roles.py:259 and imports paired_auc, bootstrap_interval and cost_latency_summary from imas_codex/discovery/base/evaluation.py, so no owned capability is forked.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:336 follow-on: exact-name match (_figures) and family agreement (_family_agreement) are driver-local while the node's brief said to report the figures from metric functions in evaluation.py and none of your own; no evaluation.py owner exists for either capability, so this is a deviation from the brief wording rather than a forked capability, and the fragment discloses it at ssog-segment-selection-measure.html:12-27.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection-measure-run.py:303 follow-on: the sentinel that makes an absent composer prediction a mismatch on every slot is guarded by no committed test; the manifest's negative_control_round4 is an uncommitted /tmp script, so nothing reddens if the fix regresses and the composer column is inflated again.\n",
+  "review_run_id": "r-20261013T045451081313-review-of-ssog-segment-selection-measure-ab4eb5d6440d",
+  "reviewed_base_sha": "f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7",
+  "reviewed_head_sha": "ab4eb5d6440df2495fb73305d41be2e6dcdb0a45",
+  "reviewed_run_id": "r-20261013T015404779919-ssog-segment-selection-measure",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T05:04:06Z",
+  "total": 99,
+  "verdict": "SOUND WITH FINDINGS"
+}
