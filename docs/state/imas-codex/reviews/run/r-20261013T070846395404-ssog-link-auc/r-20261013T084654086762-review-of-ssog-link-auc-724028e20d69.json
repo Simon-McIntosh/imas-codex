@@ -6,6 +6,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-13T09:02:01.144Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "selection-evidence-driver-cleanup",
+      "recorded_at": "2026-10-13T09:03:55.101279+00:00"
+    }
+  },
   "dispatched_at": "2026-10-13T08:47:19Z",
   "findings": [
     {
