@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite and after_suite both record exit_status 0 and completed true with failure_count 0 and empty failure_ids over the reviewed run's own gate logs; base_gate.log ends '68 passed' at a7de878b2cfb4837b23b7742cf8378d58a66a54e and head_gate.log ends '72 passed' at 73bbd94ba6ae777e1995fd582a5f06ad993dbf78; zero added failures",
+  "backend": "local",
+  "base_log_revision": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T141738768278-shc-report-graph-links/base_gate.log",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/harmonize.py:586",
+    "imas_codex/standard_names/review/audits.py:804"
+  ],
+  "completed_at": "2026-10-13T14:51:24.444Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "shc-pin-anchor",
+      "recorded_at": "2026-10-13T14:51:01.611593+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T14:32:44Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": 527,
+      "severity": "follow-on",
+      "text": "follow-on: _NAME_IDS_QUERY at harmonize.py:527 and _known_name_ids at harmonize.py:530 duplicate the capability the repository already owns at imas_codex/standard_names/graph_ops.py:865 get_existing_standard_names, whose body is the same statement 'MATCH (sn:StandardName) RETURN sn.id AS id' returning a set of ids; the addition neither calls nor extends that owner (it hardcodes its own query string), so the all-name-id read now has two implementations that can drift. The stated reason (the owner opens its own client) is real friction but the remedy is to extend the owner to accept a client, not to fork the query; the behaviour is correct and does not hold the node."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": 573,
+      "severity": "follow-on",
+      "text": "follow-on: 'known_ids = _known_name_ids(gc) if gc is not None else None' at harmonize.py:573 keeps the pre-change scope-only deadness whenever gc is None, and gc's default in the signature at harmonize.py:537 is None, so a gc-less caller silently reverts to counting an out-of-scope but valid link as dead; the production caller imas_codex/cli/sn.py:6241 passes gc so the shipped path is correct, but the fallback is untested and re-introduces the defect the node exists to remove."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit over a7de878b2cfb4837b23b7742cf8378d58a66a54e..73bbd94ba6ae777e1995fd582a5f06ad993dbf78; the single commit 73bbd94ba changes imas_codex/standard_names/review/audits.py (adds known_ids param; keeps the missing-reverse test on the new scope_ids), imas_codex/standard_names/harmonize.py (_NAME_IDS_QUERY, _known_name_ids, and the report wiring), adds tests/standard_names/test_report_graph_links.py (98 lines, 4 tests), and adds the 44-line evidence fragment.",
+    "done_when": "the done_when requires a two-member scope linking to a third name outside it report no dead link when the graph set holds the third name and one when it does not, failing with the graph set ignored (log with EXIT=); tests/standard_names/test_report_graph_links.py:63 test_target_in_graph_outside_scope_is_not_dead asserts 0 and :69 test_target_absent_from_graph_is_dead asserts 1, and negative_control.log shows '1 failed, 3 passed', EXIT=1 when known_ids is dropped from report_family_rows.",
+    "goal": "the node's goal is that a report link be dead only when the graph has no such name: run_link_integrity now takes a known_ids set (imas_codex/standard_names/review/audits.py:406, used for the dead-link test at audits.py:457) and report_family_rows supplies the graph-wide StandardName id set via _known_name_ids (imas_codex/standard_names/harmonize.py:530,573,586), so an out-of-scope but valid reference is no longer counted as dead.",
+    "manifest": "read from the reviewed run's classification.json manifest block (run r-20261013T141738768278): status complete, commits ['73bbd94ba'], changed_paths matching the diff, tests '72 passed, 2 warnings in 41.58s' vs a 68-passed base, retry_counted_failures 0, and negative_control_log plus negative_control_note recorded.",
+    "write_paths": "the manifest declares four write paths (imas_codex/standard_names/review/audits.py, imas_codex/standard_names/harmonize.py, tests/standard_names/test_report_graph_links.py, docs/evidence/fragments/sn-harmonize-command/shc-report-graph-links.html); git diff --stat a7de878b2cfb4837b23b7742cf8378d58a66a54e 73bbd94ba6ae777e1995fd582a5f06ad993dbf78 changes exactly those four files and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_report_graph_links.py:63 and :74 redden when known_ids is ignored (negative_control.log: 'assert 1 == 0' at line 66 under a dropped known_ids), and the assertions are independent of the code under test because the expected count is derived from the CLI-visible lint row rather than from any value the test passes in; the gc-is-None fallback at harmonize.py:573 is the untested path.",
+    "evidence": "the gate the done_when names ran at both revisions and is recorded, not claimed: base_gate.log ends '68 passed' at a7de878b2cfb4837b23b7742cf8378d58a66a54e and head_gate.log ends '72 passed' at 73bbd94ba6ae777e1995fd582a5f06ad993dbf78, with the four added tests at tests/standard_names/test_report_graph_links.py in the head arm and negative_control.log retained.",
+    "fit": "imas_codex/standard_names/harmonize.py:527 follows the module's module-level-query-constant idiom and harmonize.py:530 names the helper by what it does, introducing no plan, sprint or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/review/audits.py:427 sets all_ids from known_ids for the dead-link test while audits.py:471 keeps the missing-reverse test on scope_ids, and imas_codex/standard_names/harmonize.py:586 passes the graph-wide set, exactly meeting the node's one-sentence deliverable.",
+    "reuse": "imas_codex/standard_names/harmonize.py:527 forks the all-StandardName-id read that imas_codex/standard_names/graph_ops.py:865 get_existing_standard_names already owns, without calling or extending it, which is the capability duplication the owner rule scores at 5 or below.",
+    "scope_discipline": "git diff --name-only a7de878b2cfb4837b23b7742cf8378d58a66a54e 73bbd94ba6ae777e1995fd582a5f06ad993dbf78 lists only the four declared paths, with the declared docs/figures directory left unused and no unrelated payload."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a report link be dead only when the graph has no such name; imas_codex/standard_names/review/audits.py:406 now takes known_ids, audits.py:427 uses it for the dead-link test, and imas_codex/standard_names/harmonize.py:586 supplies the graph-wide StandardName id set.\nVERDICT done_when: the done_when's two-member-scope test is present at tests/standard_names/test_report_graph_links.py:63 and :69 and its negative control is recorded in negative_control.log ('1 failed, 3 passed', EXIT=1).\nVERDICT write_paths: the manifest declares four paths; git diff a7de878b2 73bbd94ba changes exactly those four files.\nVERDICT manifest: read the reviewed run's status:complete record from classification.json; it reports tests 72 passed vs 68 base and zero added failures.\nVERDICT diff: read commit 73bbd94ba over a7de878b2cfb4837b23b7742cf8378d58a66a54e..73bbd94ba6ae777e1995fd582a5f06ad993dbf78; four files, all inside the fence.\nCALL_SITES: imas_codex/standard_names/harmonize.py:586, imas_codex/standard_names/review/audits.py:804\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/audits.py:427 and harmonize.py:586 resolve deadness against the graph-wide set while missing-reverse stays on scope_ids at audits.py:471.\nSCORE evidence: 18\nJUSTIFICATION evidence: base_gate.log '68 passed' at a7de878b2 and head_gate.log '72 passed' at 73bbd94ba record the done_when's gate at both revisions.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only a7de878b2 73bbd94ba lists only the four declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_report_graph_links.py:63 reddens when known_ids is ignored (negative_control.log 'assert 1 == 0'), though the gc-is-None fallback at harmonize.py:573 is untested.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/harmonize.py:527 follows the module's query-constant idiom and introduces no banned plan or ticket label.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/standard_names/harmonize.py:527 forks the all-id read that imas_codex/standard_names/graph_ops.py:865 owns without extending it.\nFINDING imas_codex/standard_names/harmonize.py:527 follow-on: _NAME_IDS_QUERY/_known_name_ids duplicates graph_ops.py:865 get_existing_standard_names.\nFINDING imas_codex/standard_names/harmonize.py:573 follow-on: the gc-is-None fallback reverts to scope-only deadness and is untested.",
+  "review_run_id": "r-20261013T143229588904-review-of-shc-report-graph-links-73bbd94ba6ae",
+  "reviewed_base_sha": "a7de878b2cfb4837b23b7742cf8378d58a66a54e",
+  "reviewed_head_sha": "73bbd94ba6ae777e1995fd582a5f06ad993dbf78",
+  "reviewed_run_id": "r-20261013T141738768278-shc-report-graph-links",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T14:40:13Z",
+  "total": 99
+}
