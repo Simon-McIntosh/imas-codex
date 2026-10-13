@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:1932 (mark_signals_enriched)",
+    ":2020 (mark_signals_underspecified)",
+    ":2490 (propagate_source_enrichment)",
+    ":5402 (individualize_source_descriptions)",
+    ":1855 (reembed_stale_signal_descriptions)"
+  ],
+  "completed_at": "2026-10-13T01:43:59.965Z",
+  "dispatched_at": "2026-10-13T01:35:49Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_embedding_sweep.py",
+      "line": "246",
+      "severity": "follow-on",
+      "text": "follow-on: the graph-marked census test asserts result[\"n\"] >= 0, which holds for any count including an empty population, so the test passes even if census_signal_embeddings reads nothing; the positive control that the census sees 61983 live signals lives only in the run's printed sweep_graph.log:5, not in an assertion, so the done-when's \"checks it returns counts\" is met only in the weakest sense."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit against 39b8a36ae73ff20aee95a06bdcb03a389e7e47ec; beccf77a5 deletes _default_embed_text (parallel.py:1536), repoints the writer default to signal_embed_text (:1589) and the sweep to pass it (:1855), and adds test_writer_and_census_share_one_embed_text_derivation plus the graph-marked test_census_statement_runs_against_the_live_graph; 177406c48 adds the evidence fragment.",
+    "done_when": "the done_when asks for one derivation, both writer/sweep/census calling it, a graph-marked test running the real read-only census statement, existing sweep tests passing and no added failures in tests/discovery/; the manifest records each arm (sweep_unit 4 passed, sweep_graph 1 passed, head 1562 passed vs base 1561 passed) and the cited logs confirm the counts, though the graph-marked test at tests/discovery/test_signal_embedding_sweep.py:246 asserts only result[\"n\"] >= 0.",
+    "goal": "the goal is to give the signal embed-text choice a single owner shared by the description writer and the census, tested against the real census statement; the landed change does exactly that \u2014 imas_codex/discovery/signals/parallel.py:1589 makes write_signal_descriptions default embed_text to signal_embed_text, :1855 has the re-embed sweep pass that same function explicitly, and :1806 has the census recompute it, with the duplicate _default_embed_text deleted.",
+    "manifest": "read; it records status complete, commits beccf77a5 and 177406c48, the gate commands and their logs, baseline/after suites both completed with 0 failures, and negative_control.log; every claim survives a check of the logs it cites.",
+    "write_paths": "the declared scope is imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_embedding_sweep.py, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-embed-text-one-owner.html and the docs/figures/... node dir; git diff 39b8a36ae73ff20aee95a06bdcb03a389e7e47ec..177406c48eee9d690d22ebdbc574cb56b2578ea7 touches exactly the first three, no figure, and nothing outside the fence."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows that pointing the census predicate at a private derivation reddens test_writer_and_census_share_one_embed_text_derivation (1 failed, EXIT=1), so it fails on the divergence it guards, but the graph-marked test at tests/discovery/test_signal_embedding_sweep.py:247 asserts only identities that hold by construction.",
+    "evidence": "the gate logs record head 1562 passed / base 1561 passed with zero added failures and negative_control.log shows the mutation reddening the new test, but the live census test at tests/discovery/test_signal_embedding_sweep.py:246 asserts only result[\"n\"] >= 0.",
+    "fit": "the reworded docstring at imas_codex/discovery/signals/parallel.py:1555 and :1749 follows the module's own idiom and introduces no plan, gate or author label.",
+    "goal_fidelity": "imas_codex/discovery/signals/parallel.py:1589 defaults the writer's embed_text to signal_embed_text and :1855/:1806 have the sweep and census call the same function, so the choice has one owner; _default_embed_text no longer exists.",
+    "reuse": "the change deletes the duplicate _default_embed_text and extends the existing owner signal_embed_text (imas_codex/discovery/signals/parallel.py:1749); a search over imas_codex/discovery/signals found no other embed-text derivation.",
+    "scope_discipline": "git diff 39b8a36ae73ff20aee95a06bdcb03a389e7e47ec..177406c48eee9d690d22ebdbc574cb56b2578ea7 touches only parallel.py, tests/discovery/test_signal_embedding_sweep.py and the declared evidence fragment, all inside the fence."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261013T011641454886-ssfms-embed-text-one-owner (imas-codex, plan signal-search-finds-the-measured-signal section 5, node ssfms-embed-text-one-owner), base 39b8a36ae73ff20aee95a06bdcb03a389e7e47ec, head 177406c48eee9d690d22ebdbc574cb56b2578ea7.\nVERDICT goal: the goal is to give the signal embed-text choice a single owner shared by the description writer and the census, tested against the real census statement; the landed change does exactly that \u2014 imas_codex/discovery/signals/parallel.py:1589 makes write_signal_descriptions default embed_text to signal_embed_text, :1855 has the re-embed sweep pass that same function explicitly, and :1806 has the census recompute it, with the duplicate _default_embed_text deleted.\nVERDICT done_when: the done_when asks for one derivation, both writer/sweep/census calling it, a graph-marked test running the real read-only census statement, existing sweep tests passing and no added failures in tests/discovery/; the manifest records each arm (sweep_unit 4 passed, sweep_graph 1 passed, head 1562 passed vs base 1561 passed) and the cited logs confirm the counts, though the graph-marked test at tests/discovery/test_signal_embedding_sweep.py:246 asserts only result[\"n\"] >= 0.\nVERDICT write_paths: the declared scope is imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_embedding_sweep.py, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-embed-text-one-owner.html and the docs/figures/... node dir; git diff 39b8a36ae73ff20aee95a06bdcb03a389e7e47ec..177406c48eee9d690d22ebdbc574cb56b2578ea7 touches exactly the first three, no figure, and nothing outside the fence.\nVERDICT manifest: read; it records status complete, commits beccf77a5 and 177406c48, the gate commands and their logs, baseline/after suites both completed with 0 failures, and negative_control.log; every claim survives a check of the logs it cites.\nVERDICT diff: read commit by commit against 39b8a36ae73ff20aee95a06bdcb03a389e7e47ec; beccf77a5 deletes _default_embed_text (parallel.py:1536), repoints the writer default to signal_embed_text (:1589) and the sweep to pass it (:1855), and adds test_writer_and_census_share_one_embed_text_derivation plus the graph-marked test_census_statement_runs_against_the_live_graph; 177406c48 adds the evidence fragment.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:1932 (mark_signals_enriched), :2020 (mark_signals_underspecified), :2490 (propagate_source_enrichment), :5402 (individualize_source_descriptions), :1855 (reembed_stale_signal_descriptions)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/parallel.py:1589 defaults the writer's embed_text to signal_embed_text and :1855/:1806 have the sweep and census call the same function, so the choice has one owner; _default_embed_text no longer exists.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate logs record head 1562 passed / base 1561 passed with zero added failures and negative_control.log shows the mutation reddening the new test, but the live census test at tests/discovery/test_signal_embedding_sweep.py:246 asserts only result[\"n\"] >= 0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 39b8a36ae73ff20aee95a06bdcb03a389e7e47ec..177406c48eee9d690d22ebdbc574cb56b2578ea7 touches only parallel.py, tests/discovery/test_signal_embedding_sweep.py and the declared evidence fragment, all inside the fence.\nSCORE durability: 17\nJUSTIFICATION durability: negative_control.log shows that pointing the census predicate at a private derivation reddens test_writer_and_census_share_one_embed_text_derivation (1 failed, EXIT=1), so it fails on the divergence it guards, but the graph-marked test at tests/discovery/test_signal_embedding_sweep.py:247 asserts only identities that hold by construction.\nSCORE fit: 19\nJUSTIFICATION fit: the reworded docstring at imas_codex/discovery/signals/parallel.py:1555 and :1749 follows the module's own idiom and introduces no plan, gate or author label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change deletes the duplicate _default_embed_text and extends the existing owner signal_embed_text (imas_codex/discovery/signals/parallel.py:1749); a search over imas_codex/discovery/signals found no other embed-text derivation.\nFINDING tests/discovery/test_signal_embedding_sweep.py:246 follow-on: the graph-marked census test asserts result[\"n\"] >= 0, which holds for any count including an empty population, so the test passes even if census_signal_embeddings reads nothing; the positive control that the census sees 61983 live signals lives only in the run's printed sweep_graph.log:5, not in an assertion, so the done-when's \"checks it returns counts\" is met only in the weakest sense.\nFINAL: SOUND WITH FINDINGS. The node delivers the single embed-text owner: _default_embed_text is deleted, the writer defaults to signal_embed_text, and the sweep and census both call it, so the writer's stored hash and the census's expected hash move together. The added unit test is an independent guard \u2014 the recorded negative control shows a private derivation on the census side reddens it \u2014 and the diff stays inside the three touched declared paths with zero added failures across the discovery suite. What remains is weak, not wrong: the live-graph test's assertions cannot fail on a real census defect, so the run's census reading is evidenced by its log rather than by the test.\n",
+  "review_run_id": "r-20261013T013532838739-review-of-ssfms-embed-text-one-owner-177406c48eee",
+  "reviewed_base_sha": "39b8a36ae73ff20aee95a06bdcb03a389e7e47ec",
+  "reviewed_head_sha": "177406c48eee9d690d22ebdbc574cb56b2578ea7",
+  "reviewed_run_id": "r-20261013T011641454886-ssfms-embed-text-one-owner",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:41:52.197833+00:00",
+  "total": 111
+}
