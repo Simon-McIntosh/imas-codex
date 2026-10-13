@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "base gate_discovery_base.log (631206b82, parallel.py at base, new test file ignored) 1559 passed EXIT=0; head gate_discovery_head.log 1564 passed EXIT=0; both record 0 failures, so the two reviewed commits add no failures and the delta is the +5 tests of the test file.",
+  "base_log_revision": "631206b82",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:1741 (mark_signals_enriched)",
+    "imas_codex/discovery/signals/parallel.py:1829 (mark_signals_underspecified)",
+    "imas_codex/discovery/signals/parallel.py:2299 (propagate_source_enrichment)",
+    "imas_codex/discovery/signals/parallel.py:5211 (individualize_source_descriptions)"
+  ],
+  "completed_at": "2026-10-13T00:16:31.669Z",
+  "dispatched_at": "2026-10-13T00:09:43Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_description_writer.py",
+      "line": "358",
+      "severity": "follow-on",
+      "text": "follow-on: the mixed-batch assertion compares tcv:ip's stored embedding against _embedding_of(\"Plasma current (A)\") -- a value derived from the same description string the test passes in, through the same _embedding_of helper the monkeypatched embedder uses -- so the two sides move together and it held even under the pre-fix writer (negative_control_absent_vector.log reddens only at the independent q95 assertion on the following line), making it coverage-shape rather than a discriminating guard."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T232339331806-ssfms-description-writer/gate_discovery_head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the head gate log's header reads \"# revision: 7c13967b7 + uncommitted repair\" while the head log's cited run is the manifest's after_suite \"at head revision c71a38be9\", so a reader reconciling the recorded result against the log it cites finds a revision that does not match."
+    }
+  ],
+  "head_log_revision": "7c13967b7",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s) in imas_codex/discovery/signals/parallel.py",
+    "diff": "read commit by commit against 7c13967b7; c71a38be9 splits write_signal_descriptions into an embedded arm and an unembedded arm through the new _write_description_arms helper (imas_codex/discovery/signals/parallel.py:1660) and adds two tests (test_unembedded_item_keeps_its_vector_and_hash, test_only_the_embedded_item_receives_a_fresh_vector); f21bdab86 updates only the evidence fragment, and no path outside the fence is touched.",
+    "done_when": "read; the done_when requires the single writer, the declared hash slot, the individualisation re-embed test and no added failures on the discovery tests, and the manifest records base 1559 passed EXIT=0 and head 1564 passed EXIT=0 with the revision and command in each log header (gate_discovery_base.log, gate_discovery_head.log) plus the negative control at negative_control_absent_vector.log, so the gate asserts the stated measure; the head log's header labels itself \"7c13967b7 + uncommitted repair\" rather than the named head revision.",
+    "goal": "the goal is one writer routing every FacilitySignal description write through a statement that stores the description with its embedding and text hash; the reviewed commits add the absent-vector guard to write_signal_descriptions (imas_codex/discovery/signals/parallel.py:1604-1622), splitting the batch so an item with no fresh vector is written with its description alone, which keeps the writer's stated invariant, and the writer and its four call sites keep their shape, so the goal remains met.",
+    "manifest": "read; it records status complete, commits 6bd69f40c/7c13967b7/c71a38be9/f21bdab86, the changed paths, the 1559/1564 EXIT=0 gate results, the negative control at negative_control_absent_vector.log and a checkpoint, and its claims (the split arms, the kept-vector guard, the tests failing under mutation) survive my own read of the diff and logs.",
+    "write_paths": "read; the manifest declares imas_codex/schemas/facility.yaml, imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_description_writer.py and the evidence fragment, and git diff 7c13967b7..f21bdab86 touches only parallel.py, the test file and the fragment -- every path inside the fence, with facility.yaml unchanged in this increment because the embedded_text_hash slot landed in the earlier commit."
+  },
+  "justifications": {
+    "durability": "negative_control_absent_vector.log shows test_only_the_embedded_item_receives_a_fresh_vector failing EXIT=1 against the pre-repair writer at its independent old-text assertion (tests/discovery/test_signal_description_writer.py:362), so the guard reddens when the split is reverted.",
+    "evidence": "tests/discovery/ base 1559 passed / head 1564 passed, EXIT=0 in gate_discovery_base.log and gate_discovery_head.log, with the absent-vector negative control at negative_control_absent_vector.log showing EXIT=1 and the two new tests failing before the repair.",
+    "fit": "_write_description_arms at imas_codex/discovery/signals/parallel.py:1660 follows the module's helper style and its comment states the mechanism, and no plan label or banned name is introduced.",
+    "goal_fidelity": "imas_codex/discovery/signals/parallel.py:1604-1622 keeps the writer's invariant that a stored vector is never recorded as current when the embedder answered nothing, which is what the node's goal asserts.",
+    "reuse": "the writer still delegates the embed to embed_descriptions_before_batch owner: it delegates to embed_descriptions_batch (imas_codex/embeddings/description.py:29) and the split extends that owner rather than forking it; the None-handling in imas_codex/discovery/base/embed_worker.py:411 is a distinct retry/persist capability, not a description-writer owner.",
+    "scope_discipline": "git diff 7c13967b7..f21bdab86 lists only imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_description_writer.py and the declared evidence fragment, every path inside the fence."
+  },
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261012T232339331806-ssfms-description-writer (imas-codex, plan signal-search-finds-the-measured-signal section 5, node ssfms-description-writer), covering only the commits gained since the prior review: base 7c13967b7138a17cf6af69c71927ddb8de2f630e, head f21bdab8677ee487c4dddb66f7b858f09f70b7d4.\nreviewed_base_sha: 7c13967b7138a17cf6af69c71927ddb8de2f630e\nreviewed_head_sha: f21bdab8677ee487c4dddb66f7b858f09f70b7d4\nVERDICT goal: the goal is one writer routing every FacilitySignal description write through a statement that stores the description with its embedding and text hash; the reviewed commits add the absent-vector guard to write_signal_descriptions (imas_codex/discovery/signals/parallel.py:1604-1622), splitting the batch so an item with no fresh vector is written with its description alone, which keeps the writer's stated invariant, and the writer and its four call sites keep their shape, so the goal remains met.\nVERDICT done_when: read; the done_when requires the single writer, the declared hash slot, the individualisation re-embed test and no added failures on the discovery tests, and the manifest records base 1559 passed EXIT=0 and head 1564 passed EXIT=0 with the revision and command in each log header (gate_discovery_base.log, gate_discovery_head.log) plus the negative control at negative_control_absent_vector.log, so the gate asserts the stated measure; the head log's header labels itself \"7c13967b7 + uncommitted repair\" rather than the named head revision.\nVERDICT write_paths: read; the manifest declares imas_codex/schemas/facility.yaml, imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_description_writer.py and the evidence fragment, and git diff 7c13967b7..f21bdab86 touches only parallel.py, the test file and the fragment -- every path inside the fence, with facility.yaml unchanged in this increment because the embedded_text_hash slot landed in the earlier commit.\nVERDICT manifest: read; it records status complete, commits 6bd69f40c/7c13967b7/c71a38be9/f21bdab86, the changed paths, the 1559/1564 EXIT=0 gate results, the negative control at negative_control_absent_vector.log and a checkpoint, and its claims (the split arms, the kept-vector guard, the tests failing under mutation) survive my own read of the diff and logs.\nVERDICT diff: read commit by commit against 7c13967b7; c71a38be9 splits write_signal_descriptions into an embedded arm and an unembedded arm through the new _write_description_arms helper (imas_codex/discovery/signals/parallel.py:1660) and adds two tests (test_unembedded_item_keeps_its_vector_and_hash, test_only_the_embedded_item_receives_a_fresh_vector); f21bdab86 updates only the evidence fragment, and no path outside the fence is touched.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:1741 (mark_signals_enriched), imas_codex/discovery/signals/parallel.py:1829 (mark_signals_underspecified), imas_codex/discovery/signals/parallel.py:2299 (propagate_source_enrichment), imas_codex/discovery/signals/parallel.py:5211 (individualize_source_descriptions)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/parallel.py:1604-1622 keeps the writer's invariant that a stored vector is never recorded as current when the embedder answered nothing, which is what the node's goal asserts.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/discovery/ base 1559 passed / head 1564 passed, EXIT=0 in gate_discovery_base.log and gate_discovery_head.log, with the absent-vector negative control at negative_control_absent_vector.log showing EXIT=1 and the two new tests failing before the repair.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 7c13967b7..f21bdab86 lists only imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_description_writer.py and the declared evidence fragment, every path inside the fence.\nSCORE durability: 18\nJUSTIFICATION durability: negative_control_absent_vector.log shows test_only_the_embedded_item_receives_a_fresh_vector failing EXIT=1 against the pre-repair writer at its independent old-text assertion (tests/discovery/test_signal_description_writer.py:362), so the guard reddens when the split is reverted.\nSCORE fit: 19\nJUSTIFICATION fit: _write_description_arms at imas_codex/discovery/signals/parallel.py:1660 follows the module's helper style and its comment states the mechanism, and no plan label or banned name is introduced.\nSCORE reuse: 19\nJUSTIFICATION reuse: the writer still delegates the embed to embed_descriptions_batch (imas_codex/embeddings/description.py:29) and the split extends that owner rather than forking it; the None-handling in imas_codex/discovery/base/embed_worker.py:411 is a distinct retry/persist capability, not a description-writer owner.\nFINDING tests/discovery/test_signal_description_writer.py:358 follow-on: the mixed-batch assertion compares tcv:ip's stored embedding against _embedding_of(\"Plasma current (A)\") -- a value derived from the same description string the test passes in, through the same _embedding_of helper the monkeypatched embedder uses -- so the two sides move together and it held even under the pre-fix writer (negative_control_absent_vector.log reddens only at the independent q95 assertion on the following line), making it coverage-shape rather than a discriminating guard.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T232339331806-ssfms-description-writer/gate_discovery_head.log:1 follow-on: the head gate log's header reads \"# revision: 7c13967b7 + uncommitted repair\" while the head log's cited run is the manifest's after_suite \"at head revision c71a38be9\", so a reader reconciling the recorded result against the log it cites finds a revision that does not match.",
+  "review_run_id": "r-20261013T000933246305-review-of-ssfms-description-writer-f21bdab8677e",
+  "reviewed_base_sha": "7c13967b7138a17cf6af69c71927ddb8de2f630e",
+  "reviewed_head_sha": "f21bdab8677ee487c4dddb66f7b858f09f70b7d4",
+  "reviewed_run_id": "r-20261012T232339331806-ssfms-description-writer",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:17:54.438550+00:00",
+  "total": 112
+}
