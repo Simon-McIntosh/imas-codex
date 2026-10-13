@@ -10,10 +10,10 @@
      rerank-pool-labels-default-tests.log (8 passed),
      rerank-pool-labels-graph-tests.log (3 passed).
      Fixture: tests/llm/fixtures/signal_search_questions.json, 464 labels added. -->
-<section id="ssfms-rerank-pool-labels" data-reckon="evidence">
-  <h2 id="ssfms-rerank-pool-labels-heading">Labelling the RRF top-60 pool on every golden question</h2>
+<section id="ssfms-rerank-pool-labels-record-record" data-reckon="evidence">
+  <h2 id="ssfms-rerank-pool-labels-record-heading">Labelling the RRF top-60 pool on every golden question</h2>
 
-  <p id="ssfms-rerank-pool-labels-intro">
+  <p id="ssfms-rerank-pool-labels-record-intro">
     The golden harness scores four ranking arms over 22 graded questions. The
     <code>rrf</code> arm fuses a 100-candidate vector pool with a 50-candidate
     full-text pool, keeps the eligible candidates in that fused order, and hands
@@ -25,7 +25,7 @@
     surface this node exists to close.
   </p>
 
-  <p id="ssfms-rerank-pool-labels-scope">
+  <p id="ssfms-rerank-pool-labels-record-scope">
     The pool is recomputed live, not cached: vector search over the production
     description embedding, full-text search over the same descriptions, both
     fused by reciprocal rank fusion, filtered to the eligible population
@@ -36,8 +36,8 @@
     one question's pool.
   </p>
 
-  <h3 id="ssfms-rerank-pool-labels-method-heading">How each grade was chosen</h3>
-  <p id="ssfms-rerank-pool-labels-method-prose">
+  <h3 id="ssfms-rerank-pool-labels-record-method-heading">How each grade was chosen</h3>
+  <p id="ssfms-rerank-pool-labels-record-method-prose">
     Every candidate was read from its signal id, name, unit, source and
     description against the question's declared intent, under the fixture's
     grading rule: a grade-3 signal measures the queried quantity itself; a
@@ -50,8 +50,8 @@
     rather than introducing a second convention.
   </p>
 
-  <h3 id="ssfms-rerank-pool-labels-check-heading">The check, and its negative control</h3>
-  <p id="ssfms-rerank-pool-labels-check-prose">
+  <h3 id="ssfms-rerank-pool-labels-record-check-heading">The check, and its negative control</h3>
+  <p id="ssfms-rerank-pool-labels-record-check-prose">
     <code>check_pool_labels.py</code> recomputes each question's RRF top-60 pool
     live and asserts that every pool member carries a grade in the fixture's
     <code>relevant</code> map. Run after the last label it exits 0, reporting 60
@@ -64,7 +64,7 @@
     the point: the gap this check closes is invisible to the top-10 guard.
   </p>
 
-  <table id="ssfms-rerank-pool-labels-negative-control-table">
+  <table id="ssfms-rerank-pool-labels-record-negative-control-table">
     <caption>Negative control on a scratch copy of the fixture</caption>
     <tr><th>step</th><th>result</th></tr>
     <tr><td>check on the labelled fixture</td><td>exit 0 — 22 questions, 60 pool members each, 0 unlabelled</td></tr>
@@ -72,14 +72,14 @@
     <tr><td>golden harness four-arm table over the same mutated copy</td><td>exit 0 — passed (guards top-10 only)</td></tr>
   </table>
 
-  <h3 id="ssfms-rerank-pool-labels-grades-heading">What was added, per question</h3>
-  <p id="ssfms-rerank-pool-labels-grades-prose">
+  <h3 id="ssfms-rerank-pool-labels-record-grades-heading">What was added, per question</h3>
+  <p id="ssfms-rerank-pool-labels-record-grades-prose">
     Added labels per question, split by grade. Two questions
     (<code>soft-x-ray-emission</code>, <code>hydrogen-isotope-partial-pressure</code>)
     had no unlabelled candidate in their pool: those pools were already fully
     labelled before this node.
   </p>
-  <table id="ssfms-rerank-pool-labels-grades-table">
+  <table id="ssfms-rerank-pool-labels-record-grades-table">
     <caption>Labels added by this node, per question and grade</caption>
     <tr><th>question</th><th>added</th><th>grade 3</th><th>grade 2</th><th>grade 1</th><th>grade 0</th></tr>
     <tr><td><code>plasma-current-total</code></td><td>31</td><td>0</td><td>5</td><td>16</td><td>10</td></tr>
@@ -107,8 +107,8 @@
     <tr><td><strong>total</strong></td><td><strong>464</strong></td><td><strong>30</strong></td><td><strong>143</strong></td><td><strong>168</strong></td><td><strong>123</strong></td></tr>
   </table>
 
-  <h3 id="ssfms-rerank-pool-labels-tests-heading">Tests run</h3>
-  <p id="ssfms-rerank-pool-labels-tests-prose">
+  <h3 id="ssfms-rerank-pool-labels-record-tests-heading">Tests run</h3>
+  <p id="ssfms-rerank-pool-labels-record-tests-prose">
     The fixture's own harness was run over the labelled fixture: 8 non-graph
     tests pass (<code>test_fixture_holds_draft_and_held_out_questions</code>,
     <code>test_every_question_is_phrased_without_facility_or_source_vocabulary</code>,
