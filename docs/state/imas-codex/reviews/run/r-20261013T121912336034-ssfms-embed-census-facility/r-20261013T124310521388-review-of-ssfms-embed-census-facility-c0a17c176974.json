@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:1846",
+    "imas_codex/discovery/signals/parallel.py:1880"
+  ],
+  "completed_at": "2026-10-13T13:02:42.951Z",
+  "dispatched_at": "2026-10-13T12:43:25Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_embedding_sweep.py",
+      "line": "234",
+      "severity": "follow-on",
+      "text": "follow-on: the added _RecordingClient at tests/discovery/test_signal_embedding_sweep.py:234 duplicates a capability and a name the suite already carries, since a graph-client double that records statements and parameters under the same class name already exists at tests/graph/test_dd_path_domain_upsert.py:8, so the capture-a-statement test double has no single owner and a further copy is likely; it is small and does not hold the node."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "production reach: fetch_signal_embed_state is called by reembed_stale_signal_descriptions at imas_codex/discovery/signals/parallel.py:1846 and by census_signal_embeddings at imas_codex/discovery/signals/parallel.py:1880, both forwarding facility; neither function has a caller outside this module, so no CLI or entrypoint reaches the changed statement yet, and the only runtime call sites are these two internal ones.",
+    "diff": "read commit by commit over 6b4fcb5bb71717e304b87ff5f8d6cae97b64ad2e..c0a17c176974beae50785eee79ec2f161ba69d4a; commit 93dcb0cb4 changes imas_codex/discovery/signals/parallel.py:1783 by inserting one space and adds 46 lines to tests/discovery/test_signal_embedding_sweep.py, and commit c0a17c1769 adds the 27-line evidence fragment, all inside the declared scope.",
+    "done_when": "the done_when names tests/discovery/test_signal_embedding_sweep.py with -m 'graph or not graph' and a facility-scoped live population of 15,111; head_graph_or_nongraph.log:1 records rev=93dcb0cb4 and 7 passed EXIT=0, the recording test asserts the separator and the $facility binding at tests/discovery/test_signal_embedding_sweep.py:259, and the graph test asserts n==15111 through census_signal_embeddings at parallel.py:1880.",
+    "goal": "the goal is 'make the embedding census read one facility with valid Cypher'; imas_codex/discovery/signals/parallel.py:1783 inserts the separator so the facility-scoped statement parses, where it now renders 'WHERE s.facility_id = $facility RETURN'; the graph-marked test reads the JT-60SA population, so the goal is met, though the function is reachable only from within its own module.",
+    "manifest": "read; status complete, commits 93dcb0cb4 and c0a17c1769, gate 7 passed EXIT=0, negative_control_log negative_control.log, landing line recorded, and the manifest honestly notes the unscoped query now renders a harmless double space; it records no baseline_suite or after_suite arm.",
+    "write_paths": "the manifest declares four write paths; git diff 6b4fcb5bb..c0a17c1769 changes exactly three files, imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_embedding_sweep.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-embed-census-facility.html, every one inside the fence, with the declared figure directory left unused."
+  },
+  "justifications": {
+    "durability": "the assertion at tests/discovery/test_signal_embedding_sweep.py:259 is independent of the value under test, a regex literal checked against the query the code rendered, and negative_control.log shows it reddening when the space is removed, so it is a genuine guard; the companion $facility assertion at :261 guards parameter forwarding, while the graph test's 'mismatch == missing_hash + differing' at :293 is an internal identity of the same returned dict and adds little.",
+    "evidence": "head_graph_or_nongraph.log:1 records rev=93dcb0cb4 and 7 passed EXIT=0 and negative_control.log records EXIT=1 with the query rendered as '$facilityRETURN', so the gate measures the done-when, but the base-labelled head_nongraph.log and head_graph.log collect 7 items and are therefore head-state runs, leaving no clean pre-change baseline arm.",
+    "fit": "the one-space repair at imas_codex/discovery/signals/parallel.py:1783 matches the module's hand-built query idiom, and the added names test_facility_scoped_state_query_separates_joining_clauses_from_return, _RecordingClient and test_facility_scoped_census_runs_against_the_live_graph carry no plan, version or ticket label.",
+    "goal_fidelity": "imas_codex/discovery/signals/parallel.py:1783 renders 'WHERE s.facility_id = $facility RETURN' for a named facility where the base rendered '$facilityRETURN' with no separator, so census_signal_embeddings(facility='jt-60sa') is now valid Cypher and the goal is met.",
+    "reuse": "searching tests/ by capability found no shared owner for a capture-only graph-client double, since tests/conftest.py:539 _create_mock_graph_client is a DD-focused MagicMock, while a graph-client double under the same class name already exists at tests/graph/test_dd_path_domain_upsert.py:8, so the added _RecordingClient at tests/discovery/test_signal_embedding_sweep.py:234 is a further module-local double rather than an extension of an owner.",
+    "scope_discipline": "git diff 6b4fcb5bb..c0a17c1769 lists only imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_embedding_sweep.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-embed-census-facility.html, each inside the manifest's four declared write paths, and the change carries nothing the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is 'make the embedding census read one facility with valid Cypher'; imas_codex/discovery/signals/parallel.py:1783 inserts the separator so the facility-scoped statement parses, where it now renders 'WHERE s.facility_id = $facility RETURN'; the graph-marked test reads the JT-60SA population, so the goal is met, though the function is reachable only from within its own module.\nVERDICT done_when: the done_when names tests/discovery/test_signal_embedding_sweep.py with -m 'graph or not graph' and a facility-scoped live population of 15,111; head_graph_or_nongraph.log:1 records rev=93dcb0cb4 and 7 passed EXIT=0, the recording test asserts the separator and the $facility binding at tests/discovery/test_signal_embedding_sweep.py:259, and the graph test asserts n==15111 through census_signal_embeddings at parallel.py:1880.\nVERDICT write_paths: the manifest declares four write paths; git diff 6b4fcb5bb..c0a17c1769 changes exactly three files, imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_embedding_sweep.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-embed-census-facility.html, every one inside the fence, with the declared figure directory left unused.\nVERDICT manifest: read; status complete, commits 93dcb0cb4 and c0a17c1769, gate 7 passed EXIT=0, negative_control_log negative_control.log, landing line recorded, and the manifest honestly notes the unscoped query now renders a harmless double space; it records no baseline_suite or after_suite arm.\nVERDICT diff: read commit by commit over 6b4fcb5bb71717e304b87ff5f8d6cae97b64ad2e..c0a17c176974beae50785eee79ec2f161ba69d4a; commit 93dcb0cb4 changes imas_codex/discovery/signals/parallel.py:1783 by inserting one space and adds 46 lines to tests/discovery/test_signal_embedding_sweep.py, and commit c0a17c1769 adds the 27-line evidence fragment, all inside the declared scope.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:1846, imas_codex/discovery/signals/parallel.py:1880\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/parallel.py:1783 renders 'WHERE s.facility_id = $facility RETURN' for a named facility where the base rendered '$facilityRETURN' with no separator, so census_signal_embeddings(facility='jt-60sa') is now valid Cypher and the goal is met.\nSCORE evidence: 16\nJUSTIFICATION evidence: head_graph_or_nongraph.log:1 records rev=93dcb0cb4 and 7 passed EXIT=0 and negative_control.log records EXIT=1 with the query rendered as '$facilityRETURN', so the gate measures the done-when, but the base-labelled head_nongraph.log and head_graph.log collect 7 items and are therefore head-state runs, leaving no clean pre-change baseline arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 6b4fcb5bb..c0a17c1769 lists only imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_embedding_sweep.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-embed-census-facility.html, each inside the manifest's four declared write paths, and the change carries nothing the goal does not imply.\nSCORE durability: 17\nJUSTIFICATION durability: the assertion at tests/discovery/test_signal_embedding_sweep.py:259 is independent of the value under test, a regex literal checked against the query the code rendered, and negative_control.log shows it reddening when the space is removed, so it is a genuine guard; the companion $facility assertion at :261 guards parameter forwarding, while the graph test's 'mismatch == missing_hash + differing' at :293 is an internal identity of the same returned dict and adds little.\nSCORE fit: 18\nJUSTIFICATION fit: the one-space repair at imas_codex/discovery/signals/parallel.py:1783 matches the module's hand-built query idiom, and the added names test_facility_scoped_state_query_separates_joining_clauses_from_return, _RecordingClient and test_facility_scoped_census_runs_against_the_live_graph carry no plan, version or ticket label.\nSCORE reuse: 18\nJUSTIFICATION reuse: searching tests/ by capability found no shared owner for a capture-only graph-client double, since tests/conftest.py:539 _create_mock_graph_client is a DD-focused MagicMock, while a graph-client double under the same class name already exists at tests/graph/test_dd_path_domain_upsert.py:8, so the added _RecordingClient at tests/discovery/test_signal_embedding_sweep.py:234 is a further module-local double rather than an extension of an owner.\nFINDING tests/discovery/test_signal_embedding_sweep.py:234 follow-on: the added _RecordingClient at tests/discovery/test_signal_embedding_sweep.py:234 duplicates a capability and a name the suite already carries, since a graph-client double that records statements and parameters under the same class name already exists at tests/graph/test_dd_path_domain_upsert.py:8, so the capture-a-statement test double has no single owner and a further copy is likely; it is small and does not hold the node.\n",
+  "review_run_id": "r-20261013T124310521388-review-of-ssfms-embed-census-facility-c0a17c176974",
+  "reviewed_base_sha": "6b4fcb5bb71717e304b87ff5f8d6cae97b64ad2e",
+  "reviewed_head_sha": "c0a17c176974beae50785eee79ec2f161ba69d4a",
+  "reviewed_run_id": "r-20261013T121912336034-ssfms-embed-census-facility",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T13:03:56.014478+00:00",
+  "total": 108
+}
