@@ -1,0 +1,41 @@
+<section>
+  <h2 id="shc-dry-run-guard">A dry run reports the apply's refusals</h2>
+  <p id="shc-dry-run-guard-scope">
+    <code>sn harmonize --apply --dry-run</code> returned before
+    <code>apply_families</code> ran, so the recommended-name guard never saw the
+    scope and the dry run printed <code>decision=apply</code> with the full call
+    total for a scope the real apply refuses. The dry run now runs the same
+    guard, over the same targets, and reports the refusal instead of hiding it.
+    Write paths: <code>imas_codex/standard_names/harmonize.py</code>,
+    <code>imas_codex/cli/sn.py</code>,
+    <code>tests/standard_names/test_harmonize_apply.py</code>.
+  </p>
+
+  <h3 id="shc-dry-run-guard-shared-targets">One target computation, one evidence read</h3>
+  <p id="shc-dry-run-guard-shared-targets-text">
+    <code>apply_guard_targets</code> is extracted in <code>harmonize.py</code>
+    and now feeds both the real apply and the dry run, so the guard operates on
+    exactly the members of every <code>apply</code>-decision family in either
+    path. <code>preview_recommended_refusals</code> reads the evidence through
+    <code>protection.recommended_name_protections</code> — the same call the
+    guard reads — in a single query, and writes nothing. With no
+    <code>--force</code> a family holding a protected member prints
+    <code>decision=refused</code>, names each protected member with its evidence,
+    and its calls are excluded from the planned-call total and cost estimate; with
+    <code>--force REASON</code> it prints <code>decision=forced</code> and keeps
+    its calls. The override reason is never stamped by a dry run.
+  </p>
+
+  <h3 id="shc-dry-run-guard-measure">Measure</h3>
+  <ul id="shc-dry-run-guard-measure-list">
+    <li>Fixture family, one member at <code>name_stage=approved</code>:
+      <code>decision=refused</code>, the member named with
+      <code>name_stage=approved</code>, and <code>0 planned call(s)</code>;
+      with <code>--force</code> <code>decision=forced</code> and
+      <code>3 planned call(s)</code>. Both write nothing.</li>
+    <li>Gate over the harmonize and protection suites: base 71 passed (0
+      failures) → head 73 passed (0 failures); 2 added tests, 0 added failures.</li>
+    <li>Negative control: removing the dry-run guard call reverts the output to
+      <code>decision=apply calls=3</code> and fails the refusal test (EXIT=1).</li>
+  </ul>
+</section>

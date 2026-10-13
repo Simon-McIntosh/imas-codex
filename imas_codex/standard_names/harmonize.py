@@ -822,6 +822,53 @@ def _stamp_applied_family(gc: Any, anchor_id: str) -> bool:
     )
 
 
+def apply_guard_targets(plans: list[dict[str, Any]]) -> list[str]:
+    """The names an anchored apply would rewrite: every ``apply`` family's members.
+
+    The recommended-name guard runs over exactly this set, so both the real
+    apply and a dry run that reports it derive the targets here rather than
+    restating the selection.
+    """
+    return sorted(
+        {
+            mid
+            for fam_plan in plans
+            if fam_plan["decision"] == "apply"
+            for mid in fam_plan["members"]
+        }
+    )
+
+
+def preview_recommended_refusals(
+    gc: Any,
+    plans: list[dict[str, Any]],
+    *,
+    reviews_dir: Any | None = None,
+) -> list[dict[str, str]]:
+    """Per plan, the protected members an ``apply`` would refuse, with evidence.
+
+    One entry per plan in order: the ``{member_id: evidence}`` map of that
+    plan's members recommended into a catalog request (empty when none). Reads
+    the same evidence as :func:`refuse_recommended_members`, in a single query,
+    and writes nothing — so a dry run can report the refusal the real apply
+    would raise without raising it.
+    """
+    from imas_codex.standard_names.protection import recommended_name_protections
+
+    protections = recommended_name_protections(
+        gc, apply_guard_targets(plans), reviews_dir=reviews_dir
+    )
+    preview: list[dict[str, str]] = []
+    for fam_plan in plans:
+        held = {
+            mid: protections[mid]
+            for mid in fam_plan["members"]
+            if fam_plan["decision"] == "apply" and mid in protections
+        }
+        preview.append(held)
+    return preview
+
+
 def refuse_recommended_members(
     gc: Any,
     member_ids: list[str],
@@ -928,14 +975,7 @@ def apply_families(
     # The recommended-name guard runs BEFORE any family is marked: a reset
     # rewrites text a reviewer was asked to read, so the whole apply is refused
     # (or the override reason recorded) before the first batch touches the graph.
-    targets = sorted(
-        {
-            mid
-            for fam_plan in plans
-            if fam_plan["decision"] == "apply"
-            for mid in fam_plan["members"]
-        }
-    )
+    targets = apply_guard_targets(plans)
     guards: dict[str, str] = {}
     override_run_id: str | None = None
     try:
@@ -1001,6 +1041,8 @@ __all__ = [
     "ESTIMATED_DOC_CALL_COST_USD",
     "plan_family_applies",
     "apply_families",
+    "apply_guard_targets",
+    "preview_recommended_refusals",
     "refuse_recommended_members",
 ]
 

@@ -6090,6 +6090,7 @@ def sn_harmonize(
             ESTIMATED_DOC_CALL_COST_USD,
             apply_families,
             plan_family_applies,
+            preview_recommended_refusals,
         )
         from imas_codex.standard_names.protection import RecommendedNameError
 
@@ -6097,14 +6098,28 @@ def sn_harmonize(
             plans = plan_family_applies(gc, seeds=seeds, min_size=min_size)
 
             if dry_run:
-                total_calls = sum(p["planned_calls"] for p in plans)
-                for plan in plans:
+                # The same guard the apply runs, over the same targets, so the
+                # dry run reports the refusals the apply would raise.
+                refusals = preview_recommended_refusals(gc, plans)
+                total_calls = 0
+                for plan, held in zip(plans, refusals, strict=True):
+                    decision = plan["decision"]
+                    calls = plan["planned_calls"]
+                    if held and decision == "apply":
+                        if force_reason is None:
+                            decision = "refused"
+                            calls = 0
+                        else:
+                            decision = "forced"
+                    total_calls += calls
                     console.print(
                         f"family {plan['physical_base']}  "
-                        f"decision={plan['decision']}  "
+                        f"decision={decision}  "
                         f"anchor={plan['anchor'] or '—'}  "
-                        f"members={plan['n']}  calls={plan['planned_calls']}"
+                        f"members={plan['n']}  calls={calls}"
                     )
+                    for member, evidence in sorted(held.items()):
+                        console.print(f"    {decision} {member} ({evidence})")
                 console.print(
                     f"[green]Dry run[/green]: {len(plans)} family(ies), "
                     f"{total_calls} planned call(s), estimated cost "
