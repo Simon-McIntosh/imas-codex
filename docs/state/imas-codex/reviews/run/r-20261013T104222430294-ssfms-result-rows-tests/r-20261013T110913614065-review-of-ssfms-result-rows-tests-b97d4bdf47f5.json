@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/llm/search_tools.py:401",
+    "imas_codex/llm/search_tools.py:431"
+  ],
+  "completed_at": "2026-10-13T11:19:19.099Z",
+  "dispatched_at": "2026-10-13T11:09:32Z",
+  "findings": [
+    {
+      "file": "imas_codex/llm/search_formatters.py",
+      "line": "245",
+      "severity": "follow-on",
+      "text": "follow-on: the single-member branch re-lays out the imports/connection/template lines that the shared-templates loop also lays out at imas_codex/llm/search_formatters.py:280-283, so the two render sites can drift as the report format evolves."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two production call sites in imas_codex/llm/search_tools.py (lines 401 and 431); line 431 is the live signal-search report and line 401 the empty-signals path, both reaching the changed single-member render.",
+    "diff": "read the single commit b97d4bdf47f51ad9074cfad15370fef377c52d13 across four files (+43/-2), all inside the declared scope: the single-member render branch at imas_codex/llm/search_formatters.py:242, the rank golden at tests/llm/test_search_tools.py:731, the new row test at tests/llm/test_signal_report_rows.py:62, and the node fragment.",
+    "done_when": "the done_when names tests/llm/test_search_tools.py::TestFormatSignalsReport::test_basic_signal_formatting asserting the row rank instead of 0.92, a single-member resolved call printed through _interpolate_template with no {accessor} surviving, a test in tests/llm/test_signal_report_rows.py, and the focused pytest gate; the manifest records head 119 passed/8 skipped/0 failed against base 1 failed/117 passed, and logs/head_gate.log:13 and logs/base_gate.log:13 confirm both arms.",
+    "goal": "the goal is to bring the signal report's tests and template helper in line with the collapsed report; imas_codex/llm/search_formatters.py:242-256 interpolates a single-member row's access call through _interpolate_template and tests/llm/test_search_tools.py:731 asserts the row's fused rank, so the goal is met.",
+    "manifest": "read; status complete, one commit b97d4bdf47f51ad9074cfad15370fef377c52d13, carrying baseline_suite and after_suite arms with revision/command/exit_status/completed/failure_count/failure_ids, negative_control_log logs/negative_control.log, and a landing line.",
+    "write_paths": "the manifest declares five paths (imas_codex/llm/search_formatters.py, tests/llm/test_search_tools.py, tests/llm/test_signal_report_rows.py, the node fragment, and a figures directory); the 97eac4222..b97d4bdf diff changes four files and every one is inside the fence, the figures directory receiving no file."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_signal_report_rows.py:68 reddens under the recorded control (logs/negative_control.log, EXIT=1) when the _interpolate_template call at imas_codex/llm/search_formatters.py:249 is removed, and the `0.92 not in result` assertion at tests/llm/test_search_tools.py:732 reddens on a re-added fused score.",
+    "evidence": "logs/head_gate.log:13 records 119 passed, 8 skipped, 0 failed with EXIT=0 and logs/base_gate.log:13 records the single base failure, both at their own revisions and both naming the same gate command.",
+    "fit": "the new block at imas_codex/llm/search_formatters.py:242 carries a mechanism comment with no plan label or ticket, reuses the module's own helpers, and the fragment's element ids (ssfms-result-rows-tests-*) begin with the node id.",
+    "goal_fidelity": "imas_codex/llm/search_formatters.py:242-256 renders single-member rows with the interpolated call and tests/llm/test_search_tools.py:731 replaces the retired 0.92 assertion with `Rank: 1`, matching the goal.",
+    "reuse": "the change extends format_signals_report in place and reuses _signal_access_methods (imas_codex/llm/search_formatters.py:115) and _interpolate_template (imas_codex/llm/search_formatters.py:316); no other report renderer of access templates exists in imas_codex/, and imas_codex/ids/codegen.py:219 emits them only for generated code.",
+    "scope_discipline": "every path in the 97eac4222..b97d4bdf diff is inside the five declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to bring the signal report's tests and template helper in line with the collapsed report; imas_codex/llm/search_formatters.py:242-256 interpolates a single-member row's access call through _interpolate_template and tests/llm/test_search_tools.py:731 asserts the row's fused rank, so the goal is met.\nVERDICT done_when: the done-when names test_basic_signal_formatting asserting rank in place of the 0.92 fused score, a single-member resolved call printed through _interpolate_template with no {accessor} surviving, a test in tests/llm/test_signal_report_rows.py, and the focused pytest gate; the manifest records head 119 passed/8 skipped/0 failed against base 1 failed/117 passed, and logs/head_gate.log:13 and logs/base_gate.log:13 confirm both arms.\nVERDICT write_paths: the manifest declares five paths; the 97eac4222..b97d4bdf diff changes four files and every one is inside the fence, the fifth being an empty figures directory that received no file.\nVERDICT manifest: read; status complete, one commit b97d4bdf47f51ad9074cfad15370fef377c52d13, carrying baseline_suite and after_suite arms with revision/command/exit_status/completed/failure_count/failure_ids, negative_control_log logs/negative_control.log, and a landing line.\nVERDICT diff: read the single commit b97d4bdf across four files (+43/-2), all inside the declared scope: the single-member render branch at search_formatters.py:242, the rank golden at test_search_tools.py:731, the new row test at test_signal_report_rows.py:62, and the node fragment.\nCALL_SITES: imas_codex/llm/search_tools.py:401, imas_codex/llm/search_tools.py:431\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/llm/search_formatters.py:242-256 renders single-member rows with the interpolated call and tests/llm/test_search_tools.py:731 replaces the retired 0.92 assertion with `Rank: 1`, matching the goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/head_gate.log:13 records 119 passed, 8 skipped, 0 failed with EXIT=0 and logs/base_gate.log:13 records the single base failure, both at their own revisions and both naming the same gate command.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the 97eac4222..b97d4bdf diff - imas_codex/llm/search_formatters.py, tests/llm/test_search_tools.py, tests/llm/test_signal_report_rows.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-result-rows-tests.html - is inside the five declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/llm/test_signal_report_rows.py:68 reddens under the recorded control (logs/negative_control.log, EXIT=1) when the _interpolate_template call at imas_codex/llm/search_formatters.py:249 is removed, and the `0.92 not in result` assertion at tests/llm/test_search_tools.py:732 reddens on a re-added fused score.\nSCORE fit: 18\nJUSTIFICATION fit: the new block at imas_codex/llm/search_formatters.py:242 carries a mechanism comment with no plan label or ticket, reuses the module's own helpers, and the fragment's element ids (ssfms-result-rows-tests-*) begin with the node id.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends format_signals_report in place and reuses _signal_access_methods (imas_codex/llm/search_formatters.py:115) and _interpolate_template (imas_codex/llm/search_formatters.py:316); no other report renderer of access templates exists in imas_codex/, and imas_codex/ids/codegen.py:219 emits them only for generated code.\nFINDING imas_codex/llm/search_formatters.py:245 follow-on: the single-member branch re-lays out the imports/connection/template lines that the shared-templates loop also lays out at imas_codex/llm/search_formatters.py:280-283, so the two render sites can drift as the report format evolves.\n",
+  "review_run_id": "r-20261013T110913614065-review-of-ssfms-result-rows-tests-b97d4bdf47f5",
+  "reviewed_base_sha": "97eac4222c89103942f49538791b294ab9134abf",
+  "reviewed_head_sha": "b97d4bdf47f51ad9074cfad15370fef377c52d13",
+  "reviewed_run_id": "r-20261013T104222430294-ssfms-result-rows-tests",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T11:19:57.958041+00:00",
+  "total": 112
+}
