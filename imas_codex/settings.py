@@ -160,6 +160,7 @@ MODEL_SECTIONS = frozenset(
         "sn-escalation",
         "sn-parent-enrich",
         "sn-classifier",
+        "sn-domain-tree",
         "sn-prose-adjudicator",
         "sn-release-notes",
     }
@@ -213,6 +214,13 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # Owns a seat rather than borrowing a generic one so the model choice is
     # attributable to the SN pipeline.
     "sn-classifier": "openrouter/openai/gpt-5.5",
+    # The two-level category-then-domain Choice over the physics-domain
+    # guidance, which decides a domain from a probability distribution rather
+    # than from free text. It runs through the decisions endpoint, so it holds
+    # its own seat: the tree and the chat classifier below it change models
+    # independently of one another. Active model in
+    # [tool.imas-codex.sn-domain-tree].
+    "sn-domain-tree": "typesafe/jev-1.13",
     # Adjudicates banned-prose grep flags on refined docs at the campaign
     # convergence gate; quorum-independent. Active model in
     # [tool.imas-codex.sn-prose-adjudicator].

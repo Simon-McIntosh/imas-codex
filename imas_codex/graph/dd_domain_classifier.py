@@ -19,11 +19,13 @@ import hashlib
 import json
 import logging
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, Field
+
+from imas_codex.discovery.base.judgment import decide_batch
 
 if TYPE_CHECKING:
     from imas_codex.graph.client import GraphClient
@@ -117,6 +119,23 @@ DEFAULT_BATCH_SIZE = 30
 
 #: Service tag for cost attribution
 SERVICE_TAG = "data-dictionary"
+
+#: First-level question: the ISN category the path belongs to.
+CATEGORY_QUESTION = "physics_category"
+
+#: Second-level question: the physics domain within a category.
+DOMAIN_QUESTION = "physics_domain"
+
+#: Beam width at the first level: the second category is asked as well when its
+#: probability lies within this of the first.
+CATEGORY_BEAM_MARGIN = 0.15
+
+#: A path whose two-level probability falls below this is re-judged by the chat
+#: classifier, which reads the same guidance but as one free-text decision.
+DEFAULT_TREE_THRESHOLD = 0.8
+
+#: Maximum domain Choices in flight at once, matching the decisions owner's bound.
+DEFAULT_DECISION_CONCURRENCY = 8
 
 # =============================================================================
 # Pydantic Response Models
@@ -610,20 +629,27 @@ async def classify_tier1_llm(
     *,
     model: str,
     service: str = SERVICE_TAG,
+    tree_model: str | None = None,
+    threshold: float = DEFAULT_TREE_THRESHOLD,
     on_cost: Callable[[float], None] | None = None,
     on_items: Callable[[int], None] | None = None,
 ) -> list[dict[str, Any]]:
     """LLM batch classification for physics paths.
 
-    Batches paths by subtree for coherence, calls the LLM with
-    domain_classifier prompt, validates responses, and retries
-    paths that got "general" with expanded context.
+    Batches paths by subtree for coherence, judges each batch through the
+    two-level category-then-domain Choice tree, and re-judges with the chat
+    classifier the paths the tree could not settle confidently — a path whose
+    two-level probability is below *threshold*, or one whose Jev call failed.
+    Paths that got "general" are retried with expanded context, as before.
 
     Args:
         gc: GraphClient instance.
         paths: List of path dicts from _query_unclassified_paths.
-        model: LLM model identifier.
+        model: Chat classifier model identifier (the seat below the tree).
         service: Cost attribution service tag.
+        tree_model: Decisions model for the two-level tree. Defaults to the
+            ``sn-domain-tree`` seat.
+        threshold: Below this two-level probability a path goes to chat.
         on_cost: Callback for accumulated cost.
         on_items: Callback for completed item count.
 
@@ -632,6 +658,11 @@ async def classify_tier1_llm(
         {id, physics_domain, domain_source, domain_model, cost}.
     """
     from imas_codex.core.physics_domain import PhysicsDomain
+
+    if tree_model is None:
+        from imas_codex.settings import get_model as _get_model
+
+        tree_model = _get_model("sn-domain-tree")
 
     valid_domains = {d.value for d in PhysicsDomain}
 
@@ -657,8 +688,13 @@ async def classify_tier1_llm(
     total_cost = 0.0
 
     for batch_idx, batch in enumerate(batches):
-        batch_results, cost = await _classify_batch(
-            batch, model=model, service=service, valid_domains=valid_domains
+        batch_results, cost = await _classify_batch_tree(
+            batch,
+            model=tree_model,
+            chat_model=model,
+            service=service,
+            valid_domains=valid_domains,
+            threshold=threshold,
         )
         total_cost += cost
 
@@ -793,6 +829,7 @@ def _format_batch_user_prompt(batch: list[dict[str, Any]]) -> str:
         parts = [
             f"{i}. path: {p.get('id', p.get('path', '?'))}",
             f"   description: {p.get('description', 'N/A')}",
+            f"   documentation: {p.get('documentation', '')}",
             f"   units: {p.get('units', '')}",
             f"   parent_path: {p.get('parent_path', 'N/A')}",
             f"   parent_description: {p.get('parent_description', 'N/A')}",
@@ -805,8 +842,383 @@ def _format_batch_user_prompt(batch: list[dict[str, Any]]) -> str:
 
 
 # =============================================================================
-# Context Gathering
+# Tier 1b: two-level Choice over the guided categories and domains
 # =============================================================================
+
+
+def _category_options() -> dict[str, str]:
+    """ISN category → its classification scope, read at call time.
+
+    The category set is read from the ISN vocabulary rather than a frozen list
+    so a category added upstream reaches the first-level question without a code
+    change, and its scope comes from the guidance file keyed by the same value.
+    """
+    from imas_codex.definitions.physics import (
+        load_domain_guidance,
+        load_isn_physics_domains,
+    )
+
+    scopes = load_domain_guidance().get("categories") or {}
+    options: dict[str, str] = {}
+    for meta in load_isn_physics_domains().values():
+        category = meta.get("category")
+        if category and category not in options:
+            options[category] = (scopes.get(category) or {}).get("scope", "")
+    return options
+
+
+def _domain_option_text(meta: dict[str, Any], guide: dict[str, Any]) -> str:
+    """Render one domain's ISN description beside its scope, includes and excludes."""
+    parts = [(meta.get("description") or "").strip()]
+    if guide.get("scope"):
+        parts.append(str(guide["scope"]).strip())
+    if guide.get("includes"):
+        parts.append("Includes: " + "; ".join(str(i) for i in guide["includes"]))
+    for exclusion in guide.get("excludes") or []:
+        parts.append(
+            "Excludes {quantity} (→ {neighbour})".format(
+                quantity=exclusion.get("quantity", ""),
+                neighbour=exclusion.get("neighbour", ""),
+            )
+            + (f": {exclusion['rule']}" if exclusion.get("rule") else "")
+        )
+    return "\n".join(part for part in parts if part)
+
+
+def _domain_options(category: str) -> dict[str, str]:
+    """The domains ISN places in *category*, each with its guidance, at call time."""
+    from imas_codex.definitions.physics import (
+        load_domain_guidance,
+        load_isn_physics_domains,
+    )
+
+    guidance = load_domain_guidance().get("domains") or {}
+    options: dict[str, str] = {}
+    for value, meta in load_isn_physics_domains().items():
+        if meta.get("category") != category:
+            continue
+        options[value] = _domain_option_text(meta, guidance.get(value) or {})
+    return options
+
+
+def build_category_question() -> dict[str, Any]:
+    """The first-level Choice: which ISN category the path belongs to.
+
+    One option per ISN category, carrying that category's guidance scope, so the
+    question cannot fall behind the vocabulary it is drawn from.
+    """
+    return {
+        CATEGORY_QUESTION: {
+            "type": "choice",
+            "instructions": (
+                "Choose the one category of physics or machine function this IMAS "
+                "Data Dictionary path belongs to, judging what the quantity is "
+                "rather than which IDS carries it."
+            ),
+            "criteria": _category_options(),
+        }
+    }
+
+
+def build_domain_question(category: str) -> dict[str, Any]:
+    """The second-level Choice: which domain within *category* the path belongs to."""
+    return {
+        DOMAIN_QUESTION: {
+            "type": "choice",
+            "instructions": (
+                f"Choose the one physics domain within the '{category}' category "
+                "this IMAS Data Dictionary path belongs to, judging what the "
+                "quantity measures rather than the IDS it lives under."
+            ),
+            "criteria": _domain_options(category),
+        }
+    }
+
+
+def tree_state(path: dict[str, Any]) -> dict[str, Any]:
+    """The judgement context for one path: path id, description and documentation.
+
+    Both levels are shown the same state, so a decision reaches its answer with
+    the DD path, the LLM-generated description and the DD documentation clause.
+    """
+    return {
+        "path": path.get("id") or "",
+        "ids_name": path.get("ids_name") or "",
+        "description": path.get("description") or "",
+        "documentation": path.get("documentation") or "",
+        "unit": path.get("units") or "",
+        "parent": path.get("parent_path") or "",
+        "parent_description": path.get("parent_description") or "",
+        "siblings": list(path.get("siblings") or []),
+        "node_category": path.get("node_category") or "",
+    }
+
+
+def _answer_for(result: Any, question: str) -> Mapping[str, Any] | None:
+    """One state's answer to *question*, or ``None`` when the state went unscored.
+
+    ``decide_batch`` returns each state's answers keyed by question name, so the
+    mapping carrying ``choice`` and ``probabilities`` is reached through that
+    name rather than being the answers mapping itself.
+    """
+    if not result:
+        return None
+    answers = result[0]
+    if not isinstance(answers, Mapping):
+        return None
+    answer = answers.get(question)
+    return answer if isinstance(answer, Mapping) else None
+
+
+def _ranked_probabilities(answer: Mapping[str, Any] | None) -> list[tuple[str, float]]:
+    """One question's probability distribution, highest first, ties by label."""
+    probabilities = (answer or {}).get("probabilities") or {}
+    ranked = [(str(label), float(value)) for label, value in probabilities.items()]
+    return sorted(ranked, key=lambda item: (-item[1], item[0]))
+
+
+def _beamed_categories(result: Any) -> list[str]:
+    """The categories to ask the domain question in, given a first-level result.
+
+    The top category always, plus the runner-up when its probability lies within
+    :data:`CATEGORY_BEAM_MARGIN` of the top — the second-level question is cheap
+    relative to committing to a category the first level was unsure of.
+    """
+    ranked = _ranked_probabilities(_answer_for(result, CATEGORY_QUESTION))
+    if not ranked:
+        return []
+    chosen = [ranked[0][0]]
+    if len(ranked) > 1 and ranked[0][1] - ranked[1][1] < CATEGORY_BEAM_MARGIN:
+        chosen.append(ranked[1][0])
+    return chosen
+
+
+async def _safe_decide_batch(
+    states: list[dict[str, Any]],
+    questions: dict[str, Any],
+    **kwargs: Any,
+) -> tuple[list[Any], float]:
+    """Run one decisions batch, reporting a whole-call failure as unscored states.
+
+    A transport failure is already reported per state by ``decide_batch``; this
+    covers the batch that cannot run at all, such as an answer the endpoint
+    rejects as malformed, so a broken call routes its paths to the chat
+    classifier instead of failing the run.
+    """
+    try:
+        return await decide_batch(states, questions, **kwargs)
+    except Exception as exc:  # noqa: BLE001 - a failed call is a routing signal
+        logger.warning("decisions batch failed (%s): %s", type(exc).__name__, exc)
+        return [None] * len(states), 0.0
+
+
+async def decide_domain_tree(
+    paths: list[dict[str, Any]],
+    *,
+    model: str,
+    service: str = SERVICE_TAG,
+    concurrency: int = DEFAULT_DECISION_CONCURRENCY,
+    cost: Any | None = None,
+    step: str = "domain-classification",
+) -> tuple[list[dict[str, Any] | None], float]:
+    """Classify each path through the category-then-domain Choice tree.
+
+    The first level asks which ISN category the path belongs to; the second asks
+    which domain within that category. Every path is shown its DD path, the
+    LLM-generated description and the DD documentation clause, because both
+    levels read the same state. A path's probability is the product of the two
+    levels, and it is what separates a confident decision from one the chat
+    classifier should make instead.
+
+    Args:
+        paths: Path context dicts, the shape ``gather_classification_context``
+            returns.
+        model: Decisions model id for both levels.
+        service: Cost attribution service tag.
+        concurrency: Maximum Calls in flight per level.
+        cost: Optional run cost tracker.
+        step: Pipeline-cost step the reported cost is booked to.
+
+    Returns:
+        ``(decisions, total_cost)`` — ``decisions[i]`` is the decision for the
+        path at index ``i``, or ``None`` when either level failed to score it.
+        A decision carries ``id``, ``physics_domain``, ``physics_category``,
+        ``category_probability``, ``domain_probability`` and ``probability``.
+    """
+    if not paths:
+        return [], 0.0
+
+    states = [tree_state(path) for path in paths]
+    total_cost = 0.0
+
+    first_level, first_cost = await _safe_decide_batch(
+        states,
+        build_category_question(),
+        model=model,
+        service=service,
+        concurrency=concurrency,
+        cost=cost,
+        step=step,
+    )
+    total_cost += first_cost
+
+    # Ask the domain question once per (category, its candidate paths), so each
+    # call carries only the domains that category actually contains.
+    candidates: dict[str, list[int]] = {}
+    for index, result in enumerate(first_level):
+        for category in _beamed_categories(result):
+            candidates.setdefault(category, []).append(index)
+
+    best: list[dict[str, Any] | None] = [None] * len(paths)
+    for category, indices in candidates.items():
+        question = build_domain_question(category)
+        options = set(question[DOMAIN_QUESTION]["criteria"])
+        if not options:
+            logger.warning(
+                "category %r has no domains — every path falls to chat", category
+            )
+            continue
+        results, domain_cost = await _safe_decide_batch(
+            [states[i] for i in indices],
+            question,
+            model=model,
+            service=service,
+            concurrency=concurrency,
+            cost=cost,
+            step=step,
+        )
+        total_cost += domain_cost
+
+        for index, result in zip(indices, results, strict=True):
+            answer = _answer_for(result, DOMAIN_QUESTION)
+            if not answer:
+                continue
+            domain = answer.get("choice")
+            if domain not in options:
+                logger.warning(
+                    "domain %r not offered for category %r — discarding",
+                    domain,
+                    category,
+                )
+                continue
+            probabilities = answer.get("probabilities") or {}
+            category_probability = 0.0
+            for label, value in _ranked_probabilities(
+                _answer_for(first_level[index], CATEGORY_QUESTION)
+            ):
+                if label == category:
+                    category_probability = value
+                    break
+            domain_probability = float(probabilities.get(domain, 0.0))
+            probability = category_probability * domain_probability
+            previous = best[index]
+            if previous is not None and previous["probability"] >= probability:
+                continue
+            best[index] = {
+                "id": paths[index]["id"],
+                "physics_domain": domain,
+                "physics_category": category,
+                "domain_model": model,
+                "domain_source": "jev_tree",
+                "category_probability": category_probability,
+                "domain_probability": domain_probability,
+                "probability": probability,
+            }
+
+    share = total_cost / max(len(paths), 1)
+    for decision in best:
+        if decision is not None:
+            decision["cost"] = share
+
+    return best, total_cost
+
+
+def _route_below_threshold(
+    decisions: list[dict[str, Any] | None],
+    paths: list[dict[str, Any]],
+    threshold: float,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split the tree's output into confident decisions and paths for chat.
+
+    A path goes to chat when the tree failed to score it or when its two-level
+    probability falls below *threshold*. A confident path is returned with its
+    deterministic override applied, so a route through the tree carries the same
+    override semantics as a route through chat.
+    """
+    confident: list[dict[str, Any]] = []
+    to_chat: list[dict[str, Any]] = []
+    for path, decision in zip(paths, decisions, strict=True):
+        if decision is None or decision["probability"] < threshold:
+            to_chat.append(path)
+            continue
+        domain = decision["physics_domain"]
+        source = "jev_tree"
+        override = apply_path_domain_override(path["id"])
+        if override is not None and override != domain:
+            logger.info(
+                "path-domain override: %s %s -> %s", path["id"], domain, override
+            )
+            domain = override
+            source = "deterministic_override"
+        confident.append(
+            {**decision, "physics_domain": domain, "domain_source": source}
+        )
+    return confident, to_chat
+
+
+async def _classify_batch_tree(
+    batch: list[dict[str, Any]],
+    *,
+    model: str,
+    chat_model: str,
+    service: str,
+    valid_domains: set[str],
+    threshold: float = DEFAULT_TREE_THRESHOLD,
+    concurrency: int = DEFAULT_DECISION_CONCURRENCY,
+    cost: Any | None = None,
+) -> tuple[list[dict[str, Any]], float]:
+    """Classify one batch through the tree, then chat for the paths it cannot settle.
+
+    The tier-1 entry point ``sn role-bench --role classifier`` calls. Paths the
+    tree decides confidently (probability at or above *threshold*) are returned
+    as-is; a path below it, or one whose Jev call failed, is re-judged by the
+    chat classifier reading the same guidance as one free-text decision. A chat
+    call that itself fails contributes no result for that path, leaving it to
+    tier 2.
+
+    Returns:
+        ``(results, total_cost)`` — results carry ``id``, ``physics_domain``,
+        ``domain_source``, ``domain_model`` and ``cost``, plus the tree's
+        ``probability`` and ``physics_category`` when the tree decided the path.
+    """
+    decisions, total_cost = await decide_domain_tree(
+        batch,
+        model=model,
+        service=service,
+        concurrency=concurrency,
+        cost=cost,
+    )
+
+    confident, to_chat = _route_below_threshold(decisions, batch, threshold)
+    results: list[dict[str, Any]] = list(confident)
+
+    if to_chat:
+        chat_results, chat_cost = await _classify_batch(
+            to_chat, model=chat_model, service=service, valid_domains=valid_domains
+        )
+        total_cost += chat_cost
+        tree_probability = {
+            path["id"]: decision["probability"]
+            for path, decision in zip(batch, decisions, strict=True)
+            if decision is not None
+        }
+        for result in chat_results:
+            probability = tree_probability.get(result["id"])
+            if probability is not None:
+                result["tree_probability"] = probability
+        results.extend(chat_results)
+
+    return results, total_cost
 
 
 def gather_classification_context(
@@ -815,7 +1227,7 @@ def gather_classification_context(
     """Query graph for rich classification context per path.
 
     Returns list of context dicts with:
-    - id, description, units, parent_path, parent_description
+    - id, description, documentation, units, parent_path, parent_description
     - siblings (same parent), ids_name, node_category
 
     Args:
@@ -838,6 +1250,7 @@ def gather_classification_context(
          collect(DISTINCT split(sibling.id, '/')[-1])[..15] AS siblings
     RETURN n.id AS id,
            n.description AS description,
+           n.documentation AS documentation,
            n.unit AS units,
            parent.id AS parent_path,
            parent.description AS parent_description,
@@ -851,6 +1264,7 @@ def gather_classification_context(
         {
             "id": r["id"],
             "description": r.get("description") or "",
+            "documentation": r.get("documentation") or "",
             "units": r.get("units") or "",
             "parent_path": r.get("parent_path") or "",
             "parent_description": r.get("parent_description") or "",
@@ -890,6 +1304,7 @@ def _gather_expanded_context(
          collect(DISTINCT {path: peer.id, domain: peer.physics_domain})[..5] AS cluster_peers
     RETURN n.id AS id,
            n.description AS description,
+           n.documentation AS documentation,
            n.unit AS units,
            parent.id AS parent_path,
            parent.description AS parent_description,
@@ -905,6 +1320,7 @@ def _gather_expanded_context(
         ctx = {
             "id": r["id"],
             "description": r.get("description") or "",
+            "documentation": r.get("documentation") or "",
             "units": r.get("units") or "",
             "parent_path": r.get("parent_path") or "",
             "parent_description": r.get("parent_description") or "",

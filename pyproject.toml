@@ -368,6 +368,14 @@ reasoning-effort = "medium"
 # name sees at compose/review), so it uses a strong model.
 model = "openrouter/openai/gpt-5.5"
 
+[tool.imas-codex.sn-domain-tree]
+# Two-level category-then-domain Choice over the physics-domain guidance
+# (dd_domain_classifier.decide_domain_tree): asks the ISN category first, then
+# the domain within it, and returns a probability for the path. Runs through
+# the decisions endpoint, which takes its own request shape — so it holds a
+# seat separate from the chat classifier that re-judges low-confidence paths.
+model = "typesafe/jev-1.13"
+
 [tool.imas-codex.sn-prose-adjudicator]
 # Adjudicates banned-prose grep flags on refined docs at the campaign
 # convergence gate: decides whether a flagged doc genuinely reintroduced banned

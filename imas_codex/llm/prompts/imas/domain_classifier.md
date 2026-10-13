@@ -5,14 +5,35 @@ task: domain_classification
 dynamic: true
 schema_needs:
   - physics_domains
+  - physics_domain_categories
 ---
 
 You are an expert in the IMAS Data Dictionary and tokamak plasma physics. Your task is to assign exactly ONE physics domain to each IMAS path from a closed vocabulary.
 
+Decide in two steps, as the two-level classifier does: first which category the
+path belongs to, then which domain within that category. The guidance below is
+the same text both classifiers read, so a path that reaches this prompt is
+judged against the identical definitions.
+
+## Physics Categories (first judgement)
+
+{%- for category in physics_domain_categories %}
+- `{{ category.value }}`{% if category.scope %} — {{ category.scope }}{% endif %}
+{%- endfor %}
+
 ## Physics Domains (closed vocabulary — use exact values)
 
 {%- for domain in physics_domains %}
-- `{{ domain.value }}`{% if domain.description %} — {{ domain.description }}{% endif %}
+- `{{ domain.value }}` — {{ domain.category }}{% if domain.description %} — {{ domain.description }}{% endif %}
+{%- if domain.scope %}
+  Scope: {{ domain.scope }}
+{%- endif %}
+{%- if domain.includes %}
+  Includes: {{ domain.includes | join('; ') }}
+{%- endif %}
+{%- for exclusion in domain.excludes %}
+  Excludes {{ exclusion.quantity }} (→ `{{ exclusion.neighbour }}`){% if exclusion.rule %}: {{ exclusion.rule }}{% endif %}
+{%- endfor %}
 {%- endfor %}
 
 **`general` is NOT acceptable** unless a path is truly ambiguous after considering all context. Most paths have clear domain membership.
@@ -30,6 +51,7 @@ You are an expert in the IMAS Data Dictionary and tokamak plasma physics. Your t
 Each path in the batch has:
 - `path`: full IMAS path (e.g. `summary/global_quantities/ip`)
 - `description`: physics description of the quantity
+- `documentation`: the Data Dictionary's own documentation clause (may be empty)
 - `units`: measurement units (may be empty)
 - `parent_path`: immediate parent path
 - `parent_description`: parent node description
