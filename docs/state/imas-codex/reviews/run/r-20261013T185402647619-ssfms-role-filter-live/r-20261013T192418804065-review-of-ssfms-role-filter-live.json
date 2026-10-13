@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded baseline_suite: null and after_suite: null (manifest and classification.json), so no armed suite pair exists to difference; its only gate is gate_live.log (3 passed, EXIT=0) and negative_control.log (2 failed, 1 passed, EXIT=1), both at rev ce47976e0092a336b672328b3137cef34422a2cd, so zero added failures are attributable.",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/llm/server.py:2458"
+  ],
+  "completed_at": "2026-10-13T19:41:40.233Z",
+  "dispatched_at": "2026-10-13T19:24:31Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_signal_role_filter_live.py",
+      "line": "140",
+      "severity": "follow-on",
+      "text": "follow-on: neither test_filtered_call_returns_only_measured_signals (line 140) nor test_filtered_top_holds_no_grade2_command_or_reference (line 152) asserts that a filtered result holds any rows, so an over-strict role predicate that returns zero signals for every question leaves both offenders lists empty and the suite green; the unfiltered control at line 166 cannot catch it because it reads the unfiltered arm. A positive control over the filtered arm (as the fragment's five-rows-per-question tables informally supply) belongs in the test."
+    }
+  ],
+  "gate_log_revision": "ce47976e0092a336b672328b3137cef34422a2cd",
+  "item_verdicts": {
+    "diff": "read both commits against base ce47976e0: f13f1e582 adds the 170-line graph test, dd7e64c92 adds the 513-line fragment; no product source is changed, consistent with a measurement node.",
+    "done_when": "the done_when names the graph-marked test file and the fragment tabulating per-question filtered/unfiltered top 5 with grade and stored role; the manifest records gate_live.log (3 passed, EXIT=0) and negative_control.log (EXIT=1), the fragment is present with 22 filtered and 22 unfiltered tables, and its headline (0 non-measured filtered rows, 0 filtered graded-2 commands/references, 4 of 22 control questions) is corroborated from the file itself.",
+    "goal": "the node goal is to show on the live graph that a role=measured signal search keeps every reference, command or setpoint out of each golden question's top 5; tests/llm/test_signal_role_filter_live.py drives _search_signals with role='measured' and role=None over the 22 graded questions and the fragment docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-filter-live.html tabulates the result.",
+    "manifest": "read; status complete, commits f13f1e582/dd7e64c92, changed_paths matching the two committed paths, tests line naming the -m graph run (3 passed), negative_control_log=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185402647619-ssfms-role-filter-live/negative_control.log; baseline_suite and after_suite are null.",
+    "write_paths": "the brief declares tests/llm/test_signal_role_filter_live.py, the fragment html and a docs/figures/.../ssfms-role-filter-later directory; both commits touch only the test file and the fragment, each inside the declared set, and no figure was written."
+  },
+  "justifications": {
+    "durability": "negative_control.log reds test_filtered_call_returns_only_measured_signals and test_filtered_top_holds_no_grade2_command_or_reference (EXIT=1) with the declared input mutation, but the filtered arm has no non-emptiness guard at tests/llm/test_signal_role_filter_live.py:140, so an over-strict filter returning zero rows for every question would leave all three tests green.",
+    "evidence": "the -m graph gate at tests/llm/test_signal_role_filter_live.py records 3 passed (gate_live.log, EXIT=0) and the fragment's own tables (22 filtered, 22 unfiltered) reproduce its headline figures when recounted from the committed html.",
+    "fit": "the module follows the surrounding tests/llm idiom (pytest.mark.graph, autouse monkeypatch, mock.patch.object, module docstring) and its helpers _served_top/_row/_live_table are named by mechanism; the node-id abbreviation survives only in fragment element ids the contract mandates.",
+    "goal_fidelity": "tests/llm/test_signal_role_filter_live.py:116 searches each of the 22 questions with role='measured' through the served path. Each question's stored role differs only within the six roles.",
+    "reuse": "tests/llm/test_signal_role_filter_live.py:79 reuses the served path search_tools._search_signals and search_formatters.format_signals_report rather than re-deriving ranking, and adds no production capability; the formatter-spy capture parallels tests/llm/measure_search_rankings.py:283 but for signals and no owner claims the served signal-row read.",
+    "scope_discipline": "git show --stat ce47976e0..dd7e64c92 lists only tests/llm/test_signal_role_filter_live.py and the fragment html, both inside the declared write paths; no product source or figure is touched."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261013T192418804065-review-of-ssfms-role-filter-live",
+  "reviewed_base_sha": "ce47976e0092a336b672328b3137cef34422a2cd",
+  "reviewed_head_sha": "dd7e64c9263bc59bdba631bcc02cae803d614ba2",
+  "reviewed_run_id": "r-20261013T185402647619-ssfms-role-filter-live",
+  "reviewer": {
+    "backend": "deepseek",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T19:40:00+00:00",
+  "total": 112
+}
