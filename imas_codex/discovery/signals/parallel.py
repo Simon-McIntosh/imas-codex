@@ -1894,6 +1894,189 @@ def census_signal_embeddings(
             client.close()
 
 
+# =============================================================================
+# Signal role — store, sweep and census
+# =============================================================================
+#
+# A signal's role is judged once, from the text a searcher reads, and stored
+# as ``signal_role``. Enrichment judges each signal it has just described; the
+# sweep below is the backfill for a signal the judgement left role-less, and it
+# selects its rows with the same predicate the census counts, so the two can
+# never disagree about which signal still needs a role — the property the
+# re-embed sweep and its census also hold.
+
+# The one predicate that selects a signal still awaiting a role: it carries a
+# description to judge and no stored role yet. Rendered as a Cypher ``WHERE``
+# over the ``s`` alias, it selects both the rows the sweep judges and the rows
+# the census counts. A signal the judge could not answer for, or whose answer
+# fell outside the six roles, keeps no role and is selected again on the next
+# sweep. The status bound keeps the sweep off signals that are not yet enriched
+# and off skipped ones the pipeline filtered out.
+_SIGNAL_ROLE_MISSING_WHERE = (
+    "s.status IN ['enriched', 'checked'] "
+    "AND s.description IS NOT NULL AND trim(s.description) <> '' "
+    "AND s.signal_role IS NULL"
+)
+
+# Rows a sweep judges in one decision batch.
+_SIGNAL_ROLE_BATCH = 64
+
+
+def store_signal_roles(
+    items: list[dict[str, Any]], *, gc: GraphClient | None = None
+) -> int:
+    """Write each item's ``signal_role`` and return the rows written.
+
+    A caller passes only the roles the judge accepted, so an item with no
+    ``signal_role`` never reaches here and a signal the judge could not answer
+    for simply stays role-less.
+    """
+    payload = [
+        {"id": item["id"], "signal_role": item["signal_role"]}
+        for item in items
+        if item.get("signal_role")
+    ]
+    if not payload:
+        return 0
+    statement = (
+        "UNWIND $items AS item "
+        "MATCH (s:FacilitySignal {id: item.id}) "
+        "SET s.signal_role = item.signal_role "
+        "RETURN count(s) AS updated"
+    )
+    if gc is None:
+        with GraphClient() as client:
+            rows = client.query(statement, items=payload)
+    else:
+        rows = gc.query(statement, items=payload)
+    if rows and isinstance(rows[0], dict) and "updated" in rows[0]:
+        return rows[0]["updated"]
+    return len(payload)
+
+
+async def judge_and_store_signal_roles(
+    signals: list[dict[str, Any]], *, gc: GraphClient | None = None
+) -> tuple[int, float]:
+    """Judge freshly enriched signals' roles and store the accepted ones.
+
+    Run after a signal's description is written, so the role describes the text
+    a searcher will read. The judge answers one of the six roles or refuses an
+    answer outside them; a failed or refused judgement stores no role and
+    leaves the signal for the sweep to take on a later run. Returns the number
+    of roles stored and the response-usage cost.
+    """
+    if not signals:
+        return 0, 0.0
+    from imas_codex.discovery.signals.role import judge_signal_roles
+
+    try:
+        accepted, cost, _failed = await judge_signal_roles(signals)
+    except ValueError as exc:
+        logger.warning("Signal role judgement refused: %s", exc)
+        return 0, 0.0
+    if not accepted:
+        return 0, cost
+    return store_signal_roles(accepted, gc=gc), cost
+
+
+def fetch_signal_role_candidates(
+    gc: GraphClient | None = None, facility: str | None = None
+) -> list[dict[str, Any]]:
+    """Every signal that carries a description but no stored role.
+
+    ``facility`` restricts the population to one facility id; omitted, every
+    facility is read. The rows are exactly the ones the census counts, through
+    the same predicate.
+    """
+    where = f"WHERE {_SIGNAL_ROLE_MISSING_WHERE}"
+    if facility:
+        where += " AND s.facility_id = $facility"
+    query = (
+        "MATCH (s:FacilitySignal) "
+        f"{where} "
+        "RETURN s.id AS id, s.name AS name, s.description AS description, "
+        "s.unit AS unit, s.facility_id AS facility_id"
+    )
+    if gc is None:
+        with GraphClient() as client:
+            return list(client.query(query, facility=facility))
+    return list(gc.query(query, facility=facility))
+
+
+def census_signal_roles(
+    *, facility: str | None = None, gc: GraphClient | None = None
+) -> dict[str, Any]:
+    """Count the signals still awaiting a role, through the sweep's predicate.
+
+    Uses the same predicate the sweep judges against, so a census taken after a
+    sweep reads zero exactly when the sweep left nothing behind. The population
+    and the missing ids are reported alongside the count.
+    """
+    own_client = gc is None
+    client = GraphClient() if gc is None else gc
+    try:
+        rows = fetch_signal_role_candidates(client, facility)
+        where = "WHERE s.facility_id = $facility" if facility else ""
+        population = client.query(
+            f"MATCH (s:FacilitySignal) {where} RETURN count(s) AS n",
+            facility=facility,
+        )
+        return {
+            "n": population[0]["n"] if population else 0,
+            "missing": len(rows),
+            "missing_ids": sorted(row["id"] for row in rows),
+        }
+    finally:
+        if own_client:
+            client.close()
+
+
+def backfill_signal_roles(
+    *,
+    facility: str | None = None,
+    gc: GraphClient | None = None,
+    batch_size: int = _SIGNAL_ROLE_BATCH,
+    concurrency: int = 8,
+) -> dict[str, Any]:
+    """Judge and store a role for every signal whose description lacks one.
+
+    Selects its rows with the census's own predicate, judges them in batches
+    through :func:`imas_codex.discovery.signals.role.judge_signal_roles`, and
+    stores only the accepted roles. A batch the judge refuses stores nothing
+    for that batch and those rows are left for a later run. ``facility=None``
+    sweeps every facility. Returns the number of candidates, the number of
+    roles stored and the response-usage cost.
+    """
+    own_client = gc is None
+    client = GraphClient() if gc is None else gc
+    try:
+        rows = fetch_signal_role_candidates(client, facility)
+        written = 0
+        cost = 0.0
+        for chunk in _chunks(rows, batch_size):
+            try:
+                accepted, chunk_cost, _failed = _run_coro(
+                    _judge_role_rows(chunk, concurrency)
+                )
+            except ValueError as exc:
+                logger.warning("Signal role judgement refused a batch: %s", exc)
+                continue
+            cost += chunk_cost
+            written += store_signal_roles(accepted, gc=client)
+        return {"candidates": len(rows), "written": written, "cost_usd": cost}
+    finally:
+        if own_client:
+            client.close()
+
+
+async def _judge_role_rows(
+    rows: list[dict[str, Any]], concurrency: int
+) -> tuple[list[dict[str, Any]], float, list[Any]]:
+    from imas_codex.discovery.signals.role import judge_signal_roles
+
+    return await judge_signal_roles(rows, concurrency=concurrency)
+
+
 def mark_signals_enriched(
     signals: list[dict],
     batch_cost: float = 0.0,
@@ -5083,6 +5266,23 @@ async def enrich_worker(
                         state.enrich_stats,
                         enriched,
                     )
+
+            # Judge each freshly described signal's role from the text now
+            # stored. A judgement the model could not answer, or answered
+            # outside the six roles, stores no role and leaves the signal for
+            # the sweep to take on a later run.
+            try:
+                role_written, role_cost = await judge_and_store_signal_roles(enriched)
+                if role_written:
+                    logger.info(
+                        "Stored %d signal roles (cost $%.6f)",
+                        role_written,
+                        role_cost,
+                    )
+                if role_cost and hasattr(state.enrich_stats, "cost"):
+                    state.enrich_stats.cost += role_cost
+            except Exception as exc:
+                logger.warning("Signal role judgement failed (non-fatal): %s", exc)
 
             if on_progress:
                 on_progress("enriched batch", state.enrich_stats, enriched)

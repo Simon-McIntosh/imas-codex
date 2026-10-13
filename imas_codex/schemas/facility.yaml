@@ -118,6 +118,26 @@ enums:
       comment:
         description: Comment data; EDDB class N, read with eddbreadComment
 
+  SignalRole:
+    description: >-
+      Physical role a facility signal plays, judged once at enrichment from its
+      name, description and glossary. Kept separate from physics_domain: a sensor
+      value stays measured even when control uses it, and a reference stays a
+      reference even when it is a time series.
+    permissible_values:
+      measured:
+        description: A direct observation from an instrument, sensor, or diagnostic
+      commanded:
+        description: An actuator command or demand sent to equipment
+      reference_or_setpoint:
+        description: A desired target or setpoint control is compared against
+      status_or_flag:
+        description: A discrete state, alarm, validity flag, interlock, or operating status
+      configuration_parameter:
+        description: A setting, identifier, calibration, or analysis configuration
+      derived_or_computed:
+        description: A calculated, reconstructed, fitted, or aggregated result
+
   DiagnosticCategory:
     description: Categories of fusion plasma diagnostics
     permissible_values:
@@ -2715,6 +2735,14 @@ classes:
         description: What this signal measures (physics description)
       source_description:
         description: Catalogue wording supplied by the source data system, independent of enrichment
+      signal_role:
+        description: >-
+          Physical role this signal plays (measured, commanded,
+          reference_or_setpoint, status_or_flag, configuration_parameter, or
+          derived_or_computed), judged at enrichment from its name, description
+          and glossary. A reprocessed signal is judged again on its new
+          description, because the reset to discovered clears this.
+        range: SignalRole
       embedding:
         description: Vector embedding of description for semantic search
         multivalued: true
