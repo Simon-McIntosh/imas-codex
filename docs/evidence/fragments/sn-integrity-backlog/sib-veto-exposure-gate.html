@@ -30,9 +30,10 @@ collected items at the head (8174 vs 8170) are the superseded-veto regression
 test added by the head commit. The base arm ran from a <code>git archive</code>
 checkout, which has no <code>.git</code>; the archive isolation was asserted in
 the base shell (<code>imas_codex.__file__</code> resolved under the archive, else
-exit 98). Base and head therefore differ by the source change plus the
-archive's absent <code>.git</code>, which is why the added-failure diff — not the
-absolute counts — is the instrument.</p>
+exit 98). Base and head therefore differ by the source change, and each arm's
+absolute failure count is timing-dependent on this node, which is why the
+added-failure diff across two arms rather than either absolute count is the
+instrument.</p>
 
 <h3 id="sib-veto-exposure-gate-added">Added failures (head and not base)</h3>
 <ol>
@@ -60,10 +61,28 @@ absolute counts — is the instrument.</p>
 parent-admission probe, or any fake graph client. No failure has the
 superseded-veto signature (a parent the test expected being dropped).</p>
 
+<h3 id="sib-veto-exposure-gate-receded">Failures at the base and not the head</h3>
+
 <p>Four <code>test_review_release.py</code> ids fail at the base and pass at the
-head; all four are release-provenance tests that need a <code>.git</code> the
-archive does not carry, so they are an artefact of the archive, not a repair by
-the head change.</p>
+head. They are <strong>not</strong> an artefact of the archive's absent
+<code>.git</code>: each of the four uses the <code>isnc_repo</code> fixture
+(<code>test_review_release.py:33</code>), which builds its own repository under
+<code>tmp_path</code>, and <code>base.log</code> records every one with the same
+<code>Failed: Timeout (&gt;30.0s) from pytest-timeout</code> signature as the two
+head-only failures — a load-induced timeout on the parallel arms, most of them
+landing inside <code>_run_git</code>. The archive's absent <code>.git</code> is
+not the cause, so the counts on this arm are timing-dependent rather than
+archive-dependent.</p>
+
+<p>A serial re-run of three of the four at the base
+(<code>base-refire.log</code>) settles it: two
+(<code>test_review_release_scopes_dd_caveats_to_batch_names</code>
+and <code>test_unavailable_dd_gap_read_is_visible_but_not_release_blocking</code>)
+<strong>pass</strong> alone, confirming the parallel-arm timeout. The third,
+<code>test_review_assembly_reproduces_and_closes_sparse_baseline_failure</code>,
+still fails serially, with the timeout inside the <code>yaml</code> parser
+(<code>compose_node</code>) rather than in <code>_run_git</code> — a slow path on
+this node, again unrelated to the probe and not the archive.</p>
 
 <h3 id="sib-veto-exposure-gate-callers">Callers reaching the probe</h3>
 
@@ -83,4 +102,5 @@ unexercised caller.</strong></p>
   <li>base: <code>r-20261013T110801737095-sib-veto-exposure-gate/base.log</code></li>
   <li>head: <code>r-20261013T110801737095-sib-veto-exposure-gate/head.log</code></li>
   <li>head serial re-fire of the two added failures: <code>r-20261013T110801737095-sib-veto-exposure-gate/head-refire.log</code></li>
+  <li>base serial re-fire of three base-only failures: <code>r-20261013T110801737095-sib-veto-exposure-gate/base-refire.log</code></li>
 </ul>
