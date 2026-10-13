@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shs-registry-worklist uv run pytest -p no:cacheprovider tests/standard_names/test_conventions_registry.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T063935739302-shs-registry-worklist/gate-base-and-head.log",
+    "note": "the reviewed run recorded this same log for both arms with revision 38e5dc355 (the base); no separate head-arm log exists, and nothing under imas_codex/ changes so the head result cannot differ",
+    "revision": "38e5dc355c6e9f7ae522264fac3a6ffa5dfbaf91"
+  },
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shs-registry-worklist uv run pytest -p no:cacheprovider tests/standard_names/test_conventions_registry.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T063935739302-shs-registry-worklist/gate-base-and-head.log",
+    "revision": "38e5dc355c6e9f7ae522264fac3a6ffa5dfbaf91"
+  },
+  "completed_at": "2026-10-13T10:12:30.528Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "The census is a standalone evidence script, run once to size the registry worklist. The node that re-runs it to close house-style section 3 will replace the copied segment and template rules with calls to select_conventions, so the census follows the registry's own selection.",
+      "recorded_at": "2026-10-13T10:12:17.708734+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "The census is a standalone evidence script, run once to size the registry worklist. The node that re-runs it to close house-style section 3 will replace the copied segment and template rules with calls to select_conventions, so the census follows the registry's own selection.",
+      "recorded_at": "2026-10-13T10:12:15.079884+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T09:58:12Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py",
+      "line": 107,
+      "severity": "follow-on",
+      "text": "_filled_segments re-implements the segment-kind set that imas_standard_names/grammar/terms.py:212 _ir_segments owns, and _template_matches at :126 duplicates the template-selection filter inside select_conventions (terms.py:234); the brief names select_conventions as the same-capability owner and the census forks it rather than importing _ir_segments or reading select_conventions(name).templates, so a change to ISN's segment or template rule drifts silently from this copy; it does not hold the landing because the census is a standalone evidence script."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: no production module imports the driver or its artefacts; it is a standalone evidence script and the change alters no runtime path.",
+    "diff": "read commit by commit against base 38e5dc355; the single commit 7e73ce74b is additive (4134 insertions, 0 deletions) and creates exactly three files \u2014 shs-registry-worklist-run.py (304 lines), shs-registry-worklist-results.json and shs-registry-worklist.html \u2014 changing nothing under imas_codex/.",
+    "done_when": "the node done-when asks for two logged driver runs exiting 0 with identical results JSON and a scratch run listing flux_surface_averaged while the live run does not; live-run-1.log and live-run-3.log both read EXIT=0 with 139/79/121, the committed results JSON is byte-identical to results-run1.json (diff -q), and control-scratch-registry.log and scratch-results.json show 140 concepts with flux_surface_averaged present against the live run's 139 absent.",
+    "goal": "the goal is a re-runnable census of the convention entries the frozen WEST roster resolves to but the registry lacks; shs-registry-worklist-run.py:141 census() parses all 220 roster names via parse(strict=True) and emits the concepts, notation, templates and unparsed lists.",
+    "manifest": "read; status complete, commit 7e73ce74b; changed_paths names the three files; the tests line records the pytest gate at 2 passed EXIT=0; test_logs names gate-base-and-head.log, live-run-1.log, live-run-3.log and control-scratch-registry.log, all present; blockers and follow_ons empty.",
+    "write_paths": "the source was granted the three fragment paths; git show --name-status 7e73ce74b lists exactly those three (shs-registry-worklist-run.py, shs-registry-worklist-results.json, shs-registry-worklist.html), all added."
+  },
+  "justifications": {
+    "durability": "shs-registry-worklist-run.py carries no assertion and the node adds no test, so nothing reddens if its segment mapping (:107) or template match (:126) regresses; the only falsification is the manual control-scratch-registry.log, which shows the gap but is manual rather than automatic.",
+    "evidence": "live-run-1.log and live-run-3.log both read 'EXIT=0' with 139/79/121 and the committed results JSON is byte-identical to the reviewed run's results-run1.json, and the scratch control reproduces the flux_surface_averaged gap, but the manifest's after_suite records the base revision 38e5dc355 and reuses gate-base-and-head.log so the brief's separate head arm has no log of its own.",
+    "fit": "shs-registry-worklist-run.py follows the module-docstring and type-hint idiom of the surrounding evidence scripts and carries no plan or ticket label, but imports the private ISN symbol _qualifier_segment_kind at :37.",
+    "goal_fidelity": "shs-registry-worklist-run.py:84 _walk yields every parse token by segment kind and :141 census() writes the four lists the goal names with per-token use counts and up to five sample names, sorted highest-first, matching the brief.",
+    "reuse": "_filled_segments at shs-registry-worklist-run.py:107 re-implements imas_standard_names/grammar/terms.py:212 _ir_segments and _template_matches at :126 duplicates the template filter inside select_conventions (terms.py:234) instead of importing or calling them, while load_conventions, parse and _qualifier_segment_kind are correctly imported from ISN.",
+    "scope_discipline": "git show --name-status 7e73ce74b lists exactly the three granted fragment paths in one additive commit, and no file under imas_codex/ is modified."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a re-runnable census of the convention tokens and patterns the frozen WEST roster resolves to but the registry lacks; docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py:84 _walk records each parse's operator/qualifier/base/projection/locus/process token by segment kind and :141 census() emits the concepts, notation, templates and unparsed lists with per-token use counts and up to five sample names, sorted highest-first.\nVERDICT done_when: the node done-when asks for two logged driver runs exiting 0 with identical results JSON plus a scratch run listing flux_surface_averaged while the live run does not; live-run-1.log and live-run-3.log both read EXIT=0 with 139/79/121 and the committed results JSON is byte-identical to results-run1.json, and the scratch control (140 concepts, flux_surface_averaged present) differs from the live run \u2014 all verified on disk.\nVERDICT write_paths: git show --name-status 7e73ce74b lists exactly three added paths, all inside the brief's declared scope: shs-registry-worklist-run.py, shs-registry-worklist-results.json and shs-registry-worklist.html.\nVERDICT manifest: read; status complete, commit 7e73ce74b, landing present, tests line records the pytest gate at 2 passed EXIT=0, and test_logs names the gate, driver and control logs, all present.\nVERDICT diff: read commit by commit against base 38e5dc355; one additive commit (4134 insertions, 0 deletions) creating the driver, the results JSON and the fragment, changing nothing under imas_codex/.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: shs-registry-worklist-run.py:84 _walk yields every parse token by segment kind and :141 census() writes the four lists the goal names with per-token counts and up to five sample names.\nSCORE evidence: 17\nJUSTIFICATION evidence: live-run-1.log and live-run-3.log both read EXIT=0 with 139/79/121 and the committed results JSON is byte-identical to results-run1.json, and the scratch control shows 140 concepts with flux_surface_averaged present versus the live run's 139 absent, but the manifest's after_suite records the base revision 38e5dc355 and reuses the base log so the brief's separate head arm is asserted rather than shown.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --name-status 7e73ce74b is exactly the three granted fragment paths in one additive commit, and no file under imas_codex/ is modified.\nSCORE durability: 8\nJUSTIFICATION durability: the driver carries no assertion and no committed test, so nothing reddens if its segment mapping or template match regresses; the only falsification is the manual control-scratch-registry.log, which shows the gap but does not run automatically.\nSCORE fit: 15\nJUSTIFICATION fit: shs-registry-worklist-run.py follows the script idiom with a module docstring and type hints and carries no plan or ticket label in any symbol, but imports the private ISN symbol _qualifier_segment_kind at :37, coupling the driver to an underscore-prefixed accessor internal.\nSCORE reuse: 5\nJUSTIFICATION reuse: _filled_segments at shs-registry-worklist-run.py:107 re-implements the segment-kind set that imas_standard_names/grammar/terms.py:212 _ir_segments already owns, and _template_matches at :126 duplicates the template-selection filter inside select_conventions (terms.py:234); load_conventions, parse and _qualifier_segment_kind are correctly imported from ISN.\nFINDING docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py:107 follow-on: _filled_segments re-implements the segment-kind set that imas_standard_names/grammar/terms.py:212 _ir_segments owns and _template_matches at :126 duplicates the template-selection filter inside select_conventions (terms.py:234); the brief names select_conventions as the accessor to read through, so the census forks an owner it was told to use \u2014 importing _ir_segments and reading select_conventions(name).templates would extend the owner instead, and this does not hold the landing because the census is a standalone evidence script.",
+  "review_run_id": "r-20261013T095757825722-review-of-shs-registry-worklist-7e73ce74bc5e",
+  "reviewed_base_sha": "38e5dc355c6e9f7ae522264fac3a6ffa5dfbaf91",
+  "reviewed_head_sha": "7e73ce74bc5eb34ca99d400647cd3589942935bb",
+  "reviewed_run_id": "r-20261013T063935739302-shs-registry-worklist",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:06:00+00:00",
+  "total": 84
+}
