@@ -1,0 +1,81 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T03:29:19.739Z",
+  "dispatched_at": "2026-10-13T03:16:03Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:516",
+      "id": "wiring-1",
+      "reason": "the gate's declared measure is what a closer counts against, so correcting it (or re-declaring the gate at 21:08:54Z) changes what the plan asserts the gate proves.",
+      "text": "gate g-ssfms-1 declares its measure as `enriched_at at or after 2026-10-11T19:08:21Z`, but \u00a73 (line 125) derives the cutover as 2026-10-11T21:08:54Z and calls the 19:08:21Z value \"two hours early\", admitting 801 signals enriched before the fix; a closer counting against the gate's own wording admits pre-fix JET signals the fixture's predicate excludes",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:322",
+      "id": "reasoning-1",
+      "reason": "a node that implements only the server-mode gate enables the signal rerank on every full server, bypassing the measurement decision the done-when exists to enforce.",
+      "text": "\u00a77 states \"The switch follows the DD-path rerank: on for a full or facility server, off for a read-only or DD-only server\", which is the server-mode-derived `_rerank_dd_paths = not (read_only or dd_only)` (imas_codex/llm/server.py:1882), yet its done-when (line 351) says the switch \"ships on only if\" the measurement supports it and node 2 \"leaves it off\"; a node cannot tell whether one switch is reused or whether a second flag gates \u00a77's rerank",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:73",
+      "id": "anchors_resolve-1",
+      "reason": "\u00a71 is a historical account of the pre-\u00a74 state whose mechanism \u00a74 has already replaced, so the stale line numbers mislead a curious reader but change no node's work.",
+      "text": "\u00a71's first cause cites `imas_codex/llm/search_tools.py` \"line 287; the same rule at lines 915 (docs) and 1667 (code)\" for the additive blend, but after \u00a74 those lines hold unrelated code (a docstring at 287; rank-fusion comments at 915/1667), so the pointer no longer resolves to the rule it names",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:351",
+      "id": "done_when-1",
+      "reason": "fusion is an explicit comparator and the decision rule can fail, so the node can show its guard bites without a separate mutation control.",
+      "text": "\u00a77's done-when is a decision rule (rerank must beat fusion on mean nDCG@10 and grade-3 precision@5 over three passes, p95 within 5 s) but names no declared negative control, unlike \u00a74 (\"The old rule must fail the same test\") and \u00a78 (a control query whose top 5 holds a grade-2 reference)",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:343",
+      "id": "single_goal-1",
+      "reason": "the port is a small mechanical step of building the measurement module the node already builds, not an independent claim, so one verdict still covers the node.",
+      "text": "\u00a77's third node both \"scores the arms and decides the switch\" and \"ports the \u00a74 and \u00a75 measurement scripts into that module\", two deliverables that cannot be closed on one verdict",
+      "type": "single_goal",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "bd1966319ba256c94c5e30cac8a513b0a195bfdb7a8f1f67e6a9c4d21d76cc18",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 64,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T031538271462-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "282ca9cfca048a4ea141b8a9e796be961dd70c66",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a71's additive-rule cause cites `search_tools.py` lines 287/915/1667, which no longer hold that rule after \u00a74 replaced it with rank fusion.",
+    "done_when": "a finding \u2014 every built node's done-when is measurable, but \u00a77's names no declared negative control; the other strict sections (\u00a74, \u00a75, \u00a76, \u00a78) each name a mutation the guard must redden.",
+    "evidence_paths": "pass \u2014 \u00a73, \u00a74, \u00a75, \u00a76, \u00a77 name durable in-repo fragment paths under `docs/evidence/fragments/signal-search-finds-the-measured-signal/`; \u00a78 and \u00a79 name none but point at no scratchpad, relying on the plan's own convention.",
+    "naming": "pass \u2014 the implementable sections introduce `signal_role`, a `role=` filter and a signal state builder, all mechanism-named; the earlier plan-labelled `SSFMS_JEV_ARMS` variable no longer exists in the tree.",
+    "reasoning": "a finding \u2014 \u00a77 describes a single \"switch\" as both a server-mode gate and a measurement-decided ship flag, so the mechanism its done-when relies on is under-specified.",
+    "single_goal": "a finding \u2014 \u00a77's third node carries the \u00a74/\u00a75 measurement-script port alongside its switch-decision goal.",
+    "wiring": "a finding \u2014 the plan's only declared gate, `g-ssfms-1`, states its measure against a cutover that \u00a73 derives as wrong; the plan otherwise declares no `depends-on`/`informs` relations (`relations: {}`) and carries its section ordering only in the \u00a7-followup prose, which is coherent."
+  },
+  "section_digests": {
+    "_document": "6696124ebd584b8301282dba9ed1faa4ea8816e65a64a881eaaa5dc88d764ffe",
+    "s1": "754ad874aaef18e73ebc818d4d84d06fc2ffe143b5202fdd00a1e0634f39afc6",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "5a77efb737bcf64e7fd5b30aaa71ed3ff5a27b6c8e7b4d33023f03292a98fb15",
+    "s4": "31e1b80d34ee0473acbbff8894edb94dee236159b67ee202ce8891143f015e9a",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "f6a4d1163d7266fa02b3962579f6a27b43a493888d2e105e3aad6eb2c69db803",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "37a1002a450850d41b5c609a5a3ea2a4591ba2f6fb3e3bc91d6cfee5d3cd82ee"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T03:31:15.811798+00:00"
+}
