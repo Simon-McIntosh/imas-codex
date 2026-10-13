@@ -187,9 +187,10 @@
           "ids": "edge_profiles"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "electron_density",
@@ -214,9 +215,10 @@
           "ids": "equilibrium"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "safety_factor",
@@ -241,9 +243,10 @@
           "ids": "edge_profiles"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "plasma_current",
@@ -268,9 +271,10 @@
           "ids": "equilibrium"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "poloidal_magnetic_flux",
@@ -295,9 +299,10 @@
           "ids": "disruption"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "atomic_count",
@@ -322,9 +327,10 @@
           "ids": "amns_data"
         }
       ],
-      "label": "",
+      "label": "general",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "atomic_mass",
@@ -349,9 +355,10 @@
           "ids": "core_profiles"
         }
       ],
-      "label": "",
+      "label": "general",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "radial_coordinate_of_line_of_sight",
@@ -376,9 +383,10 @@
           "ids": "bolometer"
         }
       ],
-      "label": "",
+      "label": "plasma_measurement_diagnostics",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "vertical_coordinate_of_line_of_sight",
@@ -403,9 +411,10 @@
           "ids": "bolometer"
         }
       ],
-      "label": "",
+      "label": "plasma_measurement_diagnostics",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "atomic_number",
@@ -430,9 +439,10 @@
           "ids": "core_profiles"
         }
       ],
-      "label": "",
+      "label": "general",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "ion_charge",
@@ -457,9 +467,10 @@
           "ids": "core_profiles"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "ion_state_maximum_charge_number",
@@ -484,9 +495,10 @@
           "ids": "core_profiles"
         }
       ],
-      "label": "",
+      "label": "core_plasma_physics",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "normalized_poloidal_flux_coordinate",
@@ -511,9 +523,10 @@
           "ids": "core_sources"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "poloidal_magnetic_flux_at_plasma_boundary",
@@ -538,9 +551,10 @@
           "ids": "core_sources"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "toroidal_angle_of_measurement_position",
@@ -565,9 +579,10 @@
           "ids": "ece"
         }
       ],
-      "label": "",
+      "label": "plasma_measurement_diagnostics",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "normalized_toroidal_flux_coordinate",
@@ -592,9 +607,10 @@
           "ids": "core_sources"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "area_of_diagnostic_aperture",
@@ -619,9 +635,10 @@
           "ids": "bolometer"
         }
       ],
-      "label": "",
+      "label": "plasma_measurement_diagnostics",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "volume_of_flux_surface",
@@ -646,9 +663,10 @@
           "ids": "core_sources"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "toroidal_flux_coordinate",
@@ -673,9 +691,10 @@
           "ids": "core_sources"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     },
     {
       "name": "reference_major_radius",
@@ -700,9 +719,10 @@
           "ids": "core_sources"
         }
       ],
-      "label": "",
+      "label": "equilibrium",
       "note": "",
-      "reference": true
+      "reference": true,
+      "label_source": "lead"
     }
   ],
   "sample": [
@@ -4186,5 +4206,10 @@
       "note": "",
       "split": "calibration"
     }
-  ]
+  ],
+  "reference_approved": {
+    "by": "lead",
+    "on": "2026-10-13",
+    "note": "all twenty approved as proposed by the coordinator"
+  }
 }
