@@ -3,11 +3,15 @@
 
   <p id="ssfms-fulltext-guard-node-what">
     The widened <code>facility_signal_text</code> definition is now held by a test that reads it
-    straight from the schema — <code>tests/graph/test_signal_fulltext_fields.py</code> loads the
-    <code>FacilitySignal.fulltext_index</code> annotation from
-    <code>imas_codex/schemas/facility.yaml</code> with no graph and requires the index to carry
-    <code>name</code>, <code>description</code>, <code>node_path</code>, <code>keywords</code>,
-    <code>aliases</code>, <code>unit</code> and <code>source_description</code>. The
+    through its owners — <code>tests/graph/test_signal_fulltext_fields.py</code> reads the index
+    through <code>GraphSchema.fulltext_indexes</code> (the LinkML schema in
+    <code>imas_codex/schemas/facility.yaml</code>) and through the generated
+    <code>FULLTEXT_INDEXES</code> that <code>GraphClient</code>'s
+    <code>EXPECTED_FULLTEXT_INDEXES</code> builds the live index from, with no graph, and requires
+    each to carry <code>name</code>, <code>description</code>, <code>node_path</code>,
+    <code>keywords</code>, <code>aliases</code>, <code>unit</code> and
+    <code>source_description</code>, so a dropped annotation field or a stale regeneration fails.
+    The
     <code>_text_search_signals</code> docstring in <code>imas_codex/llm/search_tools.py</code> now
     names those seven fields and states that the CONTAINS fallback covers only
     <code>name</code>, <code>description</code> and <code>node_path</code>, replacing its stale
@@ -15,7 +19,7 @@
   </p>
 
   <ul id="ssfms-fulltext-guard-node-measure">
-    <li id="ssfms-fulltext-guard-node-measure-gate">Gate — <code>pytest tests/graph/test_signal_fulltext_fields.py tests/llm/test_search_tools.py</code> — reads <strong>107 passed, 8 skipped</strong>, exit 0, at the revision that carries both changes.</li>
-    <li id="ssfms-fulltext-guard-node-measure-control">Declared negative control — removing <code>keywords</code> from the annotation in a scratch copy — fails the new test: exit 1, <code>AssertionError: facility_signal_text index is missing indexed fields: ['keywords']</code>, an id the head arm passes. Log: <code>negative-control.log</code>.</li>
+    <li id="ssfms-fulltext-guard-node-measure-gate">Gate — <code>pytest tests/graph/test_signal_fulltext_fields.py tests/llm/test_search_tools.py</code> — reads <strong>108 passed, 8 skipped</strong>, exit 0, at the revision that carries both changes.</li>
+    <li id="ssfms-fulltext-guard-node-measure-control">Declared negative control — removing <code>keywords</code> from the annotation in a scratch copy — fails the schema test: exit 1, <code>AssertionError: facility_signal_text schema definition is missing indexed fields: ['keywords']</code>, an id the head arm passes. Log: <code>negative-control.log</code>.</li>
   </ul>
 </section>
