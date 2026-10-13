@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": "631206b82",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:1692 (mark_signals_enriched)",
+    "imas_codex/discovery/signals/parallel.py:1780 (mark_signals_underspecified)",
+    "imas_codex/discovery/signals/parallel.py:2255 (propagate_source_enrichment)",
+    "imas_codex/discovery/signals/parallel.py:5162 (individualize_source_descriptions)",
+    "imas_codex/discovery/signals/parallel.py:2319 (sweep_source_enrichment -> propagate_source_enrichment)",
+    "imas_codex/discovery/signals/parallel.py:6013 (individualize_source_descriptions call site)"
+  ],
+  "completed_at": "2026-10-13T00:08:30.079Z",
+  "dispatched_at": "2026-10-12T23:54:08Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-description-writer.html",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the landed fragment says \"The three description writes in the signals package route through the writer\" but then names four functions (mark_signals_enriched, mark_signals_underspecified, propagate_source_enrichment, individualize_source_descriptions) and the code has four call sites (parallel.py:1692, :1780, :2255, :5162), so the count a reader checks the fragment against does not match the code."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "2255",
+      "severity": "follow-on",
+      "text": "follow-on: propagate_source_enrichment passes extra_params (enriched, description, name, physics_domain, keywords) that the rendered followers statement never references -- those values travel through the UNWIND item (s.status = item.status etc. from the extra_clause at parallel.py:1617) -- so the parameters are dead bindings that read as if they drive the write."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "1600",
+      "severity": "follow-on",
+      "text": "follow-on: the writer pops any caller-supplied embedding and then relies on embed_descriptions_batch to set it, so a description rewrite with empty or whitespace text stores embedding null (embed_descriptions_batch sets None for empty text) and blanks a previously valid vector; the source manifest records this not-backfilled case under follow_ons."
+    }
+  ],
+  "head_log_revision": "7c13967b7",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against 631206b82; 6bd69f40c adds the writer and the _DESCRIPTION_WRITER_KEYS set, routes mark_signals_enriched/mark_signals_underspecified/propagate_source_enrichment/individualize_source_descriptions through it, and adds the embedded_text_hash slot to the FacilitySignal class in facility.yaml (class header at line 2518); 7c13967b7 adds only the evidence fragment, and no production file outside the fence is touched.",
+    "done_when": "read; the done_when names the single writer, the declared slot, the individualisation re-embed test and no-added-failures on the discovery tests, and the manifest records each -- base 1559 passed EXIT=0 and head 1562 passed EXIT=0 on tests/discovery/ with the revision and command in each log header, plus the negative-control log -- so the gate asserts the stated measure.",
+    "goal": "the goal is one writer routing every FacilitySignal description write through a statement that stores the description with its embedding and text hash; the diff adds write_signal_descriptions at imas_codex/discovery/signals/parallel.py:1541 which sets description, embedding, embedded_at and embedded_text_hash in one UNWIND, embeds via embed_descriptions_batch, and is reached by all four FacilitySignal description writes in the package (parallel.py:1692, :1780, :2255, :5162), while the remaining description SETs in the package target DataSource, SignalEpoch, CalibrationEpoch and SignalSource nodes (scanners/device_xml.py:221, scanners/device_xml.py:278, scanners/device_xml.py:1653, parallel.py:2209), so the goal is met.",
+    "manifest": "read; it records status complete, the two commits, the changed paths, the 1559/1562 EXIT=0 gate results, the negative-control log at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T232339331806-ssfms-description-writer/negative_control.log and a checkpoint, and its headline claims (one writer, the declared hash slot, the re-embed test failing under the mutation) survive my own read of the diff and logs.",
+    "write_paths": "read; the manifest declares facility.yaml, parallel.py, tests/discovery/test_signal_description_writer.py and the evidence fragment, and git diff 631206b82..7c13967b7 touches exactly those four files (parallel.py, facility.yaml, the new test file, the fragment), every path inside the fence and none touching the declared figure directory."
+  },
+  "justifications": {
+    "durability": "removing the embed_descriptions_batch call from write_signal_descriptions (the declared mutation) reddens tests/discovery/test_signal_description_writer.py::test_individualization_write_reembeds_each_member at negative_control.log, whose assertion compares each member's stored embedding against the test's independent _embedding_of(member[\"description\"]) so it fails when the writer drops the re-embed.",
+    "evidence": "the gate is recorded and reproducible at head -- gate_discovery_head.log carries \"# revision: 6bd69f40c\" and the summary \"1562 passed ... EXIT=0\" against gate_discovery_base.log \"1559 passed ... EXIT=0\", and the negative control at negative_control.log records \"3 failed ... EXIT=1\" -- but the manifest's baseline_suite/after_suite fields are prose rather than structured failure ids and the landed fragment miscounts the routed writes (fragment line 19).",
+    "fit": "the writer follows the module's helper style (module-level _DESCRIPTION_WRITER_KEYS, typed signature) and introduces no plan label, but the propagate call binds extra_params at parallel.py:2255 whose values the rendered statement never references.",
+    "goal_fidelity": "the writer at imas_codex/discovery/signals/parallel.py:1541 sets description with embedding, embedded_at and embedded_text_hash, but for an empty description it stores embedding null (props.pop at :1600 then embed_descriptions_batch leaves None) rather than an embedding, a small gap against \"stores the description with its embedding\".",
+    "reuse": "the writer delegates the embed to embed_descriptions_batch (imas_codex/embeddings/description.py:29), reusing the owner rather than forking it, and no prior owner of a combined description+embedding write exists (the create_nodes auto-embed at imas_codex/graph/client.py:656 is a distinct create-path capability with no text hash).",
+    "scope_discipline": "git diff 631206b82..7c13967b7 lists only imas_codex/discovery/signals/parallel.py, imas_codex/schemas/facility.yaml, tests/discovery/test_signal_description_writer.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-description-writer.html, every one a declared write path with no generated model staged."
+  },
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261012T232339331806-ssfms-description-writer (imas-codex, plan signal-search-finds-the-measured-signal section 5, node ssfms-description-writer), base 631206b823c7888c7074811b00c685675b854ad3, head 7c13967b7138a17cf6af69c71927ddb8de2f630e.\nreviewed_base_sha: 631206b823c7888c7074811b00c685675b854ad3\nreviewed_head_sha: 7c13967b7138a17cf6af69c71927ddb8de2f630e\nVERDICT goal: the goal is one writer routing every FacilitySignal description write through a statement that stores the description with its embedding and text hash; the diff adds write_signal_descriptions at imas_codex/discovery/signals/parallel.py:1541 which sets description, embedding, embedded_at and embedded_text_hash in one UNWIND, embeds via embed_descriptions_batch, and is reached by all four FacilitySignal description writes in the package (parallel.py:1692, :1780, :2255, :5162), while the remaining description SETs in the package target DataSource, SignalEpoch, CalibrationEpoch and SignalSource nodes (scanners/device_xml.py:221, scanners/device_xml.py:278, scanners/device_xml.py:1653, parallel.py:2209), so the goal is met.\nVERDICT done_when: read; the done_when names the single writer, the declared slot, the individualisation re-embed test and no-added-failures on the discovery tests, and the manifest records each -- base 1559 passed EXIT=0 and head 1562 passed EXIT=0 on tests/discovery/ with the revision and command in each log header, plus the negative-control log -- so the gate asserts the stated measure.\nVERDICT write_paths: read; the manifest declares facility.yaml, parallel.py, tests/discovery/test_signal_description_writer.py and the evidence fragment, and git diff 631206b82..7c13967b7 touches exactly those four files (parallel.py, facility.yaml, the new test file, the fragment), every path inside the fence and none touching the declared figure directory.\nVERDICT manifest: read; it records status complete, the two commits, the changed paths, the 1559/1562 EXIT=0 gate results, the negative-control log at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T232339331806-ssfms-description-writer/negative_control.log and a checkpoint, and its headline claims (one writer, the declared hash slot, the re-embed test failing under the mutation) survive my own read of the diff and logs.\nVERDICT diff: read commit by commit against 631206b82; 6bd69f40c adds the writer and the _DESCRIPTION_WRITER_KEYS set, routes mark_signals_enriched/mark_signals_underspecified/propagate_source_enrichment/individualize_source_descriptions through it, and adds the embedded_text_hash slot to the FacilitySignal class in facility.yaml (class header at line 2518); 7c13967b7 adds only the evidence fragment, and no production file outside the fence is touched.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:1692 (mark_signals_enriched), imas_codex/discovery/signals/parallel.py:1780 (mark_signals_underspecified), imas_codex/discovery/signals/parallel.py:2255 (propagate_source_enrichment), imas_codex/discovery/signals/parallel.py:5162 (individualize_source_descriptions), imas_codex/discovery/signals/parallel.py:2319 (sweep_source_enrichment -> propagate_source_enrichment), imas_codex/discovery/signals/parallel.py:6013 (individualize_source_descriptions call site)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the writer at imas_codex/discovery/signals/parallel.py:1541 sets description with embedding, embedded_at and embedded_text_hash, but for an empty description it stores embedding null (props.pop at :1600 then embed_descriptions_batch leaves None) rather than an embedding, a small gap against \"stores the description with its embedding\".\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate is recorded and reproducible at head -- gate_discovery_head.log carries \"# revision: 6bd69f40c\" and the summary \"1562 passed ... EXIT=0\" against gate_discovery_base.log \"1559 passed ... EXIT=0\", and the negative control at negative_control.log records \"3 failed ... EXIT=1\" -- but the manifest's baseline_suite/after_suite fields are prose rather than structured failure ids and the landed fragment miscounts the routed writes (fragment line 19).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 631206b82..7c13967b7 lists only imas_codex/discovery/signals/parallel.py, imas_codex/schemas/facility.yaml, tests/discovery/test_signal_description_writer.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-description-writer.html, every one a declared write path with no generated model staged.\nSCORE durability: 19\nJUSTIFICATION durability: removing the embed_descriptions_batch call from write_signal_descriptions (the declared mutation) reddens tests/discovery/test_signal_description_writer.py::test_individualization_write_reembeds_each_member at negative_control.log, whose assertion compares each member's stored embedding against the test's independent _embedding_of(member[\"description\"]) so it fails when the writer drops the re-embed.\nSCORE fit: 17\nJUSTIFICATION fit: the writer follows the module's helper style (module-level _DESCRIPTION_WRITER_KEYS, typed signature) and introduces no plan label, but the propagate call binds extra_params at parallel.py:2255 whose values the rendered statement never references.\nSCORE reuse: 18\nJUSTIFICATION reuse: the writer delegates the embed to embed_descriptions_batch (imas_codex/embeddings/description.py:29), reusing the owner rather than forking it, and no prior owner of a combined description+embedding write exists (the create_nodes auto-embed at imas_codex/graph/client.py:656 is a distinct create-path capability with no text hash).\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-description-writer.html:19 follow-on: the landed fragment says \"The three description writes in the signals package route through the writer\" but then names four functions (mark_signals_enriched, mark_signals_underspecified, propagate_source_enrichment, individualize_source_descriptions) and the code has four call sites (parallel.py:1692, :1780, :2255, :5162), so the count a reader checks the fragment against does not match the code.\nFINDING imas_codex/discovery/signals/parallel.py:2255 follow-on: propagate_source_enrichment passes extra_params (enriched, description, name, physics_domain, keywords) that the rendered followers statement never references -- those values travel through the UNWIND item (s.status = item.status etc. from the extra_clause at parallel.py:1617) -- so the parameters are dead bindings that read as if they drive the write.\nFINDING imas_codex/discovery/signals/parallel.py:1600 follow-on: the writer pops any caller-supplied embedding and then relies on embed_descriptions_batch to set it, so a description rewrite with empty or whitespace text stores embedding null (embed_descriptions_batch sets None for empty text) and blanks a previously valid vector; the source manifest records this not-backfilled case under follow_ons.",
+  "review_run_id": "r-20261012T235358686278-review-of-ssfms-description-writer",
+  "reviewed_base_sha": "631206b823c7888c7074811b00c685675b854ad3",
+  "reviewed_head_sha": "7c13967b7138a17cf6af69c71927ddb8de2f630e",
+  "reviewed_run_id": "r-20261012T232339331806-ssfms-description-writer",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:09:17.956405+00:00",
+  "total": 110
+}
