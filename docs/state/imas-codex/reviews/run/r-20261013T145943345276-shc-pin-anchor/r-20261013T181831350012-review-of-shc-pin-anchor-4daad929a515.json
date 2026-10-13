@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: baseline_suite gate_base.log (184 passed, 12 deselected, EXIT=0) and after_suite gate_head.log (185 passed, 12 deselected, EXIT=0); zero FAILED lines in either arm, so zero added failures across the 17-file harmonize+families+cypher set.",
+  "base_log_revision": "4ae756c8581cf670ae0ec97b16029cb4516e837f",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6098",
+    "imas_codex/cli/sn.py:6154",
+    "imas_codex/cli/sn.py:6241",
+    "imas_codex/standard_names/loop.py:1066",
+    "imas_codex/standard_names/loop.py:1240",
+    "imas_codex/standard_names/workers.py:1621",
+    "imas_codex/standard_names/pool_adapter.py:242"
+  ],
+  "completed_at": "2026-10-13T18:16:20.352Z",
+  "dispatched_at": "2026-10-13T15:00:06Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "765",
+      "severity": "follow-on",
+      "text": "follow-on: _FAMILY_ANCHOR_PROPERTY writes and reads sn.harmonized_anchor, but no schema declares it (only harmonized_at/harmonized_group_signature are declared in imas_codex/graph/models.py:5062-5063 and the LinkML slots), so a property-name typo would set a throwaway key and read zero rows silently; the manifest and fragment record the slot declaration as deferred to a later node, so this is recorded, not blocking."
+    }
+  ],
+  "head_log_revision": "4daad929a5154cf2ce786c78f24e168cf2564662",
+  "item_verdicts": {
+    "diff": "read commit by commit against base 48c569aff: f60614237 adds the pin (harmonize.py, families.py, test, fragment), 4ae756c85 gives the graph-wide name read one owner (deletes families copy, extends graph_ops.get_existing_standard_names, harmonize.known_name_ids), 4daad929a makes the stamp the pin's only release and drops the force release.",
+    "done_when": "the done_when names reuse/release tests with the graph stubs, an out-of-scope-link test, the harmonize+families gate at base and head, a cypher gate, and the fragment; the manifest records gate_base.log (184 passed EXIT=0) and gate_head.log (185 passed EXIT=0), and five red negative-control logs at EXIT=1.",
+    "goal": "the node's goal is to keep a harmonize run's chosen anchor until its family is stamped harmonized, and to fold in two follow-ons (one owner for the graph-wide all-name read; no scope-only deadness fallback); imas_codex/standard_names/harmonize.py:768 pins the anchor via pinned_family_anchor over _FAMILY_ANCHOR_PROPERTY, and harmonize.py:528 known_name_ids now calls graph_ops.get_existing_standard_names.",
+    "manifest": "read; status complete, declaring write paths, a scope_deviation for graph_ops.py, base/head gate results, negative_control_log naming logs/neg_force.log, and prose naming the other four red logs.",
+    "write_paths": "the brief declares harmonize.py, families.py, tests/standard_names/test_harmonize_anchor_pin.py and the fragment (resume-1 widened it to include docs/figures/sn-harmonize-command); the diff touches those plus imas_codex/standard_names/graph_ops.py, which the brief named out of scope but the coordinator's resume-2 advice authorized with --accept-path."
+  },
+  "justifications": {
+    "durability": "each added assertion reddens under a named source mutation: neg_pin_reuse.log (plan stops reading the pin) fails test_recorded_anchor_reused_when_another_member_outscores_it; neg_release.log fails test_stamped_family_releases_the_anchor_and_selects_normally; neg_scope_read.log fails test_report_within_a_client; neg_duplicate.log fails test_the_graph_wide_name_read_has_one_definition; neg_force.log fails the forced-apply test, all EXIT=1.",
+    "evidence": "the gate is the exact 17-file harmonize+families+cypher set the done_when names, run at base (gate_base.log 184 passed EXIT=0) and head (gate_head.log 185 passed EXIT=0) with zero added failures and delta 0.",
+    "fit": "the added helpers follow the module's existing shape (module-level gc-parameterized functions, _resolve_gc/_close_if_owned) and the names pinned_family_anchor / _record_family_anchor / _clear_family_anchor describe the mechanism, avoiding the plan abbreviation SHC that a prior round had leaked into env seams.",
+    "goal_fidelity": "harmonize.py:844 reuses the recorded anchor in :844-847 (the not-yet-stamped family reuses the pin even when another member outscores it) and differs from the goal only in that the flag-semantics of --force were narrowed by coordinator direction, not the goal.",
+    "reuse": "the duplicate all-name read is deleted and harmonize.known_name_ids:528 now calls graph_ops.get_existing_standard_names (the owner), so the change extends the owner rather than forking it; test_the_graph_wide_name_read_has_one_definition pins the singleton going forward.",
+    "scope_discipline": "every path in the diff is inside the declared scope except imas_codex/standard_names/graph_ops.py:865, which the brief named out of scope but the coordinator's resume-2 advice explicitly authorized; docked for the deviation and because the property read rides the same untyped name."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261013T181831350012-review-of-shc-pin-anchor-4daad929a515",
+  "reviewed_base_sha": "48c569aff3430879dd3c777a236b09526b230d7d",
+  "reviewed_head_sha": "4daad929a5154cf2ce786c78f24e168cf2564662",
+  "reviewed_run_id": "r-20261013T145943345276-shc-pin-anchor",
+  "reviewer": {
+    "backend": "deepseek",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T19:10:00+00:00",
+  "total": 107
+}
