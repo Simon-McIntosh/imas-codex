@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -256,7 +256,10 @@
     <div class="r-comment-body"><p>reviewed r-20261013T112336580366-srtj-name-review-build at head 45efcf0bc8e27341e6cc092506bed9e3745a63c2 against base aae4cf82bf3f2c82ebdfb7677d81b04c4a5e5628; verdict SOUND WITH FINDINGS, scores goal_fidelity 18, evidence 13, scope_discipline 20, durability 16, fit 15, reuse 19 (total 101); one blocking finding (the landing fragment records neither the live smoke's answers nor its booked cost, both named by the reviewed done_when) and two follow-on findings (a comment promising a Choice-table construction refusal no code implements; an audit-decided check recorded answered True when no audit_report was supplied)</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T154457013891-review-of-srtj-name-review-build-cb90cf79417f" data-who="reckon-build" data-when="2026-10-13T15:57:05.943Z">
-    <div class="r-comment-body"><p>reviewed r-20261013T112336580366-srtj-name-review-build at head cb90cf79 against base aae4cf82; verdict SOUND WITH FINDINGS, scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 16, fit 15, reuse 19 (total 105); four follow-on findings (a comment promising a Choice-table construction refusal no code implements; an audit-decided check recorded answered True when no audit_report was supplied; a &quot;cascade of the plan&quot; plan reference in a source comment; a baseline_suite command in the run manifest that disagrees with its own gate log header); the prior blocking finding (fragment missing the smoke answers and cost) is repaired at cb90cf79, whose fragment now records the two names, their per-check answers and USD 0.0001407.</p></div>
+    <div class="r-comment-body"><p>reviewed r-20261013T112336580366-srtj-name-review-build at head cb90cf79 against base aae4cf82; verdict SOUND WITH FINDINGS, scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 16, fit 15, reuse 19 (total 105); four follow-on findings (a comment promising a Choice-table construction refusal no code implements; an audit-decided check recorded answered True when no audit_report was supplied; a "cascade of the plan" plan reference in a source comment; a baseline_suite command in the run manifest that disagrees with its own gate log header); the prior blocking finding (fragment missing the smoke answers and cost) is repaired at cb90cf79, whose fragment now records the two names, their per-check answers and USD 0.0001407.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T112336580366-srtj-name-review-build" data-who="reckon-build" data-when="2026-10-13T12:41:17.275Z">
+    <div class="r-comment-body"><p>built the name-axis Jev review as a state builder and a taxonomy-read question table (dimension category per dimension, one Noul/Choice per check, audit-class checks contribute findings with no question), with per-dimension decisions derived in code and sibling reranking keeping the embedding order on failure; 21 new tests, gate 43 passed EXIT=0, negative control 10 failed EXIT=1, live smoke over two golden-A names at USD 0.0001407; the repair round records that smoke&#x27;s names, answers and cost in the landing fragment so the record reconciles with its own description</p></div>
 </div>
 </section>
 </main>
