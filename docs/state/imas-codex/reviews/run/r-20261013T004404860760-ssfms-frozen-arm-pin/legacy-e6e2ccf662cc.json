@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "deepseek-v4.1-flash",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T00:44:19Z",
+  "findings": [
+    {
+      "file": "tests/search/test_fusion.py",
+      "line": "37",
+      "severity": "follow-on",
+      "text": "follow-on: the refactored _additive_rank in tests/llm/test_signal_search_goldens.py:257 now mirrors the retired-additive-rule helper this file already owns at tests/search/test_fusion.py:37 (same signature (vector_ids, vector_scores, text_hits, k) and the same 0.7*cosine + 0.3*text + 0.1 arithmetic); the node modified its own helper to that shape rather than importing or extending the owner, so two frozen copies of the same additive rule now live in the tree and can drift (the llm copy uses .get(sid, 0) and does not round the combined score, the fusion copy rounds to 3 dp)."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-frozen-arm-pin.html",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the evidence fragment names the replacement test as test_the_frozen_additive_rule_ranks_fixed_streams_by_that_formula, but the landed test at tests/llm/test_signal_search_goldens.py:742 is test_the_frozen_additive_rule_ranks_fixed_streams_by_its_formula; the fragment cites a test name that does not exist."
+    },
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "713",
+      "severity": "follow-on",
+      "text": "follow-on (pre-existing, out of this node's scope): test_four_arm_table_matches_the_control_below_every_arm fails with UnlabelledCandidates for arm additive_rule on question magnetic-fluctuation-toroidal-mode-one (4 jt-60sa signals), so the done_when clause that the whole file passes under -m 'graph or not graph' is not met; the base arm (basearm.log) reproduces the identical failure on the HEAD revision of the file, and the fix is fixture labels in tests/llm/fixtures/signal_search_questions.json, which is ssfms-fusion-measure's write scope."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "call_sites": "none \u2014 the changed helpers (_additive_rank, _additive_streams) are test-local; grep finds them referenced only within tests/llm/test_signal_search_goldens.py (and an unrelated same-named copy in tests/search/test_fusion.py), so no production runtime code reaches the landed change.",
+    "diff": "One commit 65ec6ed34 against base c1f5b3a4b; the test-file hunk turns _additive_rank (tests/llm/test_signal_search_goldens.py:257) into a pure formula over fixed inputs, adds _additive_streams (:285), updates the module docstring and the additive_rule arm at :345, retires the graph-pin test and adds the no-graph formula test at :742; the second hunk adds the 27-line evidence fragment. The changed arithmetic is identical to what it was \u2014 only the inputs moved from a live graph fetch to fixed arguments.",
+    "done_when": "The done_when names a graph-free formula test (present at tests/llm/test_signal_search_goldens.py:742) and a pass of tests/llm/test_signal_search_goldens.py under -m 'graph or not graph'; the retired graph-pin test is replaced, but the full-file run is 1 failed / 10 passed (gate.log EXIT=1), the single failure being a pre-existing UnlabelledCandidates gap (:713) that basearm.log reproduces on the base revision of the file.",
+    "goal": "The landed change refactors _additive_rank (tests/llm/test_signal_search_goldens.py:257) to a pure function over fixed streams and moves the graph fetch into _additive_streams (:285), with the additive_rule arm at :345 delegating to both, pinning the frozen additive arm to its own formula exactly as the node goal states.",
+    "manifest": "Read; status complete; tests names the -m 'graph or not graph' gate at 1 failed / 10 passed and the -m 'not graph' subset at 8 passed / 3 deselected EXIT=0; test_logs name gate.log, gate-nograph.log, basearm.log, negctl.log; baseline_suite and after_suite carry completed true, each with the same single failure id; negative_control_log is a bare path.",
+    "write_paths": "git diff c1f5b3a4b..65ec6ed34 --name-only is exactly tests/llm/test_signal_search_goldens.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-frozen-arm-pin.html, both inside the declared grant; the third granted path (the figures directory) is unused, which the done-when permits since it names the fragment rather than a figure."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_signal_search_goldens.py:759 asserts a literal order [sig:t1, sig:v1, sig:v2, sig:v3] against fixed inputs and :763 asserts the k=3 cut, both independent of the code under test; the declared mutation (the rule changed to the fused order) reddens the test as negctl.log records it (EXIT=1, one failing id) and the head arm passes it.",
+    "evidence": "The run records its own arms \u2014 baseline_suite (c1f5b3a4b, 5.98s subset, the pre-existing failure) and after_suite (65ec6ed34, the same single failure) \u2014 plus the no-graph subset at 8 passed / 3 deselected EXIT=0 (gate-nograph.log) and the red negative control (negctl.log), so the added-failure count is 0; the one shortfall is that the done_when's full-file-pass clause is unmet by the pre-existing :713 failure, which the worker disclosed rather than papered over.",
+    "fit": "The refactor follows the module's existing arm-helper idiom (arm_ranking at :345 already dispatches per arm) and keeps mechanism-first docstrings with no plan labels or ticket references; the one blemish is the fragment at docs/evidence/fragments/.../ssfms-frozen-arm-pin.html:15 citing a test name that does not exist.",
+    "goal_fidelity": "_additive_rank at tests/llm/test_signal_search_goldens.py:257 now takes fixed streams and applies the 0.7/0.3/0.1 formula directly, and the arm at :345 consumes it through _additive_streams, which is the frozen-arm pin the goal names.",
+    "reuse": "The change did not add a new mechanism \u2014 _additive_streams is a thin graph-fetch wrapper and _additive_rank is the module's own pre-existing helper modified in place \u2014 but the refactor now makes that helper a near-clone of the additive-rule helper tests/search/test_fusion.py:37 already owns, so two copies of the same frozen rule coexist without one extending the other.",
+    "scope_discipline": "git diff --name-only c1f5b3a4b..65ec6ed34 is exactly the two changed files, both declared, and the tree at 65ec6ed34 is clean with nothing outside the grant."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the landed change refactors _additive_rank in tests/llm/test_signal_search_goldens.py:257 to a pure function over fixed streams (vector_ids, vector_scores, text_rows, k) and moves the graph fetch to _additive_streams (:285), with the additive_rule arm at :345 delegating to them, which pins the frozen additive arm to its formula exactly as the node goal states.\nVERDICT done_when: the done_when names a no-graph formula test and a pass of tests/llm/test_signal_search_goldens.py under -m 'graph or not graph'; the graph-pin test is retired and replaced by test_the_frozen_additive_rule_ranks_fixed_streams_by_its_formula (:742), but the full-file run is 1 failed / 10 passed (gate.log EXIT=1) because of a pre-existing UnlabelledCandidates failure (:713) that the base arm reproduces identically (basearm.log).\nVERDICT write_paths: git diff c1f5b3a4b..65ec6ed34 --name-only is exactly tests/llm/test_signal_search_goldens.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-frozen-arm-pin.html, both inside the declared three-path grant, with nothing outside it.\nVERDICT manifest: read; status complete, tests names the -m 'graph or not graph' gate at 1 failed / 10 passed and the -m 'not graph' subset at 8 passed / 3 deselected EXIT=0, test_logs name gate/gate-nograph/basearm/negctl, baseline_suite and after_suite are recorded as their own JSON blocks with completed true and the same single failure id, and negative_control_log is a bare path.\nVERDICT diff: one commit 65ec6ed34 against base c1f5b3a4b; the test-file hunk turns _additive_rank into a pure formula over fixed inputs, adds _additive_streams, updates the module docstring and the additive_rule arm comment, retires the graph-pin test and adds the no-graph formula test at :742; the second hunk adds the 27-line evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: _additive_rank at tests/llm/test_signal_search_goldens.py:257 now takes fixed streams and applies the 0.7/0.3/0.1 formula directly, and the arm at :345 consumes it through _additive_streams, which is the frozen-arm pin the goal names.\nSCORE evidence: 15\nJUSTIFICATION evidence: the run records its own arms as after_suite (65ec6ed34, the single pre-existing failure) and the no-graph subset at 8 passed / 3 deselected EXIT=0 (gate-nograph.log), with a red negative control (negctl.log) giving added_failure_count 0, but the done_when's full-file-pass clause is unmet because of the pre-existing :713 failure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only c1f5b3a4b..65ec6ed34 is exactly tests/llm/test_signal_search_goldens.py and the evidence fragment, both declared, and the tree at 65ec6ed34 is clean.\nSCORE durability: 19\nJUSTIFICATION durability: tests/llm/test_signal_search_goldens.py:759 asserts a literal order against fixed inputs and the declared mutation (the rule changed to the fused order) reddens it as negctl.log records (EXIT=1, one failing id).\nSCORE fit: 18\nJUSTIFICATION fit: the refactor follows the module's existing arm-helper idiom (arm_ranking at :345) with no plan labels, blemished only by the fragment at docs/evidence/fragments/.../ssfms-frozen-arm-pin.html:15 naming a test that does not exist.\nSCORE reuse: 12\nJUSTIFICATION reuse: the refactored _additive_rank at tests/llm/test_signal_search_goldens.py:257 is a near-clone of the additive-rule helper tests/search/test_fusion.py:37 already owns, so two frozen copies of the same rule coexist without one extending the other.\nFINDING tests/search/test_fusion.py:37 follow-on: the refactored _additive_rank now duplicates the retired-additive-rule helper this file already owns (same signature and 0.7/0.3/0.1 arithmetic), so two frozen copies can drift.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-frozen-arm-pin.html:15 follow-on: the fragment names the replacement test by a name that does not exist (test_the_frozen_additive_rule_ranks_fixed_streams_by_that_formula vs ..._by_its_formula).\nFINDING tests/llm/test_signal_search_goldens.py:713 follow-on: an out-of-scope pre-existing UnlabelledCandidates failure blocks the done_when's full-file-pass clause; the fix belongs to the fixture owned by ssfms-fusion-measure.\nreviewed_base_sha: c1f5b3a4b7ecbeb40c43b5ca62d130b4a38c59b4\nreviewed_head_sha: 65ec6ed34d2691ca1b74e8bdf8f02be17d87a64a",
+  "review_run_id": "legacy-e6e2ccf662cc",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "c1f5b3a4b7ecbeb40c43b5ca62d130b4a38c59b4",
+  "reviewed_commits": [
+    "65ec6ed34"
+  ],
+  "reviewed_head_sha": "65ec6ed34d2691ca1b74e8bdf8f02be17d87a64a",
+  "reviewed_run_id": "r-20261013T004404860760-ssfms-frozen-arm-pin",
+  "reviewer_run_id": "r-20261013T010312807741-review-of-ssfms-frozen-arm-pin-65ec6ed34d26",
+  "scores": {
+    "durability": 19,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:10:00.000000+00:00",
+  "total": 103
+}
