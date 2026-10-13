@@ -353,9 +353,9 @@ def _search_signals(
 
     ``rerank`` reorders the fused pool through the shared Jev relevance rerank
     on the role-aware signal question, spending on the discovery-relevance
-    seat. It is off by default: a direct caller leaves it off, and the server
-    passes the server's own switch, which no mode turns on until the arms are
-    scored.
+    seat. A direct caller leaves it off, and the server passes the server's own
+    switch, which follows the server mode: on for a full or facility server,
+    off for a read-only or DD-only server.
 
     Optional check outcome filtering:
         check_status: "passed", "failed", or "unchecked"
@@ -415,8 +415,9 @@ def _search_signals(
         data_node_results = _vector_search_data_nodes(gc, embedding, facility, k)
 
         # Step 4: Rerank the fused pool on the role-aware signal question and
-        # keep the top k. The switch is off, so this runs only once its arms
-        # are scored; a rerank that fails or overruns leaves the fused order.
+        # keep the top k. The switch follows the server mode, so this runs on a
+        # full or facility server; a rerank that fails or overruns leaves the
+        # fused order.
         if rerank and enriched:
             enriched, rerank_note = rerank_candidates(
                 query,
