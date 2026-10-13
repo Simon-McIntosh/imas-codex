@@ -55,6 +55,11 @@
     <p>The real apply refuses the whole run when any family holds a protected member. The dry run now says so: zero planned calls and zero estimated cost, the refusing family named, and the other families shown as <code>decision=apply (blocked by refusal)</code> rather than as running. Under <code>--force</code> every family counts. A two-family fixture test pins both cases, with nothing written (merge <code>de3e96abd</code>). Gate: harmonize and protection tests 68 passed at base, 70 at head, no added failures. Independent review: 114/120.</p>
   </section>
 
+  <section id="s4-score-regression">
+    <h2>§4 — the apply names every member whose documentation score fell</h2>
+    <p>An apply over a pattern family now keeps each member's documentation-axis score from the plan's own family read, before the reset, and compares it with the score after the family drains. <code>docs_score_regressions</code> in <code>imas_codex/standard_names/harmonize.py</code> reports two lists by name, each with its before and after value: members below the pipeline's acceptance threshold (<code>DEFAULT_MIN_SCORE</code>, 0.85) and members whose score fell. <code>sn harmonize --apply</code> prints them per family and across the scope. A member with no measured score on either side is skipped, not reported as a fall.</p><p>Harmonize, guard and campaign gate: 144 passed at base, 148 at head (four new tests), zero added failures. With the comparison removed, the below-threshold test fails. Merge <code>05fceac43</code>; independent review 110/120 with three follow-ons: the red-arm log carries no revision header, the CLI test asserts the values it injected, and the before score is read from the family plan rather than the revision snapshot (equivalent, and taken before the reset). <a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-score-regression">node record</a></p>
+  </section>
+
 </main>
 </body>
 </html>
