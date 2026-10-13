@@ -19,6 +19,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from collections import defaultdict
+from collections.abc import Collection
 from typing import Any, NoReturn
 
 from pydantic import BaseModel, Field
@@ -402,15 +403,28 @@ def run_lexical_lint(names: list[dict[str, Any]]) -> list[LintFinding]:
 # ---------------------------------------------------------------------------
 
 
-def run_link_integrity(names: list[dict[str, Any]]) -> list[LinkFinding]:
+def run_link_integrity(
+    names: list[dict[str, Any]],
+    *,
+    known_ids: Collection[str] | None = None,
+) -> list[LinkFinding]:
     """Check link resolution status and cross-reference consistency.
 
     Operates purely in-memory from the provided name catalog.
+
+    *known_ids* is the set of name ids the graph holds. A link whose target is
+    absent from it is dead. When *known_ids* is ``None`` the ids of *names*
+    are used instead, so a caller that passes the whole catalog keeps the
+    previous behaviour; a caller reporting over a scope narrower than the
+    catalog passes the graph-wide set so a link to a name outside the scope is
+    not counted as dead. *names* alone remains the scope of the missing-reverse
+    scope and the reverse-link index.
     """
     findings: list[LinkFinding] = []
 
-    # Build lookup of all name IDs
-    all_ids = {name.get("id", "") for name in names}
+    # The scoped set scopes what is reported; the known set decides deadness.
+    scope_ids = {name.get("id", "") for name in names}
+    all_ids = scope_ids if known_ids is None else set(known_ids)
 
     # Build reverse-link index: target → set of sources that link to it
     reverse_links: dict[str, set[str]] = defaultdict(set)
@@ -451,8 +465,10 @@ def run_link_integrity(names: list[dict[str, Any]]) -> list[LinkFinding]:
                     )
                 )
 
-            # Missing reverse: A→B exists but B→A does not
-            if target and target in all_ids:
+            # Missing reverse: A→B exists but B→A does not. The reverse index
+            # and this test stay on the scoped set: a target outside the scope
+            # is not reported on, so it cannot be reported as non-reciprocal.
+            if target and target in scope_ids:
                 target_linkers = reverse_links.get(name_id, set())
                 if target not in target_linkers:
                     findings.append(

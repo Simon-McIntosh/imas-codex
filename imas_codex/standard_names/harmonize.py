@@ -520,6 +520,19 @@ def _domain_scoped_finding(name_id: str) -> str | None:
     return None
 
 
+#: Dead-link resolution reads the whole catalog, not the scope under report:
+#: a target is dead only when no ``StandardName`` anywhere carries it. The
+#: report's scope stays the scope of what is reported. Bounded, because the
+#: read names its row set (every live name id).
+_NAME_IDS_QUERY = "MATCH (sn:StandardName) RETURN sn.id AS id LIMIT 200000"
+
+
+def _known_name_ids(gc: Any) -> set[str]:
+    """Every ``StandardName`` id the graph holds, for dead-link resolution."""
+    rows = gc.query(_NAME_IDS_QUERY) or []
+    return {row["id"] for row in rows if row.get("id")}
+
+
 def report_family_rows(
     gc: Any | None = None,
     *,
@@ -534,7 +547,8 @@ def report_family_rows(
     :func:`~imas_codex.standard_names.review.audits.run_lint_checks` plus
     :func:`~imas_codex.standard_names.review.audits.run_link_integrity` — the
     report never calls ``run_all_audits``, whose embedding preflight writes.
-    Nothing here writes to the graph.
+    Nothing here writes to the graph. Link-target deadness resolves against
+    every name.
 
     A lint finding scoped to a physics domain rather than to one name — the
     lexical lint's cross-name position-form findings carry the synthetic id
@@ -553,6 +567,10 @@ def report_family_rows(
 
     families = fetch_pattern_families(gc, seeds=seeds, min_size=min_size)
     in_scope = [member for family in families for member in family["members"]]
+    # A link target is dead only when the graph holds no such name. The scoped
+    # members alone are the report's subject, not the test for deadness: many
+    # valid references point outside a family.
+    known_ids = _known_name_ids(gc) if gc is not None else None
 
     by_name: dict[str, dict[str, int]] = {}
     # (domain, class) → count, one entry per domain-scoped finding.
@@ -565,7 +583,7 @@ def report_family_rows(
             continue
         counts = by_name.setdefault(finding.name_id, {})
         counts[finding.finding_type] = counts.get(finding.finding_type, 0) + 1
-    for link_finding in run_link_integrity(in_scope):
+    for link_finding in run_link_integrity(in_scope, known_ids=known_ids):
         counts = by_name.setdefault(link_finding.name_id, {})
         key = f"link_{link_finding.finding_type}"
         counts[key] = counts.get(key, 0) + 1

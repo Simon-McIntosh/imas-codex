@@ -1,0 +1,44 @@
+<section>
+  <h2 id="shc-report-graph-links">A report link is dead only when the graph holds no such name</h2>
+  <p>
+    The §2 report built its dead-link lookup from the scoped members alone, so
+    a family documentation linking to a valid name outside the family counted
+    that link as dead — 19 such links on the 17-member boundary-density family.
+    Deadness now resolves against every name the graph holds; the scoped set
+    stays the scope of what is reported, and the missing-reverse test is
+    unchanged.
+  </p>
+  <p>
+    <code>run_link_integrity</code> in
+    <code>imas_codex/standard_names/review/audits.py</code> takes an optional
+    <code>known_ids</code> set. The dead-link test uses it when given and the
+    ids of the passed names otherwise, so a caller that hands the whole catalog
+    keeps its previous behaviour. The reverse-link index and the
+    missing-reverse test stay on the scoped ids: a target outside the scope is
+    not reported on, so it cannot be reported as non-reciprocal.
+    <code>report_family_rows</code> in
+    <code>imas_codex/standard_names/harmonize.py</code> supplies the set from
+    one bounded read of every <code>StandardName.id</code>
+    (<code>_known_name_ids</code>).
+  </p>
+  <h3 id="shc-report-graph-links-test">The test and its negative control</h3>
+  <p>
+    <code>tests/standard_names/test_report_graph_links.py</code> drives
+    <code>report_family_rows</code> with a two-member scope whose default member
+    links to a third name outside the scope. With the third name in the graph
+    set the report carries no <code>link_dead_link</code> finding; with the set
+    holding only the two scoped ids it carries one. A direct call to
+    <code>run_link_integrity</code> without <code>known_ids</code> still reports
+    that link dead, pinning the fallback.
+  </p>
+  <p>
+    The declared negative control — <em>ignore the graph set and the
+    out-of-scope link is reported dead again</em> — was applied by passing
+    <code>in_scope</code> without <code>known_ids</code> in
+    <code>report_family_rows</code> and kept as
+    <code>negative_control.log</code>: <code>EXIT=1</code>, with
+    <code>test_target_in_graph_outside_scope_is_not_dead</code> failing while
+    the other three pass. Reverted, the gate runs 72 passed, 4 more than the
+    68-pass base with no added failures.
+  </p>
+</section>
