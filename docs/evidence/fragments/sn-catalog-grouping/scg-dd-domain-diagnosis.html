@@ -1,0 +1,56 @@
+<section id="dd-domain-diagnosis">
+  <h2>Why DD path domains echo their IDS</h2>
+  <p>
+    The DD build overwrites an existing path's <code>physics_domain</code> with
+    its IDS default, while leaving <code>domain_source</code> and
+    <code>domain_classified_at</code> intact. The subsequent classifier selects
+    only paths whose <code>domain_source IS NULL</code>, so it skips those
+    overwritten paths. A prior LLM classification remains visible in metadata
+    even though its domain value has been replaced.
+  </p>
+  <table>
+    <thead><tr><th>Evidence</th><th>Observed fact</th></tr></thead>
+    <tbody>
+      <tr><td>Build writer</td><td><code>build_dd.py:3495</code> obtains the IDS domain; <code>build_dd.py:3576-3583</code> uses <code>MERGE</code> and unconditionally sets the path domain. The <code>SET</code> does not clear classification metadata. The seed and assignment trace to commit <code>8ef2a37c3b</code>.</td></tr>
+      <tr><td>Classifier gate</td><td><code>dd_domain_classifier.py:1022-1034</code> requires <code>n.domain_source IS NULL</code> unless forced. Its response mapping at lines 740-785 uses the returned path index and validates the domain; it does not map a valid answer to the IDS domain.</td></tr>
+      <tr><td>Run history</td><td>The DD log records 12,011 Tier 1 classifications on 2026-06-18 at lines 28498-28499. On 2026-07-22 it records 61,474 paths processed by the build at line 29310, followed by only 23 Tier 1 candidates and classifications at lines 29742-29751. The log is <code>/home/ITER/mcintos/.local/share/imas-codex/logs/imas_dd_dd.log</code>.</td></tr>
+      <tr><td>Live graph</td><td>A read-only <code>IMASNode-[:IN_IDS]-&gt;IDS</code> census found 61,337 of 61,366 path domains equal to their IDS domain, including 12,030 of 12,038 paths still marked <code>llm_classified</code>. The maximum classification timestamp is 2026-07-22. The query and its <code>EXIT=0</code> receipt are in <code>live-domain-census.log</code> in this run's record.</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The prompt itself has not changed since its original commit
+    <code>b37044e7f</code>. It says to use path structure first and calls the IDS
+    name informational; its explicit examples still associate electron
+    temperature under core profiles with <code>transport</code>. Its vocabulary
+    table lists 21 of the 32 installed domains and omits
+    <code>core_plasma_physics</code> and ten others. This limits the fresh
+    classifier's ability to reproduce some reviewed labels, but cannot explain
+    the retained old timestamps beside the build's IDS defaults. The response
+    mapper, the two narrow deterministic override patterns, and the unused
+    <code>compute_domain_input_hash</code> do not reset a path to its IDS.
+  </p>
+  <p>
+    The read-only driver follows each labelled name's live
+    <code>StandardName &larr;PRODUCED_NAME&minus; StandardNameSource
+    &minus;FROM_DD_PATH&rarr; IMASNode</code> links. The positive control found
+    856 distinct source paths for 148 of 170 names; 22 have no source through
+    that route. It calls <code>gather_classification_context</code> and
+    <code>classify_tier1_llm</code> in memory and uses
+    <code>pick_primary_domain</code> for the derived name domain. Names without a
+    source count as misses against their labels. The source-set measures count a
+    match when the labelled domain occurs among a name's source domains; the
+    derived measure requires exact equality after priority selection.
+  </p>
+  <p>
+    The first fresh pass cached 800 of 856 paths for USD 1.91418, then stopped
+    at its reserve under the USD 2 ceiling. Complete accuracy values remain
+    pending classification of the last 56 paths. The completed batches are
+    durable in <code>fresh-cache.json</code> in this run's record; the run receipt
+    is <code>fresh-run-2.log</code>. The source and name property fingerprint was
+    <code>aecb5deed110b245cfc08a69925840378b631924081f84cf4e42169278367e0d</code>
+    before and after that read-only pass; both snapshots retain 170 names, 856
+    source paths, the same domain distributions, and the same maximum
+    classification timestamp. The receipts are <code>fresh-run-2.log</code> and
+    <code>read-only-after-partial.log</code> in this run's record.
+  </p>
+</section>
