@@ -1,0 +1,174 @@
+{
+  "facility": "jt-60sa",
+  "node": "ssfms-reprocess-bulk-4",
+  "pipeline": "imas-codex discover run jt-60sa --only signals --reset-to discovered --focus <manifest>",
+  "reprocess_start": "2026-10-13T11:53:35Z",
+  "node_started_at": "2026-10-13T14:30:14Z",
+  "assigned_categories": [
+    "b260008",
+    "a048717",
+    "DCSV",
+    "QMS",
+    "PSC"
+  ],
+  "assigned_category_totals": {
+    "b260008": 2959,
+    "a048717": 1598,
+    "DCSV": 753,
+    "QMS": 650,
+    "PSC": 494
+  },
+  "measured_rate_signals_per_minute": 60,
+  "scopes_finished": [
+    {
+      "scope": "probe-psc-subset",
+      "categories": [
+        "PSC"
+      ],
+      "ids": 120,
+      "mode": "reset+enrich",
+      "post_reset_census": null,
+      "final_census": {
+        "total": 120,
+        "discovered": 0,
+        "roles": 104,
+        "described": 120,
+        "emb": 120,
+        "since_start": 120,
+        "no_role": 16,
+        "hash_mismatch": 0
+      },
+      "enrichment": {
+        "engine_signals": 226,
+        "spend_usd": 0.02,
+        "seconds": 224.2
+      }
+    },
+    {
+      "scope": "psc-remaining-and-qms",
+      "categories": [
+        "PSC",
+        "QMS"
+      ],
+      "ids": 1024,
+      "mode": "reset then enrich",
+      "post_reset_census": {
+        "total": 1024,
+        "discovered": 1018,
+        "roles": 0,
+        "described": 6,
+        "emb": 1024,
+        "since_start": 6,
+        "no_role": 6,
+        "hash_mismatch": 1018
+      },
+      "final_census": {
+        "total": 1024,
+        "discovered": 0,
+        "roles": 356,
+        "described": 1024,
+        "emb": 1024,
+        "since_start": 1024,
+        "no_role": 668,
+        "hash_mismatch": 0
+      },
+      "enrichment": {
+        "engine_signals": 1772,
+        "spend_usd": 0.04,
+        "seconds": 536.5
+      }
+    },
+    {
+      "scope": "dcsv",
+      "categories": [
+        "DCSV"
+      ],
+      "ids": 753,
+      "mode": "reset then enrich",
+      "post_reset_census": {
+        "total": 753,
+        "discovered": 751,
+        "roles": 0,
+        "described": 2,
+        "emb": 753,
+        "since_start": 2,
+        "no_role": 2,
+        "hash_mismatch": 751
+      },
+      "final_census": {
+        "total": 753,
+        "discovered": 0,
+        "roles": 359,
+        "described": 753,
+        "emb": 753,
+        "since_start": 753,
+        "no_role": 394,
+        "hash_mismatch": 0
+      },
+      "enrichment": {
+        "engine_signals": 1167,
+        "spend_usd": 0.03,
+        "seconds": 415.5
+      }
+    },
+    {
+      "scope": "a048717-subset",
+      "categories": [
+        "a048717"
+      ],
+      "ids": 700,
+      "mode": "reset then enrich",
+      "post_reset_census": {
+        "total": 713,
+        "discovered": 713,
+        "roles": 0,
+        "described": 0,
+        "emb": 713,
+        "since_start": 0,
+        "no_role": 0,
+        "hash_mismatch": 713
+      },
+      "final_census": {
+        "total": 700,
+        "discovered": 0,
+        "roles": 288,
+        "described": 700,
+        "emb": 700,
+        "since_start": 700,
+        "no_role": 412,
+        "hash_mismatch": 0
+      },
+      "enrichment": {
+        "engine_signals": 1431,
+        "spend_usd": 0.03,
+        "seconds": 630.4
+      }
+    }
+  ],
+  "not_yet_reset": [
+    {
+      "category": "a048717",
+      "assigned": 1598,
+      "reset_and_finished": 700,
+      "remaining": 898,
+      "reason": "the remaining a048717 signals exceed what the node's measured rate (about 60 signals/min) could finish before the 60-minute deadline; the first 700 ids were reset and finished"
+    },
+    {
+      "category": "b260008",
+      "assigned": 2959,
+      "reset_and_finished": 2946,
+      "remaining": 13,
+      "remaining_status": "discovered",
+      "reason": "b260008 was largely reprocessed before this node (2946 of 2959 described and enriched); 13 signals were already at discovered when this node started and a scoped flush did not enrich them, so they remain for a continuation node"
+    }
+  ],
+  "totals": {
+    "ids_finished": 2597,
+    "discovered": 0,
+    "described": 2597,
+    "emb": 2597,
+    "hash_mismatch": 0,
+    "spend_usd": 0.12,
+    "seconds": 1806.6
+  }
+}

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<body>
+<section id="ssfms-reprocess-bulk-4">
+  <h2 id="ssfms-reprocess-bulk-4-title">Reprocessing the large JT-60SA categories in bulk</h2>
+
+  <p id="ssfms-reprocess-bulk-4-summary">
+    This node reprocessed the four smallest of the five categories in this
+    node's assignment, finishing
+    <strong id="ssfms-reprocess-bulk-4-count">2597 signals</strong> across
+    PSC, QMS, DCSV and the first 700 ids of a048717. Every finished signal is
+    off <code>discovered</code>, carries a description, and carries an
+    embedding whose <code>embedded_text_hash</code> matches a hash recomputed
+    from its own text (0 mismatches). Engine spend was
+    <strong>$0.12</strong> over 4596 engine-signals at 1806.6s of enrichment
+    wall time.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-4-sizing">
+    The five assigned categories hold 6454 signals, of which about 3460 needed
+    reprocessing — far more than a 60-minute node can finish. A 120-signal
+    probe measured the local enrichment rate at about 60 signals per minute, so
+    each scope was reset only once that rate said it could finish before the
+    deadline: PSC (494), QMS (650) and DCSV (753) whole, and the first 700 ids
+    of a048717. The remaining 898 a048717 signals and 13 stray
+    <code>discovered</code> b260008 signals are listed in
+    <code>reprocess-progress-bulk-4.json</code> for a continuation node. No
+    scope was reset after 15:08Z, within the 40-minute reset window; the node's
+    last reset at 15:08Z preceded the 15:10Z cutoff.
+  </p>
+
+  <h3 id="ssfms-reprocess-bulk-4-table-title">Each scope: reset size, enrichment record, and final census</h3>
+  <table id="ssfms-reprocess-bulk-4-table">
+    <thead>
+      <tr>
+        <th>scope</th><th>ids</th><th>engine enriched</th><th>spend</th>
+        <th>seconds</th><th>discovered</th><th>described</th>
+        <th>emb</th><th>hash mismatch</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="ssfms-reprocess-bulk-4-row-probe">
+        <td>PSC probe subset</td><td>120</td><td>226</td><td>$0.02</td>
+        <td>279.2</td><td>0</td><td>120</td><td>120</td><td>0</td>
+      </tr>
+      <tr id="ssfms-reprocess-bulk-4-row-a">
+        <td>PSC remaining + QMS</td><td>1024</td><td>1772</td><td>$0.04</td>
+        <td>536.5</td><td>0</td><td>1024</td><td>1024</td><td>0</td>
+      </tr>
+      <tr id="ssfms-reprocess-bulk-4-row-dcsv">
+        <td>DCSV</td><td>753</td><td>1167</td><td>$0.03</td>
+        <td>415.5</td><td>0</td><td>753</td><td>753</td><td>0</td>
+      </tr>
+      <tr id="ssfms-reprocess-bulk-4-row-a048717">
+        <td>a048717 first 700</td><td>700</td><td>1431</td><td>$0.03</td>
+        <td>630.4</td><td>0</td><td>700</td><td>700</td><td>0</td>
+      </tr>
+      <tr id="ssfms-reprocess-bulk-4-row-total">
+        <td><strong>total</strong></td><td><strong>2597</strong></td>
+        <td><strong>4596</strong></td><td><strong>$0.12</strong></td>
+        <td><strong>1806.6</strong></td><td><strong>0</strong></td>
+        <td><strong>2597</strong></td><td><strong>2597</strong></td>
+        <td><strong>0</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-reprocess-bulk-4-control">
+    The reset is the step that could have silently done nothing, so each of the
+    three scoped resets carries a post-reset census taken immediately after the
+    reset and before enrichment. Chunk D (DCSV) was the cleanest:
+    751 of 753 signals at <code>discovered</code> with <code>described=0</code>
+    — the complement of the control, so a census that had found them still
+    described would have meant the reset never ran. Chunk B (a048717 subset)
+    read 713 of 713 at <code>discovered</code>, <code>described=0</code>.
+    Those censuses are captured at
+    <code>census-chunkD-postreset.json</code> and
+    <code>census-chunkB-postreset.json</code> under the run directory, beside
+    each scope's enrichment log and final census.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-4-note">
+    One correction for a continuation node: b260008 was largely reprocessed
+    before this node (2946 of 2959 described and enriched). Its 13 signals
+    already at <code>discovered</code> were included in a scoped flush but were
+    not enriched by it, so they remain at <code>discovered</code> and are
+    reported as not-yet-reset rather than silently counted as finished.
+  </p>
+</section>
+</body>
+</html>
