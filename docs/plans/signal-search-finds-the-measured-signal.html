@@ -332,26 +332,33 @@
       paid requests inside a test process, so they are scored by the harness's own arm functions called from a
       measurement run outside pytest. The rerank may lift any of its 60 candidates into its top 10, and its order varies
       between runs, so this section first labels RRF's top 60 on every question, under §3's rule and into §3's fixture,
-      extending the top-10 labels §3 leaves. The section is three nodes. The first is that labelling, sized as §3's
+      extending the top-10 labels §3 leaves. The section is four nodes. The first is that labelling, sized as §3's
       labelling was. The second, in parallel with it, is the product change: the signal state builder, the role-aware
       question moved beside <code>_RERANK_QUESTION</code>, and <code>_search_signals</code> routed through
-      <code>rerank_candidates</code> behind the switch, which it leaves off. The third, after both, scores the arms and
-      decides the switch. Both arms build each candidate's state with the signal state
-      builder this section adds to the product, not the generic one the harness used for the prototype, so the switch
-      is decided on the state that ships. The generic arm uses
+      <code>rerank_candidates</code> behind the switch, which it leaves off. The third, after both, builds the
+      measurement module and the harness changes it rests on; it spends Jev only to reproduce §4's docs and code figure.
+      The fourth, after the third, runs the module's three passes and sets the switch. Both rerank arms build each
+      candidate's state with the signal state builder this section adds to the product, not the generic one the harness
+      used for the prototype, so the switch is decided on the state that ships. The generic arm uses
       <code>_RERANK_QUESTION</code>; the role-aware arm uses <code>_ROLE_RERANK_QUESTION</code>, which the product node
-      moved beside it and the harness now imports. The measurement run is a module in the repository, so its figures
-      reproduce from a checkout. The third node also ports the §4 and §5 measurement scripts into that module. §4's
-      docs and code questions and labels live outside the repository, in the rerank prototype's
-      <code>queries.json</code> and <code>labels.json</code>, so the node vendors them into a fixture beside the signal
-      fixture as query, candidate id and grade only, without candidate text, and the ported §4 measurement reads that
-      fixture. The originals stay where their landed fragments cite them, and each of those fragments gains the
-      module's command. The node also makes two harness fixes. The frozen additive rule breaks score ties by signal id,
-      so its order no longer depends on set iteration. The arm-table test asserts the fused tool stays above the frozen
-      additive rule on mean nDCG@10, a regression floor beside the random control. And a test with the switch on and
-      <code>k</code> of 10 asserts the rerank receives a pool of 60. The labelling node checked the pool with a script
-      kept outside the repository, so the harness's rerank arms refuse an unlabelled candidate anywhere in their pool
-      of 60, not only in their top 10, and a test that removes one pool label shows the refusal naming it.
+      moved beside it and the harness now imports.
+    </p>
+    <p>
+      The third node's measurement run is a module in the repository, so its figures reproduce from a checkout. It
+      ports the §4 and §5 measurement scripts into that module. §4's docs and code questions and labels live outside the
+      repository, in the rerank prototype's <code>queries.json</code> and <code>labels.json</code>, so the node vendors
+      them into a fixture beside the signal fixture as query, candidate id and grade only, without candidate text, and
+      the ported §4 measurement reads that fixture. The originals stay where their landed fragments cite them, and each
+      of those fragments gains the module's command. The node makes four harness changes. The frozen additive rule
+      breaks score ties by signal id, so its order no longer depends on set iteration. The arm-table test asserts the
+      fused tool stays above the frozen additive rule on mean nDCG@10, a regression floor beside the random control. A
+      test with the switch on and <code>k</code> of 10 asserts the rerank receives a pool of 60. And because the
+      labelling node checked the pool with a script kept outside the repository, the harness's rerank arms refuse an
+      unlabelled candidate anywhere in their pool of 60, not only in their top 10, and a test that removes one pool
+      label shows the refusal naming it. The third node is done when those four changes pass, the removal test fails
+      with the refusal narrowed back to the top 10, the ported §4 measurement reproduces §4's docs and code figure from
+      the vendored fixture, and the module's command is in §4's and §5's fragments. The fourth node owns the done-when
+      below.
     </p>
     <p>
       <strong>Done when</strong> no candidate in RRF's top 60 on any question is unlabelled, and the harness reports the
