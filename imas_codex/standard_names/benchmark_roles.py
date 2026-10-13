@@ -1473,15 +1473,26 @@ async def run_docs_bench(
 
 
 async def run_classifier_bench(
-    models: list[str], gold: list[dict], incumbent: str | None = None, gc: Any = None
+    models: list[str],
+    gold: list[dict],
+    incumbent: str | None = None,
+    gc: Any = None,
+    *,
+    use_tree: bool = False,
 ) -> RoleBenchReport:
-    """Benchmark the domain classifier seat: gold-set exact-match accuracy."""
+    """Benchmark the domain classifier seat: gold-set exact-match accuracy.
+
+    With ``use_tree`` the two-level category-then-domain Choice decides each
+    batch and re-judges its low-confidence paths with the chat classifier; the
+    default path is the chat classifier alone, unchanged.
+    """
     from imas_codex.core.physics_domain import PhysicsDomain
     from imas_codex.discovery.base.llm import ensure_model_prefix
     from imas_codex.graph.client import GraphClient
     from imas_codex.graph.dd_domain_classifier import (
         DEFAULT_BATCH_SIZE,
         _classify_batch,
+        _classify_batch_tree,
         batch_by_subtree,
         gather_classification_context,
     )
@@ -1510,13 +1521,25 @@ async def run_classifier_bench(
         _bench_progress(f"classifier: [{_ci}/{len(models)}] {model.split('/')[-1]}…")
 
         async def _classify_one(
-            batch: list[dict], _m: str = ensure_model_prefix(model)
+            batch: list[dict], _m: str = model
         ) -> tuple[list[dict], float]:
             async with _cls_sem:
                 try:
+                    if use_tree:
+                        from imas_codex.settings import get_model
+
+                        # the tree seat is configured with its own provider
+                        # prefix; only the chat fallback arrives as a bare name
+                        return await _classify_batch_tree(
+                            batch,
+                            model=_m,
+                            chat_model=ensure_model_prefix(get_model("sn-classifier")),
+                            service="standard-names",
+                            valid_domains=valid_domains,
+                        )
                     return await _classify_batch(
                         batch,
-                        model=_m,
+                        model=ensure_model_prefix(_m),
                         service="standard-names",
                         valid_domains=valid_domains,
                     )

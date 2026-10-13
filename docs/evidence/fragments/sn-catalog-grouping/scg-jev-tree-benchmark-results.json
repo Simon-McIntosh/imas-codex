@@ -1,0 +1,646 @@
+{
+ "calibration_sweep": [
+  {
+   "calibration_accuracy": 0.5753424657534246,
+   "threshold": 0.0
+  },
+  {
+   "calibration_accuracy": 0.5753424657534246,
+   "threshold": 0.05
+  },
+  {
+   "calibration_accuracy": 0.5753424657534246,
+   "threshold": 0.1
+  },
+  {
+   "calibration_accuracy": 0.5753424657534246,
+   "threshold": 0.15
+  },
+  {
+   "calibration_accuracy": 0.5753424657534246,
+   "threshold": 0.2
+  },
+  {
+   "calibration_accuracy": 0.589041095890411,
+   "threshold": 0.25
+  },
+  {
+   "calibration_accuracy": 0.589041095890411,
+   "threshold": 0.3
+  },
+  {
+   "calibration_accuracy": 0.5616438356164384,
+   "threshold": 0.35
+  },
+  {
+   "calibration_accuracy": 0.5616438356164384,
+   "threshold": 0.4
+  },
+  {
+   "calibration_accuracy": 0.5616438356164384,
+   "threshold": 0.45
+  },
+  {
+   "calibration_accuracy": 0.5616438356164384,
+   "threshold": 0.5
+  },
+  {
+   "calibration_accuracy": 0.6027397260273972,
+   "threshold": 0.55
+  },
+  {
+   "calibration_accuracy": 0.6027397260273972,
+   "threshold": 0.6
+  },
+  {
+   "calibration_accuracy": 0.6164383561643836,
+   "threshold": 0.65
+  },
+  {
+   "calibration_accuracy": 0.6164383561643836,
+   "threshold": 0.7
+  },
+  {
+   "calibration_accuracy": 0.6027397260273972,
+   "threshold": 0.75
+  },
+  {
+   "calibration_accuracy": 0.6164383561643836,
+   "threshold": 0.8
+  },
+  {
+   "calibration_accuracy": 0.6301369863013698,
+   "threshold": 0.85
+  },
+  {
+   "calibration_accuracy": 0.6575342465753424,
+   "threshold": 0.9
+  },
+  {
+   "calibration_accuracy": 0.6301369863013698,
+   "threshold": 0.95
+  },
+  {
+   "calibration_accuracy": 0.6301369863013698,
+   "threshold": 1.0
+  }
+ ],
+ "chat_share": 0.5,
+ "chosen_threshold": 0.9,
+ "classified_path_count": 856,
+ "gold": {
+  "chat": {
+   "accuracy": 0.1914,
+   "correct": 40,
+   "model": "openrouter/openai/gpt-5.5",
+   "n": 209,
+   "spend_usd": 0.345686
+  },
+  "tree": {
+   "accuracy": 0.3876,
+   "correct": 81,
+   "model": "typesafe/jev-1.13",
+   "n": 209,
+   "spend_usd": 0.4094423800000001
+  }
+ },
+ "model": "typesafe/jev-1.13",
+ "overrides_changed_after_confident_jev": 0,
+ "paired_accuracy_difference": {
+  "excludes_zero": false,
+  "level": 0.95,
+  "lower": -0.03896103896103896,
+  "n_resamples": 1000,
+  "names": 77,
+  "point": -0.012987012987012988,
+  "upper": 0.0
+ },
+ "per_domain": [
+  {
+   "chat_accuracy": 0.7142857142857143,
+   "chat_correct": 5,
+   "label": "auxiliary_heating",
+   "names": 7,
+   "tree_accuracy": 0.5714285714285714,
+   "tree_correct": 4
+  },
+  {
+   "chat_accuracy": 0.6,
+   "chat_correct": 3,
+   "label": "core_plasma_physics",
+   "names": 5,
+   "tree_accuracy": 0.6,
+   "tree_correct": 3
+  },
+  {
+   "chat_accuracy": 0.5,
+   "chat_correct": 1,
+   "label": "current_drive",
+   "names": 2,
+   "tree_accuracy": 0.5,
+   "tree_correct": 1
+  },
+  {
+   "chat_accuracy": 0.2,
+   "chat_correct": 1,
+   "label": "edge_plasma_physics",
+   "names": 5,
+   "tree_accuracy": 0.2,
+   "tree_correct": 1
+  },
+  {
+   "chat_accuracy": 1.0,
+   "chat_correct": 4,
+   "label": "electromagnetic_wave_diagnostics",
+   "names": 4,
+   "tree_accuracy": 1.0,
+   "tree_correct": 4
+  },
+  {
+   "chat_accuracy": 0.5,
+   "chat_correct": 3,
+   "label": "equilibrium",
+   "names": 6,
+   "tree_accuracy": 0.5,
+   "tree_correct": 3
+  },
+  {
+   "chat_accuracy": 0.5,
+   "chat_correct": 2,
+   "label": "fast_particles",
+   "names": 4,
+   "tree_accuracy": 0.5,
+   "tree_correct": 2
+  },
+  {
+   "chat_accuracy": 0.5,
+   "chat_correct": 1,
+   "label": "fueling",
+   "names": 2,
+   "tree_accuracy": 0.5,
+   "tree_correct": 1
+  },
+  {
+   "chat_accuracy": 0.0,
+   "chat_correct": 0,
+   "label": "general",
+   "names": 1,
+   "tree_accuracy": 0.0,
+   "tree_correct": 0
+  },
+  {
+   "chat_accuracy": 0.5,
+   "chat_correct": 2,
+   "label": "gyrokinetics",
+   "names": 4,
+   "tree_accuracy": 0.5,
+   "tree_correct": 2
+  },
+  {
+   "chat_accuracy": 1.0,
+   "chat_correct": 2,
+   "label": "magnetic_field_diagnostics",
+   "names": 2,
+   "tree_accuracy": 1.0,
+   "tree_correct": 2
+  },
+  {
+   "chat_accuracy": 1.0,
+   "chat_correct": 4,
+   "label": "magnetic_field_systems",
+   "names": 4,
+   "tree_accuracy": 1.0,
+   "tree_correct": 4
+  },
+  {
+   "chat_accuracy": 0.3333333333333333,
+   "chat_correct": 1,
+   "label": "magnetohydrodynamics",
+   "names": 3,
+   "tree_accuracy": 0.3333333333333333,
+   "tree_correct": 1
+  },
+  {
+   "chat_accuracy": 0.0,
+   "chat_correct": 0,
+   "label": "mechanical_measurement_diagnostics",
+   "names": 1,
+   "tree_accuracy": 0.0,
+   "tree_correct": 0
+  },
+  {
+   "chat_accuracy": 1.0,
+   "chat_correct": 2,
+   "label": "neutronics",
+   "names": 2,
+   "tree_accuracy": 1.0,
+   "tree_correct": 2
+  },
+  {
+   "chat_accuracy": 0.0,
+   "chat_correct": 0,
+   "label": "particle_measurement_diagnostics",
+   "names": 1,
+   "tree_accuracy": 0.0,
+   "tree_correct": 0
+  },
+  {
+   "chat_accuracy": 0.0,
+   "chat_correct": 0,
+   "label": "plasma_control",
+   "names": 1,
+   "tree_accuracy": 0.0,
+   "tree_correct": 0
+  },
+  {
+   "chat_accuracy": 0.0,
+   "chat_correct": 0,
+   "label": "plasma_measurement_diagnostics",
+   "names": 2,
+   "tree_accuracy": 0.0,
+   "tree_correct": 0
+  },
+  {
+   "chat_accuracy": 0.4,
+   "chat_correct": 2,
+   "label": "plasma_wall_interactions",
+   "names": 5,
+   "tree_accuracy": 0.4,
+   "tree_correct": 2
+  },
+  {
+   "chat_accuracy": 1.0,
+   "chat_correct": 7,
+   "label": "radiation_measurement_diagnostics",
+   "names": 7,
+   "tree_accuracy": 1.0,
+   "tree_correct": 7
+  },
+  {
+   "chat_accuracy": 1.0,
+   "chat_correct": 1,
+   "label": "runaway_electrons",
+   "names": 1,
+   "tree_accuracy": 1.0,
+   "tree_correct": 1
+  },
+  {
+   "chat_accuracy": 1.0,
+   "chat_correct": 4,
+   "label": "spectroscopy",
+   "names": 4,
+   "tree_accuracy": 1.0,
+   "tree_correct": 4
+  },
+  {
+   "chat_accuracy": 0.5,
+   "chat_correct": 1,
+   "label": "structural_components",
+   "names": 2,
+   "tree_accuracy": 0.5,
+   "tree_correct": 1
+  },
+  {
+   "chat_accuracy": 0.5,
+   "chat_correct": 1,
+   "label": "transport",
+   "names": 2,
+   "tree_accuracy": 0.5,
+   "tree_correct": 1
+  }
+ ],
+ "probability_bands": [
+  {
+   "band": "above 0.8",
+   "chat_accuracy": 0.7555555555555555,
+   "chat_correct": 34,
+   "names": 45,
+   "tree_accuracy": 0.7333333333333333,
+   "tree_correct": 33
+  },
+  {
+   "band": "0.5 to 0.8",
+   "chat_accuracy": 0.6363636363636364,
+   "chat_correct": 7,
+   "names": 11,
+   "tree_accuracy": 0.6363636363636364,
+   "tree_correct": 7
+  },
+  {
+   "band": "below 0.5",
+   "chat_accuracy": 0.6,
+   "chat_correct": 6,
+   "names": 10,
+   "tree_accuracy": 0.6,
+   "tree_correct": 6
+  }
+ ],
+ "question_hash": "906a864bed854c6d",
+ "source_path_count": 856,
+ "spend": {
+  "chat_cost_per_path_usd": 0.0031102862149532716,
+  "chat_fallback_path_count": 49,
+  "jev_spend_usd": 0.11925828599999999,
+  "validation_path_count": 98
+ },
+ "spend_usd": 0.11925828599999999,
+ "unclassified_paths": [],
+ "validation": {
+  "chat": {
+   "derived": {
+    "accuracy": 0.6103896103896104,
+    "confusion": [
+     {
+      "count": 2,
+      "label": "edge_plasma_physics",
+      "predicted": "spectroscopy"
+     },
+     {
+      "count": 2,
+      "label": "gyrokinetics",
+      "predicted": "<none>"
+     },
+     {
+      "count": 2,
+      "label": "magnetohydrodynamics",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "current_drive",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "general",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "core_plasma_physics",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "plasma_measurement_diagnostics",
+      "predicted": "particle_measurement_diagnostics"
+     },
+     {
+      "count": 1,
+      "label": "fast_particles",
+      "predicted": "transport"
+     },
+     {
+      "count": 1,
+      "label": "plasma_measurement_diagnostics",
+      "predicted": "spectroscopy"
+     },
+     {
+      "count": 1,
+      "label": "fueling",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "plasma_wall_interactions",
+      "predicted": "transport"
+     },
+     {
+      "count": 1,
+      "label": "transport",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "plasma_control",
+      "predicted": "equilibrium"
+     },
+     {
+      "count": 1,
+      "label": "auxiliary_heating",
+      "predicted": "current_drive"
+     },
+     {
+      "count": 1,
+      "label": "particle_measurement_diagnostics",
+      "predicted": "plasma_measurement_diagnostics"
+     },
+     {
+      "count": 1,
+      "label": "plasma_wall_interactions",
+      "predicted": "radiation_measurement_diagnostics"
+     },
+     {
+      "count": 1,
+      "label": "plasma_wall_interactions",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "core_plasma_physics",
+      "predicted": "electromagnetic_wave_diagnostics"
+     },
+     {
+      "count": 1,
+      "label": "structural_components",
+      "predicted": "magnetic_field_systems"
+     },
+     {
+      "count": 1,
+      "label": "edge_plasma_physics",
+      "predicted": "core_plasma_physics"
+     },
+     {
+      "count": 1,
+      "label": "equilibrium",
+      "predicted": "waves"
+     },
+     {
+      "count": 1,
+      "label": "auxiliary_heating",
+      "predicted": "waves"
+     },
+     {
+      "count": 1,
+      "label": "fast_particles",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "equilibrium",
+      "predicted": "magnetic_field_systems"
+     },
+     {
+      "count": 1,
+      "label": "equilibrium",
+      "predicted": "edge_plasma_physics"
+     },
+     {
+      "count": 1,
+      "label": "mechanical_measurement_diagnostics",
+      "predicted": "machine_operations"
+     },
+     {
+      "count": 1,
+      "label": "edge_plasma_physics",
+      "predicted": "transport"
+     }
+    ],
+    "correct": 47,
+    "total": 77
+   }
+  },
+  "tree": {
+   "derived": {
+    "accuracy": 0.5974025974025974,
+    "confusion": [
+     {
+      "count": 2,
+      "label": "auxiliary_heating",
+      "predicted": "waves"
+     },
+     {
+      "count": 2,
+      "label": "edge_plasma_physics",
+      "predicted": "spectroscopy"
+     },
+     {
+      "count": 2,
+      "label": "gyrokinetics",
+      "predicted": "<none>"
+     },
+     {
+      "count": 2,
+      "label": "magnetohydrodynamics",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "current_drive",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "general",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "core_plasma_physics",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "plasma_measurement_diagnostics",
+      "predicted": "radiation_measurement_diagnostics"
+     },
+     {
+      "count": 1,
+      "label": "fast_particles",
+      "predicted": "transport"
+     },
+     {
+      "count": 1,
+      "label": "plasma_measurement_diagnostics",
+      "predicted": "spectroscopy"
+     },
+     {
+      "count": 1,
+      "label": "fueling",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "plasma_wall_interactions",
+      "predicted": "transport"
+     },
+     {
+      "count": 1,
+      "label": "transport",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "plasma_control",
+      "predicted": "equilibrium"
+     },
+     {
+      "count": 1,
+      "label": "auxiliary_heating",
+      "predicted": "current_drive"
+     },
+     {
+      "count": 1,
+      "label": "particle_measurement_diagnostics",
+      "predicted": "plasma_measurement_diagnostics"
+     },
+     {
+      "count": 1,
+      "label": "plasma_wall_interactions",
+      "predicted": "radiation_measurement_diagnostics"
+     },
+     {
+      "count": 1,
+      "label": "plasma_wall_interactions",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "core_plasma_physics",
+      "predicted": "electromagnetic_wave_diagnostics"
+     },
+     {
+      "count": 1,
+      "label": "structural_components",
+      "predicted": "magnetic_field_systems"
+     },
+     {
+      "count": 1,
+      "label": "edge_plasma_physics",
+      "predicted": "core_plasma_physics"
+     },
+     {
+      "count": 1,
+      "label": "equilibrium",
+      "predicted": "waves"
+     },
+     {
+      "count": 1,
+      "label": "fast_particles",
+      "predicted": "<none>"
+     },
+     {
+      "count": 1,
+      "label": "equilibrium",
+      "predicted": "magnetic_field_systems"
+     },
+     {
+      "count": 1,
+      "label": "equilibrium",
+      "predicted": "edge_plasma_physics"
+     },
+     {
+      "count": 1,
+      "label": "mechanical_measurement_diagnostics",
+      "predicted": "machine_operations"
+     },
+     {
+      "count": 1,
+      "label": "edge_plasma_physics",
+      "predicted": "transport"
+     }
+    ],
+    "correct": 46,
+    "total": 77
+   }
+  }
+ },
+ "verdict": {
+  "adopt": true,
+  "rule": "adopt when validation derived accuracy >= chat accuracy - 0.03 and tree spend (jev + chat fallback) < chat spend on the same paths",
+  "validation_chat_accuracy": 0.6103896103896104,
+  "validation_chat_spend_usd": 0.30480804906542064,
+  "validation_tree_accuracy": 0.5974025974025974,
+  "validation_tree_spend_usd": 0.16605742643457946
+ }
+}

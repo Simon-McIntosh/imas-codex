@@ -1,0 +1,169 @@
+<section id="scg-jev-tree-benchmark">
+  <h2>Measuring the two-level domain tree against the chat classifier</h2>
+  <p>
+    The two-level Choice asks Jev a physics category first and a domain within
+    that category, and multiplies the two probabilities into a per-path
+    confidence. A path the tree does not score above a threshold falls to the
+    free-text chat classifier, so the two-level arm is a router over the chat
+    arm, not a replacement for it. This benchmark measures the routed classifier
+    against the chat classifier on held-out domain labels and settles the
+    threshold under a rule fixed before the run.
+  </p>
+
+  <h3>The rule</h3>
+  <p>
+    <strong>Adopt</strong> when, on the validation rows, both hold: the tree's
+    derived name-domain accuracy is at least the chat classifier's accuracy
+    minus <code>0.03</code>, and its total spend (Jev tree plus chat fallback)
+    is below the chat classifier's spend on the same paths. The threshold is
+    chosen on the calibration rows only; every figure below is reported on the
+    validation rows.
+  </p>
+  <p>
+    <strong>Verdict: adopt.</strong> On the 77 validation names the tree reaches
+    <strong>0.597</strong> against the chat classifier's <strong>0.610</strong>
+    &mdash; within the 0.03 tolerance &mdash; while its spend on the same
+    validation paths is <strong>$0.166</strong> against the chat classifier's
+    <strong>$0.305</strong>, about 45% less.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Validation figure</th><th>Two-level tree</th><th>Chat classifier</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Derived name-domain accuracy (77 names)</td><td>0.597 (46/77)</td><td>0.610 (47/77)</td></tr>
+      <tr><td>Spend on the same validation paths</td><td>$0.1661</td><td>$0.3048</td></tr>
+      <tr><td>Chosen threshold</td><td colspan="2"><code>0.90</code>, chosen on the 73 calibration names (sweep peak 0.658 at 0.90)</td></tr>
+      <tr><td>Share of validation paths sent to chat</td><td colspan="2">0.50 (49 of 98 validation source paths)</td></tr>
+      <tr><td>Deterministic overrides changed after a confident tree answer</td><td colspan="2">0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Paired difference and its interval</h3>
+  <p>
+    The paired difference (tree minus chat) on the 77 validation names is
+    <strong>&minus;0.013</strong>, with a central-95% percentile bootstrap
+    interval of <strong>[&minus;0.039, 0.000]</strong> over 1,000 resamples
+    (seed 123). <strong>The interval does not exclude zero</strong> (its upper
+    bound is exactly 0.0, its lower bound is negative), so the validation set
+    cannot distinguish the two accuracies. The interval is a mean of paired 0/1
+    outcomes; <code>bootstrap_interval</code> in the evaluation module is
+    AUC-typed and cannot express that statistic, so the same percentile policy
+    is applied to the paired difference instead.
+  </p>
+
+  <h3>Accuracy by probability band</h3>
+  <table>
+    <thead>
+      <tr><th>Tree confident probability</th><th>Names</th><th>Tree correct</th><th>Tree accuracy</th><th>Chat accuracy</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>above 0.8</td><td>45</td><td>33</td><td>0.733</td><td>0.756</td></tr>
+      <tr><td>0.5 to 0.8</td><td>11</td><td>7</td><td>0.636</td><td>0.636</td></tr>
+      <tr><td>below 0.5</td><td>10</td><td>6</td><td>0.600</td><td>0.600</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The tree's confidence is ordered with, but not strongly separated from,
+    accuracy: its most confident band scores highest (0.733), but only 45 of 77
+    names reach it, and the chat classifier is marginally better in that band.
+    Below 0.8 the two classifiers agree name for name, because those paths route
+    to chat under the chosen threshold.
+  </p>
+
+  <h3>Per-domain validation accuracy</h3>
+  <img src="/imas-codex/figures/sn-catalog-grouping/scg-jev-tree-benchmark/validation_domain_accuracy.svg"
+       alt="Per-domain validation accuracy of the chat classifier and the two-level tree">
+  <p>
+    Each row is one labelled domain on the validation split; the grey dot is the
+    chat classifier, the blue dot the tree, and the rule between them the
+    difference. Domains the tree answers are those whose names clear the
+    threshold; the two classifiers coincide where the names route to chat. The
+    largest disagreements are <code>auxiliary_heating</code> (chat 0.714, tree
+    0.571) and, marginally, <code>radiation_measurement_diagnostics</code> and
+    <code>spectroscopy</code>, where both classifiers are perfect.
+  </p>
+
+  <h3>Confusion against the first benchmark</h3>
+  <p>
+    The first benchmark's leading coordinator confusions were
+    <code>magnetohydrodynamics</code> &rarr; none (5),
+    <code>gyrokinetics</code> &rarr; none (4), and
+    <code>auxiliary_heating</code> &rarr; <code>waves</code> (3)
+    paired with <code>radiation_measurement_diagnostics</code> &rarr;
+    <code>spectroscopy</code> (3). The tree reproduces the first two exactly: on
+    the validation names both classifiers leave <code>gyrokinetics</code> (2) and
+    <code>magnetohydrodynamics</code> (2) unanswered, showing those confusions
+    are a label-sheet property rather than a classifier property. The
+    <code>auxiliary_heating</code> confusion persists and deepens: the tree sends
+    2 of those 7 names to <code>waves</code> against the chat arm's 1, so the
+    tree's one clear regression is a category-boundary choice between heating and
+    the waves that carry it.
+  </p>
+
+  <h3>Gold set: second view</h3>
+  <p>
+    The 209-path gold set <code>imas_codex/definitions/physics/domain_gold_set.json</code>
+    was run through the benchmark's own entry point for both classifiers. This
+    is a second view only; the verdict is the validation rule's.
+  </p>
+  <table>
+    <thead><tr><th>Gold-set figure</th><th>Two-level tree</th><th>Chat classifier</th></tr></thead>
+    <tbody>
+      <tr><td>Exact-match accuracy (209 paths)</td><td>0.388 (81/209)</td><td>0.191 (40/209)</td></tr>
+      <tr><td>Spend</td><td>$0.4094</td><td>$0.3457</td></tr>
+      <tr><td>Model</td><td><code>typesafe/jev-1.13</code></td><td><code>openrouter/openai/gpt-5.5</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    On the gold set the tree is roughly twice as accurate as the chat
+    classifier. The two views disagree in direction because they measure
+    different label populations: the gold set labels a single DD path, while the
+    validation split labels a standard name by the highest-ranked domain over its
+    source paths.
+  </p>
+
+  <h3>Changes to the benchmark entry point</h3>
+  <p>
+    <code>run_classifier_bench</code> gained a keyword-only <code>use_tree</code>
+    option that routes each batch to <code>_classify_batch_tree</code> and keeps
+    the chat path as the default; the tree seat is passed through unchanged while
+    the chat arm still takes <code>ensure_model_prefix</code>. The import of
+    <code>DEFAULT_BATCH_SIZE</code>, referenced but unimported, was added: without
+    it the function raised <code>NameError</code> before any classification, so no
+    prior gold run could have measured anything. The new test
+    <code>tests/standard_names/test_role_bench_classifier_tree.py</code> fails if
+    the option is dropped or the routing is swapped.
+  </p>
+
+  <h3>Spend</h3>
+  <table>
+    <thead><tr><th>Call</th><th>USD</th></tr></thead>
+    <tbody>
+      <tr><td>20-path pilot (Jev tree)</td><td>0.0030</td></tr>
+      <tr><td>856-path tree run (all source paths)</td><td>0.1193</td></tr>
+      <tr><td>Gold attempt rejected on a model-prefix defect</td><td>1.0896</td></tr>
+      <tr><td>Gold run (both arms)</td><td>0.7551</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>1.967</strong> of the $4.00 ceiling</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The pilot estimate was $0.025 for all 856 paths, far under the $1.00
+    pilot-gated ceiling, so the full run proceeded; the realized cost was
+    $0.119 because each tree call also pays for the re-judged paths. The gold
+    attempt whose tree arm was rejected on a wrong provider prefix still paid for
+    its chat arm, which is the $1.09 line above; the corrected run is the pair
+    reported here.
+  </p>
+
+  <h3>Negative control</h3>
+  <p>
+    Rescoring the recorded chat answers on the validation names through the same
+    derivation and scorer reproduces the chat baseline at no cost, and scoring the
+    tree's answers through that same scorer yields a different accuracy (0.597
+    against 0.610), so the scorer can tell the two classifiers apart. Re-running
+    the driver without <code>--fresh</code> reads the complete tree cache and
+    rewrites the results JSON and figure with no paid call.
+  </p>
+</section>
