@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-retire-successor-scalar">
+<title>Retiring the successor scalar</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-retire-successor-scalar-title">The signed successor edge owns the successor record</h1>
+<p>Base <code>e01a93fff02001e42f84622ba165fd0a65827c94</code>; code and tests
+commit <code>64905bbc14b4a595a3e714f7d2124bd8c0f603ac</code>. The signed
+supersede already minted a receipt-stamped <code>HAS_SUCCESSOR</code> edge in
+the same mutation. Its postcondition now checks the edge count, signed
+successor id and receipt id without consulting the legacy property. The
+mutation no longer writes that property.</p>
+
+<h2 id="sib-retire-successor-scalar-reader-map">Reader-record disposition</h2>
+<p>The line coordinates below are those of
+<code>docs/evidence/sn-lifecycle-integrity/successor-scalar-readers.md</code>;
+the changed code moved as lines were removed. Each row names the edited
+reader or fixture and its replacement.</p>
+<table id="sib-retire-successor-scalar-reader-table">
+<thead><tr><th>Record row</th><th>Edited site</th><th>Disposition</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>graph_ops.py:3193</code> and its successor batch/filter/write</td><td>Removed the generic successor projection. A scan of production payload construction found no caller setting <code>successor</code> on the batch: the two <code>provenance_lifecycle.py</code> occurrences are result dictionaries, not writer inputs.</td></tr>
+<tr><td>2</td><td><code>graph_ops.py:3103</code></td><td>The edge-writer docstring names signed supersede as the successor-edge writer.</td></tr>
+<tr><td>3</td><td><code>graph_ops.py:3351</code></td><td>The catalog-import comment now describes only the predecessor projection.</td></tr>
+<tr><td>4</td><td><code>signed_manifest.py:4090</code></td><td>The postcondition reads stage and status, then reads every outgoing successor edge.</td></tr>
+<tr><td>5</td><td><code>signed_manifest.py:4097</code></td><td>The expected state omits the property; the edge check requires exactly one edge to the signed successor carrying the change receipt.</td></tr>
+<tr><td>6</td><td><code>signed_manifest.py:4712</code></td><td>The signed mutation drops the property assignment and retains its receipt-stamped edge write in the same Cypher mutation.</td></tr>
+<tr><td>7</td><td><code>edit.py:2104</code></td><td>Removed the scalar refusal; the existing lineage walk decides whether a tombstoned target is occupied.</td></tr>
+<tr><td>8</td><td><code>edit.py:2085</code></td><td>The fold docstring describes the lineage-only rule.</td></tr>
+<tr><td>9</td><td><code>canonical.py:35</code></td><td>Removed the nullable scalar default.</td></tr>
+<tr><td>10</td><td><code>canonical.py:69</code></td><td>Removed the canonical catalog key. A stale YAML entry carrying <code>superseded_by</code> is refused with <code>UnknownCatalogKeyError</code> instead of being silently stripped; the release note should state this.</td></tr>
+<tr><td>11</td><td><code>catalog_import.py:332</code></td><td>Removed the catalog-model attribute read and graph payload member.</td></tr>
+<tr><td>12</td><td><code>protection.py:34</code></td><td>Removed protection for the retired field.</td></tr>
+<tr><td>13</td><td><code>schemas/standard_name.yaml:925</code></td><td>Deleted the LinkML slot and ran <code>build-models --force</code>; generated files were not staged.</td></tr>
+<tr><td>14</td><td><code>schemas/standard_name.yaml:1996</code></td><td>Kept <code>successor</code> and described it as the target of the signed successor edge.</td></tr>
+<tr><td>15</td><td><code>standard_names/AGENTS.md:111</code></td><td>Removed the retired slot from the reference table.</td></tr>
+<tr><td>19</td><td><code>test_export_deprecation.py:72,151</code></td><td>Removed obsolete fixture inputs.</td></tr>
+<tr><td>20</td><td><code>test_export_deprecation.py:119,157</code></td><td>Kept both absence assertions unchanged.</td></tr>
+<tr><td>21</td><td><code>test_graph_edge_writers.py:11,734,739</code></td><td>Documented signed supersede ownership of the edge.</td></tr>
+<tr><td>22</td><td><code>test_graph_edge_writers.py:348</code></td><td>Removed the obsolete payload fixture member.</td></tr>
+<tr><td>23</td><td><code>test_graph_edge_writers.py:746,759</code></td><td>Repointed the gate: a generic payload containing <code>successor</code> cannot mint an unstamped edge.</td></tr>
+<tr><td>24</td><td><code>test_protection.py:205</code></td><td>Removed the retired field from the expected protected set.</td></tr>
+<tr><td>25</td><td><code>test_description_latex.py:116</code></td><td>Removed the mock catalog attribute.</td></tr>
+<tr><td>26</td><td><code>test_supersede_into_tombstone.py:36</code></td><td>Removed the baseline scalar fixture.</td></tr>
+<tr><td>27</td><td><code>test_supersede_into_tombstone.py:136</code></td><td>Removed the scalar-only refusal case; the lineage refusal remains.</td></tr>
+<tr><td>28</td><td><code>test_fold_guard_current_successor.py:60</code></td><td>Removed the scalar fixture argument.</td></tr>
+<tr><td>29</td><td><code>test_supersede_successor_scalar.py:234,245</code></td><td>The signed supersede assertion reads the edge's signed target, receipt id and stamp together with the receipt row.</td></tr>
+<tr><td>30</td><td><code>test_tombstone_fold_lineage.py:6,35,48,93</code></td><td>Removed stale census prose and scalar fixtures; the remaining tests exercise lineage refusal directly.</td></tr>
+<tr><td>31</td><td><code>test_sn_tools.py:543</code></td><td>Kept the unrelated test name unchanged.</td></tr>
+</tbody>
+</table>
+<p>Two live-list additions were also changed: <code>graph_ops.py</code>'s
+rescore refusal reads the successor edge without a property fallback, and
+<code>test_rescore_terminal_status.py</code> models that edge result. The
+signed-edge test's prose now describes a stray unstamped edge, and its new
+unit test makes the postcondition refuse when the edge is absent.</p>
+
+<h2 id="sib-retire-successor-scalar-measure">Measured result</h2>
+<ul>
+<li><code>rg -n superseded_by imas_codex/ tests/</code> finds only the two unchanged export absence assertions and the unchanged unrelated test name.</li>
+<li><code>baseline-tests.log</code>: 96 passed, 5 deselected, <code>EXIT=0</code>. <code>head-tests-final.log</code>: 151 passed, 5 deselected, <code>EXIT=0</code>; the latter adds the catalog-layout and tombstone-supersede files. Both run the scoped supersede, signed-manifest, fold, export, rescore and Cypher-property files. The five graph-marked tests were deselected because no disposable Neo4j endpoint was configured.</li>
+<li><code>negative-control.log</code>: with the postcondition edge check disabled, <code>test_supersede_postcondition_refuses_missing_signed_edge</code> fails, <code>EXIT=1</code>. The restored head test passes.</li>
+<li><code>stale-yaml-refusal.log</code>: <code>UnknownCatalogKeyError</code> for the retired key, <code>EXIT=0</code>.</li>
+</ul>
+
+<h2 id="sib-retire-successor-scalar-migration-hold">Graph removal held</h2>
+<p>The read-only cohort instrument in <code>orphan-read-final.log</code>
+observed 21 names carrying the property at 2026-10-13 17:17 UTC, rather
+than the required 18. One, <code>cross_section_of_flux_surface</code>, has
+neither a direct <code>HAS_SUCCESSOR</code> edge nor an incoming
+<code>REFINED_FROM</code> edge from the successor named by its property.
+<code>orphan-detail.log</code> shows an incoming lineage edge from
+<code>area_of_flux_surface</code>, a different intermediate name. The
+required zero-orphan, 18-row precondition is unmet. No removal authority
+was authored or previewed, and no graph property was cleared. The live
+cohort and this successor route need an authority decision before the
+coordinator can apply a removal.</p>
+
+</main>
+</body>
+</html>
