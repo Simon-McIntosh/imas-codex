@@ -11,6 +11,13 @@
     "imas_codex/llm/search_tools.py:678"
   ],
   "completed_at": "2026-10-13T02:24:17.735Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "ssfms-fulltext-guard",
+      "recorded_at": "2026-10-13T02:27:29.387826+00:00"
+    }
+  },
   "dispatched_at": "2026-10-13T02:18:33Z",
   "findings": [
     {
