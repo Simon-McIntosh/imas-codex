@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite gate logs. This node's declared write paths reach no test path, so its manifest carries no baseline_suite or after_suite arm and the reviewed run produced no suite log; there is no head arm to diff and no added failure ids. The node's measure is a graph census, recorded under the run directory: census-c2-passB.json, census-c3-passB.json, census-c4-final.json (discovered=0, described=367/385/646, hash_mismatch=0) and scope-embed-census.json (facility mismatch 13, all outside scope).",
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T15:45:38.000Z",
+  "dispatched_at": "2026-10-13T15:32:04Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-6.html",
+      "line": 43,
+      "severity": "follow-on",
+      "text": "the figcaption says the bars are \"Drawn from the censuses recorded in reprocess-progress-bulk-6.json\", but the generating script make_figure.py carries the per-category counts as a hardcoded DATA literal and reads no census file, so the figure would not change if a census disagreed; the done_when required the figures be read from the census results at run time. The displayed values reconcile exactly with cat_census.json and the progress JSON (0 discovered, 0 in-scope hash mismatch), so this does not hold the node."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read against base e44c9048f; one commit adding the progress JSON, the fragment HTML and the progress.svg, all inside the declared scope.",
+    "done_when": "the done_when names a scoped census plus census_signal_embeddings(facility='jt-60sa'); both live-repo owners were exercised and census-c2-passB.json / census-c3-passB.json / census-c4-final.json / scope-embed-census.json record discovered=0, all described and 0 in-scope hash mismatch.",
+    "goal": "the node goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; reprocess-progress-bulk-6.json records three scopes finished (14 categories, 1398 signals) and the three assigned categories left unreset.",
+    "manifest": "read; status complete, commit 128d36dfc, three post-reset censuses as the declared control, cost record and 13 facility mismatches under follow_ons; no suite arm because the write paths reach no test path.",
+    "write_paths": "read the manifest; git show --stat 128d36dfc lists exactly the three declared paths and nothing else."
+  },
+  "justifications": {
+    "durability": "the reset's control is real and ran (census-c2/c3/c4-postreset.json read discovered=N, described=0, the complement of the declared mutation), but the added figure is a hardcoded DATA literal in make_figure.py whose caption at ssfms-reprocess-bulk-6.html:43 asserts census provenance, so it is not independent of a census regression.",
+    "evidence": "the censuses reconcile with their own cost logs (c2-passA.log 518 enriched/$0.09, c4-passC.log 1741/$0.05, c4-passD.log 136/$0.03, summing to $0.29/3151), but the done_when clause requiring the figures be read from the census results at run time is unmet (make_figure.py hardcodes the counts) and the 13 facility mismatches are attributed to concurrent peers as a hypothesis.",
+    "fit": "the fragment follows the evidence-fragment convention (ids prefixed with the node id, data + html + svg) and the SVG follows the plotting style (14in wide, despined, direct count labels), though it sets rcParams inline rather than via the repo style sheet.",
+    "goal_fidelity": "reprocess-progress-bulk-6.json scopes[].final_census reads discovered=0 and described=367/385/646 for the 14 reset categories, and not_yet_reset names the 3 unfinished ones, matching the goal of finishing every scope it resets.",
+    "reuse": "the measurement reuses the owners rather than forking them \u2014 census_signal_embeddings (imas_codex/discovery/signals/parallel.py:1867) for the hash census and reset_to_status/SIGNAL_RESET_SPECS (imas_codex/discovery/base/reset.py:74,173) for the reset.",
+    "scope_discipline": "git show --stat 128d36dfc lists only the three declared write paths (reprocess-progress-bulk-6.json, ssfms-reprocess-bulk-6.html, progress.svg), each inside its fence grant."
+  },
+  "node": "review-of-ssfms-reprocess-bulk-6-128d36dfcce3",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; the landed reprocess-progress-bulk-6.json records three scopes (chunk2/chunk3/chunk4) finished, 14 categories holding 1398 signals, and lists the three assigned categories left unreset (CryoIL 286, a042181 278, UDDB 189).\nVERDICT done_when: the done_when's measure is a scoped census plus census_signal_embeddings(facility='jt-60sa'); the worker ran census_scope.py per scope and scope_embed_census.py, and the recorded after-censuses read discovered=0, described=367/385/646 and hash_mismatch-free in scope (census-c2-passB.json, census-c3-passB.json, census-c4-final.json; scope-embed-census.json).\nVERDICT write_paths: the manifest declares the progress JSON, the fragment HTML and the figures dir docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-6; git show --stat 128d36dfc lists exactly those three files (json, html, progress.svg) and nothing else.\nVERDICT manifest: read; it records status complete, commit 128d36dfc, the three per-scope post-reset censuses as its negative control, the cost record and the 13 facility-wide embedding mismatches as a follow-on; it carries no baseline_suite/after_suite arm because its write paths reach no test path.\nVERDICT diff: read commit by commit against base e44c9048f; the single commit 128d36dfc adds only docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-6.json (78 lines), ssfms-reprocess-bulk-6.html (61 lines) and docs/figures/.../progress.svg (1859 lines), all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: reprocess-progress-bulk-6.json scopes[].final_census reads discovered=0 and described=367/385/646 for the 14 reset categories, and not_yet_reset names the 3 unfinished ones, matching the goal of finishing every scope it resets.\nSCORE evidence: 15\nJUSTIFICATION evidence: the censuses reconcile with their own cost logs (c2-passA.log 518 enriched/$0.09, c4-passC.log 1741/$0.05, c4-passD.log 136/$0.03, summing to $0.29/3151), but the done_when clause requiring the figures be read from the census results at run time is unmet (make_figure.py hardcodes the counts) and the 13 facility mismatches are attributed to concurrent peers as a hypothesis.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 128d36dfc lists only the three declared write paths (reprocess-progress-bulk-6.json, ssfms-reprocess-bulk-6.html, progress.svg), each inside its fence grant.\nSCORE durability: 15\nJUSTIFICATION durability: the reset's control is real and ran (census-c2/c3/c4-postreset.json read discovered=N, described=0, the complement of the declared mutation), but the added figure is a hardcoded DATA literal in make_figure.py whose caption at ssfms-reprocess-bulk-6.html:43 asserts census provenance, so it is not independent of a census regression.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment follows the evidence-fragment convention (ids prefixed with the node id, data + html + svg) and the SVG follows the plotting style (14in wide, despined, direct count labels), though it sets rcParams inline rather than via the repo style sheet.\nSCORE reuse: 20\nJUSTIFICATION reuse: the measurement reuses the owners rather than forking them \u2014 census_signal_embeddings (imas_codex/discovery/signals/parallel.py:1867) for the hash census and reset_to_status/SIGNAL_RESET_SPECS (imas_codex/discovery/base/reset.py:74,173) for the reset.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-6.html:43 follow-on: the figcaption says the bars are \"Drawn from the censuses recorded in reprocess-progress-bulk-6.json\", but the generating script make_figure.py carries the per-category counts as a hardcoded DATA literal and reads no census file, so the figure would not change if a census disagreed; the values reconcile exactly today, so this does not hold the node.",
+  "review_run_id": "r-20261013T153121992687-review-of-ssfms-reprocess-bulk-6-128d36dfcce3",
+  "reviewed_base_sha": "e44c9048f7c98d6104a27ee6b0371fd298160174",
+  "reviewed_head_sha": "128d36dfcce3a01a916a9df984996d267b39a79f",
+  "reviewed_run_id": "r-20261013T143100044312-ssfms-reprocess-bulk-6",
+  "reviewer_run_id": "r-20261013T153121992687-review-of-ssfms-reprocess-bulk-6-128d36dfcce3",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143100044312-ssfms-reprocess-bulk-6/scratch/census-c2-passB.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143100044312-ssfms-reprocess-bulk-6/scratch/census-c3-passB.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143100044312-ssfms-reprocess-bulk-6/scratch/census-c4-final.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143100044312-ssfms-reprocess-bulk-6/scratch/scope-embed-census.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143100044312-ssfms-reprocess-bulk-6/scratch/census-c2-postreset.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143100044312-ssfms-reprocess-bulk-6/scratch/census-c3-postreset.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143100044312-ssfms-reprocess-bulk-6/scratch/census-c4-postreset.json"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T15:45:00+00:00",
+  "total": 105
+}
