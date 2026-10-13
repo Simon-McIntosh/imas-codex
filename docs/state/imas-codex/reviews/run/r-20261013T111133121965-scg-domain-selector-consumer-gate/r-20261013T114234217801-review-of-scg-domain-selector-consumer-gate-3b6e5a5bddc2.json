@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 12,
+  "added_failure_ids": [
+    "tests/standard_names/test_graph_ops.py::TestWriteStandardNames::test_dd_relationship_created",
+    "tests/standard_names/test_graph_ops.py::TestWriteStandardNames::test_rich_fields_in_batch",
+    "tests/standard_names/test_graph_ops.py::TestWriteStandardNames::test_signal_relationship_created",
+    "tests/standard_names/test_graph_ops.py::TestWriteStandardNames::test_unit_relationship_created",
+    "tests/standard_names/test_graph_ops.py::TestWriteStandardNames::test_write_coalesce_preserves_existing",
+    "tests/standard_names/test_metadata_invariants.py::TestDDVersionConsistency::test_dd_version_uses_coalesce_in_write",
+    "tests/standard_names/test_metadata_invariants.py::TestWriteCypherInvariants::test_unit_in_batch_payload",
+    "tests/standard_names/test_metadata_invariants.py::TestWritePathRelationships::test_has_standard_name_created_for_dd_source",
+    "tests/standard_names/test_metadata_invariants.py::TestWritePathRelationships::test_has_unit_self_heals_before_merge",
+    "tests/standard_names/test_metadata_invariants.py::TestWritePathRelationships::test_has_unit_uses_merge",
+    "tests/standard_names/test_metadata_invariants.py::TestWritePathRelationships::test_unit_batch_includes_all_non_null_units",
+    "tests/standard_names/test_review_pipeline.py::test_audit_duplicate_candidates"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T11:56:39.185Z",
+  "dispatched_at": "2026-10-13T11:42:50Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states \"Both arms ran the same test set\", but the head arm ran 600 test files against the base's 599 - tests/standard_names/test_domain_selector.py exists only at head (logs/shards_head/files.txt vs logs/shards_base/files.txt) - so the arms differ by one file and the statement overstates the control; the twelve added failures are all in files present at both arms, so the conclusion is unaffected."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the landed change is a documentation fragment, so no runtime code reaches it.",
+    "diff": "read the single commit 3b6e5a5bd against its base 1a3ac300a80bf82ae04a7be0162d68482e24d308; it adds only the 70-line evidence fragment, no code and no test.",
+    "done_when": "the done-when asks for two logged runs (base and head) each ending in a pytest totals line and EXIT=, both logs named in the manifest, and the fragment stating the base and head totals and every added failure with its classification; logs/shards_base/chunk_00..03.log and logs/shards_head/chunk_00..03.log each end EXIT=1 with a totals line, the manifest's test_logs names both shard directories, and the fragment's table lists the totals and its list names all twelve added failures.",
+    "goal": "the goal is a measurement of whether the declared-order domain selector breaks any standard-name caller; the fragment at docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html reports tests/standard_names/ at base ef9f71261 and head 1a3ac300a with twelve added failures, all classified, so the goal is met.",
+    "manifest": "read; status complete, one commit 3b6e5a5bd, test_logs naming both shard arms, the tests line quoting base ef9f71261 (20 failed, 7695 passed, 9 skipped, 330 deselected, 112 errors) against head 1a3ac300a (32 failed, 7673 passed, 8 skipped, 330 deselected, 117 errors) with 12 added failures, but its baseline_suite and after_suite keys are null.",
+    "write_paths": "the manifest declares docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html; the 1a3ac300a..3b6e5a5bd diff changes exactly that one file, 70 insertions, and nothing else."
+  },
+  "justifications": {
+    "durability": "the node adds no code and no test, so nothing reddens if the fragment's recorded figures drift from a future re-run; the two shard logs are the durable artefact and are stored under the run directory.",
+    "evidence": "the added set reproduces exactly from logs/shards_base and logs/shards_head (20 base failures, 32 head, twelve added, eleven core_profiles and one magnetics, all ValueError from select_primary_domain), but the method line at docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html:23 overstates the control: the head arm ran 600 test files against the base's 599.",
+    "fit": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html follows the sibling evidence fragments' HTML convention, and its section and element ids are the node slug, with no plan, section, gate or ticket label in the file.",
+    "goal_fidelity": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html:5-10 measures tests/standard_names at the base and head revisions and reports the twelve added failures with their refused values, which is exactly the goal.",
+    "reuse": "the 1a3ac300a..3b6e5a5bd diff adds no function, class or module, so no capability is forked; the only added artefact is a docs fragment.",
+    "scope_discipline": "the 1a3ac300a..3b6e5a5bd diff changes only docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html, the single declared write path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a measurement of whether the declared-order domain selector breaks any standard-name caller; the fragment at docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html reports tests/standard_names/ at base ef9f71261 and head 1a3ac300a with twelve added failures, all classified, so the goal is met.\nVERDICT done_when: the done-when asks for two logged runs (base and head) each ending in a pytest totals line and EXIT=, both logs named in the manifest, and the fragment stating the base and head totals and every added failure with its classification; logs/shards_base/chunk_00..03.log and logs/shards_head/chunk_00..03.log each end EXIT=1 with a totals line, the manifest's test_logs names both shard directories, and the fragment's table lists the totals and its list names all twelve added failures.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html; the 1a3ac300a..3b6e5a5bd diff changes exactly that one file, 70 insertions, and nothing else.\nVERDICT manifest: read; status complete, one commit 3b6e5a5bd, test_logs naming both shard arms, the tests line quoting base ef9f71261 (20 failed, 7695 passed, 9 skipped, 330 deselected, 112 errors) against head 1a3ac300a (32 failed, 7673 passed, 8 skipped, 330 deselected, 117 errors) with 12 added failures, but its baseline_suite and after_suite keys are null.\nVERDICT diff: read the single commit 3b6e5a5bd against its base 1a3ac300a80bf82ae04a7be0162d68482e24d308; it adds only the 70-line evidence fragment, no code and no test.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scg-domain-selector-consumer-gate.html:5-10 measures tests/standard_names at the base and head revisions and reports the twelve added failures with their refused values, which is exactly the goal.\nSCORE evidence: 17\nJUSTIFICATION evidence: the added set reproduces exactly from logs/shards_base and logs/shards_head (20 base failures, 32 head, twelve added, eleven core_profiles and one magnetics, all ValueError from select_primary_domain), but the method line at scg-domain-selector-consumer-gate.html:23 overstates the control: the head arm ran 600 test files against the base's 599.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the 1a3ac300a..3b6e5a5bd diff changes only docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html, the single declared write path.\nSCORE durability: 13\nJUSTIFICATION durability: the node adds no code and no test, so nothing reddens if the fragment's recorded figures drift from a future re-run; the two shard logs are the durable artefact and are stored under the run directory.\nSCORE fit: 19\nJUSTIFICATION fit: the fragment follows the sibling evidence fragments' HTML convention, and its section and element ids are the node slug, with no plan, section, gate or ticket label in the file.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, so no capability is forked; the only added artefact is a docs fragment.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector-consumer-gate.html:23 follow-on: the fragment states \"Both arms ran the same test set\", but the head arm ran 600 test files against the base's 599 - tests/standard_names/test_domain_selector.py exists only at head (logs/shards_head/files.txt vs logs/shards_base/files.txt) - so the arms differ by one file and the statement overstates the control; the twelve added failures are all in files present at both arms, so the conclusion is unaffected.\n",
+  "review_run_id": "r-20261013T114234217801-review-of-scg-domain-selector-consumer-gate-3b6e5a5bddc2",
+  "reviewed_base_sha": "1a3ac300a80bf82ae04a7be0162d68482e24d308",
+  "reviewed_head_sha": "3b6e5a5bddc2a19af17dc08ce75809b482bb435d",
+  "reviewed_run_id": "r-20261013T111133121965-scg-domain-selector-consumer-gate",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T11:55:51.643775+00:00",
+  "total": 109
+}
