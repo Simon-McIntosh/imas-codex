@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/review/pipeline.py:597 judge_review_stage",
+    "imas_codex/standard_names/review/pipeline.py:31 judge_stage import"
+  ],
+  "completed_at": "2026-10-13T01:28:54.179Z",
+  "dispatched_at": "2026-10-13T01:19:42Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_judge_stage.py",
+      "line": "320",
+      "severity": "follow-on",
+      "text": "follow-on: the canonical-text guard asserts the literal tokens \"synonym\" and \"may also give\" are absent, so a regression that re-admits the separatrix with different wording (e.g. \"it may also be called the separatrix\") would leave both assertions green; the declared mutation (restoring the exact old clause) does redden it as negative-control.log shows, so the guard is real but word-specific rather than semantic."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/review/pipeline.py:597 awaits judge_review_stage, which owns _form_question/_verdict over _CONCEPT_FORMS, imported at pipeline.py:31; no other production caller reaches the changed data.",
+    "diff": "read the single commit e84bee2c71a6f840bbddb0bdef9a5cf9d32344e0 against base c98a0d42dc8195dd60c9c145340703409c87b2ec; it rewrites the plasma_boundary criteria and verdict map in imas_codex/standard_names/review/judge_stage.py (14 lines), updates tests/standard_names/test_judge_stage.py (35 lines) and adds the three evidence fragments, and changes nothing else.",
+    "done_when": "the measure asks for a unit test that reddens under the restored synonym clause, a live run of at most ten calls over the four fixtures plus a new equated fixture, and a review-pipeline gate adding no failure against base; tests/standard_names/test_judge_stage.py:303-328 is the guard, negative-control.log shows it failing (1 failed, EXIT=1), live-run.log and shs-boundary-criterion-decisions.json record 10 calls / USD 0.000358, and gate-base.log (264 passed) vs gate-after.log (265 passed) both exit 0 with 0 failures, so all three parts are met.",
+    "goal": "the goal is to make the judged plasma_boundary canonical criterion admit no separatrix synonym and map an equated separatrix to the forbidden verdict; imas_codex/standard_names/review/judge_stage.py:113-127 carries the rewritten canonical text and the separatrix_equated -> FORBIDDEN entry, so the goal is met.",
+    "manifest": "read; it records status complete, one commit, baseline_suite and after_suite as JSON with revision, exit_status and completed true (0 failures each), the negative-control log and the live-run log, and every headline claim survives a check of the logs it cites.",
+    "write_paths": "read the brief's five declared paths; git show --stat e84bee2c71a6f840bbddb0bdef9a5cf9d32344e0 lists exactly those five (judge_stage.py, test_judge_stage.py and the three docs/evidence fragments) and no path outside the fence."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_judge_stage.py:320 asserts \"synonym\" not in canonical and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T004845076915-shs-boundary-criterion/negative-control.log shows it reddening on the restored clause (1 failed, EXIT=1) while the head arm passes, but the guard is word-literal so a differently-worded regression escapes it.",
+    "evidence": "gate-base.log ends \"264 passed\" EXIT=0 and gate-after.log \"265 passed\" EXIT=0 (one added test, zero added failures), negative-control.log shows the guard red under the declared mutation, and live-run.log and shs-boundary-criterion-decisions.json record 10 calls booked USD 0.000358 with the required verdicts.",
+    "fit": "imas_codex/standard_names/review/judge_stage.py:113-127 keeps the surrounding _CONCEPT_FORMS shape and names the option separatrix_equated exactly as the smoke fragment docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.py:26 does, with no plan, gate or ticket label in any symbol, comment or commit subject.",
+    "goal_fidelity": "imas_codex/standard_names/review/judge_stage.py:113 drops the synonym clause from the canonical criterion and :124 maps separatrix_equated to FORBIDDEN, which is the goal exactly.",
+    "reuse": "the change extends _CONCEPT_FORMS in imas_codex/standard_names/review/judge_stage.py, the owner of the judged-form vocabulary, and forks no capability; a search for a boundary-gloss criterion owner found only the evidence script docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.py, which is not a production mechanism.",
+    "scope_discipline": "git show --stat e84bee2c71a6f840bbddb0bdef9a5cf9d32344e0 lists only imas_codex/standard_names/review/judge_stage.py, tests/standard_names/test_judge_stage.py and the three docs/evidence/sn-house-style fragments, every one inside the brief's write scope, and no generated model or other path is touched."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261013T004845076915-shs-boundary-criterion (imas-codex, plan sn-house-style section 13, node shs-boundary-criterion), base c98a0d42dc8195dd60c9c145340703409c87b2ec, head e84bee2c71a6f840bbddb0bdef9a5cf9d32344e0.\nreviewed_base_sha: c98a0d42dc8195dd60c9c145340703409c87b2ec\nreviewed_head_sha: e84bee2c71a6f840bbddb0bdef9a5cf9d32344e0\nVERDICT goal: the goal is to make the judged plasma_boundary canonical criterion admit no separatrix synonym and map an equated separatrix to the forbidden verdict; imas_codex/standard_names/review/judge_stage.py:113-127 carries the rewritten canonical text and the separatrix_equated -> FORBIDDEN entry, so the goal is met.\nVERDICT done_when: the measure asks for a unit test that reddens under the restored synonym clause, a live run of at most ten calls over the four fixtures plus a new equated fixture, and a review-pipeline gate adding no failure against base; tests/standard_names/test_judge_stage.py:303-328 is the guard, negative-control.log shows it failing (1 failed, EXIT=1), live-run.log and shs-boundary-criterion-decisions.json record 10 calls / USD 0.000358, and gate-base.log (264 passed) vs gate-after.log (265 passed) both exit 0 with 0 failures, so all three parts are met.\nVERDICT write_paths: read the brief's five declared paths; git show --stat e84bee2c71a6f840bbddb0bdef9a5cf9d32344e0 lists exactly those five (judge_stage.py, test_judge_stage.py and the three evidence fragments) and no path outside the fence.\nVERDICT manifest: read; it records status complete, one commit, baseline_suite and after_suite as JSON with revision, exit_status and completed true (0 failures each), the negative-control log and the live-run log, and every headline claim survives a check of the logs it cites.\nVERDICT diff: read the single commit e84bee2c71a6f840bbddb0bdef9a5cf9d32344e0 against base c98a0d42dc8195dd60c9c145340703409c87b2ec; it rewrites the plasma_boundary criteria and verdict map in imas_codex/standard_names/review/judge_stage.py (14 lines), updates tests/standard_names/test_judge_stage.py (35 lines) and adds the three evidence fragments, and changes nothing else.\nCALL_SITES: imas_codex/standard_names/review/pipeline.py:597 judge_review_stage, imas_codex/standard_names/review/pipeline.py:31 judge_stage import\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/judge_stage.py:113 drops the synonym clause from the canonical criterion and :124 maps separatrix_equated to FORBIDDEN, which is the goal exactly.\nSCORE evidence: 19\nJUSTIFICATION evidence: gate-base.log ends \"264 passed\" EXIT=0 and gate-after.log \"265 passed\" EXIT=0 (one added test, zero added failures), negative-control.log shows the guard red under the declared mutation, and live-run.log and shs-boundary-criterion-decisions.json record 10 calls booked USD 0.000358 with the required verdicts.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat e84bee2c71a6f840bbddb0bdef9a5cf9d32344e0 lists only imas_codex/standard_names/review/judge_stage.py, tests/standard_names/test_judge_stage.py and the three docs/evidence/sn-house-style fragments, every one inside the brief's write scope, and no generated model or other path is touched.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_judge_stage.py:320 asserts \"synonym\" not in canonical and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T004845076915-shs-boundary-criterion/negative-control.log shows it reddening on the restored clause (1 failed, EXIT=1) while the head arm passes, but the guard is word-literal so a differently-worded regression escapes it.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/review/judge_stage.py:113-127 keeps the surrounding _CONCEPT_FORMS shape and names the option separatrix_equated exactly as the smoke fragment docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.py:26 does, with no plan, gate or ticket label in any symbol, comment or commit subject.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends _CONCEPT_FORMS in imas_codex/standard_names/review/judge_stage.py, the owner of the judged-form vocabulary, and forks no capability; a search for a boundary-gloss criterion owner found only the evidence script docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.py, which is not a production mechanism.\nFINDING tests/standard_names/test_judge_stage.py:320 follow-on: the canonical-text guard asserts the literal tokens \"synonym\" and \"may also give\" are absent, so a regression that re-admits the separatrix with different wording (e.g. \"it may also be called the separatrix\") would leave both assertions green; the declared mutation (restoring the exact old clause) does redden it as negative-control.log shows, so the guard is real but word-specific rather than semantic.\nFINAL: SOUND WITH FINDINGS. The node does what section 13 asks: the judged plasma_boundary canonical criterion no longer offers the separatrix as a synonym and a new separatrix_equated option maps to the forbidden verdict, the guard reddens under the restored clause, the live run books 10 calls and returns the required verdicts, and the review-pipeline gate adds no failure against base. The one follow-on is that the guard is word-literal rather than semantic; it does not hold the node.",
+  "review_run_id": "r-20261013T011927243198-review-of-shs-boundary-criterion-e84bee2c71a6",
+  "reviewed_base_sha": "c98a0d42dc8195dd60c9c145340703409c87b2ec",
+  "reviewed_head_sha": "e84bee2c71a6f840bbddb0bdef9a5cf9d32344e0",
+  "reviewed_run_id": "r-20261013T004845076915-shs-boundary-criterion",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:25:00.000000+00:00",
+  "total": 110,
+  "verdict": "SOUND WITH FINDINGS"
+}
