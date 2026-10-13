@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run r-20261013T132648132380-ssfms-reprocess-bulk-2 is an evidence-only node whose manifest declares neither a baseline_suite nor an after_suite arm, so its own gate logs contribute no pytest failure ids and the derived added-failure set is empty",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T15:01:41.777Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "an operational reprocess writes only evidence, so no test can redden on an edited figure; its post-condition is re-measured live by section 12's third node, whose census over every JT-60SA signal must read no signal at discovered, no hash mismatch and no role-less described signal",
+      "recorded_at": "2026-10-13T14:51:51.362659+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T14:34:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-2.json",
+      "line": "60",
+      "severity": "follow-on",
+      "text": "follow-on: the record reports final_described 2946 for b260008 and 704 for CryoHRS as the finished measure but omits the signal_role count its own census logs carry (bulk-logs/b260008_final.log has_role 692 of 2946 described; bulk-logs/cryohrs_full_final.log has_role 84 of 704), so a successor reading the record cannot see that section 12's 'role census reports no described signal without a role' is far from met for these categories."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-2.html",
+      "line": "41",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment names six LCDB zeff sources as the parents of the 13 stuck signals (s002_metafile, s002_xfitdata, s002_cst1, s002_ifunc, s002_used_fitdata_index and s005_topics_xfitdata), but the residue file it cites (bulk-logs/ids_b260008_residue.json) lists 13 ids whose suffixes span s001, s002, s003 and s005 and whose 'sources' field is empty, so the stated cause is not supported by the evidence it points a reader to."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-2.json",
+      "line": "62",
+      "severity": "follow-on",
+      "text": "follow-on: the residue_reason cites imas_codex/discovery/signals/parallel.py:5453 for the status='enriched' match, but that MATCH clause is at parallel.py:5450; the mechanism it describes is real and verified at 5450, only the line citation is off."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T132648132380-ssfms-reprocess-bulk-2/manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's tests line names census_signal_embeddings alongside find_signal_hash_mismatches, but no facility-scoped census output was captured under bulk-logs/; the done-when names census_signal_embeddings(facility='jt-60sa') as a reporter of the measure and the reading (n=15111, mismatch=0) exists only in the run stream, which a later reader without the run envelope cannot open."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the diff adds only evidence docs under docs/evidence/fragments/signal-search-finds-the-measured-signal/; no runtime module, function or statement is added or changed, so no production call site reaches the landed change.",
+    "diff": "read commit by commit over 5b349e087b4d344be2ffacdaa4ee815e9a5e007f..7f3f7d0d7de985de77bf5e34bc9f21e0f3c7b4b8; commit cfc507fb0 adds the 67-line progress JSON and the 80-line HTML fragment and commit 7f3f7d0d7 corrects two census log names in the JSON, all under docs/, no product source and no test.",
+    "done_when": "the done_when names a census scoped to the two categories plus census_signal_embeddings(facility='jt-60sa'); the gate that actually ran (bulk-logs/census_scope.py over the two id lists, cf. bulk-logs/b260008_final.log and bulk-logs/cryohrs_full_final.log) asserts the scoped half and records 13 discovered / 13 hash mismatch for b260008, but the facility census is captured to no log under the run directory and the done_when's rate precondition ('a scope is reset only when the node's measured rate says it can finish in the remaining time') is not satisfied by b260008.",
+    "goal": "the goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-2.json:36-38 records CryoHRS finished 704/704 but :57-61 records b260008 reset with 13 of 2959 still at discovered, so not every reset scope was finished, and the shortfall is reported as a blocker in the manifest rather than hidden.",
+    "manifest": "read; status complete, commits cfc507fb0 and 7f3f7d0d7, tests records the scoped census with its results, negative_control_log names bulk-logs/b260008.postreset.log, and it records no baseline_suite or after_suite gate log, so the added-failure count is unmeasured.",
+    "write_paths": "the manifest declares three write paths; git diff 5b349e087b4d344be2ffacdaa4ee815e9a5e007f..7f3f7d0d7de985de77bf5e34bc9f21e0f3c7b4b8 changes exactly reprocess-progress-bulk-2.json and ssfms-reprocess-bulk-2.html, both inside the fence, and the declared figure directory docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-2 is left unused."
+  },
+  "justifications": {
+    "durability": "the change adds only evidence docs (reprocess-progress-bulk-2.json, ssfms-reprocess-bulk-2.html), so no test fails if a recorded figure is edited or the record regresses.",
+    "evidence": "bulk-logs/b260008_final.log (described 2946, discovered 13, hash_mismatch 13) and bulk-logs/cryohrs_full_final.log (described 704, hash_mismatch 0) are real census receipts reproducing reprocess-progress-bulk-2.json:57-61, but the done_when's census_signal_embeddings(facility='jt-60sa') reading is in no captured log and bulk-logs/b260008_enrich.log's first pass carries no cost-summary line.",
+    "fit": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-2.html:5 uses the sibling fragments' section data-reckon=\"evidence\" idiom and every element id begins with the node id (lines 8, 19, 32, 41).",
+    "goal_fidelity": "reprocess-progress-bulk-2.json:57-61 records b260008 with 13 of 2959 still at discovered after its reset, so the goal's 'finishing every scope it resets' is unmet for that scope even though CryoHRS finished 704/704.",
+    "reuse": "the diff adds no function, class or module, and the run's census helper (bulk-logs/census_scope.py) lives in the run directory and calls the pipeline's own find_signal_hash_mismatches rather than forking it.",
+    "scope_discipline": "git diff 5b349e087b4d344be2ffacdaa4ee815e9a5e0070..7f3f7d0d7de985de77bf5e34bc9f21e0f3c7b4b8 changes only reprocess-progress-bulk-2.json and ssfms-reprocess-bulk-2.html, the two evidence files the manifest fences, and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-2.json:36-38 records CryoHRS finished 704/704 but :57-61 records b260008 reset with 13 of 2959 still at discovered, so not every reset scope was finished and the shortfall is reported as a blocker rather than hidden.\nVERDICT done_when: the done_when names a category-scoped census and census_signal_embeddings(facility='jt-60sa'); the gate that ran (bulk-logs/census_scope.py over the two id lists, bulk-logs/b260008_final.log and bulk-logs/cryohrs_full_final.log) asserts the scoped half and records 13 discovered / 13 hash mismatch for b260008, but the facility census is captured to no log and the rate precondition was not met for b260008.\nVERDICT write_paths: the manifest declares three write paths; git diff 5b349e087b4d344be2ffacdaa4ee815e9a5e007f..7f3f7d0d7de985de77bf5e34bc9f21e0f3c7b4b8 changes exactly reprocess-progress-bulk-2.json and ssfms-reprocess-bulk-2.html, both inside the manifest's fence, and the declared figure directory is unused.\nVERDICT manifest: read; status complete, commits cfc507fb0 and 7f3f7d0d7, tests records the scoped census with its results, negative_control_log names bulk-logs/b260008.postreset.log; it records no baseline_suite or after_suite arm, so the added-failure count is unmeasured.\nVERDICT diff: read commit by commit over 5b349e087b4d344be2ffacdaa4ee815e9a5e007f..7f3f7d0d7de985de77bf5e34bc9f21e0f3c7b4b8; cfc507fb0 adds the 67-line progress JSON and the 80-line HTML fragment, and 7f3f7d0d7 corrects two census log names in the JSON, all under docs/ with no product source and no test.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: reprocess-progress-bulk-2.json:57-61 records b260008 with 13 of 2959 still at discovered after its reset, so the goal's 'finishing every scope it resets' is unmet for that scope even though CryoHRS finished 704/704.\nSCORE evidence: 12\nJUSTIFICATION evidence: bulk-logs/b260008_final.log (described 2946, discovered 13, hash_mismatch 13) and bulk-logs/cryohrs_full_final.log (described 704, hash_mismatch 0) reproduce reprocess-progress-bulk-2.json:57-61, but the done_when's census_signal_embeddings(facility='jt-60sa') reading is in no captured log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 5b349e0..7f3f7d0d7 changes only reprocess-progress-bulk-2.json and ssfms-reprocess-bulk-2.html, the two evidence files the manifest fences, and nothing else.\nSCORE durability: 6\nJUSTIFICATION durability: the change adds only evidence docs (reprocess-progress-bulk-2.json, ssfms-reprocess-bulk-2.html), so no test reddens if a recorded figure is edited or the record regresses.\nSCORE fit: 18\nJUSTIFICATION fit: ssfms-reprocess-bulk-2.html:5 uses the sibling fragments' section data-reckon=\"evidence\" idiom and every element id begins with the node id (lines 8, 19, 32, 41).\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, and the run's census helper (bulk-logs/census_scope.py) calls the pipeline's own find_signal_hash_mismatches rather than forking it.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-2.json:60 follow-on: the record reports final_described 2946 for b260008 and 704 for CryoHRS but omits the signal_role count its own census logs carry (bulk-logs/b260008_final.log has_role 692 of 2946; bulk-logs/cryohrs_full_final.log 84 of 704), so a successor cannot see from the record that section 12's role census is far from zero for these categories.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-2.html:41 follow-on: the fragment names six LCDB zeff sources as the parents of the 13 stuck signals, but the residue file it cites lists 13 ids spanning the s001/s002/s003/s005 suffixes with an empty 'sources' field, so the stated cause is not supported by the evidence it points to.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-2.json:62 follow-on: the residue_reason cites imas_codex/discovery/signals/parallel.py:5453 for the status='enriched' match, but that MATCH clause is at parallel.py:5450; the mechanism is real, only the line citation is off.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T132648132380-ssfms-reprocess-bulk-2/manifest.md:22 follow-on: the manifest's tests line names census_signal_embeddings, but no facility-scoped census output was captured under bulk-logs/; the done-when's facility census reading exists only in the run stream.\n",
+  "review_run_id": "r-20261013T143401982371-review-of-ssfms-reprocess-bulk-2-7f3f7d0d7de9",
+  "reviewed_base_sha": "5b349e087b4d344be2ffacdaa4ee815e9a5e007f",
+  "reviewed_head_sha": "7f3f7d0d7de985de77bf5e34bc9f21e0f3c7b4b8",
+  "reviewed_run_id": "r-20261013T132648132380-ssfms-reprocess-bulk-2",
+  "scores": {
+    "durability": 6,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T15:02:44.332664+00:00",
+  "total": 90
+}
