@@ -236,5 +236,36 @@
     },
     "with_description": 0,
     "census_utc": "2026-10-13T11:54:27Z"
-  }
+  },
+  "enrichment_command": "imas-codex discover run jt-60sa --only signals --flush --focus reprocess-sample-ids.json",
+  "enrichment": {
+    "run_cost_usd": 0.17,
+    "run_elapsed_s": 453.7,
+    "engine_done_enriched": 1106,
+    "signals_per_minute": 146.3,
+    "cost_per_processed_signal_usd": 0.00015371,
+    "signals_per_minute_sample_basis": 26.7,
+    "cost_per_sample_signal_usd": 0.00084158
+  },
+  "role_backfill": {
+    "missing_at_verification": 34,
+    "roles_stored": 34,
+    "cost_usd": 0.000891,
+    "missing_after": 0
+  },
+  "verification": {
+    "status_enriched": 202,
+    "with_description": 202,
+    "embedded_text_hash_mismatch": 0,
+    "embedded_text_hash_null": 0,
+    "enriched_at_before_start": 0,
+    "signal_role_missing": 0
+  },
+  "projection_15111": {
+    "jevy_cost_record_basis_usd": 2.32,
+    "jevy_sample_basis_usd": 12.72,
+    "wall_minutes_record_basis": 103.3,
+    "wall_minutes_sample_basis": 565.7
+  },
+  "total_spend_usd": 0.1709
 }
