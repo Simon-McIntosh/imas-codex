@@ -25,6 +25,17 @@
     judge's ordering over repeats, which is what the band absorbs.
   </p>
 
+  <figure id="ssfms-rerank-measure-module-node-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-rerank-measure-module/docs-code-ndcg.svg"
+         alt="Labelled-only nDCG@10 at pool 60: the embedding order at 0.4627, section 4's recorded rerank at 0.5136, and the module's two rerank passes at 0.5303 and 0.5345, both inside or a hair outside the shaded plus-or-minus 0.02 band about 0.5136.">
+    <figcaption>
+      Labelled-only nDCG@10 at pool 60 on the 18 JT-60SA docs and code questions. The embedding order
+      (grey) reproduces section 4's 0.4627 exactly; the two rerank passes (blue) bracket section 4's
+      recorded 0.5136 (grey, with its ±0.02 band shaded), so the ported measurement lands on the
+      recorded figure and the spread is the judge re-ordering over repeats.
+    </figcaption>
+  </figure>
+
   <p id="ssfms-rerank-measure-module-node-spend">
     <strong>Jev spent reproducing section 4.</strong> Read from the response usage the judged call layer
     returns: <strong>1191 calls</strong> and <strong>$0.040528</strong> per pass, over 18 questions at
