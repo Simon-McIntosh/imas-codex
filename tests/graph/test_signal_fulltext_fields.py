@@ -1,19 +1,20 @@
 """Guard the widened ``facility_signal_text`` index definition.
 
 The signal full-text index is defined once, as a LinkML annotation on
-``FacilitySignal`` in ``imas_codex/schemas/facility.yaml``. A searcher's words
-live in more than the identifier, so the index must cover the catalogue wording,
-alias code, unit and source prose beside the name and node path — a physicist
-copies those from a logbook or a wiki table. This module reads that definition
-straight from the schema, with no graph, and fails if any field it must carry is
-dropped.
+``FacilitySignal`` in ``imas_codex/schemas/facility.yaml``, and materialised by
+the generated context that ``GraphClient`` reads. A searcher's words live in more
+than the identifier, so the index must cover the catalogue wording, alias code,
+unit and source prose beside the name and node path. The schema definition and
+its generated form are each read through their owner — no graph — and both must
+carry every field, so a dropped annotation or a stale regeneration fails here.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
+from imas_codex.graph.schema import GraphSchema
+from imas_codex.graph.schema_context_data import FULLTEXT_INDEXES
 
 _SCHEMA_PATH = (
     Path(__file__).resolve().parents[2] / "imas_codex" / "schemas" / "facility.yaml"
@@ -34,17 +35,32 @@ REQUIRED_PROPERTIES: tuple[str, ...] = (
 )
 
 
-def _facility_signal_fulltext(schema_path: Path) -> tuple[str, list[str]]:
-    """Read the ``FacilitySignal`` full-text index definition from the schema."""
-    document = yaml.safe_load(schema_path.read_text())
-    annotation = document["classes"]["FacilitySignal"]["annotations"]["fulltext_index"]
-    index_name, _, properties = annotation["value"].partition(":")
-    return index_name, [p.strip() for p in properties.split(",") if p.strip()]
+def _missing(properties: list[str]) -> list[str]:
+    """The required fields absent from ``properties``."""
+    return [name for name in REQUIRED_PROPERTIES if name not in properties]
 
 
-def test_facility_signal_text_index_covers_searchable_fields():
-    """The signal full-text index carries every field a searcher's words reach."""
-    index_name, properties = _facility_signal_fulltext(_SCHEMA_PATH)
-    assert index_name == INDEX_NAME
-    missing = [name for name in REQUIRED_PROPERTIES if name not in properties]
-    assert not missing, f"{INDEX_NAME} index is missing indexed fields: {missing}"
+def _schema_index_properties() -> list[str]:
+    """Read the ``facility_signal_text`` properties from the LinkML schema."""
+    indexes = {
+        name: props
+        for name, _label, props in GraphSchema(_SCHEMA_PATH).fulltext_indexes
+    }
+    return indexes[INDEX_NAME]
+
+
+def test_schema_index_covers_searchable_fields():
+    """The schema's index definition carries every field a searcher's words reach."""
+    missing = _missing(_schema_index_properties())
+    assert not missing, (
+        f"{INDEX_NAME} schema definition is missing indexed fields: {missing}"
+    )
+
+
+def test_generated_index_covers_searchable_fields():
+    """The generated context the client builds the index from carries the fields."""
+    _label, properties = FULLTEXT_INDEXES[INDEX_NAME]
+    missing = _missing(properties)
+    assert not missing, (
+        f"{INDEX_NAME} generated definition is missing indexed fields: {missing}"
+    )
