@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="54">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -455,6 +455,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-land-s3-forbidden-spelling-fixture" data-who="reckon-build" data-when="2026-10-13T10:42:00Z">
     <div class="r-comment-body"><p>The density forbidden-spelling fixture now uses a spelling the registry forbids (merge <code>ef2e88cef</code>); the house-style check test is green again. Section stays open for the binary-operator templates and the census re-run. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s3-forbidden-spelling-fixture">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T141258848032-shs-registry-worklist-rerun" data-who="reckon-build" data-when="2026-10-13T14:21:08.195Z">
+    <div class="r-comment-body"><p>Registry worklist driver now decides template presence through select_conventions (no copied matcher); live registry lists 0 template gaps over 125 patterns (219 of 219 parsed names select a template) against 121 in the first run, the binary-operator templates close the one pattern (placeholder (physical_base, transformation), 8 names) the driver&#x27;s own matcher still listed, and a scratch registry without ratio lists it again with 5 names unmatched; record at docs/evidence/fragments/sn-house-style/shs-registry-worklist-rerun.html</p></div>
 </div>
 </section>
 </main>
