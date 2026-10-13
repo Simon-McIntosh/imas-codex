@@ -13,4 +13,103 @@
     sibling names are ordered through the comparator reranker, which keeps the
     embedding order on failure. Nothing in the pipeline calls it yet.
   </p>
+
+  <h3 id="srtj-name-review-build-smoke-title">Live smoke: two names judged, answers recorded</h3>
+  <p id="srtj-name-review-build-smoke">
+    One live call judged two golden-A names through
+    <code>review_names</code> at concurrency 2, both answered, for a booked
+    spend of <strong>USD 0.0001407</strong>. The question table asked four
+    dimension categories and twenty-nine named checks of each name in the one
+    call. The run inputs carried no description, so the categories below record
+    the thin state the smoke supplied, not a judgement of the names' real
+    backing text.
+  </p>
+
+  <table id="srtj-name-review-build-smoke-answers">
+    <caption>
+      The two smoke names and the category the judge placed each in, with the
+      decision derived in code from that category. Both names landed on the same
+      four categories, so the smoke separates their per-check answers rather
+      than their dimensions.
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">dimension</th>
+        <th scope="col">diamagnetic_momentum_diffusivity</th>
+        <th scope="col">ion_average_temperature</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>grammar</td><td>canonical &rarr; accept</td><td>canonical &rarr; accept</td></tr>
+      <tr><td>semantic</td><td>unambiguous &rarr; accept</td><td>unambiguous &rarr; accept</td></tr>
+      <tr><td>convention</td><td>conforms &rarr; accept</td><td>conforms &rarr; accept</td></tr>
+      <tr><td>completeness</td><td>incomplete &rarr; reject</td><td>incomplete &rarr; reject</td></tr>
+    </tbody>
+  </table>
+
+  <table id="srtj-name-review-build-smoke-checks">
+    <caption>
+      Every check question the smoke answered, per name. A Noul is the
+      probability its defect holds, failing at or above 0.5; a Choice is the
+      selected option, failing when it is not the acceptable form (authored
+      first). Seven checks failed for each name, bolded. The three audit-decided
+      checks carry no question and are not asked.
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">check</th>
+        <th scope="col">diamagnetic_momentum_diffusivity</th>
+        <th scope="col">ion_average_temperature</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>malformed_physical_base</strong></td><td><strong>noul 0.84</strong></td><td><strong>noul 0.84</strong></td></tr>
+      <tr><td>unregistered_token_in_closed_segment</td><td>noul 0.44</td><td>noul 0.49</td></tr>
+      <tr><td>decomposition_group_absorbed_into_base</td><td>noul 0.18</td><td>noul 0.22</td></tr>
+      <tr><td>field_region_preposition_wrong</td><td>noul 0.42</td><td>noul 0.42</td></tr>
+      <tr><td>ordered_sample_positional_token</td><td>noul 0.04</td><td>noul 0.06</td></tr>
+      <tr><td>retired_operator_spelling</td><td>noul 0.13</td><td>noul 0.16</td></tr>
+      <tr><td>dropped_distinguishing_axis</td><td>noul 0.49</td><td>noul 0.45</td></tr>
+      <tr><td>ambiguity_in_isolation</td><td>noul 0.38</td><td>noul 0.35</td></tr>
+      <tr><td><strong>device_attributed_observable</strong></td><td><strong>noul 0.86</strong></td><td><strong>noul 0.86</strong></td></tr>
+      <tr><td>over_qualified_modifier</td><td>noul 0.38</td><td>noul 0.28</td></tr>
+      <tr><td>source_fidelity_unsupported_qualifier</td><td>noul 0.38</td><td>noul 0.28</td></tr>
+      <tr><td><strong>bound_to_wrong_object</strong></td><td><strong>choice a different object (0.73, confidence 0.59)</strong></td><td><strong>choice a different object (0.64, confidence 0.46)</strong></td></tr>
+      <tr><td>collapsed_two_quantities</td><td>choice one quantity (0.99)</td><td>choice one quantity (0.99)</td></tr>
+      <tr><td>over_specialised_parent</td><td>noul 0.33</td><td>noul 0.34</td></tr>
+      <tr><td>owner_erased_outline</td><td>noul 0.27</td><td>noul 0.26</td></tr>
+      <tr><td>coupled_vs_launched_confusion</td><td>noul 0.13</td><td>noul 0.12</td></tr>
+      <tr><td>value_provenance_in_name</td><td>noul 0.05</td><td>noul 0.08</td></tr>
+      <tr><td>non_canonical_operator_join</td><td>noul 0.29</td><td>noul 0.28</td></tr>
+      <tr><td><strong>non_canonical_segment_order</strong></td><td><strong>noul 0.72</strong></td><td><strong>noul 0.69</strong></td></tr>
+      <tr><td><strong>non_canonical_render</strong></td><td><strong>noul 0.56</strong></td><td><strong>noul 0.51</strong></td></tr>
+      <tr><td>non_canonical_locus_token</td><td>noul 0.12</td><td>noul 0.09</td></tr>
+      <tr><td>advisory_alias_collapsed</td><td>noul 0.08</td><td>noul 0.08</td></tr>
+      <tr><td>bare_shape_parameter_missing_surface</td><td>noul 0.46</td><td>noul 0.42</td></tr>
+      <tr><td>model_surname_suffix</td><td>noul 0.07</td><td>noul 0.08</td></tr>
+      <tr><td>minority_spelling_not_in_roster</td><td>noul 0.14</td><td>noul 0.15</td></tr>
+      <tr><td>redundant_repeated_segment</td><td>noul 0.07</td><td>noul 0.15</td></tr>
+      <tr><td><strong>missing_required_segment</strong></td><td><strong>noul 0.79</strong></td><td><strong>noul 0.76</strong></td></tr>
+      <tr><td><strong>unit_kind_inconsistent</strong></td><td><strong>noul 0.78</strong></td><td><strong>noul 0.86</strong></td></tr>
+      <tr><td>source_binding_drift</td><td>noul 0.11</td><td>noul 0.14</td></tr>
+    </tbody>
+  </table>
+
+  <p id="srtj-name-review-build-smoke-reading">
+    Both names failed <code>malformed_physical_base</code>,
+    <code>device_attributed_observable</code>,
+    <code>bound_to_wrong_object</code>,
+    <code>non_canonical_segment_order</code>,
+    <code>non_canonical_render</code>,
+    <code>missing_required_segment</code> and
+    <code>unit_kind_inconsistent</code> &mdash; matching each other check for
+    check, and matching on all four dimension categories. The uniform column
+    across two different names is the signal the measurement node must explain
+    before the state's discrimination is trusted: the smoke gave both names an
+    empty description, so the redundancy may be thin input rather than a
+    question table that cannot tell names apart. The
+    <code>bound_to_wrong_object</code> Choice is the one answer that separates
+    them &mdash; 0.73 to 0.64 at confidence 0.59 and 0.46 &mdash; and at 0.64
+    the second name is only just over the line.
+  </p>
 </section>
