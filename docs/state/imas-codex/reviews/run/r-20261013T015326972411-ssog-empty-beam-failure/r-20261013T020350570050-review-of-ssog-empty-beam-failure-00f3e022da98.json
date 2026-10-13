@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T02:09:47.644Z",
+  "dispatched_at": "2026-10-13T02:04:07Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_segment_selection.py",
+      "line": "6",
+      "severity": "follow-on",
+      "text": "follow-on: the module docstring states that every test's mechanism can be removed via SS_SEGMENT_MUTATION so the test can be shown to fail without it, but the new hand-off test adds no SS_SEGMENT_MUTATION value and its guard is exercised only by an out-of-repo script in the run directory, so the file's own negative-control contract no longer covers every test it claims to."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-empty-beam-failure.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the new fragment file has no trailing newline (git show reports 'No newline at end of file'), a minor hygiene defect in an otherwise well-formed evidence file."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: select_segments has no production caller in the repository (grep over *.py outside .venv, excluding the module definition and its own test, returns nothing), so no runtime code reaches this node's landed change.",
+    "diff": "read commit by commit against f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7; the single commit 00f3e022d adds the test function plus its docstring and stub to tests/standard_names/test_segment_selection.py and a new landing fragment, with no product source touched.",
+    "done_when": "the done_when asks the test to pass at head and fail when the hand-off is altered in a scratch copy to drop the missing-slot failure (log with EXIT=), with no added failure against base and baseline_suite/after_suite recorded with revision, exit_status and completed:true; the manifest records all of these and the cited logs confirm them (baseline 4 passed EXIT=0, after 5 passed EXIT=0, negative_control EXIT=1).",
+    "goal": "the goal is one test that drives select_segments with the decisions call stubbed so every call for one slot fails (returns None) while the other slots succeed, asserting the item records a failure naming that slot, renders no name, and sibling items are unaffected; tests/standard_names/test_segment_selection.py:278 test_a_slot_with_no_surviving_path_is_that_items_failure stubs decide_batch so the physical_base slot of the /dd/electron/density source returns None (lines 294-311), calls _run([empty, filled]) (line 314), and asserts exactly those three things (lines 319-328).",
+    "manifest": "read; it records status complete, commit 00f3e022d, the gate command (5 passed, EXIT=0), baseline_suite (revision f6b42f89, completed true, failure_count 0) and after_suite (revision 00f3e02, completed true, failure_count 0), and negative_control.log (EXIT=1); every cited log reconciles with the claim.",
+    "write_paths": "the declared write paths are tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-empty-beam-failure.html; git show --stat 00f3e022d shows exactly those two files (+58 and +20), both inside the fence, nothing outside it."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows that replacing item.failure = str(exc) with pass in a scratch copy of imas_codex/standard_names/segment_selection.py reddens the new test at tests/standard_names/test_segment_selection.py:321 (1 failed, EXIT=1), so the guard fails on the regression it was added to catch.",
+    "evidence": "the recorded baseline_segment_selection.log (4 passed) and after_segment_selection.log (5 passed) both reach their summary line at the revisions the manifest names, and negative_control.log carries EXIT=1 with the failing test id, so the gate measures the done_when and the result is recorded rather than claimed.",
+    "fit": "the new test follows the module's existing idiom, reusing the _source/_run/_distribution helpers and the monkeypatch-of-ss.decide_batch pattern of tests/standard_names/test_segment_selection.py:110 and 199, and introduces no forbidden name.",
+    "goal_fidelity": "tests/standard_names/test_segment_selection.py:319-328 assert the physical_base slot is absent from the failed item, that it renders no name, that its failure names the slot, and that the sibling source renders electron_density unaffected, which is exactly the goal.",
+    "reuse": "the added test extends the existing suite by driving the entry point select_segments rather than forking a capability, and it reuses the file's helpers instead of re-implementing a distribution helper already owned by tests/standard_names/test_segment_selection.py:40; no existing mechanism is duplicated.",
+    "scope_discipline": "the diff of 00f3e022d touches only the two declared write paths in the manifest, so the change carries nothing the goal does not imply."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261013T015326972411-ssog-empty-beam-failure (imas-codex, plan sn-selection-over-generation section 2, node ssog-empty-beam-failure), base f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7, head 00f3e022da983135d35c4a9132d59d81a96bdb80.\nVERDICT goal: the goal is one test that drives select_segments with the decisions call stubbed so every call for one slot fails (returns None) while the other slots succeed, asserting the item records a failure naming that slot, renders no name, and sibling items are unaffected; tests/standard_names/test_segment_selection.py:278 test_a_slot_with_no_surviving_path_is_that_items_failure stubs decide_batch so the physical_base slot of the /dd/electron/density source returns None (lines 294-311), calls _run([empty, filled]) (line 314), and asserts exactly those three things (lines 319-328).\nVERDICT done_when: the done_when asks the test to pass at head and fail when the hand-off is altered in a scratch copy to drop the missing-slot failure (log with EXIT=), with no added failure against base and baseline_suite/after_suite recorded with revision, exit_status and completed:true; the manifest records all of these and the cited logs confirm them (baseline 4 passed EXIT=0, after 5 passed EXIT=0, negative_control EXIT=1).\nVERDICT write_paths: the declared write paths are tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-empty-beam-failure.html; git show --stat 00f3e022d shows exactly those two files (+58 and +20), both inside the fence, nothing outside it.\nVERDICT manifest: read; it records status complete, commit 00f3e022d, the gate command (5 passed, EXIT=0), baseline_suite (revision f6b42f89, completed true, failure_count 0) and after_suite (revision 00f3e02, completed true, failure_count 0), and negative_control.log (EXIT=1); every cited log reconciles with the claim.\nVERDICT diff: read commit by commit against base f6b42f894; the single commit 00f3e022d adds the test function plus its docstring and stub to tests/standard_names/test_segment_selection.py and a new landing fragment, with no product source touched.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/standard_names/test_segment_selection.py:319-328 assert the physical_base slot is absent from the failed item, that it renders no name, that its failure names the slot, and that the sibling source renders electron_density unaffected, which is exactly the goal.\nSCORE evidence: 19\nJUSTIFICATION evidence: the recorded baseline_segment_selection.log (4 passed) and after_segment_selection.log (5 passed) both reach their summary line at the revisions the manifest names, and negative_control.log carries EXIT=1 with the failing test id, so the gate measures the done_when and the result is recorded rather than claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff of 00f3e022d touches only the two declared write paths in the manifest, so the change carries nothing the goal does not imply.\nSCORE durability: 19\nJUSTIFICATION durability: negative_control.log shows that replacing item.failure = str(exc) with pass in a scratch copy of imas_codex/standard_names/segment_selection.py reddens the new test at tests/standard_names/test_segment_selection.py:321 (1 failed, EXIT=1), so the guard fails on the regression it was added to catch.\nSCORE fit: 20\nJUSTIFICATION fit: the new test follows the module's existing idiom, reusing the _source/_run/_distribution helpers and the monkeypatch-of-ss.decide_batch pattern of tests/standard_names/test_segment_selection.py:110 and 199, and introduces no forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the added test extends the existing suite by driving the entry point select_segments rather than forking a capability, and it reuses the file's helpers instead of re-implementing a distribution helper already owned by tests/standard_names/test_segment_selection.py:40; no existing mechanism is duplicated.\nFINDING tests/standard_names/test_segment_selection.py:6 follow-on: the module docstring states that every test's mechanism can be removed via SS_SEGMENT_MUTATION so the test can be shown to fail without it, but the new hand-off test adds no SS_SEGMENT_MUTATION value and its guard is exercised only by an out-of-repo script in the run directory, so the file's own negative-control contract no longer covers every test it claims to.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-empty-beam-failure.html:20 follow-on: the new fragment file has no trailing newline (git show reports '\\ No newline at end of file'), a minor hygiene defect in an otherwise well-formed evidence file.",
+  "review_run_id": "r-20261013T020350570050-review-of-ssog-empty-beam-failure-00f3e022da98",
+  "reviewed_base_sha": "f6b42f89414d63ca7aeaf37e4d45d231fbeacdf7",
+  "reviewed_head_sha": "00f3e022da983135d35c4a9132d59d81a96bdb80",
+  "reviewed_run_id": "r-20261013T015326972411-ssog-empty-beam-failure",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T02:08:51.663524+00:00",
+  "total": 118
+}
