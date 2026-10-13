@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="88">
+<meta name="plan-version" content="89">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47">
 </head>
@@ -738,7 +738,10 @@
     <div class="r-comment-body"><p>Row collapse delivered and promoted (worker head <code>97eac4222</code>), not yet merged: the booster report falls from 341 to 112 lines, 20 rows to 13 and 20 access templates to 1, still naming all four booster voltages; no golden question's k=20 report holds two rows with one template in a category; the fused tool's nDCG@10 is 0.7890 at base and head. It left <code>test_basic_signal_formatting</code> asserting the old fused score, in a file outside its write paths, so a repair based on its head updates that test, revives <code>_interpolate_template</code> to print a resolved call for single-member rows, and merges with it. Independent review 105/120.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261013T110913614065-review-of-ssfms-result-rows-tests-b97d4bdf47f5" data-who="reckon-build" data-when="2026-10-13T11:19:19.099Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-result-rows-tests.html - independent review of run r-20261013T104222430294-ssfms-result-rows-tests stored at both granted review paths; 6 dimensions scored (goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 18, reuse 19; total 112), reviewed_base_sha 97eac4222c89103942f49538791b294ab9134abf / reviewed_head_sha b97d4bdf47f51ad9074cfad15370fef377c52d13, added_failure_count 0 / ids [] derived from the reviewed run&#x27;s baseline_suite (1 failure) and after_suite (0 failures) arms, 1 follow-on finding.</p></div>
+    <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-result-rows-tests.html - independent review of run r-20261013T104222430294-ssfms-result-rows-tests stored at both granted review paths; 6 dimensions scored (goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 18, reuse 19; total 112), reviewed_base_sha 97eac4222c89103942f49538791b294ab9134abf / reviewed_head_sha b97d4bdf47f51ad9074cfad15370fef377c52d13, added_failure_count 0 / ids [] derived from the reviewed run's baseline_suite (1 failure) and after_suite (0 failures) arms, 1 follow-on finding.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261013T104222430294-ssfms-result-rows-tests" data-who="reckon-build" data-when="2026-10-13T11:00:48.542Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-result-rows-tests.html — a single-member row in format_signals_report now prints its own access call with placeholders filled through _interpolate_template so no {accessor} survives in it, while a multi-member row keeps one shared template plus its members&#x27; accessors; the single-signal formatter golden asserts the row&#x27;s fused rank (Rank: 1) instead of the retired 0.92 fused score; gate 119 passed, 8 skipped, 0 failed against one failure at base 97eac4222.</p></div>
 </div>
 </section>
 </main>
