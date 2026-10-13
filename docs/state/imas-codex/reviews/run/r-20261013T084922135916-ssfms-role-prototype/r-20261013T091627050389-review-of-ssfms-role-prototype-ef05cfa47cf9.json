@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded only its after_suite arm (role-head-absolute.log); the reviewed manifest names no baseline_suite, so the count was derived by reading the two arms the run left on disk -- role-head-absolute.log (head, 3 passed, EXIT=0) and role-unit.log (the base-revision arm, 3 passed, EXIT=0) -- each with zero FAILED or ERROR node ids, giving 0 added failures against an unchanged, empty base set; the base arm's own revision stamp is itself inconsistent (see the finding on role-unit.log:1).",
+  "base_log_revision": "7f54df09dd95bd456d45f56b9b7676b6ef5867f4",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T09:34:25.143Z",
+  "dispatched_at": "2026-10-13T09:16:45Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_role.py",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: \"assert set(signal_role_questions()[\"signal_role\"][\"criteria\"]) == set(ROLE_CRITERIA)\" compares the function under test against the module's own constant, so it can only fail if that function hardcodes a set differing from ROLE_CRITERIA and cannot catch a wrong or missing role definition that appears in both; it is not independent of the code it checks."
+    },
+    {
+      "file": "tests/discovery/test_signal_role.py",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "follow-on: \"assert accepted == [{\"id\": \"sample\", \"signal_role\": \"measured\", \"cost_usd\": 0.002}]\" compares the result against the value fake_decision returned, so both sides move with the input the test supplied and the assertion survives a regression that hardcodes the accepted role or the cost rather than reading them through judge_rows."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T084922135916-ssfms-role-prototype/role-unit.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: this log's header names revision 7f54df09 (the reviewed base), but git cat-file at 7f54df09 reports tests/discovery/test_signal_role.py \"exists on disk, but not in this revision\" -- the file is added in ef05cfa47 -- so the run it records was made against the worktree's uncommitted files while HEAD still stood at the base, and a reader who checks out the cited revision cannot reproduce its \"3 passed\" result."
+    }
+  ],
+  "head_log_revision": "ef05cfa47cf980f996fabdf9c9a58547fac21be4",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit over 7f54df09..ef05cfa47; c904259fe adds role.py, cdf205495 freezes the fixture, 2a23b3269 adds the measure module, 0bd11ced4 records the measurement into the results fragment, a3db5b91a links it, and ef05cfa47 adds the three tests -- all inside the declared scope.",
+    "done_when": "every clause of the done_when is measured and recorded -- /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T084922135916-ssfms-role-prototype/role-head-absolute.log:19 shows \"3 passed ... EXIT=0\" for the decision call mocked beneath judge_rows, role-measure.log:47 records the paid run's 300/287/USD 0.007922292 result, and docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-prototype.html carries overall 287/300 (95.7%), per-role counts, the confusion table and the per-signal cost; my recount of the fragment's 300 item rows reproduces 287 agreements and a USD 0.0079221 cost sum.",
+    "goal": "the node goal is to measure a stored-role Jev judgment against 300 hand-labelled JT-60SA signals before any backfill; imas_codex/discovery/signals/role.py:48 judges each row through judge_rows, tests/llm/fixtures/signal_role_labels.json holds the fixture's 300 frozen labels, and tests/llm/measure_signal_role.py scores them against those labels without writing graph state, so the deliverable is met.",
+    "manifest": "read; it records status complete, six commits, the gate command with its \"3 passed, EXIT=0\" result and the 300/287/USD 0.007922292 measure, names negative_control_log role-negative-control-final.log, and carries after_suite for the head arm while leaving baseline_suite empty.",
+    "write_paths": "the manifest declares seven paths and git show --stat 7f54df09..ef05cfa47 lists exactly six changed files -- imas_codex/discovery/signals/role.py, tests/discovery/test_signal_role.py, tests/llm/fixtures/signal_role_labels.json, tests/llm/measure_signal_role.py and the two evidence fragments -- every one inside the declared fence, with the declared figures directory left empty."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_signal_role.py:52 is a real guard whose removal reddens the suite (role-negative-control-final.log:26 FAILED, EXIT=1), but the state test's criteria assertion at line 30 compares the module under test against its own constant and the plumbing assertion at line 47 compares against the value the fake supplied, and the accuracy measurement itself has no test that can redden on a regression.",
+    "evidence": "the result is recorded, not claimed -- role-head-absolute.log:19 (3 passed, EXIT=0), role-measure.log:47 (300/287/0.007922292) and the fragment reproduce each other, and my own recount of the fragment's 300 item rows independently returns 287 agreements and a USD 0.0079221 cost sum, but the reviewed run's own manifest names no baseline gate log; only its after_suite arm is recorded.",
+    "fit": "imas_codex/discovery/signals/role.py:21,33,48 mirror the state_for/questions_for/apply shape of the sibling judges (imas_codex/discovery/wiki/scoring.py:160, imas_codex/discovery/paths/scorer.py:176) and carry no plan label, version suffix or ticket reference, though ROLE_CRITERIA at role.py:10 embeds the six role names as a second copy of section 8's vocabulary with no test binding it to the plan's list.",
+    "goal_fidelity": "imas_codex/discovery/signals/role.py:48 judges each signal's role in the six-role closed vocabulary through judge_rows and tests/llm/measure_signal_role.py:52 samples every 10 rows against the frozen labels with no graph write, so the \"measure before any backfill\" goal is met, though the module is not yet reachable from production.",
+    "reuse": "the CRITERIA/state/questions/apply additions extend the shared owner imas_codex/discovery/base/judgment.py:307 (judge_rows) rather than forking a loop, and a search over imas_codex/ for other judge_rows callers and for '\"type\": \"choice\"' question builders found only sibling judges each owning their own criteria, so signal-role judging has no existing owner to duplicate.",
+    "scope_discipline": "git show --stat 7f54df09..ef05cfa47 lists only the six declared paths and no file outside the fence, and the declared docs/figures/signal-search-finds-the-measured-signal/ssfms-role-prototype directory received no file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to measure a stored-role Jev judgment against 300 hand-labelled JT-60SA signals before any backfill; imas_codex/discovery/signals/role.py:48 judges each row through judge_rows, tests/llm/fixtures/signal_role_labels.json holds the fixture's 300 frozen labels, and tests/llm/measure_signal_role.py scores them against those labels without writing graph state, so the deliverable is met.\nVERDICT done_when: every clause of the done_when is measured and recorded -- /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T084922135916-ssfms-role-prototype/role-head-absolute.log:19 shows \"3 passed ... EXIT=0\" for the decision call mocked beneath judge_rows, role-measure.log:47 records the paid run's 300/287/USD 0.007922292 result, and docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-prototype.html carries overall 287/300 (95.7%), per-role counts, the confusion table and the per-signal cost; my recount of the fragment's 300 item rows reproduces 287 agreements and a USD 0.0079221 cost sum.\nVERDICT write_paths: the manifest declares seven paths and git show --stat 7f54df09..ef05cfa47 lists exactly six changed files -- imas_codex/discovery/signals/role.py, tests/discovery/test_signal_role.py, tests/llm/fixtures/signal_role_labels.json, tests/llm/measure_signal_role.py and the two evidence fragments -- every one inside the declared fence, with the declared figures directory left empty.\nVERDICT manifest: read; it records status complete, six commits, the gate command with its \"3 passed, EXIT=0\" result and the 300/287/USD 0.007922292 measure, names negative_control_log role-negative-control-final.log, and carries after_suite for the head arm while leaving baseline_suite empty.\nVERDICT diff: read commit by commit over 7f54df09..ef05cfa47; c904259fe adds role.py, cdf205495 freezes the fixture, 2a23b3269 adds the measure module, 0bd11ced4 records the measurement into the results fragment, a3db5b91a links it, and ef05cfa47 adds the three tests -- all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/role.py:48 judges each signal's role in the six-role closed vocabulary through judge_rows and tests/llm/measure_signal_role.py:52 samples every 10 rows against the frozen labels with no graph write, so the \"measure before any backfill\" goal is met, though the module is not yet reachable from production.\nSCORE evidence: 18\nJUSTIFICATION evidence: the result is recorded, not claimed -- role-head-absolute.log:19 (3 passed, EXIT=0), role-measure.log:47 (300/287/0.007922292) and the fragment reproduce each other, and my own recount of the fragment's 300 item rows independently returns 287 agreements and a USD 0.0079221 cost sum, but the reviewed run's own manifest names no baseline gate log; only its after_suite arm is recorded.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 7f54df09..ef05cfa47 lists only the six declared paths and no file outside the fence, and the declared docs/figures/signal-search-finds-the-measured-signal/ssfms-role-prototype directory received no file.\nSCORE durability: 14\nJUSTIFICATION durability: tests/discovery/test_signal_role.py:52 is a real guard whose removal reddens the suite (role-negative-control-final.log:26 FAILED, EXIT=1), but the state test's criteria assertion at line 30 compares the module under test against its own constant and the plumbing assertion at line 47 compares against the value the fake supplied, and the accuracy measurement itself has no test that can redden on a regression.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/discovery/signals/role.py:21,33,48 mirror the state_for/questions_for/apply shape of the sibling judges (imas_codex/discovery/wiki/scoring.py:160, imas_codex/discovery/paths/scorer.py:176) and carry no plan label, version suffix or ticket reference, though ROLE_CRITERIA at role.py:10 embeds the six role names as a second copy of section 8's vocabulary with no test binding it to the plan's list.\nSCORE reuse: 20\nJUSTIFICATION reuse: the CRITERIA/state/questions/apply additions extend the shared owner imas_codex/discovery/base/judgment.py:307 (judge_rows) rather than forking a loop, and a search over imas_codex/ for other judge_rows callers and for '\"type\": \"choice\"' question builders found only sibling judges each owning their own criteria, so signal-role judging has no existing owner to duplicate.\nFINDING tests/discovery/test_signal_role.py:30 follow-on: \"assert set(signal_role_questions()[\"signal_role\"][\"criteria\"]) == set(ROLE_CRITERIA)\" compares the function under test against the module's own constant, so it can only fail if that function hardcodes a set differing from ROLE_CRITERIA and cannot catch a wrong or missing role definition that appears in both; it is not independent of the code it checks.\nFINDING tests/discovery/test_signal_role.py:47 follow-on: \"assert accepted == [{\"id\": \"sample\", \"signal_role\": \"measured\", \"cost_usd\": 0.002}]\" compares the result against the value fake_decision returned, so both sides move with the input the test supplied and the assertion survives a regression that hardcodes the accepted role or the cost rather than reading them through judge_rows.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T084922135916-ssfms-role-prototype/role-unit.log:1 follow-on: this log's header names revision 7f54df09 (the reviewed base), but git cat-file at 7f54df09 reports tests/discovery/test_signal_role.py \"exists on disk, but not in this revision\" -- the file is added in ef05cfa47 -- so the run it records was made against the worktree's uncommitted files while HEAD still stood at the base, and a reader who checks out the cited revision cannot reproduce its \"3 passed\" result.\n",
+  "review_run_id": "r-20261013T091627050389-review-of-ssfms-role-prototype-ef05cfa47cf9",
+  "reviewed_base_sha": "7f54df09dd95bd456d45f56b9b7676b6ef5867f4",
+  "reviewed_head_sha": "ef05cfa47cf980f996fabdf9c9a58547fac21be4",
+  "reviewed_run_id": "r-20261013T084922135916-ssfms-role-prototype",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T09:33:25.913926+00:00",
+  "total": 107
+}
