@@ -54,13 +54,20 @@ _RETIRED_NAME_STAGES = frozenset({"superseded", "exhausted"})
 
 @dataclass(frozen=True)
 class SourceBindingConflict:
-    """A source a migration cannot move, and the live identity holding it."""
+    """A source a migration cannot move, and the live identity holding it.
+
+    ``retired_identity`` and ``retired_stage`` name a settled holder the source
+    also still points at. They are set only when the migration pairs one live
+    claim with one retired one, so the record never reports two live identities.
+    """
 
     source_id: str
     holding_identity: str
     holding_stage: str | None
     source_status: str | None
     detail: str
+    retired_identity: str | None = None
+    retired_stage: str | None = None
 
 
 class SourceBindingConflictError(RuntimeError):
@@ -85,6 +92,27 @@ class SourceBindingConflictError(RuntimeError):
             "source migration compare-and-set failed: "
             f"{len(self.conflicts)} source(s) already bound to a different live "
             f"identity await adjudication — {detail}"
+        )
+
+
+class SourceRetiredSuccessorConflictError(RuntimeError):
+    """Named outcome for a source bound to a live identity and a retired one.
+
+    A source the migration would move is bound to the live predecessor and to a
+    successor that has itself been retired. Only one of the two is a live claim,
+    so this is not the dual-live conflict; but repeating the migration changes
+    nothing either, so the state is reported through this named type — naming
+    the live holder and the retired holder with its stage — and withheld rather
+    than spent as a transient retry.
+    """
+
+    def __init__(self, conflicts: Sequence[SourceBindingConflict]) -> None:
+        self.conflicts: tuple[SourceBindingConflict, ...] = tuple(conflicts)
+        detail = "; ".join(item.detail for item in self.conflicts)
+        super().__init__(
+            "source migration compare-and-set failed: "
+            f"{len(self.conflicts)} source(s) bound to a live identity alongside "
+            f"a retired successor await adjudication — {detail}"
         )
 
 
@@ -474,8 +502,12 @@ def retarget_standard_name_sources(
     adjudicable :class:`SourceBindingConflictError` naming the holding identity
     and its stage, rather than as an anonymous fault: nothing about the source
     changes between attempts, so it is a decision for an operator and must not
-    be answered by spending a retry budget. Any other ineligible preflight
-    state is a transient or malformed fault and raises ``RuntimeError``.
+    be answered by spending a retry budget. A source bound to the live
+    predecessor and to a successor that has itself been retired is a single live
+    claim beside a settled one, reported through
+    :class:`SourceRetiredSuccessorConflictError` which names both the live holder
+    and the retired holder with its stage. Any other ineligible preflight state
+    is a transient or malformed fault and raises ``RuntimeError``.
     """
     if not old_name or not new_name or old_name == new_name:
         raise ValueError("source migration requires two distinct name ids")
@@ -589,6 +621,7 @@ def retarget_standard_name_sources(
     completed: list[str] = []
     conflicts: list[str] = []
     binding_conflicts: list[SourceBindingConflict] = []
+    retired_conflicts: list[SourceBindingConflict] = []
     for row in preflight_rows:
         source_id = row["source_id"]
         binding_state = row.get("binding_state")
@@ -610,6 +643,20 @@ def retarget_standard_name_sources(
             if entry.get("id") in comparison_expected_names
             and entry.get("name_stage") not in _RETIRED_NAME_STAGES
         ]
+        # The expected cohort may also carry one retired holder: the successor
+        # this migration targets when it has itself been retired. That row is a
+        # single live claim plus a settled one, classified below.
+        retired_expected_holders = [
+            (entry["id"], entry.get("name_stage"))
+            for entry in (binding_state or ())
+            if entry.get("id") in comparison_expected_names
+            and entry.get("name_stage") in _RETIRED_NAME_STAGES
+        ]
+        stage_by_id = {
+            entry["id"]: entry.get("name_stage")
+            for entry in (binding_state or ())
+            if entry.get("id") is not None
+        }
         scalar = row.get("scalar_binding")
         if (
             row.get("source_exists")
@@ -659,11 +706,6 @@ def retarget_standard_name_sources(
             and len(live_expected_holders) > 1
             and set(bindings) <= comparison_expected_names
         ):
-            live_stages = {
-                entry["id"]: entry.get("name_stage")
-                for entry in (binding_state or ())
-                if entry.get("id") is not None
-            }
             # Name the identity that actually holds the binding: the live
             # expected holder other than the predecessor this migration retires.
             successor_holders = [
@@ -674,17 +716,52 @@ def retarget_standard_name_sources(
                 SourceBindingConflict(
                     source_id=source_id,
                     holding_identity=holding_identity,
-                    holding_stage=live_stages.get(holding_identity),
+                    holding_stage=stage_by_id.get(holding_identity),
                     source_status=row.get("source_status"),
                     detail=(
                         f"{source_id} is bound to {len(live_expected_holders)} live "
                         f"identities "
                         f"{bindings!r} at stages "
-                        f"{[live_stages.get(name) for name in bindings]!r} "
+                        f"{[stage_by_id.get(name) for name in bindings]!r} "
                         f"(source status={row.get('source_status')!r}, "
                         f"scalar={scalar!r}); a source may claim at most one live "
                         "identity, so the operator must decide which binding is "
                         "correct"
+                    ),
+                )
+            )
+        elif (
+            row.get("source_exists")
+            and row.get("source_status") != "stale"
+            and not row.get("actively_claimed")
+            and live_expected_holders == [old_name]
+            and len(retired_expected_holders) == 1
+            and retired_expected_holders[0][0] == new_name
+            and set(bindings) <= comparison_expected_names
+        ):
+            # The migration's predecessor is the only live expected holder and
+            # its target successor has been retired: one live claim beside a
+            # settled one. It is neither the dual-live conflict nor a state any
+            # retry can settle, so it reaches the caller as its own named
+            # outcome rather than the anonymous transient fault.
+            retired_identity, retired_stage = retired_expected_holders[0]
+            live_stage = stage_by_id.get(old_name)
+            retired_conflicts.append(
+                SourceBindingConflict(
+                    source_id=source_id,
+                    holding_identity=old_name,
+                    holding_stage=live_stage,
+                    retired_identity=retired_identity,
+                    retired_stage=retired_stage,
+                    source_status=row.get("source_status"),
+                    detail=(
+                        f"{source_id} is bound to the live identity {old_name!r} at "
+                        f"stage {live_stage!r} alongside the retired successor "
+                        f"{retired_identity!r} at stage {retired_stage!r} (source "
+                        f"status={row.get('source_status')!r}, "
+                        f"bindings={bindings!r}, scalar={scalar!r}); the successor "
+                        "is retired, so repeating the migration cannot settle the "
+                        "binding and the operator must decide it"
                     ),
                 )
             )
@@ -700,6 +777,8 @@ def retarget_standard_name_sources(
         raise RuntimeError(f"source migration compare-and-set failed: {details}")
     if binding_conflicts:
         raise SourceBindingConflictError(binding_conflicts)
+    if retired_conflicts:
+        raise SourceRetiredSuccessorConflictError(retired_conflicts)
     if completed:
         return 0
 
