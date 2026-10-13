@@ -40,7 +40,24 @@
   "plan_slug": "sn-selection-over-generation",
   "plan_version": 5,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "thin_wrapper-1",
+      "reason": "section 2 is the unwired measurement that decides whether the composer's slot choice should be constrained: its rule, fixed before the run, selects cross-check (the composer stays sole producer, Jev only flags) or generator (Jev's per-slot choice replaces the composer's own); no parallel producer is deployed by this section",
+      "when": "2026-10-13T00:31:06.943519+00:00"
+    }
+  ],
+  "responses": {
+    "thin_wrapper-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 2 is the unwired measurement that decides whether the composer's slot choice should be constrained: its rule, fixed before the run, selects cross-check (the composer stays sole producer, Jev only flags) or generator (Jev's per-slot choice replaces the composer's own); no parallel producer is deployed by this section",
+      "when": "2026-10-13T00:31:06.943519+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-selection-over-generation/r-20261013T002028839141-plan-review-of-sn-selection-over-generation.json",
   "review_run_id": "r-20261013T002028839141-plan-review-of-sn-selection-over-generation",
   "reviewed_blob_sha": "99304a644b18d00cd6c44fb2cf124b380e762beb",
   "rubric": "design",
