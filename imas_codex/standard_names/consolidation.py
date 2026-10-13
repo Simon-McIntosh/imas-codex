@@ -52,8 +52,7 @@ def _resolve_physics_domains(
     """Merge physics_domain values from all candidates in a merge group.
 
     Returns ``(primary_scalar, source_domains_list)`` where
-    *primary_scalar* is the highest-ranked domain (per
-    ``domain_ranking.domain_rank``) across all inputs and
+    *primary_scalar* is the highest-ranked domain in the declared order and
     *source_domains_list* is the sorted, deduplicated union.
 
     Args:
@@ -63,7 +62,7 @@ def _resolve_physics_domains(
     Returns:
         Tuple ``(primary, sources)``.  Empty inputs → ``(None, [])``.
     """
-    from imas_codex.standard_names.domain_ranking import maybe_promote_domain
+    from imas_codex.standard_names import domain_ranking
 
     all_domains: set[str] = set()
     for item in domain_lists:
@@ -76,10 +75,7 @@ def _resolve_physics_domains(
             all_domains.update(d for d in item if d)
 
     sources = sorted(all_domains)
-    primary: str | None = None
-    for d in sources:
-        primary = maybe_promote_domain(primary, d)
-    return primary, sources
+    return domain_ranking.select_primary_domain(sources), sources
 
 
 def _merge_duplicates(group: list[dict]) -> dict:

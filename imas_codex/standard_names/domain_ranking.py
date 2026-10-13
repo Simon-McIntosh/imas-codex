@@ -1,34 +1,10 @@
-"""Physics-domain ranking for promote-on-higher-rank logic.
-
-A :class:`StandardName` carries a single ``physics_domain``: when a new
-source is attached to an existing name (or composed from multiple
-sources at birth), the name's primary domain may be *promoted* to a
-more central / higher-ranked domain.  Lower rank value = more central.
-
-The canonical ranking comes from
-:func:`imas_codex.standard_names.domain_priority.get_domain_priority_index`,
-which is graph-derived from cluster ``mapping_relevance`` weights.  When
-the graph is unreachable or empty (CI, fresh checkout, unit tests) we
-fall back to :data:`FALLBACK_RANK_TABLE` — a hand-maintained ordering
-that mirrors the operational priority.
-
-Promotion is monotonic: a name's ``physics_domain`` only ever moves
-*toward* lower rank values.  Ties are resolved by keeping the current
-domain (no flapping when ranks are equal).
-
-Every domain that has ever contributed a source to a StandardName is
-recorded in ``source_domains`` (multivalued, append-only) so cross-domain
-discoverability is preserved even after promotion.
-"""
+"""Declared, stable order for a standard name's physics domain."""
 
 from __future__ import annotations
 
-from imas_codex.standard_names.domain_priority import (
-    get_domain_priority_index,
-)
+from collections.abc import Iterable
 
-# Hand-maintained fallback ordering used when the graph priority index
-# is empty or unreachable.  Values are PhysicsDomain enum members; the
+# Declared ordering of PhysicsDomain enum members; the
 # rank is the position in this tuple (lower index = more central).
 #
 # Design intent (lower rank = higher priority):
@@ -73,54 +49,25 @@ FALLBACK_RANK_TABLE: tuple[str, ...] = (
     "general",
 )
 
-#: Sentinel rank for unranked / unknown domains.  Higher than any
-#: value in :data:`FALLBACK_RANK_TABLE` so unknowns never promote.
-UNKNOWN_RANK: int = 999
+_RANK_INDEX = {domain: rank for rank, domain in enumerate(FALLBACK_RANK_TABLE)}
 
 
-def _fallback_rank_index() -> dict[str, int]:
-    """Materialise :data:`FALLBACK_RANK_TABLE` as a dict for O(1) lookup."""
-    return {d: i for i, d in enumerate(FALLBACK_RANK_TABLE)}
+def select_primary_domain(domains: Iterable[str]) -> str | None:
+    """Select the highest-ranked member of a domain set, or ``None`` if empty.
 
-
-def domain_rank(domain: str | None) -> int:
-    """Return the rank for *domain* (lower = more central).
-
-    Resolution order:
-      1. Graph-derived index (cluster ``mapping_relevance`` weighting).
-      2. :data:`FALLBACK_RANK_TABLE` ordering.
-      3. :data:`UNKNOWN_RANK` for ``None``, empty, or unknown values.
+    All supplied values must belong to the declared vocabulary. The answer
+    depends only on the set, so duplicates and arrival order have no effect.
     """
-    if not domain:
-        return UNKNOWN_RANK
-    try:
-        graph_idx = get_domain_priority_index()
-    except Exception:  # pragma: no cover — defensive
-        graph_idx = {}
-    if domain in graph_idx:
-        return graph_idx[domain]
-    fallback = _fallback_rank_index()
-    return fallback.get(domain, UNKNOWN_RANK)
+    unique = set(domains)
+    unknown = unique - _RANK_INDEX.keys()
+    if unknown:
+        raise ValueError(f"Unknown physics domain: {sorted(map(str, unknown))}")
+    return min(unique, key=_RANK_INDEX.__getitem__) if unique else None
 
 
 def maybe_promote_domain(current: str | None, candidate: str | None) -> str | None:
-    """Return the higher-priority of *current* and *candidate*.
-
-    Semantics:
-      * If both are empty → ``None``.
-      * If exactly one is empty → return the non-empty value.
-      * If both are non-empty → return the lower-ranked.  On a tie,
-        keep *current* (no flapping when ranks are equal).
-    """
-    if not current and not candidate:
-        return None
-    if not current:
-        return candidate
-    if not candidate:
-        return current
-    if domain_rank(candidate) < domain_rank(current):
-        return candidate
-    return current
+    """Compatibility adapter for graph writers pending set-based rewiring."""
+    return select_primary_domain(domain for domain in (current, candidate) if domain)
 
 
 def merge_source_domains(existing: list[str] | None, *new: str | None) -> list[str]:
@@ -144,8 +91,7 @@ def merge_source_domains(existing: list[str] | None, *new: str | None) -> list[s
 
 __all__ = [
     "FALLBACK_RANK_TABLE",
-    "UNKNOWN_RANK",
-    "domain_rank",
+    "select_primary_domain",
     "maybe_promote_domain",
     "merge_source_domains",
 ]
