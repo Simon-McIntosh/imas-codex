@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/standard_names/judgment_goldens.py:228 (_finish",
+    "called by build_name_acceptable:401",
+    ":500",
+    ":582 and build_documentation_sheet:759)",
+    "docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py:215 (build",
+    "the sheet driver)"
+  ],
+  "completed_at": "2026-10-13T11:01:21.551Z",
+  "dispatched_at": "2026-10-13T10:48:40Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/judgment_goldens.py",
+      "line": "80",
+      "severity": "follow-on",
+      "text": "follow-on: the factored rule spells the split labels as literal \"calibration\"/\"validation\" while imas_codex/discovery/base/evaluation.py:57-59 owns the CALIBRATION/VALIDATION constants and SPLITS tuple that validate every row[\"split\"]; importing them would keep one vocabulary for the split identity, though the inline rule it replaced carried the same literals so this change neither introduces nor widens the divergence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against f5db2421 \u2014 8a0a316c0 factors the rule into judgment_goldens.py:80 assign_group_splits and adds the test, c74af1e07 deletes the driver's assign_splits, routes the split through the shared function and counts families by the pattern_family key, and 0bfecdca2d adds the landing fragment.",
+    "done_when": "the done_when names three measures and all three are met and logged \u2014 tests/standard_names/test_judgment_goldens.py records 16 passed at base (base-test.log) and 17 passed at head (final-test.log), no `def assign_splits` remains at the reviewed head, and scg-domain-label-sheet.json is the same git blob (8a40ffbe, 138108 bytes) at base and head with the family table now keyed on pattern_family.",
+    "goal": "the goal is to stop the domain sheet copying the goldens' calibration/validation split rule; imas_codex/standard_names/judgment_goldens.py:80 adds assign_group_splits and :228 makes _finish call it, and docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py:30 imports it and :215 calls it, so the rule is imported rather than copied.",
+    "manifest": "read; status complete; commits 8a0a316c0, c74af1e07, 0bfecdca2d; changed_paths match the diff; tests line records the base/head gate; test_logs names base-test.log, head-test.log, final-test.log, head-driver-annotated.log; negative_control_log names negative-control.log; baseline_suite and after_suite each record 0 failures with empty ids.",
+    "write_paths": "git diff --name-only f5db2421..0bfecdca2d changes exactly imas_codex/standard_names/judgment_goldens.py, tests/standard_names/test_judgment_goldens.py, docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py, .../scg-domain-label-sheet.html and .../scg-domain-sheet-split-reuse.html, every one inside the manifest's declared write paths."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_judgment_goldens.py:93 test_finished_rows_use_shared_group_split_rule pins assign_group_splits and _finish to a hardcoded mapping, and negative-control.log shows it failing at EXIT=1 when the rule is mutated, but the driver's own use of the shared rule is vetted only by the rg check, not by a committed test.",
+    "evidence": "base-test.log shows 16 passed EXIT=0 and final-test.log shows 17 passed EXIT=0, and byte identity is shown not asserted \u2014 scg-domain-label-sheet.json is the same blob 8a40ffbe at base and at the reviewed head.",
+    "fit": "the new function at judgment_goldens.py:80 carries a one-line docstring, full type hints and no plan or ticket label, matching the surrounding _sample/_rank idiom.",
+    "goal_fidelity": "judgment_goldens.py:80 defines assign_group_splits and the only other implementations are gone, so the driver at scg-domain-label-sheet-run.py:215 and _finish at :228 share one rule.",
+    "reuse": "judgment_goldens.py:80 is the extracted owner of the group-split capability and both callers extend it, so no capability the repository owns is forked.",
+    "scope_discipline": "git diff --name-only f5db2421..0bfecdca2d lists exactly the five declared paths and no other file is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to stop the domain sheet copying the goldens' calibration/validation split rule; imas_codex/standard_names/judgment_goldens.py:80 adds assign_group_splits and :228 makes _finish call it, and docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py:30 imports it and :215 calls it, so the rule is imported rather than copied.\nVERDICT done_when: the done_when names three measures and all three are met and logged \u2014 tests/standard_names/test_judgment_goldens.py records 16 passed at base (base-test.log) and 17 passed at head (final-test.log), no `def assign_splits` remains at the reviewed head, and scg-domain-label-sheet.json is the same git blob (8a40ffbe, 138108 bytes) at base and head with the family table now keyed on pattern_family.\nVERDICT write_paths: git diff --name-only f5db2421..0bfecdca2d changes exactly imas_codex/standard_names/judgment_goldens.py, tests/standard_names/test_judgment_goldens.py, docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py, .../scg-domain-label-sheet.html and .../scg-domain-sheet-split-reuse.html, every one inside the manifest's declared write paths.\nVERDICT manifest: read; status complete; commits 8a0a316c0, c74af1e07, 0bfecdca2d; changed_paths match the diff; tests line records the base/head gate; test_logs names base-test.log, head-test.log, final-test.log, head-driver-annotated.log; negative_control_log names negative-control.log; baseline_suite and after_suite each record 0 failures with empty ids.\nVERDICT diff: read commit by commit against f5db2421 \u2014 8a0a316c0 factors the rule into judgment_goldens.py:80 assign_group_splits and adds the test, c74af1e07 deletes the driver's assign_splits, routes the split through the shared function and counts families by the pattern_family key, and 0bfecdca2d adds the landing fragment.\nCALL_SITES: imas_codex/standard_names/judgment_goldens.py:228 (_finish, called by build_name_acceptable:401, :500, :582 and build_documentation_sheet:759), docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet-run.py:215 (build, the sheet driver)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: judgment_goldens.py:80 defines assign_group_splits and the only other implementations are gone, so the driver at scg-domain-label-sheet-run.py:215 and _finish at :228 share one rule.\nSCORE evidence: 19\nJUSTIFICATION evidence: base-test.log shows 16 passed EXIT=0 and final-test.log shows 17 passed EXIT=0, and byte identity is shown not asserted \u2014 scg-domain-label-sheet.json is the same blob 8a40ffbe at base and at the reviewed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only f5db2421..0bfecdca2d lists exactly the five declared paths and no other file is touched.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_judgment_goldens.py:93 test_finished_rows_use_shared_group_split_rule pins assign_group_splits and _finish to a hardcoded mapping, and negative-control.log shows it failing at EXIT=1 when the rule is mutated, but the driver's own use of the shared rule is vetted only by the rg check, not by a committed test.\nSCORE fit: 19\nJUSTIFICATION fit: the new function at judgment_goldens.py:80 carries a one-line docstring, full type hints and no plan or ticket label, matching the surrounding _sample/_rank idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: judgment_goldens.py:80 is the extracted owner of the group-split capability and both callers extend it, so no capability the repository owns is forked.\nFINDING imas_codex/standard_names/judgment_goldens.py:80 follow-on: the factored rule spells the split labels as literal \"calibration\"/\"validation\" while imas_codex/discovery/base/evaluation.py:57-59 owns the CALIBRATION/VALIDATION constants and SPLITS tuple that validate every row[\"split\"]; importing them would keep one vocabulary for the split identity, though the inline rule it replaced carried the same literals so this change neither introduces nor widens the divergence.",
+  "review_run_id": "r-20261013T104824474201-review-of-scg-domain-sheet-split-reuse-0bfecdca2d0b",
+  "reviewed_base_sha": "f5db2421486771190dcee300a83deb5e665d18a1",
+  "reviewed_head_sha": "0bfecdca2d0b2bab20dcd7ff73e3d7d46d1ed57f",
+  "reviewed_run_id": "r-20261013T103220129692-scg-domain-sheet-split-reuse",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:59:43.186072+00:00",
+  "total": 114
+}
