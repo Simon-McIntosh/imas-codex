@@ -1,0 +1,108 @@
+<section id="ssog-rerank-ndcg-record">
+  <h3>The comparator rerank puts better comparators in the top ten, measured on the labelled 30-item set</h3>
+  <p id="ssog-rerank-ndcg-method">
+    The comparator label sheet records 30 DD sources, each with the union of the
+    embedding-ordered top ten and the reranked top ten of its comparator block;
+    every candidate carries its <code>embedding_rank</code>, its
+    <code>rerank_rank</code> over a pool of 20, and a coordinator grade. The
+    grades landed in commit <code>95231110a</code>, whose body states the 0–3
+    rubric (3 same quantity, 2 neighbouring quantity, 1 shares subject/locus/
+    family, 0 unrelated); scoring the 342 candidates gave 130 at 0, 111 at 1, 73
+    at 2 and 28 at 3. The driver
+    <code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-ndcg-run.py</code>
+    scores each item twice with <code>sklearn.metrics.ndcg_score</code> at
+    <code>k=10</code>, once against <code>embedding_rank</code> and once against
+    <code>rerank_rank</code>, both keyed on the negative rank so rank 1 is best.
+    Because every listed candidate is graded, the metric sees only the labelled
+    union and never an ungraded name, so the ideal ordering is taken over the
+    whole graded candidate set — this is what "labelled-only" means. The driver
+    refuses a candidate whose grade is not an integer from 0 to 3 or whose ranks
+    are not both positive integers, and excludes an item whose grades are all
+    zero, where nDCG is undefined.
+  </p>
+  <p id="ssog-rerank-ndcg-result">
+    Over the 30 scored items the mean nDCG@10 rose from
+    <strong>0.7486</strong> in embedding order to <strong>0.9249</strong> in
+    reranked order, a mean per-item difference of <strong>+0.1763</strong> with a
+    95 percent percentile bootstrap interval of
+    <strong>[0.1144, 0.2432]</strong> — 23 wins, 2 ties and 5 losses. The
+    interval is a plain unit bootstrap over items (1000 resamples, seed 123,
+    resampling item indices with replacement) and is not copy-grouped, so the
+    nine boundary-density items are treated as independent of one another. The
+    same figures split into a strata view: the nine <code>boundary_density</code>
+    items gain the most (0.6097 to 0.9087, a difference of +0.2990,
+    CI [0.1811, 0.4008], 8/1/0), while the other 21 items gain less (0.8082 to
+    0.9319, +0.1237, CI [0.0578, 0.1930], 15/1/5). No item was excluded: every
+    item carries at least one candidate graded above zero.
+  </p>
+  <p id="ssog-rerank-ndcg-negative-control">
+    As a negative control the reranked order was rescored with the grades
+    shuffled within each item (seed 123), which carries no relation to that
+    order. The shuffled rerank scores 0.6786 on average, a mean difference of
+    <strong>−0.0700</strong> against the unshuffled embedding score — near zero
+    beside the +0.1763 the real rerank earns, and the shape of no signal.
+  </p>
+  <table id="ssog-rerank-ndcg-figures">
+    <caption>Mean nDCG@10 by order, mean per-item difference (rerank minus
+    embedding) with its 95 percent bootstrap interval, and win/tie/loss counts.
+    Grades from commit <code>95231110a</code>; no item excluded.</caption>
+    <thead>
+      <tr>
+        <th>subset</th>
+        <th>n</th>
+        <th>mean nDCG@10 (embedding)</th>
+        <th>mean nDCG@10 (rerank)</th>
+        <th>mean diff</th>
+        <th>95% CI</th>
+        <th>w/t/l</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>all items</td>
+        <td>30</td>
+        <td>0.7486</td>
+        <td>0.9249</td>
+        <td>+0.1763</td>
+        <td>[0.1144, 0.2432]</td>
+        <td>23/2/5</td>
+      </tr>
+      <tr>
+        <td><code>boundary_density</code></td>
+        <td>9</td>
+        <td>0.6097</td>
+        <td>0.9087</td>
+        <td>+0.2990</td>
+        <td>[0.1811, 0.4008]</td>
+        <td>8/1/0</td>
+      </tr>
+      <tr>
+        <td>other</td>
+        <td>21</td>
+        <td>0.8082</td>
+        <td>0.9319</td>
+        <td>+0.1237</td>
+        <td>[0.0578, 0.1930]</td>
+        <td>15/1/5</td>
+      </tr>
+      <tr>
+        <td>negative control (shuffled grades)</td>
+        <td>30</td>
+        <td>0.7486</td>
+        <td>0.6786</td>
+        <td>−0.0700</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="ssog-rerank-ndcg-items">
+    Per-item scores in both orders, with each item's difference, are in
+    <code>ssog-rerank-ndcg-results.json</code> under <code>items</code>, sorted
+    by difference. The five losses are three items whose embedding order is
+    already ideal (nDCG 1.0, which a rerank cannot improve and this one lowers),
+    one item that falls from 0.8262 to 0.7967, and one marginal fall of 0.0023;
+    the two ties are items whose grades are flat enough that both orders score
+    alike.
+  </p>
+</section>

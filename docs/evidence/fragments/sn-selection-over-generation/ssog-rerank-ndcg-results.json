@@ -1,0 +1,269 @@
+{
+  "sheet": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/ssog-rerank-ndcg/docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet.json",
+  "rubric_commit": "95231110a",
+  "k": 10,
+  "n_items": 30,
+  "n_scored": 30,
+  "n_excluded": 0,
+  "excluded_items": [],
+  "bootstrap": {
+    "resamples": 1000,
+    "seed": 123,
+    "grouped": false,
+    "note": "plain unit bootstrap over items; not copy-grouped"
+  },
+  "overall": {
+    "n": 30,
+    "mean_ndcg_embedding": 0.7486420498664426,
+    "mean_ndcg_rerank": 0.92494005319825,
+    "mean_diff": 0.17629800333180717,
+    "ci_low": 0.11436177507911457,
+    "ci_high": 0.2431791047176837,
+    "wins": 23,
+    "ties": 2,
+    "losses": 5
+  },
+  "strata": {
+    "boundary_density": {
+      "n": 9,
+      "mean_ndcg_embedding": 0.6096714033915976,
+      "mean_ndcg_rerank": 0.908677657429553,
+      "mean_diff": 0.29900625403795544,
+      "ci_low": 0.18111100246290712,
+      "ci_high": 0.40084908270744335,
+      "wins": 8,
+      "ties": 1,
+      "losses": 0
+    },
+    "other": {
+      "n": 21,
+      "mean_ndcg_embedding": 0.8082008983556621,
+      "mean_ndcg_rerank": 0.9319096513848342,
+      "mean_diff": 0.12370875302917221,
+      "ci_low": 0.057769604170012694,
+      "ci_high": 0.1929919363419724,
+      "wins": 15,
+      "ties": 1,
+      "losses": 5
+    }
+  },
+  "negative_control": {
+    "description": "grades shuffled within each item, reranked order rescored",
+    "seed": 123,
+    "n": 30,
+    "mean_ndcg_shuffled_rerank": 0.6786144099272746,
+    "mean_diff_vs_embedding": -0.07002763993916797
+  },
+  "items": [
+    {
+      "path": "neutron_diagnostic/detectors/mode/counting",
+      "family": null,
+      "ndcg_embedding": 1.0,
+      "ndcg_rerank": 0.8733683229467235,
+      "diff": -0.1266316770532765
+    },
+    {
+      "path": "spi/injector/fragment/velocity_z",
+      "family": null,
+      "ndcg_embedding": 1.0,
+      "ndcg_rerank": 0.906158425405734,
+      "diff": -0.09384157459426601
+    },
+    {
+      "path": "wall/global_quantities/neutral/wall_inventory",
+      "family": null,
+      "ndcg_embedding": 1.0,
+      "ndcg_rerank": 0.9560296388000017,
+      "diff": -0.04397036119999831
+    },
+    {
+      "path": "summary/local/itb/n_i/argon/value",
+      "family": null,
+      "ndcg_embedding": 0.82623465712856,
+      "ndcg_rerank": 0.7967075809905065,
+      "diff": -0.0295270761380535
+    },
+    {
+      "path": "camera_x_rays/camera/pixel_dimensions",
+      "family": null,
+      "ndcg_embedding": 0.9308374566913354,
+      "ndcg_rerank": 0.9285646959971232,
+      "diff": -0.002272760694212228
+    },
+    {
+      "path": "summary/local/separatrix/n_i/deuterium_tritium/value",
+      "family": "boundary_density",
+      "ndcg_embedding": 0.3154648767857289,
+      "ndcg_rerank": 0.3154648767857289,
+      "diff": 0.0
+    },
+    {
+      "path": "ferritic/object/time_slice/magnetic_moment_tor",
+      "family": null,
+      "ndcg_embedding": 0.9776431056097817,
+      "ndcg_rerank": 0.9776431056097817,
+      "diff": 0.0
+    },
+    {
+      "path": "plasma_initiation/global_quantities/b_field_perpendicular",
+      "family": null,
+      "ndcg_embedding": 0.9808356424002065,
+      "ndcg_rerank": 0.9894634029318995,
+      "diff": 0.008627760531693007
+    },
+    {
+      "path": "ece/channel/line_of_sight/first_point/r",
+      "family": null,
+      "ndcg_embedding": 0.8887295574005635,
+      "ndcg_rerank": 0.9219912275801967,
+      "diff": 0.03326167017963322
+    },
+    {
+      "path": "summary/local/separatrix/n_e/value",
+      "family": "boundary_density",
+      "ndcg_embedding": 0.9062342073563165,
+      "ndcg_rerank": 0.9473635789834092,
+      "diff": 0.041129371627092626
+    },
+    {
+      "path": "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum_rotating_frame/particles_a_field_parallel",
+      "family": null,
+      "ndcg_embedding": 0.9059776748137058,
+      "ndcg_rerank": 0.9886270129966366,
+      "diff": 0.08264933818293074
+    },
+    {
+      "path": "edge_profiles/profiles_1d/electrons/pressure_thermal",
+      "family": null,
+      "ndcg_embedding": 0.8697481094092135,
+      "ndcg_rerank": 0.9711350214958034,
+      "diff": 0.1013869120865899
+    },
+    {
+      "path": "ec_launchers/latency",
+      "family": null,
+      "ndcg_embedding": 0.8048099750039491,
+      "ndcg_rerank": 0.9178287402913377,
+      "diff": 0.11301876528738852
+    },
+    {
+      "path": "neutron_diagnostic/detectors/temperature_sensor/fall_time",
+      "family": null,
+      "ndcg_embedding": 0.8772153153380493,
+      "ndcg_rerank": 1.0,
+      "diff": 0.1227846846619507
+    },
+    {
+      "path": "magnetics/bpol_probe/position/r",
+      "family": null,
+      "ndcg_embedding": 0.871020651443638,
+      "ndcg_rerank": 1.0000000000000002,
+      "diff": 0.12897934855636217
+    },
+    {
+      "path": "workflow/time_loop/time_end",
+      "family": null,
+      "ndcg_embedding": 0.8679650489304587,
+      "ndcg_rerank": 1.0000000000000002,
+      "diff": 0.13203495106954155
+    },
+    {
+      "path": "dataset_description/simulation/time_restart",
+      "family": null,
+      "ndcg_embedding": 0.78294863634421,
+      "ndcg_rerank": 1.0000000000000002,
+      "diff": 0.21705136365579025
+    },
+    {
+      "path": "divertors/divertor/target/two_point_model/n_e_target",
+      "family": null,
+      "ndcg_embedding": 0.7386645548788586,
+      "ndcg_rerank": 0.9676281981379152,
+      "diff": 0.2289636432590566
+    },
+    {
+      "path": "summary/local/separatrix/n_i/boron/value",
+      "family": "boundary_density",
+      "ndcg_embedding": 0.7480023303078996,
+      "ndcg_rerank": 0.9971150419971939,
+      "diff": 0.24911271168929427
+    },
+    {
+      "path": "cryostat/description_2d/thermal_shield/unit/annular/thickness",
+      "family": null,
+      "ndcg_embedding": 0.6361435305137416,
+      "ndcg_rerank": 0.8914151387303486,
+      "diff": 0.255271608216607
+    },
+    {
+      "path": "nbi/unit/beam_current_fraction",
+      "family": null,
+      "ndcg_embedding": 0.6691919031675041,
+      "ndcg_rerank": 0.9360403422435029,
+      "diff": 0.26684843907599876
+    },
+    {
+      "path": "summary/local/separatrix/n_i/beryllium/value",
+      "family": "boundary_density",
+      "ndcg_embedding": 0.7071381778504491,
+      "ndcg_rerank": 0.9760403922783824,
+      "diff": 0.2689022144279333
+    },
+    {
+      "path": "ntms/time_slice/mode/detailed_evolution/time_detailed",
+      "family": null,
+      "ndcg_embedding": 0.7231651179817774,
+      "ndcg_rerank": 1.0,
+      "diff": 0.2768348820182226
+    },
+    {
+      "path": "summary/local/separatrix/n_i/deuterium/value",
+      "family": "boundary_density",
+      "ndcg_embedding": 0.6738193526383114,
+      "ndcg_rerank": 0.9791840321602853,
+      "diff": 0.3053646795219739
+    },
+    {
+      "path": "equilibrium/time_slice/ggd/psi/values",
+      "family": null,
+      "ndcg_embedding": 0.28906482631788766,
+      "ndcg_rerank": 0.6309297535714573,
+      "diff": 0.34186492725356965
+    },
+    {
+      "path": "summary/local/separatrix/n_i/hydrogen/value",
+      "family": "boundary_density",
+      "ndcg_embedding": 0.5372608085086531,
+      "ndcg_rerank": 0.9629309946609783,
+      "diff": 0.4256701861523252
+    },
+    {
+      "path": "summary/local/separatrix/n_i/carbon/value",
+      "family": "boundary_density",
+      "ndcg_embedding": 0.5714285040141095,
+      "ndcg_rerank": 1.0,
+      "diff": 0.4285714959858905
+    },
+    {
+      "path": "summary/local/separatrix/n_i/helium_3/value",
+      "family": "boundary_density",
+      "ndcg_embedding": 0.5429915607747366,
+      "ndcg_rerank": 1.0,
+      "diff": 0.45700843922526335
+    },
+    {
+      "path": "summary/local/separatrix/n_i/helium_4/value",
+      "family": "boundary_density",
+      "ndcg_embedding": 0.484702812288174,
+      "ndcg_rerank": 1.0,
+      "diff": 0.515297187711826
+    },
+    {
+      "path": "core_transport/model/profiles_1d/momentum_tor/v",
+      "family": null,
+      "ndcg_embedding": 0.3320231020954627,
+      "ndcg_rerank": 0.9165720713525508,
+      "diff": 0.5845489692570881
+    }
+  ]
+}
