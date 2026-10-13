@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="98">
+<meta name="plan-version" content="99">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -463,6 +463,9 @@
 </div>
 <div class="r-comment" data-section="s28" data-id="c-run-r-20261013T003633699354-sib-export-chain-bound" data-who="reckon-build" data-when="2026-10-13T02:25:29.842Z">
     <div class="r-comment-body"><p>sib-export-chain-bound: the export waiver refusal now detects a successor chain reaching its depth bound in the same query and raises WaivedSourceDeclarationError naming the source and the identity at the bound instead of returning a truncated set; focused gate 6 passed EXIT=0, over-long chain fails EXIT=1 with the bound check removed, cypher property check 4 passed EXIT=0, live EXPLAIN parses.</p></div>
+</div>
+<div class="r-comment" data-section="s28" data-id="c-run-r-20261013T023413553125-sib-release-flake-check" data-who="reckon-build" data-when="2026-10-13T03:56:30.202Z">
+    <div class="r-comment-body"><p>report at /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/sib-release-flake-check.html records the reach trace, the 5x2 EXIT table, the whole-file attempts, and the verdict per id (test node: no repository write, no commit)</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
