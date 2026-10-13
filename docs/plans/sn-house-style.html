@@ -25,7 +25,7 @@
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -442,7 +442,10 @@
     <div class="r-comment-body"><p>shs-registry-worklist — added a re-runnable conventions-registry gap census over the 220-name frozen WEST roster; live run reports 139 distinct tokens with no concepts entry, 79 with no notation entry and 121 of 125 name patterns with no template.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T095757825722-review-of-shs-registry-worklist-7e73ce74bc5e" data-who="reckon-build" data-when="2026-10-13T10:12:30.528Z">
-    <div class="r-comment-body"><p>reviewed r-20261013T063935739302-shs-registry-worklist at 7e73ce74b (base 38e5dc355): goal_fidelity 19, evidence 17, scope_discipline 20, durability 8, fit 15, reuse 5 (total 84); one follow-on finding — the census re-implements ISN&#x27;s _ir_segments and select_conventions template filter rather than importing them</p></div>
+    <div class="r-comment-body"><p>reviewed r-20261013T063935739302-shs-registry-worklist at 7e73ce74b (base 38e5dc355): goal_fidelity 19, evidence 17, scope_discipline 20, durability 8, fit 15, reuse 5 (total 84); one follow-on finding — the census re-implements ISN's _ir_segments and select_conventions template filter rather than importing them</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-land-s3-registry-worklist" data-who="reckon-build" data-when="2026-10-13T10:15:00Z">
+    <div class="r-comment-body"><p>Landed the registry gap census (merge <code>c68d7b9c0</code>): 139 tokens lack a concepts entry, 79 lack a notation entry, and 121 of 125 name patterns lack a template. The review's reuse and durability notes move to the census re-run that closes this section, which must call <code>select_conventions</code> instead of its copied rules. Section stays open. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s3-registry-worklist">evidence</a></p></div>
 </div>
 </section>
 </main>

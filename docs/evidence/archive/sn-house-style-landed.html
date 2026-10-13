@@ -75,6 +75,11 @@
     <p>The judge stage's canonical <code>plasma_boundary</code> criterion now reads: the last closed flux surface, and it does not call it the separatrix. The new option <code>separatrix_equated</code> (the separatrix as a synonym beside the last closed flux surface, or as its only name) maps to forbidden (merge <code>61b638032</code>). A live run of ten calls, booked at USD 0.000358, classifies §12's four fixtures as before and judges the new synonym fixture forbidden on the boundary. Its driver and raw decisions sit beside the record. Gate: 264 passed at base, 265 at head, no added failures. Negative control: restoring the synonym clause fails the criterion test. Independent review 110/120. Its one note: the test pins the wording rather than the meaning, and the live run covers the meaning.</p>
   </section>
 
+  <section id="s3-registry-worklist">
+    <h2>§3 — conventions-registry gap census over the WEST roster</h2>
+    <p>Run <code>r-20261013T063935739302-shs-registry-worklist</code>, merged at <code>c68d7b9c0</code>. The census <code>docs/evidence/fragments/sn-house-style/shs-registry-worklist-run.py</code> reads the 220-name frozen WEST roster (219 parse) against the ISN conventions registry. It finds 139 distinct tokens with no concepts entry and 79 with no notation entry, and 121 of 125 distinct name patterns (69 bases) with no template. Results: <code>shs-registry-worklist-results.json</code>.</p><p>The independent review found no added failures. It scored reuse 5 and durability 8, below the floor of 10, because the census copies ISN's segment-kind set and template filter instead of calling <code>select_conventions</code>. Both are exempted: the census re-run that closes this section must call <code>select_conventions</code>, so the census follows the registry's own selection.</p>
+  </section>
+
 </main>
 </body>
 </html>
