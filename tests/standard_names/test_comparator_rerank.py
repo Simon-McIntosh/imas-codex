@@ -29,8 +29,13 @@ _POOL = [
 
 
 def _stub_rerank(monkeypatch, order, *, cost=0.25):
-    """Install a rerank stub that returns *order*, recording the queries seen."""
-    seen: list[str] = []
+    """Install a rerank stub that returns *order*, recording what it was asked.
+
+    Each call records the query and the state each candidate is judged in, built
+    through the same ``state_for`` the real pool is handed, so a test can pin the
+    text the judgement is made on rather than only that a judgement happened.
+    """
+    seen: list[tuple[str, list[dict]]] = []
 
     async def fake_rerank_pool(
         query,
@@ -45,7 +50,7 @@ def _stub_rerank(monkeypatch, order, *, cost=0.25):
         concurrency=8,
         budget_seconds=None,
     ):
-        seen.append(query)
+        seen.append((query, [state_for(query, candidate) for candidate in candidates]))
         by_id = {candidate["id"]: candidate for candidate in candidates}
         return [by_id[name] for name in order], None, cost
 
@@ -67,7 +72,26 @@ async def test_switch_on_reorders_the_comparator_block_by_score(monkeypatch) -> 
         "first_name",
     ]
     assert cost == 0.25
-    assert seen, "the rerank must be asked about the item's description and path"
+    assert len(seen) == 1, "the whole block is judged once against the item"
+
+    query, states = seen[0]
+    assert query == (
+        "electron temperature (core_profiles/profiles_1d/electrons/temperature)"
+    ), "the query is the item's description and its DD path"
+    assert states == [
+        {
+            "query": query,
+            "candidate": {"locator": "first_name", "text": "nearest by embedding"},
+        },
+        {
+            "query": query,
+            "candidate": {"locator": "second_name", "text": "next by embedding"},
+        },
+        {
+            "query": query,
+            "candidate": {"locator": "third_name", "text": "last by embedding"},
+        },
+    ], "each comparator is judged in a state of its own name and description"
 
 
 @pytest.mark.asyncio
