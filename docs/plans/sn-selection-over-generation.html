@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -246,6 +246,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T051848429980-ssog-link-label-sheet" data-who="reckon-build" data-when="2026-10-13T05:36:56.962Z">
     <div class="r-comment-body"><p>Self-link detection (find_name_links/find_self_links) and the link-label Jev state added to doc_links.py; the sheet ssog-link-label-sheet.json holds 180 links (all 74 self-links, 19 domains), each with Jev's probability; run spend USD 0.0037.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T081950747970-review-of-ssog-link-auc" data-who="reckon-build" data-when="2026-10-13T08:32:28.443Z">
+    <div class="r-comment-body"><p>Reviewed ssog-link-auc at 3cd8fced: parsed record scoring goal_fidelity 19, evidence 18, scope_discipline 20, durability 6, fit 17, reuse 20 (total 100), added_failure_count 0 from the reviewed run&#x27;s own baseline/after gate logs, two follow-on findings in ssog-link-auc.html:45 and :47 where the disagreement prose mis-pairs a link text/probability and a target with the results JSON; the figures themselves are correct and independently reproduced.</p></div>
 </div>
 </section>
 </main>

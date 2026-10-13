@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T07:09:06Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc.html",
+      "line": "45",
+      "severity": "follow-on",
+      "text": "follow-on: the disagreement prose mis-pairs a link text and probability with the target, reading \"atomic count of pellet\" at 0.30 against fast_ion_critical_energy's neighbour, where the results JSON has the 0.30 row as fast_particle_critical_energy -> fast_ion_critical_energy and \"atomic count of pellet\" at 0.41 against atomic_count_of_pellet."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc.html",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "follow-on: it names the target as maximum_power_at_outer_divertor_target, but the results JSON row at 0.50 targets power_at_outer_divertor_target, so a reader checking the served figure against the store finds a name that is not there."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base 6168972; one additive commit (567 insertions, 0 deletions) creating the driver, its results JSON and the fragment HTML; it imports roc_auc and bootstrap_interval from imas_codex.discovery.base.evaluation and changes nothing under imas_codex/.",
+    "done_when": "the done-when asks for two logged driver runs that reproduce the same numbers, a fragment reporting the figures in prose and one table, and tests/discovery/test_evaluation.py passing at base and head; the manifest records run1.log and run2.log both EXIT=0 with byte-identical JSON (verified: run1.json == run2.json == the committed results file) and test_evaluation_at_base.log and test_evaluation_after.log both \"18 passed ... EXIT=0\".",
+    "goal": "the node goal is to compute Jev's link-label AUC and its interval over three populations plus a self-link baseline and a shuffled-label control; docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc-run.py:193 measure() produces all six figures and writes them to ssog-link-auc-results.json.",
+    "manifest": "read; status complete; single commit 3cd8fce; changed_paths names the three files; the tests line records the pytest gate at 18 passed EXIT=0; test_logs names run1.log, run2.log, test_evaluation_at_base.log and test_evaluation_after.log, all present; baseline_suite and after_suite both completed:true with failure_count 0; blockers and follow_ons empty.",
+    "write_paths": "the brief declares three fragment artefacts under docs/evidence/fragments/sn-selection-over-generation/; git diff --name-only 6168972705c17a611cc0ee860d314497a5283ab4..3cd8fced1043e6fdf17bba187d52b98e1ab99121 lists exactly ssog-link-auc-run.py, ssog-link-auc-results.json and ssog-link-auc.html, all inside them."
+  },
+  "justifications": {
+    "durability": "no test guards ssog-link-auc-run.py, so reverting the population split at :193 or the disagreement sort at :162 would redden nothing, and the control's contains_0_5 flag at :158 is computed and printed but never asserted.",
+    "evidence": "run1.log and run2.log record the same figures at EXIT=0 and I independently recomputed 0.7567/0.7593/0.6594/0.7993 from the sheet at head with sklearn, matching ssog-link-auc-results.json.",
+    "fit": "ssog-link-auc-run.py follows the module-docstring, argparse and main-guard idiom of the sibling ssog-link-label-sheet-run.py and its single commit carries a conventional subject and a body, though its docstring at :3 names the node id.",
+    "goal_fidelity": "ssog-link-auc-run.py:193 measure() reports Jev's AUC over all, non-self and self populations, the 1-is_self_link baseline, the paired difference and the shuffled control, and ssog-link-auc-results.json holds jev.all auc 0.7567 and baseline 0.7993.",
+    "reuse": "ssog-link-auc-run.py:29 imports roc_auc and bootstrap_interval from imas_codex.discovery.base.evaluation and calls them at :86, :104, :124 and :149, adding no second AUC or resampler, and no owner exists for the population split or disagreement ranking.",
+    "scope_discipline": "git diff --name-only 6168972..3cd8fce is exactly the three declared fragment paths, all additive, and no path outside docs/evidence/fragments/sn-selection-over-generation/ is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to compute Jev's link-label AUC and its interval over three populations plus a self-link baseline and a shuffled-label control; docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc-run.py:193 measure() produces all six figures and writes them to ssog-link-auc-results.json.\nVERDICT done_when: the done-when asks for two logged driver runs that reproduce the same numbers, a fragment reporting the figures in prose and one table, and tests/discovery/test_evaluation.py passing at base and head; the manifest records run1.log and run2.log both EXIT=0 with byte-identical JSON (verified: run1.json == run2.json == the committed results file) and test_evaluation_at_base.log and test_evaluation_after.log both \"18 passed ... EXIT=0\".\nVERDICT write_paths: the brief declares three fragment artefacts under docs/evidence/fragments/sn-selection-over-generation/; git diff --name-only 6168972705c17a611cc0ee860d314497a5283ab4..3cd8fced1043e6fdf17bba187d52b98e1ab99121 lists exactly ssog-link-auc-run.py, ssog-link-auc-results.json and ssog-link-auc.html, all inside them.\nVERDICT manifest: read; status complete; single commit 3cd8fce; changed_paths names the three files; the tests line records the pytest gate at 18 passed EXIT=0; test_logs names run1.log, run2.log, test_evaluation_at_base.log and test_evaluation_after.log, all present; baseline_suite and after_suite both completed:true with failure_count 0; blockers and follow_ons empty.\nVERDICT diff: read commit by commit against base 6168972; one additive commit (567 insertions, 0 deletions) creating the driver, its results JSON and the fragment HTML; it imports roc_auc and bootstrap_interval from imas_codex.discovery.base.evaluation and changes nothing under imas_codex/.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: ssog-link-auc-run.py:193 measure() reports Jev's AUC over all, non-self and self populations, the 1-is_self_link baseline, the paired difference and the shuffled control, and ssog-link-auc-results.json holds jev.all auc 0.7567 and baseline 0.7993.\nSCORE evidence: 18\nJUSTIFICATION evidence: run1.log and run2.log record the same figures at EXIT=0 and I independently recomputed 0.7567/0.7593/0.6594/0.7993 from the sheet at head with sklearn, matching ssog-link-auc-results.json.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 6168972..3cd8fce is exactly the three declared fragment paths, all additive, and no path outside docs/evidence/fragments/sn-selection-over-generation/ is touched.\nSCORE durability: 6\nJUSTIFICATION durability: no test guards ssog-link-auc-run.py, so reverting the population split at :193 or the disagreement sort at :162 would redden nothing, and the control's contains_0_5 flag at :158 is computed and printed but never asserted.\nSCORE fit: 17\nJUSTIFICATION fit: ssog-link-auc-run.py follows the module-docstring, argparse and main-guard idiom of the sibling ssog-link-label-sheet-run.py and its single commit carries a conventional subject and a body, though its docstring at :3 names the node id.\nSCORE reuse: 20\nJUSTIFICATION reuse: ssog-link-auc-run.py:29 imports roc_auc and bootstrap_interval from imas_codex.discovery.base.evaluation and calls them at :86, :104, :124 and :149, adding no second AUC or resampler, and no owner exists for the population split or disagreement ranking.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc.html:45 follow-on: the disagreement prose mis-pairs a link text and probability with the target, reading \"atomic count of pellet\" at 0.30 against fast_ion_critical_energy's neighbour, where the results JSON has the 0.30 row as fast_particle_critical_energy -> fast_ion_critical_energy and \"atomic count of pellet\" at 0.41 against atomic_count_of_pellet.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-link-auc.html:47 follow-on: it names the target as maximum_power_at_outer_divertor_target, but the results JSON row at 0.50 targets power_at_outer_divertor_target, so a reader checking the served figure against the store finds a name that is not there.\n",
+  "review_run_id": "r-20261013T080210692626-review-of-ssog-link-auc",
+  "reviewed_base_sha": "6168972705c17a611cc0ee860d314497a5283ab4",
+  "reviewed_head_sha": "3cd8fced1043e6fdf17bba187d52b98e1ab99121",
+  "reviewed_run_id": "r-20261013T070846395404-ssog-link-auc",
+  "scores": {
+    "durability": 6,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T08:33:48.327021+00:00",
+  "total": 100
+}
