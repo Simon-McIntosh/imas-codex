@@ -1,0 +1,4190 @@
+{
+  "reference_rule": "the live accepted or approved names with the most DD source bindings, at most one per physical base, excluding the fixed five",
+  "reference_absent": [],
+  "options": [
+    {
+      "value": "equilibrium",
+      "description": "MHD equilibrium, flux surfaces, magnetic geometry, coordinate systems",
+      "category": "core_plasma"
+    },
+    {
+      "value": "transport",
+      "description": "Transport coefficients, fluxes, neoclassical and anomalous transport modeling",
+      "category": "core_plasma"
+    },
+    {
+      "value": "core_plasma_physics",
+      "description": "Core plasma profiles, kinetic quantities, global parameters, integrated quantities",
+      "category": "core_plasma"
+    },
+    {
+      "value": "turbulence",
+      "description": "Turbulence physics, fluctuations, turbulent transport, correlation analysis",
+      "category": "core_plasma"
+    },
+    {
+      "value": "magnetohydrodynamics",
+      "description": "MHD stability, disruptions, instabilities, sawteeth, tearing modes",
+      "category": "core_plasma"
+    },
+    {
+      "value": "auxiliary_heating",
+      "description": "Auxiliary heating systems including neutral beam, electron cyclotron, ion cyclotron, and lower hybrid",
+      "category": "heating_current_drive"
+    },
+    {
+      "value": "current_drive",
+      "description": "Non-inductive current drive physics, efficiency, and profile control",
+      "category": "heating_current_drive"
+    },
+    {
+      "value": "waves",
+      "description": "Wave propagation, RF physics, wave-particle interactions, dispersion",
+      "category": "heating_current_drive"
+    },
+    {
+      "value": "edge_plasma_physics",
+      "description": "Scrape-off layer, divertor physics, plasma-wall interactions, recycling",
+      "category": "edge_divertor"
+    },
+    {
+      "value": "plasma_wall_interactions",
+      "description": "First wall, plasma-facing components, erosion, deposition, material migration",
+      "category": "edge_divertor"
+    },
+    {
+      "value": "divertor_physics",
+      "description": "Divertor target loads, detachment, particle and heat exhaust",
+      "category": "edge_divertor"
+    },
+    {
+      "value": "fueling",
+      "description": "Gas injection, pellet injection, shattered pellet injection, fueling systems",
+      "category": "edge_divertor"
+    },
+    {
+      "value": "fast_particles",
+      "description": "Fast ion and electron distributions, energetic particles, slowing-down",
+      "category": "energetic_particles"
+    },
+    {
+      "value": "runaway_electrons",
+      "description": "Runaway electron physics, avalanche generation, loss mechanisms",
+      "category": "energetic_particles"
+    },
+    {
+      "value": "particle_measurement_diagnostics",
+      "description": "Thomson scattering and particle-based diagnostic measurements",
+      "category": "diagnostics"
+    },
+    {
+      "value": "electromagnetic_wave_diagnostics",
+      "description": "Interferometry, polarimetry, reflectometry, and wave-based diagnostics",
+      "category": "diagnostics"
+    },
+    {
+      "value": "radiation_measurement_diagnostics",
+      "description": "Bolometry, X-ray diagnostics, bremsstrahlung, imaging systems",
+      "category": "diagnostics"
+    },
+    {
+      "value": "magnetic_field_diagnostics",
+      "description": "Magnetic diagnostics, flux loops, Rogowski coils, diamagnetic measurements",
+      "category": "diagnostics"
+    },
+    {
+      "value": "mechanical_measurement_diagnostics",
+      "description": "Mechanical and structural measurement diagnostics, strain, vibration",
+      "category": "diagnostics"
+    },
+    {
+      "value": "plasma_measurement_diagnostics",
+      "description": "General plasma parameter measurement diagnostics",
+      "category": "diagnostics"
+    },
+    {
+      "value": "spectroscopy",
+      "description": "Emission spectroscopy, charge exchange, motional Stark effect, impurity diagnostics",
+      "category": "diagnostics"
+    },
+    {
+      "value": "neutronics",
+      "description": "Neutron diagnostics, fusion product measurements, activation",
+      "category": "diagnostics"
+    },
+    {
+      "value": "plasma_control",
+      "description": "Plasma position and shape control, feedback systems, electromagnetic coupling",
+      "category": "control_operations"
+    },
+    {
+      "value": "machine_operations",
+      "description": "Pulse scheduling, workflow management, operational metadata",
+      "category": "control_operations"
+    },
+    {
+      "value": "plasma_initiation",
+      "description": "Plasma startup, breakdown, initiation physics, early heating phase",
+      "category": "control_operations"
+    },
+    {
+      "value": "magnetic_field_systems",
+      "description": "Magnetic coil systems, superconducting magnets, field generation infrastructure",
+      "category": "machine_systems"
+    },
+    {
+      "value": "structural_components",
+      "description": "Vacuum vessel, cryostat, structural support systems",
+      "category": "machine_systems"
+    },
+    {
+      "value": "plant_systems",
+      "description": "Power supplies, cooling systems, vacuum systems, plant infrastructure",
+      "category": "machine_systems"
+    },
+    {
+      "value": "data_management",
+      "description": "Summary data products, integrated analysis results, data archival",
+      "category": "data_computing"
+    },
+    {
+      "value": "computational_workflow",
+      "description": "Auxiliary data, atomic and molecular data, geometry definitions, computational tools",
+      "category": "data_computing"
+    },
+    {
+      "value": "general",
+      "description": "Universal plasma physics quantities appearing across multiple IDS",
+      "category": "general"
+    },
+    {
+      "value": "gyrokinetics",
+      "description": "Gyrokinetic theory, simulation, and turbulence modeling",
+      "category": "advanced_physics"
+    }
+  ],
+  "reference": [
+    {
+      "name": "electron_temperature",
+      "description": "Energy-equivalent measure of the mean random kinetic energy per electron in the bulk electron population, defined by its second velocity moment.",
+      "unit": "eV",
+      "segments": {
+        "physical_base": "temperature",
+        "geometric_base": "",
+        "subject": "electron",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/electrons/temperature",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:edge_profiles/ggd/electrons/temperature/values",
+          "ids": "edge_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "electron_density",
+      "description": "Free-electron number density is the number of unbound electrons per physical volume, with population selection and spatial aggregation defined by each specialization.",
+      "unit": "m^-3",
+      "segments": {
+        "physical_base": "density",
+        "geometric_base": "",
+        "subject": "electron",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:equilibrium/time_slice/constraints/n_e/measured",
+          "ids": "equilibrium"
+        },
+        {
+          "path": "dd:equilibrium/time_slice/constraints/n_e/reconstructed",
+          "ids": "equilibrium"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "safety_factor",
+      "description": "Signed ratio of toroidal to poloidal field-line winding on a magnetic flux surface, equal to the toroidal turns made during one poloidal circuit.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "safety_factor",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/q",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:edge_profiles/profiles_1d/q",
+          "ids": "edge_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "plasma_current",
+      "description": "Net toroidal electric current carried by the entire plasma column, obtained by integrating toroidal current density over its enclosed poloidal cross-section.",
+      "unit": "A",
+      "segments": {
+        "physical_base": "current",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/global_quantities/ip",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:equilibrium/time_slice/constraints/ip/measured",
+          "ids": "equilibrium"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "poloidal_magnetic_flux",
+      "description": "Poloidal magnetic flux is the signed surface integral of the magnetic field over a surface bounded by a closed toroidal contour of a nested magnetic flux surface. It labels nested magnetic flux surfaces and is complementary to toroidal magnetic flux.",
+      "unit": "Wb",
+      "segments": {
+        "physical_base": "magnetic_flux",
+        "geometric_base": "",
+        "subject": "",
+        "component": "poloidal",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_sources/source/profiles_1d/grid/psi",
+          "ids": "core_sources"
+        },
+        {
+          "path": "dd:disruption/profiles_1d/grid/psi",
+          "ids": "disruption"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "atomic_count",
+      "description": "Stoichiometric multiplicity of a selected element within the chemical formula of an atomic or molecular species.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "count",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:amns_data/process/products/element/atoms_n",
+          "ids": "amns_data"
+        },
+        {
+          "path": "dd:amns_data/process/reactants/element/atoms_n",
+          "ids": "amns_data"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "atomic_mass",
+      "description": "Mass parameter assigned to a specified ion or neutral particle species, encoding its isotope or constituent composition for inertial and transport calculations.",
+      "unit": "u",
+      "segments": {
+        "physical_base": "mass",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:amns_data/a",
+          "ids": "amns_data"
+        },
+        {
+          "path": "dd:core_profiles/profiles_1d/ion/element/a",
+          "ids": "core_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "radial_coordinate_of_line_of_sight",
+      "description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radial_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "line_of_sight",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:bolometer/camera/channel/line_of_sight/first_point/r",
+          "ids": "bolometer"
+        },
+        {
+          "path": "dd:bolometer/camera/channel/line_of_sight/second_point/r",
+          "ids": "bolometer"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "vertical_coordinate_of_line_of_sight",
+      "description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "vertical",
+        "operator": "",
+        "locus": "line_of_sight",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:bolometer/camera/channel/line_of_sight/first_point/z",
+          "ids": "bolometer"
+        },
+        {
+          "path": "dd:bolometer/camera/channel/line_of_sight/second_point/z",
+          "ids": "bolometer"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "atomic_number",
+      "description": "Nuclear proton count identifying the selected element in a plasma or neutral-particle species, independent of isotope and ionization state.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "atomic_number",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/ion/element/z_n",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_profiles/profiles_1d/neutral/element/z_n",
+          "ids": "core_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "ion_charge",
+      "description": "Dimensionless density-weighted mean ionic charge number for a specified ion species, combining its represented ionic charge states into one mean value.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "charge",
+        "geometric_base": "",
+        "subject": "ion",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:charge_exchange/channel/ion/z_ion",
+          "ids": "charge_exchange"
+        },
+        {
+          "path": "dd:core_profiles/profiles_1d/ion/z_ion",
+          "ids": "core_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "ion_state_maximum_charge_number",
+      "description": "Upper ionization charge-number bound of an ion charge-state bundle, identifying the highest ionic charge state represented.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "charge_number",
+        "geometric_base": "",
+        "subject": "ion_state",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/ion/state/z_max",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_profiles/profiles_2d/ion/state/z_max",
+          "ids": "core_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "normalized_poloidal_flux_coordinate",
+      "description": "Normalized poloidal flux coordinate is a radial label for nested magnetic flux surfaces based on poloidal magnetic flux. It is zero at the magnetic axis and one at the last closed flux surface; for a line-of-sight locus, it denotes the minimum value reached along the line.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "normalized_poloidal_flux_coordinate",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/grid/rho_pol_norm",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_sources/source/profiles_1d/grid/rho_pol_norm",
+          "ids": "core_sources"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "poloidal_magnetic_flux_at_plasma_boundary",
+      "description": "Signed poloidal magnetic flux evaluated on the last closed flux surface, providing the outer reference for normalized poloidal-flux coordinates.",
+      "unit": "Wb",
+      "segments": {
+        "physical_base": "magnetic_flux",
+        "geometric_base": "",
+        "subject": "",
+        "component": "poloidal",
+        "operator": "",
+        "locus": "plasma_boundary",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/grid/psi_boundary",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_sources/source/profiles_1d/grid/psi_boundary",
+          "ids": "core_sources"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "toroidal_angle_of_measurement_position",
+      "description": "Toroidal angular coordinate locating a measurement position around the machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "rad",
+      "segments": {
+        "physical_base": "toroidal_angle",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "measurement_position",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:barometry/gauge/position/phi",
+          "ids": "barometry"
+        },
+        {
+          "path": "dd:ece/channel/position/phi",
+          "ids": "ece"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "normalized_toroidal_flux_coordinate",
+      "description": "Dimensionless radial label equal to the square root of toroidal magnetic flux normalized between the magnetic axis and equilibrium boundary.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "normalized_toroidal_flux_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/grid/rho_tor_norm",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_sources/source/profiles_1d/grid/rho_tor_norm",
+          "ids": "core_sources"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "area_of_diagnostic_aperture",
+      "description": "Geometric area of the designated diagnostic aperture surface that admits or collects radiation or particles.",
+      "unit": "m^2",
+      "segments": {
+        "physical_base": "area",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "diagnostic_aperture",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:bolometer/camera/channel/aperture/surface",
+          "ids": "bolometer"
+        },
+        {
+          "path": "dd:bolometer/camera/channel/detector/surface",
+          "ids": "bolometer"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "volume_of_flux_surface",
+      "description": "Geometric volume contained within a nested magnetic flux surface, cumulative from the magnetic axis toward the outermost closed surface.",
+      "unit": "m^3",
+      "segments": {
+        "physical_base": "volume",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "flux_surface",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/grid/volume",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_sources/source/profiles_1d/grid/volume",
+          "ids": "core_sources"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "toroidal_flux_coordinate",
+      "description": "Non-negative, radius-like label of a nested magnetic flux surface, derived from enclosed toroidal magnetic flux using a positive reference vacuum toroidal field.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "toroidal_flux_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/grid/rho_tor",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_sources/source/profiles_1d/grid/rho_tor",
+          "ids": "core_sources"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    },
+    {
+      "name": "reference_major_radius",
+      "description": "Nonnegative perpendicular distance from the toroidal symmetry axis to a designated reference location, serving as the major-radius coordinate where the vacuum toroidal magnetic field is specified in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radius",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/vacuum_toroidal_field/r0",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_sources/vacuum_toroidal_field/r0",
+          "ids": "core_sources"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "reference": true
+    }
+  ],
+  "sample": [
+    {
+      "name": "poloidal_angle_of_plasma_boundary_gap",
+      "description": "Orientation of a plasma-boundary gap vector directed away from its reference point, measured clockwise from the radial cylindrical direction (grad R) in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "rad",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "poloidal_angle",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "plasma_boundary_gap",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:equilibrium/time_slice/boundary/gap/angle",
+          "ids": "equilibrium"
+        },
+        {
+          "path": "dd:pulse_schedule/position_control/gap/angle",
+          "ids": "pulse_schedule"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "poloidal_magnetic_flux_at_pellet_path",
+      "description": "Poloidal magnetic flux at a pellet-path point is the value of the equilibrium poloidal magnetic-flux function evaluated at the position of a pellet along its injection trajectory. For an axisymmetric equilibrium it depends only on the major-radius and vertical coordinates of that trajectory point.",
+      "unit": "Wb",
+      "segments": {
+        "physical_base": "magnetic_flux",
+        "geometric_base": "",
+        "subject": "",
+        "component": "poloidal",
+        "operator": "",
+        "locus": "pellet_path",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pellets/time_slice/pellet/path_profiles/psi",
+          "ids": "pellets"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "ratio_of_vertical_vorticity_to_major_radius",
+      "description": "Vertical plasma vorticity divided by the local major radius, retaining the signed rotation rate about the vertical axis with inverse-length scaling.",
+      "unit": "m^-1.s^-1",
+      "segments": {
+        "physical_base": "vorticity",
+        "geometric_base": "",
+        "subject": "",
+        "component": "vertical",
+        "operator": "ratio",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:edge_profiles/ggd/vorticity_over_r/z",
+          "ids": "edge_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "total_absorbed_wave_power_at_inside_flux_surface",
+      "description": "Cumulative power transferred from electromagnetic waves to electrons, ions, and fast populations within a selected magnetic flux surface.",
+      "unit": "W",
+      "segments": {
+        "physical_base": "power",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "inside_flux_surface",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:waves/coherent_wave/profiles_1d/power_inside",
+          "ids": "waves"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "plasma_mass_density_real_part",
+      "description": "Real part of a complex plasma mass-density quantity, representing the in-phase quadrature relative to the chosen complex phase. It is the real component only, not the full complex density or its imaginary quadrature.",
+      "unit": "kg.m^-3",
+      "segments": {
+        "physical_base": "mass_density",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "real_part",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "toroidal_coordinate_of_soft_xray_detector",
+      "description": "Toroidal angle of the geometric center of a soft X-ray detector in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "rad",
+      "segments": {
+        "physical_base": "coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "toroidal",
+        "operator": "",
+        "locus": "soft_xray_detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:soft_x_rays/channel/detector/centre/phi",
+          "ids": "soft_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "wave_curvature_of_electron_cyclotron_beam",
+      "description": "Wave curvature of an electron-cyclotron beam is the signed inverse radius of curvature of its phase front along one selected principal transverse direction of the phase ellipse.",
+      "unit": "m^-1",
+      "segments": {
+        "physical_base": "curvature",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "electron_cyclotron_beam",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ec_launchers/beam/phase/curvature",
+          "ids": "ec_launchers"
+        },
+        {
+          "path": "dd:waves/coherent_wave/beam_tracing/beam/phase/curvature",
+          "ids": "waves"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "volume_averaged_runaway_electron_kinetic_energy_density",
+      "description": "Mean relativistic kinetic energy per unit volume of the runaway electron population, obtained by averaging the local kinetic energy density over the confined plasma volume.",
+      "unit": "J.m^-3",
+      "segments": {
+        "physical_base": "energy",
+        "geometric_base": "",
+        "subject": "runaway_electron",
+        "component": "",
+        "operator": "volume_averaged",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:runaway_electrons/global_quantities/volume_average/energy_density_kinetic",
+          "ids": "runaway_electrons"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "current_density_due_to_non_inductive_current_drive",
+      "description": "Vector current-density contribution produced by bootstrap and externally driven non-inductive mechanisms, excluding current generated by an inductive electric field.",
+      "unit": "A.m^-2",
+      "segments": {
+        "physical_base": "current_density",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "non_inductive_current_drive"
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "wave_voltage_amplitude",
+      "description": "Amplitude of the detected voltage signal from a probing microwave wave returned after interaction with the plasma cutoff layer.",
+      "unit": "V",
+      "segments": {
+        "physical_base": "voltage",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "amplitude",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:reflectometer_fluctuation/channel/amplitude",
+          "ids": "reflectometer_fluctuation"
+        },
+        {
+          "path": "dd:reflectometer_profile/channel/amplitude",
+          "ids": "reflectometer_profile"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "radius_of_bragg_crystal",
+      "description": "Geometric distance from the center of a circular Bragg-crystal aperture to the edge of its active diffracting surface.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radius",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "bragg_crystal",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_x_ray_crystal/channel/crystal/radius",
+          "ids": "spectrometer_x_ray_crystal"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "vertical_coordinate_of_lower_hybrid_antenna",
+      "description": "Vertical Z-coordinate of the reference point of a lower-hybrid antenna in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "coordinate",
+        "subject": "",
+        "component": "vertical",
+        "operator": "",
+        "locus": "lower_hybrid_antenna",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:lh_antennas/reference_point/z",
+          "ids": "lh_antennas"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "normalized_poloidal_flux_coordinate_at_minimum_absolute_safety_factor",
+      "description": "Dimensionless normalized poloidal-flux coordinate locating the closed magnetic surface where the safety-factor magnitude is globally minimized.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "normalized_poloidal_flux_coordinate",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "minimum_absolute_safety_factor",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:equilibrium/time_slice/global_quantities/q_min/psi_norm",
+          "ids": "equilibrium"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "poloidal_suprathermal_electron_angle_perturbed_at_ece_channel_emission_position",
+      "description": "Poloidal angular offset estimate of the electron cyclotron emission measurement position due to the presence of suprathermal electrons, relative to the thermal-electron emission reference.",
+      "unit": "rad",
+      "segments": {
+        "physical_base": "angle",
+        "geometric_base": "",
+        "subject": "electron",
+        "component": "poloidal",
+        "operator": "",
+        "locus": "ece_channel_emission_position",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ece/channel/delta_position_suprathermal/theta",
+          "ids": "ece"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "second_local_tangential_coordinate_of_hard_xray_detector",
+      "description": "Signed coordinate of a hard X-ray detector outline vertex along the second local tangential axis of the right-handed detector-local Cartesian basis (first local tangential, second local tangential, local normal).",
+      "unit": "m",
+      "segments": {
+        "physical_base": "second_local_tangential_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "hard_xray_detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:hard_x_rays/channel/detector/outline/x2",
+          "ids": "hard_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "power_due_to_first_orbit_loss",
+      "description": "Power carried out of the confined fast-ion population by particles whose first guiding-center orbit after birth or acceleration is unconfined; it is a positive loss magnitude.",
+      "unit": "W",
+      "segments": {
+        "physical_base": "power",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "first_orbit_loss"
+      },
+      "sources": [
+        {
+          "path": "dd:distributions/distribution/global_quantities/power_first_orbit",
+          "ids": "distributions"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "magnetic_field_magnitude",
+      "description": "Scalar magnetic-field-strength quantity derived from the local total magnetic-induction vector, retaining its magnitude or using that magnitude in an aggregation or algebraic transformation.",
+      "unit": "T",
+      "segments": {
+        "physical_base": "magnetic_field",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "magnitude",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "total_plasma_radiated_power",
+      "description": "Total plasma radiated power is the electromagnetic power emitted by the full plasma, summed over all photon-emission mechanisms and integrated over the plasma volume.",
+      "unit": "W",
+      "segments": {
+        "physical_base": "power",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:bolometer/power_radiated_total",
+          "ids": "bolometer"
+        },
+        {
+          "path": "dd:summary/global_quantities/power_radiated/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "neutral_gas_pressure_of_gauge",
+      "description": "Neutral gas pressure of a gage is the pressure indicated by a barometry gage for residual neutral gas in the vacuum vessel or surrounding vacuum system. It represents local vacuum conditions rather than a kinetic neutral-particle pressure moment.",
+      "unit": "Pa",
+      "segments": {
+        "physical_base": "pressure",
+        "geometric_base": "",
+        "subject": "neutral",
+        "component": "",
+        "operator": "",
+        "locus": "gauge",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:barometry/gauge/pressure",
+          "ids": "barometry"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "poloidal_perturbed_vacuum_magnetic_field",
+      "description": "Complex poloidal component of the first-order magnetic-field perturbation eigenfunction in the current-free vacuum region outside the plasma boundary, for a single toroidal Fourier mode in linear MHD stability analysis.",
+      "unit": "T",
+      "segments": {
+        "physical_base": "magnetic_field",
+        "geometric_base": "",
+        "subject": "",
+        "component": "poloidal",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "time",
+      "description": "Temporal measure expressing an elapsed interval or characteristic duration, including the time denominator used to define a physical rate.",
+      "unit": "s",
+      "segments": {
+        "physical_base": "time",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+      "description": "Dimensionless compressional electromagnetic fluctuation amplitude from the parallel magnetic-field perturbation, time- and flux-surface-averaged and summed over kx for each ky.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "magnetic_field",
+        "geometric_base": "",
+        "subject": "",
+        "component": "parallel",
+        "operator": "flux_surface_averaged",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:gyrokinetics_local/non_linear/fields_intensity_1d/b_field_parallel_perturbed_norm",
+          "ids": "gyrokinetics_local"
+        },
+        {
+          "path": "dd:gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/b_field_parallel_perturbed_norm",
+          "ids": "gyrokinetics_local"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "parallel_electric_field",
+      "description": "Parallel electric-field component giving the force per unit positive stationary test charge along the local magnetic-field direction, including electrostatic, inductive, and electromagnetic-wave contributions.",
+      "unit": "V.m^-1",
+      "segments": {
+        "physical_base": "electric_field",
+        "geometric_base": "",
+        "subject": "",
+        "component": "parallel",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/e_field/parallel",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:edge_profiles/ggd/e_field/parallel",
+          "ids": "edge_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "beryllium_density",
+      "description": "Local number density of beryllium impurity ions per unit plasma volume, summed over all ionization states from singly ionized to fully stripped (Be1+ through Be4+), excluding neutral beryllium atoms.",
+      "unit": "m^-3",
+      "segments": {
+        "physical_base": "density",
+        "geometric_base": "",
+        "subject": "beryllium",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude",
+      "description": "Geometric metric coefficient formed by averaging the local magnitude of the toroidal-flux-coordinate gradient over each nested magnetic flux surface.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "toroidal_flux_coordinate_gradient",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "flux_surface_averaged",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:equilibrium/time_slice/profiles_1d/gm7",
+          "ids": "equilibrium"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "toroidal_magnetic_field_at_pedestal_top",
+      "description": "Signed toroidal component of the magnetic induction evaluated on the low-field-side, core-side shoulder of the H-mode pressure pedestal.",
+      "unit": "T",
+      "segments": {
+        "physical_base": "magnetic_field",
+        "geometric_base": "",
+        "subject": "",
+        "component": "toroidal",
+        "operator": "",
+        "locus": "pedestal_top",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:summary/pedestal_fits/linear/b_field_tor_pedestal_top_lfs/value",
+          "ids": "summary"
+        },
+        {
+          "path": "dd:summary/pedestal_fits/mtanh/b_field_tor_pedestal_top_lfs/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "volume_averaged_ion_charge_state_average_charge_number",
+      "description": "Volume average of the local density-weighted mean charge number of an ion charge-state bundle over the confined plasma volume.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "charge_number",
+        "geometric_base": "",
+        "subject": "ion_charge_state",
+        "component": "",
+        "operator": "volume_averaged",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:plasma_profiles/profiles_1d/ion/state/z_average",
+          "ids": "plasma_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "flux_surface_averaged_toroidal_current_density",
+      "description": "Geometry-weighted flux-surface average of the net conventional toroidal current density driving the equilibrium poloidal magnetic-flux distribution.",
+      "unit": "A.m^-2",
+      "segments": {
+        "physical_base": "current_density",
+        "geometric_base": "",
+        "subject": "",
+        "component": "toroidal",
+        "operator": "flux_surface_averaged",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:equilibrium/time_slice/profiles_1d/j_phi",
+          "ids": "equilibrium"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "area_of_toroidal_field_coil",
+      "description": "Non-negative geometric area of the conducting material within a toroidal-field-coil conductor’s cross-sectional boundary, measured normal to its local centerline.",
+      "unit": "m^2",
+      "segments": {
+        "physical_base": "area",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "toroidal_field_coil",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:tf/coil/conductor/cross_section/area",
+          "ids": "tf"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "volume_of_pellet_fragment",
+      "description": "Geometric volume occupied by the material of an individual shattered pellet fragment, distinguishing fragment size from the intact pellet and surrounding propellant.",
+      "unit": "m^3",
+      "segments": {
+        "physical_base": "volume",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "pellet_fragment",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spi/injector/fragment/volume",
+          "ids": "spi"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "perpendicular_normalized_perturbed_pressure_bessel_1",
+      "description": "Perpendicular normalized perturbed pressure Bessel-1 is the perpendicular pressure moment of a perturbed gyrocenter distribution in a linear gyrokinetic eigenmode, normalized to a reference thermal pressure and weighted by the first-order Bessel function J1.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "pressure",
+        "geometric_base": "",
+        "subject": "",
+        "component": "perpendicular",
+        "operator": "bessel_1",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_1/pressure_perpendicular",
+          "ids": "gyrokinetics_local"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "height_of_plasma_filament",
+      "description": "Full vertical extent of the rectangular cross-section of a discrete plasma current-carrying filament element, measured along the machine’s vertical axis.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "height",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "plasma_filament",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pf_plasma/element/geometry/rectangle/height",
+          "ids": "pf_plasma"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "viewing_efficiency_of_spectrometer_channel",
+      "description": "Fraction of locally emitted light collected by a spectrometer channel’s optical system from each specified region-of-interest point, including non-pinhole viewing geometries.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "efficiency",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "spectrometer_channel",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_visible/channel/light_collection_efficiencies/values",
+          "ids": "spectrometer_visible"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "vertical_coordinate_of_ion_cyclotron_heating_antenna",
+      "description": "Vertical Z coordinate of the reference point associated with an ion-cyclotron heating antenna in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "vertical",
+        "operator": "",
+        "locus": "ion_cyclotron_heating_antenna",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ic_antennas/antenna/module/pressure/position/z",
+          "ids": "ic_antennas"
+        },
+        {
+          "path": "dd:ic_antennas/reference_point/z",
+          "ids": "ic_antennas"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "line_integrated_electron_number_density",
+      "description": "Free-electron column density accumulated along a complete electromagnetic propagation path, including both forward and return segments when present.",
+      "unit": "m^-2",
+      "segments": {
+        "physical_base": "number_density",
+        "geometric_base": "",
+        "subject": "electron",
+        "component": "",
+        "operator": "line_integrated",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:equilibrium/time_slice/constraints/n_e_line/measured",
+          "ids": "equilibrium"
+        },
+        {
+          "path": "dd:equilibrium/time_slice/constraints/n_e_line/reconstructed",
+          "ids": "equilibrium"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "nuclear_heating_power_of_breeder_blanket_layer",
+      "description": "Total rate of heat generated within one breeder-blanket material layer by neutron and photon interactions, excluding external and surface heat loads.",
+      "unit": "W",
+      "segments": {
+        "physical_base": "heating_power",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "breeder_blanket_layer",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:breeding_blanket/module/layer/time_slice/power_nuclear",
+          "ids": "breeding_blanket"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "electrostatic_potential_amplitude",
+      "description": "Normalized phase-independent magnitude of an electrostatic-potential fluctuation relative to its reference field. It describes amplitude only, not the signed potential perturbation or its phase.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "electrostatic_potential",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "amplitude",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "first_local_tangential_width_of_diagnostic_aperture",
+      "description": "Full clear-opening extent of a rectangular diagnostic aperture along its object-local first tangential axis, used to define the aperture geometry for étendue calculations.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "width",
+        "geometric_base": "",
+        "subject": "",
+        "component": "first_local_tangential",
+        "operator": "",
+        "locus": "diagnostic_aperture",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:bolometer/camera/channel/aperture/x1_width",
+          "ids": "bolometer"
+        },
+        {
+          "path": "dd:neutron_diagnostic/detector/geometry/x1_width",
+          "ids": "neutron_diagnostic"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "first_local_tangential_coordinate_of_soft_xray_detector",
+      "description": "Signed coordinate of a soft X-ray detector outline vertex along the first local tangential (X1) axis of the detector-local two-dimensional Cartesian frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "first_local_tangential_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "soft_xray_detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:soft_x_rays/channel/detector/outline/x1",
+          "ids": "soft_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "alfven_frequency_imaginary_part",
+      "description": "Damping rate when negative or growth rate when positive, the imaginary part of the complex shear Alfvén continuum frequency, for a single toroidal mode number at a given radial position.",
+      "unit": "s^-1",
+      "segments": {
+        "physical_base": "frequency",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "imaginary_part",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary",
+          "ids": "mhd_linear"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "electrostatic_potential_real_part",
+      "description": "Electrostatic potential real part is the real-valued quadrature of a complex electrostatic-potential representation. It identifies the in-phase scalar-potential component, not the full complex potential or its magnitude.",
+      "unit": "V",
+      "segments": {
+        "physical_base": "electrostatic_potential",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "real_part",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "description": "Geometric rate of change of the cumulative volume enclosed by a nested magnetic flux surface as its signed poloidal flux coordinate varies.",
+      "unit": "Wb^-1.m^3",
+      "segments": {
+        "physical_base": "volume",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "derivative_with_respect_to_poloidal_magnetic_flux_coordinate",
+        "locus": "flux_surface",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:equilibrium/time_slice/profiles_1d/dvolume_dpsi",
+          "ids": "equilibrium"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "total_thermal_coolant_absorbed_power_at_wall",
+      "description": "Thermal power extracted by active coolant circuits from cooled plasma-facing wall surfaces, representing energy removal from the wall rather than incident plasma power.",
+      "unit": "W",
+      "segments": {
+        "physical_base": "power",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "wall",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:wall/global_quantities/power_to_cooling",
+          "ids": "wall"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "poloidal_gyrocenter_frequency",
+      "description": "Poloidal component of gyrocenter orbit angular frequency, equal to the signed rate of gyrocenter advance in poloidal angle θ within flux coordinates (ρ, θ, φ).",
+      "unit": "rad.s^-1",
+      "segments": {
+        "physical_base": "frequency",
+        "geometric_base": "",
+        "subject": "gyrocenter",
+        "component": "poloidal",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:distributions/distribution/ggd/orbit_frequency_pol/values",
+          "ids": "distributions"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "parallel_refractive_index",
+      "description": "Parallel refractive index is the signed component of the refractive-index vector projected onto the local equilibrium magnetic-field direction, equal to the parallel wave-vector component normalized by the vacuum wavenumber.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "refractive_index",
+        "geometric_base": "",
+        "subject": "",
+        "component": "parallel",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ece/channel/beam_tracing/beam/wave_vector/n_parallel",
+          "ids": "ece"
+        },
+        {
+          "path": "dd:summary/heating_current_drive/lh/n_parallel/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "incident_energy_flux_at_wall_due_to_eddy_current",
+      "description": "Local energy flux density entering each plasma-facing wall element from the plasma side, attributed specifically to eddy-current processes rather than emitted wall energy.",
+      "unit": "W.m^-2",
+      "segments": {
+        "physical_base": "energy",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "wall",
+        "process": "eddy_current"
+      },
+      "sources": [
+        {
+          "path": "dd:wall/description_ggd/ggd/energy_fluxes/current/incident",
+          "ids": "wall"
+        },
+        {
+          "path": "dd:wall/description_ggd/ggd/energy_fluxes/current/incident/values",
+          "ids": "wall"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "etendue_of_soft_xray_detector",
+      "description": "Geometric optical throughput of a soft X-ray detector channel, set by the collecting area and accepted solid angle of its optical system.",
+      "unit": "m^2.sr",
+      "segments": {
+        "physical_base": "etendue",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "soft_xray_detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:soft_x_rays/channel/etendue",
+          "ids": "soft_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "diameter_of_diagnostic_aperture",
+      "description": "Full transverse diameter of a circular diagnostic aperture, measured across its center between opposite points on the circumferential boundary.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "diameter",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "diagnostic_aperture",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:charge_exchange/channel/cone_diameter",
+          "ids": "charge_exchange"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "source_rate_due_to_injection",
+      "description": "Source rate due to injection is the instantaneous rate of electron-equivalent particles supplied by active injection, formed by nuclear-charge weighting of the injected species. It represents the injection-only material source and excludes particle production or loss after injection.",
+      "unit": "s^-1",
+      "segments": {
+        "physical_base": "source_rate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "injection"
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "initial_polarization_ellipticity_of_polarimeter_beam",
+      "description": "Signed ratio of the minor to major semiaxes of the electric-field polarization ellipse of a polarimeter probing beam in its incident state, before plasma entry. It gives only the ellipticity component of the initial polarization vector, not the ellipse orientation.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "ellipticity",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "polarimeter_beam",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:polarimeter/channel/ellipticity_initial",
+          "ids": "polarimeter"
+        },
+        {
+          "path": "dd:polarimeter/channel/polarization_initial",
+          "ids": "polarimeter"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "volume_averaged_total_ion_temperature",
+      "description": "Density-weighted effective temperature of the combined thermal ion population, with all included species and charge states contributing by number density and averaged over the confined plasma volume.",
+      "unit": "eV",
+      "segments": {
+        "physical_base": "temperature",
+        "geometric_base": "",
+        "subject": "ion",
+        "component": "",
+        "operator": "volume_averaged",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:summary/volume_average/t_i_average/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "fast_ion_charge_state_power_density",
+      "description": "Absorbed wave power density deposited on fast (non-thermal) ions in a specified charge state, expressed per unit plasma volume.",
+      "unit": "W.m^-3",
+      "segments": {
+        "physical_base": "power_density",
+        "geometric_base": "",
+        "subject": "ion_charge_state",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:waves/coherent_wave/profiles_1d/ion/state/power_density_fast",
+          "ids": "waves"
+        },
+        {
+          "path": "dd:waves/coherent_wave/profiles_2d/ion/state/power_density_fast",
+          "ids": "waves"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "temperature_of_coil_conductor",
+      "description": "Thermodynamic temperature of the conductor in an active poloidal-field or central-solenoid coil, used to establish its allowable current limit.",
+      "unit": "K",
+      "segments": {
+        "physical_base": "temperature",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "coil_conductor",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pf_active/coil/temperature",
+          "ids": "pf_active"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "nuclear_heating_power_of_limiter_tile",
+      "description": "Nuclear heating power of a limiter tile is the rate at which nuclear energy is deposited within one limiter tile by neutron interactions and associated primary and secondary gamma-ray absorption.",
+      "unit": "W",
+      "segments": {
+        "physical_base": "heating_power",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "limiter_tile",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:wall/description_2d/limiter/unit/power_nuclear",
+          "ids": "wall"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "poloidal_ion_velocity_at_charge_exchange_channel",
+      "description": "Poloidal ion velocity at measurement position is the signed poloidal component of the ion flow velocity evaluated at the physical location of a measurement channel.",
+      "unit": "m.s^-1",
+      "segments": {
+        "physical_base": "velocity",
+        "geometric_base": "",
+        "subject": "ion",
+        "component": "poloidal",
+        "operator": "",
+        "locus": "charge_exchange_channel",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:charge_exchange/channel/ion/velocity_pol",
+          "ids": "charge_exchange"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "current_due_to_fusion_reactions",
+      "description": "Net parallel plasma current generated by fusion reactions, associated with fast alpha particles produced by deuterium–tritium reactions and distinct from other non-inductive current-drive mechanisms.",
+      "unit": "A",
+      "segments": {
+        "physical_base": "current",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "fusion_reactions"
+      },
+      "sources": [
+        {
+          "path": "dd:summary/fusion/current/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "safety_factor_at_internal_transport_barrier",
+      "description": "Signed field-line winding ratio evaluated on the magnetic flux surface designated as the internal transport barrier, giving toroidal turns per poloidal circuit.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "safety_factor",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "internal_transport_barrier",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:summary/local/itb/q/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "total_neutron_rate",
+      "description": "Total neutron emission rate produced by deuterium–tritium, deuterium–deuterium, and tritium–tritium fusion reactions in the plasma.",
+      "unit": "Hz",
+      "segments": {
+        "physical_base": "rate",
+        "geometric_base": "",
+        "subject": "neutron",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:summary/fusion/neutron_rates/total/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "maximum_of_back_surface_neutron_flux",
+      "description": "Maximum neutron energy flux escaping through the rear surface of a breeding blanket module toward vessel structures.",
+      "unit": "W.m^-2",
+      "segments": {
+        "physical_base": "flux",
+        "geometric_base": "",
+        "subject": "neutron",
+        "component": "",
+        "operator": "maximum",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:breeding_blanket/module/time_slice/escape_flux_max",
+          "ids": "breeding_blanket"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "radial_coordinate_of_active_wall_point",
+      "description": "Major-radius coordinate of the active wall point where the plasma boundary contacts the wall, expressed in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "radial_coordinate",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "active_wall_point",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:disruption/halo_currents/active_wall_point/r",
+          "ids": "disruption"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "intensity_at_spectral_line",
+      "description": "Uncalibrated photoelectron detection rate obtained by integrating the measured emission signal across an identified spectral line.",
+      "unit": "s^-1",
+      "segments": {
+        "physical_base": "intensity",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "spectral_line",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_visible/channel/grating_spectrometer/processed_line/intensity",
+          "ids": "spectrometer_visible"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "square_of_toroidal_flux_coordinate_gradient_magnitude",
+      "description": "Squared spatial gradient of a toroidal magnetic-flux coordinate, providing a geometric coefficient for equilibrium descriptions in physical space.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "toroidal_flux_coordinate_gradient",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "square",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope",
+      "description": "Odds ratio of the neutral density of a selected hydrogen isotope to the summed neutral density of all other hydrogen isotopes, distinguishing composition odds from total isotope fraction.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "density",
+        "geometric_base": "",
+        "subject": "neutral",
+        "component": "",
+        "operator": "ratio",
+        "locus": "isotope",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_visible/channel/isotope_ratios/isotope/density_ratio",
+          "ids": "spectrometer_visible"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "radial_outline_of_coil_conductor_element",
+      "description": "Non-negative major-radius coordinate of a point on the cross-sectional outline of an active poloidal-field coil conductor element in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "outline",
+        "subject": "",
+        "component": "radial",
+        "operator": "",
+        "locus": "coil_conductor_element",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pf_active/coil/element/geometry/outline/r",
+          "ids": "pf_active"
+        },
+        {
+          "path": "dd:pf_passive/loop/element/geometry/arcs_of_circle/r",
+          "ids": "pf_passive"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "toroidal_angle_of_active_limiter_point",
+      "description": "Toroidal angle φ of the active limiter point, the contact location where a limited plasma boundary touches the limiter surface, in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "toroidal_angle",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "active_limiter_point",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:edge_transport/model/ggd/ion/momentum/flux_limiter/phi",
+          "ids": "edge_transport"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "ratio_of_ion_density_to_electron_density",
+      "description": "Local ion concentration relative to the electron population, defined as the number-density ratio for a specified impurity or fuel ion species.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "density",
+        "geometric_base": "",
+        "subject": "ion",
+        "component": "",
+        "operator": "ratio",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:charge_exchange/channel/ion/n_i_over_n_e",
+          "ids": "charge_exchange"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "y_coordinate_of_ferritic_element_centroid",
+      "description": "Signed y coordinate of the geometric centroid of a ferritic element in the right-handed Cartesian (x, y, z) frame, with z aligned to vertical Z.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "y",
+        "operator": "",
+        "locus": "ferritic_element_centroid",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ferritic/object/centroid/y",
+          "ids": "ferritic"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "radius_of_neutral_beam_injector",
+      "description": "Radius of the circular ion-source surface from which neutral beams are extracted, defining the radial extent of its extraction aperture.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radius",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "neutral_beam_injector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:nbi/unit/source/radius",
+          "ids": "nbi"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "torque_due_to_collisions",
+      "description": "Net torque transferred to a plasma particle population through collisional interactions with other particles, expressed as the corresponding rate of angular-momentum change.",
+      "unit": "N.m",
+      "segments": {
+        "physical_base": "torque",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "collisions"
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "vertical_velocity_at_current_center",
+      "description": "Vertical velocity of the plasma-current centroid, defined by the rate of change of its vertical position.",
+      "unit": "m.s^-1",
+      "segments": {
+        "physical_base": "velocity",
+        "geometric_base": "",
+        "subject": "",
+        "component": "vertical",
+        "operator": "",
+        "locus": "current_center",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:equilibrium/time_slice/global_quantities/current_centre/velocity_z",
+          "ids": "equilibrium"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "toroidal_rotation_frequency_due_to_e_cross_b_drift",
+      "description": "Toroidal angular frequency due to the E-cross-B drift is the species-independent electric-field cross magnetic-field contribution to toroidal motion, equal to its toroidal velocity component divided by local major radius in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "s^-1",
+      "segments": {
+        "physical_base": "rotation_frequency",
+        "geometric_base": "",
+        "subject": "",
+        "component": "toroidal",
+        "operator": "",
+        "locus": "",
+        "process": "e_cross_b_drift"
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/rotation_frequency_tor_sonic",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:edge_profiles/profiles_1d/rotation_frequency_tor_sonic",
+          "ids": "edge_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude",
+      "description": "Signed ratio of the charge-state-averaged toroidal ion bulk velocity to the local magnetic-field magnitude, retaining the toroidal flow contribution.",
+      "unit": "m.s^-1",
+      "segments": {
+        "physical_base": "velocity",
+        "geometric_base": "",
+        "subject": "ion",
+        "component": "toroidal",
+        "operator": "ratio",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:edge_profiles/ggd/ion/velocity_over_b_field/phi",
+          "ids": "edge_profiles"
+        },
+        {
+          "path": "dd:plasma_profiles/ggd/ion/velocity_over_b_field/r",
+          "ids": "plasma_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "shattered_pellet_species_number_density_of_pellet_fragment",
+      "description": "Number density of a specified atomic species within the solid material of an individual shattered-pellet fragment.",
+      "unit": "m^-3",
+      "segments": {
+        "physical_base": "number_density",
+        "geometric_base": "",
+        "subject": "shattered_pellet_species",
+        "component": "",
+        "operator": "",
+        "locus": "pellet_fragment",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spi/injector/fragment/species/density",
+          "ids": "spi"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "temperature_of_soft_xray_detector",
+      "description": "Thermodynamic temperature of the soft X-ray detector assembly, describing its physical thermal state for calibration and monitoring rather than a plasma temperature inferred from radiation.",
+      "unit": "K",
+      "segments": {
+        "physical_base": "temperature",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "soft_xray_detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:camera_x_rays/detector_temperature",
+          "ids": "camera_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "resistance_of_toroidal_field_coil",
+      "description": "Ohmic resistance of a toroidal-field-coil winding, relating its current to the resistive voltage drop and Joule power dissipation.",
+      "unit": "ohm",
+      "segments": {
+        "physical_base": "resistance",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "toroidal_field_coil",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:tf/coil/conductor/resistance",
+          "ids": "tf"
+        },
+        {
+          "path": "dd:tf/coil/resistance",
+          "ids": "tf"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "toroidal_launched_wave_index_of_lower_hybrid_antenna",
+      "description": "Signed toroidal component of the refractive-index vector for a lower-hybrid wave launched by a lower-hybrid antenna.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "index",
+        "geometric_base": "",
+        "subject": "",
+        "component": "toroidal",
+        "operator": "",
+        "locus": "lower_hybrid_antenna",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:lh_antennas/antenna/row/n_phi",
+          "ids": "lh_antennas"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "vertical_displacement_of_beamlet_group",
+      "description": "Signed vertical displacement of a neutral-beam-injection beamlet-group center from its static geometry during dynamic beam tilting.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "displacement",
+        "subject": "",
+        "component": "vertical",
+        "operator": "",
+        "locus": "beamlet_group",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:nbi/unit/beamlets_group/tilting/delta_position/z",
+          "ids": "nbi"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "radial_outline_of_ferritic_element",
+      "description": "Non-negative major-radius coordinate of a point on a ferritic element outline in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "outline",
+        "geometric_base": "",
+        "subject": "",
+        "component": "radial",
+        "operator": "",
+        "locus": "ferritic_element",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ferritic/object/axisymmetric/outline/r",
+          "ids": "ferritic"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "derivative_of_logarithm_of_density_with_respect_to_normalized_minor_radius",
+      "description": "Signed logarithmic derivative of a selected particle-species density with respect to normalized minor radius, expressing the relative change of that density as the normalized minor-radius coordinate increases. For charge-state-aggregated ion species, the density is summed over all charge states.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "density",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "derivative_with_respect_to_normalized_minor_radius",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:gyrokinetics_local/species/density_log_gradient_norm",
+          "ids": "gyrokinetics_local"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "radial_length_of_divertor_target",
+      "description": "Non-negative span of a divertor target’s plasma-facing surface along the major-radius direction, measured between its minimum and maximum R coordinates.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "length",
+        "geometric_base": "",
+        "subject": "",
+        "component": "radial",
+        "operator": "",
+        "locus": "divertor_target",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:divertors/divertor/target/extension_r",
+          "ids": "divertors"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "core_atomic_count_of_pellet",
+      "description": "Core atomic count of a pellet is the total inventory of individual atoms contained in its core material, independent of bonding, phase, or species.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "count",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "pellet",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spi/injector/pellet/core/atoms_n",
+          "ids": "spi"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "surface_area_of_neutron_detector",
+      "description": "Geometric area of the neutron-sensitive detector surface, excluding passive housing, shielding, supports, electronics, projection effects, and solid-angle weighting.",
+      "unit": "m^2",
+      "segments": {
+        "physical_base": "area",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "neutron_detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:neutron_diagnostic/detector/geometry/surface",
+          "ids": "neutron_diagnostic"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "current_due_to_lower_hybrid_current_drive",
+      "description": "Net toroidal plasma current driven non-inductively by lower-hybrid slow waves through wave–particle interactions, contributing to the total non-inductive current.",
+      "unit": "A",
+      "segments": {
+        "physical_base": "current",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "lower_hybrid_current_drive"
+      },
+      "sources": [
+        {
+          "path": "dd:summary/heating_current_drive/lh/current/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "nuclear_power_density_of_limiter_tile",
+      "description": "Local volumetric rate of nuclear energy deposition in limiter-tile material from neutron interactions and associated absorption of primary and secondary gamma radiation.",
+      "unit": "W.m^-3",
+      "segments": {
+        "physical_base": "power_density",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "limiter_tile",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:wall/description_2d/limiter/unit/midplane_power_density_nuclear",
+          "ids": "wall"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection",
+      "description": "Instantaneous total rate at which neutral gas is introduced into the lower vacuum-vessel region by gas injection valves, summed over lower-region valves and expressed using the equivalent-electron convention across injected species.",
+      "unit": "s^-1",
+      "segments": {
+        "physical_base": "source_rate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "vacuum_vessel",
+        "process": "gas_injection"
+      },
+      "sources": [
+        {
+          "path": "dd:summary/gas_injection_rates/bottom/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+      "description": "Time-averaged normalized perturbed parallel magnetic-field magnitude is the time-averaged amplitude of a magnetic-field perturbation projected along the local equilibrium magnetic field and normalized by a reference magnetic-field magnitude. It does not include flux-surface averaging unless a more specific name states that aggregation.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "magnetic_field",
+        "geometric_base": "",
+        "subject": "",
+        "component": "parallel",
+        "operator": "time_averaged",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "ratio_of_volume_averaged_carbon_density_to_volume_averaged_electron_density",
+      "description": "Dimensionless plasma-wide carbon abundance defined as the ratio of volume-averaged carbon number density to volume-averaged electron number density. The carbon density is summed over all carbon charge states.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "density",
+        "geometric_base": "",
+        "subject": "carbon",
+        "component": "",
+        "operator": "ratio",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:summary/composition/carbon/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "mhd_mode_reference_phase",
+      "description": "Signed angular offset that fixes the complex phase of a mode relative to its zero-phase reference.",
+      "unit": "rad",
+      "segments": {
+        "physical_base": "phase",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "radius_of_neutron_detector",
+      "description": "Radius of the circular collimating aperture forming a neutron detector’s sensitive opening, measured from its center to the circumferential boundary.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radius",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "neutron_detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:mse/channel/detector/radius",
+          "ids": "mse"
+        },
+        {
+          "path": "dd:neutron_diagnostic/detector/aperture/radius",
+          "ids": "neutron_diagnostic"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "reference_frequency_of_wave_beam",
+      "description": "Reference temporal carrier frequency of a probing electromagnetic wave beam, specified before frequency conversion or modulation and used as the phase-measurement baseline.",
+      "unit": "Hz",
+      "segments": {
+        "physical_base": "frequency",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "wave_beam",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:refractometer/channel/bandwidth/frequency_main",
+          "ids": "refractometer"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "second_local_tangential_coordinate_of_soft_xray_detector",
+      "description": "Signed coordinate of a soft X-ray detector outline vertex along the second local tangential (X2) axis of the detector-local right-handed Cartesian frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "second_local_tangential_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "soft_xray_detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:soft_x_rays/channel/detector/outline/x2",
+          "ids": "soft_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "plasma_temperature_imaginary_part",
+      "description": "Imaginary part of plasma temperature is the quadrature component of a complex-valued plasma-temperature quantity. It is the coefficient of the imaginary basis element and is distinct from both the real part and the full complex temperature.",
+      "unit": "eV",
+      "segments": {
+        "physical_base": "temperature",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "imaginary_part",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "turn_count_of_toroidal_magnetic_field_probe",
+      "description": "Signed number of complete winding turns in a toroidal magnetic-field probe coil, with orientation referenced to the positive toroidal direction.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "turn_count",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "toroidal_magnetic_field_probe",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:magnetics/b_field_phi_probe/turns",
+          "ids": "magnetics"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "vertical_coordinate_of_polarizer",
+      "description": "Vertical coordinate of a polarizer is the signed Z position of the polarizer geometric center in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "coordinate",
+        "subject": "",
+        "component": "vertical",
+        "operator": "",
+        "locus": "polarizer",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_visible/channel/polarizer/centre/z",
+          "ids": "spectrometer_visible"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "saturated_ion_current",
+      "description": "Ion charge flux collected by a Langmuir probe at the ion-saturation limit, expressed as the non-negative magnitude of the area-integrated ion current when electron collection is suppressed.",
+      "unit": "A",
+      "segments": {
+        "physical_base": "current",
+        "geometric_base": "",
+        "subject": "ion",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:langmuir_probes/embedded/ion_saturation_current",
+          "ids": "langmuir_probes"
+        },
+        {
+          "path": "dd:langmuir_probes/reciprocating/plunge/collector/ion_saturation_current",
+          "ids": "langmuir_probes"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "voltage_of_shunt",
+      "description": "Signed terminal-potential difference across a resistive shunt, providing the voltage used with its resistance to determine current in an associated structure segment.",
+      "unit": "V",
+      "segments": {
+        "physical_base": "voltage",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "shunt",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:magnetics/shunt/voltage",
+          "ids": "magnetics"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+      "description": "Dimensionless toroidal plasma-momentum flux contribution driven by the perturbed parallel electromagnetic vector potential in gyrokinetic turbulence, generalized across parallel and perpendicular velocity-space channels.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "momentum",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "perturbed_parallel_vector_potential"
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "normalized_toroidal_flux_coordinate_of_neoclassical_tearing_mode_center",
+      "description": "Dimensionless magnetic-surface label locating the resonant flux surface at the center of a neoclassical tearing-mode magnetic island.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "normalized_toroidal_flux_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "neoclassical_tearing_mode_center",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ntms/time_slice/mode/rho_tor_norm",
+          "ids": "ntms"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "resistance_of_ion_cyclotron_heating_antenna",
+      "description": "Resistance of an ion-cyclotron heating antenna is the real part of the effective radio-frequency loading impedance at the antenna feed reference plane. It represents the resistive component associated with power coupled to the plasma and dissipative antenna losses.",
+      "unit": "ohm",
+      "segments": {
+        "physical_base": "resistance",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "ion_cyclotron_heating_antenna",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ic_antennas/antenna/module/coupling_resistance",
+          "ids": "ic_antennas"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "description": "Flux-surface average of the signed electric-field projection along the magnetic field, taken over the separatrix rather than at a single point.",
+      "unit": "V.m^-1",
+      "segments": {
+        "physical_base": "electric_field",
+        "geometric_base": "",
+        "subject": "",
+        "component": "parallel",
+        "operator": "flux_surface_averaged",
+        "locus": "separatrix",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "second_local_tangential_coordinate_of_filter",
+      "description": "Second local tangential coordinate of a filter boundary point is the signed position of that point along the filter's second in-plane basis direction in the object-local planar frame attached to the filter.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "second_local_tangential_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "filter",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:soft_x_rays/channel/filter_window/outline/x2",
+          "ids": "soft_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "toroidal_angle_of_grating",
+      "description": "Toroidal azimuthal coordinate of the center of the surface on which a grating image is focused, locating that image-field center around the machine symmetry axis.",
+      "unit": "rad",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "toroidal_angle",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "grating",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_uv/channel/grating/image_field/centre/phi",
+          "ids": "spectrometer_uv"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "particle_source_rate_due_to_distribution_function_driven",
+      "description": "Net volumetric particle production or loss generated by kinetic distribution-function sources and entering a particle continuity or density-transport equation.",
+      "unit": "m^-3.s^-1",
+      "segments": {
+        "physical_base": "source_rate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "distribution_function_driven"
+      },
+      "sources": [
+        {
+          "path": "dd:distribution_sources/source/ggd/particles/values",
+          "ids": "distribution_sources"
+        },
+        {
+          "path": "dd:distribution_sources/source/profiles_1d/particles",
+          "ids": "distribution_sources"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "vertical_outline_of_fiber_optic_current_sensor",
+      "description": "Signed vertical Z coordinate of a contour point defining the geometric boundary of a fiber-optic current sensor in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "outline",
+        "subject": "",
+        "component": "vertical",
+        "operator": "",
+        "locus": "fiber_optic_current_sensor",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:focs/outline/z",
+          "ids": "focs"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "spectral_efficiency_of_hard_xray_detector",
+      "description": "Energy-dependent probability that a photon impacting a hard X-ray detector is registered by its detection system.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "efficiency",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "hard_xray_detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:hard_x_rays/channel/energy_band/detection_efficiency",
+          "ids": "hard_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "hot_neutral_velocity",
+      "description": "Hot neutral velocity is the line-of-sight component of the bulk flow of an energetic neutral atom population, identified from the Doppler centroid shift of its broad emission component.",
+      "unit": "m.s^-1",
+      "segments": {
+        "physical_base": "velocity",
+        "geometric_base": "",
+        "subject": "neutral",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals",
+          "ids": "spectrometer_visible"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "total_plasma_mass_density",
+      "description": "Local total plasma mass per unit volume, obtained by summing the masses of all charged species and charge states while excluding neutral atoms and molecules.",
+      "unit": "kg.m^-3",
+      "segments": {
+        "physical_base": "mass_density",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:edge_profiles/ggd/mass_density/values",
+          "ids": "edge_profiles"
+        },
+        {
+          "path": "dd:equilibrium/time_slice/profiles_1d/mass_density",
+          "ids": "equilibrium"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "y_coordinate_of_divertor_target",
+      "description": "Signed Cartesian y-coordinate locating the geometric center of the divertor target surface in the right-handed Cartesian (x, y, z) frame; positive values lie along the +y axis.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "coordinate",
+        "subject": "",
+        "component": "y",
+        "operator": "",
+        "locus": "divertor_target",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:camera_ir/channel/target_surface_center/y",
+          "ids": "camera_ir"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "flux_at_limiter",
+      "description": "Flux at a limiter is the local surface rate density at which an energy-dimensioned plasma-borne quantity is deposited on the plasma-facing surface of a limiter. It fixes the limiter locus and the local surface-flux character; more specific quantities state the energy channel being carried, as in energy flux at limiter.",
+      "unit": "W.m^-2",
+      "segments": {
+        "physical_base": "flux",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "limiter",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "toroidal_coordinate_of_filter_window",
+      "description": "Toroidal angular coordinate of a filter window’s geometric center, locating the window around the symmetry axis in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "rad",
+      "segments": {
+        "physical_base": "coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "toroidal",
+        "operator": "",
+        "locus": "filter_window",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:camera_x_rays/filter_window/centre/phi",
+          "ids": "camera_x_rays"
+        },
+        {
+          "path": "dd:hard_x_rays/channel/filter_window/centre/phi",
+          "ids": "hard_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "vertical_coordinate_of_antenna_strap",
+      "description": "Vertical coordinate of the annular geometric center of an ion-cyclotron antenna strap in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "coordinate",
+        "subject": "",
+        "component": "vertical",
+        "operator": "",
+        "locus": "antenna_strap",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ic_antennas/antenna/module/strap/geometry/annulus/z",
+          "ids": "ic_antennas"
+        },
+        {
+          "path": "dd:ic_antennas/antenna/module/strap/geometry/thick_line/first_point/z",
+          "ids": "ic_antennas"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "effective_charge",
+      "description": "Dimensionless effective ionic charge of a plasma mixture, given by the second ionic charge moment divided by free-electron density and indicating impurity content.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "charge",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/global_quantities/z_eff_resistive",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_profiles/profiles_1d/zeff",
+          "ids": "core_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "momentum_flux_normalized_due_to_e_cross_b_drift",
+      "description": "Normalized momentum flux due to E×B drift is the dimensionless transport of resolved linear plasma momentum across an oriented surface by the electric-field drift. Concrete specializations supply the momentum component, crossing direction, velocity-space contribution, and normalization reference.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "momentum",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "e_cross_b_drift"
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "total_electron_count",
+      "description": "Total inventory of free electrons within the plasma, including thermal and fast populations and excluding electrons bound in atoms or molecules.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "count",
+        "geometric_base": "",
+        "subject": "electron",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:interferometer/electrons_n",
+          "ids": "interferometer"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "radial_coordinate_of_coil_conductor_element",
+      "description": "Major-radius coordinate of the geometric center associated with a coil-conductor element, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radial_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "coil_conductor_element",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:coils_non_axisymmetric/coil/conductor/elements/centres/r",
+          "ids": "coils_non_axisymmetric"
+        },
+        {
+          "path": "dd:coils_non_axisymmetric/coil/conductor/elements/intermediate_points/r",
+          "ids": "coils_non_axisymmetric"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "upper_wavelength_of_filter",
+      "description": "Upper wavelength of a filter is the vacuum-wavelength coordinate marking the long-wavelength, low-frequency edge of its transmitted spectral band.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "wavelength",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "filter",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:bremsstrahlung_visible/channel/filter/wavelength_upper",
+          "ids": "bremsstrahlung_visible"
+        },
+        {
+          "path": "dd:camera_x_rays/filter_window/wavelength_upper",
+          "ids": "camera_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "toroidal_thermal_ion_torque_density_due_to_thermalization",
+      "description": "Signed toroidal component of the local collisional angular-momentum transfer rate per unit volume deposited in thermal ions by fast-particle thermalization.",
+      "unit": "N.m^-2",
+      "segments": {
+        "physical_base": "torque_density",
+        "geometric_base": "",
+        "subject": "ion",
+        "component": "toroidal",
+        "operator": "",
+        "locus": "",
+        "process": "thermalization"
+      },
+      "sources": [
+        {
+          "path": "dd:distributions/distribution/profiles_2d/collisions/ion/torque_thermal_phi",
+          "ids": "distributions"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "radius_of_filter_window",
+      "description": "Geometric distance from the center of a circular filter-window aperture to its circumferential boundary, defining the window’s radial size.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radius",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "filter_window",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:camera_x_rays/filter_window/radius",
+          "ids": "camera_x_rays"
+        },
+        {
+          "path": "dd:hard_x_rays/channel/filter_window/radius",
+          "ids": "hard_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "alpha_angle_of_passive_loop_element",
+      "description": "Signed inclination of the first axis of an oblique passive conductor loop-element cross-section, measured counterclockwise from the outward radial direction in the poloidal plane.",
+      "unit": "rad",
+      "segments": {
+        "physical_base": "angle",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "passive_loop_element",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pf_passive/loop/element/geometry/oblique/alpha",
+          "ids": "pf_passive"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "incident_neutral_particle_flux_at_wall_due_to_recombination",
+      "description": "Incident number flux density of neutral recombination products arriving at a plasma-facing wall, summed over neutral species and internal states.",
+      "unit": "m^-2.s^-1",
+      "segments": {
+        "physical_base": "flux",
+        "geometric_base": "",
+        "subject": "neutral",
+        "component": "",
+        "operator": "",
+        "locus": "wall",
+        "process": "recombination"
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "ion_charge_state_lower_bound_charge",
+      "description": "Lower charge-number bound of an ion charge-state bundle is the smallest integer ionization charge number included in the bundle. For a single charge state, the lower and upper charge-number bounds are equal.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "charge",
+        "geometric_base": "",
+        "subject": "ion_charge_state",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:core_profiles/profiles_1d/ion/state/z_min",
+          "ids": "core_profiles"
+        },
+        {
+          "path": "dd:core_profiles/profiles_2d/ion/state/z_min",
+          "ids": "core_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "radial_current_density_due_to_ion_neutral_friction",
+      "description": "Radial component of the electric current density produced by frictional momentum exchange between plasma ions and background neutral particles in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "A.m^-2",
+      "segments": {
+        "physical_base": "current_density",
+        "geometric_base": "",
+        "subject": "",
+        "component": "radial",
+        "operator": "",
+        "locus": "",
+        "process": "ion_neutral_friction"
+      },
+      "sources": [
+        {
+          "path": "dd:edge_profiles/ggd/j_ion_neutral_friction/r",
+          "ids": "edge_profiles"
+        },
+        {
+          "path": "dd:edge_profiles/ggd/j_ion_neutral_friction/radial",
+          "ids": "edge_profiles"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "beryllium_source_rate_due_to_gas_injection",
+      "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
+      "unit": "s^-1",
+      "segments": {
+        "physical_base": "source_rate",
+        "geometric_base": "",
+        "subject": "beryllium",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "gas_injection"
+      },
+      "sources": [
+        {
+          "path": "dd:summary/gas_injection_rates/beryllium/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "vertical_front_surface_radius_of_optical_element",
+      "description": "Radius of curvature of an optical element's beam-entry front surface along the local second tangential direction (X2, the optical-element vertical direction) in the right-handed local optical-element frame (X1, X2, z).",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radius",
+        "geometric_base": "",
+        "subject": "",
+        "component": "vertical",
+        "operator": "",
+        "locus": "optical_element",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_x_ray_crystal/channel/reflector/x2_curvature",
+          "ids": "spectrometer_x_ray_crystal"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "electron_density_at_pellet_path",
+      "description": "Local free-electron number density of the background plasma at points along a pellet's ablation trajectory.",
+      "unit": "m^-3",
+      "segments": {
+        "physical_base": "density",
+        "geometric_base": "",
+        "subject": "electron",
+        "component": "",
+        "operator": "",
+        "locus": "pellet_path",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pellets/time_slice/pellet/path_profiles/n_e",
+          "ids": "pellets"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "normalized_toroidal_flux_coordinate_at_beam_tracing_point",
+      "description": "Dimensionless magnetic-surface label assigned to each point along a traced electromagnetic-wave beam, locating that propagation point within nested toroidal-flux geometry.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "normalized_toroidal_flux_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "beam_tracing_point",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:ece/channel/beam_tracing/beam/position/rho_tor_norm",
+          "ids": "ece"
+        },
+        {
+          "path": "dd:waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm",
+          "ids": "waves"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "normalized_perturbed_parallel_magnetic_field_magnitude",
+      "description": "Normalized perturbed parallel magnetic-field magnitude is the nonnegative amplitude of a magnetic-field perturbation projected along the local equilibrium magnetic-field direction and divided by a reference magnetic-field magnitude. More specific names may add averaging conventions.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "magnetic_field",
+        "geometric_base": "",
+        "subject": "",
+        "component": "parallel",
+        "operator": "normalized",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "perpendicular_wave_vector_of_ion_cyclotron_heating_antenna",
+      "description": "Non-negative magnitude of the RF wave-vector component perpendicular to the local equilibrium magnetic field launched by an ion-cyclotron heating antenna.",
+      "unit": "m^-1",
+      "segments": {
+        "physical_base": "wave_vector",
+        "geometric_base": "",
+        "subject": "",
+        "component": "perpendicular",
+        "operator": "",
+        "locus": "ion_cyclotron_heating_antenna",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:summary/heating_current_drive/ic/k_perpendicular/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "radius_of_detector",
+      "description": "Radius from the center to the circumferential edge of a detector's circular front face, defining its geometric size for optical throughput.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radius",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "detector",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_uv/channel/detector/radius",
+          "ids": "spectrometer_uv"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "radius_of_coil_conductor_element",
+      "description": "Curvature radius of each circular arc used to define the cross-sectional contour of an active poloidal-field coil conductor element.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radius",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "coil_conductor_element",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pf_active/coil/element/geometry/arcs_of_circle/curvature_radii",
+          "ids": "pf_active"
+        },
+        {
+          "path": "dd:pf_active/coil/geometry/arcs_of_circle/curvature_radii",
+          "ids": "pf_active"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "flux_surface_averaged_current_density_due_to_wave_driven_current_drive",
+      "description": "Vector average on a magnetic flux surface of conventional plasma current density generated non-inductively by electromagnetic-wave–particle interactions, excluding inductive and non-wave current drive.",
+      "unit": "A.m^-2",
+      "segments": {
+        "physical_base": "current_density",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "flux_surface_averaged",
+        "locus": "",
+        "process": "wave_driven_current_drive"
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "current_density_due_to_fast_ion",
+      "description": "Vector density of electric current carried by a specified charged-particle contribution, obtained from its signed charge-weighted particle flux.",
+      "unit": "A.m^-2",
+      "segments": {
+        "physical_base": "current_density",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": "fast_ion"
+      },
+      "sources": [],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "electron_particle_flux_at_wall_due_to_pumping",
+      "description": "Rate at which particles represented as equivalent electrons are removed from the plasma region by wall pumping, giving global electron-equivalent exhaust throughput.",
+      "unit": "s^-1",
+      "segments": {
+        "physical_base": "flux",
+        "geometric_base": "",
+        "subject": "electron",
+        "component": "",
+        "operator": "",
+        "locus": "wall",
+        "process": "pumping"
+      },
+      "sources": [
+        {
+          "path": "dd:wall/global_quantities/electrons/pumping_speed",
+          "ids": "wall"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "current_of_rogowski_coil",
+      "description": "Signed conventional current threading a Rogowski-coil winding contour, with orientation set by the coil's assigned normal.",
+      "unit": "A",
+      "segments": {
+        "physical_base": "current",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "rogowski_coil",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:magnetics/rogowski_coil/current",
+          "ids": "magnetics"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "major_length_of_plasma_filament",
+      "description": "Length of the major oblique side of a plasma-filament cross-section, inclined relative to the major-radius axis and distinct from the height-oriented side.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "length",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "plasma_filament",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pf_plasma/element/geometry/oblique/length_alpha",
+          "ids": "pf_plasma"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "normalized_poloidal_flux_coordinate_of_pedestal",
+      "description": "Dimensionless poloidal-flux label locating the H-mode edge transport-barrier pedestal between the magnetic axis and the last closed flux surface.",
+      "unit": "1",
+      "segments": {
+        "physical_base": "normalized_poloidal_flux_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "pedestal",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:summary/pedestal_fits/linear/n_e/pedestal_position/value",
+          "ids": "summary"
+        },
+        {
+          "path": "dd:summary/pedestal_fits/linear/pressure_electron/pedestal_position/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "resistance_of_poloidal_field_coil",
+      "description": "Ohmic resistance of an individual poloidal-field coil winding, relating its resistive voltage drop to current and determining Joule dissipation.",
+      "unit": "ohm",
+      "segments": {
+        "physical_base": "resistance",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "poloidal_field_coil",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pf_active/coil/resistance",
+          "ids": "pf_active"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "breakdown_magnetic_field",
+      "description": "Breakdown magnetic-field strength associated with local magnetic induction during plasma initiation, without selecting a particular source contribution or field-strength representation.",
+      "unit": "T",
+      "segments": {
+        "physical_base": "magnetic_field",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:plasma_initiation/global_quantities/b_field_stray",
+          "ids": "plasma_initiation"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "spectral_calibration_factor_at_line_of_sight",
+      "description": "Wavelength-specific interferometric conversion coefficient that converts a signed phase change along a line of sight into electron column density.",
+      "unit": "m^-2.rad^-1",
+      "segments": {
+        "physical_base": "factor",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "line_of_sight",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:interferometer/channel/wavelength/phase_to_n_e_line",
+          "ids": "interferometer"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "thickness_of_bragg_crystal",
+      "description": "Physical thickness of a Bragg crystal is the normal material thickness measured between its opposing surfaces along the local surface normal. It excludes the X-ray ray-path length through the crystal, which depends on incidence geometry.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "thickness",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "bragg_crystal",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:spectrometer_x_ray_crystal/channel/crystal/thickness",
+          "ids": "spectrometer_x_ray_crystal"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "first_local_tangential_coordinate_of_optical_element",
+      "description": "Signed position of an optical-element outline vertex along the first local tangential axis in the orthogonal element-local tangential basis.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "first_local_tangential_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "optical_element",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:camera_ir/optical_element/geometry/outline/x1",
+          "ids": "camera_ir"
+        },
+        {
+          "path": "dd:spectrometer_uv/channel/detector/outline/x1",
+          "ids": "spectrometer_uv"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "power_of_divertor_due_to_ohmic_dissipation",
+      "description": "Power deposited on all divertor targets by irreversible electrical-current dissipation, summed over the complete divertor assembly.",
+      "unit": "W",
+      "segments": {
+        "physical_base": "power",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "divertor",
+        "process": "ohmic_dissipation"
+      },
+      "sources": [
+        {
+          "path": "dd:divertors/divertor/power_currents",
+          "ids": "divertors"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "y_coordinate_of_sensor_attachment_point",
+      "description": "Signed Cartesian y coordinate of the point where a sensor is mechanically attached to a device component, in the right-handed Cartesian (x, y, z) machine frame with z vertical.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "",
+        "geometric_base": "coordinate",
+        "subject": "",
+        "component": "y",
+        "operator": "",
+        "locus": "sensor_attachment_point",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:operational_instrumentation/sensor/attachement_points/y",
+          "ids": "operational_instrumentation"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "second_local_tangential_width_of_filter_window",
+      "description": "Full aperture extent of one rectangular filter window along its object-local second tangential axis, distinct from the window’s orthogonal width and curvature radius.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "width",
+        "geometric_base": "",
+        "subject": "",
+        "component": "second_local_tangential",
+        "operator": "",
+        "locus": "filter_window",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:soft_x_rays/channel/filter_window/x2_width",
+          "ids": "soft_x_rays"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "total_power_at_separatrix",
+      "description": "Net energy power leaving the confined plasma through the last closed magnetic flux surface and entering the scrape-off layer.",
+      "unit": "W",
+      "segments": {
+        "physical_base": "power",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "separatrix",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:summary/global_quantities/power_loss/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "radial_offset_of_beamlet_group",
+      "description": "Signed major-radius displacement of a beamlet-group center from its nominal position, measured along the radial direction in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "offset",
+        "geometric_base": "",
+        "subject": "",
+        "component": "radial",
+        "operator": "",
+        "locus": "beamlet_group",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:nbi/unit/beamlets_group/tilting/delta_position/r",
+          "ids": "nbi"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "radial_coordinate_of_thomson_scattering_laser",
+      "description": "Major-radius location of the Thomson-scattering laser endpoint, measured as perpendicular distance from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radial_coordinate",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "thomson_scattering_laser",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:thomson_scattering/laser/end_point/r",
+          "ids": "thomson_scattering"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "minor_radius_of_plasma_boundary",
+      "description": "Half the difference between the maximum and minimum major-radius coordinates of the last closed plasma-boundary contour, defining its horizontal cross-sectional size.",
+      "unit": "m",
+      "segments": {
+        "physical_base": "radius",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "plasma_boundary",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:equilibrium/time_slice/boundary/minor_radius",
+          "ids": "equilibrium"
+        },
+        {
+          "path": "dd:summary/boundary/minor_radius/value",
+          "ids": "summary"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    },
+    {
+      "name": "parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection",
+      "description": "Parallel effective neutral internal-state momentum velocity due to convection is the signed, field-aligned component of the effective convection velocity representing transport of momentum carried by neutrals in a resolved internal state. The parallel direction is along the local magnetic field.",
+      "unit": "m.s^-1",
+      "segments": {
+        "physical_base": "momentum",
+        "geometric_base": "",
+        "subject": "neutral",
+        "component": "parallel",
+        "operator": "",
+        "locus": "",
+        "process": "convection"
+      },
+      "sources": [
+        {
+          "path": "dd:plasma_transport/model/ggd/neutral/state/momentum/v/parallel",
+          "ids": "plasma_transport"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "validation"
+    },
+    {
+      "name": "alpha_angle_of_plasma_filament",
+      "description": "Signed inclination of the first side of a plasma-filament oblique cross-section, measured counterclockwise from the outward radial direction in the poloidal plane.",
+      "unit": "rad",
+      "segments": {
+        "physical_base": "angle",
+        "geometric_base": "",
+        "subject": "",
+        "component": "",
+        "operator": "",
+        "locus": "plasma_filament",
+        "process": ""
+      },
+      "sources": [
+        {
+          "path": "dd:pf_plasma/element/geometry/oblique/alpha",
+          "ids": "pf_plasma"
+        }
+      ],
+      "label": "",
+      "note": "",
+      "split": "calibration"
+    }
+  ]
+}
