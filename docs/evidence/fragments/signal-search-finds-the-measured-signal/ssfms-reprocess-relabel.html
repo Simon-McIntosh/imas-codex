@@ -33,43 +33,50 @@
     <tr><td><strong>total</strong></td><td>—</td><td><strong>690</strong></td></tr>
   </table>
 
-  <h3 id="ssfms-reprocess-relabel-regrade-heading">Re-grading the pre-existing labels</h3>
+  <h3 id="ssfms-reprocess-relabel-regrade-heading">Re-reading the pre-existing labels on grouped members</h3>
   <p id="ssfms-reprocess-relabel-regrade-prose">
     The reprocess rewrote every JT-60SA description, so a label graded against
     the text a signal used to carry may name a quantity that text no longer
-    describes. Each of the <strong>2,224</strong> pre-existing labels was
-    therefore re-graded against its signal's <em>current</em> name and
-    description, with the old and new grade both listed. The grade is the
-    fixture's own scale, and the judgement is the product's own: the same
-    role-aware relevance question a rerank arm ranks on, read through
-    <code>decide_batch</code>, so a re-grade here is the judgement the harness
-    would make, not a second grading rule.
-    <strong>1,220 of the 2,224 labels moved grade</strong> (683 up, 537 down)
-    across <strong>1,065</strong> distinct signals across all 22 questions; the
-    remaining 1,004 kept the grade they already carried. The moves are listed
-    below.
+    describes. The labels most exposed to that change are those on
+    <strong>grouped members</strong> — signals whose <code>SignalSource</code>
+    carries more than one member, whose description changed from the group's
+    shared template to the member's own channel. <strong>1,321</strong>
+    pre-existing labels sit on <strong>1,168</strong> such signals. Each was
+    re-read by an agent from the signal's <em>current</em> name, unit and
+    description against its question's intent, under the fixture's own grading
+    rule: 3 a measurement of the queried quantity; 2 a commanded, reference or
+    setpoint value of it, or the same quantity at an adjacent point; 1 related
+    hardware; 0 read and judged irrelevant. No rerank question and no
+    <code>decide_batch</code> was used — a set graded by the arm it measures
+    would agree with that arm by construction.
+    <strong>11 labels changed, every one of them 3 to 1</strong>, all under one
+    question. Labels on single-member signals were not re-read, because their
+    descriptions were not template-derived and the reprocess left their meaning
+    alone. The pre-reprocess descriptions were not kept, so the old text is not
+    shown. Every changed label is listed below.
   </p>
 
   <table id="ssfms-reprocess-relabel-regrade-table">
-    <caption>Pre-existing labels re-graded against the reprocessed text, old grade to new</caption>
-    <tr><th>old grade</th><th>new grade</th><th>labels</th></tr>
-    <tr><td>0</td><td>1</td><td>145</td></tr>
-    <tr><td>0</td><td>3</td><td>2</td></tr>
-    <tr><td>1</td><td>0</td><td>126</td></tr>
-    <tr><td>1</td><td>3</td><td>8</td></tr>
-    <tr><td>2</td><td>0</td><td>51</td></tr>
-    <tr><td>2</td><td>1</td><td>68</td></tr>
-    <tr><td>2</td><td>3</td><td>33</td></tr>
-    <tr><td>3</td><td>0</td><td>29</td></tr>
-    <tr><td>3</td><td>1</td><td>35</td></tr>
-    <tr><td>3</td><td>2</td><td>228</td></tr>
-    <tr><td><strong>total</strong></td><td>—</td><td><strong>1,220</strong></td></tr>
+    <caption>Every grouped-member label whose grade changed, from the signal's current text</caption>
+    <tr><th>question</th><th>signal</th><th>old</th><th>new</th><th>current description</th><th>why</th></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab11</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 11 and CS structures ST 11.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab12</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 12 and CS structures ST 12.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab13</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 13 and CS structures ST 13.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab14</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 14 and CS structures ST 14.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab15</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 15 and CS structures ST 15.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab16</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 16 and CS structures ST 16.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab17</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 17 and CS structures ST 17.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab18</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 18 and CS structures ST 18.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab19</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 19 and CS structures ST 19.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab26</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 26 and CS structures ST 26.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td>helium-coolant-outlet-temperature-of-the-poloidal-field-coils</td><td><code>cryomag_m1tab30</code></td><td>3</td><td>1</td><td>Inlet temperature of the helium coolant supplied to the TF structure ST 30 and CS structures ST 30.</td><td>a TF/CS structure inlet temperature, not a poloidal-field coil's coolant outlet: related hardware</td></tr>
+    <tr><td><strong>total</strong></td><td>—</td><td>—</td><td>—</td><td><strong>11 labels changed, all 3 to 1</strong></td><td></td></tr>
   </table>
 
   <h3 id="ssfms-reprocess-relabel-harness-heading">The harness on the wider, re-graded population</h3>
   <p id="ssfms-reprocess-relabel-harness-prose">
-    The golden harness was run over the 14 tests with the new cutover and the
-    re-graded labels in place. All 14 pass, and no rerank arm refuses a
+    The golden harness was run over the 15 tests with the new cutover and the
+    re-read labels in place. All 15 pass, and no rerank arm refuses a
     question — every candidate its pool surfaces carries a label. The arm
     table, mean nDCG@10, is computed over the labels as they now stand, so it
     measures the arms against the reprocessed text rather than the retired
@@ -79,11 +86,11 @@
   <table id="ssfms-reprocess-relabel-arm-table">
     <caption>Mean nDCG@10 by arm over the reprocessed, re-graded population</caption>
     <tr><th>arm</th><th>mean nDCG@10</th></tr>
-    <tr><td>rrf</td><td>0.6551</td></tr>
-    <tr><td>current_tool</td><td>0.6551</td></tr>
-    <tr><td>vector_only</td><td>0.5120</td></tr>
-    <tr><td>additive_rule</td><td>0.4621</td></tr>
-    <tr><td>random_control</td><td>0.3273</td></tr>
+    <tr><td>rrf</td><td>0.8473</td></tr>
+    <tr><td>current_tool</td><td>0.8473</td></tr>
+    <tr><td>vector_only</td><td>0.6579</td></tr>
+    <tr><td>additive_rule</td><td>0.4955</td></tr>
+    <tr><td>random_control</td><td>0.3475</td></tr>
   </table>
 
   <p id="ssfms-reprocess-relabel-arm-order">
@@ -98,8 +105,8 @@
     fixture's <code>enriched_at_cutover</code> to the pre-reprocess
     <code>2026-10-11T21:08:54Z</code> and running the pin test fails by name —
     the fixture's declared cutover no longer matches the canonical constant.
-    The re-grade carries its own: restoring the fixture to the committed
-    pre-merge state leaves zero labels carrying a listed old-to-new move, and
-    the check that reads the move table fails on the empty set.
+    The re-read carries its own: a test pins the fixture's label population —
+    2,914 labels at 1,019 / 792 / 461 / 642 for grades 0 / 1 / 2 / 3 — so a
+    silent mass re-grade fails by name.
   </p>
 </section>

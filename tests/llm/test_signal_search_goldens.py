@@ -534,6 +534,21 @@ def test_fixture_holds_draft_and_held_out_questions() -> None:
     assert len(ids) == len(set(ids))
 
 
+def test_fixture_label_population_is_pinned() -> None:
+    """The committed fixture carries an exact count of labels by grade.
+
+    A silent mass re-grade moves one of these totals, so the test names the
+    population rather than letting a rewritten fixture pass unseen.
+    """
+    totals = {0: 0, 1: 0, 2: 0, 3: 0}
+    for q in json_fixture["questions"]:
+        for grade in q["relevant"].values():
+            assert grade in totals, (q["id"], grade)
+            totals[grade] += 1
+    assert sum(totals.values()) == 2914, sum(totals.values())
+    assert totals == {0: 1019, 1: 792, 2: 461, 3: 642}, totals
+
+
 def test_every_question_is_phrased_without_facility_or_source_vocabulary() -> None:
     """No facility name and no data-source code in any query."""
     banned = [json_fixture["eligibility"]["facility"]]
