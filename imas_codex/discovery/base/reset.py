@@ -180,6 +180,7 @@ SIGNAL_RESET_SPECS: dict[str, ResetSpec] = {
             "enriched_at",
             "name",
             "description",
+            "signal_role",
             "physics_domain",
             "keywords",
             "sign_convention",
