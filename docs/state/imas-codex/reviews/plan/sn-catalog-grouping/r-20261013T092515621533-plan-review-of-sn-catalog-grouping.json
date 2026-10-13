@@ -24,7 +24,24 @@
   "plan_slug": "sn-catalog-grouping",
   "plan_version": 27,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-13T09:46:37.751086+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-13T09:46:37.751086+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-grouping/r-20261013T092515621533-plan-review-of-sn-catalog-grouping.json",
   "review_run_id": "r-20261013T092515621533-plan-review-of-sn-catalog-grouping",
   "reviewed_blob_sha": "3de56bb7b4e837dc6bc4efeb7b91db713e6ea970",
   "rubric": "content",
