@@ -1,0 +1,47 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T20:03:11Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "commit 45d024533319faf7677763f4ca8641bc5ace821c against base 0834a4614fb5a55d0366af54a806984f108ff4a0 is a single-line deletion of `no_activate=True,` in tests/core/test_settings.py; no other file changed.",
+    "done_when": "the done_when names tests/core/test_settings.py at 0 failures head and exactly one base plus a red negative control; base.log reads \"1 failed, 51 passed\" EXIT=1, head.log reads \"52 passed\" EXIT=0, negative_control.log reads EXIT=1.",
+    "goal": "the node goal is to drop the removed no_activate argument from the ids-mapping seat test; tests/core/test_settings.py:508 no longer passes it and imas_codex/cli/map.py:444 no longer accepts it.",
+    "manifest": "read r-20261013T200124623625-settings-test-run-rich-mode/manifest.md; status complete; it records base 1 failed/51 passed, head 52 passed, and the three log paths.",
+    "write_paths": "declared scope is tests/core/test_settings.py alone; the diff touches only tests/core/test_settings.py."
+  },
+  "justifications": {
+    "durability": "tests/core/test_settings.py:508 reddens with TypeError if the removed argument is restored, and the routing assertion at :524 was proven non-vacuous by the red negative-control log.",
+    "evidence": "base.log records \"1 failed, 51 passed\" (EXIT=1) and head.log records \"52 passed\" (EXIT=0), each with the literal command on line 1 and EXIT= last.",
+    "fit": "the one-line deletion keeps the call's keyword style and adds no name, matching the surrounding call at tests/core/test_settings.py:508-521.",
+    "goal_fidelity": "tests/core/test_settings.py:508 calls _run_rich_mode without no_activate, matching the signature at imas_codex/cli/map.py:444-458.",
+    "reuse": "the change adds no definition, so no new mechanism exists to duplicate against the owner imas_codex/cli/map.py:444.",
+    "scope_discipline": "the sole changed path is tests/core/test_settings.py, inside the declared write scope; imas_codex/cli/map.py is untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to drop the removed no_activate argument from the ids-mapping seat test; tests/core/test_settings.py:508 no longer passes it and imas_codex/cli/map.py:444 no longer accepts it.\nVERDICT done_when: the done_when names tests/core/test_settings.py at 0 failures head and exactly one base plus a red negative control; base.log reads \"1 failed, 51 passed\" EXIT=1, head.log reads \"52 passed\" EXIT=0, negative_control.log reads EXIT=1.\nVERDICT write_paths: declared scope is tests/core/test_settings.py alone; the diff touches only tests/core/test_settings.py.\nVERDICT manifest: read r-20261013T200124623625-settings-test-run-rich-mode/manifest.md; status complete; it records base 1 failed/51 passed, head 52 passed, and the three log paths.\nVERDICT diff: commit 45d024533319faf7677763f4ca8641bc5ace821c against base 0834a4614fb5a55d0366af54a806984f108ff4a0 is a single-line deletion of `no_activate=True,` in tests/core/test_settings.py; no other file changed.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/core/test_settings.py:508 calls _run_rich_mode without no_activate, matching the signature at imas_codex/cli/map.py:444-458.\nSCORE evidence: 20\nJUSTIFICATION evidence: base.log records \"1 failed, 51 passed\" (EXIT=1) and head.log records \"52 passed\" (EXIT=0), each with the literal command on line 1 and EXIT= last.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the sole changed path is tests/core/test_settings.py, inside the declared write scope; imas_codex/cli/map.py is untouched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/core/test_settings.py:508 reddens with TypeError if the removed argument is restored, and the routing assertion at :524 was proven non-vacuous by the red negative-control log.\nSCORE fit: 19\nJUSTIFICATION fit: the one-line deletion keeps the call's keyword style and adds no name, matching the surrounding call at tests/core/test_settings.py:508-521.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition, so no new mechanism exists to duplicate against the owner imas_codex/cli/map.py:444.\n",
+  "review_run_id": "legacy-a0db83a4f933",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "0834a4614fb5a55d0366af54a806984f108ff4a0",
+  "reviewed_head_sha": "45d024533319faf7677763f4ca8641bc5ace821c",
+  "reviewed_run_id": "r-20261013T200250473869-settings-test-run-rich-mode",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T20:33:43.379249+00:00",
+  "total": 117
+}
