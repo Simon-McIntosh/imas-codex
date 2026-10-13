@@ -1,0 +1,68 @@
+<section id="ssfms-embed-text-measure-section" data-reckon="fragment">
+  <h2 id="ssfms-embed-text-measure-section-title">§5 — which text a signal's embedding encodes</h2>
+
+  <p id="ssfms-embed-text-measure-section-what">
+    Decision <code>embed-text</code> is settled here by measurement, before any stored vector is
+    touched. Every eligible <code>jt-60sa</code> signal — the 14,312 the fixture's predicate admits
+    (<code>enriched_at &gt;= 2026-10-11T21:08:54Z</code>) — is embedded in memory both ways: once on its
+    <code>description</code> alone, once on a composed <em>name — description (unit)</em> text. Each text
+    is then scored on §3's golden harness with a vector-only arm and an RRF arm, the RRF stream fusing the
+    100-candidate vector pool with the harness's own 50-candidate full-text pool, so the full-text stream
+    is identical between the two texts and the difference is the vector stream alone. Ranking is a cosine
+    over the freshly computed vectors; no stored vector is read or written.
+  </p>
+
+  <table id="ssfms-embed-text-measure-section-table">
+    <caption>Mean over the 22 questions; every question scores on both arms under both texts, no arm refusing</caption>
+    <thead>
+      <tr><th>Embed text</th><th>Arm</th><th>mean nDCG@10</th><th>mean grade-3 precision@5</th><th>mean grade-3 recall@30</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>description only</td><td>vector-only</td><td>0.6890</td><td>0.5636</td><td>0.5575</td></tr>
+      <tr><td>description only</td><td>RRF</td><td><strong>0.7761</strong></td><td><strong>0.6818</strong></td><td>0.7390</td></tr>
+      <tr><td>name, description, unit</td><td>vector-only</td><td>0.6641</td><td>0.5000</td><td>0.4859</td></tr>
+      <tr><td>name, description, unit</td><td>RRF</td><td>0.7620</td><td>0.6636</td><td>0.6916</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-embed-text-measure-section-reading">
+    <strong>Reading.</strong> Description-only is the higher text on both arms and on all three metrics.
+    The gap is small on mean nDCG@10 (0.014 RRF, 0.025 vector-only) and larger on grade-3 precision@5
+    (0.018 RRF, 0.064 vector-only), so composing the name and unit into the text does not help this
+    embedding model. The distance is not an artefact of the instrument: the description-only run
+    reproduces the §3 harness's stored-vector arms, which were embedded on descriptions, to within 0.004
+    nDCG@10 for vector-only (0.6890 here against 0.6846) and 0.020 for RRF (0.7761 against 0.7963) —
+    confirming the in-memory pipeline ranks the same population the stored index does.
+  </p>
+
+  <p id="ssfms-embed-text-measure-section-labels">
+    <strong>Labels the comparison added.</strong> Both texts lift candidates into a top 10 that §3's pooled
+    labelling had not reached. Every such candidate is read and graded under §3's rule; <strong>124
+    labels across 18 of the 22 questions</strong> are added to
+    <code>tests/llm/fixtures/signal_search_questions.json</code>, so no candidate either text lifts into a
+    top 10 is unlabelled and no arm refuses. Grades follow each question's declared intent: a measured
+    quantity is 3, a commanded or reference value of it (or the same quantity at an adjacent point) is 2,
+    related hardware is 1, a different quantity is 0.
+  </p>
+
+  <p id="ssfms-embed-text-measure-section-not-written">
+    <strong>No stored vector was written.</strong> A census over every <code>FacilitySignal</code> —
+    its count, the number missing an embedding or an <code>embedded_at</code>, and a SHA-256 digest of
+    every signal's <code>(id, embedded_at, embedding length)</code> — is taken before and after the
+    measurement and is byte-identical both times
+    (<code>n=61983, no_embedding=3410, no_embedded_at=3410</code>, digest
+    <code>d5b7e827…f95d471b</code>). The guard that compares the two snapshots is
+    <code>test_census_guard.py</code>; run against a mutated after-snapshot it fails by name, which is this
+    node's negative control.
+  </p>
+
+  <p id="ssfms-embed-text-measure-section-recipe">
+    <strong>Reproduction.</strong> The measurement script is
+    <code>signal-embed-text/measure_embed_text.py</code> under the crew reports directory, beside the
+    <code>results.json</code>, <code>unlabelled.json</code> and <code>census_{before,after}.json</code> it
+    writes and the <code>measure.log</code> it ran under. It embeds <code>name — description (unit)</code>
+    as <code>name</code>, an em-dash, <code>description</code>, and <code>vector &nbsp;(unit)</code> when a
+    unit is present. The vectors are cached (<code>vectors_*.npy</code>) so a re-run after a label change
+    re-scores without re-embedding.
+  </p>
+</section>
