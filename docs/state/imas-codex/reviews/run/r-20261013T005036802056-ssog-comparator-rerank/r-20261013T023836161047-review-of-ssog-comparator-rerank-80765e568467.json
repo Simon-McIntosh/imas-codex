@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "c98a0d42dc8195dd60c9c145340703409c87b2ec",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:3996",
+    "imas_codex/standard_names/workers.py:5865",
+    "imas_codex/standard_names/context.py:1154"
+  ],
+  "completed_at": "2026-10-13T02:47:18.659Z",
+  "dispatched_at": "2026-10-13T02:38:52Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_comparator_rerank.py",
+      "line": "158",
+      "severity": "follow-on",
+      "text": "follow-on: the comment \"(0+1)/2 = 0.5\" and the name at line 120 still describe a per-comparator mean-rank merge, but the delta replaced that merge with rrf_fuse_in_input_order at imas_codex/standard_names/context.py:1154, so the test misstates the mechanism it guards."
+    },
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": "3996",
+      "severity": "follow-on",
+      "text": "follow-on: compose_worker discards the seat the rerank now returns and adds its spend only to state.compose_stats.cost at imas_codex/standard_names/workers.py:4000, a telemetry counter, so the rerank there is charged to no lease and reduces no budget, unlike the batch path at imas_codex/standard_names/workers.py:2065."
+    }
+  ],
+  "head_log_revision": "9258a1adabd6fa298da2e1e435c6712f4040d0a7",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against 1e08155c22cb; 2ba37e1ff fixes cost attribution and the failure guard, b0b8693c9 gates the lease on the switch, 87affca0f and 80765e568 record evidence, 9258a1ada adds rrf_fuse_in_input_order and replaces the mean-rank merge; all six changed paths are inside the extended scope.",
+    "done_when": "the done_when names the switch-on reorder test that fails with the call removed, the fragment citing test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails, and the compose/context plus judgment gate; the manifest records baseline 827 passed/0 failed and after 842 passed/0 failed at 9258a1ada with EXIT=0 (head_gate_c.log), and negative_control.log shows the reorder test red at EXIT=1.",
+    "goal": "the source node's goal is a default-off Jev rerank of the compose comparator block; this delta (1e08155c22cb..80765e568) adds no capability but answers the three prior follow-on findings, seat-correct booking at imas_codex/standard_names/workers.py:2010, the caller-side guard at imas_codex/standard_names/workers.py:1999, and the fusion reuse at imas_codex/search/fusion.py:45.",
+    "manifest": "read; it records baseline_suite and after_suite each with revision, exit_status and completed:true at logs that resolve on disk with an EXIT= summary, plus three negative-control logs and the three defects answered by commit.",
+    "write_paths": "the delta changes context.py, workers.py, tests/standard_names/test_comparator_rerank.py, the fragment, and fusion.py plus tests/search/test_fusion.py, the last two granted by the resume-3 scope widening; every path is inside the fence the manifest's orientation_write_paths declares."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_comparator_rerank.py:183 fails if the charge is dropped or misattributed to the compose model, and tests/search/test_fusion.py:109 fails on a fallback to rrf_fuse's tie order (tie_order_control.log EXIT=1).",
+    "evidence": "head_gate_c.log:1 names revision 9258a1ada and the full file list, and its 842 passed/EXIT=0 summary is recorded in the manifest's after_suite against the 827-passed base arm.",
+    "fit": "imas_codex/standard_names/workers.py:2010 follows the charge_event/release_unused idiom, but tests/standard_names/test_comparator_rerank.py:158 still describes the mean-rank arithmetic the delta replaced with RRF fusion.",
+    "goal_fidelity": "imas_codex/standard_names/workers.py:2010 books the rerank under the seat that billed it and imas_codex/standard_names/workers.py:1999 guards the call, so the two named defects land as directed and imas_codex/search/fusion.py:45 answers the reuse one.",
+    "reuse": "imas_codex/search/fusion.py:45 extends the rank-fusion owner, sharing _rrf_mass at imas_codex/search/fusion.py:18 rather than restating it, and no owner exists for the booking or batch helpers.",
+    "scope_discipline": "git diff --stat 1e08155c22cb..80765e568 lists only the six paths the manifest declares, fusion.py and test_fusion.py included by the resume-3 widening."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is a default-off Jev rerank of the compose comparator block; this delta (1e08155c22cb..80765e568) adds no capability but answers the three prior follow-on findings, seat-correct booking at imas_codex/standard_names/workers.py:2010, the caller-side guard at imas_codex/standard_names/workers.py:1999, and the fusion reuse at imas_codex/search/fusion.py:45.\nVERDICT done_when: the done_when names the switch-on reorder test that fails with the call removed, the fragment citing test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails, and the compose/context plus judgment gate; the manifest records baseline 827 passed/0 failed and after 842 passed/0 failed at 9258a1ada with EXIT=0 (head_gate_c.log), and negative_control.log shows the reorder test red at EXIT=1.\nVERDICT write_paths: the delta changes context.py, workers.py, tests/standard_names/test_comparator_rerank.py, the fragment, and fusion.py plus tests/search/test_fusion.py, the last two granted by the resume-3 scope widening; every path is inside the fence the manifest's orientation_write_paths declares.\nVERDICT manifest: read; it records baseline_suite and after_suite each with revision, exit_status and completed:true at logs that resolve on disk with an EXIT= summary, plus three negative-control logs and the three defects answered by commit.\nVERDICT diff: read commit by commit against 1e08155c22cb; 2ba37e1ff fixes cost attribution and the failure guard, b0b8693c9 gates the lease on the switch, 87affca0f and 80765e568 record evidence, 9258a1ada adds rrf_fuse_in_input_order and replaces the mean-rank merge; all six changed paths are inside the extended scope.\nCALL_SITES: imas_codex/standard_names/workers.py:3996, imas_codex/standard_names/workers.py:5865, imas_codex/standard_names/context.py:1154\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/workers.py:2010 books the rerank under the seat that billed it and imas_codex/standard_names/workers.py:1999 guards the call, so the two named defects land as directed and imas_codex/search/fusion.py:45 answers the reuse one.\nSCORE evidence: 18\nJUSTIFICATION evidence: head_gate_c.log:1 names revision 9258a1ada and the full file list, and its 842 passed/EXIT=0 summary is recorded in the manifest's after_suite against the 827-passed base arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 1e08155c22cb..80765e568 lists only the six paths the manifest declares, fusion.py and test_fusion.py included by the resume-3 widening.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_comparator_rerank.py:183 fails if the charge is dropped or misattributed to the compose model, and tests/search/test_fusion.py:109 fails on a fallback to rrf_fuse's tie order (tie_order_control.log EXIT=1).\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/standard_names/workers.py:2010 follows the charge_event/release_unused idiom, but tests/standard_names/test_comparator_rerank.py:158 still describes the mean-rank arithmetic the delta replaced with RRF fusion.\nSCORE reuse: 20\nJUSTIFICATION reuse: imas_codex/search/fusion.py:45 extends the rank-fusion owner, sharing _rrf_mass at imas_codex/search/fusion.py:18 rather than restating it, and no owner exists for the booking or batch helpers.\nFINDING tests/standard_names/test_comparator_rerank.py:158 follow-on: the comment \"(0+1)/2 = 0.5\" and the name at line 120 still describe a per-comparator mean-rank merge, but the delta replaced that merge with rrf_fuse_in_input_order at imas_codex/standard_names/context.py:1154, so the test misstates the mechanism it guards.\nFINDING imas_codex/standard_names/workers.py:3996 follow-on: compose_worker discards the seat the rerank now returns and adds its spend only to state.compose_stats.cost at imas_codex/standard_names/workers.py:4000, a telemetry counter, so the rerank there is charged to no lease and reduces no budget, unlike the batch path at imas_codex/standard_names/workers.py:2065.\n",
+  "review_run_id": "r-20261013T023836161047-review-of-ssog-comparator-rerank-80765e568467",
+  "reviewed_base_sha": "1e08155c22cb6e11318fa96d961c25bbf223a2da",
+  "reviewed_head_sha": "80765e568467a05b08bbd0ce4cb30ef27f7d8e29",
+  "reviewed_run_id": "r-20261013T005036802056-ssog-comparator-rerank",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T02:46:02.736000+00:00",
+  "total": 110
+}

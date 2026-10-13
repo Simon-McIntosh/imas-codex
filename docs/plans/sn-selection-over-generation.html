@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -201,6 +201,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T014601210394-review-of-ssog-comparator-rerank-1e08155c22cb" data-who="reckon-build" data-when="2026-10-13T01:58:04.863Z">
     <div class="r-comment-body"><p>Reviewed r-20261013T005036802056-ssog-comparator-rerank at base c98a0d42 → head 1e08155c22cb; 6 dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 5; total 98), 3 follow-on findings (context.py:1149 rank-fusion duplication of imas_codex/search/fusion.py:rrf_fuse; workers.py:5795 cost row uses the compose model for a sn-judge spend, and the reserve-then-charge runs after the spend; context.py:1120 missing caller-side exception guard), 0 blocking, added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261013T023836161047-review-of-ssog-comparator-rerank-80765e568467" data-who="reckon-build" data-when="2026-10-13T02:47:18.659Z">
+    <div class="r-comment-body"><p>Review of ssog-comparator-rerank at 1e08155c22cb..80765e568 scores 110/120 (goal 18, evidence 18, scope 20, durability 18, fit 16, reuse 20): the three prior follow-on findings (seat-correct booking, caller-side guard, rank-fusion reuse) are all answered by commit with the fusion variant extending the owner through shared arithmetic, and two new follow-on findings are recorded (a stale mean-rank test name/comment, and the compose_worker seat being discarded).</p></div>
 </div>
 </section>
 </main>
