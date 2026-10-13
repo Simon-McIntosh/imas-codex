@@ -1,0 +1,105 @@
+<section id="ssog-rerank-batch-acceptance-record">
+  <h3>The held-out batch acceptance measure is blocked: the benchmark harness renders no comparator block, so the switch cannot move its compose prompt</h3>
+  <p id="ssog-rerank-batch-acceptance-finding">
+    The measure compares first-pass review acceptance of a held-out compose
+    batch with the comparator rerank off (arm A) and on (arm B). The switch is
+    <code>IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS</code>, read by
+    <code>comparator_rerank_enabled()</code> in
+    <code>imas_codex/standard_names/context.py:1037</code>. Its required
+    positive control is a differing rendered-message hash for at least one item
+    between arms. That control <strong>fails</strong>: both arms render a
+    byte-identical harness compose prompt, so the two arms are the same run and
+    any acceptance difference between identical prompts would be noise. The
+    finding is that the block the switch reranks is not carried by the
+    benchmark harness at all.
+  </p>
+  <p id="ssog-rerank-batch-acceptance-evidence">
+    The rerank reorders the nearby-name comparator block
+    (<code>nearby_existing_names</code>) and is invoked only on the production
+    compose path in <code>imas_codex/standard_names/workers.py</code>
+    (<code>_rerank_comparators_for_worker</code> at line 4033, and the batch
+    path at line 5897). The harness's compose step,
+    <code>benchmark._run_model</code>, builds its <code>sn/generate_name_dd</code>
+    user context from <code>items</code>, <code>ids_name</code>,
+    <code>existing_names</code> and <code>cluster_context</code> only
+    (<code>imas_codex/standard_names/benchmark.py</code> render site, lines
+    1622–1642) and never sets <code>nearby_existing_names</code>, so the
+    template's <code>{% if nearby_existing_names %}</code> branch is empty and
+    the block cannot be reranked. The harness's reviewer prompt hardcodes the
+    same key to an empty list (<code>score_with_reviewer</code>, line 693).
+    <code>benchmark.py</code> contains no reference to
+    <code>comparator_rerank</code> or to any rerank helper.
+  </p>
+  <p id="ssog-rerank-batch-acceptance-control">
+    The control is a local render, no paid call, through
+    <code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-batch-acceptance-run.py</code>
+    (see the results JSON beside it). It renders the harness compose messages
+    under the switch unset and set to <code>1</code> and hashes them with the
+    harness's own <code>_rendered_messages_hash</code>: both arms give
+    <code>9e369f27…</code>, identical. As an instrument check the same template
+    is rendered once with a populated <code>nearby_existing_names</code> block;
+    that render carries the "Nearby Existing Standard Names" section and hashes
+    to <code>84b65bb4…</code>, so the never-injective case is ruled out — the
+    template does render the block, and the harness simply never supplies it.
+  </p>
+  <table id="ssog-rerank-batch-acceptance-negative-control">
+    <caption>Positive control for the switched compose prompt. The instrument
+    check supplies the block the harness omits, proving the template renders it,
+    so the identical arm hashes reflect an absent block and not an inert render.</caption>
+    <thead>
+      <tr>
+        <th>render</th>
+        <th>switch</th>
+        <th>rerank enabled</th>
+        <th>rendered-message hash</th>
+        <th>nearby section present</th>
+        <th>prompt chars</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>arm A (harness)</td>
+        <td>unset</td>
+        <td>false</td>
+        <td><code>9e369f27…</code></td>
+        <td>no</td>
+        <td>31719</td>
+      </tr>
+      <tr>
+        <td>arm B (harness)</td>
+        <td>1</td>
+        <td>true</td>
+        <td><code>9e369f27…</code></td>
+        <td>no</td>
+        <td>31719</td>
+      </tr>
+      <tr>
+        <td>instrument check (block supplied)</td>
+        <td>unset</td>
+        <td>false</td>
+        <td><code>84b65bb4…</code></td>
+        <td>yes</td>
+        <td>32135</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="ssog-rerank-batch-acceptance-batch">
+    A second constraint reinforces the block. The brief draws 40 held-out DD
+    sources with the harness's own extraction, excluding the 30 label-sheet
+    sources and the 9 boundary-density sources.
+    <code>benchmark._extract_candidates</code> composes a fixed curated set of
+    <code>REFERENCE_NAMES</code> (47 paths) and <code>run_benchmark</code>
+    exposes no held-out draw through it, so the specified held-out batch cannot
+    be drawn from the harness either.
+  </p>
+  <p id="ssog-rerank-batch-acceptance-spend">
+    No arms were run and no paid call was made: the positive control failed
+    before the batch, so spend is <strong>USD 0.00</strong> against the
+    USD 3.00 ceiling. The gate
+    <code>tests/standard_names/test_benchmark*.py</code> plus
+    <code>test_advisory_benchmark.py</code> and the evaluation module's
+    <code>tests/discovery/test_evaluation.py</code> ran 143 passed (exit 0) with
+    no source changed, so base and head are the same revision and no failures
+    were added.
+  </p>
+</section>

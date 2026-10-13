@@ -1,0 +1,61 @@
+{
+  "node": "ssog-rerank-batch-acceptance",
+  "plan": "sn-selection-over-generation",
+  "section": "s4-comparator-rerank",
+  "status": "blocked",
+  "blocker": "positive-control-failed: the harness compose path renders no comparator block",
+  "switch_env": "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS",
+  "harness": "imas_codex/standard_names/benchmark.py",
+  "harness_compose_render_site": "imas_codex/standard_names/benchmark.py:_run_model user_context (lines 1622-1642)",
+  "harness_reviewer_render_site": "imas_codex/standard_names/benchmark.py:score_with_reviewer nearby_existing_names hardcoded [] (line 693)",
+  "rerank_reachable_only_via": [
+    "imas_codex/standard_names/workers.py:4032-4033",
+    "imas_codex/standard_names/workers.py:5897"
+  ],
+  "positive_control": {
+    "method": "render sn/generate_name_dd exactly as benchmark._run_model builds it, under both switch settings, compare rendered-message hashes",
+    "arm_off": {
+      "switch_env": null,
+      "rerank_enabled": false,
+      "hash": "9e369f2737c2dfd699b2477828c79cb36c64d0b3ebd0bec514176cd2d66b63bf",
+      "user_prompt_chars": 31719,
+      "has_nearby_section": false
+    },
+    "arm_on": {
+      "switch_env": "1",
+      "rerank_enabled": true,
+      "hash": "9e369f2737c2dfd699b2477828c79cb36c64d0b3ebd0bec514176cd2d66b63bf",
+      "user_prompt_chars": 31719,
+      "has_nearby_section": false
+    },
+    "instrument_check_populated_nearby": {
+      "switch_env": null,
+      "rerank_enabled": false,
+      "hash": "84b65bb40dbcb643b6dfe5ca9be0e2061593a6fc6d32d10e9db6407d9d197293",
+      "user_prompt_chars": 32135,
+      "has_nearby_section": true
+    },
+    "switch_changes_harness_compose_prompt": false,
+    "comparator_block_is_injective_in_template": true,
+    "template_renders_nearby_block_when_supplied": true,
+    "positive_control_passed": false
+  },
+  "batch_constraint": {
+    "brief": "draw 40 held-out DD sources with the harness's own extraction, excluding the 30 label-sheet sources and 9 boundary-density sources",
+    "harness_extraction_source": "imas_codex/standard_names/benchmark_reference.REFERENCE_NAMES",
+    "harness_extraction_size": 47,
+    "held_out_draw_supported": false,
+    "note": "benchmark._extract_candidates draws a fixed curated set of 47 paths and takes no held-out path override through run_benchmark"
+  },
+  "arms_run": false,
+  "paid_calls_made": 0,
+  "spend_usd": 0.0,
+  "spend_ceiling_usd": 3.0,
+  "gate": {
+    "command": "uv run pytest -p no:cacheprovider tests/standard_names/test_benchmark.py tests/standard_names/test_benchmark_banner.py tests/standard_names/test_benchmark_roles.py tests/standard_names/test_benchmark_spearman.py tests/standard_names/test_advisory_benchmark.py tests/discovery/test_evaluation.py",
+    "revision": "d454cfc93918177d3d907ec9c02f74aade9886fb",
+    "result": "143 passed",
+    "exit_code": 0,
+    "note": "node changes no product source or tests, so base == head; no failures added"
+  }
+}
