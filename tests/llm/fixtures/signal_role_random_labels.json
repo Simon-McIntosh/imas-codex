@@ -785,7 +785,7 @@
       "unit": "",
       "enriched_at": "2026-10-11T21:42:46.394000000+00:00",
       "glossary": [],
-      "hand_label": "measured"
+      "hand_label": "derived_or_computed"
     },
     {
       "id": "jt-60sa:general/cryoctb_mc01pfv",
@@ -794,7 +794,7 @@
       "unit": "V",
       "enriched_at": "2026-10-11T21:39:28.642000000+00:00",
       "glossary": [],
-      "hand_label": "derived_or_computed"
+      "hand_label": "measured"
     },
     {
       "id": "jt-60sa:general/lcdb_b260008_ate.s011_pid_tab_kind",
