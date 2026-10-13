@@ -19,12 +19,12 @@
   <meta name="plan-sprint" content="S18">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s5&quot;:[&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -181,9 +181,9 @@
     <p>
       The refine prompts render the failed checks as their instruction list: id, the criterion
       text, the evidence it pointed at, and the segment or sentence concerned. The fanout trigger
-      becomes the maximum probability over the checks whose retrieval flag (§2) is set (a check decided by an <code>AuditReport</code> finding class contributes 1.0 when its finding is present and 0.0 when absent; a Noul check contributes the probability of its true case; a categorising Choice check contributes the summed probability of every option other than its conforming ones, which the taxonomy names per Choice question and the loader requires to be a subset of its options, so an unverifiable claim counts as a failure because it is what retrieval resolves), compared with a
+      becomes the maximum probability over the checks whose retrieval flag (§2) is set (a check decided by an <code>AuditReport</code> finding class contributes 1.0 when its finding is present and 0.0 when absent; a Noul check contributes the probability of its true case; a categorising Choice check contributes the summed probability of every option other than its conforming ones, which this section adds to the taxonomy as a <code>conforming</code> list on each Choice question in <code>review_checks.yaml</code>, with the loader in <code>imas_codex/standard_names/review/checks.py</code> refusing a list that is empty or not a subset of the question's options, so an unverifiable claim counts as a failure because it is what retrieval resolves), compared with a
       calibrated threshold, which retires the keyword list in <code>refine-trigger-keywords</code> and the field that
-      holds it in <code>imas_codex/standard_names/fanout/config.py</code>.
+      holds it in <code>imas_codex/standard_names/fanout/config.py</code>, together with <code>refine-trigger-comment-dims</code> and <code>refine-trigger-comment-chars</code>, whose only reader is that trigger call at <code>workers.py:7304</code>.
       The free-text comment field remains for people and no code path reads it.
     </p>
     <p>
@@ -266,6 +266,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-choice-probability" data-who="reckon-build" data-when="2026-10-13T18:05:00Z">
     <div class="r-comment-body"><p>The content review of version 10 found that the trigger's maximum was undefined for checks decided by a categorising Choice. A Choice returns an option, not a failure probability. The section now defines it: a Choice check contributes the summed probability of its non-conforming options, and the taxonomy names the conforming options for each Choice question.</p><p>Each of the four Choice checks in <code>review_checks.yaml</code> has one conforming option: <em>the bound source object</em>, <em>one quantity</em>, <em>true of all</em> and <em>supports</em>. For the claim-support check, <em>says nothing</em> counts as a failure, because an unverifiable claim is the case retrieval exists to resolve. A Noul check contributes the probability of its true case. The same review's two stale anchors in §1 are corrected: the fanout call is at <code>workers.py:7304</code>, and <code>_run_rd_quorum_cycles</code> is defined at line 7992.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-s5-review-v16-acted" data-who="reckon-build" data-when="2026-10-13T18:55:00Z">
+    <div class="r-comment-body"><p>The content review of version 16 raised two findings, and both are acted on.</p><ul><li><strong>The conforming field:</strong> the <code>conforming</code> list did not exist, so §5 now adds it to each Choice question in <code>review_checks.yaml</code>. The loader in <code>checks.py</code> refuses a list that is empty or not a subset of the question's options.</li><li><strong>The dependency:</strong> §5 now depends on §3 and §4, which produce the per-check probabilities its trigger reduces over.</li></ul><p>The review's follow-on is settled as well. <code>refine-trigger-comment-dims</code> and <code>refine-trigger-comment-chars</code> retire with the keyword list, because the trigger call at <code>workers.py:7304</code> is their only reader.</p></div>
 </div>
 </section>
 </main>
