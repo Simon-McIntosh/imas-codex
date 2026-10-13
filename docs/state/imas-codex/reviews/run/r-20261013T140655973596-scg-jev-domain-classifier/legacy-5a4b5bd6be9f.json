@@ -1,0 +1,106 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs. base-gate.log (REV=6b5f1d573596f9cb91f98977e092efa380bbd3d2) records 120 passed, EXIT=0 over tests/graph/test_dd_domain_classifier.py + tests/graph/test_cypher_property_check.py + tests/graph/test_domain_classifier_prompt.py. head-gate.log records 1 failed, 186 passed, EXIT=1 over those files plus tests/graph/test_dd_domain_classifier_jev.py + tests/core/test_settings.py + tests/test_settings_sn.py. The single head failure is tests/core/test_settings.py::TestMapRunModelCheckNamesIdsMapping::test_map_run_model_check_names_ids_mapping, which passes no_activate=True to cli/map.py:_run_rich_mode; git show at BOTH revisions (base 6b5f1d573 and head e03908400) shows _run_rich_mode is keyword-only with no no_activate parameter and is untouched by the commit, so the failure is pre-existing and not an added failure. Zero added failure ids in the files this node owns.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/graph/test_dd_domain_classifier.py tests/graph/test_dd_domain_classifier_jev.py tests/graph/test_cypher_property_check.py tests/core/test_settings.py tests/test_settings_sn.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 1,
+    "failure_ids": [
+      "tests/core/test_settings.py::TestMapRunModelCheckNamesIdsMapping::test_map_run_model_check_names_ids_mapping"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T140655973596-scg-jev-domain-classifier/head-gate.log",
+    "revision": "e0390840075adec57a8e5ca2b2152769992b6b4c"
+  },
+  "baseline_suite": {
+    "command": "pytest tests/graph/test_dd_domain_classifier.py tests/graph/test_cypher_property_check.py tests/graph/test_domain_classifier_prompt.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T140655973596-scg-jev-domain-classifier/base-gate.log",
+    "revision": "6b5f1d573596f9cb91f98977e092efa380bbd3d2"
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/graph/dd_workers.py:728 classify_worker calls classify_domains (CLASSIFY phase of the DD build)",
+    "imas_codex/cli/sn.py:3327 role-bench --role classifier",
+    "imas_codex/cli/sn.py:3245 _safe(get_model, \"sn-classifier\") reads the seat"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T14:07:17Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/benchmark_roles.py",
+      "line": 1484,
+      "severity": "follow-on",
+      "text": "run_classifier_bench imports _classify_batch from imas_codex.graph.dd_domain_classifier, a symbol this change removes, so the local import fires on call and `imas-codex sn` role-bench --role classifier (imas_codex/cli/sn.py:3327) now raises ImportError before doing any work. This is the one production path the change breaks; it is the reachable consequence of retiring the chat batch and sits outside the node's declared write paths, and the sibling benchmark node r-20261013T145437191680-scg-jev-domain-benchmark is in flight to rewrite it, so it does not hold this node's landing \u2014 but the classifier seat cannot be benchmarked until it is repaired and the plan's \u00a73 Done-when requires that measurement."
+    },
+    {
+      "file": "imas_codex/graph/dd_domain_classifier.py",
+      "line": 207,
+      "severity": "follow-on",
+      "text": "classify_domains still runs `if r[\"physics_domain\"] == \"general\"` and tracks stats[\"tier1_general\"]/stats[\"tier1_retried\"] (lines 174-175, 205-213), all residual of the retired chat retry design: the new tier-1 writes only a valid PhysicsDomain or omits the path, so the branch is unreachable and the \"%d general\" log always reports zero; left in place because tests/graph/test_dd_domain_classifier.py still asserts tier1_general is present, and that gate file is outside this node's fence."
+    },
+    {
+      "file": "imas_codex/definitions/physics/path_domain_overrides.json",
+      "line": 3,
+      "severity": "follow-on",
+      "text": "the override table's description still says it is \"consulted after the LLM in _classify_batch\", naming a function this change deletes; apply_path_domain_override is still called (dd_domain_classifier.py:~740) but the pointer names a removed symbol, so a later reader is sent to code that no longer exists."
+    },
+    {
+      "file": "runs/r-20261013T140655973596-scg-jev-domain-classifier/manifest.md",
+      "line": 16,
+      "severity": "follow-on",
+      "text": "baseline_suite is recorded as a provisional sentence and after_suite as `none`, so neither is a schema-readable suite arm though both gate logs (base-gate.log, head-gate.log) exist and ran to their summary lines; a reader who parses the manifest for a base/head arm sees none, and the base arm it describes covers only 3 of the 5 test files the head arm runs, omitting the settings tests."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 6b5f1d573596f9cb91f98977e092efa380bbd3d2; e03908400 replaces the pydantic batch model and chat call in dd_domain_classifier.py with build_domain_questions/_path_state/_decide_batch over decide_batch, adds domain_probability to the result row, retires _format_batch_user_prompt and _gather_expanded_context, flips the sn-classifier default to typesafe/jev-1.13 in settings.py and pyproject.toml, deletes domain_classifier.md and test_domain_classifier_prompt.py, prunes the removed-symbol tests from test_dd_domain_classifier.py, exempts sn-classifier from the openrouter-prefix guard in tests/core/test_settings.py, and adds tests/graph/test_dd_domain_classifier_jev.py and the fragment html.",
+    "done_when": "the done_when names stubbed-decisions tests for the enum-held options, the written domain+probability, the None result leaving the path unclassified, and the cost reaching the tracker, plus the four gate file groups at base and head and the evidence fragment; tests/graph/test_dd_domain_classifier_jev.py holds all four (TestDomainChoiceOptions::test_options_are_the_physics_domain_vocabulary:47, TestDomainDecisionWiring::test_answer_writes_domain_and_probability:74, test_failed_call_leaves_the_path_unclassified:127, test_cost_reaches_the_path_tracker cost test:155) and each has a red negative-control log, but the base arm ran only 3 of the 5 test files the head arm runs (base-gate.log omits tests/core/test_settings.py and tests/test_settings_sn.py), so the delta for the settings group is argued from source rather than measured.",
+    "goal": "the node goal is to move tier-1 DD domain classification onto one typed Jev Choice per path through decide_batch, record the answer probability, switch the sn-classifier seat to typesafe/jev-1.13 and retire the chat path; the landed dd_domain_classifier.py:607 classify_tier1_llm now builds one `choice` question (build_domain_questions:646, options = {m.value: get_physics_domain_description(m.value) for m in PhysicsDomain}) and hands it to decide_batch:701, the pydantic batch models / _classify_batch / _format_batch_user_prompt / _gather_expanded_context and the domain_classifier.md prompt are gone, the seat is typesafe/jev-1.13 in settings.py:214 and pyproject.toml, and probability rides in the returned row (dd_domain_classifier.py:757) without a new graph property (_write_tier1_results:980 writes only id/physics_domain/domain_source/domain_model).",
+    "manifest": "read; it records status complete, commit e03908400, the classifier rewrite, the four negative controls each EXIT=1, the base/head gate logs, the fence_exceptions disclosure and the working-tree provenance of the settings failure; its baseline_suite is a prose string rather than an arm object and its after_suite is `none`, so neither is a schema-readable suite arm even though both gate logs exist and ran to their summary lines.",
+    "write_paths": "the manifest declares imas_codex/graph/dd_domain_classifier.py, imas_codex/settings.py, pyproject.toml, the deleted imas_codex/llm/prompts/imas/domain_classifier.md, the deleted tests/graph/test_domain_classifier_prompt.py, the new tests/graph/test_dd_domain_classifier_jev.py and docs/evidence/fragments/sn-catalog-grouping/scg-jev-domain-classifier.html; git diff --stat against 6b5f1d573 additionally lists tests/graph/test_dd_domain_classifier.py and tests/core/test_settings.py, both outside the declared write paths, both disclosed under the manifest's fence_exceptions and both required to keep the brief's own named gate files green."
+  },
+  "justifications": {
+    "durability": "each added assertion has a shown failure mode: nc-options-frozen reddens test_options_are_the_physics_domain_vocabulary when build_domain_questions is frozen to four domains, nc-none-defaulted reddens test_failed_call_leaves_the_path_unclassified when None is written as a default, nc-probability-dropped reddens on a missing domain_probability key, and nc-cost-not-booked reddens the cost test \u2014 the domain+probability assertion (test_answer_writes_domain_and_probability:74) is not tautological because the value passes through a question-key lookup, enum validation and the deterministic override before it is asserted.",
+    "evidence": "the four done-when behaviours are backed by real red controls (nc-options-frozen/nc-probability-dropped/nc-none-defaulted/nc-cost-not-booked, each EXIT=1) and head-gate.log records 186 passed with the one failure pre-existing; the base arm however ran only tests/graph/test_dd_domain_classifier.py + test_cypher_property_check.py + test_domain_classifier_prompt.py (base-gate.log: 120 passed), omitting the settings files the head arm runs, so the delta for that group rests on a source argument (map.py unchanged, no no_activate at either revision) rather than an arm-to-arm measurement.",
+    "fit": "the additions follow the surrounding idiom \u2014 decide_batch is called exactly as the sibling decisions seats (settings.py discovery-reason seats and imas_codex/standard_names/segment_selection.py) call it, the {\"type\":\"choice\",\"criteria\":...} question shape matches _form_question in imas_codex/standard_names/review/judge_stage.py:140, and no plan/ticket identifier appears in the changed source; the seat's model prefix typesafe/ matches the other decisions seats.",
+    "goal_fidelity": "the landed tier-1 path is one typed Choice per path through decide_batch (dd_domain_classifier.py:646 build_domain_questions, :701 the decide_batch call), the seat is typesafe/jev-1.13 (settings.py:214, pyproject.toml), the probability is carried in the returned row (:757). Residual: classify_domains still counts a \"general\" domain that the new tier-1 can no longer produce (dd_domain_classifier.py:207) \u2014 dead branch left from the retired retry design, not a fidelity failure.",
+    "reuse": "the change reuses the owners rather than forking them: decide_batch (imas_codex/discovery/base/judgment.py:230) owns concurrency/budget/retries, gather_classification_context (:815) owns the path context, and imas_standard_names.grammar.tags.get_physics_domain_description owns the scope sentences; the only new definition, build_domain_questions, composes those and matches the repo's established inline choice-question idiom (judge_stage.py:140 _form_questions, imas_codex/discovery/paths/scorer.py:251), for which no shared builder exists.",
+    "scope_discipline": "the diff stays inside the declared write paths except tests/graph/test_dd_domain_classifier.py and tests/core/test_settings.py (git diff --stat against 6b5f1d573), both outside the fence and both disclosed in the manifest's fence_exceptions as necessary to keep the brief's named gate files green."
+  },
+  "node": "review-of-scg-jev-domain-classifier-e0390840075a",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to move tier-1 DD domain classification onto one typed Jev Choice per path through decide_batch, record the gate logs and the evidence fragment.\nVERDICT goal: the landed tier-1 path is one typed Choice per path through decide_batch (dd_domain_classifier.py:646 build_domain_questions, :701 the decide_batch call), the seat is typesafe/jev-1.13 (settings.py:214), the probability is carried in the returned row (:757).\nVERDICT done_when: the done_when names stubbed-decisions tests for the enum-held options, the written domain+probability, the None result leaving the path unclassified, and the cost reaching the tracker; tests/graph/test_dd_domain_classifier_jev.py holds all four and each has a red negative-control log, but the base arm ran only 3 of the 5 test files the head arm runs, so the delta for the settings group is argued from source rather than measured.\nVERDICT write_paths: the manifest declares dd_domain_classifier.py, settings.py, pyproject.toml, the two deletions, the new test file and the fragment; git diff --stat against 6b5f1d573 additionally lists tests/graph/test_dd_domain_classifier.py and tests/core/test_settings.py, both outside the declared paths and both disclosed in the manifest's fence_exceptions.\nVERDICT manifest: read; records status complete, commit e03908400, the four negative controls each EXIT=1 and the base/head gate logs, but its baseline_suite is a prose string and its after_suite is `none`, so neither is a schema-readable suite arm.\nVERDICT diff: read commit by commit against base 6b5f1d573596f9cb91f98977e092efa380bbd3d2.\nCALL_SITES: imas_codex/graph/dd_workers.py:728 classify_worker calls classify_domains, imas_codex/cli/sn.py:3327 role-bench --role classifier, imas_codex/cli/sn.py:3245 _safe(get_model, \"sn-classifier\")\nSCORE goal_fidelity: 18\nSCORE evidence: 15\nSCORE scope_discipline: 16\nSCORE durability: 17\nSCORE fit: 17\nSCORE reuse: 19\nFINDING imas_codex/standard_names/benchmark_roles.py:1484 follow-on: run_classifier_bench imports _classify_batch, a symbol this change removes, so the role-bench classifier path raises ImportError.\nFINDING imas_codex/graph/dd_domain_classifier.py:207 follow-on: classify_domains still counts a \"general\" domain the new tier-1 cannot produce and tracks tier1_general/tier1_retried, dead branches of the retired retry design.\nFINDING imas_codex/definitions/physics/path_domain_overrides.json:3 follow-on: the description names _classify_batch, a function this change deletes.\nFINDING runs/r-20261013T140655973596-scg-jev-domain-classifier/manifest.md:16 follow-on: baseline_suite is prose and after_suite is `none`, so neither is a schema-readable suite arm though both gate logs ran to their summary lines.",
+  "review_run_id": "legacy-5a4b5bd6be9f",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "6b5f1d573596f9cb91f98977e092efa380bbd3d2",
+  "reviewed_head_sha": "e0390840075adec57a8e5ca2b2152769992b6b4c",
+  "reviewed_run_id": "r-20261013T140655973596-scg-jev-domain-classifier",
+  "reviewer_run_id": "r-20261013T152412545887-review-of-scg-jev-domain-classifier-e0390840075a",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T140655973596-scg-jev-domain-classifier/base-gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T140655973596-scg-jev-domain-classifier/head-gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T140655973596-scg-jev-domain-classifier/nc-options-frozen.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T140655973596-scg-jev-domain-classifier/nc-probability-dropped.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T140655973596-scg-jev-domain-classifier/nc-none-defaulted.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T140655973596-scg-jev-domain-classifier/nc-cost-not-booked.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T15:40:00+00:00",
+  "total": 102
+}
