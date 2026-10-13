@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="82">
+<meta name="plan-version" content="83">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -415,6 +415,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261013T005110809374-review-of-sib-sanctioned-holes-repro-7e804e328494" data-who="reckon-build" data-when="2026-10-13T01:04:33.176Z">
     <div class="r-comment-body"><p>review record with verdict "SOUND WITH FINDINGS", six dimension scores (goal_fidelity 19, evidence 17, scope_discipline 20, durability 9, fit 18, reuse 19, total 102) and two follow-on findings, stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T002423146729-sib-sanctioned-holes-repro.json with an identical revision-pinned twin at the .at-7e804e32849469ebcd3627dab5f1c02e5e7ec7f7 path.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-s7-holes-decided" data-who="reckon-build" data-when="2026-10-13T01:15:00Z">
+    <div class="r-comment-body"><p>All three holes reproduce (<a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s7-holes-diagnosed">diagnosis</a>). Decisions:</p><ul><li><strong>Docs edit at pending:</strong> admit <code>pending</code> under the existing claim. The fix node has delivered and is awaiting review.</li><li><strong>Rescore:</strong> refuse a terminal <code>status</code> in <code>stage_name_for_rescore</code>'s guarded transition, and make every refusal name the signed transition in <code>imas_codex/standard_names/signed_manifest.py</code> as the route out of a terminal state. That is the only mechanism that moves one today. Rescore then never leaves the two axes disagreeing. This makes rescore refuse rather than proceed for that state, a deliberate narrowing of the done-when's "proceeds": the original followup said the terminal-status refusal should be reached through a sanctioned transition, not bypassed.</li><li><strong>Rename onto a tombstone: a question for the lead.</strong> The proposed repair resurrects a successor-less superseded row in place, reusing it as the rename's successor, because two rows cannot share an id. That overwrites a historical row's fields. The sn-edit skill documents rename as the resurrection route for exactly this case. The alternative keeps the refusal and makes it name the signed transition back to <code>draft</code>, followed by an edit of that identity. Which route should the sanctioned surface offer?</li></ul></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
