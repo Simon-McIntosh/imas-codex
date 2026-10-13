@@ -1,0 +1,88 @@
+<section id="sib-successor-edge-tests">
+  <h2 id="sib-successor-edge-tests-overview">sib-successor-edge-tests — the signed supersede's edge check is isolated and executed</h2>
+  <p id="sib-successor-edge-tests-summary">
+    Three follow-ons from the review of the node that retired the successor
+    scalar are closed: the <code>successor_ids</code> clause of the signed
+    supersede postcondition is now isolated by its own unit test and shown to
+    refuse; the graph-marked supersede test is executed against a disposable
+    Neo4j rather than left deselected; and no plan-label test class remains in
+    the graph edge-writer file.
+  </p>
+
+  <h3 id="sib-successor-edge-tests-isolated-clause">1. The <code>successor_ids</code> clause has an isolating test</h3>
+  <p id="sib-successor-edge-tests-isolated-clause-body">
+    In <code>imas_codex/standard_names/signed_manifest.py</code> the signed
+    supersede postcondition refuses unless three clauses hold: the successor
+    edge count is exactly one, its <code>receipt_ids</code> equal the minting
+    receipt, and its <code>successor_ids</code> equal the mutation's declared
+    successor. The pre-existing unit test returned <code>count=0</code>, so its
+    refusal came from the count clause whether or not the id was checked.
+    <code>test_supersede_postcondition_refuses_edge_to_a_different_successor</code>
+    returns exactly one edge whose <code>receipt_ids</code> are the minted
+    receipt — satisfying count and receipt — but whose
+    <code>successor_ids</code> point at a different name, so the refusal can
+    only come from the id comparison.
+  </p>
+  <ul id="sib-successor-edge-tests-isolated-clause-evidence">
+    <li><code>head-new-test.log</code>: 1 passed, <code>EXIT=0</code>.</li>
+    <li><code>negative-control-successor-ids.log</code>: with the
+      <em>declared mutation</em> — the <code>successor_ids</code> comparison
+      removed and nothing else changed — the same test fails,
+      1 failed, <code>EXIT=1</code>. The production file was restored
+      afterwards (<code>git diff</code> on it is empty).</li>
+  </ul>
+
+  <h3 id="sib-successor-edge-tests-graph-run">2. The re-pointed assertion ran under <code>-m graph</code></h3>
+  <p id="sib-successor-edge-tests-graph-run-body">
+    <code>tests/standard_names/test_supersede_successor_scalar.py</code> is
+    marked <code>graph</code>, so the recorded gate of the prior node deselected
+    it. It was run here under <code>-m graph</code> against a fresh disposable
+    Neo4j (the apptainer image started on <code>bolt://127.0.0.1:56001</code>,
+    auth disabled, empty store) rather than the project graph, which the
+    fixture refuses. It passes: the signed supersede writes the receipt-stamped
+    successor edge, the receipt binds predecessor to successor, collateral
+    bytes are unchanged, and a replay is <code>already_applied</code> with zero
+    persistent writes. No test change was needed.
+  </p>
+  <ul id="sib-successor-edge-tests-graph-run-evidence">
+    <li><code>graph-supersede-successor-scalar.log</code>: 1 passed,
+      <code>EXIT=0</code>.</li>
+  </ul>
+
+  <h3 id="sib-successor-edge-tests-label-scrub">3. No plan-label test class
+    remains in the edge-writer file</h3>
+  <p id="sib-successor-edge-tests-label-scrub-body">
+    Every class in <code>tests/standard_names/test_graph_edge_writers.py</code>
+    whose name was a letter-plus-number label was renamed after what it tests —
+    for example <code>TestG7</code> becomes
+    <code>TestHasPredecessorFromDeprecates</code> and <code>TestG8</code>
+    becomes <code>TestSuccessorEdgeOwnedBySignedSupersede</code>. No test body
+    moved. <code>grep -nE "class Test[A-Z][0-9]+"</code> over the file finds
+    nothing.
+  </p>
+
+  <h3 id="sib-successor-edge-tests-gate">Gate</h3>
+  <p id="sib-successor-edge-tests-gate-body">
+    The three named files were run at base and at head under the default marker
+    policy. Base: 25 passed, 5 deselected, <code>EXIT=0</code>
+    (<code>base-gate.log</code>). Head: 26 passed, 5 deselected,
+    <code>EXIT=0</code> (<code>head-gate.log</code>) — the one added test, no
+    added failures. The five deselected cases are this node's own graph-marked
+    tests plus the module-level rollback test; the scalar file's case is the
+    one executed separately under <code>-m graph</code> above.
+  </p>
+  <ul id="sib-successor-edge-tests-gate-evidence">
+    <li>Base: 25 passed, 5 deselected, <code>EXIT=0</code></li>
+    <li>Head: 26 passed, 5 deselected, <code>EXIT=0</code></li>
+  </ul>
+
+  <h3 id="sib-successor-edge-tests-files">Files changed</h3>
+  <ul id="sib-successor-edge-tests-files-list">
+    <li><code>tests/standard_names/test_signed_supersede_edge.py</code> — adds
+      the isolating test.</li>
+    <li><code>tests/standard_names/test_graph_edge_writers.py</code> — renames
+      label classes.</li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-successor-edge-tests.html</code>
+      — this record.</li>
+  </ul>
+</section>
