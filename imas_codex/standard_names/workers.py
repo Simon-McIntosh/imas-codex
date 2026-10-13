@@ -1966,6 +1966,27 @@ def _collect_nearby_name_comparators(
     return nearby
 
 
+async def _rerank_comparators_for_compose(
+    items: Sequence[dict[str, Any]], nearby: list[dict]
+) -> tuple[list[dict], float]:
+    """Rerank the nearby-name comparator block when the switch is on.
+
+    Off by default, so the block reaches the composed prompt exactly as the
+    embedding retrieval produced it. When on, each item judges the block and
+    it is reordered by judged relevance, keeping the embedding order on any
+    failure. Returns the block and the Jev call cost.
+    """
+    from imas_codex.standard_names.context import (
+        comparator_rerank_enabled,
+        rerank_name_comparators,
+    )
+
+    if not comparator_rerank_enabled():
+        return nearby, 0.0
+    ordered, cost = await rerank_name_comparators(items, nearby)
+    return list(ordered), cost
+
+
 # =============================================================================
 # DD context enrichment — fetch rich graph data before composing
 # =============================================================================
@@ -3893,6 +3914,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
     ) -> list[dict] | None:
         # Search for nearby existing names with a bounded share per item.
         nearby = await asyncio.to_thread(_collect_nearby_name_comparators, batch.items)
+        nearby, _rerank_cost = await _rerank_comparators_for_compose(
+            batch.items, nearby
+        )
+        if _rerank_cost:
+            state.compose_stats.cost += _rerank_cost
 
         # IDS-level context — collect for each IDS present in batch
         ids_names = sorted(
@@ -5757,6 +5783,24 @@ async def compose_batch(
     # items, give each item a share, and cap at 30 total.
     group_key = batch[0].get("path", "").split("/")[0] if batch else ""
     nearby = await asyncio.to_thread(_collect_nearby_name_comparators, batch)
+    nearby, _rerank_cost = await _rerank_comparators_for_compose(batch, nearby)
+    if _rerank_cost > 0:
+        from imas_codex.standard_names.budget import LLMCostEvent
+
+        _rerank_phase = "regen" if regen else "generate_name"
+        _rerank_lease = mgr.reserve(_rerank_cost, phase=_rerank_phase)
+        if _rerank_lease is not None:
+            _rerank_lease.charge_event(
+                _rerank_cost,
+                LLMCostEvent(
+                    model=model,
+                    tokens_in=0,
+                    tokens_out=0,
+                    phase=_rerank_phase,
+                    service="standard-names",
+                ),
+            )
+            _rerank_lease.release_unused()
 
     # ── IDS context ────────────────────────────────────────────────────
     ids_names = sorted(

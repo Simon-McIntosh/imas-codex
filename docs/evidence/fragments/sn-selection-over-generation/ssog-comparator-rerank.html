@@ -1,0 +1,58 @@
+<section id="ssog-comparator-rerank-record">
+  <h3>The compose comparator block can be reranked by Jev behind a default-off switch</h3>
+  <p id="ssog-comparator-rerank-change">
+    The compose and regen prompts carry a nearby-name comparator block whose
+    order is the embedding retrieval's. <code>rerank_name_comparators</code> in
+    <code>imas_codex/standard_names/context.py</code> reranks a batch's block
+    through <code>rerank_pool</code> under the <code>sn-judge</code> seat with
+    service <code>standard-names</code>: each batch item judges the whole block
+    once, the item's description and DD path are the query, and each
+    comparator's name and description are the state. A comparator's final rank
+    is its mean rank across the items, with ties keeping the embedding order, so
+    the merged order is never worse than the retrieval order it replaces.
+    <code>rerank_pool</code>'s own failure-order guarantee is pinned by
+    <code>test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails</code>
+    in <code>tests/discovery/test_judgment.py</code>, so the rerank inherits it
+    rather than restating it.
+  </p>
+  <p id="ssog-comparator-rerank-switch">
+    Both compose sites — <code>compose_worker</code>'s per-batch body and
+    <code>compose_batch</code> — now call the block through
+    <code>_rerank_comparators_for_compose</code> in
+    <code>imas_codex/standard_names/workers.py</code>. It reads
+    <code>comparator_rerank_enabled()</code>, which is off unless
+    <code>IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS</code> is set, and returns the
+    block untouched with zero cost when off, so the composed prompt is identical
+    to a run without the rerank. The rerank's cost is returned and booked by each
+    site — to <code>state.compose_stats.cost</code> in <code>compose_worker</code>
+    and through a <code>BudgetManager</code> lease in <code>compose_batch</code> —
+    the way every other Jev call in these paths is booked.
+  </p>
+  <table id="ssog-comparator-rerank-measure">
+    <caption>Gate: the compose/context tests and <code>tests/discovery/test_judgment.py</code></caption>
+    <thead><tr><th>arm</th><th>revision</th><th>command</th><th>result</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>baseline</td><td><code>c98a0d42d</code></td>
+        <td><code>uv run pytest -p no:cacheprovider &lt;35 compose/context files&gt; tests/discovery/test_judgment.py</code></td>
+        <td>827 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
+      </tr>
+      <tr>
+        <td>head</td><td><code>c98a0d42d</code> + this change</td>
+        <td><code>uv run pytest -p no:cacheprovider &lt;same files&gt; tests/standard_names/test_comparator_rerank.py</code></td>
+        <td>830 passed, 1 skipped, 0 failed (<code>EXIT=0</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="ssog-comparator-rerank-negative">
+    <code>tests/standard_names/test_comparator_rerank.py</code> stubs
+    <code>rerank_pool</code>'s decisions: with the switch on the block follows the
+    stubbed order, with the switch off the block object itself is returned and no
+    call is made. Removing the rerank call from
+    <code>_rerank_comparators_for_compose</code> turns the on-arm reorder test
+    red (<code>EXIT=1</code>, <code>test_switch_on_reorders_the_comparator_block_by_score</code>
+    and <code>test_comparator_rerank_merges_item_orders_by_mean_rank</code>); the
+    off-arm test stays green, which is what pins the switch as the only path to
+    the reorder.
+  </p>
+</section>
