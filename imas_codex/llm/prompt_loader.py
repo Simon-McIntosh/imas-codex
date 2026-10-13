@@ -574,53 +574,52 @@ def _provide_format_patterns() -> dict[str, Any]:
 
 @lru_cache(maxsize=1)
 def _provide_physics_domains() -> dict[str, Any]:
-    """Provide PhysicsDomain enum values for LLM prompts.
+    """Provide the physics domain vocabulary and its classification guidance.
 
-    Returns the physics domain values with descriptions, organized by category.
-    This ensures the LLM outputs valid enum values rather than freeform strings.
+    Domain values, one-line descriptions and categories are canonical in
+    imas-standard-names. The scope, includes and excludes for each domain and
+    the scope for each category come from
+    ``imas_codex/definitions/physics/domains.yaml``. Returning the guidance here
+    lets a prompt match a path against what a domain covers rather than against
+    a bare label, and keeps the guidance in one place that both the classifier
+    prompt and the chat prompt read.
     """
     from imas_codex.core.physics_domain import PhysicsDomain
+    from imas_codex.definitions.physics import (
+        load_domain_guidance,
+        load_isn_physics_domains,
+    )
 
-    # Get the schema definition if available for categories
-    try:
-        from pathlib import Path
+    isn_vocabulary = load_isn_physics_domains()
+    guidance = load_domain_guidance()
+    domain_guidance = guidance["domains"]
+    category_guidance = guidance["categories"]
 
-        from linkml_runtime.utils.schemaview import SchemaView
-
-        schema_path = Path(__file__).parent.parent / "definitions/physics/domains.yaml"
-        if schema_path.exists():
-            sv = SchemaView(str(schema_path))
-            enum_def = sv.get_enum("PhysicsDomain")
-            if enum_def:
-                domains = []
-                for pv_name, pv in enum_def.permissible_values.items():
-                    category = (
-                        pv.annotations.get("category", {}).get("value", "uncategorized")
-                        if pv.annotations
-                        else "uncategorized"
-                    )
-                    domains.append(
-                        {
-                            "value": pv_name,
-                            "description": pv.description or "",
-                            "category": category,
-                        }
-                    )
-                return {"physics_domains": domains}
-    except Exception:
-        pass
-
-    # Fallback: extract from enum directly without categories
     domains = []
     for member in PhysicsDomain:
+        value = member.value
+        meta = isn_vocabulary.get(value, {})
+        guide = domain_guidance.get(value, {})
         domains.append(
             {
-                "value": member.value,
-                "description": "",
-                "category": "uncategorized",
+                "value": value,
+                "description": meta.get("description", ""),
+                "category": meta.get("category") or "uncategorized",
+                "scope": guide.get("scope", ""),
+                "includes": list(guide.get("includes") or ()),
+                "excludes": list(guide.get("excludes") or ()),
             }
         )
-    return {"physics_domains": domains}
+
+    categories = [
+        {"value": name, "scope": entry.get("scope", "")}
+        for name, entry in category_guidance.items()
+    ]
+
+    return {
+        "physics_domains": domains,
+        "physics_domain_categories": categories,
+    }
 
 
 @lru_cache(maxsize=1)

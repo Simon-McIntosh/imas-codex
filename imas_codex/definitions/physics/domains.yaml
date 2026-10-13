@@ -1,0 +1,1034 @@
+# Classification guidance for the IMAS physics domains.
+#
+# The domain values, their one-line descriptions and their categories are
+# canonical in imas-standard-names
+# (imas_standard_names/grammar/vocabularies/physics_domains.yml). This file
+# repeats none of that. It holds only what that vocabulary lacks and a
+# classifier needs: a scope for each domain and each category, the quantity
+# kinds a domain covers with a few DD path patterns, and the exclusions that
+# separate a domain from a named neighbour. Every key is an ISN value, so the
+# file falls behind the vocabulary loudly rather than silently.
+#
+# A reader for this file lives in imas_codex/definitions/physics/__init__.py
+# and is consumed by the prompt provider in imas_codex/llm/prompt_loader.py.
+
+categories:
+  core_plasma:
+    scope: >-
+      The physics of the confined plasma itself: how it is shaped, what it is
+      made of, how it moves energy and particles within itself, and how it
+      sets its own field. Choose this first when the quantity is a property of
+      the plasma column, not of a device, a diagnostic or a data product.
+
+  heating_current_drive:
+    scope: >-
+      The systems and physics that add energy or momentum to the plasma and
+      the waves that carry that power. Choose this when the quantity belongs
+      to an actuator that heats or drives the plasma, or to the wave physics
+      that transports its power to the particles.
+
+  edge_divertor:
+    scope: >-
+      The plasma boundary and the surfaces it touches: the scrape-off layer,
+      the divertor, plasma-wall interaction and fueling of the boundary.
+      Choose this when the quantity concerns plasma outside the core, or the
+      material surfaces that plasma meets.
+
+  energetic_particles:
+    scope: >-
+      Populations far from the thermal bulk: fast ions, fast electrons and
+      runaway electrons, their distributions, slowing-down, and their losses.
+
+  diagnostics:
+    scope: >-
+      The measurement systems of the machine and the quantities they produce.
+      Choose this when the quantity is a diagnostic response or the
+      instrument that records it, rather than a plasma state, even where it is
+      calibrated to a physical quantity.
+
+  control_operations:
+    scope: >-
+      Real-time control, pulse scheduling and the operational metadata of
+      running a discharge: what the control system commands and when, in an
+      equilibrium or a shot cycle.
+
+  machine_systems:
+    scope: >-
+      The engineering plant and auxiliary systems of the device rather than
+      its plasma: magnets and coil systems, structural components and balance
+      of plant.
+
+  data_computing:
+    scope: >-
+      Data products and computational infrastructure: archived and summary
+      results, atomic and molecular reference data, geometry definitions and
+      workflow tooling that carries no single physics subject.
+
+  general:
+    scope: >-
+      Quantities that genuinely appear across many domains or carry no single
+      physics subject. A held-back last resort, never a default for a path
+      whose subject is knowable.
+
+  advanced_physics:
+    scope: >-
+      Specialised theory or simulation frameworks whose quantities describe a
+      model world rather than the measured machine, and do not reduce to one
+      experimental domain.
+
+domains:
+  equilibrium:
+    scope: >-
+      The static magnetic configuration of a plasma in force balance and the
+      coordinate system it is expressed in: the flux-surface geometry, the
+      poloidal flux and its radial derivatives, the safety factor, and the
+      shape of the boundary. Judge by whether the quantity states where the
+      field is and what shape its surfaces have, not by whether it is stored
+      with a time coordinate.
+    includes:
+      - flux-surface geometry — boundary outline, major and minor radius, elongation, triangularity
+      - poloidal flux and its radial derivative — `equilibrium/time_slice/profiles_1d/psi`, `psi_norm`
+      - safety factor and magnetic shear along the profile
+      - the equilibrium reconstruction itself — the currents and coils fitted to it
+      - coordinate systems and the mapping between real space and flux space — `equilibrium/time_slice/profiles_1d/rho_tor`, `equilibrium/grids_ggd`
+    excludes:
+      - quantity: a heat, particle or momentum flux, a diffusivity or a confinement time
+        neighbour: transport
+        rule: >-
+          A quantity that says how fast the plasma redistributes energy or
+          particles — a flux, a diffusion coefficient, a confinement time —
+          is transport; equilibrium holds only the field's shape and the
+          mapping to it, never a flow across it.
+      - quantity: the numerical value of a kinetic profile at a surface, such as the classical electron temperature
+        neighbour: core_plasma_physics
+        rule: >-
+          The amplitude of a temperature or density profile is a property of
+          the plasma, so it is core_plasma_physics; equilibrium owns the
+          surface on which that value sits, not the value.
+      - quantity: a growing instability, its growth rate or its stability limit
+        neighbour: magnetohydrodynamics
+        rule: >-
+          A mode that destabilises the configuration is magnetohydrodynamics;
+          a property of the converged, static configuration is equilibrium.
+
+  transport:
+    scope: >-
+      The rates and sources by which a plasma redistributes particles, energy
+      and momentum, and the coefficients and model parameters that predict
+      them. Judge by whether the quantity measures or models a transport rate,
+      not by the IDS that happens to carry it — an equilibrium IDS with a
+      diffusion model still holds transport quantities.
+    includes:
+      - particle, energy and momentum fluxes, including their decomposed parts and errors
+      - diffusivities, conductivities and pinch velocities from neoclassical or anomalous models
+      - source and sink terms for the transport equations — `core_sources/source/profiles_1d/*`
+      - flux-surface-averaged transport and the transport solver's own parameters — `plasma_transport/*`
+      - heat and particle confinement times
+    excludes:
+      - quantity: a static shape property of the magnetic field, such as the safety factor or the separatrix position
+        neighbour: equilibrium
+        rule: >-
+          If the quantity describes the configuration's geometry rather than a
+          movement of particles or energy through it, it is equilibrium. A
+          transport model that references the safety factor does not make
+          that factor transport.
+      - quantity: the value of a kinetic profile such as temperature or density
+        neighbour: core_plasma_physics
+        rule: >-
+          The plasma's own profile value is core_plasma_physics; a flux or
+          diffusivity derived from it is transport.
+      - quantity: a turbulent fluctuation amplitude, spectrum or correlation length
+        neighbour: turbulence
+        rule: >-
+          The fluctuating field and its spectrum are turbulence; the mean flux
+          it produces crosses into transport.
+
+  core_plasma_physics:
+    scope: >-
+      What a plasma is in its core: the values of its particle and energy
+      distributions, the profiles built from them, and the global scalars
+      integrated from those profiles, whether measured or modelled. Judge by
+      whether the quantity is a state of the plasma rather than a rate of
+      change, a diagnostic response or a data product.
+    includes:
+      - electron and ion temperature, density and pressure profiles — `core_profiles/profiles_1d/electrons/temperature`
+      - toroidal and poloidal rotation and current-density profiles
+      - composition, impurity and effective-charge profiles
+      - moments of the distribution function — density, mean velocity, pressure tensor
+      - global scalars integrated from the profiles — stored energy, plasma current, line-averaged density
+    excludes:
+      - quantity: a transport coefficient, flux or source term
+        neighbour: transport
+        rule: >-
+          How the plasma moves energy or particles is transport; the state it
+          is in is core_plasma_physics. A profile's gradient is core; the flux
+          that gradient drives is transport.
+      - quantity: a raw diagnostic measurement that infers a profile, such as a Thomson scattering spectrum or a line-integrated chord
+        neighbour: particle_measurement_diagnostics
+        rule: >-
+          The instrument response and its calibrated signal are a diagnostic
+          domain; the profile derived from it is core_plasma_physics.
+      - quantity: a geometry definition or a data-product wrapper
+        neighbour: computational_workflow
+        rule: >-
+          A core-plasma quantity is core_plasma_physics even when its IDS is
+          named like a profile container or carries solver numerics; the
+          domain follows the subject of the quantity, never the folder it is
+          filed under.
+
+  turbulence:
+    scope: >-
+      The fluctuating part of a plasma's fields and distributions: the
+      amplitude, spectrum and correlation structure of turbulent fluctuations
+      in density, temperature, potential and magnetic field. Judge by whether
+      the quantity describes a fluctuation or its wavenumber-frequency
+      spectrum rather than a mean value or a mean flux.
+    includes:
+      - fluctuation amplitudes and their spatial or wavenumber spectra — `turbulence/*`
+      - correlation lengths and times, and cross-phase between fluctuating fields
+      - radial and poloidal flux spectra of the turbulent fields
+      - the turbulent-transport model inputs that describe the fluctuations themselves
+    excludes:
+      - quantity: a mean heat or particle flux produced by the turbulence
+        neighbour: transport
+        rule: >-
+          The fluctuation and its spectrum are turbulence; once the quantity
+          is the mean flux those fluctuations drive, it is transport — the
+          essence of transport is the average, not the fluctuation.
+      - quantity: a gyrokinetic simulation quantity from a gyrokinetics IDS
+        neighbour: gyrokinetics
+        rule: >-
+          A quantity expressed in the gyrokinetic model's own coordinates
+          (gyrocenter moments, normalised fluxes) is gyrokinetics, even when
+          it is turbulent in character.
+      - quantity: an MHD mode amplitude or growth rate
+        neighbour: magnetohydrodynamics
+        rule: >-
+          A coherent, macroscale unstable mode is magnetohydrodynamics; the
+          broadband turbulent fluctuation is turbulence.
+
+  magnetohydrodynamics:
+    scope: >-
+      The stability and macroscopic dynamics of a plasma as a conducting
+      fluid: instabilities, their growth and saturation, magnetic reconnection
+      and the events a loss of stability produces. Judge by whether the
+      quantity describes a coherent mode, its mode numbers and growth, or the
+      evolution of a disruption.
+    includes:
+      - linear and non-linear mode amplitudes, mode numbers, growth rates and mode frequencies
+      - tearing, kink, ballooning and neoclassical tearing-mode quantities
+      - disruption quantities — the thermal quench, current quench and their timing
+      - sawtooth and other macroscopic relaxation events — `sawteeth/*`, `ntms/*`, `mhd/*`
+    excludes:
+      - quantity: a static property of the equilibrium the mode sits in
+        neighbour: equilibrium
+        rule: >-
+          The shape of the field is equilibrium; a mode that grows on it and
+          its stability is magnetohydrodynamics.
+      - quantity: a turbulent broadband fluctuation
+        neighbour: turbulence
+        rule: >-
+          A single coherent mode with definite mode numbers is
+          magnetohydrodynamics; a broadband turbulent spectrum is turbulence.
+      - quantity: a plasma-control command that reacts to a stability event
+        neighbour: plasma_control
+        rule: >-
+          What the mode does is magnetohydrodynamics; what the controller
+          commands in response is plasma_control.
+
+  auxiliary_heating:
+    scope: >-
+      The external systems that heat a plasma and their launch and coupling
+      quantities, judged by whether the quantity belongs to a heating
+      actuator or to the power it delivers. The heating method may be beams or
+      waves; what decides the domain is that the quantity is about the
+      injected power, not the transport it later causes.
+    includes:
+      - neutral-beam injection quantities — beam power, energy, current drive by injection — `nbi/*`
+      - electron, ion cyclotron and lower-hybrid launch quantities — `ec_launchers/*`, `ic_antennas/*`,     `lh_antennas/*`
+      - antenna and launcher hardware, and the coupling of power to the plasma
+      - absorbed and launched heating power, and the heating system's efficiency
+    excludes:
+      - quantity: a wave field propagating in the plasma as such
+        neighbour: waves
+        rule: >-
+          The antenna and the power it delivers are auxiliary_heating; the
+          wave it launches, its dispersion and its wave-particle interaction
+          inside the plasma are waves.
+      - quantity: a non-inductive current driven by the heating
+        neighbour: current_drive
+        rule: >-
+          The deposition of heat is auxiliary_heating; the driven current and
+          its efficiency and control are current_drive.
+      - quantity: a plant component that supplies the heating system
+        neighbour: plant_systems
+        rule: >-
+          A supply or cooling element serving an antenna is a plant
+          component, plant_systems; the antenna and its launched power are
+          auxiliary_heating.
+
+  current_drive:
+    scope: >-
+      The physics and profiles of current driven in the plasma by non-inductive
+      means and the control of the current profile. Judge by whether the
+      quantity states an amount of driven current, its efficiency, or the
+      target current profile, rather than the power that drove it.
+    includes:
+      - driven current density and its profiles — `nbi/*/current_drive`, `ec_launchers/*/current_drive`
+      - current-drive efficiency and the figure of merit for a drive method
+      - the target and achieved current profile and its control
+      - bootstrap and other self-generated current fractions
+    excludes:
+      - quantity: the injected power or deposition of the heating system
+        neighbour: auxiliary_heating
+        rule: >-
+          The energy that was launched is auxiliary_heating; the current it
+          drove is current_drive. Both may come from one beam, and the
+          quantity's subject decides.
+      - quantity: the total plasma current as a global plasma parameter
+        neighbour: core_plasma_physics
+        rule: >-
+          The total current the plasma carries is a global state of the
+          plasma, core_plasma_physics; the part of it driven externally and
+          its efficiency are current_drive.
+      - quantity: an ohmic-field loop voltage from the central solenoid
+        neighbour: magnetic_field_systems
+        rule: >-
+          The transformer that induces the current is a machine system; the
+          current it drives in the plasma is current_drive.
+
+  waves:
+    scope: >-
+      Electromagnetic waves in a plasma: their propagation, dispersion, mode
+      conversion, damping and wave-particle interaction, and the model
+      quantities a wave code computes. Judge by whether the quantity
+      describes a wave field or its interaction rather than the hardware that
+      launched it.
+    includes:
+      - the wave electric and magnetic field and their polarisation — `waves/*`
+      - dispersion relations, refractive index, ray trajectories and cut-offs/resonances
+      - absorption, damping and mode-conversion coefficients
+      - the wave's effect through quasilinear or wave-particle interaction terms
+    excludes:
+      - quantity: a launcher, antenna or its delivered power
+        neighbour: auxiliary_heating
+        rule: >-
+          Hardware and launched power are auxiliary_heating; the wave in the
+          plasma and its propagation are waves.
+      - quantity: a diagnostic that measures waves or the plasma
+        neighbour: electromagnetic_wave_diagnostics
+        rule: >-
+          A wave field inside the plasma is waves; an instrument that probes
+          the plasma with waves and records a signal, such as interferometry,
+          reflectometry or polarimetry, is a diagnostic.
+      - quantity: an electrostatic fluctuation from turbulence
+        neighbour: turbulence
+        rule: >-
+          A launched wave of definite frequency and mode is waves; a broadband
+          turbulent fluctuation is turbulence.
+
+  edge_plasma_physics:
+    scope: >-
+      The physics of the plasma outside the core and its boundary: the
+      scrape-off layer, the pedestal, the edge transport barrier and the
+      flows that carry plasma to the walls. Judge by whether the quantity
+      describes plasma in the edge region rather than the core or a material
+      surface.
+    includes:
+      - scrape-off-layer and edge profiles — `edge_profiles/*`
+      - the edge transport barrier and pedestal structure and its height or width
+      - radial electric field, edge flows and edge currents
+      - the edge's own sources and sinks — `edge_sources/*`
+    excludes:
+      - quantity: a plasma-wall interaction on a material surface
+        neighbour: plasma_wall_interactions
+        rule: >-
+          The edge plasma's behaviour near the wall is edge_plasma_physics;
+          the surface's erosion, deposition or heat load and the material
+          migration are plasma_wall_interactions.
+      - quantity: a divertor target quantity
+        neighbour: divertor_physics
+        rule: >-
+          Edge physics concerns the boundary plasma; target loads, detachment
+          and the divertor's own heat and particle exhaust are
+          divertor_physics.
+      - quantity: the core plasma state
+        neighbour: core_plasma_physics
+        rule: >-
+          A core profile is core_plasma_physics; the same quantity resolved
+          in the scrape-off layer or pedestal region is edge_plasma_physics.
+
+  plasma_wall_interactions:
+    scope: >-
+      The interaction between the plasma and the material surfaces it meets:
+      erosion, deposition, material migration, fuel retention and the surface
+      conditions that follow. Judge by whether the quantity is a property of a
+      surface or of the interface rather than of the plasma volume.
+    includes:
+      - erosion and deposition rates and net erosion — `wall/*`
+      - surface temperature, surface composition and material migration
+      - fuel retention and recycling at the surface
+      - first-wall and plasma-facing-component temperatures and fluxes
+    excludes:
+      - quantity: the plasma's behaviour in the scrape-off layer
+        neighbour: edge_plasma_physics
+        rule: >-
+          The plasma near the wall is edge_plasma_physics; the wall surface's
+          response to it is plasma_wall_interactions.
+      - quantity: the structural or engineering definition of the wall component
+        neighbour: structural_components
+        rule: >-
+          A component's material, geometry and support structure are
+          structural_components; the erosion and deposition on its surface are
+          plasma_wall_interactions.
+      - quantity: a divertor plasma quantity such as the target heat flux in the plasma
+        neighbour: divertor_physics
+        rule: >-
+          The plasma heat flux arriving at the target is divertor_physics; the
+          target surface's erosion from it is plasma_wall_interactions.
+
+  divertor_physics:
+    scope: >-
+      The divertor region's plasma and its exhaust of heat and particles:
+      target loads, detachment, the radiation front and the ionisation and
+      recombination in the divertor. Judge by whether the quantity concerns
+      the divertor plasma rather than the edge globally or a wall surface.
+    includes:
+      - target heat and particle fluxes — `divertors/*`
+      - detachment onset, the radiation front and its position
+      - divertor plasma temperature, density and ionisation state
+      - the divertor's neutral and impurity radiation
+    excludes:
+      - quantity: a general scrape-off-layer quantity away from the divertor target
+        neighbour: edge_plasma_physics
+        rule: >-
+          The edge plasma at large is edge_plasma_physics; the divertor's own
+          target and exhaust physics is divertor_physics.
+      - quantity: a wall-surface erosion or retention quantity
+        neighbour: plasma_wall_interactions
+        rule: >-
+          The plasma arriving at the target is divertor_physics; the surface
+          it erodes is plasma_wall_interactions.
+      - quantity: an MHD instability during a disruption at the divertor
+        neighbour: magnetohydrodynamics
+        rule: >-
+          The instability is magnetohydrodynamics; the plasma exhaust and
+          target load that follow are divertor_physics.
+
+  fueling:
+    scope: >-
+      The injection of particles into a plasma and the systems that deliver
+      them: gas puffing, pellets and shattered-pellet injection, and the
+      resulting transport of injected neutrals and their ionisation source.
+      Judge by whether the quantity concerns the delivery or the source of
+      particles rather than the plasma's own density.
+    includes:
+      - gas injection rates, valve and puff quantities — `gas_injection/*`
+      - pellet quantities — velocity, mass, ablation rate — `pellets/*`
+      - shattered-pellet injection quantities — `spi/*`
+      - the ionisation source and density deposition from injected particles
+    excludes:
+      - quantity: the plasma's own density profile
+        neighbour: core_plasma_physics
+        rule: >-
+          The delivered particles are fueling; the density the plasma holds as a
+          result is core_plasma_physics.
+      - quantity: a pumping or plant component
+        neighbour: plant_systems
+        rule: >-
+          The gas and pellet systems that inject are fueling; the pumping and
+          gas-supply plant that supports them is plant_systems.
+      - quantity: a particle source term for the transport equations
+        neighbour: transport
+        rule: >-
+          The injection itself and its deposition source are fueling; the
+          transport of the injected particles through the plasma is
+          transport.
+
+  fast_particles:
+    scope: >-
+      Populations of particles far from the thermal bulk — their distribution
+      functions, slowing-down, thermalisation, and the instabilities they
+      drive. Judge by whether the quantity describes a suprathermal
+      population's distribution or its interaction with the plasma.
+    includes:
+      - fast-ion and fast-electron distribution functions — `distributions/*`
+      - slowing-down and thermalisation quantities
+      - fast-particle sources and their deposition — `distribution_sources/*`
+      - fast-particle-driven modes and their effect on the distribution
+    excludes:
+      - quantity: a data-product or solver-numerics wrapper around a distribution
+        neighbour: computational_workflow
+        rule: >-
+          A distribution of fast particles is fast_particles even when its IDS
+          also holds solver numerics or auxiliary data; the domain follows the
+          subject of the quantity, never the container it is filed in.
+      - quantity: a neutral-beam heating quantity
+        neighbour: auxiliary_heating
+        rule: >-
+          The beam and the power it injects are auxiliary_heating; the
+          suprathermal population it creates in the plasma is fast_particles.
+      - quantity: a thermal plasma profile
+        neighbour: core_plasma_physics
+        rule: >-
+          The bulk thermal population is core_plasma_physics; the small
+          suprathermal tail is fast_particles.
+
+  runaway_electrons:
+    scope: >-
+      The runaway electron population produced when the accelerating
+      electric field exceeds collisional drag: its generation, avalanche
+      growth, confinement and loss. Judge by whether the quantity is specific
+      to a runaway population rather than a general fast electron.
+    includes:
+      - runaway electron density, current and energy distribution
+      - primary generation and avalanche growth rates
+      - runaway loss and wall-stability quantities
+      - the runaway population's effect during disruptions — `runaway_electrons/*`
+    excludes:
+      - quantity: a general suprathermal fast-particle distribution
+        neighbour: fast_particles
+        rule: >-
+          A suprathermal population in general is fast_particles; the specific
+          runaway population driven by the electric field is
+          runaway_electrons.
+      - quantity: the disruption that produced the runaways
+        neighbour: magnetohydrodynamics
+        rule: >-
+          The disruption event is magnetohydrodynamics; the runaway
+          population it generates is runaway_electrons.
+      - quantity: a control action to mitigate the runaways
+        neighbour: plasma_control
+        rule: >-
+          The runaway population is runaway_electrons; the commanded mitigation
+          and its feedback are plasma_control.
+
+  particle_measurement_diagnostics:
+    scope: >-
+      Diagnostics that count or characterise particles to measure the plasma,
+      chiefly Thomson scattering and other particle-based systems. Judge by
+      whether the instrument works by scattering or collecting particles,
+      rather than by an electromagnetic wave or the radiation the plasma
+      emits.
+    includes:
+      - Thomson scattering spectra and the profiles they infer — `thomson_scattering/*`
+      - Langmuir probe current-voltage characteristics — `langmuir_probes/*`
+      - mass-spectrometer and neutral particle measurement
+      - the diagnostic's own configuration — channels, geometry, calibration
+    excludes:
+      - quantity: a spectrum that measures emission rather than scattering
+        neighbour: spectroscopy
+        rule: >-
+          A scattering or particle-collection measurement is
+          particle_measurement_diagnostics; an emission spectrum analysed for
+          species, temperature or field is spectroscopy.
+      - quantity: a wave-based diagnostic such as interferometry or reflectometry
+        neighbour: electromagnetic_wave_diagnostics
+        rule: >-
+          Counting particles is particle_measurement_diagnostics; probing with
+          electromagnetic waves and detecting their propagation is
+          electromagnetic_wave_diagnostics.
+      - quantity: the plasma profile derived from the measurement
+        neighbour: core_plasma_physics
+        rule: >-
+          The instrument's raw and calibrated signals are the diagnostic
+          domain; the physical profile reconstructed from them is
+          core_plasma_physics.
+
+  electromagnetic_wave_diagnostics:
+    scope: >-
+      Diagnostics that probe the plasma with electromagnetic waves and detect
+      the wave's propagation: interferometry, polarimetry, reflectometry and
+      refractometry. Judge by whether the instrument transmits a wave and
+      measures its phase, polarisation or reflection.
+    includes:
+      - line-integrated density from interferometry — `interferometer/*`
+      - Faraday-rotation and polarimetry measurements — `polarimeter/*`
+      - reflectometry and refractometry profiles and fluctuation spectra — `reflectometer_profile/*`, `reflectometer_fluctuation/*`
+      - the diagnostic's own frequencies, chords and calibration
+    excludes:
+      - quantity: a wave propagating in the plasma as physics
+        neighbour: waves
+        rule: >-
+          A probe instrument and its measured signal are
+          electromagnetic_wave_diagnostics; the plasma wave physics the probe
+          studies is waves.
+      - quantity: an emission line measured with a spectrometer
+        neighbour: spectroscopy
+        rule: >-
+          Transmitting a wave to probe the plasma is
+          electromagnetic_wave_diagnostics; passively measuring emitted light
+          is spectroscopy.
+      - quantity: a particle-counting measurement
+        neighbour: particle_measurement_diagnostics
+        rule: >-
+          A wave probe is electromagnetic_wave_diagnostics; a measurement that
+          counts particles or their scattering is
+          particle_measurement_diagnostics.
+
+  radiation_measurement_diagnostics:
+    scope: >-
+      Diagnostics of the radiation the plasma emits or of the imaging of it:
+      bolometry, X-ray and bremsstrahlung detection, and the visible, IR and
+      X-ray cameras. Judge by whether the instrument records radiated power,
+      photon flux or an image, rather than a spectrum resolved in wavelength.
+    includes:
+      - radiated power from bolometry — `bolometer/*`
+      - soft, hard X-ray and bremsstrahlung measurements — `soft_x_rays/*`, `hard_x_rays/*`, `bremsstrahlung_visible/*`
+      - visible, infrared and X-ray camera images — `camera_visible/*`, `camera_ir/*`, `camera_x_rays/*`
+      - imaging system configuration, sightlines and calibration
+    excludes:
+      - quantity: an emission spectrum analysed for species or temperature
+        neighbour: spectroscopy
+        rule: >-
+          Recording radiated power, photon flux or an image is
+          radiation_measurement_diagnostics; resolving an emission spectrum is
+          spectroscopy. The failing case this file exists to separate: a
+          spectrometer's line-of-sight emission belongs to spectroscopy, not
+          to radiation_measurement_diagnostics.
+      - quantity: a magnetic measurement
+        neighbour: magnetic_field_diagnostics
+        rule: >-
+          Measured photons or radiated power are
+          radiation_measurement_diagnostics; measured magnetic flux or field
+          is magnetic_field_diagnostics.
+      - quantity: neutron or fusion-product radiation
+        neighbour: neutronics
+        rule: >-
+          Electromagnetic radiation (photons) is
+          radiation_measurement_diagnostics; neutron and fusion-product
+          measurement is neutronics.
+
+  magnetic_field_diagnostics:
+    scope: >-
+      Diagnostics of the magnetic field and flux: magnetic probes, flux loops,
+      Rogowski coils and diamagnetic loops. Judge by whether the instrument
+      measures the magnetic field, its flux or the current it reveals.
+    includes:
+      - magnetic probe and Mirnov coil signals — `magnetics/*`
+      - flux loops and the poloidal flux they measure
+      - Rogowski coil and the current it measures
+      - diamagnetic-loop and saddle-loop measurements
+    excludes:
+      - quantity: the equilibrium reconstructed from the measurements
+        neighbour: equilibrium
+        rule: >-
+          The coils' signals are magnetic_field_diagnostics; the flux-surface
+          geometry reconstructed from them is equilibrium.
+      - quantity: a coil or magnet as a machine system
+        neighbour: magnetic_field_systems
+        rule: >-
+          A sensing loop that measures the field is
+          magnetic_field_diagnostics; a magnet or coil that generates the
+          field is magnetic_field_systems.
+      - quantity: an imaging or radiation measurement
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          Measuring the magnetic field is magnetic_field_diagnostics;
+          measuring emitted radiation is
+          radiation_measurement_diagnostics.
+
+  mechanical_measurement_diagnostics:
+    scope: >-
+      Diagnostics of mechanical and structural quantities of machine
+      components: strain, vibration, displacement and inertial or pressure
+      measurement. Judge by whether the instrument measures the mechanical
+      state of a component rather than the plasma or its fields.
+    includes:
+      - strain and stress gauges on machine components
+      - vibration, acceleration and displacement measurement — `operational_instrumentation/*`
+      - pressure and barometry measurement — `barometry/*`
+      - structural monitoring instrumentation
+    excludes:
+      - quantity: a plasma parameter measurement
+        neighbour: plasma_measurement_diagnostics
+        rule: >-
+          A measurement of a machine component's mechanical state is
+          mechanical_measurement_diagnostics; a measurement of a plasma
+          parameter is plasma_measurement_diagnostics.
+      - quantity: the structural component itself
+        neighbour: structural_components
+        rule: >-
+          The structure is structural_components; the instrument that measures
+          its mechanical state is mechanical_measurement_diagnostics.
+      - quantity: a magnetic-field measurement
+        neighbour: magnetic_field_diagnostics
+        rule: >-
+          Measuring strain or vibration is
+          mechanical_measurement_diagnostics; measuring the magnetic field is
+          magnetic_field_diagnostics.
+
+  plasma_measurement_diagnostics:
+    scope: >-
+      General plasma-parameter measurement instruments that do not belong to
+      one of the more specific diagnostic families. Judge by whether the
+      instrument measures a plasma parameter directly and has no stronger
+      home above.
+    includes:
+      - diagnostic instruments whose subject is a plasma parameter and whose method does not fix a more specific family
+      - the configuration and calibration of such a general instrument
+    excludes:
+      - quantity: a measurement that a more specific diagnostic domain already owns
+        neighbour: magnetic_field_diagnostics
+        rule: >-
+          Choose the specific family when the method fixes it — magnetic,
+          Thomson/particle, wave, radiation or spectroscopic; this domain
+          holds only what none of them owns.
+      - quantity: a plasma state inferred from a measurement
+        neighbour: core_plasma_physics
+        rule: >-
+          The instrument and its signal are plasma_measurement_diagnostics;
+          the plasma state inferred from it is core_plasma_physics.
+      - quantity: a mechanical measurement of a machine component
+        neighbour: mechanical_measurement_diagnostics
+        rule: >-
+          A plasma-parameter instrument is plasma_measurement_diagnostics; a
+          component's mechanical state is
+          mechanical_measurement_diagnostics.
+
+  spectroscopy:
+    scope: >-
+      Passive emission spectroscopy and its analysis: the spectrum of light
+      the plasma emits, resolved in wavelength and interpreted for species,
+      temperature, flows or the motional Stark effect. Judge by whether the
+      quantity is an emission spectrum or an analysis of one.
+    includes:
+      - visible, UV, X-ray-crystal and mass emission spectra — `spectrometer_visible/*`, `spectrometer_uv/*`, `spectrometer_x_ray_crystal/*`, `spectrometer_mass/*`
+      - impurity line identification and intensity
+      - charge-exchange spectroscopy — `charge_exchange/*`
+      - motional Stark effect measurement of the field — `mse/*`
+    excludes:
+      - quantity: a broadband radiated-power or imaging measurement
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          A spectrum resolved in wavelength is spectroscopy; a bolometric
+          power or a camera image is radiation_measurement_diagnostics. The
+          failing case this file exists to separate: a spectrometer's emission
+          is spectroscopy even though a spectrometer measures radiation.
+      - quantity: a scattering measurement that counts particles
+        neighbour: particle_measurement_diagnostics
+        rule: >-
+          A passively measured emission spectrum is spectroscopy; a
+          scattering or particle-counting measurement is
+          particle_measurement_diagnostics.
+      - quantity: a wave-transmission probe
+        neighbour: electromagnetic_wave_diagnostics
+        rule: >-
+          Measuring emitted light is spectroscopy; transmitting a wave to probe
+          the plasma is electromagnetic_wave_diagnostics.
+
+  neutronics:
+    scope: >-
+      Neutron and fusion-product measurement and the activation they cause:
+      neutron detection, fusion-product counting and the neutronics of the
+      machine. Judge by whether the quantity concerns neutrons or fusion
+      products and their interactions with materials.
+    includes:
+      - neutron diagnostics — `neutron_diagnostic/*`
+      - fusion-product counting and the neutron emission rate
+      - neutron activation and dose quantities
+      - the neutron flux and spectrum at a measurement location
+    excludes:
+      - quantity: an electromagnetic-radiation measurement
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          Neutrons and fusion products are neutronics; photons, X-rays and
+          imaging are radiation_measurement_diagnostics.
+      - quantity: the stored-energy or power balance of the plasma
+        neighbour: core_plasma_physics
+        rule: >-
+          The plasma's energy state is core_plasma_physics; the neutron
+          emission and its measurement are neutronics.
+      - quantity: a structural component that is neutron-activated
+        neighbour: structural_components
+        rule: >-
+          The component is structural_components; the neutronics of activation
+          and dose in it is neutronics.
+
+  plasma_control:
+    scope: >-
+      The control of the plasma in real time: position and shape control,
+      feedback loops and the reference and actuator signals that hold a
+      discharge on its trajectory. Judge by whether the quantity is a control
+      reference, a feedback signal or an actuator command rather than a plasma
+      state.
+    includes:
+      - reference and target position, shape and current profiles — `control/*`, `controllers/*`
+      - feedback loop quantities, gains and error signals
+      - actuator commands for the poloidal field — `pf_active/*`
+      - plasma-shape and position control during the discharge
+    excludes:
+      - quantity: the plasma state or equilibrium being controlled
+        neighbour: equilibrium
+        rule: >-
+          The commanded or reference configuration is plasma_control; the
+          achieved equilibrium is equilibrium.
+      - quantity: a machine system that generates the field
+        neighbour: magnetic_field_systems
+        rule: >-
+          The coil that generates the field is magnetic_field_systems; the
+          control command that sets its current is plasma_control.
+      - quantity: an MHD event the controller reacts to
+        neighbour: magnetohydrodynamics
+        rule: >-
+          The mode is magnetohydrodynamics; the control response to it is
+          plasma_control.
+
+  machine_operations:
+    scope: >-
+      The operation of the machine around a discharge: pulse scheduling, the
+      shot cycle, workflow orchestration and operational metadata. Judge by
+      whether the quantity concerns when and whether the machine runs rather
+      than the physics it produces.
+    includes:
+      - pulse schedules and the shot cycle — `pulse_schedule/*`
+      - workflow and orchestration metadata — `workflow/*`
+      - operational configuration that is not physics — `real_time_data/*`
+      - dataset description and fair-metadata records tied to an operation
+    excludes:
+      - quantity: a plasma-control reference during the discharge
+        neighbour: plasma_control
+        rule: >-
+          A command issued during the plasma is plasma_control; the schedule of
+          when the shot runs and its phase is machine_operations.
+      - quantity: a summary data product
+        neighbour: data_management
+        rule: >-
+          Operational metadata about a shot is machine_operations; the archived
+          summary data products from it are data_management.
+      - quantity: a plant-system state
+        neighbour: plant_systems
+        rule: >-
+          The operational schedule of a shot is machine_operations; the state
+          of the plant that supports it is plant_systems.
+
+  plasma_initiation:
+    scope: >-
+      The start of a discharge: breakdown of the gas, the initial ionisation
+      front, and the physics by which a burnthrough plasma is established.
+      Judge by whether the quantity describes the very start of the plasma,
+      before it is a confined, controlled discharge.
+    includes:
+      - breakdown and start-up quantities — `plasma_initiation/*`
+      - the ionisation front position and speed
+      - loop voltage and field-null configuration during breakdown
+      - burnthrough and the early-current-rise phase
+    excludes:
+      - quantity: a plasma-control reference for the discharge that follows
+        neighbour: plasma_control
+        rule: >-
+          The breakdown itself is plasma_initiation; controlling the confined
+          plasma that forms after it is plasma_control.
+      - quantity: a magnetic-field-system definition
+        neighbour: magnetic_field_systems
+        rule: >-
+          The field-null configuration as a start-up physics quantity is
+          plasma_initiation; the coils that produce it are
+          magnetic_field_systems.
+      - quantity: an operational schedule
+        neighbour: machine_operations
+        rule: >-
+          The physics of the breakdown is plasma_initiation; the schedule that
+          triggers it is machine_operations.
+
+  magnetic_field_systems:
+    scope: >-
+      The machines that generate and confine the magnetic field: coil systems,
+      superconducting magnets and the iron or ferritic field-shaping
+      infrastructure. Judge by whether the quantity describes the hardware
+      that produces the field rather than the field it produces or measures.
+    includes:
+      - poloidal field coil systems and their currents — `pf_active/*`, `pf_passive/*`
+      - toroidal field coils — `tf/*`
+      - non-axisymmetric and error-field coils — `coils_non_axisymmetric/*`
+      - iron core, ferritic and electromagnetic-coupling infrastructure — `iron_core/*`, `ferritic/*`, `em_coupling/*`
+    excludes:
+      - quantity: the magnetic field or flux reconstructed in the plasma
+        neighbour: equilibrium
+        rule: >-
+          The coils that make the field are magnetic_field_systems; the
+          equilibrium field and its surfaces are equilibrium.
+      - quantity: a measurement of the field
+        neighbour: magnetic_field_diagnostics
+        rule: >-
+          A generator (a magnet or coil) is magnetic_field_systems; a sensor
+          (a loop or probe) is magnetic_field_diagnostics.
+      - quantity: a control command that sets a coil current
+        neighbour: plasma_control
+        rule: >-
+          The coil hardware is magnetic_field_systems; the control command
+          that sets its current is plasma_control.
+
+  structural_components:
+    scope: >-
+      The static engineering structure of the device: vacuum vessel, cryostat,
+      supports and the structural definition of components — materials,
+      geometry and load paths. Judge by whether the quantity describes a
+      structure that holds the machine rather than the plasma physics around
+      it.
+    includes:
+      - vacuum vessel and cryostat structures — `cryostat/*`
+      - structural supports and their mechanical definitions
+      - breeding-blanket structures and component geometry — `breeding_blanket/*`
+      - component material and geometry definitions
+    excludes:
+      - quantity: an interaction of plasma with a surface
+        neighbour: plasma_wall_interactions
+        rule: >-
+          The component structure is structural_components; the erosion,
+          deposition or heat load on its surface is plasma_wall_interactions.
+      - quantity: a field-generating magnet
+        neighbour: magnetic_field_systems
+        rule: >-
+          A magnetic coil system is magnetic_field_systems; the passive
+          structure that supports it is structural_components.
+      - quantity: a plant system that serves the structure
+        neighbour: plant_systems
+        rule: >-
+          The structure is structural_components; the supply, cooling or
+          vacuum plant that serves it is plant_systems.
+
+  plant_systems:
+    scope: >-
+      The auxiliaries and balance of plant that support a discharge without
+      being plasma-facing or field-generating: power supplies, cooling,
+      vacuum and gas handling. Judge by whether the quantity describes
+      supporting infrastructure that acts on the machine as a whole.
+    includes:
+      - power-supply and electrical plant quantities
+      - cooling-water and thermal plant quantities
+      - vacuum pumping and gas-handling plant — `gas_pumping/*`
+      - balance-of-plant monitoring — `balance_of_plant/*`
+    excludes:
+      - quantity: the pellet, gas or SPI system that injects into the plasma
+        neighbour: fueling
+        rule: >-
+          The injection system and its delivered particles are fueling; the
+          gas handling, pumping and supply plant behind it is plant_systems.
+      - quantity: a heating system's launcher or its power
+        neighbour: auxiliary_heating
+        rule: >-
+          The launcher and its delivered power are auxiliary_heating; the power
+          supply and cooling that serve it are plant_systems.
+      - quantity: the field-generating coil system
+        neighbour: magnetic_field_systems
+        rule: >-
+          The coils are magnetic_field_systems; the plant that powers and cools
+          them is plant_systems.
+
+  data_management:
+    scope: >-
+      Summary data products, integrated analysis results and the archival and
+      FAIR metadata of a dataset. Judge by whether the quantity is a data
+      product assembled from a run, rather than a direct physics measurement
+      or state.
+    includes:
+      - summary and integrated global quantities — `summary/*`
+      - assembled data products that combine several sources
+      - dataset description, provenance and FAIR metadata — `dataset_description/*`, `dataset_fair/*`
+      - archives and derived products intended for downstream use
+    excludes:
+      - quantity: a directly measured or modelled plasma state
+        neighbour: core_plasma_physics
+        rule: >-
+          A plasma profile is core_plasma_physics; a product that summarises
+          many of them is data_management. The summary's own container decides
+          the domain, not the physical quantity it happens to name.
+      - quantity: operational metadata about a shot
+        neighbour: machine_operations
+        rule: >-
+          Operational metadata about how a shot ran is machine_operations; the
+          archived data products from it are data_management.
+      - quantity: atomic or molecular reference data
+        neighbour: computational_workflow
+        rule: >-
+          A data product from a run is data_management; external atomic and
+          molecular reference data is computational_workflow.
+
+  computational_workflow:
+    scope: >-
+      Computational and auxiliary infrastructure: atomic and molecular data,
+      geometry definitions, generic temporary containers and the numerics that
+      support a solver. Judge by whether the quantity is tooling or reference
+      data rather than physics.
+    includes:
+      - atomic and molecular data services — `amns_data/*`
+      - geometry definitions and computational geometry — `geometry/*`
+      - generic and temporary containers — `temporary/*`
+      - solver numerics and workflow tooling that carry no physics subject
+    excludes:
+      - quantity: a physics quantity that a numeric or profile container happens to hold
+        neighbour: core_plasma_physics
+        rule: >-
+          A physics quantity is its own domain even when it is stored in a
+          solver-numerics or temporary container. The failing case this file
+          exists to separate: a kinetic profile or a fast-particle
+          distribution must not fall to computational_workflow merely because
+          its IDS also carries numerics.
+      - quantity: an archived summary product
+        neighbour: data_management
+        rule: >-
+          Tooling and reference data are computational_workflow; a summary
+          product assembled from a run is data_management.
+      - quantity: a structural geometry of a real component
+        neighbour: structural_components
+        rule: >-
+          A computational geometry definition is computational_workflow; the
+          structure of a real component is structural_components.
+
+  general:
+    scope: >-
+      Quantities that genuinely appear across many domains or carry no single
+      physics subject, so no narrower domain fits. Hold this back: it is a
+      last resort, and a path whose subject is knowable belongs in that
+      subject's domain.
+    includes:
+      - universal quantities that recur identically across many domains and have no single subject
+      - structural or placeholder quantities whose subject cannot be established
+    excludes:
+      - quantity: a quantity whose subject is knowable
+        neighbour: core_plasma_physics
+        rule: >-
+          Choose the subject's own domain over general whenever the subject can
+          be named; general is only for what remains after every narrower
+          domain has been considered and rejected.
+      - quantity: an auxiliary or tooling container
+        neighbour: computational_workflow
+        rule: >-
+          Tooling and reference data are computational_workflow; general is for
+          physical quantities with no single subject.
+      - quantity: a summary data product
+        neighbour: data_management
+        rule: >-
+          A product assembled from a run is data_management; general is for a
+          physical quantity itself, not a container around many, so a summary
+          product does not default to general.
+
+  gyrokinetics:
+    scope: >-
+      The gyrokinetic model's own quantities: gyrocenter moments, the
+      gyrokinetic distribution and its fluxes, expressed in the model's
+      normalised coordinates. Judge by whether the quantity is defined within
+      the gyrokinetic framework rather than in measured machine coordinates.
+    includes:
+      - gyrokinetic distribution and gyrocenter moments — `gyrokinetics/*`
+      - normalised turbulent fluxes and their spectra in gyrokinetic coordinates — `gyrokinetics_local/*`
+      - linear eigenmodes and their frequencies and growth rates
+      - the gyrokinetic simulation's own input and output quantities
+    excludes:
+      - quantity: a broadband turbulence spectrum measured in the machine
+        neighbour: turbulence
+        rule: >-
+          A quantity in the gyrokinetic model's own normalised coordinates is
+          gyrokinetics; a fluctuation measured in the machine's coordinates is
+          turbulence.
+      - quantity: a coherent MHD mode and its growth rate
+        neighbour: magnetohydrodynamics
+        rule: >-
+          A fluid-scale coherent instability is magnetohydrodynamics; a
+          gyrokinetic eigenmode is gyrokinetics.
+      - quantity: an experimental transport flux derived from a gyrokinetic model
+        neighbour: transport
+        rule: >-
+          The model's internal flux is gyrokinetics; the mean transport flux it
+          predicts or that is measured in the plasma is transport.
