@@ -10346,10 +10346,10 @@
   "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
-    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=\"$PWD\" uv run pytest -p no:cacheprovider --basetemp=$TMPDIR/bt-after tests/cli/test_sn_identity_fold.py tests/graph/test_identity_fold.py tests/llm/test_sn_edit_cascade_reporting.py tests/standard_names/test_accepted_cohort_restage.py tests/standard_names/test_cascade_atomicity.py tests/standard_names/test_edit_cli.py tests/standard_names/test_edit_engine.py tests/standard_names/test_edit_inline_review.py tests/standard_names/test_edit_parity.py tests/standard_names/test_edit_scope.py tests/standard_names/test_fold_dry_run_predicts_live.py tests/standard_names/test_fold_keeps_richer_prose.py tests/standard_names/test_lineage_edge_removal.py tests/standard_names/test_pinned_rename_refine.py tests/standard_names/test_pipeline_recovery_mechanics.py tests/standard_names/test_refine_attempt_budget.py tests/standard_names/test_rename_carries_sources.py tests/standard_names/test_rename_cascade.py tests/standard_names/test_rename_unit_derivation.py tests/standard_names/test_scoped_edit_keeps_its_scope.py tests/standard_names/test_sn_approve.py tests/standard_names/test_sn_edit_kind.py tests/standard_names/test_source_backing_removal.py tests/standard_names/test_source_refresh.py tests/standard_names/test_source_refresh_docs_requeue.py tests/standard_names/test_target_load_unit_resolution.py tests/standard_names/test_tombstone_supersede.py -> 414 passed, 10 deselected, exit 0",
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=\"$PWD\" uv run pytest -p no:cacheprovider --basetemp=$TMPDIR/bt-doc tests/standard_names/test_edit_engine.py",
     "exit_status": 0,
     "log_digest": null,
-    "log_path": "PYTHONPATH=\\\"$PWD\\\" uv run pytest -p no:cacheprovider --basetemp=$TMPDIR/bt-doc tests/standard_names/test_edit_engine.py\" /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005218473863-sib-docs-edit-pending/after-edit-engine.log"
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T005218473863-sib-docs-edit-pending/after-edit-engine.log"
   },
   "impl_move": {
     "at_complete": null,
