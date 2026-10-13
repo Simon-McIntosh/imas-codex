@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf">
 </head>
@@ -120,7 +120,8 @@
       committed 2026-10-11T21:08:21Z). The cutover is 2026-10-11T21:08:54Z, when the first run with that commit loaded
       started; the run before it took SIGTERM at 21:08:29Z and finished its last batches with the old code, so the
       commit time would admit them. The predicate is <code>enriched_at</code> at or after the cutover. It holds today
-      for 14,190 JT-60SA signals and for no JET signal. JET was enriched earlier by another model and joins only when it is
+      for 14,190 JT-60SA signals at the time of that derivation, 14,312 when the labels were pooled, and for no JET
+      signal; the count grows as enrichment continues. JET was enriched earlier by another model and joins only when it is
       re-extracted (§11). The predicate and its cutover live in the fixture as data, not code. A labelled signal that is
       no longer eligible fails the fixture by name rather than being skipped. The fixture was first written with
       2026-10-11T19:08:21Z, two hours early, which admitted 801 signals enriched before the fix, two of the held-out
@@ -206,8 +207,10 @@
       <code>imas_codex/search/fusion.py</code>, which exports <code>rrf_fuse</code> and <code>RRF_K</code> and nothing
       else, and have the standard-name search and these four callers import it from there. This moves a definition
       rather than adding one. Do not write a second fusion. The code path fuses three streams: chunk vector, chunk text
-      with its reference hits, and code-example vector, which today adds 0.05 to the larger of its own score and the chunk's. Signal search over-fetches 100 vector and 50 full-text candidates before fusing, the prototype's
-      values, then cuts to <code>k</code>. <code>_vector_search_signals</code> duplicates
+      with its reference hits, and code-example vector, which today adds 0.05 to the larger of its own score and the chunk's. Signal search over-fetches 100 vector candidates and a full-text stream before fusing, then cuts to
+      <code>k</code>. The full-text stream is requested at 50, the prototype's value, and
+      <code>_text_search_signals</code> returns up to twice its argument, so it carries up to 100 rows in the product and
+      the harness alike. <code>_vector_search_signals</code> duplicates
       <code>_find_signals_semantic</code> in <code>imas_codex/graph/domain_queries.py</code>: both build the
       <code>facility_id</code>-prefiltered query over <code>facility_signal_desc_embedding</code>. Raising the pool in one
       copy would leave the two disagreeing, so give that query one owner and have the other call it, adding no helper
