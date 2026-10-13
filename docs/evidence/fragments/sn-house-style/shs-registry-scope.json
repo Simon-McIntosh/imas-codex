@@ -1,12 +1,11 @@
 {
  "registry": "concepts.yml",
- "registry_commit": "imas-standard-names c2db47e",
+ "registry_commit": "imas-standard-names 18b78cd",
  "ruled_by": "coordinator",
  "ruled_at": "2026-10-13",
  "rule": "a token gets a concept entry only when one canonical equation defines every name that carries it",
  "counts": {
   "no_concept_entry": 92,
-  "awaiting_lead": 4,
   "covered_by_entry": 1,
   "accessor_gap": 3
  },
@@ -265,12 +264,6 @@
    "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
   },
   {
-   "token": "inboard_midplane",
-   "kind": "position",
-   "ruling": "awaiting_lead",
-   "reason": "as outboard_midplane"
-  },
-  {
    "token": "inlet",
    "kind": "position",
    "ruling": "no_concept_entry",
@@ -287,12 +280,6 @@
    "kind": "object",
    "ruling": "no_concept_entry",
    "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
-  },
-  {
-   "token": "internal_inductance",
-   "kind": "physical_base",
-   "ruling": "awaiting_lead",
-   "reason": "li(1), li(2) and li(3) are distinct normalizations; the lead rules which one the base means before an equation is written"
   },
   {
    "token": "ion_cyclotron_heating_antenna",
@@ -385,12 +372,6 @@
    "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
   },
   {
-   "token": "outboard_midplane",
-   "kind": "position",
-   "ruling": "awaiting_lead",
-   "reason": "the vocabulary follows the DD midplane identifier (default dr_dz_zero_sep), not Z = Z_axis; the lead rules which definition the concept carries"
-  },
-  {
    "token": "outlet",
    "kind": "position",
    "ruling": "no_concept_entry",
@@ -449,12 +430,6 @@
    "kind": "object",
    "ruling": "no_concept_entry",
    "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
-  },
-  {
-   "token": "poloidal_angle",
-   "kind": "geometric_base",
-   "ruling": "awaiting_lead",
-   "reason": "its sign and zero depend on the COCOS convention; the roster documentation measures it clockwise from the low-field side, which the lead rules on before an equation is written"
   },
   {
    "token": "poloidal_field_coil",
@@ -612,5 +587,11 @@
    "ruling": "no_concept_entry",
    "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
   }
- ]
+ ],
+ "entries_after_lead_ruling": {
+  "poloidal_angle": "zero on the outboard midplane, increasing clockwise viewed with R right and Z up",
+  "outboard_midplane": "dR/dZ = 0 on the separatrix, R > R_axis (DD midplane identifier default)",
+  "inboard_midplane": "dR/dZ = 0 on the separatrix, R < R_axis",
+  "internal_inductance": "li(3) normalization"
+ }
 }
