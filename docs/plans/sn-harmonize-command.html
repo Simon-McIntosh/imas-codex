@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="38">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -162,6 +162,35 @@
       through <code>sn edit</code>.
     </p>
     <p>
+      <strong>Convergence repairs.</strong> One forced apply over the 17-member family did
+      not converge it, and a no-spend diagnosis
+      (<a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-convergence-diagnosis.html">record</a>)
+      found why: the template, the equation and the anchor all reached every prompt, but
+      nothing downstream enforces them. Four repairs follow, in the order the evidence ranks
+      them, before the family is applied again:
+    </p>
+    <ol>
+      <li><strong>Report links resolve graph-wide.</strong> The report built its link-target
+        lookup from the scoped names only, so 19 valid references to names outside the family
+        counted as dead links. A target is dead only when no <code>StandardName</code> carries
+        it.</li>
+      <li><strong>Acceptance enforces the opening.</strong> The documentation axis accepts on
+        the review score alone; the house-style <code>template_opening</code> finding is a
+        warning nobody reads, so 16 of 17 non-conforming openings were accepted. A
+        documentation whose first line matches none of its selected templates is refined, not
+        accepted. The check runs on the documentation axis in
+        <code>imas_codex/standard_names/workers.py</code>, before
+        <code>persist_reviewed_docs</code>, and reuses the existing lint.</li>
+      <li><strong>The anchor is pinned for a run.</strong> <code>select_anchor</code> ranks
+        current accepted scores, so a partial run that reset the anchor let a replan pick
+        another member, and a score tie picked a third by id. A run records its anchor, and a
+        continuation of the same scope run reuses it.</li>
+      <li><strong>Members hold the anchor's equation.</strong> When the accepted anchor states
+        the flux-surface-average equation, a member is accepted only if its own display
+        equation for that concept is the anchor's, character for character; a member that
+        states none is unaffected.</li>
+    </ol>
+    <p>
       <strong>Done when:</strong> on the 17-member boundary-averaged density family, an apply
       leaves zero lint errors, one opening template and one flux-surface-average equation.
       Every member stays accepted on the documentation axis. A second
@@ -296,6 +325,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T114403646013-review-of-shc-convergence-diagnosis-c64dcdb7da7f" data-who="reckon-build" data-when="2026-10-13T11:54:42.062Z">
     <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T112005641242-shc-convergence-diagnosis.at-c64dcdb7da7f8c9d2dfe314f1b57321407faec1a.json — independent review of c64dcdb7d, six dimensions scored, no blocking findings</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261013T1210-convergence-diagnosis" data-who="reckon-build" data-when="2026-10-13T12:10:00Z">
+    <div class="r-comment-body"><p>The convergence diagnosis landed (merge <code>5252d447d</code>, review 104/120): every prompt carried the template, equation and anchor; nothing enforced them. §3 is re-planned with four repairs in the evidence's order (graph-wide report links, acceptance enforcing the opening, a pinned anchor, members holding the anchor's equation); the family is applied again only after them. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s3-convergence-diagnosis">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T063359699428-review-of-shc-score-regression-cec62409e711" data-who="reckon-build" data-when="2026-10-13T06:50:33.699Z">
     <div class="r-comment-body"><p>Review of run r-20261013T050709331171-shc-score-regression (base f2b0a0109, head cec62409e): goal_fidelity 18, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 18 (total 110); zero added failures; three follow-on findings, no blockers. Record: /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T050709331171-shc-score-regression.json</p></div>
