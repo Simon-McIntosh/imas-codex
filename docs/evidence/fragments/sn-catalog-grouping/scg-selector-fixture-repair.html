@@ -1,0 +1,111 @@
+<section id="scg-selector-fixture-repair">
+<h2>Repair fixtures that pass an IDS name where a physics domain belongs</h2>
+
+<p id="scg-selector-fixture-repair-summary">
+The declared-order domain selector raises <code>ValueError: Unknown physics domain</code>
+on a value that is not a <code>PhysicsDomain</code> member. Twelve tests that passed at the
+selector's base (<code>ef9f71261</code>) failed at its head because their fixtures gave a name
+an IDS name where a domain belongs: eleven fed <code>core_profiles</code>, one fed
+<code>magnetics</code>. Both are IDS names, not members of the 32-value
+<code>PhysicsDomain</code> vocabulary. The selector is correct to refuse them; no selector,
+allow-list or error handler was changed. Each fixture now carries a valid, fitting domain.
+</p>
+
+<h3 id="scg-selector-fixture-repair-fixtures">Fixtures changed (old value &rarr; new value)</h3>
+<table id="scg-selector-fixture-repair-fixture-table">
+<thead><tr><th>file</th><th>fixture / literal</th><th>old</th><th>new</th><th>why this domain</th></tr></thead>
+<tbody>
+<tr>
+<td><code>tests/standard_names/test_graph_ops.py</code></td>
+<td>new module fixture <code>valid_domain_names</code>, requested by the eleven
+    <code>TestWriteStandardNames</code> tests (each test signature renamed from the shared
+    <code>sample_standard_names</code>)</td>
+<td><code>core_profiles</code>, <code>magnetics</code></td>
+<td><code>core_plasma_physics</code>, <code>magnetic_field_diagnostics</code></td>
+<td>the tests exercise the write path and its Cypher; a core-profiles quantity
+    (<code>electron_temperature</code>) takes <code>core_plasma_physics</code> and a magnetics
+    quantity (<code>plasma_current</code>) takes <code>magnetic_field_diagnostics</code></td>
+</tr>
+<tr>
+<td><code>tests/standard_names/test_metadata_invariants.py</code></td>
+<td>new module fixture <code>valid_domain_names</code>, requested by the six
+    <code>TestWriteCypherInvariants</code>, <code>TestDDVersionConsistency</code> and
+    <code>TestWritePathRelationships</code> tests</td>
+<td><code>core_profiles</code>, <code>magnetics</code></td>
+<td><code>core_plasma_physics</code>, <code>magnetic_field_diagnostics</code></td>
+<td>same reasoning as above; the tests read the writer's Cypher, so only a valid domain is needed</td>
+</tr>
+<tr>
+<td><code>tests/standard_names/test_review_pipeline.py</code></td>
+<td>inline name literal in <code>test_audit_duplicate_candidates</code></td>
+<td><code>magnetics</code></td>
+<td><code>magnetic_field_diagnostics</code></td>
+<td>the test is about lexical duplicate blocking; the domain must still be valid for
+    the audit's grouping key to resolve</td>
+</tr>
+</tbody>
+</table>
+
+<p id="scg-selector-fixture-repair-scope-note">
+The two shared fixtures that carry the IDS-name values live in
+<code>tests/standard_names/conftest.py</code> (<code>sample_standard_names</code>, line 184
+<code>physics_domain="core_profiles"</code> and line 205 <code>physics_domain="magnetics"</code>),
+which is outside this node's granted write paths. The repair is therefore a module-local
+fixture that requests the shared fixture and replaces the two IDS names with valid members,
+leaving every other field identical. The shared fixture itself still carries the IDS names:
+correcting it there is one line per value and is recorded under <code>follow_ons</code>.
+</p>
+
+<h3 id="scg-selector-fixture-repair-callers">Production callers that can pass a non-<code>PhysicsDomain</code> string</h3>
+<p id="scg-selector-fixture-repair-callers-note">
+Traced from the four entry points <code>select_*</code>/<code>domain_key</code>/<code>pick_primary_domain</code>
+(all of which funnel into <code>domain_ranking.select_primary_domain</code>, which raises rather
+than falling back). "Live-reachable" means a value stored on a live graph node or supplied
+by a caller can reach the call.
+</p>
+<table id="scg-selector-fixture-repair-caller-table">
+<thead><tr><th>caller</th><th>value source</th><th>live-reachable?</th></tr></thead>
+<tbody>
+<tr><td><code>imas_codex/standard_names/graph_ops.py:5753</code> — <code>maybe_promote_domain(existing_primary, p["candidate"])</code></td>
+<td><code>candidate</code> is the incoming name dict's <code>physics_domain</code>
+(<code>_scalar_domain(n.get("physics_domain"))</code>); <code>existing_primary</code> is the stored
+node's <code>physics_domain</code></td>
+<td><strong>yes</strong> — a standard name whose stored <code>physics_domain</code> (or incoming dict)
+carries an IDS name or any non-member raises on every write. This is the path the repaired tests exercise.</td></tr>
+<tr><td><code>imas_codex/standard_names/consolidation.py:78</code> — <code>select_primary_domain(sources)</code></td>
+<td><code>sources</code> is the union of candidate <code>physics_domain</code> values
+(<code>consolidation.py:114</code>)</td>
+<td><strong>yes</strong> — same stored value can reach it through consolidation.</td></tr>
+<tr><td><code>imas_codex/standard_names/catalog_import.py:559</code> — <code>pick_primary_domain([str(d) for d in resolved])</code></td>
+<td><code>resolved</code> is <code>sn.physics_domain</code> or its producing source's
+<code>physics_domain</code>, read from the graph</td>
+<td><strong>yes</strong> — a stored non-member raises during a catalog divergence check.</td></tr>
+<tr><td><code>imas_codex/standard_names/export.py:1560</code> — <code>pick_primary_domain(physics_domains)</code></td>
+<td>node or resolved source <code>physics_domain</code></td>
+<td><strong>yes</strong> — a stored non-member raises on export.</td></tr>
+<tr><td><code>imas_codex/standard_names/domain_priority.py:25</code> twice — <code>domain_key</code></td>
+<td>its <code>fallback</code> argument does <em>not</em> catch the raise: <code>select_primary_domain(domains) or fallback</code>
+only handles <code>None</code></td>
+<td><strong>yes</strong> — every <code>domain_key</code> caller (review/consolidation.py:192,323;
+review/audits.py:348,538; review/enrichment.py:196; harmonize.py:578) reads stored
+<code>physics_domain</code>, so a stored non-member raises instead of falling back.</td></tr>
+<tr><td><code>imas_codex/standard_names/catalog_import.py:444</code> — <code>_derive_domain_from_path(yaml_path) or "unscoped"</code></td>
+<td>the catalog YAML basename (per-domain layout) or the literal <code>"unscoped"</code>, itself
+not a <code>PhysicsDomain</code> member</td>
+<td><strong>no</strong> in this module today — the derived value becomes the catalog-side entry's
+<code>physics_domain</code>, which the divergence check compares as a plain field; the only
+<code>pick_primary_domain</code> call (line 559) is on the graph side. Would raise if ever routed to the selector.</td></tr>
+<tr><td><code>imas_codex/standard_names/enrichment.py:100</code> — <code>reclassify_magnetics_domain</code></td>
+<td>a magnetics-IDS path's domain</td>
+<td>n/a — this IDS-name&rarr;domain derivation emits a valid member
+(<code>magnetic_field_diagnostics</code>), so it is the correct shape, not a defect.</td></tr>
+</tbody>
+</table>
+
+<p id="scg-selector-fixture-repair-method">
+No production code was changed. The fixture values were confirmed against the enum
+(<code>magnetics</code> and <code>core_profiles</code> are absent from all 32
+<code>PhysicsDomain</code> members and from the declared order in <code>domain_ranking.py</code>),
+and the twelve tests were reproduced failing at head before the repair.
+</p>
+</section>

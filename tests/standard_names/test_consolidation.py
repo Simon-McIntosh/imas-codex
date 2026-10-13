@@ -663,9 +663,13 @@ class TestResolvePhysicsDomains:
 
     def test_mixed_scalar_and_list(self):
         _, sources = _resolve_physics_domains(
-            ["equilibrium", ["transport", "magnetics"]]
+            ["equilibrium", ["transport", "magnetic_field_diagnostics"]]
         )
-        assert sorted(sources) == ["equilibrium", "magnetics", "transport"]
+        assert sorted(sources) == [
+            "equilibrium",
+            "magnetic_field_diagnostics",
+            "transport",
+        ]
 
 
 class TestMergeDuplicatesPhysicsDomain:

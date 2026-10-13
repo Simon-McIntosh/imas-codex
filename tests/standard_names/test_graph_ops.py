@@ -7,9 +7,29 @@ reset/clear filter plumbing
 
 from __future__ import annotations
 
+import copy
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+#: The shared sample names carry IDS names (``core_profiles``, ``magnetics``)
+#: where a physics domain belongs; the declared domain selector refuses a value
+#: that is not a PhysicsDomain member.  These tests exercise the write path and
+#: its Cypher, so they need a valid, fitting domain rather than an IDS name.
+_DOMAIN_REPLACEMENTS = {
+    "core_profiles": "core_plasma_physics",
+    "magnetics": "magnetic_field_diagnostics",
+}
+
+
+@pytest.fixture()
+def valid_domain_names(sample_standard_names: list[dict]) -> list[dict]:
+    """Shared sample names with valid physics-domain values."""
+    names = copy.deepcopy(sample_standard_names)
+    for entry in names:
+        domain = entry.get("physics_domain")
+        entry["physics_domain"] = _DOMAIN_REPLACEMENTS.get(domain, domain)
+    return names
 
 
 @pytest.fixture(autouse=True)
@@ -49,7 +69,7 @@ class TestWriteStandardNames:
         raise AssertionError("No MERGE StandardName query found in calls")
 
     def test_write_coalesce_preserves_existing(
-        self, sample_standard_names: list[dict]
+        self, valid_domain_names: list[dict]
     ) -> None:
         """Re-running write with None fields should NOT overwrite existing data.
 
@@ -60,7 +80,7 @@ class TestWriteStandardNames:
         mock_gc.query = MagicMock(return_value=[])
 
         # First write: all fields populated
-        self._call_write(sample_standard_names, mock_gc)
+        self._call_write(valid_domain_names, mock_gc)
 
         # Verify MERGE query uses coalesce
         merge_call = self._find_merge_call(mock_gc)
@@ -97,12 +117,12 @@ class TestWriteStandardNames:
         result = write_standard_names([])
         assert result == 0
 
-    def test_dd_relationship_created(self, sample_standard_names: list[dict]) -> None:
+    def test_dd_relationship_created(self, valid_domain_names: list[dict]) -> None:
         """DD-sourced names should create (IMASNode)-[:HAS_STANDARD_NAME]->(StandardName)."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        self._call_write(sample_standard_names, mock_gc)
+        self._call_write(valid_domain_names, mock_gc)
 
         # Find the DD relationship query
         dd_calls = [
@@ -116,13 +136,13 @@ class TestWriteStandardNames:
         assert "IMASNode" in dd_cypher
 
     def test_signal_relationship_created(
-        self, sample_standard_names: list[dict]
+        self, valid_domain_names: list[dict]
     ) -> None:
         """Signal-sourced names should create (FacilitySignal)-[:HAS_STANDARD_NAME]->(StandardName)."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        self._call_write(sample_standard_names, mock_gc)
+        self._call_write(valid_domain_names, mock_gc)
 
         # Find the signal relationship query
         signal_calls = [
@@ -139,12 +159,12 @@ class TestWriteStandardNames:
         assert "MEASURES" not in signal_cypher
         assert "FacilitySignal" in signal_cypher
 
-    def test_unit_relationship_created(self, sample_standard_names: list[dict]) -> None:
+    def test_unit_relationship_created(self, valid_domain_names: list[dict]) -> None:
         """Names with units should create (StandardName)-[:HAS_UNIT]->(Unit)."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        self._call_write(sample_standard_names, mock_gc)
+        self._call_write(valid_domain_names, mock_gc)
 
         # Find the HAS_UNIT relationship query
         unit_calls = [
@@ -176,12 +196,12 @@ class TestWriteStandardNames:
         ]
         assert len(unit_calls) == 0, "Should NOT create HAS_UNIT when no units"
 
-    def test_rich_fields_in_batch(self, sample_standard_names: list[dict]) -> None:
+    def test_rich_fields_in_batch(self, valid_domain_names: list[dict]) -> None:
         """All rich fields should be included in the batch parameter."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        self._call_write(sample_standard_names, mock_gc)
+        self._call_write(valid_domain_names, mock_gc)
 
         merge_call = self._find_merge_call(mock_gc)
         batch = merge_call[1]["batch"]
