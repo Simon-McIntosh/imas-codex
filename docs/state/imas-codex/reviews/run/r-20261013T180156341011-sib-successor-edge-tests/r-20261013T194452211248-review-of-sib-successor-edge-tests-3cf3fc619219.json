@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "clive",
+  "base_log_revision": "4f898fef90dfbe9d706d50ad1285631d573bf06c",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:4334",
+    "imas_codex/standard_names/signed_manifest.py:7979"
+  ],
+  "completed_at": "2026-10-13T19:57:58.989Z",
+  "dispatched_at": "2026-10-13T19:45:08Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_signed_supersede_edge.py",
+      "line": "208",
+      "severity": "follow-on",
+      "text": "follow-on: _loaded_supersede_authority was extracted for the new test yet the pre-existing test_supersede_postcondition_refuses_missing_signed_edge at :182 still builds the same _LoadedRow/_Authority inline, leaving two copies of one fixture in the file."
+    }
+  ],
+  "head_log_revision": "3cf3fc61921943ce1d5406c0bc8b2594a1dbd2be",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit 3cf3fc61921943ce1d5406c0bc8b2594a1dbd2be against base 4f898fef90dfbe9d706d50ad1285631d573bf06c; three files, 155 insertions and 9 deletions, the change is test-only, and the one added assertion is independent of the value under test.",
+    "done_when": "the done_when names three gate files run at base and head by delta, a red log with EXIT= for the new test, an EXIT= log for the -m graph run, and a grep; base-gate.log records 25 passed, 5 deselected, EXIT=0 against head-gate.log 26 passed, 5 deselected, EXIT=0, negative-control-successor-ids.log records 1 failed EXIT=1, graph-supersede-successor-scalar.log records 1 passed EXIT=0, and grep -nE \"class Test[A-Z][0-9]+\" over the head file returns nothing.",
+    "goal": "the source node's goal is to close three follow-ons from the prior review by isolating the successor_ids clause with its own unit test, executing the graph-marked successor-scalar test, and scrubbing plan-label class names; tests/standard_names/test_signed_supersede_edge.py:226 adds test_supersede_postcondition_refuses_edge_to_a_different_successor and tests/standard_names/test_graph_edge_writers.py renames nine label classes to capability names, so all three are met in the window read.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180156341011-sib-successor-edge-tests/manifest.md, status complete, carrying base and head gate summaries, the negative-control note and the graph arm; all five declared logs exist, each with a command head and a bare EXIT= tail.",
+    "write_paths": "brief.md declares four paths (the three named test files plus docs/evidence/fragments/sn-integrity-backlog/sib-successor-edge-tests.html); git diff 4f898fef90dfbe9d706d50ad1285631d573bf06c 3cf3fc61921943ce1d5406c0bc8b2594a1dbd2be changes exactly those three files and no production file, so every changed path is inside the declared scope."
+  },
+  "justifications": {
+    "durability": "removing the successor_ids comparison alone makes tests/standard_names/test_signed_supersede_edge.py:226 fail (negative-control-successor-ids.log, DID NOT RAISE, EXIT=1), the strongest available proof of isolation, though the shared match=\"successor edge\" string is reused by the count clause so the message alone would not discriminate.",
+    "evidence": "base-gate.log records 25 passed, 5 deselected, EXIT=0 and head-gate.log 26 passed, 5 deselected, EXIT=0, giving added_failure_count 0; the graph arm ran against a disposable Neo4j because the module fixture at tests/standard_names/test_signed_supersede_edge.py:31 fails on the project URI, so the brief's \"live graph\" is provably unsatisfiable and the disposable run is the executable check.",
+    "fit": "tests/standard_names/test_signed_supersede_edge.py:209 _loaded_supersede_authority follows the file's existing inline _Authority idiom and _WrongSuccessorEdge:229 mirrors the sibling _MissingEdge mock, and the renames at head:test_graph_edge_writers.py:116 read as capability names.",
+    "goal_fidelity": "tests/standard_names/test_signed_supersede_edge.py:226 adds the isolating test, the scalar file has a recorded -m graph run (graph-supersede-successor-scalar.log EXIT=0), and head:test_graph_edge_writers.py carries no letter-number class name, so all three goal items are landed.",
+    "reuse": "a capability search over tests/standard_names found no shared authority-builder owner, but tests/standard_names/test_signed_supersede_edge.py:208 duplicates the construction still inline at :182 rather than the pre-existing test reusing the new helper.",
+    "scope_discipline": "git diff 4f898fef..3cf3fc619 changes tests/standard_names/test_signed_supersede_edge.py, tests/standard_names/test_graph_edge_writers.py and the fragment, all four inside the brief.md write scope, and touches no production file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Reviewed head: 3cf3fc61921943ce1d5406c0bc8b2594a1dbd2be\nreviewed_base_sha: 4f898fef90dfbe9d706d50ad1285631d573bf06c\nreviewed_head_sha: 3cf3fc61921943ce1d5406c0bc8b2594a1dbd2be\nVERDICT goal: the source node's goal is to close three follow-ons from the prior review by isolating the successor_ids clause with its own unit test, executing the graph-marked successor-scalar test, and scrubbing plan-label class names; tests/standard_names/test_signed_supersede_edge.py:226 adds test_supersede_postcondition_refuses_edge_to_a_different_successor and tests/standard_names/test_graph_edge_writers.py renames nine label classes to capability names, so all three are met in the window read.\nVERDICT done_when: the done_when names three gate files run at base and head by delta, a red log with EXIT= for the new test, an EXIT= log for the -m graph run, and a grep; base-gate.log records 25 passed, 5 deselected, EXIT=0 against head-gate.log 26 passed, 5 deselected, EXIT=0, negative-control-successor-ids.log records 1 failed EXIT=1, graph-supersede-successor-scalar.log records 1 passed EXIT=0, and grep -nE \"class Test[A-Z][0-9]+\" over the head file returns nothing.\nVERDICT write_paths: brief.md declares four paths (the three named test files plus docs/evidence/fragments/sn-integrity-backlog/sib-successor-edge-tests.html); git diff 4f898fef90dfbe9d706d50ad1285631d573bf06c 3cf3fc61921943ce1d5406c0bc8b2594a1dbd2be changes exactly those three files and no production file, so every changed path is inside the declared scope.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180156341011-sib-successor-edge-tests/manifest.md, status complete, carrying base and head gate summaries, the negative-control note and the graph arm; all five declared logs exist, each with a command head and a bare EXIT= tail.\nVERDICT diff: read commit 3cf3fc61921943ce1d5406c0bc8b2594a1dbd2be against base 4f898fef90dfbe9d706d50ad1285631d573bf06c; three files, 155 insertions and 9 deletions, the change is test-only, and the one added assertion is independent of the value under test.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:4334, imas_codex/standard_names/signed_manifest.py:7979\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/standard_names/test_signed_supersede_edge.py:226 adds the isolating test, the scalar file has a recorded -m graph run (graph-supersede-successor-scalar.log EXIT=0), and head:test_graph_edge_writers.py carries no letter-number class name, so all three goal items are landed.\nSCORE evidence: 19\nJUSTIFICATION evidence: base-gate.log records 25 passed, 5 deselected, EXIT=0 and head-gate.log 26 passed, 5 deselected, EXIT=0, giving added_failure_count 0; the graph arm ran against a disposable Neo4j because the module fixture at tests/standard_names/test_signed_supersede_edge.py:31 fails on the project URI, so the brief's \"live graph\" is provably unsatisfiable and the disposable run is the executable check.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 4f898fef..3cf3fc619 changes tests/standard_names/test_signed_supersede_edge.py, tests/standard_names/test_graph_edge_writers.py and the fragment, all four inside the brief.md write scope, and touches no production file.\nSCORE durability: 19\nJUSTIFICATION durability: removing the successor_ids comparison alone makes tests/standard_names/test_signed_supersede_edge.py:226 fail (negative-control-successor-ids.log, DID NOT RAISE, EXIT=1), the strongest available proof of isolation, though the shared match=\"successor edge\" string is reused by the count clause so the message alone would not discriminate.\nSCORE fit: 18\nJUSTIFICATION fit: tests/standard_names/test_signed_supersede_edge.py:209 _loaded_supersede_authority follows the file's existing inline _Authority idiom and _WrongSuccessorEdge:229 mirrors the sibling _MissingEdge mock, and the renames at head:test_graph_edge_writers.py:116 read as capability names.\nSCORE reuse: 17\nJUSTIFICATION reuse: a capability search over tests/standard_names found no shared authority-builder owner, but tests/standard_names/test_signed_supersede_edge.py:208 duplicates the construction still inline at :182 rather than the pre-existing test reusing the new helper.\nFINDING tests/standard_names/test_signed_supersede_edge.py:208 follow-on: _loaded_supersede_authority was extracted for the new test yet the pre-existing test_supersede_postcondition_refuses_missing_signed_edge at :182 still builds the same _LoadedRow/_Authority inline, leaving two copies of one fixture in the file.\n",
+  "review_run_id": "r-20261013T194452211248-review-of-sib-successor-edge-tests-3cf3fc619219",
+  "reviewed_base_sha": "4f898fef90dfbe9d706d50ad1285631d573bf06c",
+  "reviewed_head_sha": "3cf3fc61921943ce1d5406c0bc8b2594a1dbd2be",
+  "reviewed_run_id": "r-20261013T180156341011-sib-successor-edge-tests",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T19:54:28.411924+00:00",
+  "total": 113
+}
