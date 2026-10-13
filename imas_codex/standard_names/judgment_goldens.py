@@ -77,6 +77,15 @@ def _rank(value: str) -> str:
     return hashlib.sha256(f"{SEED}:{value}".encode()).hexdigest()
 
 
+def assign_group_splits(rows: list[dict[str, Any]], group_key: str) -> dict[str, str]:
+    """Alternate ranked groups between calibration and validation."""
+    groups = sorted({row[group_key] for row in rows}, key=_rank)
+    return {
+        group: "calibration" if index % 2 == 0 else "validation"
+        for index, group in enumerate(groups)
+    }
+
+
 def _sample(rows: list[dict[str, Any]], count: int) -> list[dict[str, Any]]:
     """Round-robin physics domains and name-pattern families with a fixed seed."""
     buckets: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
@@ -219,11 +228,7 @@ def _finish(
     covered = _review_coverage(
         graph, [row.get(name_key, row["unit"]) for row in unique]
     )
-    groups = sorted({row["copy_group"] for row in unique}, key=_rank)
-    split = {
-        group: "calibration" if index % 2 == 0 else "validation"
-        for index, group in enumerate(groups)
-    }
+    split = assign_group_splits(unique, "copy_group")
     for row in unique:
         row["split"] = split[row["copy_group"]]
         row["incumbent_review"] = row.get(name_key, row["unit"]) in covered
