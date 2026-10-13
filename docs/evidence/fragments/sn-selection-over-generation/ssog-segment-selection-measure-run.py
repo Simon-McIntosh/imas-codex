@@ -209,12 +209,15 @@ async def measure(limit: int | None, pilot: bool, out_path: str) -> dict[str, An
     if Path(out_path).exists():
         try:
             prior = json.loads(Path(out_path).read_text())
-            done_targets = {r["target"] for r in prior.get("records", [])}
-            for r in prior.get("records", []):
-                records.append(r)
-            calls.extend(prior.get("_calls", []))
-            pending = [p for p in pending if p[0]["target"] not in done_targets]
-            print(f"resume: {len(records)} records already present", flush=True)
+            pr = prior.get("records", [])
+            # The artifact omits derived per-record fields, so a compact file
+            # cannot seed a resume that needs them.
+            if pr and "slot_match" in pr[0]:
+                done_targets = {r["target"] for r in pr}
+                records.extend(pr)
+                calls.extend(prior.get("_calls", []))
+                pending = [p for p in pending if p[0]["target"] not in done_targets]
+                print(f"resume: {len(records)} records already present", flush=True)
         except (ValueError, KeyError):
             pass
 
@@ -259,13 +262,13 @@ async def measure(limit: int | None, pilot: bool, out_path: str) -> dict[str, An
             records, calls, excluded_no_source, excluded_no_parse, len(cohort)
         )
         payload["_calls"] = calls
-        Path(out_path).write_text(json.dumps(payload, indent=2, default=str))
+        _write_results(payload, out_path)
 
     payload = _aggregate(
         records, calls, excluded_no_source, excluded_no_parse, len(cohort)
     )
     payload["_calls"] = calls
-    Path(out_path).write_text(json.dumps(payload, indent=2, default=str))
+    _write_results(payload, out_path)
     return payload
 
 
@@ -430,6 +433,27 @@ def _aggregate(
     }
 
 
+#: Per-record fields the artifact omits because they are derivable: ``gold`` by
+#: parsing ``target``, ``slot_match`` from ``jev_chosen`` against ``gold``, and
+#: ``composer_segments`` by parsing ``composer``.  Dropping them keeps the
+#: committed results stay under the data-file size the repository allows.
+_DERIVED_RECORD_FIELDS = ("gold", "slot_match", "composer_segments")
+
+
+def _write_results(result: dict[str, Any], out_path: str) -> None:
+    slim = dict(result)
+    slim["records"] = [
+        {k: v for k, v in r.items() if k not in _DERIVED_RECORD_FIELDS}
+        for r in result.get("records", [])
+    ]
+    slim["_note"] = (
+        "_note: gold, slot_match and composer_segments are omitted as derivable: "
+        "gold by parsing target, slot_match from jev_chosen vs gold, "
+        "composer_segments by parsing composer."
+    )
+    Path(out_path).write_text(json.dumps(slim, separators=(",", ":"), default=str))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
@@ -438,7 +462,7 @@ def main() -> int:
     args = ap.parse_args()
 
     result = asyncio.run(measure(args.limit, args.pilot, args.out))
-    Path(args.out).write_text(json.dumps(result, indent=2, default=str))
+    _write_results(result, args.out)
     print("WROTE", args.out)
     print(
         json.dumps(
