@@ -1,0 +1,101 @@
+<section id="dd-domain-diagnosis">
+  <h2>Why DD path domains echo their IDS</h2>
+  <p>
+    The DD build overwrites an existing path's <code>physics_domain</code> with
+    its IDS default, while leaving <code>domain_source</code> and
+    <code>domain_classified_at</code> intact. The subsequent classifier selects
+    only paths whose <code>domain_source IS NULL</code>, so it skips those
+    overwritten paths. A prior LLM classification remains visible in metadata
+    even though its domain value has been replaced.
+  </p>
+  <table>
+    <thead><tr><th>Evidence</th><th>Observed fact</th></tr></thead>
+    <tbody>
+      <tr><td>Build writer</td><td><code>build_dd.py:3495</code> obtains the IDS domain; <code>build_dd.py:3576-3583</code> uses <code>MERGE</code> and unconditionally sets the path domain. The <code>SET</code> does not clear classification metadata. The seed and assignment trace to commit <code>8ef2a37c3b</code>.</td></tr>
+      <tr><td>Classifier gate</td><td><code>dd_domain_classifier.py:1022-1034</code> requires <code>n.domain_source IS NULL</code> unless forced. Its response mapping at lines 740-785 uses the returned path index and validates the domain; it does not map a valid answer to the IDS domain.</td></tr>
+      <tr><td>Run history</td><td>The DD log records 12,011 Tier 1 classifications on 2026-06-18 at lines 28498-28499. On 2026-07-22 it records 61,474 paths processed by the build at line 29310, followed by only 23 Tier 1 candidates and classifications at lines 29742-29751. The log is <code>/home/ITER/mcintos/.local/share/imas-codex/logs/imas_dd_dd.log</code>.</td></tr>
+      <tr><td>Live graph</td><td>A read-only <code>IMASNode-[:IN_IDS]-&gt;IDS</code> census found 61,337 of 61,366 path domains equal to their IDS domain, including 12,030 of 12,038 paths still marked <code>llm_classified</code>. All 12,011 paths with a June 18 LLM timestamp now equal their IDS; among the 23 classified on July 22, 15 equal it and eight differ. The maximum classification timestamp is 2026-07-22. The <code>EXIT=0</code> receipts are <code>live-domain-census.log</code> and <code>classification-cohorts.log</code> in this run's record.</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The prompt itself has not changed since its original commit
+    <code>b37044e7f</code>. It says to use path structure first and calls the IDS
+    name informational; its explicit examples still associate electron
+    temperature under core profiles with <code>transport</code>. Its vocabulary
+    table lists 21 of the 32 installed domains and omits
+    <code>core_plasma_physics</code> and ten others. This limits the fresh
+    classifier's ability to reproduce some reviewed labels, but cannot explain
+    the retained old timestamps beside the build's IDS defaults. The response
+    mapper, the two narrow deterministic override patterns, and the unused
+    <code>compute_domain_input_hash</code> do not reset a path to its IDS.
+  </p>
+  <p>
+    The read-only driver follows each labelled name's live
+    <code>StandardName &larr;PRODUCED_NAME&minus; StandardNameSource
+    &minus;FROM_DD_PATH&rarr; IMASNode</code> links. The positive control found
+    856 distinct source paths for 148 of 170 names; 22 have no source through
+    that route. It calls <code>gather_classification_context</code> and
+    <code>classify_tier1_llm</code> in memory and uses
+    <code>pick_primary_domain</code> for the derived name domain. Names without a
+    source count as misses against their labels. The source-set measures count a
+    match when the labelled domain occurs among a name's source domains; the
+    derived measure requires exact equality after priority selection.
+  </p>
+  <p>
+    The fresh run classified all 856 paths for USD 2.048175 against the
+    authorised USD 2.25 total ceiling. The cached replay reproduced every
+    per-name row, score, and spend value. The
+    <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-dd-domain-diagnosis-results.json">result rows</a>
+    include each source path's stored and fresh domains, the derived name
+    domain, all three cohort scores, and the graph snapshots. The run receipts
+    are <code>fresh-run-3.log</code> and <code>cached-run.log</code> in this run's
+    record, both ending in <code>EXIT=0</code>.
+    Fresh domains differ from stored values on 178 of 856 paths; the largest
+    change is 53 paths from <code>transport</code> to
+    <code>equilibrium</code>.
+  </p>
+  <table>
+    <thead><tr><th>Labels</th><th>Stored DD source set</th><th>Fresh DD source set</th><th>Derived name domain</th><th>Live DD coverage</th></tr></thead>
+    <tbody>
+      <tr><td>20 lead</td><td>11/20 (55%)</td><td>11/20 (55%)</td><td>1/20 (5%)</td><td>20/20</td></tr>
+      <tr><td>150 coordinator</td><td>63/150 (42%)</td><td>67/150 (44.7%)</td><td>67/150 (44.7%)</td><td>128/150</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Source-set accuracy asks whether at least one live source has the labelled
+    domain. Derived accuracy asks whether <code>pick_primary_domain</code>
+    selects that domain from the fresh set. For the lead rows, eight
+    <code>equilibrium</code> labels become <code>edge_plasma_physics</code> under
+    selection, and three <code>general</code> labels become
+    <code>auxiliary_heating</code>. The live priority index is empty because
+    there are zero <code>Cluster</code> nodes, beside 61,366 present
+    <code>IMASNode</code> controls; the current function therefore breaks ties
+    alphabetically. For example, <code>safety_factor</code> has both
+    <code>equilibrium</code> and <code>edge_plasma_physics</code> fresh sources,
+    and selects the latter. The control receipts are
+    <code>priority-ranks.log</code> and <code>priority-positive-control.log</code>.
+  </p>
+  <p>
+    The coordinator misses are concentrated in
+    <code>fueling</code> &rarr; <code>plant_systems</code> (5 fresh),
+    <code>spectroscopy</code> &rarr; <code>radiation_measurement_diagnostics</code>
+    (5 fresh), <code>core_plasma_physics</code> &rarr; <code>transport</code>
+    (4 fresh), and <code>neutronics</code> &rarr;
+    <code>structural_components</code> (4 fresh). Five
+    <code>magnetohydrodynamics</code> and four <code>gyrokinetics</code> labels
+    have no live DD source; the 22 sourceless coordinator names all count as
+    misses. Lead source-set misses include four
+    <code>core_plasma_physics</code> and four
+    <code>plasma_measurement_diagnostics</code> labels, both domains absent
+    from the prompt's closed vocabulary table.
+  </p>
+  <p>
+    The source and name property fingerprint was
+    <code>aecb5deed110b245cfc08a69925840378b631924081f84cf4e42169278367e0d</code>
+    before and after both read-only runs; the 170 name properties and 856
+    source-path domain properties, domain distributions, and maximum
+    classification timestamp are identical. The prompt vocabulary and
+    alphabetical fallback need repair before a DD reclassification can meet
+    the lead's domain target; the reported fresh score does not meet it.
+  </p>
+</section>
