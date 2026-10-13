@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -262,7 +262,10 @@
     <div class="r-comment-body"><p>The guard test now names its negative control by mechanism (merge <code>f919e6760</code>); review 100/120. §3 stays open: the live apply awaits the lead's ruling on catalog PR #3, and the dry-run guard is in flight. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s3-guard-test-naming">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261012T235526815778-review-of-shc-guard-test-naming" data-who="reckon-build" data-when="2026-10-13T00:06:15.382Z">
-    <div class="r-comment-body"><p>review-of-shc-guard-test-naming — independent review of run r-20261012T234548025982-shc-guard-test-naming at head 8639966d9f27323a03384ad0fe2934f06dea4564 (base 354b2c345738809dad4145f121460b833f7240f2); verdict: the naming cleanup landed (the SHC_ seam and &quot;lead ruled&quot; are gone, the seam helper removed), scores goal_fidelity 19 / evidence 18 / scope_discipline 20 / durability 15 / fit 19 / reuse 20, one follow-on finding on the negative-control log&#x27;s provenance, no blocking finding.</p></div>
+    <div class="r-comment-body"><p>review-of-shc-guard-test-naming — independent review of run r-20261012T234548025982-shc-guard-test-naming at head 8639966d9f27323a03384ad0fe2934f06dea4564 (base 354b2c345738809dad4145f121460b833f7240f2); verdict: the naming cleanup landed (the SHC_ seam and "lead ruled" are gone, the seam helper removed), scores goal_fidelity 19 / evidence 18 / scope_discipline 20 / durability 15 / fit 19 / reuse 20, one follow-on finding on the negative-control log's provenance, no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261012T235954085932-shc-dry-run-guard" data-who="reckon-build" data-when="2026-10-13T00:15:51.241Z">
+    <div class="r-comment-body"><p>A dry run now runs the recommended-name guard over the same targets as the apply -- a family holding a protected member prints decision=refused naming the member and its evidence with its calls excluded from the total, and decision=forced with calls kept under --force, writing nothing either way; harmonize+protection gate 71 passed base to 73 passed head, 0 added failures.</p></div>
 </div>
 </section>
 </main>
