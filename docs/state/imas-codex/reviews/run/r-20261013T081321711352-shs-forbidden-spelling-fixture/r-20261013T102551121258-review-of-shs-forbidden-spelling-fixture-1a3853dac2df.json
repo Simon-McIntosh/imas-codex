@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (46f767eac) failure_count 1 [tests/standard_names/test_house_style_checks.py::test_forbidden_symbol_spelling_is_flagged]; after_suite (1a3853dac) failure_count 0; added = 0",
+  "backend": "clive",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/review/audits.py:674",
+    "imas_codex/standard_names/review/audits.py:769"
+  ],
+  "completed_at": "2026-10-13T10:36:50.536Z",
+  "dispatched_at": "2026-10-13T10:26:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-house-style/shs-forbidden-spelling-fixture.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the node's declared write scope and the sprint working rules name this path as its landing record, and every sibling node in this plan has written one, but the file is absent from the tree and from the diff, so the plan's evidence archive carries no record of this node."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "git diff 46f767eac..1a3853dac is one file, tests/standard_names/test_house_style_checks.py, +12/-1, one commit whose conventional subject and body carry no plan or ticket label; the change is the fixture spelling swap and the one added test.",
+    "done_when": "the done_when asks for one named failure at base and none at head over the two listed files plus a scratch-registry run in which restoring rho reddens the new test; baseline.log reads '1 failed, 16 passed, 1 deselected' with failure id test_forbidden_symbol_spelling_is_flagged, head.log reads '18 passed, 1 deselected', and negative-control.log reads '1 failed' on test_density_documentation_allows_rho_symbol with the scratch density list printed as ('N_s', '\\rho').",
+    "goal": "the node goal is to move the forbidden-spelling fixture onto a spelling the registry still forbids and add one test recording that rho stays allowed; tests/standard_names/test_house_style_checks.py:82-96 swaps the rho fixture for N_s and adds test_density_documentation_allows_rho_symbol asserting the class is absent.",
+    "manifest": "the manifest records changed_paths as the one test file, commit 1a3853dac, the base/after suite pair with their log paths, and a negative_control_log path; its failure and pass figures match the logs I opened.",
+    "write_paths": "the declared scope is tests/standard_names/test_house_style_checks.py and docs/evidence/fragments/sn-house-style/shs-forbidden-spelling-fixture.html; the single-file diff is inside the first, and the second is declared in the write scope but never written."
+  },
+  "justifications": {
+    "durability": "test_density_documentation_allows_rho_symbol at tests/standard_names/test_house_style_checks.py:90 fails when the guarded state is reinstated, as negative-control.log shows by restoring rho to the scratch density forbidden list; both added assertions compare finding classes against the HouseStyleFindingClass enum, never against the documentation string the test itself supplied.",
+    "evidence": "baseline.log, head.log and negative-control.log each record a run, and the checks arithmetically reconcile at tests/standard_names/test_house_style_checks.py: a 16-passed base that fails the named test becomes 18 passed at head, and negative-control.log prints MEASUREMENT_MODULE under the scratch root with DENSITY_FORBIDDEN=('N_s', '\\rho').",
+    "fit": "the added test follows the file's fixture idiom at tests/standard_names/test_house_style_checks.py:34-46 (_documentation plus a class-membership assertion), uses a raw string for the backslash-bearing literal at line 90, and introduces no plan or ticket label.",
+    "goal_fidelity": "the guarded capability at tests/standard_names/test_house_style_checks.py:78-96 now names N_s, which imas-standard-names notation.yml:29-30 still lists under density.forbidden_spellings, so the fixture proves the check flags a live forbidden spelling instead of the retired rho.",
+    "reuse": "the change adds no definition; it exercises the existing owner imas_codex/standard_names/docs_gates.py:683 conformance_findings, reached in production through imas_codex/standard_names/review/audits.py:674, so no capability is forked.",
+    "scope_discipline": "git diff 46f767eac..1a3853dac touches only tests/standard_names/test_house_style_checks.py, inside the declared write path, and carries nothing the goal does not imply."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to move the forbidden-spelling fixture onto a spelling the registry still forbids and add one test recording that rho stays allowed; tests/standard_names/test_house_style_checks.py:82-96 swaps the rho fixture for N_s and adds test_density_documentation_allows_rho_symbol asserting the class is absent.\nVERDICT done_when: the done_when asks for one named failure at base and none at head over the two listed files plus a scratch-registry run in which restoring rho reddens the new test; baseline.log reads '1 failed, 16 passed, 1 deselected' with failure id test_forbidden_symbol_spelling_is_flagged, head.log reads '18 passed, 1 deselected', and negative-control.log reads '1 failed' on test_density_documentation_allows_rho_symbol with the scratch density list printed as ('N_s', '\\rho').\nVERDICT write_paths: the declared scope is tests/standard_names/test_house_style_checks.py and docs/evidence/fragments/sn-house-style/shs-forbidden-spelling-fixture.html; the single-file diff is inside the first, and the second is declared in the write scope but never written.\nVERDICT manifest: the manifest records changed_paths as the one test file, commit 1a3853dac, the base/after suite pair with their log paths, and a negative_control_log path; its failure and pass figures match the logs I opened.\nVERDICT diff: git diff 46f767eac..1a3853dac is one file, tests/standard_names/test_house_style_checks.py, +12/-1, one commit whose conventional subject and body carry no plan or ticket label; the change is the fixture spelling swap and the one added test.\nCALL_SITES: imas_codex/standard_names/review/audits.py:674, imas_codex/standard_names/review/audits.py:769\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the guarded capability at tests/standard_names/test_house_style_checks.py:78-96 now names N_s, which imas-standard-names notation.yml:29-30 still lists under density.forbidden_spellings, so the fixture proves the check flags a live forbidden spelling instead of the retired rho.\nSCORE evidence: 19\nJUSTIFICATION evidence: baseline.log, head.log and negative-control.log each record a run, and the checks arithmetically reconcile at tests/standard_names/test_house_style_checks.py: a 16-passed base that fails the named test becomes 18 passed at head, and negative-control.log prints MEASUREMENT_MODULE under the scratch root with DENSITY_FORBIDDEN=('N_s', '\\rho').\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 46f767eac..1a3853dac touches only tests/standard_names/test_house_style_checks.py, inside the declared write path, and carries nothing the goal does not imply.\nSCORE durability: 18\nJUSTIFICATION durability: test_density_documentation_allows_rho_symbol at tests/standard_names/test_house_style_checks.py:90 fails when the guarded state is reinstated, as negative-control.log shows by restoring rho to the scratch density forbidden list; both added assertions compare finding classes against the HouseStyleFindingClass enum, never against the documentation string the test itself supplied.\nSCORE fit: 19\nJUSTIFICATION fit: the added test follows the file's fixture idiom at tests/standard_names/test_house_style_checks.py:34-46 (_documentation plus a class-membership assertion), uses a raw string for the backslash-bearing literal at line 90, and introduces no plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition; it exercises the existing owner imas_codex/standard_names/docs_gates.py:683 conformance_findings, reached in production through imas_codex/standard_names/review/audits.py:674, so no capability is forked.\nFINDING docs/evidence/fragments/sn-house-style/shs-forbidden-spelling-fixture.html:1 follow-on: the node's declared write scope and the sprint working rules name this path as its landing record, and every sibling node in this plan has written one, but the file is absent from the tree and from the diff, so the plan's evidence archive carries no record of this node.\n",
+  "review_run_id": "r-20261013T102551121258-review-of-shs-forbidden-spelling-fixture-1a3853dac2df",
+  "reviewed_base_sha": "46f767eaca3303bdfda24cc01cd4aceb96c46f7c",
+  "reviewed_head_sha": "1a3853dac2df5528123722b2de73e6a124e78c2c",
+  "reviewed_run_id": "r-20261013T081321711352-shs-forbidden-spelling-fixture",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:35:00+02:00",
+  "total": 115
+}
