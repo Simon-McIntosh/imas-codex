@@ -1,0 +1,818 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "7f54df09dd95bd456d45f56b9b7676b6ef5867f4",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 20392960,
+      "cached_input_tokens_cumulative": 20392960,
+      "input_tokens": 20592624,
+      "input_tokens_cumulative": 20592624,
+      "output_tokens": 40642,
+      "output_tokens_cumulative": 40642,
+      "reasoning_output_tokens": 13644,
+      "reasoning_output_tokens_cumulative": 13644
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 10,
+    "files": 1,
+    "removed": 16
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_pass_symbols_defined",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 33,
+        "name": "signal_role_questions",
+        "path": "imas_codex/discovery/signals/role.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_returns_messages_list",
+        "path": "tests/core/test_dd_refinement.py"
+      },
+      "run_function": {
+        "line": 11,
+        "name": "test_state_uses_only_the_recorded_text",
+        "path": "tests/discovery/test_signal_role.py"
+      },
+      "window_line": 13
+    }
+  ],
+  "commit_list_shortfall": {
+    "declared": 6,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261013T084922135916-ssfms-role-prototype' has a passing gate presenting 1 commit(s) of the 6 its manifest declares; missing: 0bd11ced485944cadd15f4845903893d33e8dc30, 2a23b3269762f7032ddcf7c92445288b51027a03, a3db5b91af2b3753bf197d13b1df8f40efe61c30, c904259f3bce9d2a5c0f27699dee6fd6ab2023eb, cdf205495519fcd4c609d8848f57243ed6e5ea51. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present the full list, or the boundary check may not cover the node's work",
+    "missing": [
+      "0bd11ced485944cadd15f4845903893d33e8dc30",
+      "2a23b3269762f7032ddcf7c92445288b51027a03",
+      "a3db5b91af2b3753bf197d13b1df8f40efe61c30",
+      "c904259f3bce9d2a5c0f27699dee6fd6ab2023eb",
+      "cdf205495519fcd4c609d8848f57243ed6e5ea51"
+    ],
+    "presented": 1
+  },
+  "commit_resolution": null,
+  "commits": [
+    "ef05cfa47cf980f996fabdf9c9a58547fac21be4"
+  ],
+  "completed_at": "2026-10-13T09:14:59Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-13T08:49:48Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run pytest -p no:cacheprovider tests/discovery/test_signal_role.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T084922135916-ssfms-role-prototype/role-head-absolute.log"
+  },
+  "impl_move": {
+    "at_complete": 0.5961538461538461,
+    "at_dispatch": 0.5961538461538461,
+    "plan": "signal-search-finds-the-measured-signal",
+    "reason": "the prototype is section 8's first node; section 8 closes after the stored role and its filter land",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-13T09:49:25.656439+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-13T08:49:24Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-20T04:58:15Z",
+    "seconds_until_reset": 590930,
+    "state": "quiet",
+    "utilisation_pct": 21.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-13T08:49:24Z",
+    "read_at": "2026-10-13T08:49:25Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 21.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-13T09:14:59Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T084922135916-ssfms-role-prototype/manifest.md",
+  "member": "disposable-r-20261013T084922135916-ssfms-role-prototype",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/discovery/test_signal_role.py::test_judge_refuses_choice_outside_six_roles"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/discovery/test_signal_role.py::test_judge_refuses_choice_outside_six_roles"
+    ],
+    "declaration": "a test feeding the judge a mocked answer outside the six roles must fail with the answer refused rather than stored",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T084922135916-ssfms-role-prototype/role-negative-control-final.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T084922135916-ssfms-role-prototype/role-negative-control-final.log",
+    "test_paths": [
+      "tests/discovery/test_signal_role.py",
+      "tests/llm/fixtures/signal_role_labels.json",
+      "tests/llm/measure_signal_role.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "ssfms-role-prototype",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 806,
+          "cached_input_tokens": 516340,
+          "input_tokens": 517148,
+          "output_tokens": 755,
+          "reasoning_output_tokens": 266,
+          "total_tokens": 517903,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+      "session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf"
+    },
+    "done_when": "imas_codex/discovery/signals/role.py judges one signal's role as a Jev choice among measured, commanded, reference or setpoint, status or flag, configuration parameter, and derived or computed, from its name, description, unit and glossary, through judge_rows in imas_codex/discovery/base/judgment.py; tests/llm/fixtures/signal_role_labels.json holds a stratified sample of 300 eligible JT-60SA signals, each with the text judged and a hand label written before the judge ran; python -m tests.llm.measure_signal_role scores the judge against those labels from the fixture's stored text and reports overall agreement, per-role agreement, a confusion table and Jev cost per signal read from response usage, all in docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-prototype.html; tests in tests/discovery/test_signal_role.py pass with the decision call mocked; no signal_role property is written to the graph and no backfill runs; total Jev spend is under USD 1",
+    "estimated_hours": null,
+    "goal": "measure a stored-role Jev judgment against 300 hand-labelled JT-60SA signals before any backfill",
+    "id": "ssfms-role-prototype",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-13T08:49:24Z",
+      "read_at": "2026-10-13T08:49:25Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 21.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T084922135916-ssfms-role-prototype/manifest.md",
+    "negative_control": "a test feeding the judge a mocked answer outside the six roles must fail with the answer refused rather than stored",
+    "plan": "signal-search-finds-the-measured-signal",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§8",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/signals/role.py",
+      "tests/discovery/test_signal_role.py",
+      "tests/llm/fixtures/signal_role_labels.json",
+      "tests/llm/measure_signal_role.py",
+      "docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-prototype.html",
+      "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-prototype.html",
+      "docs/figures/signal-search-finds-the-measured-signal/ssfms-role-prototype"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.022950930874669172,
+      "elapsed_hours": 3.855756386944421,
+      "group": "codex-sub",
+      "limited_by": null,
+      "observed_at": "2026-10-13T08:49:35+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 2.30% elapsed is below the 5% floor",
+      "remaining_budget": 0.79,
+      "remaining_windows": null,
+      "resets_at": "2026-10-20T04:58:15Z",
+      "state": "observed",
+      "utilisation": 0.21,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.11377799999999999,
+      "decided_by": "window",
+      "margin": 0.6237220000000001,
+      "name": "ssfms-role-prototype",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.21
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.722993,
+        "observed_at": "2026-10-13T08:49:35+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-20T04:58:15Z",
+        "state": "observed",
+        "utilisation": 0.21,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "ssfms-role-prototype",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-13T08:49:35.722993+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "codex",
+    "comment": "Review waived: the only unreviewed change is section 12, edited to answer its content review's three findings; this node builds section 8, whose text the stored reviews cover. signal-role is locked to stored-at-enrichment, after this prototype. Label the 300 signals from their text under a written rule before running the judge, and keep the text judged in the fixture so the measurement does not depend on the graph, which section 12 will reprocess. Write the fixture as you label, in batches. Spends Jev on the discovery-relevance seat; stop and report if spend passes USD 1. The pytest guard refuses paid requests, so the measurement runs outside pytest.",
+    "confidence": 0.57,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "codex",
+    "jev_latency_ms": 378.036,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1152.86,
+    "model": "gpt-6-sol",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 27266.150106,
+        "budget_reason": null,
+        "burn_multiple": 1.4705115086439546,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.7,
+          "peak_utilisation_p90_pct": 15.7,
+          "peak_utilisation_runs": 1,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.382397035810185,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.00365194380346459,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-15T18:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 97.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 27266.150106,
+        "budget_reason": null,
+        "burn_multiple": 1.4705115086439546,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.382397035810185,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.00365194380346459,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-15T18:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 97.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 27266.150106,
+        "budget_reason": null,
+        "burn_multiple": 1.4705115086439546,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.382397035810185,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.00365194380346459,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-15T18:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 97.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "congested",
+          "running": 11,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 61.9,
+          "peak_utilisation_p90_pct": 76.8,
+          "peak_utilisation_runs": 574,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 10,
+          "not-run": 2,
+          "passed": 81,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 0
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 24.712106,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.8395266654398155,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 6,
+          "passed": 25,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 21.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 24.712106,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.8395266654398155,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 21.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 24.712106,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.8395266654398155,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 21.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001:claude-haiku": 0.01,
+      "claude:claude-opus-5-5:claude-opus": 0.01,
+      "claude:claude-sonnet-5-5:claude": 0.02,
+      "codex:gpt-6-astra:codex-astra": 0.01,
+      "codex:gpt-6-luna:codex-luna": 0.01,
+      "codex:gpt-6-sol:codex": 0.62,
+      "hold": 0.24,
+      "local:deepseek-v4.1-flash:clive": 0.08
+    },
+    "questions": {
+      "route": {
+        "criteria": {
+          "claude:claude-haiku-4-5-20251001:claude-haiku": {
+            "backend": "claude-haiku",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-haiku-4-5-20251001"
+          },
+          "claude:claude-opus-5-5:claude-opus": {
+            "backend": "claude-opus",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-opus-5-5"
+          },
+          "claude:claude-sonnet-5-5:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-sonnet-5-5"
+          },
+          "codex:gpt-6-astra:codex-astra": {
+            "backend": "codex-astra",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-astra"
+          },
+          "codex:gpt-6-luna:codex-luna": {
+            "backend": "codex-luna",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-luna"
+          },
+          "codex:gpt-6-sol:codex": {
+            "backend": "codex",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-sol"
+          },
+          "hold": "Do not dispatch now; wait for pressure to ease. When the local lane is not admitting (full, paused or unavailable), well-defined, routine or deferrable work should usually hold for it rather than spend a pressed metered lane. On a sliding scale, hard, high-risk or urgent work may still take the metered lane; weigh expected wait against urgency without a numeric threshold. When exactly one lane can serve the node, a hold waits for that lane alone, as hold_waits_for states.",
+          "local:deepseek-v4.1-flash:clive": {
+            "backend": "clive",
+            "effort": "high",
+            "lane": "local",
+            "local": true,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "deepseek-v4.1-flash"
+          }
+        },
+        "glossary": {
+          "budget_age_s": "Seconds since the budget reading was observed; null when unknown.",
+          "budget_source": "Where a budget reading came from: a document reading is taken from the published paid-lanes document, an account-surface reading describes now, and a ledger reading carries the age of the run behind it.",
+          "burn_multiple": "Metered spend so far divided by the lane's allowance for its window; above 1 is ahead of the pace that window plans for.",
+          "context": "A candidate's context block. window_tokens is the input window that gates the lane; estimated_tokens is this node's deterministic input estimate (standing instructions plus the repository files its brief loads) measured against that window; headroom_pct is the share of the window the estimate leaves free. peak_utilisation_p50_pct and peak_utilisation_p90_pct are the median and 90th-percentile peak input utilisation of recent passed runs on the lane, with peak_utilisation_runs behind them. A run whose input approaches its window risks dying mid-way, so a small headroom is a real risk to be weighed with pressure. A null figure is unknown, never zero.",
+          "days_to_reset": "Days until the lane's window resets; null when unknown.",
+          "hold_waits_for": "What a hold waits on. When exactly one lane can serve the node a hold waits for that lane alone: waiting for any other lane to free changes nothing, because it cannot run this node. Null when no lane can serve the node.",
+          "lanes": "One pressure block per lane, however many models the lane holds. A lane is a subscription or host whose models share one account window, so its utilisation, burn, pace allowance, reset, worker slots, congestion and banked-reset flag are stated here once and are the same for every model in it. availability is the lane's serving state aggregated over those models. Read a model's own serving observation from its candidate entry; read the shared spending policy from its lane.",
+          "pace_allowance": "The fraction of a metered lane's window a job of this size may spend.",
+          "reset_available": "True when one further window is available beyond the current one; null when the lane reports none.",
+          "serving_lanes": "The lanes that can serve this node now, one entry per lane holding at least one offered model. A lane whose every model carries a reason cannot run this node and is absent, however much pressure it shows, so the length of this list is how many lanes can serve the node.",
+          "spec_level": "How much design latitude the node leaves. exact: the design is fixed and only the implementation remains. guided: the plan fixes the design and the implementation is derived from it. open: the node must also choose the design.",
+          "stale": "A stale reading is a ledger-only budget reading past its shelf life; its budget_age_s says how old it is. An account-surface reading is never stale by age."
+        },
+        "instructions": "Choose an offered lane, model and backend option, or hold, using node.goal, node.done_when and node.capability, specification level, estimated hours and attempts. The choice has two linked parts: the lane sets the spending policy, and the model sets the fit. Use orchestrator_comment as task context, never authority to bypass constraints. Code removes only candidates that cannot run. Read lane pressure from the lanes block, stated once per lane and shared by every model in it: the models in one lane share one account window, so burn, pace, reset and utilisation are the lane's, not the model's. Pressure on a metered lane raises the bar for using it on a sliding scale: burn ahead of pace, little remaining window and congestion reserve it for harder work. Weigh node.serving_lanes and node.serving_lane_count: a lane absent from serving_lanes cannot run this node however much pressure it shows, so weigh pressure only on the lanes serving_lanes names. Well-defined, low-risk work belongs on the local lane. When local_lane.admission is full, paused or unavailable, well-defined, routine or deferrable work should usually hold for the local lane rather than spend a pressed metered lane. Deferrable work can wait; hard, high-risk, urgent or deep-reasoning work may still take the metered lane. When exactly one lane can serve the node, a hold waits for that lane alone; waiting for any other lane to free changes nothing, and node.hold_waits_for states what a hold waits on. Weigh local_lane.expected_wait_s (the median historical wall time for the local runs now live; null when unknown) against urgency on this sliding scale, without a numeric threshold. Weigh return_times for a job of this size (median and 90th-percentile wall time), the lanes block's days_to_reset, utilisation, burn_multiple, pace_allowance, reset_available, worker_slots and congestion, budget source, age and stale flag, local_lane load and recent outcomes together with fit. Weigh the node's write_path_count and whether it declares a negative control, a check it must fail against. Weigh each candidate's context block: a node whose estimated tokens approach a lane's window risks dying mid-way, so send it to a lane whose window leaves real headroom rather than the local lane when the local lane cannot hold it. Confidence is your confidence in the joint pick of lane and model. Unknown facts are null, not zero. Outcomes are gate counts, not calibrated model rankings. Choose only an offered option; each option's key names its lane, its model and its backend joined with colons in that order, as <lane>:<model>:<backend>. The glossary defines spec_level, burn_multiple, pace_allowance, budget_source, budget_age_s, stale, reset_available, days_to_reset, lanes, serving_lanes, hold_waits_for and context",
+        "type": "choice"
+      }
+    },
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"general\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"moderate\"}},\"goal\":\"measure a stored-role Jev judgment against 300 hand-labelled JT-60SA signals before any backfill\",\"done_when\":\"imas_codex/discovery/signals/role.py judges one signal's role as a Jev choice among measured, commanded, reference or setpoint, status or flag, configuration parameter, and derived or computed, from its name, description, unit and glossary, through judge_rows in imas_codex/discovery/base/judgment.py; tests/llm/fixtures/signal_role_labels.json holds a stratified sample of 300 eligible JT-60SA signals, each with the text judged and a hand label written before the judge ran; python -m tests.llm.measure_signal_role scores the judge against those labels from the fixture's stored text and reports overall agreement, per-role agreement, a confusion table and Jev cost per signal read from response usage, all in docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-prototype.html; tests in tests/discovery/test_signal_role.py pass with the decision call mocked; no signal_role property is written to the graph and no backfill runs; total Jev spend is under USD 1\",\"estimated_context\":50392,\"estimated_hours\":4.0,\"estimated_hours_source\":\"section\",\"attempts\":0,\"write_path_count\":6,\"negative_control_declared\":true,\"serving_lanes\":[\"claude\",\"local\",\"codex\"],\"serving_lane_count\":3,\"hold_waits_for\":\"any one of 3 lanes that can serve this node to have room\"},\"orchestrator_comment\":\"Review waived: the only unreviewed change is section 12, edited to answer its content review's three findings; this node builds section 8, whose text the stored reviews cover. signal-role is locked to stored-at-enrichment, after this prototype. Label the 300 signals from their text under a written rule before running the judge, and keep the text judged in the fixture so the measurement does not depend on the graph, which section 12 will reprocess. Write the fixture as you label, in batches. Spends Jev on the discovery-relevance seat; stop and report if spend passes USD 1. The pytest guard refuses paid requests, so the measurement runs outside pytest.\",\"candidates\":{\"claude\":{\"backend\":\"claude\",\"lane\":\"claude\",\"model\":\"claude-sonnet-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":97.0,\"burn_multiple\":1.4705115086439546,\"pace_allowance\":0.00365194380346459,\"days_to_reset\":2.382397035810185,\"resets_at\":\"2026-10-15T18:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":15.7,\"peak_utilisation_p90_pct\":15.7,\"peak_utilisation_runs\":1},\"budget_source\":null,\"budget_age_s\":27266.150106,\"stale\":true,\"reset_available\":null},\"claude-haiku\":{\"backend\":\"claude-haiku\",\"lane\":\"claude\",\"model\":\"claude-haiku-4-5-20251001\",\"availability\":\"unknown\",\"utilisation_pct\":97.0,\"burn_multiple\":1.4705115086439546,\"pace_allowance\":0.00365194380346459,\"days_to_reset\":2.382397035810185,\"resets_at\":\"2026-10-15T18:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":27266.150106,\"stale\":true,\"reset_available\":null},\"claude-opus\":{\"backend\":\"claude-opus\",\"lane\":\"claude\",\"model\":\"claude-opus-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":97.0,\"burn_multiple\":1.4705115086439546,\"pace_allowance\":0.00365194380346459,\"days_to_reset\":2.382397035810185,\"resets_at\":\"2026-10-15T18:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":27266.150106,\"stale\":true,\"reset_available\":null},\"clive\":{\"backend\":\"clive\",\"lane\":\"local\",\"model\":\"deepseek-v4.1-flash\",\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":null,\"resets_at\":null,\"worker_slots\":0,\"congestion\":{\"running\":11,\"waiting\":0,\"admission_verdict\":\"congested\",\"stale\":false,\"slots_state\":\"measured\"},\"outcomes\":{\"passed\":81,\"failed\":10,\"not-run\":2,\"unknown\":0},\"context\":{\"window_tokens\":230144,\"estimated_tokens\":50392,\"headroom_pct\":78.1,\"peak_utilisation_p50_pct\":61.9,\"peak_utilisation_p90_pct\":76.8,\"peak_utilisation_runs\":574},\"budget_source\":null,\"budget_age_s\":null,\"stale\":null,\"reset_available\":null},\"codex\":{\"backend\":\"codex\",\"lane\":\"codex\",\"model\":\"gpt-6-sol\",\"availability\":\"unknown\",\"utilisation_pct\":21.0,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":6.8395266654398155,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":25,\"failed\":1,\"not-run\":6,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":24.712106,\"stale\":false,\"reset_available\":null},\"codex-astra\":{\"backend\":\"codex-astra\",\"lane\":\"codex\",\"model\":\"gpt-6-astra\",\"availability\":\"unknown\",\"utilisation_pct\":21.0,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":6.8395266654398155,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":1,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":24.712106,\"stale\":false,\"reset_available\":null},\"codex-luna\":{\"backend\":\"codex-luna\",\"lane\":\"codex\",\"model\":\"gpt-6-luna\",\"availability\":\"unknown\",\"utilisation_pct\":21.0,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":6.8395266654398155,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":50392,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":24.712106,\"stale\":false,\"reset_available\":null}},\"return_times\":{\"claude\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":27266.845122,\"stale\":true},\"claude-haiku\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":27266.845122,\"stale\":true},\"claude-opus\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":27266.845122,\"stale\":true},\"clive\":{\"p50_s\":1515.5,\"p90_s\":5347,\"runs\":90,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":2785.610122,\"stale\":true},\"codex\":{\"p50_s\":1326.5,\"p90_s\":3083,\"runs\":30,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":25.407122,\"stale\":false},\"codex-astra\":{\"p50_s\":1614,\"p90_s\":1614,\"runs\":1,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":25.407122,\"stale\":false},\"codex-luna\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":25.407122,\"stale\":false}},\"lanes\":{\"claude\":{\"availability\":\"unknown\",\"utilisation_pct\":97.0,\"burn_multiple\":1.4705115086439546,\"pace_allowance\":0.00365194380346459,\"resets_at\":\"2026-10-15T18:00:00+00:00\",\"days_to_reset\":2.3823889916435186,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false},\"local\":{\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":null,\"days_to_reset\":null,\"worker_slots\":0,\"congestion\":{\"running\":11,\"waiting\":0,\"admission_verdict\":\"congested\",\"stale\":false,\"slots_state\":\"measured\"},\"reset_available\":null},\"codex\":{\"availability\":\"unknown\",\"utilisation_pct\":21.0,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"days_to_reset\":6.839518621273148,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false}},\"local_lane\":{\"admission\":\"full\",\"expected_wait_s\":741.5,\"running\":11,\"waiting\":0,\"headroom\":-2,\"worker_slots\":0,\"tokens_per_second\":24.51,\"read_at\":\"2026-10-13T08:49:21.601125+00:00\"}}",
+    "rendered_token_estimate": 2190,
+    "template_digest": "bf398dab17ed4a1f716fe26e88b498badb311b83b4b219bc1dfbeaad8ffd187d",
+    "usage": {
+      "cost": 0.000243306,
+      "input_tokens": 5793,
+      "output_tokens": 179
+    }
+  },
+  "plan": "signal-search-finds-the-measured-signal",
+  "plan_impl_at_dispatch": 0.5961538461538461,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "ef05cfa47cf980f996fabdf9c9a58547fac21be4",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "7f54df09dd95bd456d45f56b9b7676b6ef5867f4",
+    "reviewed_head_sha": "ef05cfa47cf980f996fabdf9c9a58547fac21be4",
+    "scores": {
+      "durability": 14,
+      "evidence": 18,
+      "fit": 16,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 107
+  },
+  "review_tier": "light",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261013T084922135916-ssfms-role-prototype",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§8",
+  "session": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+  "session_harness": "codex",
+  "session_id": "01a13474-4939-7ec2-8ce7-373e5865a970",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 20392960,
+    "cumulative_input_tokens": 40985584,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 54286
+  },
+  "time_budget": "60m",
+  "tool_steps": 166.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1511,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-13T09:15:03Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-13T08:49:55Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261013T084922135916-ssfms-role-prototype",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 437,
+    "worker_pid": 2301756
+  },
+  "worker_seconds": 1511,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
