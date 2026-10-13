@@ -70,7 +70,34 @@ class SourceBindingConflict:
     retired_stage: str | None = None
 
 
-class SourceBindingConflictError(RuntimeError):
+class SourceMigrationConflictError(RuntimeError):
+    """A source-migration refusal that only an operator can settle.
+
+    A source the migration cannot move to a state any retry reaches is a
+    decision, not a transient fault: repeating the migration changes nothing,
+    so the caller must adjudicate rather than spend a retry budget. This base
+    carries the offending :class:`SourceBindingConflict` records once and joins
+    their details into the message; each subclass supplies only the clause
+    naming the binding shape it reports.
+
+    Deriving from ``RuntimeError`` keeps callers that do not yet distinguish
+    the named outcomes working unchanged, and putting both named outcomes under
+    this base lets a caller that wants to exclude a transient ``RuntimeError``
+    fault test one type rather than enumerate the subclasses.
+    """
+
+    def __init__(
+        self,
+        conflicts: Sequence[SourceBindingConflict],
+        *,
+        message: str,
+    ) -> None:
+        self.conflicts: tuple[SourceBindingConflict, ...] = tuple(conflicts)
+        detail = "; ".join(item.detail for item in self.conflicts)
+        super().__init__(f"{message} — {detail}")
+
+
+class SourceBindingConflictError(SourceMigrationConflictError):
     """Named outcome for a source already bound to a different live identity.
 
     A source that binds a live identity other than the migration's predecessor
@@ -86,33 +113,35 @@ class SourceBindingConflictError(RuntimeError):
     """
 
     def __init__(self, conflicts: Sequence[SourceBindingConflict]) -> None:
-        self.conflicts: tuple[SourceBindingConflict, ...] = tuple(conflicts)
-        detail = "; ".join(item.detail for item in self.conflicts)
         super().__init__(
-            "source migration compare-and-set failed: "
-            f"{len(self.conflicts)} source(s) already bound to a different live "
-            f"identity await adjudication — {detail}"
+            conflicts,
+            message=(
+                "source migration compare-and-set failed: "
+                f"{len(tuple(conflicts))} source(s) already bound to a "
+                "different live identity await adjudication"
+            ),
         )
 
 
-class SourceRetiredSuccessorConflictError(RuntimeError):
+class SourceRetiredSuccessorConflictError(SourceMigrationConflictError):
     """Named outcome for a source bound to a live identity and a retired one.
 
     A source the migration would move is bound to the live predecessor and to a
     successor that has itself been retired. Only one of the two is a live claim,
     so this is not the dual-live conflict; but repeating the migration changes
-    nothing either, so the state is reported through this named type — naming
+    nothing either, so the state is reported through this named outcome — naming
     the live holder and the retired holder with its stage — and withheld rather
     than spent as a transient retry.
     """
 
     def __init__(self, conflicts: Sequence[SourceBindingConflict]) -> None:
-        self.conflicts: tuple[SourceBindingConflict, ...] = tuple(conflicts)
-        detail = "; ".join(item.detail for item in self.conflicts)
         super().__init__(
-            "source migration compare-and-set failed: "
-            f"{len(self.conflicts)} source(s) bound to a live identity alongside "
-            f"a retired successor await adjudication — {detail}"
+            conflicts,
+            message=(
+                "source migration compare-and-set failed: "
+                f"{len(tuple(conflicts))} source(s) bound to a live identity "
+                "alongside a retired successor await adjudication"
+            ),
         )
 
 
