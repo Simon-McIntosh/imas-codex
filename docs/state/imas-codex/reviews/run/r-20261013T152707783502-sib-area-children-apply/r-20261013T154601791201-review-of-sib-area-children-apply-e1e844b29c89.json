@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "cd061230285427cf7b66db1ba3ff9066c2f1f4d3",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T15:58:27.117Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "one-off signed graph operation: its effect is held by receipt-stamped StandardNameChange records and edges in the graph and by the fragment's exact-id read-back; the scalar-only instrument the backfill reruns re-asserts the area successor, and no repository test can hold live graph state",
+      "recorded_at": "2026-10-13T15:57:56.575757+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T15:47:02Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T152707783502-sib-area-children-apply/head-gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: head-gate.log's header records revision=8c93e40b4f5125db8dabda985672b3f7a0a48993, the authority-JSON commit, not the reviewed head e1e844b29c89f0fa48f576c3456d1d18b8817a11; the done_when asks the gate 'at base and head', and the fragment's own commit (e1e844b2) is docs-only so the delta is unchanged, but the arm asserted as 'head' predates the reviewed revision."
+    }
+  ],
+  "head_log_revision": "8c93e40b4",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site can reach the landed change -- the diff adds only docs/evidence/fragments/sn-integrity-backlog/sib-area-children-apply.html and .../sib-area-children-apply-successor-authority.json, neither of which is imported or read by runtime code (rg over imas_codex/ finds the only fragments reference, judgment_goldens.py:21, pointing at an unrelated directory); the evidence was produced through the graph-apply path, not reached by the reviewed run.",
+    "diff": "read commit by commit against cd061230285427cf7b66db1ba3ff9066c2f1f4d3: 8c93e40b4 adds the 144-line signed successor authority (schema imas-codex.repair-authority.v1, two rows), e1e844b29 adds the 15-line evidence fragment; the range is +159/-0 across exactly those two files and nothing else.",
+    "done_when": "the done_when requires the fragment to record the positive control, both authorities with preview/applied digests and receipts, the readback (0 incoming HAS_PARENT, 2 stamped HAS_SUCCESSOR) and the backfill third-row admission, plus the successor authority committed beside the fragment and a base/head gate judged by delta; the fragment records all five and the manifest names base-gate.log and head-gate.log, both 92 passed / 0 failed / EXIT=0, so 0 added.",
+    "goal": "the node goal is 'the generic area name loses its children before its successor edge' -- release the three HAS_PARENT edges on area_of_flux_surface through the signed structural reconcile and give the two superseded derivatives signed HAS_SUCCESSOR edges to their accepted replacements; final-readback.log shows 0 incoming HAS_PARENT edges on area_of_flux_surface and one receipt-stamped HAS_SUCCESSOR edge per derivative, so the goal is met.",
+    "manifest": "read; it records status complete, commits 8c93e40b4 and e1e844b2, the two changed paths, gate base 92 passed and head 92 passed both EXIT=0 with 0 added failures, the five graph receipts (release digest eb2b7118, successor digest 08d36d9b), and negative_control_note explaining no test file is in scope.",
+    "write_paths": "the brief declares docs/evidence/fragments/sn-integrity-backlog/sib-area-children-apply.html and .../sib-area-children-apply-successor-authority.json; git diff --name-only cd0612302..e1e844b2 lists exactly those two paths (+159/-0) and no file outside them."
+  },
+  "justifications": {
+    "durability": "the landed change is a docs fragment and a data authority with no runtime behaviour, so no test fails if it regresses -- the manifest's negative_control_note records that no test file is in scope, and the run instead records a positive control (positive-control.log shows the area row refused with 'target has a live structural child'), which demonstrates the guard fires but guards nothing about this change.",
+    "evidence": "the gate ran at base cd061230285427cf7b66db1ba3ff9066c2f1f4d3 (92 passed, 40 deselected, EXIT=0, base-gate.log) and at head 8c93e40b4 (92 passed, 40 deselected, EXIT=0, head-gate.log) with zero added failures, and every quantitative claim in the fragment reconciles with its log and with the artifact digests the manifest names (file SHA-256 of the successor authority recomputes to 0a6a564eebe17df8e4acb3df04e5f21fbfffbee6b44643336ebb08fe61363b4e), though the head arm runs at 8c93e40b4 rather than the reviewed head.",
+    "fit": "the fragment follows the existing evidence-fragment shape (a <section id=...> with h2 and id-bearing <p>/<table> elements) used by its siblings under docs/evidence/fragments/sn-integrity-backlog/, and the successor authority reuses the imas-codex.repair-authority.v1 schema and naming idiom the backfill authority already establishes; no plan, sprint, gate or ticket label appears in either file's content.",
+    "goal_fidelity": "final-readback.log returns INCOMING_PARENT_EDGES: [] and two DERIVATIVE_SUCCESSORS each carrying one stamped HAS_SUCCESSOR edge to its accepted replacement, and release-apply.log/successor-apply.log record 3 and 2 admitted rows applied with their receipts, so the change does what the goal states.",
+    "reuse": "no code is added, so nothing forks a capability; the successor authority extends the owner rather than duplicating it -- imas_codex/standard_names/repair_authority.py:26 defines REPAIR_AUTHORITY_SCHEMA = 'imas-codex.repair-authority.v1' and the new JSON declares schema imas-codex.repair-authority.v1 with the same row/mutation/guard/signature shape the committed backfill authority uses, and the apply path is the existing apply_signed_manifest (signed_manifest.py:7573).",
+    "scope_discipline": "every path in the diff (the evidence fragment and the successor authority JSON) is inside the brief's declared write paths and carries nothing the goal does not imply; the node touched no source, no test, and no graph schema file."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is 'the generic area name loses its children before its successor edge' -- release the three HAS_PARENT edges on area_of_flux_surface through the signed structural reconcile and give the two superseded derivatives signed HAS_SUCCESSOR edges to their accepted replacements; final-readback.log shows 0 incoming HAS_PARENT edges on area_of_flux_surface and one receipt-stamped HAS_SUCCESSOR edge per derivative, so the goal is met.\nVERDICT done_when: the done_when requires the fragment to record the positive control, both authorities with preview/applied digests and receipts, the readback (0 incoming HAS_PARENT, 2 stamped HAS_SUCCESSOR) and the backfill third-row admission, plus the successor authority committed beside the fragment and a base/head gate judged by delta; the fragment records all five and the manifest names base-gate.log and head-gate.log, both 92 passed / 0 failed / EXIT=0, so 0 added.\nVERDICT write_paths: the brief declares docs/evidence/fragments/sn-integrity-backlog/sib-area-children-apply.html and .../sib-area-children-apply-successor-authority.json; git diff --name-only cd0612302..e1e844b2 lists exactly those two paths (+159/-0) and no file outside them.\nVERDICT diff: read commit by commit against cd061230285427cf7b66db1ba3ff9066c2f1f4d3: 8c93e40b4 adds the 144-line signed successor authority (schema imas-codex.repair-authority.v1, two rows), e1e844b29 adds the 15-line evidence fragment; the range is +159/-0 across exactly those two files and nothing else.\nVERDICT manifest: read; it records status complete, commits 8c93e40b4 and e1e844b2, the two changed paths, gate base 92 passed and head 92 passed both EXIT=0 with 0 added failures, the five graph receipts (release digest eb2b7118, successor digest 08d36d9b), and negative_control_note explaining no test file is in scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 20\nSCORE durability: 9\nSCORE fit: 19\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: final-readback.log returns INCOMING_PARENT_EDGES: [] and two DERIVATIVE_SUCCESSORS each carrying one stamped HAS_SUCCESSOR edge to its accepted replacement, and release-apply.log/successor-apply.log record 3 and 2 admitted rows applied with their receipts, so the change does what the goal states.\nJUSTIFICATION evidence: the gate ran at base cd061230285427cf7b66db1ba3ff9066c2f1f4d3 (92 passed, 40 deselected, EXIT=0, base-gate.log) and at head 8c93e40b4 (92 passed, 40 deselected, EXIT=0, head-gate.log) with zero added failures, and every quantitative claim in the fragment reconciles with its log and with the artifact digests the manifest names (file SHA-256 of the successor authority recomputes to 0a6a564eebe17df8e4acb3df04e5f21fbfffbee6b44643336ebb08fe61363b4e), though the head arm runs at 8c93e40b4 rather than the reviewed head.\nJUSTIFICATION scope_discipline: every path in the diff (the evidence fragment and the successor authority JSON) is inside the brief's declared write paths and carries nothing the goal does not imply; the node touched no source, no test, and no graph schema file.\nJUSTIFICATION durability: the landed change is a docs fragment and a data authority with no runtime behaviour, so no test fails if it regresses -- the manifest's negative_control_note records that no test file is in scope, and the run instead records a positive control (positive-control.log shows the area row refused with 'target has a live structural child', which demonstrates the guard fires but guards nothing about this change.\nJUSTIFICATION fit: the fragment follows the existing evidence-fragment shape (a <section id=...> with h2 and id-bearing <p>/<table> elements) used by its siblings under docs/evidence/fragments/sn-integrity-backlog/, and the successor authority reuses the imas-codex.repair-authority.v1 schema and naming idiom the backfill authority already establishes; no plan, sprint, gate or ticket label appears in either file's content.\nJUSTIFICATION reuse: no code is added, so nothing forks a capability; the successor authority extends the owner rather than duplicating it -- imas_codex/standard_names/repair_authority.py:26 defines REPAIR_AUTHORITY_SCHEMA = 'imas-codex.repair-authority.v1' and the new JSON declares schema imas-codex.repair-authority.v1 with the same row/mutation/guard/signature shape the committed backfill authority uses, and the apply path is the existing apply_signed_manifest (signed_manifest.py:7573).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-...-sib-area-children-apply/head-gate.log:1 follow-on: head-gate.log's header records revision=8c93e40b4f5125db8dabda985672b3f7a0a48993, the authority-JSON commit, not the reviewed head e1e844b29c89f0fa48f576c3456d1d18b8817a11; the done_when asks the gate 'at base and head', and the fragment's own commit is docs-only so the delta is unchanged, but the arm asserted as 'head' predates the reviewed revision.\nFINAL: SOUND WITH FINDINGS. The node released the three HAS_PARENT edges on area_of_flux_surface through the committed signed release authority (3 admitted, digest eb2b7118, 3 receipt rows) and wrote signed HAS_SUCCESSOR edges for both superseded derivatives (2 admitted, digest 08d36d9b), then read back exactly 0 incoming HAS_PARENT edges and two stamped successor edges and showed the backfill preview admitting all three rows (digest 13698a0a) without applying it. Every digest in the fragment reconciles with its log and the recomputed artifact hash. One follow-on: the head gate arm ran at 8c93e40b4 rather than the reviewed head e1e844b2 (materially immaterial, docs-only). Nothing blocks landing.\n",
+  "review_run_id": "r-20261013T154601791201-review-of-sib-area-children-apply-e1e844b29c89",
+  "reviewed_base_sha": "cd061230285427cf7b66db1ba3ff9066c2f1f4d3",
+  "reviewed_head_sha": "e1e844b29c89f0fa48f576c3456d1d18b8817a11",
+  "reviewed_run_id": "r-20261013T152707783502-sib-area-children-apply",
+  "scores": {
+    "durability": 9,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T15:54:41.136561+00:00",
+  "total": 102,
+  "verdict": "SOUND WITH FINDINGS"
+}
