@@ -27,9 +27,9 @@ epfl:
     comment: TCV compute node
 
 jt-60sa:
-  - hostname: nakasvr23.iferc.org
-    ip: 157.111.10.188
-    comment: JT-60SA login node
+  - hostname: nakasvr26.iferc.org
+    ip: 157.111.6.49
+    comment: JT-60SA analysis host (login intr26-2) and Code wiki; replaces the retired nakasvr23
 
 # iter and jet use ITER network, which typically resolves internally
 # Only add entries here if VPN blocks ITER DNS too

@@ -445,6 +445,12 @@ discovery_roots:
 # Site 0: Static Code wiki - analysis code documentation
 # Site 1: Server landing page - hardware, software, login, batch jobs, compilers
 # Direct viewing requires the IFERC VPN; port_forwards supplies local browser ports.
+# nakasvr23 is retired: it still resolves (157.111.10.188) but answers nothing. Fetch through
+# the hop from the facility side: ssh -n jt-60sa "curl -sk '<url>'" (login host intr26-2).
+# Graph URLs https://nakasvr23.iferc.org/twiki_html/rsrc/Code/<Topic>/<file> map to
+# https://nakasvr26.iferc.org/wiki/rsrc/Code/<Topic>/<file> (39 of 40 sampled resolved,
+# 2026-10-13). The former Main web (daily operation reports, DataAnalysis manuals, the
+# ssh://jt-60sa/var/www/html/twiki/... sources) is not on nakasvr26: every probe returns 404.
 wiki_sites:
   - name: twiki_code
     url: https://nakasvr26.iferc.org/wiki

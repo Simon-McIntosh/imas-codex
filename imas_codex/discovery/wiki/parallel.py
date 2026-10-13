@@ -841,10 +841,10 @@ def _get_exclude_prefixes(facility: str, current_base_url: str) -> list[str]:
     2. Explicit exclude_prefixes from the site config (e.g., vendor docs)
 
     For example, jt-60sa has:
-      - https://nakasvr23.iferc.org/twiki_html (twiki_static)
-      - https://nakasvr23.iferc.org (static_html with exclude_prefixes)
+      - https://nakasvr26.iferc.org/wiki (twiki_static)
+      - https://nakasvr26.iferc.org (static_html with exclude_prefixes)
 
-    When crawling the root site, /twiki_html is auto-excluded, and
+    When crawling the root site, /wiki is auto-excluded, and
     /matlab, /idl, etc. are excluded via config.
 
     Args:
