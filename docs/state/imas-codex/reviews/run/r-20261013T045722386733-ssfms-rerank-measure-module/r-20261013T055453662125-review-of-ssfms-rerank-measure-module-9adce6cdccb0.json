@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's own manifest left baseline_suite and after_suite empty, so no count could be derived from its recorded gate logs; this review measured both arms itself in scratch trees at the reviewed base (f2b0a0109) and head (9adce6cdc), 0 failing test ids in each, so added_failure_count 0 is a measurement this review took rather than a value the reviewed run recorded",
+  "base_log_revision": "f2b0a0109ddf6682fbc3ff97930a618e7d35494c",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/llm/search_tools.py:421 (_search_signals calling rerank_candidates)",
+    "imas_codex/llm/search_tools.py:235 (rerank_candidates)",
+    "imas_codex/llm/search_tools.py:191 (_signal_rerank_state imported by the harness arms)",
+    "imas_codex/discovery/base/judgment.py:350 (rerank_pool)"
+  ],
+  "completed_at": "2026-10-13T06:24:07.427Z",
+  "dispatched_at": "2026-10-13T05:55:14Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "286",
+      "severity": "follow-on",
+      "text": "follow-on: the _additive_rank tie-break by signal id carries no assertion \u2014 reverting `key=lambda sid: (-scores.get(sid, 0), sid)` to a score-only sort reddens no test, so the determinism the plan's first harness change buys (an order a function of inputs, not of the per-process hash seed) is unguarded."
+    },
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "791",
+      "severity": "follow-on",
+      "text": "follow-on: the added `assert table[\"rrf\"] > table[\"additive_rule\"]` regression floor sits inside the @pytest.mark.graph test at line 765, deselected by the default gate (3 deselected), so the done_when's arm-table clause was not exercised by the node's own gate and its guard runs only in the separately dispatched live test node."
+    },
+    {
+      "file": "tests/llm/measure_search_rankings.py",
+      "line": "304",
+      "severity": "follow-on",
+      "text": "follow-on: the ported section 4 measurement's first recorded run lands at labelled-only nDCG@10 0.5345 (docs_code_measure.log), 0.0209 above section 4's 0.5136 \u2014 outside the \u00b10.02 tolerance the done_when names; the second run (0.5303) is inside, and the embedding order reproduces 0.4627 to the digit, so the residual is judge variance the fragment discloses."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T045722386733-ssfms-rerank-measure-module/manifest.md",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's commits list names only c425d9961, fdb257c7c and 9adce6cdc, omitting fb1e92f64 (the four harness changes) which lies in the reviewed range f2b0a0109..9adce6cdc and touches the node's own declared test write paths, so the durable record understates the node's diff."
+    }
+  ],
+  "head_log_revision": "9adce6cdccb002e8f10f8a8b0dbe1fe9ca69afdc",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call sites",
+    "diff": "read commit by commit over f2b0a0109..9adce6cdc; four commits (fb1e92f64 the harness changes, c425d9961 the module and ports, fdb257c7c the figure, 9adce6cdc the fragment), eight paths, all inside the declared scope.",
+    "done_when": "the done_when names the four harness changes passing (gate_llm.log 122 passed, 8 skipped, 3 deselected, EXIT=0), the removal test failing with the refusal narrowed to the top ten (negative_control.log 1 failed, EXIT=1; negative_control_head.log 2 passed, EXIT=0), the ported section 4 measurement reproducing section 4's figure from the vendored fixture (docs_code_measure.log embedding labelled-only 0.4627 equal to section 4's, rerank 0.5345/0.5303 versus 0.5136), and the module command in section 4's and 5's fragments (fusion.html, embeddings.html).",
+    "goal": "the node goal is to build the repository measurement module for section 7's scoring runs with the harness changes it rests on, and tests/llm/measure_search_rankings.py:1 scores the fused order and both rerank arms and ports the docs-code and embed-text measurements, with the four harness changes in tests/llm/test_signal_search_goldens.py:213,286,791 and tests/llm/test_search_tools.py:594.",
+    "manifest": "read; it states status complete, tests 'gate_llm.log: 122 passed, 8 skipped, 3 deselected, EXIT=0' with the negative control logs, names commits [c425d9961, fdb257c7c, 9adce6cdc], and leaves baseline_suite and after_suite empty.",
+    "write_paths": "read the manifest's eight declared paths and every path the diff touches (tests/llm/measure_search_rankings.py, tests/llm/fixtures/docs_code_search_questions.json, tests/llm/test_signal_search_goldens.py, tests/llm/test_search_tools.py, fusion.html, embeddings.html, ssfms-rerank-measure-module.html, the figure dir) is inside them."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_signal_search_goldens.py:672 fails when the pool refusal is narrowed to the top ten (negative_control.log proves it), but the tie-break at tests/llm/test_signal_search_goldens.py:286 is unguarded and the arm-table floor at line 791 is graph-deselected in the gate.",
+    "evidence": "the gate is recorded (gate_llm.log 122 passed EXIT=0) and the guard is shown to fire (negative_control.log 1 failed EXIT=1 at tests/llm/test_signal_search_goldens.py:672), but the arm-table clause's assertion sits in a graph-deselected test and the first ported run lands 0.0209 outside the stated tolerance.",
+    "fit": "tests/llm/measure_search_rankings.py reuses the harness through _harness() and follows the surrounding style, and its new names (SpendRecorder, measure_signal_arms, measure_docs_code, measure_embed_text, compose_name_desc_unit) carry no plan label, version suffix or ticket reference.",
+    "goal_fidelity": "tests/llm/measure_search_rankings.py scores the fused order and both rerank arms over passes and ports the section 4 and 5 measurements, and tests/llm/test_signal_search_goldens.py:213 adds the pool-wide label refusal, so the goal is met; the embed-text section is implemented but unrun here, as the source manifest states.",
+    "reuse": "the module reuses the harness arms, _signal_rerank_state (imas_codex/llm/search_tools.py:191) and rerank_candidates (imas_codex/llm/search_tools.py:235) rather than forking a rerank, but its SpendRecorder (tests/llm/measure_search_rankings.py:72) wraps judgment.acall_decisions because rerank_candidates discards the cost rerank_pool already computes (imas_codex/llm/search_tools.py:298-299).",
+    "scope_discipline": "every path in the f2b0a0109..9adce6cdc diff (tests/llm/measure_search_rankings.py, tests/llm/fixtures/docs_code_search_questions.json, tests/llm/test_signal_search_goldens.py, tests/llm/test_search_tools.py, the three fragments and the figure) is inside the eight declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to build the repository measurement module for section 7's scoring runs with the harness changes it rests on, and tests/llm/measure_search_rankings.py:1 scores the fused order and both rerank arms and ports the docs-code and embed-text measurements, with the four harness changes in tests/llm/test_signal_search_goldens.py:213,286,791 and tests/llm/test_search_tools.py:594.\nVERDICT done_when: the done_when names the four harness changes passing (gate_llm.log 122 passed, 8 skipped, 3 deselected, EXIT=0), the removal test failing with the refusal narrowed to the top ten (negative_control.log 1 failed, EXIT=1; negative_control_head.log 2 passed, EXIT=0), the ported section 4 measurement reproducing section 4's figure from the vendored fixture (docs_code_measure.log embedding labelled-only 0.4627 equal to section 4's, rerank 0.5345/0.5303 versus 0.5136), and the module command in section 4's and 5's fragments (fusion.html, embeddings.html).\nVERDICT write_paths: read the manifest's eight declared paths and every path the diff touches (tests/llm/measure_search_rankings.py, tests/llm/fixtures/docs_code_search_questions.json, tests/llm/test_signal_search_goldens.py, tests/llm/test_search_tools.py, fusion.html, embeddings.html, ssfms-rerank-measure-module.html, the figure dir) is inside them.\nVERDICT manifest: read; it states status complete, tests 'gate_llm.log: 122 passed, 8 skipped, 3 deselected, EXIT=0' with the negative control logs, names commits [c425d9961, fdb257c7c, 9adce6cdc], and leaves baseline_suite and after_suite empty.\nVERDICT diff: read commit by commit over f2b0a0109..9adce6cdc; four commits (fb1e92f64 the harness changes, c425d9961 the module and ports, fdb257c7c the figure, 9adce6cdc the fragment), eight paths, all inside the declared scope.\nCALL_SITES: imas_codex/llm/search_tools.py:421 (_search_signals calling rerank_candidates), imas_codex/llm/search_tools.py:235 (rerank_candidates), imas_codex/llm/search_tools.py:191 (_signal_rerank_state imported by the harness arms), imas_codex/discovery/base/judgment.py:350 (rerank_pool)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/llm/measure_search_rankings.py scores the fused order and both rerank arms over passes and ports the section 4 and 5 measurements, and tests/llm/test_signal_search_goldens.py:213 adds the pool-wide label refusal, so the goal is met; the embed-text section is implemented but unrun here, as the source manifest states.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate is recorded (gate_llm.log 122 passed EXIT=0) and the guard is shown to fire (negative_control.log 1 failed EXIT=1 at tests/llm/test_signal_search_goldens.py:672), but the arm-table clause's assertion sits in a graph-deselected test and the first ported run lands 0.0209 outside the stated tolerance.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the f2b0a0109..9adce6cdc diff (tests/llm/measure_search_rankings.py, tests/llm/fixtures/docs_code_search_questions.json, tests/llm/test_signal_search_goldens.py, tests/llm/test_search_tools.py, the three fragments and the figure) is inside the eight declared write paths.\nSCORE durability: 14\nJUSTIFICATION durability: tests/llm/test_signal_search_goldens.py:672 fails when the pool refusal is narrowed to the top ten (negative_control.log proves it), but the tie-break at tests/llm/test_signal_search_goldens.py:286 is unguarded and the arm-table floor at line 791 is graph-deselected in the gate.\nSCORE fit: 19\nJUSTIFICATION fit: tests/llm/measure_search_rankings.py reuses the harness through _harness() and follows the surrounding style, and its new names (SpendRecorder, measure_signal_arms, measure_docs_code, measure_embed_text, compose_name_desc_unit) carry no plan label, version suffix or ticket reference.\nSCORE reuse: 18\nJUSTIFICATION reuse: the module reuses the harness arms, _signal_rerank_state (imas_codex/llm/search_tools.py:191) and rerank_candidates (imas_codex/llm/search_tools.py:235) rather than forking a rerank, but its SpendRecorder (tests/llm/measure_search_rankings.py:72) wraps judgment.acall_decisions because rerank_candidates discards the cost rerank_pool already computes (imas_codex/llm/search_tools.py:298-299).\nFINDING tests/llm/test_signal_search_goldens.py:286 follow-on: the _additive_rank tie-break by signal id carries no assertion \u2014 reverting `key=lambda sid: (-scores.get(sid, 0), sid)` to a score-only sort reddens no test, so the determinism the plan's first harness change buys (an order a function of inputs, not of the per-process hash seed) is unguarded.\nFINDING tests/llm/test_signal_search_goldens.py:791 follow-on: the added `assert table[\"rrf\"] > table[\"additive_rule\"]` regression floor sits inside the @pytest.mark.graph test at line 765, deselected by the default gate (3 deselected), so the done_when's arm-table clause was not exercised by the node's own gate and its guard runs only in the separately dispatched live test node.\nFINDING tests/llm/measure_search_rankings.py:304 follow-on: the ported section 4 measurement's first recorded run lands at labelled-only nDCG@10 0.5345 (docs_code_measure.log), 0.0209 above section 4's 0.5136 \u2014 outside the \u00b10.02 tolerance the done_when names; the second run (0.5303) is inside, and the embedding order reproduces 0.4627 to the digit, so the residual is judge variance the fragment discloses.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T045722386733-ssfms-rerank-measure-module/manifest.md:12 follow-on: the manifest's commits list names only c425d9961, fdb257c7c and 9adce6cdc, omitting fb1e92f64 (the four harness changes) which lies in the reviewed range f2b0a0109..9adce6cdc and touches the node's own declared test write paths, so the durable record understates the node's diff.",
+  "review_run_id": "r-20261013T055453662125-review-of-ssfms-rerank-measure-module-9adce6cdccb0",
+  "reviewed_base_sha": "f2b0a0109ddf6682fbc3ff97930a618e7d35494c",
+  "reviewed_head_sha": "9adce6cdccb002e8f10f8a8b0dbe1fe9ca69afdc",
+  "reviewed_run_id": "r-20261013T045722386733-ssfms-rerank-measure-module",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T06:10:00.000000+00:00",
+  "total": 106
+}
