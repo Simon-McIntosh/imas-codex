@@ -1,0 +1,205 @@
+<!-- Measurement of Jev's closed-vocabulary segment selection
+     (imas_codex/standard_names/segment_selection.py) against the composer, on
+     golden A's positives and the human sn edit rename targets. Driver:
+     ssog-segment-selection-measure-run.py; raw results:
+     ssog-segment-selection-measure-results.json. -->
+<section id="ssog-segment-selection-measure" data-reckon="evidence">
+  <h2 id="ssog-segment-selection-measure-heading">Segment selection measured against the composer on golden A</h2>
+
+  <p id="ssog-segment-selection-measure-intro">
+    <code>select_segments</code> was run once per DD source over golden A
+    (<code>golden-name-acceptable.json</code>) and the human <code>sn edit</code>
+    rename targets. Each source's name is compared slot by slot against the
+    target spelling. <strong>Two figures come from
+    <code>imas_codex/discovery/base/evaluation.py</code></strong>: the
+    cross-check separation (<code>paired_auc</code>, <code>bootstrap_interval</code>)
+    and cost and latency (<code>cost_latency_summary</code>); the golden A cohort
+    is loaded with <code>load_labelled_fixture</code>. <strong>The remaining
+    figures are computed by driver-local helpers, not by
+    <code>evaluation.py</code></strong>: exact-name match and per-slot accuracy
+    and the composer's agreement and per-slot accuracy
+    (<code>_figures</code>, <code>_slot_accuracy</code>, <code>_aggregate</code>),
+    and family agreement (<code>_family_agreement</code>), all in
+    <code>ssog-segment-selection-measure-run.py</code>. Per-slot accuracy is
+    computed by the driver's <code>_slot_accuracy</code>, which delegates the
+    slot comparison to <code>benchmark_roles.exact_match_accuracy</code>
+    (<code>imas_codex/standard_names/benchmark_roles.py</code>) rather than
+    re-implementing it, so the per-slot figures use the project's own match.
+  </p>
+
+  <h3 id="ssog-segment-selection-measure-cohort-heading">Cohort and exclusions</h3>
+  <p id="ssog-segment-selection-measure-cohort-body">
+    The cohort is every golden A row (291 positives, 446 negatives) plus 336
+    distinct human-edit rename targets: <strong>1073</strong> rows. A row's DD
+    source is resolved through the name's <code>PRODUCED_NAME</code> provenance,
+    one bounded indexed read per batch of 200. <strong>618 rows carry no DD
+    source</strong> and are left out, and <strong>21 further rows' target
+    spelling does not parse canonically</strong>, leaving <strong>434 measured
+    rows</strong> (167 golden positives, 93 golden negatives, 174 edit targets).
+    The 618 is the dominant exclusion and is a property of the fixture, not of
+    Jev: a name that never reached a DD source has nothing for a source-driven
+    selection to read.
+  </p>
+
+  <h3 id="ssog-segment-selection-measure-figures-heading">Exact-name match and per-slot accuracy</h3>
+  <table id="ssog-segment-selection-measure-figures-table">
+    <caption>Exact-name match and per-slot accuracy. All three columns run over the full 174 edit targets (167 positives for Jev's positives column); the composer column includes the 126 of 174 whose pre-rename spelling does not parse. Such a spelling supplies no segment, so it is counted as a per-slot mismatch on <em>every</em> slot, empty or not.</caption>
+    <thead>
+      <tr><th>Metric</th><th>Jev, positives (n=167)</th><th>Jev, edit targets (n=174)</th><th>Composer, edit targets (n=174)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Exact-name match</td><td>0.0299</td><td>0.0287</td><td>0.0000</td></tr>
+      <tr><td><code>physical_base</code></td><td>0.515</td><td>0.506</td><td>0.195</td></tr>
+      <tr><td><code>subject</code></td><td>0.605</td><td>0.535</td><td>0.224</td></tr>
+      <tr><td><code>component</code></td><td>0.563</td><td>0.563</td><td>0.264</td></tr>
+      <tr><td><code>operator</code></td><td>0.665</td><td>0.575</td><td>0.264</td></tr>
+      <tr><td><code>locus</code></td><td>0.503</td><td>0.477</td><td>0.190</td></tr>
+      <tr><td><code>process</code></td><td>0.784</td><td>0.805</td><td>0.247</td></tr>
+    </tbody>
+  </table>
+  <img src="/imas-codex/figures/sn-selection-over-generation/ssog-segment-selection-measure/per-slot-accuracy.svg"
+       alt="Per-slot accuracy for Jev on golden A positives, Jev on human-edit targets, and the composer on human-edit targets, over the six grammar slots"/>
+  <p id="ssog-segment-selection-measure-figure-note">
+    The SVG is rendered by the driver's <code>--figure-only</code> mode from the
+    committed results JSON (<code>plt.style.use("data-ink")</code>), so it
+    regenerates without re-running any selection.
+  </p>
+  <p id="ssog-segment-selection-measure-composer-note">
+    <strong>The composer's figures use its recorded spelling, not a fresh
+    compose</strong> (no persist-nothing compose call path was used). For golden
+    A's positives the recorded spelling <em>is</em> the target spellings — the
+    fixture's rows are composer output — so the composer's exact-name match there
+    is 1.0 by construction and is <em>circular</em>; it is therefore not shown as
+    a fair comparator, and only Jev's positives column is reported above. For the
+    edit targets the composer's recorded spelling is the pre-rename
+    <code>from_name</code>: the human renamed it because the spelling was wrong,
+    so its exact-name match is 0.0 by construction too.
+  </p>
+  <p id="ssog-segment-selection-measure-composer-denominator">
+    <strong>The composer column runs over all 174 edit targets — the same
+    sources Jev selects over.</strong> A recorded spelling that does not parse
+    canonically supplies no segment, so it matches no slot and stays in the
+    denominator; <strong>126 of the 174 do not parse</strong> and are counted as
+    per-slot mismatches, not dropped. A missing prediction is compared as a
+    sentinel that equals no token, so it is a mismatch on <em>every</em> slot
+    including those whose gold token is empty; treating a missing prediction as a
+    plain <code>None</code> would instead have credited it on every empty gold
+    slot, which inflated five of the six figures in the table above. The table's
+    composer row is the full-set figure. Restricted to the <strong>48 targets
+    whose pre-rename spelling does parse</strong>, the composer's per-slot
+    accuracy is much higher — base 0.708, subject 0.813, component 0.958, operator
+    0.958, locus 0.688, process 0.896 (<code>slot_accuracy_parsable</code> in the
+    results JSON) — and that is the like-for-like figure for a reader asking how
+    near the composer sat when its output was a parseable name at all. The full-set
+    figures are exactly the parsable figure scaled by 48/174 (the share of edit
+    targets that parse), because the other 126 targets contribute no hit at all;
+    they are lower precisely because three quarters of the composer's pre-rename
+    spellings were not parseable canonical names, which is why a human renamed
+    them.
+  </p>
+
+  <h3 id="ssog-segment-selection-measure-family-heading">Family agreement</h3>
+  <p id="ssog-segment-selection-measure-family-body">
+    Family agreement groups records into species families (the target's slot
+    tokens with the subject removed) and asks whether every member of a
+    multi-member family receives a uniform <code>(physical_base, operator,
+    locus)</code> triple. <strong>The record reports two cohorts</strong>, because
+    the driver's family filter (every record with <code>label == 1</code>) is
+    wider than the plan's phrase "the positives", and the two give different
+    family counts:
+  </p>
+  <ul id="ssog-segment-selection-measure-family-cohorts">
+    <li><strong>Golden positives only — 167 records in 135 families.</strong>
+      15 families carry more than one member and 7 of those are uniform, an
+      agreement rate of <strong>0.467</strong>
+      (<code>family_agreement.golden_positives</code> in the results JSON).
+      <em>This is the cohort the plan's generator rule reads, since the rule is
+      stated over "the positives".</em></li>
+    <li><strong>Every label-positive record — 341 records in 182 families</strong>
+      (the 167 golden positives plus the 174 human-edit targets). 101 families
+      carry more than one member and 81 of those are uniform, an agreement rate of
+      <strong>0.802</strong> (<code>family_agreement.label_1_all</code>). This is
+      the natural reading of "<code>label == 1</code>" and is the wider cohort.</li>
+  </ul>
+  <p id="ssog-segment-selection-measure-family-boundary">
+    The seventeen-member boundary-density family is the exception the plan names:
+    among the measured rows only <strong>8 of its 17 members carry a DD
+    source</strong> (the other 9 are among the 618 exclusions), and those 8 do
+    <strong>not</strong> agree — they split across four distinct
+    <code>(number_density, operator, locus)</code> appearance combinations
+    (<code>flux_surface_averaged</code>/<code>separatrix</code>,
+    <code>flux_surface_averaged</code>/none, none/<code>isotope</code>,
+    none/none), so Jev does not render the boundary densities uniform. The 0.467
+    and 0.802 figures above both count that disagreement the same way; only the
+    cohort they are computed over differs.
+  </p>
+
+  <h3 id="ssog-segment-selection-measure-crosscheck-heading">Cross-check separation</h3>
+  <p id="ssog-segment-selection-measure-crosscheck-body">
+    The cross-check signal is the six-slot agreement between Jev's selection and
+    the composer's recorded spelling. <strong>On golden A the composer's recorded
+    spelling is the very name the fixture labels</strong> — the positives are the
+    composer's own outputs — so this AUC measures only whether Jev's selection
+    disagrees more with the rejected names than with the accepted ones; it is not
+    a comparison of Jev against an independent second selector. Over the 260 golden
+    rows that resolve to a DD source (167 positives, 93 negatives), flagging
+    composer-against-Jev <em>disagreement</em> separates the negatives from the
+    positives with <strong>AUC 0.480</strong>, bootstrap 95% interval
+    <strong>[0.408, 0.552]</strong> (<code>paired_auc</code> against the mirror
+    agreement arm gives the same figure, difference −0.0397;
+    <code>bootstrap_interval</code> resamples by <code>copy_group</code>,
+    1000 draws, seed 123). A value at 0.5 is no separation at all.
+  </p>
+
+  <h3 id="ssog-segment-selection-measure-cost-heading">Cost</h3>
+  <p id="ssog-segment-selection-measure-cost-body">
+    The call layer booked <strong>USD 0.261844</strong> across the 434 measured
+    names (<code>cost_latency_summary</code> over the 14 batches:
+    mean USD 0.018703 and median 20.3 s per batch), i.e. <strong>USD 0.000603 per
+    name</strong>. The node declared the rule to stop if the 10-item pilot's
+    extrapolation exceeded USD 2.00: the pilot measured USD 0.002943 for the 5 of
+    its 10 rows that had a DD source (USD 0.000589 per name), extrapolating to
+    about USD 0.63 for the full cohort, under the ceiling, so the run proceeded.
+    Total spend on this node's measurement, including the pilot and two
+    superseded runs whose cost accounting was discarded, is about USD 0.59, under
+    the USD 2.00 ceiling.
+  </p>
+
+  <h3 id="ssog-segment-selection-measure-recommendation-heading">Recommendation</h3>
+  <p id="ssog-segment-selection-measure-recommendation-body">
+    The plan fixes the rule before the run, and it is applied mechanically here:
+  </p>
+  <blockquote id="ssog-segment-selection-measure-rule">
+    <p><strong>Cross-check</strong> if flagging composer-against-Jev disagreement
+    separates golden A's negatives from its positives with AUC at or above 0.70,
+    and the interval's lower bound is above 0.60. <strong>Generator</strong> if
+    Jev's exact-name match on the positives is within 0.02 of the composer's, and
+    its family agreement is higher. <strong>Both</strong> if both conditions
+    hold; <strong>neither</strong> if neither does.</p>
+  </blockquote>
+  <p id="ssog-segment-selection-measure-verdict">
+    <strong>neither.</strong> The cross-check condition fails: AUC 0.480 is below
+    0.70 and the interval's lower bound 0.408 is below 0.60 — composer-against-Jev
+    disagreement does not separate the negatives from the positives. The generator
+    condition fails: Jev's exact-name match on the positives is 0.0299 against the
+    composer's, which is 1.0 by construction for those rows (the fixture's
+    positives are composer output), and 0.0299 is not within 0.02 of it. Family
+    agreement is read on the golden-positives cohort the rule names (0.467 on 167
+    records in 135 families). It is not in question either way because the
+    generator's exact-name conjunct already fails, so the verdict does not turn on
+    which cohort the family figure is taken over. Neither deployment is supported
+    on this evidence.
+  </p>
+  <p id="ssog-segment-selection-measure-verdict-note">
+    The rule reads exact-name match and family agreement, not the per-slot
+    accuracy of the composer column, so the correction to that column leaves the
+    verdict as it was: re-applying the rule to the corrected figures still gives
+    <strong>neither</strong>.
+  </p>
+  <p id="ssog-segment-selection-measure-caveat">
+    The controlling caveat is the exclusion rate: 618 of 1073 rows have no DD
+    source, and 21 more do not parse, so the measured 434 are the subset whose
+    names reached a source at all. The figures describe that subset, not the whole
+    fixture.
+  </p>
+</section>
