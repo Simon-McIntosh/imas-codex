@@ -1,0 +1,62 @@
+<section id="ssfms-reprocess-bulk-3">
+  <h2 id="ssfms-reprocess-bulk-3-title">Reprocess bulk-3: JT-60SA assigned categories</h2>
+  <p id="ssfms-reprocess-bulk-3-lead">
+    Reprocessed the assigned JT-60SA categories through the current signal
+    pipeline, finishing every scope this node reset. All 3588 assigned signals
+    (h060029, b250062, c260058, VV, SPC, TF) now carry a description and an
+    embedding whose text hash matches its description; none is at
+    <code>discovered</code>.
+  </p>
+
+  <h3 id="ssfms-reprocess-bulk-3-scopes">Scopes finished</h3>
+  <table id="ssfms-reprocess-bulk-3-table">
+    <thead>
+      <tr><th>scope</th><th>signals</th><th>reset&nbsp;s</th><th>enrich&nbsp;s</th><th>spend</th><th>finish</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>c260058, VV, SPC, TF</td><td>320</td><td>41.1</td><td>281.7</td><td>$0.04</td><td>described, 0 discovered</td></tr>
+      <tr><td>b250062</td><td>1041</td><td>44.7</td><td>734.4</td><td>$0.03</td><td>described, 0 discovered</td></tr>
+      <tr><td>h060029 subset (65 whole sources)</td><td>700</td><td>39.9</td><td>489.6</td><td>$0.02</td><td>described, 0 discovered</td></tr>
+      <tr><td>h060029 residue (2 sources)</td><td>2</td><td>&mdash;</td><td>48.2</td><td>$0.00</td><td>described, 0 discovered</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="ssfms-reprocess-bulk-3-census">Final census (assigned categories)</h3>
+  <table id="ssfms-reprocess-bulk-3-census-table">
+    <thead>
+      <tr><th>category</th><th>total</th><th>discovered</th><th>described</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>h060029</td><td>2227</td><td>0</td><td>2227</td></tr>
+      <tr><td>b250062</td><td>1041</td><td>0</td><td>1041</td></tr>
+      <tr><td>c260058</td><td>93</td><td>0</td><td>93</td></tr>
+      <tr><td>VV</td><td>92</td><td>0</td><td>92</td></tr>
+      <tr><td>SPC</td><td>72</td><td>0</td><td>72</td></tr>
+      <tr><td>TF</td><td>63</td><td>0</td><td>63</td></tr>
+      <tr><th>assigned</th><th>3588</th><th>0</th><th>3588</th></tr>
+    </tbody>
+  </table>
+  <p id="ssfms-reprocess-bulk-3-hash">
+    Hash mismatch across the assigned categories: <strong>0</strong>. Total engine
+    spend: <strong>$0.09</strong> against a $6 ceiling.
+  </p>
+
+  <h3 id="ssfms-reprocess-bulk-3-notes">Notes</h3>
+  <ul id="ssfms-reprocess-bulk-3-notes-list">
+    <li id="ssfms-reprocess-bulk-3-note-residue">
+      The scoped h060029 flush left two signals unclaimed
+      (<code>jt-60sa:general/lcdb_h060029_ane.s001_dname</code>,
+      <code>jt-60sa:general/lcdb_h060029_ane.s002_dname</code>). A targeted flush
+      on their exact source ids enriched both, bringing h060029
+      <code>discovered</code> to 0.
+    </li>
+    <li id="ssfms-reprocess-bulk-3-note-propagation">
+      Descriptions propagate facility-wide to follower signals, so a scoped
+      flush engine count can exceed the reset scope.
+    </li>
+    <li id="ssfms-reprocess-bulk-3-note-unreset">
+      1527 further h060029 signals were already described before this node ran
+      and were not reset.
+    </li>
+  </ul>
+</section>
