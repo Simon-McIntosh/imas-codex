@@ -1,0 +1,64 @@
+<!-- Landing record for the blind documentation-acceptability label sheet.
+     Builder: imas_codex/standard_names/judgment_goldens.py::build_documentation_sheet.
+     Sheet: docs/evidence/fragments/sn-judgment-evaluation/golden-documentation-acceptable-sheet.json.
+     Gate: tests/standard_names/test_judgment_goldens.py + tests/graph/test_cypher_property_check.py.
+     Negative control log:
+     /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T065809061523-sje-docs-label-sheet/negative-control.log -->
+<section id="sje-docs-label-sheet" data-reckon="evidence">
+  <h2 id="sje-docs-label-sheet-heading">The documentation-acceptability sheet, blind to the incumbent</h2>
+
+  <p id="sje-docs-label-sheet-intro">
+    Golden B asks whether one name's documentation is acceptable. It cannot be
+    assembled from existing labels, so
+    <code>build_documentation_sheet</code> draws the entries the coordinator reads by
+    hand: live <code>StandardName</code> nodes at <code>name_stage</code> accepted or
+    approved that carry non-empty documentation, stratified over physics domain and
+    pattern family by the module's existing <code>_sample</code> and ranked by its
+    existing split assignment. Each row carries the documentation it labels, its
+    sha256, the DD source paths and their DD text, and the registry conventions the
+    name selects. The sheet is written unlabelled &mdash; every <code>label</code> is
+    null and the only provenance is <code>label_source = "coordinator"</code>.
+  </p>
+
+  <table id="sje-docs-label-sheet-table">
+    <caption>Live build: 600 rows drawn, 400 sheet and 200 reserve, 50 marked for the lead.</caption>
+    <thead>
+      <tr><th>Measure</th><th>Figure</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Rows drawn</td><td>600</td></tr>
+      <tr><td>Sheet / reserve</td><td>400 / 200</td></tr>
+      <tr><td>Lead-overlap rows (in the sheet)</td><td>50</td></tr>
+      <tr><td>Distinct physics domains</td><td>67</td></tr>
+      <tr><td>Top domains</td><td>transport 58, plant_systems 47, radiation_measurement_diagnostics 47, auxiliary_heating 40, equilibrium 38, magnetohydrodynamics 34, edge_plasma_physics 33</td></tr>
+      <tr><td>Distinct pattern families</td><td>190</td></tr>
+      <tr><td>Top families</td><td>coordinate 33, flux 23, density 20, field 20, toroidal 18, power 17, energy 16, radial 16</td></tr>
+      <tr><td>Split by copy group</td><td>calibration 316, validation 284</td></tr>
+      <tr><td>Names the strict parse refuses</td><td>6 of 600 (empty conventions block, parse_refused true)</td></tr>
+      <tr><td>Largest row</td><td>4158 bytes</td></tr>
+      <tr><td>Sheet file</td><td>1397932 bytes</td></tr>
+    </tbody>
+  </table>
+
+  <p id="sje-docs-label-sheet-blindness">
+    <strong>The sheet is blind to incumbent scores.</strong> No row carries an
+    incumbent review; the live read does not touch review state and the builder drops
+    the shared split helper's <code>incumbent_review</code> flag before writing.
+    Verified over all 600 rows: no key matches
+    <code>incumbent|review|score|verdict|tier</code>. A label the coordinator writes
+    therefore cannot see the pipeline's own verdict on the name, which is what makes
+    the sheet usable to measure that verdict.
+  </p>
+
+  <p id="sje-docs-label-sheet-reading">
+    The gate for the two covered files passes at the base revision (14 passed) and at
+    the head (20 passed), with the six new sheet tests added. The declared negative
+    control removes each sheet mechanism in turn &mdash; <code>draw_rank</code> forced
+    to zero, the lead-overlap marking disabled, the incumbent drop removed, and
+    <code>copy_group</code> set to the unit instead of the pattern family &mdash; and
+    the four mechanism tests each turn red, exit non-zero. Determinism is exact: two
+    builds from the same live read produce identical rows. A name whose strict parse
+    is refused still reaches the sheet, recorded with an empty conventions block and a
+    <code>parse_refused</code> flag (6 of 600 here).
+  </p>
+</section>
