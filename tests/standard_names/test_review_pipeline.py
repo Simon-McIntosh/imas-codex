@@ -93,7 +93,7 @@ def test_audit_duplicate_candidates():
             "description": "Plasma current",
             "unit": "A",
             "kind": "scalar",
-            "physics_domain": "magnetics",
+            "physics_domain": "magnetic_field_diagnostics",
             "physical_base": "current",
         },
     ]

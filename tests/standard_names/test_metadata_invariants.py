@@ -2,14 +2,13 @@
 
 These tests verify structural correctness of metadata written to the
 graph by the standard-name compose pipeline.  They operate purely on
-mocked Cypher — no live Neo4j required.
-
-Guards added after the 2025-04-20 metadata QA audit (commit 35-*).
-Extended 2025-07-17 with tag, kind, dd_version, and write-path invariants.
+mocked Cypher — no live Neo4j required.  They cover tag, kind, dd_version
+and write-path invariants.
 """
 
 from __future__ import annotations
 
+import copy
 import importlib
 import inspect
 from pathlib import Path
@@ -17,6 +16,25 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
+
+#: The shared sample names carry IDS names (``core_profiles``, ``magnetics``)
+#: where a physics domain belongs; the declared domain selector refuses a value
+#: that is not a PhysicsDomain member.  These tests exercise the write path and
+#: its Cypher, so they need a valid, fitting domain rather than an IDS name.
+_DOMAIN_REPLACEMENTS = {
+    "core_profiles": "core_plasma_physics",
+    "magnetics": "magnetic_field_diagnostics",
+}
+
+
+@pytest.fixture()
+def valid_domain_names(sample_standard_names: list[dict]) -> list[dict]:
+    """Shared sample names with valid physics-domain values."""
+    names = copy.deepcopy(sample_standard_names)
+    for entry in names:
+        domain = entry.get("physics_domain")
+        entry["physics_domain"] = _DOMAIN_REPLACEMENTS.get(domain, domain)
+    return names
 
 
 @pytest.fixture(autouse=True)
@@ -112,9 +130,9 @@ class TestWriteCypherInvariants:
     """Verify Cypher produced by write_standard_names enforces metadata contracts."""
 
     @pytest.fixture()
-    def cypher_statements(self, sample_standard_names: list[dict]) -> list[str]:
+    def cypher_statements(self, valid_domain_names: list[dict]) -> list[str]:
         """Capture all Cypher statements from a write_standard_names call."""
-        return _get_write_cypher(sample_standard_names)
+        return _get_write_cypher(valid_domain_names)
 
     def _merge_cypher(self, stmts: list[str]) -> str:
         """Find the MERGE StandardName statement."""
@@ -194,7 +212,7 @@ class TestWriteCypherInvariants:
                     "Expected warning about cocos_transformation_type without cocos integer"
                 )
 
-    def test_unit_in_batch_payload(self, sample_standard_names: list[dict]) -> None:
+    def test_unit_in_batch_payload(self, valid_domain_names: list[dict]) -> None:
         """Every name dict with a unit must include it in the batch payload."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
@@ -204,7 +222,7 @@ class TestWriteCypherInvariants:
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
             from imas_codex.standard_names.graph_ops import write_standard_names
 
-            write_standard_names(sample_standard_names)
+            write_standard_names(valid_domain_names)
 
         # Find the HAS_UNIT MERGE batch call (not the self-heal DELETE sweep,
         # which also mentions HAS_UNIT but carries an `ids` param, no batch).
@@ -455,10 +473,10 @@ class TestDDVersionConsistency:
 
     def test_dd_version_uses_coalesce_in_write(
         self,
-        sample_standard_names: list[dict],
+        valid_domain_names: list[dict],
     ) -> None:
         """dd_version must use coalesce to avoid overwriting with NULL."""
-        stmts = _get_write_cypher(sample_standard_names)
+        stmts = _get_write_cypher(valid_domain_names)
         merge = next(s for s in stmts if "MERGE (sn:StandardName" in s)
         assert "coalesce(b.dd_version" in merge
 
@@ -471,16 +489,16 @@ class TestDDVersionConsistency:
 class TestWritePathRelationships:
     """Verify relationship creation patterns in write_standard_names."""
 
-    def test_has_unit_uses_merge(self, sample_standard_names: list[dict]) -> None:
+    def test_has_unit_uses_merge(self, valid_domain_names: list[dict]) -> None:
         """The HAS_UNIT edge write must use MERGE to be idempotent."""
-        stmts = _get_write_cypher(sample_standard_names)
+        stmts = _get_write_cypher(valid_domain_names)
         # The writer emits two HAS_UNIT statements: a self-heal DELETE sweep
         # and the MERGE edge write. Only the edge write must use MERGE.
         merge_stmts = [s for s in stmts if "HAS_UNIT" in s and "MERGE" in s]
         assert merge_stmts, "A HAS_UNIT MERGE statement must exist"
 
     def test_has_unit_self_heals_before_merge(
-        self, sample_standard_names: list[dict]
+        self, valid_domain_names: list[dict]
     ) -> None:
         """The writer drops existing HAS_UNIT edges before re-MERGEing.
 
@@ -488,7 +506,7 @@ class TestWritePathRelationships:
         self-heal, a unit correction leaves a stale HAS_UNIT edge alongside the
         new one. The DELETE sweep must precede the MERGE edge write.
         """
-        stmts = _get_write_cypher(sample_standard_names)
+        stmts = _get_write_cypher(valid_domain_names)
         delete_idx = next(
             (i for i, s in enumerate(stmts) if "HAS_UNIT" in s and "DELETE" in s),
             None,
@@ -503,16 +521,16 @@ class TestWritePathRelationships:
 
     def test_has_standard_name_created_for_dd_source(
         self,
-        sample_standard_names: list[dict],
+        valid_domain_names: list[dict],
     ) -> None:
         """DD-sourced names must create HAS_STANDARD_NAME edge."""
-        stmts = _get_write_cypher(sample_standard_names)
+        stmts = _get_write_cypher(valid_domain_names)
         has_sn = any("HAS_STANDARD_NAME" in s for s in stmts)
         assert has_sn, "HAS_STANDARD_NAME must be created for DD-sourced names"
 
     def test_unit_batch_includes_all_non_null_units(
         self,
-        sample_standard_names: list[dict],
+        valid_domain_names: list[dict],
     ) -> None:
         """Every name with a unit must appear in the HAS_UNIT batch."""
         mock_gc = MagicMock()
@@ -523,7 +541,7 @@ class TestWritePathRelationships:
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
             from imas_codex.standard_names.graph_ops import write_standard_names
 
-            write_standard_names(sample_standard_names)
+            write_standard_names(valid_domain_names)
 
         unit_calls = [
             c
@@ -534,7 +552,7 @@ class TestWritePathRelationships:
         batch = unit_calls[0][1]["batch"]
         unit_ids = {b["unit"] for b in batch}
         # All sample names have units
-        for n in sample_standard_names:
+        for n in valid_domain_names:
             if n.get("unit"):
                 assert n["unit"] in unit_ids, f"Unit {n['unit']} missing from batch"
 
