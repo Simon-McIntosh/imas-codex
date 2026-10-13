@@ -1,0 +1,73 @@
+<!-- Landing record: how well Jev's link judgment separates good name links from bad,
+     2026-10-13. Node ssog-link-auc. Base revision 6168972705c17a611cc0ee860d314497a5283ab4.
+     Driver: ssog-link-auc-run.py. Results: ssog-link-auc-results.json. -->
+<section id="ssog-link-auc" data-reckon="evidence">
+  <h2 id="ssog-link-auc-heading">Jev's link judgment against the coordinator's labels</h2>
+
+  <p id="ssog-link-auc-summary">
+    The link-label sheet holds <strong>180</strong> <code>name:</code> links drawn
+    from the live documentation, every self-link found plus a physics-domain
+    spread of neighbours. A link is labelled <strong>1</strong> when its text
+    describes the target's <em>own</em> quantity and <strong>0</strong> when it
+    names a different one; those coordinator labels landed in commit
+    <code>9867930cd</code>. Jev scored 180/180 links, so nothing was excluded for
+    a null probability. Resampling is by copy group —
+    <code>documenting_name</code>, because links inside one description move
+    together — with 1000 draws, seed 123 and a 95% level, through
+    <code>imas_codex.discovery.base.evaluation</code>. The sheet carries
+    <strong>116</strong> positives and <strong>64</strong> negatives across
+    <strong>168</strong> copy groups.
+  </p>
+
+  <p id="ssog-link-auc-result-body">
+    Over all rows Jev's probability ranks the links at AUC
+    <strong>0.757</strong> (0.679–0.823): clearly above chance, and no better on
+    the non-self links alone (0.759). On self-links only he is weaker at
+    <strong>0.659</strong> (0.513–0.780), which is the population where a
+    deterministic flag already knows the answer. That flag is the baseline: score
+    <code>1 - is_self_link</code>, so it predicts a non-self link is good and a
+    self-link is bad. Its AUC over all rows is <strong>0.799</strong>
+    (0.739–0.862), and the paired difference Jev minus baseline is
+    <strong>-0.043</strong> (-0.133–0.041). The point estimate favours the
+    deterministic flag, but the interval crosses zero, so this sample does not
+    separate them: on these 180 links Jev's judgment adds no measurable
+    separation over simply flagging self-links.
+  </p>
+
+  <p id="ssog-link-auc-disagreement-body">
+    The disagreements show where the two differ. The worst misses Jev would let
+    through (label 0, highest probability) are mostly self-links whose text
+    states a <em>different</em> quantity than the name's own — "power of an
+    ion-cyclotron heating antenna" scored 0.91 against
+    <code>launched_power_of_ion_cyclotron_heating_antenna</code>, whose own
+    quantity is the power actually launched rather than the antenna's radiated
+    power. The good links he would block (label 1, lowest probability) are
+    unqualified forms of a qualified target, such as "atomic count of pellet"
+    at 0.30 against <code>fast_ion_critical_energy</code>'s neighbour, and
+    "power at the outer divertor target" at 0.50 against
+    <code>maximum_power_at_outer_divertor_target</code>.
+  </p>
+
+  <p id="ssog-link-auc-control-body">
+    The negative control shuffles the label column (seed 123) and rescoring
+    gives AUC <strong>0.488</strong> (0.392–0.583), whose interval contains 0.5
+    as it must — the instrument reports separation only when there is structure
+    to find. Running the driver twice from the worktree wrote byte-identical
+    results JSON; both runs exited 0.
+  </p>
+
+  <table id="ssog-link-auc-table">
+    <caption>Jev's link-label AUC per population, and the deterministic self-link baseline, over 180 labelled links (95% copy-grouped interval)</caption>
+    <thead>
+      <tr><th>Population</th><th>n</th><th>positives</th><th>negatives</th><th>AUC</th><th>95% interval</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>All links — Jev</td><td>180</td><td>116</td><td>64</td><td>0.757</td><td>0.679–0.823</td></tr>
+      <tr><td>Non-self-links — Jev</td><td>106</td><td>93</td><td>13</td><td>0.759</td><td>0.607–0.892</td></tr>
+      <tr><td>Self-links — Jev</td><td>74</td><td>23</td><td>51</td><td>0.659</td><td>0.513–0.780</td></tr>
+      <tr><td>All links — self-link baseline (<code>1 - is_self_link</code>)</td><td>180</td><td>116</td><td>64</td><td>0.799</td><td>0.739–0.862</td></tr>
+      <tr><td>Paired difference, Jev − baseline</td><td>180</td><td>116</td><td>64</td><td>-0.043</td><td>-0.133–0.041</td></tr>
+      <tr><td>All links — shuffled-label control</td><td>180</td><td>116</td><td>64</td><td>0.488</td><td>0.392–0.583</td></tr>
+    </tbody>
+  </table>
+</section>
