@@ -1,0 +1,398 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "ce47976e0092a336b672328b3137cef34422a2cd",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4138860,
+      "input_tokens_cumulative": 4138860,
+      "output_tokens": 12842,
+      "output_tokens_cumulative": 12842,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 22,
+    "files": 1,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_list_shortfall": {
+    "declared": 3,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261013T185402647619-ssfms-role-filter-live' has a passing gate presenting 1 commit(s) of the 3 its manifest declares; missing: dd7e64c9263bc59bdba631bcc02cae803d614ba2, f13f1e5822fad5fb58fda98799bcd89133708e40. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present the full list, or the boundary check may not cover the node's work",
+    "missing": [
+      "dd7e64c9263bc59bdba631bcc02cae803d614ba2",
+      "f13f1e5822fad5fb58fda98799bcd89133708e40"
+    ],
+    "presented": 1
+  },
+  "commit_resolution": null,
+  "commits": [
+    "be370b25b2c785e61252b7ee0e80519b7892d8e9"
+  ],
+  "completed_at": "2026-10-13T19:47:06.507Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-13T18:54:40Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider -m graph tests/llm/test_signal_role_filter_live.py -v",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185402647619-ssfms-role-filter-live/gate_live.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.6923076923076923,
+    "plan": "signal-search-finds-the-measured-signal",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-13T19:54:03.552437+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-13T18:54:03Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 13,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 6,
+    "headroom": 5,
+    "mean_context": 186667,
+    "observed_at": "2026-10-13T18:54:00Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 13,
+      "aggregate_tokens_per_second": 367.236,
+      "detail": "",
+      "mean_tokens_per_second": 61.206,
+      "observed_at": "2026-10-13T18:54:00Z",
+      "runs": 6.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-13T19:47:06.507Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185402647619-ssfms-role-filter-live/manifest.md",
+  "member": "disposable-r-20261013T185402647619-ssfms-role-filter-live",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/llm/test_signal_role_filter_live.py::test_filtered_arm_returns_rows_including_a_grade3_measurement"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/llm/test_signal_role_filter_live.py::test_filtered_arm_returns_rows_including_a_grade3_measurement"
+    ],
+    "declaration": "with role='measured' replaced by no role in the filtered call, the test's assertion that every filtered result is measured fails",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185402647619-ssfms-role-filter-live/negative_control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185402647619-ssfms-role-filter-live/negative_control.log",
+    "test_paths": [
+      "tests/llm/test_signal_role_filter_live.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "ssfms-role-filter-live",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2035,
+          "cached_input_tokens": 206409,
+          "input_tokens": 208446,
+          "output_tokens": 221,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 208667,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+      "session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf"
+    },
+    "done_when": "tests/llm/test_signal_role_filter_live.py, marked graph, calls search_signals as served with the rerank off on each of the 22 questions in tests/llm/fixtures/signal_search_questions.json, once with role='measured' and once with no role, and asserts that every result of a filtered call has stored signal_role measured, that no filtered top 5 holds a candidate the fixture grades 2 whose stored signal_role is commanded or reference_or_setpoint, and that on at least one question the unfiltered top 5 holds a grade-2 candidate whose stored signal_role is commanded or reference_or_setpoint; the test passes with -m graph against the live graph; docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-filter-live.html tabulates per question the filtered and unfiltered top 5 with each candidate's fixture grade and stored role, counts the questions whose unfiltered top 5 holds a grade-2 reference or command, and, for every grade-2 candidate in a filtered top 5, states from its name and description whether it measures the quantity at an adjacent point or is a reference, command or setpoint the role judge called measured",
+    "estimated_hours": null,
+    "goal": "show on the live graph that a role=measured signal search keeps every reference, command or setpoint out of each golden question's top 5",
+    "id": "ssfms-role-filter-live",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-13T18:54:03Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 13,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 6,
+      "headroom": 5,
+      "mean_context": 186667,
+      "observed_at": "2026-10-13T18:54:00Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 13,
+        "aggregate_tokens_per_second": 367.236,
+        "detail": "",
+        "mean_tokens_per_second": 61.206,
+        "observed_at": "2026-10-13T18:54:00Z",
+        "runs": 6.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185402647619-ssfms-role-filter-live/manifest.md",
+    "negative_control": "with role='measured' replaced by no role in the filtered call, the test's assertion that every filtered result is measured fails",
+    "plan": "signal-search-finds-the-measured-signal",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§8",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/llm/test_signal_role_filter_live.py",
+      "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-filter-live.html",
+      "docs/figures/signal-search-finds-the-measured-signal/ssfms-role-filter-live"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3724631.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "ssfms-role-filter-live",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-13T18:54:26.857867+00:00",
+    "score": 0.6625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Review waived: section 8's prototype, enrichment and filter nodes are promoted under its reviewed text; this is the role-filter check the followup sequences after section 12's bulk run. Live graph reads only; no Jev.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.408,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 795.55,
+      "context-estimate": 25.614,
+      "jev": null,
+      "records": 389.047,
+      "verdict-inputs": 393.291
+    }
+  },
+  "plan": "signal-search-finds-the-measured-signal",
+  "plan_impl_at_dispatch": 0.6923076923076923,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "be370b25b2c785e61252b7ee0e80519b7892d8e9",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "ce47976e0092a336b672328b3137cef34422a2cd",
+    "reviewed_head_sha": "be370b25b2c785e61252b7ee0e80519b7892d8e9",
+    "scores": {
+      "durability": 18,
+      "evidence": 19,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 113
+  },
+  "review_tier": "light",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261013T185402647619-ssfms-role-filter-live",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§8",
+  "session": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+  "session_harness": "claude",
+  "session_id": "ae60c718-6747-4d40-ab28-963b88d7a283",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 4,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 11780160,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 480.728,
+    "generated_tokens": 47668,
+    "generation_seconds": 330.299,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 75.0,
+    "machine_seconds": 150.429,
+    "peak_input_tokens": 172597,
+    "tokens_per_second": 144.32,
+    "wall_tokens_per_second": 99.16
+  },
+  "time_budget": "60m",
+  "tool_steps": 61.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 3146,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-13T19:47:10Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-13T19:39:00Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261013T185402647619-ssfms-role-filter-live",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8164,
+    "worker_pid": 2958239
+  },
+  "worker_seconds": 3085,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
