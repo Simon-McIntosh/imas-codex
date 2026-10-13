@@ -45,6 +45,11 @@
     <p><code>tests/standard_names/test_harmonize_guard.py</code> no longer carries the <code>SHC_NO_RECOMMENDED_GUARD</code> environment seam or its no-op helper, and its docstring states the three protected classes as the rule instead of saying who ruled them (merge <code>f919e6760</code>). The negative control is now a temporary removal of the guard call in <code>apply_families</code>, restored after the run with its sha256 verified unchanged. The file passes 5 of 5 at base and at head; with the guard removed, 4 fail with EXIT=1, including both refusal tests. Independent review: 100/120, no added failures.</p>
   </section>
 
+  <section id="s3-dry-run-guard">
+    <h2>§3 — a dry run reports the recommended-name refusals</h2>
+    <p><code>sn harmonize --apply --dry-run</code> now runs the guard over the same targets the apply guards (<code>apply_guard_targets</code>, shared by both). A family holding a member recommended into a catalog request prints <code>decision=refused</code>, naming the member and its evidence, and its calls are left out of the total. Under <code>--force</code> it prints <code>decision=forced</code> and keeps them. Nothing is written either way (merge <code>b404d76a8</code>). Gate: harmonize and protection tests 71 passed at base, 73 at head, no added failures. Independent review: 115/120.</p><p>Left open: the real apply refuses the <em>whole</em> apply when any family is refused, while this dry run still totals the other families' calls. A follow-on node makes the summary report the whole-apply refusal.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -105,6 +105,11 @@
     <p>Already fixed before this sprint. <code>a3ad987cc</code> makes the fold's stamp derive from the receipt's declared instant (<code>datetime($changed_at)</code>) rather than the server clock, which was the field on which the readback and the planned state disagreed. Since 2026-09-08 (<code>80c42c6ad</code>), <code>test_dry_run_and_live_transaction_return_the_same_verdict</code> in <code>tests/standard_names/test_fold_dry_run_predicts_live.py</code> has pinned it: a fold that passes its dry run commits with its proof holding. <code>24484a91d</code> later extended the same rule to documentation. The census row predated those changes. This sprint's node reproduced the agreement (3 passed, and reverting the stamp turned it red), but its test duplicated the existing pin and re-implemented its helper (review 81/120), so it was discarded unmerged.</p>
   </section>
 
+  <section id="s10-existing-gate">
+    <h2>§10 — the one-word anchor gate was fixed a month before the census</h2>
+    <p>The §6 census carried "a one-word family anchor cannot clear the name gate" as still true. Commit <code>07486c695</code> (2026-09-05) had already fixed it: <code>semantic_gate_name_text</code> in <code>imas_codex/standard_names/workers.py</code> scores a single-token name against its vocabulary definition, and <code>tests/standard_names/test_name_gate_definition_floor.py</code> pins it. A test node mapped the done-when onto the existing tests without changing the repository:</p><ul><li>parsed one-word anchor clears the gate: <code>test_gate_embeds_the_definition_and_clears_the_floor</code>;</li><li>rejected or undefined token still fails: shown only at the substitution boundary, by <code>test_unparseable_name_falls_through_to_the_identifier</code> and <code>test_undefined_token_falls_through_and_fails_closed</code>;</li><li>fails with the fix reverted: with the substitution stubbed to return the name, 8 of 13 fail, EXIT=1.</li></ul><p>Head: 13 passed. Independent review 106/120. The second property's end-to-end test is a follow-on node.</p>
+  </section>
+
 </main>
 </body>
 </html>
