@@ -1,0 +1,87 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "restore-superseded-etendue-successor-edge",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-superseded-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "supersede_legacy_spelling",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "etendue_of_spectrometer_channel=>etendue_of_soft_xray_detector"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "etendue_of_spectrometer_channel=>etendue_of_soft_xray_detector:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "etendue_of_spectrometer_channel"
+          ]
+        },
+        {
+          "id": "etendue_of_spectrometer_channel=>etendue_of_soft_xray_detector:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "etendue_of_spectrometer_channel",
+            "etendue_of_soft_xray_detector"
+          ]
+        }
+      ],
+      "id": "etendue_of_spectrometer_channel=>etendue_of_soft_xray_detector",
+      "identity": {
+        "id": "etendue_of_spectrometer_channel=>etendue_of_soft_xray_detector",
+        "kind": "standard_name",
+        "target_id": "etendue_of_spectrometer_channel"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "etendue_of_soft_xray_detector"
+          },
+          "id": "etendue_of_spectrometer_channel:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "etendue_of_spectrometer_channel"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "etendue_of_spectrometer_channel",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "etendue_of_soft_xray_detector",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "8a0d1ce75ead98df32d3e08f65723019ab998bf971749b18f64f70b32b2e45f5"
+  }
+}

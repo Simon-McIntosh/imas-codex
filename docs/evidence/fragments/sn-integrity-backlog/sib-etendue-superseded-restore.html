@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-etendue-superseded-restore">
+<title>Historical etendue identity restored as superseded</title>
+</head>
+<body>
+<main>
+<h1 id="sib-etendue-superseded-restore-title">Historical etendue identity restored as superseded</h1>
+<p id="sib-etendue-superseded-restore-context">The archived <code>etendue_of_spectrometer_channel</code> had been deleted by a deliberate rename to the accepted <code>etendue_of_soft_xray_detector</code>. The live exact-id control found the old identity absent and <code>dd:soft_x_rays/channel/etendue</code> bound only to the corrected identity. The archive census associates 19 cost rows and USD 0.844849 with the old identity.</p>
+
+<h2 id="sib-etendue-superseded-restore-trim-title">Trim against the archived extraction</h2>
+<table id="sib-etendue-superseded-restore-trim">
+<thead><tr><th>Field or edge</th><th>Archived</th><th>Signed extraction</th></tr></thead>
+<tbody>
+<tr><td><code>name_stage</code>, <code>status</code></td><td><code>accepted</code>, <code>draft</code></td><td><code>superseded</code>, <code>superseded</code>; <code>superseded_from_stage=accepted</code></td></tr>
+<tr><td><code>PRODUCED_NAME</code> from <code>dd:soft_x_rays/channel/etendue</code></td><td>1</td><td>0; the corrected identity retains it</td></tr>
+<tr><td><code>HAS_PARENT</code> from absent <code>spectral_etendue_of_spectrometer_channel</code></td><td>1</td><td>0</td></tr>
+<tr><td>Other archived edges</td><td>18</td><td>18, including 4 <code>HAS_REVIEW</code>, 2 <code>DOCS_REVISION_OF</code>, and 1 derived <code>PRODUCED_NAME</code></td></tr>
+</tbody>
+</table>
+<p id="sib-etendue-superseded-restore-trim-hash">The committed trimmed extraction is <code>sib-etendue-superseded-restore-extraction.json</code>, SHA-256 <code>189e8a27cf6b185b493121d6ece20fad76851d251a5059f11ab59c03f9160cf6</code>. A unified diff against the archived extraction shows only the two deleted edge objects, the two lifecycle field replacements, and the new prior-stage field.</p>
+
+<h2 id="sib-etendue-superseded-restore-authorities-title">Signed authorities and transactional receipts</h2>
+<table id="sib-etendue-superseded-restore-authorities">
+<thead><tr><th>Authority</th><th>File and signature SHA-256</th><th>Preview</th><th>Applied receipt</th></tr></thead>
+<tbody>
+<tr><td>Archive reconstruction, <code>origin=pipeline</code></td><td><code>sib-etendue-superseded-restore-authority.json</code><br><code>f53be67503704741bc3d6c56a7b032a2ea536b0e1f34bbdd3824b34d06caacf4</code><br>signature <code>7fcbe2d2cd4ec59c7ce931e5297dec4fb2800a03904fadc03c23842f6aad41dd</code></td><td><code>would_apply</code>, 1 admitted, 0 refused; digest <code>8bcae2dc260f571f882fb1f373f37a20caa85f7211016d978ada6baa4bfbd552</code></td><td><code>applied</code> under the same digest, 1 admitted, 0 refused. Parity: reviews 4/4, docs revisions 2/2, internal changes 4/4, derived producers 1/1, and every other declared role matched.</td></tr>
+<tr><td>Successor edge, signed <code>supersede</code></td><td><code>sib-etendue-superseded-restore-successor-authority.json</code><br><code>419a0637055f093eee8f7574cce2e19b4d300e263f526be7c4648134d8541849</code><br>signature <code>8a0d1ce75ead98df32d3e08f65723019ab998bf971749b18f64f70b32b2e45f5</code></td><td><code>would_apply</code>, 1 admitted, 0 refused; digest <code>43eba167522bc0f415fd8bac7ade87e9e37ab1fc8e5fdbe6d84b6e63a7386761</code></td><td><code>applied</code> under the same digest, 1 changed, 1 admitted, 0 refused, 2 persistent writes. Change receipt <code>sn-change:signed-manifest:43eba167522bc0f415fd8bac7ade87e9e37ab1fc8e5fdbe6d84b6e63a7386761:c9ae5ed5ef713e9231602ef4</code>.</td></tr>
+</tbody>
+</table>
+<p id="sib-etendue-superseded-restore-refusal">Negative control: previewing the untrimmed archived authority returned <code>refused</code>, 0 admitted and 2 refused. It named the absent spectral child and the DD counterpart whose live state differs from the archive. That preview made no graph write.</p>
+
+<h2 id="sib-etendue-superseded-restore-readback-title">Bounded exact-id readback</h2>
+<table id="sib-etendue-superseded-restore-readback">
+<thead><tr><th>Exact key</th><th>Observed state</th></tr></thead>
+<tbody>
+<tr><td><code>etendue_of_spectrometer_channel</code></td><td>Present; <code>name_stage=superseded</code>, <code>status=superseded</code>, <code>origin=pipeline</code>, <code>superseded_by=etendue_of_soft_xray_detector</code>; 4 reviews and 2 docs revisions.</td></tr>
+<tr><td><code>HAS_SUCCESSOR</code> from the restored identity</td><td>Exactly 1 edge to <code>etendue_of_soft_xray_detector</code>, stamped <code>2026-10-13T16:44:06.033Z</code> with the signed change receipt above.</td></tr>
+<tr><td><code>dd:soft_x_rays/channel/etendue</code></td><td><code>produced_sn_id=etendue_of_soft_xray_detector</code>; exactly 1 <code>PRODUCED_NAME</code> edge, to that successor only.</td></tr>
+<tr><td><code>etendue_of_soft_xray_detector</code></td><td>Still <code>accepted</code> with <code>origin=pipeline</code> and one incoming DD producer. The signed successor authority's collateral-immutability guard admitted and applied without altering this participant.</td></tr>
+</tbody>
+</table>
+<p id="sib-etendue-superseded-restore-gate">The four restore test files completed at base <code>0b47beb3e021034bc352f807cfd1e48b80c7224b</code> and head <code>e23f0773cda4fef9c1f9c087f500d4a326e80a7d</code>: 44 passed and EXIT=0 in each log, for <strong>0 added failures</strong>. The run directory <code>r-20261013T163350780187-sib-etendue-superseded-restore</code> holds <code>restore-tests-base.log</code>, <code>restore-tests-head.log</code>, <code>successor-preview.json</code>, <code>successor-apply.json</code>, and <code>readback.json</code>.</p>
+</main>
+</body>
+</html>
