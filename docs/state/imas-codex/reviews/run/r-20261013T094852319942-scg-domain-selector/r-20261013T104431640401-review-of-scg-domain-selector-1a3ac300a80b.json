@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own suite logs. baseline_suite (base-gate.log, revision ef9f7126130a20680aea80208a762bd3ddadc74f, EXIT=0, completed true, failure_count 0, 93 passed) and after_suite (head-gate.log, revision 1a3ac300a80bf82ae04a7be0162d68482e24d308, EXIT=0, completed true, failure_count 0, 87 passed). Both arms green, so added failures are 0 and added_failure_ids is empty; the head arm carries the node's new selector tests and the base arm predates them, so the count difference is test-set composition, not a passing test removed.",
+  "backend": "local",
+  "base_log_revision": "ef9f7126130a20680aea80208a762bd3ddadc74f",
+  "call_site_count": 10,
+  "call_sites": [
+    "imas_codex/standard_names/export.py:1560 (pick_primary_domain)",
+    "imas_codex/standard_names/catalog_import.py:559 (pick_primary_domain)",
+    "imas_codex/standard_names/graph_ops.py:5753 (maybe_promote_domain)",
+    "imas_codex/standard_names/harmonize.py:578 (domain_key)",
+    "imas_codex/standard_names/review/audits.py:348 (domain_key)",
+    "imas_codex/standard_names/review/audits.py:538 (domain_key)",
+    "imas_codex/standard_names/review/consolidation.py:192 (domain_key)",
+    "imas_codex/standard_names/review/consolidation.py:323 (domain_key)",
+    "imas_codex/standard_names/review/enrichment.py:196 (domain_key)",
+    "imas_codex/standard_names/consolidation.py:78 (select_primary_domain)"
+  ],
+  "completed_at": "2026-10-13T10:58:53.083Z",
+  "dispatched_at": "2026-10-13T10:44:49Z",
+  "findings": [
+    "imas_codex/standard_names/domain_priority.py:25 follow-on: domain_key now routes every value through the raising selector, so a scalar or list physics_domain outside the 32-member vocabulary raises ValueError where it previously returned the value or its alphabetical-first element; the live review-grouping callers review/audits.py:348,538, review/consolidation.py:192,323 and review/enrichment.py:196 pass stored graph values, and the node's own census measured only source_domain lists, so an out-of-vocabulary scalar would abort grouping rather than degrade.",
+    "imas_codex/standard_names/graph_ops.py:5753 follow-on: the retained maybe_promote_domain adapter at domain_ranking.py:68 now raises on an unknown value rather than leaving it unpromoted, so a legacy node whose stored physics_domain is outside the vocabulary aborts the graph writer's batch instead of being skipped; the fragment names this caller for the graph-writer node but records no measurement that no such value exists.",
+    "tests/standard_names/test_domain_selector.py:76 follow-on: the assertion compares the sources element against the same domains list the test passed in, so it holds for any implementation that echoes its input and does not independently establish the sorted union the docstring promises."
+  ],
+  "head_log_revision": "1a3ac300a80bf82ae04a7be0162d68482e24d308",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read ef9f7126..1a3ac300a commit by commit; 5cbcaebe1 rewrites the three production modules and four test files, 1a3ac300a adds only the evidence fragment, and no path falls outside the declared scope.",
+    "done_when": "the done_when names tests/standard_names/test_domain_selector.py plus test_domain_ranking.py, test_domain_priority.py and test_consolidation.py at base and head judged by delta; the manifest records base 93 passed and head 87 passed both EXIT=0 and the retained base-gate.log and head-gate.log reproduce them.",
+    "goal": "the node's goal is one set-based selector that picks a name's primary domain from the declared table, with the pure callers moved onto it; imas_codex/standard_names/domain_ranking.py:55 defines select_primary_domain and imas_codex/standard_names/domain_priority.py:12, domain_priority.py:25 and consolidation.py:78 route pick_primary_domain, domain_key and _resolve_physics_domains onto it.",
+    "manifest": "read; status complete, after_suite records 87 passed EXIT=0 at 1a3ac300a and baseline_suite records 93 passed EXIT=0 at ef9f7126, both completed true with failure_count 0, and negative_control_log names a bare path with an EXIT=1 red run of five failing test ids.",
+    "write_paths": "the manifest declares imas_codex/standard_names/domain_ranking.py, domain_priority.py, consolidation.py, the four test files and docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector.html; every path in the diff is inside that set."
+  },
+  "justifications": {
+    "durability": "the selector contract is falsifiable, since negative-control.log shows a first-element stub reddening test_domain_selector.py permutation, empty-input, unknown-value, graph-isolation and caller-order tests; docked because test_domain_selector.py:76 compares the returned source list against the same domains object the test passed in, so it holds for any implementation returning the input unchanged.",
+    "evidence": "the gate covers the new file plus test_domain_ranking.py, test_domain_priority.py and test_consolidation.py at base (93 passed) and head (87 passed) with zero added failures in base-gate.log and head-gate.log, and negative-control.log reddens five contract test ids; docked because that log's first line binds it to revision ef9f7126 while the mutation ran against the head tree, so the red run is not bound to the revision it exercised.",
+    "fit": "the modules follow the surrounding docstring and typing idiom of imas_codex/standard_names/domain_ranking.py:55 and domain_priority.py:15, both commits carry conventional subjects and bodies, and no plan, sprint, ticket or author label appears in the change.",
+    "goal_fidelity": "imas_codex/standard_names/domain_ranking.py:55 selects the lowest rank of the declared table, returns None for empty input, refuses an unknown value by name at :64 and reads no graph, and domain_priority.py:12,25 and consolidation.py:78 all delegate to it.",
+    "reuse": "a capability search over imas_codex for another primary-domain or rank selector found only pick_primary_domain at domain_priority.py:10, which now delegates at :12, so select_primary_domain at domain_ranking.py:55 is the owner and no added definition forks a repository capability.",
+    "scope_discipline": "every path in ef9f7126..1a3ac300a is one of the eight declared write paths, and the removal of the cluster-weighted index and its callers stays inside imas_codex/standard_names/domain_priority.py and domain_ranking.py."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is one set-based selector that picks a name's primary domain from the declared table, with the pure callers moved onto it; imas_codex/standard_names/domain_ranking.py:55 defines select_primary_domain and imas_codex/standard_names/domain_priority.py:12, domain_priority.py:25 and consolidation.py:78 route pick_primary_domain, domain_key and _resolve_physics_domains onto it.\nVERDICT done_when: the done_when names tests/standard_names/test_domain_selector.py plus test_domain_ranking.py, test_domain_priority.py and test_consolidation.py at base and head judged by delta; the manifest records base 93 passed and head 87 passed both EXIT=0 and the retained base-gate.log and head-gate.log reproduce them.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/domain_ranking.py, domain_priority.py, consolidation.py, the four test files and docs/evidence/fragments/sn-catalog-grouping/scg-domain-selector.html; every path in the diff is inside that set.\nVERDICT manifest: read; status complete, after_suite records 87 passed EXIT=0 at 1a3ac300a and baseline_suite records 93 passed EXIT=0 at ef9f7126, both completed true with failure_count 0, and negative_control_log names a bare path with an EXIT=1 red run of five failing test ids.\nVERDICT diff: read ef9f7126..1a3ac300a commit by commit; 5cbcaebe1 rewrites the three production modules and four test files, 1a3ac300a adds only the evidence fragment, and no path falls outside the declared scope.\nCALL_SITES: imas_codex/standard_names/export.py:1560 (pick_primary_domain), imas_codex/standard_names/catalog_import.py:559 (pick_primary_domain), imas_codex/standard_names/graph_ops.py:5753 (maybe_promote_domain), imas_codex/standard_names/harmonize.py:578 (domain_key), imas_codex/standard_names/review/audits.py:348 (domain_key), imas_codex/standard_names/review/audits.py:538 (domain_key), imas_codex/standard_names/review/consolidation.py:192 (domain_key), imas_codex/standard_names/review/consolidation.py:323 (domain_key), imas_codex/standard_names/review/enrichment.py:196 (domain_key), imas_codex/standard_names/consolidation.py:78 (select_primary_domain)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/domain_ranking.py:55 selects the lowest rank of the declared table, returns None for empty input, refuses an unknown value by name at :64 and reads no graph, and domain_priority.py:12,25 and consolidation.py:78 all delegate to it.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate covers the new file plus test_domain_ranking.py, test_domain_priority.py and test_consolidation.py at base (93 passed) and head (87 passed) with zero added failures in base-gate.log and head-gate.log, and negative-control.log reddens five contract test ids; docked because that log's first line binds it to revision ef9f7126 while the mutation ran against the head tree, so the red run is not bound to the revision it exercised.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in ef9f7126..1a3ac300a is one of the eight declared write paths, and the removal of the cluster-weighted index and its callers stays inside imas_codex/standard_names/domain_priority.py and domain_ranking.py.\nSCORE durability: 17\nJUSTIFICATION durability: the selector contract is falsifiable, since negative-control.log shows a first-element stub reddening test_domain_selector.py permutation, empty-input, unknown-value, graph-isolation and caller-order tests; docked because test_domain_selector.py:76 compares the returned source list against the same domains object the test passed in, so it holds for any implementation returning the input unchanged.\nSCORE fit: 19\nJUSTIFICATION fit: the modules follow the surrounding docstring and typing idiom of imas_codex/standard_names/domain_ranking.py:55 and domain_priority.py:15, both commits carry conventional subjects and bodies, and no plan, sprint, ticket or author label appears in the change.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over imas_codex for another primary-domain or rank selector found only pick_primary_domain at domain_priority.py:10, which now delegates at :12, so select_primary_domain at domain_ranking.py:55 is the owner and no added definition forks a repository capability.\nFINDING imas_codex/standard_names/domain_priority.py:25 follow-on: domain_key now routes every value through the raising selector, so a scalar or list physics_domain outside the 32-member vocabulary raises ValueError where it previously returned the value or its alphabetical-first element; the live review-grouping callers review/audits.py:348,538, review/consolidation.py:192,323 and review/enrichment.py:196 pass stored graph values, and the node's own census measured only source_domain lists, so an out-of-vocabulary scalar would abort grouping rather than degrade.\nFINDING imas_codex/standard_names/graph_ops.py:5753 follow-on: the retained maybe_promote_domain adapter at domain_ranking.py:68 now raises on an unknown value rather than leaving it unpromoted, so a legacy node whose stored physics_domain is outside the vocabulary aborts the graph writer's batch instead of being skipped; the fragment names this caller for the graph-writer node but records no measurement that no such value exists.\nFINDING tests/standard_names/test_domain_selector.py:76 follow-on: the assertion compares the sources element against the same domains list the test passed in, so it holds for any implementation that echoes its input and does not independently establish the sorted union the docstring promises.",
+  "review_run_id": "r-20261013T104431640401-review-of-scg-domain-selector-1a3ac300a80b",
+  "reviewed_base_sha": "ef9f7126130a20680aea80208a762bd3ddadc74f",
+  "reviewed_head_sha": "1a3ac300a80bf82ae04a7be0162d68482e24d308",
+  "reviewed_run_id": "r-20261013T094852319942-scg-domain-selector",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:55:54.915549+00:00",
+  "total": 114,
+  "verdict": "SOUND"
+}
