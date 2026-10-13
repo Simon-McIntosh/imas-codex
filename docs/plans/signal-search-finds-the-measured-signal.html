@@ -18,13 +18,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="54">
 <meta name="plan-modified" content="2026-10-13">
-<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf">
+<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c">
 </head>
 <body>
   <main class="plan-doc">
@@ -196,7 +196,7 @@
     </p>
 
     <h2 id="s4">§4 — One rank fusion for every search tool</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Replace the additive rule <code>score * 0.7 + text_score * 0.3 + 0.1</code> at the four sites a tool reaches with reciprocal
       rank fusion. The sites are <code>_rank_signals</code>, the ranking <code>_search_signals</code> calls,
@@ -580,6 +580,9 @@
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T004404860760-ssfms-frozen-arm-pin" data-who="reckon-build" data-when="2026-10-13T01:02:05.826Z">
     <div class="r-comment-body"><p>Replaced the retired pin test with test_the_frozen_additive_rule_ranks_fixed_streams_by_its_formula: _additive_rank now orders fixed vector and full-text streams by 0.7*cosine + 0.3*text + 0.1 for a shared hit and the text score alone for a text-only hit, cut at K, needing no graph; the no-graph subset passes 8/8 and the declared mutation fails.</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-13T01:32:00Z">
+    <div class="r-comment-body"><p>§4 landed (final merge <code>39b8a36ae</code>): one reciprocal rank fusion for every search tool. Signal search mean nDCG@10 0.792 against the frozen additive rule's 0.561, grade-3 precision@5 0.718 against 0.518, and no question without a grade-3 hit in its top 30; docs and code 0.514 against the additive rule's same-day 0.330. The 0.02 band around 0.4821 is judged met as a regression guard, since that baseline no longer reproduces. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s4">evidence</a></p></div>
+</div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261012T235358686278-review-of-ssfms-description-writer" data-who="reckon-build" data-when="2026-10-13T00:08:30.079Z">
     <div class="r-comment-body"><p>docs/state/imas-codex — the review lands as a comment on the plan section signal-search-finds-the-measured-signal §5 via the stored record at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261012T232339331806-ssfms-description-writer.json</p></div>
 </div>
@@ -608,7 +611,7 @@
     <div class="r-comment-body"><p>Graded 29 candidates the re-embedded vectors lift into top tens (fixture 1,675 to 1,704 labels); the four-arm table scores every arm twice back to back (current_tool 0.7773 = rrf, vector_only 0.6858, additive_rule 0.5863, control 0.4527) but current_tool is 0.0147 below the pre-re-embed 0.7920, 0.0027 past the 0.012 spread.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261013T011832592870-review-of-ssfms-post-reembed-harness-83c08fd4ca34" data-who="reckon-build" data-when="2026-10-13T01:27:03.984Z">
-    <div class="r-comment-body"><p>Review of r-20261013T005826086865-ssfms-post-reembed-harness stored as a parsed six-dimension record (total 105: goal_fidelity 19, evidence 14, scope_discipline 19, durability 15, fit 18, reuse 20), reading base 9f53972b2 and head 83c08fd4c, added_failure_count 0, two follow-on findings (the four-arm test never asserts the done_when&#x27;s 0.012-spread clause; the explicitly required psc_cref3snu label is unguarded because no arm places it in a top 10).</p></div>
+    <div class="r-comment-body"><p>Review of r-20261013T005826086865-ssfms-post-reembed-harness stored as a parsed six-dimension record (total 105: goal_fidelity 19, evidence 14, scope_discipline 19, durability 15, fit 18, reuse 20), reading base 9f53972b2 and head 83c08fd4c, added_failure_count 0, two follow-on findings (the four-arm test never asserts the done_when's 0.012-spread clause; the explicitly required psc_cref3snu label is unguarded because no arm places it in a top 10).</p></div>
 </div>
 </section>
 </main>
