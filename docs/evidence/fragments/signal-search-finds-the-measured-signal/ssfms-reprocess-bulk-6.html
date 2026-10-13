@@ -1,0 +1,61 @@
+<!-- Bulk reprocess of JT-60SA signal categories through the current pipeline.
+     Three scopes reset and finished: 14 categories, 1398 signals. Machine-readable
+     record: reprocess-progress-bulk-6.json beside this fragment. Census, cost and
+     enrichment logs under
+     ~/.config/reckon/crew/runs/r-20261013T143100044312-ssfms-reprocess-bulk-6/scratch. -->
+<section id="ssfms-reprocess-bulk-6" data-reckon="evidence">
+  <h2 id="ssfms-reprocess-bulk-6-heading">Reprocessing JT-60SA categories in bulk, sixth partition</h2>
+
+  <p id="ssfms-reprocess-bulk-6-outcome">
+    Three scopes were reset to <code>discovered</code> and driven to completion
+    within one node: <strong>14 categories</strong> holding
+    <strong>1398 signals</strong>. Every signal finished — none is left at
+    <code>discovered</code>, all 1398 carry a description, and each description's
+    <code>embedded_text_hash</code> matches a hash recomputed from its own text
+    (0 mismatches within scope). Engine spend was <strong>$0.29</strong> over
+    3151 engine-signals, well under the node's <strong>$6</strong> ceiling.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-6-method">
+    This node holds a 17-category partition of JT-60SA (2151 signals). A scope
+    was reset only when the node's measured rate said it could finish in the
+    remaining time, and no scope was reset after 15:11:18Z (40 minutes into the
+    node). The first scope's pass A enriched 367 signals in 501.8s — about 38
+    signals per minute — so the later scopes were sized under that rate. Each
+    drain ran with the CLI time limit so no single foreground run exceeded the
+    tool ceiling; the reset itself was a separate graph-only call, which is what
+    makes a post-reset census possible between the reset and the enrichment.
+    Eleven categories remain unreset for a later node.
+  </p>
+
+  <table id="ssfms-reprocess-bulk-6-scopes-table">
+    <caption>Each scope: reset size, enrichment cost record, and final census</caption>
+    <tr><th>scope</th><th>categories</th><th>signals</th><th>engine enriched</th><th>spend</th><th>discovered</th><th>hash mismatch</th></tr>
+    <tr><td>chunk2</td><td>8</td><td>367</td><td>853</td><td>$0.147</td><td>0</td><td>0</td></tr>
+    <tr><td>chunk3</td><td>3</td><td>385</td><td>421</td><td>$0.063</td><td>0</td><td>0</td></tr>
+    <tr><td>chunk4</td><td>3</td><td>646</td><td>1877</td><td>$0.08</td><td>0</td><td>0</td></tr>
+    <tr><td><strong>total</strong></td><td><strong>14</strong></td><td><strong>1398</strong></td><td><strong>3151</strong></td><td><strong>$0.29</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+  </table>
+
+  <figure id="ssfms-reprocess-bulk-6-progress-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-6/progress.svg"
+         alt="Per-category signal counts for the assigned partition, finished categories in green and the three unreset categories in grey" />
+    <figcaption>Assigned JT-60SA categories for this node. Green: reset and described. Grey: not yet reset, left for a later node. Drawn from the censuses recorded in <code>reprocess-progress-bulk-6.json</code>.</figcaption>
+  </figure>
+
+  <p id="ssfms-reprocess-bulk-6-negative-control">
+    The reset is the step that could have silently done nothing, so each scope
+    carries one. Its post-reset census, taken immediately after the reset and
+    before enrichment, found all of its signals at <code>discovered</code> with
+    <code>described=0</code> — the complement of the control, so a census that
+    had found them still described would have meant the reset never ran. The
+    three censuses are captured at <code>census-c2-postreset.json</code>,
+    <code>census-c3-postreset.json</code> and <code>census-c4-postreset.json</code>
+    under the run directory.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-6-remaining">
+    Three assigned categories were not reset and remain for a later node:
+    <strong>CryoIL</strong> (286 signals), <strong>a042181</strong> (278) and
+    <strong>UDDB</strong>.</p>
+</section>
