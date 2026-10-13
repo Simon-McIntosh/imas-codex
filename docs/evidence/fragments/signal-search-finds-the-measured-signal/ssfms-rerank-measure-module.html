@@ -65,6 +65,15 @@
     3 deselected (<code>EXIT=0</code>).
   </p>
 
+  <p id="ssfms-rerank-measure-module-node-signal">
+    <strong>Signal arms, one pass.</strong> Over the 22 goldens the fused order alone scores mean
+    nDCG@10 <strong>0.7949</strong>, the generic rerank arm <strong>0.9024</strong> and the role-aware
+    arm <strong>0.9114</strong>; no question is refused, so the fixture's pooled labels cover every
+    candidate of every arm's pool of 60. The two rerank arms together spend 2639 calls /
+    <strong>$0.059213</strong>, and both build their candidate state through
+    <code>_signal_rerank_state</code>.
+  </p>
+
   <p id="ssfms-rerank-measure-module-node-logs">
     <strong>Logs.</strong> Module runs: <code>docs_code_measure.log</code> and
     <code>docs_code_measure_2.log</code>; negative control: <code>negative_control.log</code>; positive
