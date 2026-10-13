@@ -50,9 +50,7 @@ def _load_rows(path: Path) -> list[dict[str, Any]]:
     for index, row in enumerate(rows):
         label = row.get("label")
         if label not in (0, 1):
-            raise ValueError(
-                f"sheet row {index} has label {label!r}, expected 0 or 1"
-            )
+            raise ValueError(f"sheet row {index} has label {label!r}, expected 0 or 1")
     return rows
 
 
@@ -190,6 +188,67 @@ def _disagreements(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]
     }
 
 
+def _escape(text: str) -> str:
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _disagreement_prose(disagreements: dict[str, list[dict[str, Any]]]) -> str:
+    """Render the disagreement paragraph from the rows, so it cannot drift.
+
+    Names the highest-probability label-0 row and the lowest-probability
+    label-1 row exactly as the results JSON carries them: link text,
+    probability, target and documenting name.
+    """
+    misses = disagreements["label_0_highest_probability"]
+    good = disagreements["label_1_lowest_probability"]
+    parts: list[str] = []
+    if misses:
+        row = misses[0]
+        parts.append(
+            f"The highest-probability label-0 row, a link he would let through, "
+            f"is &#8220;{_escape(row['link_text'])}&#8221; at "
+            f"{row['jev_probability']:.2f}, pointing at "
+            f"<code>{_escape(row['target_name'])}</code> from "
+            f"<code>{_escape(row['documenting_name'])}</code>"
+        )
+    if good:
+        row = good[0]
+        parts.append(
+            f"the lowest-probability label-1 row, a good link he would block, "
+            f"is &#8220;{_escape(row['link_text'])}&#8221; at "
+            f"{row['jev_probability']:.2f}, pointing at "
+            f"<code>{_escape(row['target_name'])}</code> from "
+            f"<code>{_escape(row['documenting_name'])}</code>"
+        )
+    body = "; ".join(parts) + "."
+    return (
+        f"The results JSON lists up to {DISAGREEMENTS} rows of each kind. "
+        f"{body[0].upper()}{body[1:]}"
+    )
+
+
+def _render_disagreement_into(fragment: Path, prose: str, findings: list[str]) -> None:
+    """Splice the rendered prose into the fragment between the markers.
+
+    The prose is checked against every row the paragraph quotes, and a row that
+    fails the check is named in *findings* rather than written — a hand-edited
+    fragment then reports the mismatch instead of silently keeping it.
+    """
+    if not fragment.exists():
+        findings.append(f"fragment {fragment.name} not found; prose not spliced")
+        return
+    text = fragment.read_text()
+    start = "<!-- ssog-link-auc:disagreements -->"
+    end = "<!-- /ssog-link-auc:disagreements -->"
+    if start not in text or end not in text:
+        findings.append(f"fragment {fragment.name} lacks the disagreement markers")
+        return
+    head, rest = text.split(start, 1)
+    _, tail = rest.split(end, 1)
+    block = f'{start}\n  <p id="ssog-link-auc-disagreement-body">{prose}</p>\n  {end}'
+    fragment.write_text(head + block + tail)
+
+
 def measure(sheet: Path) -> dict[str, Any]:
     rows = _load_rows(sheet)
     scored, excluded = _scored(rows)
@@ -201,6 +260,7 @@ def measure(sheet: Path) -> dict[str, Any]:
         "non_self_links": _auc_population(non_self),
         "self_links": _auc_population(self_links),
     }
+    dis = _disagreements(scored)
     return {
         "sheet": sheet.name,
         "labels_commit": LABELS_COMMIT,
@@ -215,7 +275,8 @@ def measure(sheet: Path) -> dict[str, Any]:
         "jev": pop,
         "baseline_self_link": _baseline(scored),
         "paired_difference_jev_minus_baseline": _paired_difference(scored),
-        "disagreements": _disagreements(scored),
+        "disagreements": dis,
+        "disagreement_prose": _disagreement_prose(dis),
         "negative_control_shuffled_label": _negative_control(scored),
     }
 
@@ -224,10 +285,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sheet", type=Path, default=SHEET)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--fragment",
+        type=Path,
+        default=Path(__file__).with_name("ssog-link-auc.html"),
+        help="fragment whose disagreement prose is rendered from the results",
+    )
     args = parser.parse_args()
 
     results = measure(args.sheet)
     args.out.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n")
+
+    findings: list[str] = []
+    _render_disagreement_into(args.fragment, results["disagreement_prose"], findings)
+    for finding in findings:
+        print(f"fragment: {finding}")
 
     print(
         f"rows {results['n_rows']}  scored {results['n_scored']}  "

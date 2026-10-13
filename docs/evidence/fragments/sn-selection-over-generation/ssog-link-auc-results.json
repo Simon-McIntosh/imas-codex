@@ -9,6 +9,7 @@
     "upper": 0.8622866206494072
   },
   "copy_group_field": "documenting_name",
+  "disagreement_prose": "The results JSON lists up to 10 rows of each kind. The highest-probability label-0 row, a link he would let through, is &#8220;poloidal neutral species convection velocity&#8221; at 0.94, pointing at <code>poloidal_neutral_state_convection_velocity</code> from <code>poloidal_neutral_state_convection_velocity</code>; the lowest-probability label-1 row, a good link he would block, is &#8220;fast_particle_critical_energy&#8221; at 0.30, pointing at <code>fast_ion_critical_energy</code> from <code>fast_ion_critical_energy</code>.",
   "disagreements": {
     "label_0_highest_probability": [
       {

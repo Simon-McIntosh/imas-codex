@@ -34,19 +34,9 @@
     separation over simply flagging self-links.
   </p>
 
-  <p id="ssog-link-auc-disagreement-body">
-    The disagreements show where the two differ. The worst misses Jev would let
-    through (label 0, highest probability) are mostly self-links whose text
-    states a <em>different</em> quantity than the name's own — "power of an
-    ion-cyclotron heating antenna" scored 0.91 against
-    <code>launched_power_of_ion_cyclotron_heating_antenna</code>, whose own
-    quantity is the power actually launched rather than the antenna's radiated
-    power. The good links he would block (label 1, lowest probability) are
-    unqualified forms of a qualified target, such as "atomic count of pellet"
-    at 0.30 against <code>fast_ion_critical_energy</code>'s neighbour, and
-    "power at the outer divertor target" at 0.50 against
-    <code>maximum_power_at_outer_divertor_target</code>.
-  </p>
+  <!-- ssog-link-auc:disagreements -->
+  <p id="ssog-link-auc-disagreement-body">The results JSON lists up to 10 rows of each kind. The highest-probability label-0 row, a link he would let through, is &#8220;poloidal neutral species convection velocity&#8221; at 0.94, pointing at <code>poloidal_neutral_state_convection_velocity</code> from <code>poloidal_neutral_state_convection_velocity</code>; the lowest-probability label-1 row, a good link he would block, is &#8220;fast_particle_critical_energy&#8221; at 0.30, pointing at <code>fast_ion_critical_energy</code> from <code>fast_ion_critical_energy</code>.</p>
+  <!-- /ssog-link-auc:disagreements -->
 
   <p id="ssog-link-auc-control-body">
     The negative control shuffles the label column (seed 123) and rescoring
