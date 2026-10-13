@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-13T10:21:21.437Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "Both renames are confirmed in the live graph (read 2026-10-13T10:20Z): each new name is accepted, carries its DD source (darea_dpsi, darea_drho_tor) and is parented to poloidal_plane_cross_sectional_area_of_flux_surface, while the old names are superseded. The coordinator records that read in the landing evidence, which replaces the missing toroidal apply output. The operation cannot be re-run, so there is nothing further to make durable.",
+      "recorded_at": "2026-10-13T10:17:08.875342+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T10:04:26Z",
+  "findings": [
+    {
+      "file": "logs/apply-tor.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the toroidal rename's apply output is not recorded -- logs/apply-tor.log holds only the revision and command header, with no APPLIED line and no EXIT= line, so the done-when step 'each rename's dry run and apply output is recorded' is met for the poloidal rename only; the graph confirms the toroidal rename landed accepted with its source, so the deliverable is intact."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html",
+      "line": "142",
+      "severity": "follow-on",
+      "text": "follow-on: the brief's pre-rename check -- confirm with the recommended-name guard or a harmonize dry-run that none of these names is committed to a catalog request -- is recorded nowhere in the fragment or the manifest, so the guard the brief required before renaming is asserted by the successful apply rather than shown."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the change is a graph-state rename executed through the sanctioned sn edit CLI plus a docs fragment; it adds no code, so there are no production call sites to reach, and the renames are reached only by the sn edit surface and the graph's structural-derivation path.",
+    "diff": "read against base aa25ca574e; it is a single commit adding 153 lines -- the evidence fragment only -- with no source file, test, or config changed, matching the manifest's account that the node changed no source file.",
+    "done_when": "the done-when asks that each rename's dry run and apply output be recorded, that the renamed names exist with their sources ('check PRODUCED_NAME survives the rename'), that their derived parent is the successor, that surface_area_of_flux_surface's parent is either gone or the need for a code change stated precisely, that a bounded read shows area_of_flux_surface has zero live HAS_PARENT children or names those left, and that baseline_suite/after_suite be the edit tests at head with revision, exit_status and completed: true; the graph read confirms the renames, parents and sources, the fragment states the surface_area code change, and the bounded read names one remaining live child -- but the toroidal apply output is not recorded and the baseline/after suites are nested under tests: in the manifest rather than top-level.",
+    "goal": "the goal is to move the two derivative children of area_of_flux_surface to its successor through sn edit; both renames are present in the live graph as accepted with parent poloidal_plane_cross_sectional_area_of_flux_surface and their sources carried, and the third child surface_area_of_flux_surface is correctly left with its wrong parent named (docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html:32-57).",
+    "manifest": "read; status complete; one commit a29e0721 on the detached worktree HEAD, not merged; it records both renames with their sources and derived parent, a blocker naming the surface_area_of_flux_surface derivation, and tests: {baseline_suite, after_suite} both with revision aa25ca574e, exit_status 0 and completed true (nested under tests: rather than top-level), with test_logs empty and the after log listed under artifacts.",
+    "write_paths": "the manifest declares one write path, docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html, and the single landed commit a29e0721 touches exactly that path; no path outside the grant was written."
+  },
+  "justifications": {
+    "durability": "no assertion was added by this change -- it is a graph-state rename plus a docs fragment -- so no repository test fails if the rename regresses; the renamed StandardName's graph state is pinned by nothing resident, and the edit-tests gate (logs/edit-tests-after.log:4) exercises the pre-existing rename mechanism, not this rename's outcome.",
+    "evidence": "logs/edit-tests-after.log:56 records the gate summary '414 passed, 10 deselected, 1 warning' with EXIT=0 at revision aa25ca574e, and logs/dryrun-poly.log:1 and logs/apply-poly.log:1 record the poloidal rename's dry run and apply; but logs/apply-tor.log:1 is empty of output (header and command only, no APPLIED line and no EXIT= line), so the second rename's apply evidence is not recorded, and the reviewed manifest's baseline_suite/after_suite sit under tests: rather than the top-level keys the recorder reads.",
+    "fit": "the commit subject is conventional with a non-empty body and no AI attribution (checked on the source worktree), and the fragment follows the evidence-fragment convention (meta reckon-type, plan-slug and node-id at docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html:5-7) with no plan label in any symbol or filename.",
+    "goal_fidelity": "the node goal is that the two derivative children of area_of_flux_surface move to its successor through sn edit; both new spellings exist in the live graph as accepted with parent poloidal_plane_cross_sectional_area_of_flux_surface and carry their PRODUCED_NAME sources (dd:equilibrium/time_slice/profiles_1d/darea_dpsi and dd:equilibrium/time_slice/profiles_1d/darea_drho_tor), so the rename landed as specified -- and surface_area_of_flux_surface still carries its wrong parent, confirming the blocker the node records.",
+    "reuse": "the change adds no module, function, class or helper -- the diff is a single docs fragment -- so there is no capability to fork and nothing to compare against an existing owner; the renames reuse the sanctioned sn edit surface rather than a new mechanism.",
+    "scope_discipline": "git show --stat of a29e0721 lists exactly one path, docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html (+153), matching the manifest's declared changed_paths and the node's fragment-only write scope, and the source worktree is clean at HEAD a29e0721."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to move the two derivative children of area_of_flux_surface to its successor through sn edit; both renames are present in the live graph as accepted with parent poloidal_plane_cross_sectional_area_of_flux_surface and their sources carried, and surface_area_of_flux_surface is correctly left with its wrong parent named.\nVERDICT done_when: the graph confirms both renames, their successor parent and their PRODUCED_NAME sources; the fragment states the surface_area code change; the bounded read names one remaining live child -- but logs/apply-tor.log records no apply output and the suites are nested under tests: in the manifest rather than top-level.\nVERDICT write_paths: the manifest declares one path, docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html, and the single commit a29e0721 touches exactly that path.\nVERDICT manifest: read; status complete; one commit a29e0721 at the detached worktree HEAD, not merged; records both renames, a blocker, and tests.baseline_suite/after_suite with revision/exit_status/completed (nested under tests:), test_logs empty.\nVERDICT diff: read against base aa25ca574e; a single commit adding 153 lines, the fragment only, no source/test/config change.\nCALL_SITES: none -- the change is a graph-state rename through the sn edit CLI plus a docs fragment, adding no code to reach.\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: both derivative children are renamed onto the successor through sn edit and the graph confirms the new spellings are accepted with the successor parent and their sources carried.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/edit-tests-after.log:56 records 414 passed EXIT=0 at aa25ca574e, but logs/apply-tor.log:1 carries no apply output and the manifest's suites are nested under tests: rather than the top-level keys.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat of a29e0721 lists exactly the one declared path, docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html.\nSCORE durability: 6\nJUSTIFICATION durability: no assertion was added; the change is a graph-state rename plus a docs fragment, so no repository test fails if the rename regresses.\nSCORE fit: 19\nJUSTIFICATION fit: the commit subject is conventional with a body and no AI attribution, and the fragment follows the evidence-fragment convention at docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html:5-7.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no module, function, class or helper, so there is no capability to fork and the renames reuse the sanctioned sn edit surface.\nFINDING logs/apply-tor.log:1 follow-on: the toroidal rename's apply output is not recorded (header and command only, no APPLIED line and no EXIT= line), so the done-when step requiring each rename's apply output to be recorded is met for the poloidal rename only; the graph confirms the deliverable is intact.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-area-children.html:142 follow-on: the brief's pre-rename check that none of these names is committed to a catalog request is recorded nowhere in the fragment or the manifest.\n",
+  "review_run_id": "r-20261013T100409518150-review-of-sib-area-children-a29e07218524",
+  "reviewed_base_sha": "aa25ca574e960cca4767187efadb83e7eb56970c",
+  "reviewed_head_sha": "a29e07218524187c268fc55c914de6b976b45de5",
+  "reviewed_run_id": "r-20261013T061843964199-sib-area-children",
+  "scores": {
+    "durability": 6,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:20:00+00:00",
+  "total": 98
+}
