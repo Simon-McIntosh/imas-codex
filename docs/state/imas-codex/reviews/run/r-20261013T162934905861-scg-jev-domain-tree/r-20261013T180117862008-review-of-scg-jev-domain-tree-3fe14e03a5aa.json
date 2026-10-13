@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "clive",
+  "base_log_revision": "97552c2e4d1f6a29592f647aa79ea7b6cda47fc2",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/graph/dd_workers.py:716",
+    "imas_codex/graph/dd_domain_classifier.py:225",
+    "imas_codex/standard_names/benchmark_roles.py:1484",
+    "imas_codex/standard_names/benchmark_roles.py:1517"
+  ],
+  "completed_at": "2026-10-13T18:31:15.394Z",
+  "dispatched_at": "2026-10-13T18:01:41Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/dd_domain_classifier.py",
+      "line": "825",
+      "severity": "blocking",
+      "text": "blocking: _format_batch_user_prompt never emits the documentation field, so every path the chat classifier handles \u2014 each below-threshold path and every path run_classifier_bench scores at imas_codex/standard_names/benchmark_roles.py:1517 \u2014 is classified without it. Brief item 1 requires the gathered documentation be collected \"so the chat path gets it too, and send it\"; the gatherer now collects it (:1252, :1306) and the tree sends it (tree_state, :947), but the chat renderer, whose template advertises the field at imas_codex/llm/prompts/imas/domain_classifier.md:54, still sends none, so the requirement is met for one of the two classifiers."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-jev-domain-tree.html",
+      "line": "34",
+      "severity": "follow-on",
+      "text": "follow-on: the second-level option list reuses the first level's id `scg-jev-domain-tree-options-first` (also at :24), so the two lists are not distinguishable by id and an anchor or query for either resolves to whichever comes first."
+    },
+    {
+      "file": "tests/graph/test_dd_domain_classifier.py",
+      "line": "614",
+      "severity": "follow-on",
+      "text": "follow-on: the landed change reroutes classify_tier1_llm through _classify_batch_tree, which calls decide_batch, but these pre-existing tier-1 tests stub only acall_llm_structured (:646) and not decide_batch, so their 121-green exercises a live decisions call that fails in-harness and falls through to the stubbed chat path; the gate the node cites as evidence no longer measures the tree it landed, while the node's own file stubs it correctly at tests/graph/test_dd_domain_classifier_jev.py:205."
+    },
+    {
+      "file": "tests/graph/test_domain_classifier_prompt.py",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the prompt test holds only that each PhysicsDomain value appears, not that the new category block or any of the domain scope, includes or excludes render, so brief item 3's \"its prompt test holds the render\" is unmet and a dropped guidance render would leave the suite green."
+    },
+    {
+      "file": "tests/graph/test_dd_domain_classifier_jev.py",
+      "line": "270",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when asks that both option levels fail when the vocabulary gains a domain, but only the category level carries a recorded red run (negative_control_frozen_categories.log, 1 failed); the second-level guard test_domain_options_are_exactly_that_categorys_domains_with_their_guidance has no recorded negative control."
+    }
+  ],
+  "head_log_revision": "3fe14e03a5aadd17f42289ce73a81ce1c021416a",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commits 62b4f009c and 3fe14e03a against base 97552c2e4; six files, 1176 insertions, all inside the declared scope, each with a body.",
+    "done_when": "the done_when names tests/graph/test_dd_domain_classifier.py, test_domain_classifier_prompt.py, test_physics_domain_guidance.py, the new test file and the settings seat tests, run at base and head by delta; head_gate_repaired.log records 190 passed 1 failed (the four graph files 139 passed EXIT=0) against base_graph_gate.log 121 passed EXIT=0, added_failure_count 0, with three negative controls recorded red at EXIT=1, but the cited flat tests no longer reach the tree (see the finding at tests/graph/test_dd_domain_classifier.py:614).",
+    "goal": "the node goal is a two-level Jev category-then-domain Choice over the physics-domain guidance with the chat classifier below a confidence threshold, and the full context (DD path, LLM description and DD documentation) reaching every decision; imas_codex/graph/dd_domain_classifier.py:1014 decide_domain_tree and :1168 _classify_batch_tree build both levels and the below-threshold chat route, and the tree now reads each answer under its question name (:956 _answer_for), but the chat route's own prompt drops the documentation field (see the finding at :825).",
+    "manifest": "read at runs/r-20261013T160612001893-scg-jev-domain-tree/manifest.md, mtime after this run's launch; status complete, gate results recorded with their logs, three negative controls with EXIT=1, and the two prior review findings recorded as answered at 3fe14e03a.",
+    "write_paths": "the declared scope in brief.md is seven files plus one figure directory; git diff 97552c2e4..3fe14e03a changes six of the seven files and nothing outside them, leaving tests/graph/test_domain_classifier_prompt.py untouched."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_dd_domain_classifier_jev.py:654 guards the answer read and negative_control_flat_read.log reddens 8 tests on its reverted half, but tests/graph/test_domain_classifier_prompt.py:18 holds only the domain values, so a dropped guidance render would not redden, and no assertion covers the chat prompt's dropped documentation at imas_codex/graph/dd_domain_classifier.py:825.",
+    "evidence": "head_gate_repaired.log records 190 passed 1 failed against base_graph_gate.log 121 passed EXIT=0 with three negative controls red at EXIT=1, but the flat gate the manifest cites at tests/graph/test_dd_domain_classifier.py:614 no longer reaches the tree, and no test holds the documentation reaching the chat prompt.",
+    "fit": "the tree follows the module's existing _classify_batch pattern at imas_codex/graph/dd_domain_classifier.py:746 and adds no name the naming rules forbid.",
+    "goal_fidelity": "imas_codex/graph/dd_domain_classifier.py:1014 decide_domain_tree and :956 _answer_for deliver the two-level tree and read each answer correctly, but :825 _format_batch_user_prompt omits the documentation brief item 1 requires the chat path to receive, so one explicit requirement of the goal is unmet.",
+    "reuse": "_category_options at imas_codex/graph/dd_domain_classifier.py:855 and _domain_options at :889 read the guidance owner imas_codex.definitions.physics.load_domain_guidance rather than forking it, and decide_domain_tree wraps the decisions owner at imas_codex/discovery/base/judgment.py:230.",
+    "scope_discipline": "every path in git diff 97552c2e4..3fe14e03a is inside the seven declared write paths in brief.md."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 97552c2e4d1f6a29592f647aa79ea7b6cda47fc2\nreviewed_head_sha: 3fe14e03a5aadd17f42289ce73a81ce1c021416a\nVERDICT goal: the node goal is a two-level Jev category-then-domain Choice over the physics-domain guidance with the chat classifier below a confidence threshold, and the full context (DD path, LLM description and DD documentation) reaching every decision; imas_codex/graph/dd_domain_classifier.py:1014 decide_domain_tree and :1168 _classify_batch_tree build both levels and the below-threshold chat route, and the tree now reads each answer under its question name (:956 _answer_for), but the chat route's own prompt drops the documentation field (see the finding at :825).\nVERDICT done_when: the done_when names tests/graph/test_dd_domain_classifier.py, test_domain_classifier_prompt.py, test_physics_domain_guidance.py, the new test file and the settings seat tests, run at base and head by delta; head_gate_repaired.log records 190 passed 1 failed (the four graph files 139 passed EXIT=0) against base_graph_gate.log 121 passed EXIT=0, added_failure_count 0, with three negative controls recorded red at EXIT=1, but the cited flat tests no longer reach the tree (see the finding at tests/graph/test_dd_domain_classifier.py:614).\nVERDICT write_paths: the declared scope in brief.md is seven files plus one figure directory; git diff 97552c2e4..3fe14e03a changes six of the seven files and nothing outside them, leaving tests/graph/test_domain_classifier_prompt.py untouched.\nVERDICT manifest: read at runs/r-20261013T160612001893-scg-jev-domain-tree/manifest.md, mtime after this run's launch; status complete, gate results recorded with their logs, three negative controls with EXIT=1, and the two prior review findings recorded as answered at 3fe14e03a.\nVERDICT diff: read commits 62b4f009c and 3fe14e03a against base 97552c2e4; six files, 1176 insertions, all inside the declared scope, each with a body.\nCALL_SITES: imas_codex/graph/dd_workers.py:716, imas_codex/graph/dd_domain_classifier.py:225, imas_codex/standard_names/benchmark_roles.py:1484, imas_codex/standard_names/benchmark_roles.py:1517\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: imas_codex/graph/dd_domain_classifier.py:1014 decide_domain_tree and :956 _answer_for deliver the two-level tree and read each answer correctly, but :825 _format_batch_user_prompt omits the documentation brief item 1 requires the chat path to receive, so one explicit requirement of the goal is unmet.\nSCORE evidence: 15\nJUSTIFICATION evidence: head_gate_repaired.log records 190 passed 1 failed against base_graph_gate.log 121 passed EXIT=0 with three negative controls red at EXIT=1, but the flat gate the manifest cites at tests/graph/test_dd_domain_classifier.py:614 no longer reaches the tree, and no test holds the documentation reaching the chat prompt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 97552c2e4..3fe14e03a is inside the seven declared write paths in brief.md.\nSCORE durability: 14\nJUSTIFICATION durability: tests/graph/test_dd_domain_classifier_jev.py:654 guards the answer read and negative_control_flat_read.log reddens 8 tests on its reverted half, but tests/graph/test_domain_classifier_prompt.py:18 holds only the domain values, so a dropped guidance render would not redden, and no assertion covers the chat prompt's dropped documentation at imas_codex/graph/dd_domain_classifier.py:825.\nSCORE fit: 18\nJUSTIFICATION fit: the tree follows the module's existing _classify_batch pattern at imas_codex/graph/dd_domain_classifier.py:746 and adds no name the naming rules forbid.\nSCORE reuse: 19\nJUSTIFICATION reuse: _category_options at imas_codex/graph/dd_domain_classifier.py:855 and _domain_options at :889 read the guidance owner imas_codex.definitions.physics.load_domain_guidance rather than forking it, and decide_domain_tree wraps the decisions owner at imas_codex/discovery/base/judgment.py:230.\nFINDING imas_codex/graph/dd_domain_classifier.py:825 blocking: _format_batch_user_prompt never emits the documentation field, so every path the chat classifier handles \u2014 each below-threshold path and every path run_classifier_bench scores at imas_codex/standard_names/benchmark_roles.py:1517 \u2014 is classified without it. Brief item 1 requires the gathered documentation be collected \"so the chat path gets it too, and send it\"; the gatherer now collects it (:1252, :1306) and the tree sends it (tree_state, :947), but the chat renderer, whose template advertises the field at imas_codex/llm/prompts/imas/domain_classifier.md:54, still sends none, so the requirement is met for one of the two classifiers.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-jev-domain-tree.html:34 follow-on: the second-level option list reuses the first level's id `scg-jev-domain-tree-options-first` (also at :24), so the two lists are not distinguishable by id and an anchor or query for either resolves to whichever comes first.\nFINDING tests/graph/test_dd_domain_classifier.py:614 follow-on: the landed change reroutes classify_tier1_llm through _classify_batch_tree, which calls decide_batch, but these pre-existing tier-1 tests stub only acall_llm_structured (:646) and not decide_batch, so their 121-green exercises a live decisions call that fails in-harness and falls through to the stubbed chat path; the gate the node cites as evidence no longer measures the tree it landed, while the node's own file stubs it correctly at tests/graph/test_dd_domain_classifier_jev.py:205.\nFINDING tests/graph/test_domain_classifier_prompt.py:18 follow-on: the prompt test holds only that each PhysicsDomain value appears, not that the new category block or any of the domain scope, includes or excludes render, so brief item 3's \"its prompt test holds the render\" is unmet and a dropped guidance render would leave the suite green.\nFINDING tests/graph/test_dd_domain_classifier_jev.py:270 follow-on: the done_when asks that both option levels fail when the vocabulary gains a domain, but only the category level carries a recorded red run (negative_control_frozen_categories.log, 1 failed); the second-level guard test_domain_options_are_exactly_that_categorys_domains_with_their_guidance has no recorded negative control.\n",
+  "review_run_id": "r-20261013T180117862008-review-of-scg-jev-domain-tree-3fe14e03a5aa",
+  "reviewed_base_sha": "97552c2e4d1f6a29592f647aa79ea7b6cda47fc2",
+  "reviewed_head_sha": "3fe14e03a5aadd17f42289ce73a81ce1c021416a",
+  "reviewed_run_id": "r-20261013T162934905861-scg-jev-domain-tree",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T18:26:44.095958+00:00",
+  "total": 102,
+  "verdict": "MUST-FIX"
+}
