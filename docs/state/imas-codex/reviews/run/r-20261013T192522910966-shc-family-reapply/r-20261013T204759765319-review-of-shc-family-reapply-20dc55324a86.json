@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded no base/head suite pair: its manifest.md and classification.json carry baseline_suite: null and after_suite: null, so the named gate has no base arm and no added-minus-baseline delta is derivable and the count is bounded rather than measured: the named gate (tests/standard_names/test_harmonize_apply.py, test_harmonize_guard.py, test_harmonize_anchor_pin.py) runs green at the reviewed base dbc4ebcb0 (24 passed, EXIT=0, the run's gate-harmonize-tests.log) and this review reproduced the same gate green at HEAD 170066f68 (24 passed, EXIT=0, reviewer-gate-head.log), so zero failures were observed and no failure id exists to carry.",
+  "backend": "clive",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T21:03:08.005Z",
+  "dispatched_at": "2026-10-13T20:48:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html",
+      "line": "90",
+      "severity": "follow-on",
+      "text": "follow-on: the after-state table opens a row with a doubled start tag <tr><tr> (line 90: \"      <tr><tr><td>Distinct documentation openings</td>...\"), which the HTML parser resolves by closing the empty row and opening a second, rendering a blank extra row above the \"Distinct documentation openings\" line; sibling fragments such as shc-live-apply.html carry no such malformed row."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T192522910966-shc-family-reapply/manifest.md",
+      "line": "8",
+      "severity": "follow-on",
+      "text": "follow-on: orientation_write_paths declares a second path, docs/figures/sn-harmonize-command/shc-family-reapply, that no commit created and that the fragment embeds no figure from, so the declared scope overstates what the diff wrote."
+    }
+  ],
+  "gate_log_revision": "dbc4ebcb072d0aa95a035227ab5f88f3473718e8",
+  "head_log_revision": null,
+  "item_aggregate": {
+    "call_sites": 20,
+    "diff": 20,
+    "done_when": 18,
+    "goal": 19,
+    "manifest": 16,
+    "write_paths": 19
+  },
+  "item_verdicts": {
+    "call_sites": "the change is documentation only, so no production call site can reach it; verified against the tree by finding no name resolved from the diff",
+    "diff": "read commit by commit against base dbc4ebcb0; commit 20dc55324 adds one new HTML evidence fragment and changes no product code, symbol or test.",
+    "done_when": "the done-when names the fragment and the before/after counts, run id, cost, anchor, per-member stage and second-apply calls; each is present and reconciles with measure-before.json, measure-after.json and second-apply-dryrun.log, and gate-harmonize-tests.log records the eight named tests 24 passed EXIT=0 at dbc4ebcb0.",
+    "goal": "the node goal is to record the outcome of one forced apply of the 17-member boundary-averaged family and whether the one-pass convergence holds; docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html records the before/after counts, both batch run ids (57acc7f2... and 9ec4e357...), the $6.259443 cost against the $5 cap, the anchor move from xenon to tritium, every member's docs stage and the second apply's 17 planned calls.",
+    "manifest": "read at runs/r-20261013T192522910966-shc-family-reapply/manifest.md; status complete, tests and test_logs recorded, but orientation_write_paths names an unproduced docs/figures/sn-harmonize-command/shc-family-reapply path.",
+    "write_paths": "the brief declares docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html only; git diff --stat dbc4ebcb0..20dc55324 shows one path changed, the 183-line new fragment, nothing outside it."
+  },
+  "justifications": {
+    "durability": "the fragment adds no assertion and the brief forbade a new test, so nothing fails if the record regresses; the eight named existing tests guard \u00a73's mechanisms, not this fragment.",
+    "evidence": "the done-when's measure is the live before/after state; the fragment's counts reconcile with measure-before.json convention_violation_by_class and measure-after.json equation_forms, and gate-harmonize-tests.log records 24 passed EXIT=0 at dbc4ebcb0.",
+    "fit": "the fragment follows the sibling evidence-fragment idiom and carries no banned plan/section label, but shc-family-reapply.html:90 opens a row with a doubled <tr><tr>.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html:1-183 records every element the goal states, and its before/after figures match measure-before.json and measure-after.json on every headline count.",
+    "reuse": "the diff adds no definition and forks no capability; it reuses the repository's established docs/evidence/fragments/<plan-slug>/<node-id>.html evidence-fragment pattern, which the search over docs/evidence/fragments confirmed is the owner of this capability.",
+    "scope_discipline": "git diff --stat dbc4ebcb0..20dc55324 changes only docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html, inside the single declared write path."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to record the outcome of one forced apply of the 17-member boundary-averaged density family and whether \u00a73's one-pass convergence holds; docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html records the before/after counts, both batch run ids, the $6.259443 cost, the anchor, every member's docs stage, the second apply's 17 planned calls and the plain verdict that none of the five conditions is met.\nVERDICT done_when: the brief's done-when names the fragment, the before/after counts, the run id/cost/anchor, every member's stage and the second apply's calls; all are present in the fragment and reconcile with measure-before.json, measure-after.json and second-apply-done; the gate the worker ran is tests/standard_names/test_harmonize_apply.py + test_harmonize_guard.py + test_harmonize_anchor_pin.py, recorded 24 passed EXIT=0 in gate-harmonize-tests.log and independently reproduced green at this review's HEAD.\nVERDICT write_paths: the brief declares docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html only; git diff --stat dbc4ebcb0..20dc55324 changes exactly that one path, 183 insertions in the single new file, nothing outside it.\nVERDICT manifest: read at runs/r-20261013T192522910966-shc-family-reapply/manifest.md; status complete, tests, test_logs and follow_ons recorded, but orientation_write_paths also names a docs/figures/sn-harmonize-command/shc-family-reapply path no commit created and the fragment embeds no figure from.\nVERDICT diff: read commit by commit against base dbc4ebcb0; the single commit 20dc55324 adds one new HTML evidence fragment (docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html, 183 lines) and touches no product code, symbol or test.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html:1-183 records every element the goal states, and its before/after figures match measure-before.json and measure-after.json on every headline count.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done-when's measure is the live before/after state; the fragment's counts reconcile with measure-before.json/convention_violation_by_class and measure-after.json/equation_forms, and gate-harmonize-tests.log records 24 passed EXIT=0 at dbc4ebcb0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat dbc4ebcb072d0aa95a035227ab5f88f3473718e8 20dc55324a865e10f5b24889e3ffb8a1dc60c734 changes only docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html, inside the single declared write path.\nSCORE durability: 14\nJUSTIFICATION durability: the fragment adds no assertion and the brief forbade a new test (\"Write no new test\"), so nothing fails if the record regresses; the eight named existing tests (e.g. tests/standard_names/test_harmonize_apply.py:260 test_failed_anchor_leaves_members_untouched) guard \u00a73's mechanisms, not this fragment.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment follows the sibling evidence-fragment idiom of docs/evidence/fragments/sn-harmonize-constext and carries no banned plan/section label, but shc-family-reapply.html:90 opens a row with a doubled <tr><tr>.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition and forks no capability; it reuses the repository's established docs/evidence/fragments/<plan-slug>/<node-id>.html evidence-fragment pattern, which the search over docs/evidence/fragments confirmed is the owner of this capability.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-family-reapply.html:90 follow-on: the after-state table opens a row with a doubled start tag ` <tr><tr><td>Distinct documentation openings</td>...` (the line `      <tr><tr><td>Distinct documentation openings</td>`), which the HTML parser resolves by closing the empty row and opening a second, rendering a blank extra row above the \"Distinct documentation openings\" line; sibling fragments such as shc-live-apply.html carry no such malformed row.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T192522910966-shc-family-reapply/manifest.md:8 follow-on: orientation_write_paths declares a second path, docs/figures/sn-harmonize-command/shc-family-reapply, that no commit created and that the fragment embeds no figure from, so the declared scope overstates what the diff wrote.\n",
+  "review_run_id": "r-20261013T204759765319-review-of-shc-family-reapply-20dc55324a86",
+  "reviewed_base_sha": "dbc4ebcb072d0aa95a035227ab5f88f3473718e8",
+  "reviewed_head_sha": "20dc55324a865e10f5b24889e3ffb8a1dc60c734",
+  "reviewed_run_id": "r-20261013T192522910966-shc-family-reapply",
+  "rubric": "code",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T21:00:19.728540+00:00",
+  "total": 106,
+  "verdict": "SOUND WITH FINDINGS"
+}
