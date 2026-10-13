@@ -20,6 +20,7 @@ import pytest
 
 from imas_codex.standard_names.provenance_lifecycle import (
     SourceBindingConflictError,
+    SourceMigrationConflictError,
     SourceRetiredSuccessorConflictError,
     retarget_standard_name_sources,
 )
@@ -150,7 +151,7 @@ def test_transient_fault_still_raises_an_anonymous_fault(
     with pytest.raises(RuntimeError) as raised:
         _retarget(gc, row)
 
-    assert not isinstance(raised.value, SourceBindingConflictError)
+    assert not isinstance(raised.value, SourceMigrationConflictError)
     assert gc.query.call_count == 1
 
 
@@ -229,4 +230,4 @@ def test_single_live_binding_is_not_a_dual_bound_conflict() -> None:
     with pytest.raises(RuntimeError) as raised:
         _retarget(gc, row)
 
-    assert not isinstance(raised.value, SourceBindingConflictError)
+    assert not isinstance(raised.value, SourceMigrationConflictError)

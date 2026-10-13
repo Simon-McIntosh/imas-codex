@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-conflict-base">
+<title>One base for the adjudicable migration conflicts</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-conflict-base-title">One base for the adjudicable migration conflicts</h1>
+
+<p id="sib-conflict-base-landing">Both adjudicable migration outcomes now derive
+from one base, <code>SourceMigrationConflictError</code>, which carries the
+<code>conflicts</code> tuple and joins the details once; each subclass supplies
+only the clause naming its binding shape. The transient-fault assertions exclude
+that base, so a transient row misclassified into either named type no longer
+passes as transient.</p>
+
+<table id="sib-conflict-base-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>c98a0d42dc8195dd60c9c145340703409c87b2ec</code></td></tr>
+<tr><th>Gate</th><td>83 passed, 2 deselected, 0 failed (after); 83 passed, 2 deselected, 0 failed (base)</td></tr>
+<tr><th>Negative control</th><td>EXIT=1 — with a transient row mutated to raise either named type, the four transient-fault cases fail; module resolved to the mutated worktree file</td></tr>
+</tbody>
+</table>
+
+</main>
+</body>
+</html>
