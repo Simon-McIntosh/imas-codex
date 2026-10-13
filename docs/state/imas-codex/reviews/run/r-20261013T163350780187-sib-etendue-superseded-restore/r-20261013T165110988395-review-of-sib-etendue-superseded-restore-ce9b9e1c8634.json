@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "0b47beb3e021034bc352f807cfd1e48b80c7224b",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/sn.py:8755 (sn_restore group)",
+    "imas_codex/cli/sn.py:8786 (sn_restore_compose)",
+    "imas_codex/standard_names/signed_manifest.py:185 (_ARCHIVE_RECONSTRUCTION_SCHEMA)",
+    "imas_codex/standard_names/repair_authority.py:26 (REPAIR_AUTHORITY_SCHEMA)"
+  ],
+  "completed_at": "2026-10-13T16:50:04Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "one-off signed graph operation with no runtime behaviour added: its effect is held by receipt-stamped StandardNameChange records and the HAS_SUCCESSOR edge in the graph and by the fragment's exact-id read-back, which this review reproduced independently (signed_at and receipt_id byte-identical); no repository test can hold live graph state, and the brief's done_when defines the gate as a base/head delta over four restore tests judged by delta with none expected added.",
+      "recorded_at": "2026-10-13T17:14:17+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T16:34:17Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T163350780187-sib-etendue-superseded-restore/restore-tests-head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the head gate log's header records revision=e23f0773cda4fef9c1f9c087f500d4a326e80a7d, the successor-authority commit, not the reviewed head ce9b9e1c8634117c1022c6d98a5f51a92271b225; the brief's done_when asks the gate to run 'at base and head', and the reviewed head's own commit (ce9b9e1c8) is docs-only (the 50-line fragment) so the delta is unchanged, but the arm asserted as 'head' predates the reviewed revision."
+    }
+  ],
+  "head_log_revision": "e23f0773cda4fef9c1f9c087f500d4a326e80a7d",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the diff adds no runtime-reachable code; the two authority JSONs are consumed only as CLI inputs, not imported, so the runtime code that can reach the change is the restore entry point imas_codex/cli/sn.py:8755 (sn_restore) with its compose subcommand at sn.py:8786, the archive-reconstruction schema owner imas_codex/standard_names/signed_manifest.py:185, and the successor-authority schema owner imas_codex/standard_names/repair_authority.py:26; see the call_sites list.",
+    "diff": "read commit by commit against base 0b47beb3e021034bc352f807cfd1e48b80c7224b: 76416647b adds the 1860-line trimmed extraction (sha256 189e8a27...), 97b0ceabe adds the restore authority (file sha256 f53be675..., body signature 7fcbe2d2...), e23f0773c adds the successor authority (file sha256 419a0637..., body signature 8a0d1ce7...), ce9b9e1c8 adds the 50-line fragment; the range is +1998/-0 across exactly those four files and touches no source and no test.",
+    "done_when": "the brief's done_when names the four restore test files gated at base and head and judged by delta with none expected added, plus a fragment recording the trim diff, both authorities' preview/applied digests and receipts, and the read-back; the manifest records 44 passed at base (restore-tests-base.log, revision 0b47beb3e, EXIT=0) and 44 passed at head (restore-tests-head.log, revision e23f0773c, EXIT=0), 0 added failures (added_failure_ids []), and the fragment records every listed digest and receipt.",
+    "goal": "the node goal is to bring the renamed etendue identity back as superseded with a successor edge to its accepted correction; an independent exact-id read of the live graph returns etendue_of_spectrometer_channel name_stage=superseded, status=superseded, origin=pipeline, superseded_by=etendue_of_soft_xray_detector, one HAS_SUCCESSOR edge to etendue_of_soft_xray_detector signed 2026-10-13T16:44:06.033Z with receipt sn-change:signed-manifest:43eba167...:c9ae5ed5..., 4 HAS_REVIEW and 2 DOCS_REVISION_OF edges, and dd:soft_x_rays/channel/etendue carrying one PRODUCED_NAME edge to the accepted successor only -- so the goal is met.",
+    "manifest": "read; it records status complete, commits 76416647b/97b0ceabe/e23f0773c/ce9b9e1c8, the four changed paths, gate base 44 passed and head 44 passed both EXIT=0, the digests f53be675.../8bcae2dc... (restore) and 419a0637.../43eba167... (successor), and the run-directory receipts; all verified on disk.",
+    "write_paths": "the brief declares docs/evidence/fragments/sn-integrity-backlog/sib-etendue-superseded-restore.html and three sibling .json files; git diff --name-only 0b47beb3e..ce9b9e1c8 lists exactly those four and no file outside them (+1998/-0)."
+  },
+  "justifications": {
+    "durability": "the landed change adds a data extraction, two signed authorities and a docs fragment and ce9b9e1c8 adds no assertion and no test, so no committed test fails if the restored state regresses -- the effect is instead read back from the live graph; the four restore tests were run at base and head only as a delta gate, exactly as the brief's done_when specified.",
+    "evidence": "every quantitative claim in the fragment reconciles with an independent check: the trimmed extraction recomputes to 189e8a27cf6b185b493121d6ece20fad76851d251a5059f11ab59c03f9160cf6, the authority file hashes recompute to f53be675... and 419a0637..., both body signatures recompute to 7fcbe2d2... and 8a0d1ce7... under json-sort-keys-v1, the successor apply receipt carries manifest_sha256 43eba167..., and the base/head logs (44 passed, EXIT=0 each) are on disk; the arm recorded as 'head' runs at e23f0773c rather than the reviewed head.",
+    "fit": "the fragment uses the evidence-fragment doctype form (<!doctype html> with meta reckon-type=evidence-fragment and plan-slug) that 44 of 333 committed fragments share, including siblings under docs/evidence/fragments/sn-integrity-backlog/, and the two authorities reuse the imas-codex.archive-reconstruction.v1 and imas-codex.repair-authority.v1 schemas; no version, plan-stage or ticket label appears in either file's content.",
+    "goal_fidelity": "an independent bounded exact-id read of the live graph reproduces the fragment's read-back table exactly (docs/evidence/fragments/sn-integrity-backlog/sib-etendue-superseded-restore.html lines 41-44) -- the identity is superseded with a pipeline origin and superseded_by pointing to the accepted successor, whose HAS_SUCCESSOR edge carries the signed timestamp and receipt, and the DD source binds only the successor.",
+    "reuse": "no code is added, so nothing forks a capability; both authorities extend owners rather than duplicating them -- imas_codex/standard_names/signed_manifest.py:185 defines _ARCHIVE_RECONSTRUCTION_SCHEMA='imas-codex.archive-reconstruction.v1' and imas_codex/standard_names/repair_authority.py:26 defines REPAIR_AUTHORITY_SCHEMA='imas-codex.repair-authority.v1', and the committed JSONs declare those exact schemas and follow the same row/guard/signature shape the existing applied authorities use, through the existing apply_signed_manifest path.",
+    "scope_discipline": "every path in the diff (the trimmed extraction, both authorities, and the fragment) is inside the brief's declared write paths and carries nothing the goal does not imply; the node touched no source, no test, and no graph schema file, and the run-directory receipts, though outside the repo, were not committed."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to bring etendue_of_spectrometer_channel back as superseded with a successor edge to etendue_of_soft_xray_detector; an independent exact-id read of the live graph returns name_stage=superseded, status=superseded, origin=pipeline, superseded_by=etendue_of_soft_xray_detector.\nVERDICT done_when: the brief's done_when names four restore test files gated at base and head by delta (none expected added) plus a fragment recording the trim diff, both authorities' digests and receipts, and the read-back; the manifest records 44 passed at base and head with 0 added failures.\nVERDICT write_paths: the declared paths are the four docs/evidence/fragments/sn-integrity-backlog/sib-etendue-superseded-restore*.* files; git diff --name-only 0b47beb3e..ce9b9e1c8 lists exactly those four and nothing outside them.\nVERDICT manifest: read; records status complete, four commits, four changed paths, gate base 44 passed and head 44 passed both EXIT=0, and the digests f53be675.../8bcae2dc... and 419a0637.../43eba167....\nVERDICT diff: read commit by commit against base 0b47beb3e: 76416647b adds the trimmed extraction, 97b0ceabe the restore authority, e23f0773c the successor authority, ce9b9e1c8 the fragment; +1998/-0 across exactly those four files.\nCALL_SITES: imas_codex/cli/sn.py:8755, imas_codex/cli/sn.py:8786, imas_codex/standard_names/signed_manifest.py:185, imas_codex/standard_names/repair_authority.py:26\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: an independent bounded exact-id read reproduces the fragment's read-back at docs/evidence/fragments/sn-integrity-backlog/sib-etendue-superseded-restore.html lines 41-44.\nSCORE evidence: 19\nJUSTIFICATION evidence: the base and head gate logs recompute 44 passed EXIT=0 each and every fragment digest and signature verifies, but the arm asserted as head runs at e23f0773c not the reviewed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 0b47beb3e..ce9b9e1c8 lists only the four declared paths under docs/evidence/fragments/sn-integrity-backlog/.\nSCORE durability: 15\nJUSTIFICATION durability: no committed test pins the restored state; the four restore tests ran only as a base/head delta with 0 added, and the effect is read back from the graph rather than asserted.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the evidence-fragment doctype form shared by siblings under docs/evidence/fragments/sn-integrity-backlog/, and both authorities reuse existing schemas.\nSCORE reuse: 20\nJUSTIFICATION reuse: no definition is added; the JSONs declare imas-codex.archive-reconstruction.v1 (imas_codex/standard_names/signed_manifest.py:185) and imas-codex.repair-authority.v1 (imas_codex/standard_names/repair_authority.py:26).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T163350780187-sib-etendue-superseded-restore/restore-tests-head.log:1 follow-on: the head gate ran at e23f0773c, the successor-authority commit, not the reviewed head ce9b9e1c8, whose only change is the 50-line docs fragment so the delta is unchanged.\n",
+  "review_run_id": "r-20261013T165110988395-review-of-sib-etendue-superseded-restore-ce9b9e1c8634",
+  "reviewed_base_sha": "0b47beb3e021034bc352f807cfd1e48b80c7224b",
+  "reviewed_head_sha": "ce9b9e1c8634117c1022c6d98a5f51a92271b225",
+  "reviewed_run_id": "r-20261013T163350780187-sib-etendue-superseded-restore",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T17:14:17+00:00",
+  "total": 112,
+  "verdict": "SOUND WITH FINDINGS"
+}
