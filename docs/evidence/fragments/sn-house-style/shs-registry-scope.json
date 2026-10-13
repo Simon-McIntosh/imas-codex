@@ -1,0 +1,616 @@
+{
+ "registry": "concepts.yml",
+ "registry_commit": "imas-standard-names c2db47e",
+ "ruled_by": "coordinator",
+ "ruled_at": "2026-10-13",
+ "rule": "a token gets a concept entry only when one canonical equation defines every name that carries it",
+ "counts": {
+  "no_concept_entry": 92,
+  "awaiting_lead": 4,
+  "covered_by_entry": 1,
+  "accessor_gap": 3
+ },
+ "notation_and_templates": "complete for the roster except the binary-operator base placeholder, an accessor gap",
+ "rulings": [
+  {
+   "token": "angle",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "angular_width",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "antenna_strap",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "aperture",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "area",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "atomic_number",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "brightness",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "calorimetry_component",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "camera",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "capacitance",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "charge",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "closest_wall_point",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "coil_conductor_element",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "conductor_cross_section",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "confinement_enhancement_factor",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "coordinate",
+   "kind": "geometric_base",
+   "ruling": "no_concept_entry",
+   "reason": "a generic geometric carrier whose meaning comes from the axis it is combined with"
+  },
+  {
+   "token": "core_region",
+   "kind": "region",
+   "ruling": "no_concept_entry",
+   "reason": "a named region, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "count",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "current",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "current_density",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "density",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "derivative_with_respect_to_poloidal_magnetic_flux_coordinate",
+   "kind": "transformation",
+   "ruling": "accessor_gap",
+   "reason": "the accessor selects the indexed operator string; the derivative_with_respect_to entry applies once it selects the operator key"
+  },
+  {
+   "token": "derivative_with_respect_to_toroidal_flux_coordinate",
+   "kind": "transformation",
+   "ruling": "accessor_gap",
+   "reason": "as above"
+  },
+  {
+   "token": "detector_pixel",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "diagnostic_aperture",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "divertor_target",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "duration",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "ece_channel",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "ece_channel_emission_position",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "ellipticity",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "emissivity",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "energy",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "factor",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "filter",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "flux",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "flux_loop",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "fraction",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "frequency",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "gap",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "hard_xray_detector",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "heating_power",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "height",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "inboard_midplane",
+   "kind": "position",
+   "ruling": "awaiting_lead",
+   "reason": "as outboard_midplane"
+  },
+  {
+   "token": "inlet",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "intensity",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "interferometer_beam",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "internal_inductance",
+   "kind": "physical_base",
+   "ruling": "awaiting_lead",
+   "reason": "li(1), li(2) and li(3) are distinct normalizations; the lead rules which one the base means before an equation is written"
+  },
+  {
+   "token": "ion_cyclotron_heating_antenna",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "length",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "limiter_tile",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "line_of_sight",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "lower_hybrid_antenna",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "magnetic_field",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "magnetic_flux",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "mass",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "mass_flow_rate",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "mass_spectrometer_channel",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "measurement_position",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "normalized_poloidal_magnetic_flux",
+   "kind": "position",
+   "ruling": "covered_by_entry",
+   "reason": "a position value on the normalized poloidal flux label, whose equation the normalized_poloidal_flux_coordinate entry carries"
+  },
+  {
+   "token": "number_density",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "opacity",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "optical_element",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "outboard_midplane",
+   "kind": "position",
+   "ruling": "awaiting_lead",
+   "reason": "the vocabulary follows the DD midplane identifier (default dr_dz_zero_sep), not Z = Z_axis; the lead rules which definition the concept carries"
+  },
+  {
+   "token": "outlet",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "outline",
+   "kind": "geometric_base",
+   "ruling": "no_concept_entry",
+   "reason": "a generic geometric carrier whose meaning comes from the axis it is combined with"
+  },
+  {
+   "token": "passive_loop",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "phase",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "photon_energy",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "photon_radiance",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "placeholder",
+   "kind": "physical_base",
+   "ruling": "accessor_gap",
+   "reason": "the parser base of a binary-operator name, not a quantity; the ratio, difference and product entries carry its equation once the accessor selects by operator"
+  },
+  {
+   "token": "plant_component_port",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "plasma_facing_component",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "polarimeter_beam",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "poloidal_angle",
+   "kind": "geometric_base",
+   "ruling": "awaiting_lead",
+   "reason": "its sign and zero depend on the COCOS convention; the roster documentation measures it clockwise from the low-field side, which the lead rules on before an equation is written"
+  },
+  {
+   "token": "poloidal_field_coil",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "poloidal_magnetic_field_probe",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "post_sawtooth_crash",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "power",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "pressure",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "radiance",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "radius",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "rate",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "soft_xray_detector",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "source_rate",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "spectral_line",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "spectrometer_channel",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "temperature",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "thickness",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "time",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "toroidal_flux_coordinate_gradient",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "toroidal_magnetic_field_probe",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "transit_time",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "turn_count",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "voltage",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "volume",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "wall",
+   "kind": "position",
+   "ruling": "no_concept_entry",
+   "reason": "a named location, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "wave_beam",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "wave_diagnostic_channel",
+   "kind": "object",
+   "ruling": "no_concept_entry",
+   "reason": "a hardware object, defined by its vocabulary entry; no equation defines it"
+  },
+  {
+   "token": "wavelength",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  },
+  {
+   "token": "width",
+   "kind": "physical_base",
+   "ruling": "no_concept_entry",
+   "reason": "a base whose names span more than one physical definition (a kinetic and a thermodynamic temperature, a plasma and a circuit current), so one equation would be wrong for some of its names"
+  }
+ ]
+}
