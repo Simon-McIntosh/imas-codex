@@ -6728,13 +6728,22 @@ def _apply_lifecycleless_stub_reconcile(
                     for record in transaction.run(_READ_LIFECYCLELESS_STUBS_QUERY)
                 ]
                 from imas_codex.standard_names.parents import (
+                    AdmissionResult,
                     is_admissible_parent_name,
+                    superseded_parent_names,
                 )
 
+                candidate_ids = [
+                    str(row["id"]) for row in rows if row.get("child_data")
+                ]
+                superseded_ids = superseded_parent_names(adapter, candidate_ids)
                 admission_by_id = {
-                    str(row["id"]): is_admissible_parent_name(str(row["id"]), adapter)
-                    for row in rows
-                    if row.get("child_data")
+                    name_id: (
+                        AdmissionResult(False, "superseded parent", None)
+                        if name_id in superseded_ids
+                        else is_admissible_parent_name(name_id, adapter)
+                    )
+                    for name_id in candidate_ids
                 }
                 partitions = _partition_lifecycleless_stub_rows(
                     rows, admission_by_id=admission_by_id
