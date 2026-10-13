@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -279,6 +279,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-acceptance-blocked" data-who="reckon-build" data-when="2026-10-13T14:10:00Z">
     <div class="r-comment-body"><p>The held-out acceptance measure stopped at its positive control, as designed (merge <code>c0ba264fb</code>, USD 0.00 spent). The benchmark harness renders no comparator block, so with the rerank switch off and on the two arms' compose prompts are byte-identical (hash <code>9e369f27</code>). The harness also composes only its fixed reference paths. The production compose path writes names to the graph, so it cannot serve as an arm. The harness instead gains an opt-in comparator block, taken from the production helpers (<code>_collect_nearby_name_comparators</code>, then <code>_rerank_comparators_for_compose</code>), and a named held-out source list (node <code>ssog-benchmark-comparator-arms</code>, queued). The acceptance measure reruns on it.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261013T140632236585-ssog-benchmark-comparator-arms" data-who="reckon-build" data-when="2026-10-13T14:29:16.194Z">
+    <div class="r-comment-body"><p>Fragment docs/evidence/fragments/sn-selection-over-generation/ssog-benchmark-comparator-arms.html — the harness carries the production comparator block behind a default-off BenchmarkConfig.comparator_block and a named BenchmarkConfig.source_paths batch; gate 130 passed / 0 failed at head vs 126 at base.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e" data-who="reckon-build" data-when="2026-10-13T05:56:49.621Z">
     <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
