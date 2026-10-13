@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:5275",
+    "imas_codex/discovery/signals/parallel.py:6195"
+  ],
+  "completed_at": "2026-10-13T11:35:07.097Z",
+  "dispatched_at": "2026-10-13T11:23:55Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_role_store.py",
+      "line": "66",
+      "severity": "follow-on",
+      "text": "follow-on: _RoleGraph.query (line 66) collapses every candidate read onto the test's own _is_role_candidate (line 27) and matches the read by the Cypher substring \"RETURN s.id AS id, s.name AS name\", so the test named \"share one predicate\" (line 196) cannot redden if the production sweep and census ever drift onto two different predicates: the mock routes any single reader through one Python predicate, so the assertion proves census reads candidates, not that the predicates are shared."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-enrichment.html",
+      "line": "42",
+      "severity": "follow-on",
+      "text": "follow-on: the 20-signal live sweep is one homogeneous block (the lcdb_a048717_ate.s003 reconstruction-map settings and their metadata) and every stored role is configuration_parameter, so the uniform column shows the writer fires on a live run but cannot show the store handling any other role; the population-wide role correctness rests on the separately reviewed prototype and random-sample nodes."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "production reach is the enrichment pipeline: judge_and_store_signal_roles is awaited at imas_codex/discovery/signals/parallel.py:5275 inside enrich_worker, which run_enrichment registers at parallel.py:6195; the new sweep/census functions have no in-tree production caller, matching the embedding sweep's precedent.",
+    "diff": "read commit by commit over 3cafae2f71d62c57f64650842f16ada3525d2c90..3b1e4a1930c936d07bc16e544b1793347e7b286a; 720f5a7d6 adds the SignalRole enum, the FacilitySignal.signal_role slot, the store/sweep/census and the enrich_worker wiring plus its tests, and 3b1e4a193 records the live sweep, five files all inside scope.",
+    "done_when": "the done-when names tests/discovery/test_signal_role_store.py and a 20-signal live sweep; the manifest records base_suite 1565 passed / after_suite 1570 passed with 0 failed, and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-enrichment.html:28 records 20/20 stored at USD 0.000552 with a working negative-control log.",
+    "goal": "the goal is to store each enriched signal's role through the measured role judge; imas_codex/discovery/signals/parallel.py:5275 judges the just-described enriched batch with judge_and_store_signal_roles and stores the accepted role, so the goal is met.",
+    "manifest": "read; status complete, commits 720f5a7d6 and 3b1e4a193, records the store/sweep/census wiring, the reset clearing signal_role, negative_control_log negative_control.log, and the live sweep over 20 signals.",
+    "write_paths": "the manifest declares seven write paths; git diff 3cafae2f7..3b1e4a193 changes five files (facility.yaml, reset.py, parallel.py, test_signal_role_store.py, ssfms-role-enrichment.html), every one inside the fence, while the declared role.py needed no change."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_signal_role_store.py:132 reddens if the store stops writing, :165 if a failed judgement writes a role, :193 if an out-of-set role is stored, :238 if the sweep and census diverge on the population, and :249 if the reset stops clearing signal_role.",
+    "evidence": "base_suite.log:1 and after_suite.log:1 record 1565 and 1570 passed with 0 failed, negative_control.log:5 shows tests/discovery/test_signal_role_store.py:135 reddening under the store mutation, and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-enrichment.html:28 records 20/20 stored at USD 0.000552.",
+    "fit": "imas_codex/discovery/signals/parallel.py:1897 follows the module's own_client sweep/census idiom of census_signal_embeddings at :1867 and the added names signal_role and SignalRole carry no plan, version or ticket label.",
+    "goal_fidelity": "imas_codex/discovery/signals/parallel.py:5267 wires judge_and_store_signal_roles into enrich_worker after each description is written, storing the judged role on the signal.",
+    "reuse": "imas_codex/discovery/signals/parallel.py:1897's store/sweep/census extend parallel.py's existing embedding-sweep owner (census_signal_embeddings at :1867) and reuse judge_signal_roles, _chunks and GraphClient rather than forking a second writer.",
+    "scope_discipline": "git diff 3cafae2f7..3b1e4a193 lists imas_codex/schemas/facility.yaml, imas_codex/discovery/base/reset.py, imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_role_store.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-enrichment.html, each inside the manifest's seven declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to store each enriched signal's role through the measured role judge; imas_codex/discovery/signals/parallel.py:5275 judges the just-described enriched batch with judge_and_store_signal_roles and stores the accepted role, so the goal is met.\nVERDICT done_when: the done-when names tests/discovery/test_signal_role_store.py and a 20-signal live sweep; the manifest records base_suite 1565 passed / after_suite 1570 passed with 0 failed, and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-enrichment.html:28 records 20/20 stored at USD 0.000552 with a working negative-control log.\nVERDICT write_paths: the manifest declares seven write paths; git diff 3cafae2f7..3b1e4a193 changes five files (facility.yaml, reset.py, parallel.py, test_signal_role_store.py, ssfms-role-enrichment.html), every one inside the fence, while the declared role.py needed no change.\nVERDICT manifest: read; status complete, commits 720f5a7d6 and 3b1e4a193, records the store/sweep/census wiring, the reset clearing signal_role, negative_control_log negative_control.log, and the live sweep over 20 signals.\nVERDICT diff: read commit by commit over 3cafae2f71d62c57f64650842f16ada3525d2c90..3b1e4a1930c936d07bc16e544b1793347e7b286a; 720f5a7d6 adds the SignalRole enum, the FacilitySignal.signal_role slot, the store/sweep/census and the enrich_worker wiring plus its tests, and 3b1e4a193 records the live sweep, five files all inside scope.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:5275, imas_codex/discovery/signals/parallel.py:6195\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/parallel.py:5267 wires judge_and_store_signal_roles into enrich_worker after each description is written, storing the judged role on the signal.\nSCORE evidence: 18\nJUSTIFICATION evidence: base_suite.log:1 and after_suite.log:1 record 1565 and 1570 passed with 0 failed, negative_control.log:5 shows tests/discovery/test_signal_role_store.py:135 reddening under the store mutation, and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-enrichment.html:28 records 20/20 stored at USD 0.000552.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 3cafae2f7..3b1e4a193 lists imas_codex/schemas/facility.yaml, imas_codex/discovery/base/reset.py, imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_role_store.py and docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-enrichment.html, each inside the manifest's seven declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_signal_role_store.py:132 reddens if the store stops writing, :165 if a failed judgement writes a role, :193 if an out-of-set role is stored, :238 if the sweep and census diverge on the population, and :249 if the reset stops clearing signal_role.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/discovery/signals/parallel.py:1897 follows the module's own_client sweep/census idiom of census_signal_embeddings at :1867 and the added names signal_role and SignalRole carry no plan, version or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/discovery/signals/parallel.py:1897's store/sweep/census extend parallel.py's existing embedding-sweep owner (census_signal_embeddings at :1867) and reuse judge_signal_roles, _chunks and GraphClient rather than forking a second writer.\nFINDING tests/discovery/test_signal_role_store.py:66 follow-on: _RoleGraph.query (line 66) collapses every candidate read onto the test's own _is_role_candidate (line 27) and matches the read by the Cypher substring \"RETURN s.id AS id, s.name AS name\", so the test named \"share one predicate\" (line 196) cannot redden if the production sweep and census ever drift onto two different predicates: the mock routes any single reader through one Python predicate, so the assertion proves census reads candidates, not that the predicates are shared.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-role-enrichment.html:42 follow-on: the 20-signal live sweep is one homogeneous block (the lcdb_a048717_ate.s003 reconstruction-map settings and their metadata) and every stored role is configuration_parameter, so the uniform column shows the writer fires on a live run but cannot show the store handling any other role; the population-wide role correctness rests on the separately reviewed prototype and random-sample nodes.\n",
+  "review_run_id": "r-20261013T112332814742-review-of-ssfms-role-enrichment-3b1e4a1930c9",
+  "reviewed_base_sha": "3cafae2f71d62c57f64650842f16ada3525d2c90",
+  "reviewed_head_sha": "3b1e4a1930c936d07bc16e544b1793347e7b286a",
+  "reviewed_run_id": "r-20261013T105642084920-ssfms-role-enrichment",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T11:36:49.500798+00:00",
+  "total": 112
+}
