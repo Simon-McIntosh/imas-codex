@@ -597,6 +597,12 @@ async def main() -> None:
             "chat_fallback_path_count": len(fallback),
         },
     }
+    # the gold arm is a separate paid run; a rescore must reindex the gold
+    # arm a previous invocation may have merged in.
+    if args.out.exists():
+        prior = json.loads(args.out.read_text())
+        if "gold" in prior:
+            payload["gold"] = prior["gold"]
     args.out.write_text(json.dumps(payload, sort_keys=True, indent=1) + "\n")
     if args.figure is not None:
         _figure(payload, args.figure)
