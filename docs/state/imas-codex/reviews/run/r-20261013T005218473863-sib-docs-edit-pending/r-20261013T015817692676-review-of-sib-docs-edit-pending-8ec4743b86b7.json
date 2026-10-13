@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Both arms of the reviewed run are readable and record their own summaries. baseline_suite: revision c98a0d42dc8195dd60c9c145340703409c87b2ec, exit_status 0, completed true, failure_count 0, failure_ids [] (base.log: '412 passed, 10 deselected, EXIT=0'). after_suite: revision 8ec4743b86b75bf10f963c981e192587a035c53b, exit_status 0, completed true, failure_count 0, failure_ids [] (after-edit-engine.log: '68 passed, EXIT=0'). Zero added failures against the reviewed run's own baseline.",
+  "base_log_revision": "c98a0d42dc8195dd60c9c145340703409c87b2ec",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/promote.py:1248",
+    "imas_codex/standard_names/review_triage.py:346",
+    "imas_codex/cli/sn.py:7015",
+    "imas_codex/llm/sn_tools.py:918"
+  ],
+  "completed_at": "2026-10-13T02:10:06.051Z",
+  "dispatched_at": "2026-10-13T01:58:33Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/edit.py",
+      "line": "3475",
+      "severity": "follow-on",
+      "text": "follow-on: the inline comment beside the gate still describes the refused set as 'drafted' (a generate_docs claim) and 'refining' (a review_docs claim), omitting 'reviewed', which the gate at edit.py:3481 also refuses and which the module docstring this commit lands now names; the pool stages are pending (generate_docs), drafted (review_docs) and reviewed (refine_docs), so both the omission and the parenthetical mapping are imprecise. The code is correct and the gate is green; the defect is a comment that disagrees in scope with the module contract beside it, and it is not introduced by this increment."
+    }
+  ],
+  "head_log_revision": "8ec4743b86b75bf10f963c981e192587a035c53b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "reviewed commit by commit against its base d5e87ab; 8ec4743 changes only the module docstring at imas_codex/standard_names/edit.py:59-64 (+6/-2), restating the docs-mode precondition as the claim and replacing the stale `docs_stage in (accepted, exhausted)` sentence the prior review flagged at edit.py:59-60.",
+    "done_when": "the done_when names two tests (pending seeds documentation and takes the claim; refining still refused) plus a negative-control log with EXIT=; tests/standard_names/test_edit_engine.py:1577 and :1608 provide both, and the reviewed run records base.log (c98a0d4, 412 passed EXIT=0) and after-edit-engine.log (8ec4743, 68 passed EXIT=0).",
+    "goal": "the source node's goal is to admit docs_stage='pending' in the docs-edit precondition of _apply_docs so an accepted identity whose docs axis never started can be seeded; the commit this review covers (8ec4743) restates the module contract for that rule at imas_codex/standard_names/edit.py:59-64, and the admission itself is the unchanged edit.py:3481 membership test `docs_stage not in (\"pending\", \"accepted\", \"exhausted\")`.",
+    "manifest": "read at the reviewed run directory; status complete, commits 8ec4743 and d5e87ab, changed_paths the three declared files, negative_control_log named with a note, baseline_suite and after_suite arms both recorded with revision, exit_status and completed true, blockers none.",
+    "write_paths": "the reviewed manifest declares imas_codex/standard_names/edit.py, tests/standard_names/test_edit_engine.py and docs/evidence/fragments/sn-integrity-backlog/sib-docs-edit-pending.html; this review's diff (d5e87ab..8ec4743) touches only imas_codex/standard_names/edit.py, inside them."
+  },
+  "justifications": {
+    "durability": "the admission guard is proven by negative-control.log (the settled-only stage set restored reddens tests/standard_names/test_edit_engine.py:1577 with 1 failed, EXIT=1); the increment is documentation and needs no test of its own, with one deduction for the write-through assertion at test_edit_engine.py:1597.",
+    "evidence": "the run records both arms with a revision and exit status (base.log 412 passed EXIT=0 at c98a0d4; after-edit-engine.log 68 passed EXIT=0 at 8ec4743) and a red negative control, with a deduction for the FakeGraph-only path that exercises the admission without the live Cypher.",
+    "fit": "the docstring follows the module's idiom and the commit is conventional with a body and no attribution or plan label, but the inline comment at imas_codex/standard_names/edit.py:3475 still names only drafted/refining while the docstring this commit lands lists three refused stages.",
+    "goal_fidelity": "the landed docstring at imas_codex/standard_names/edit.py:59-64 now matches the code at edit.py:3481, naming pending/accepted/exhausted admitted and drafted/reviewed/refining refused.",
+    "reuse": "the increment adds no definition and extends the existing guard at imas_codex/standard_names/edit.py:3481 in place; a capability search over imas_codex/standard_names for a docs-stage admission owner found none (families.DOCS_STAGE_ACCEPTED, edit._FOLD_DOCS_STAGE_RANK and the inline-review acceptance check all govern other decisions).",
+    "scope_discipline": "the reviewed diff d5e87ab..8ec4743 touches only imas_codex/standard_names/edit.py, inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is to admit docs_stage='pending' in the docs-edit precondition of _apply_docs so an accepted identity whose docs axis never started can be seeded; the commit this review covers (8ec4743) restates the module contract for that rule at imas_codex/standard_names/edit.py:59-64, and the admission itself is the unchanged edit.py:3481 membership test `docs_stage not in (\"pending\", \"accepted\", \"exhausted\")`.\nVERDICT done_when: the done_when names two tests (pending seeds documentation and takes the claim; refining still refused) plus a negative-control log with EXIT=; tests/standard_names/test_edit_engine.py:1577 and :1608 provide both, and the reviewed run records base.log (c98a0d4, 412 passed EXIT=0) and after-edit-engine.log (8ec4743, 68 passed EXIT=0).\nVERDICT write_paths: the reviewed manifest declares imas_codex/standard_names/edit.py, tests/standard_names/test_edit_engine.py and docs/evidence/fragments/sn-integrity-backlog/sib-docs-edit-pending.html; this review's diff (d5e87ab..8ec4743) touches only imas_codex/standard_names/edit.py, inside them.\nVERDICT manifest: read at the reviewed run directory; status complete, commits 8ec4743 and d5e87ab, changed_paths the three declared files, negative_control_log named with a note, baseline_suite and after_suite arms both recorded with revision, exit_status and completed true, blockers none.\nVERDICT diff: reviewed commit by commit against its base d5e87ab; 8ec4743 changes only the module docstring at imas_codex/standard_names/edit.py:59-64 (+6/-2), restating the docs-mode precondition as the claim and replacing the stale `docs_stage in (accepted, exhausted)` sentence the prior review flagged at edit.py:59-60.\nCALL_SITES: imas_codex/standard_names/promote.py:1248, imas_codex/standard_names/review_triage.py:346, imas_codex/cli/sn.py:7015, imas_codex/llm/sn_tools.py:918\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the landed docstring at imas_codex/standard_names/edit.py:59-64 now matches the code at edit.py:3481, naming pending/accepted/exhausted admitted and drafted/reviewed/refining refused.\nSCORE evidence: 18\nJUSTIFICATION evidence: the run records both arms with a revision and exit status (base.log 412 passed EXIT=0 at c98a0d4; after-edit-engine.log 68 passed EXIT=0 at 8ec4743) and a red negative control, with a deduction for the FakeGraph-only path that exercises the admission without the live Cypher.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the reviewed diff d5e87ab..8ec4743 touches only imas_codex/standard_names/edit.py, inside the manifest's declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: the admission guard is proven by negative-control.log (the settled-only stage set restored reddens tests/standard_names/test_edit_engine.py:1577 with 1 failed, EXIT=1); the increment is documentation and needs no test of its own, with one deduction for the write-through assertion at test_edit_engine.py:1597.\nSCORE fit: 18\nJUSTIFICATION fit: the docstring follows the module's idiom and the commit is conventional with a body and no attribution or plan label, but the inline comment at imas_codex/standard_names/edit.py:3475 still names only drafted/refining while the docstring this commit lands lists three refused stages.\nSCORE reuse: 20\nJUSTIFICATION reuse: the increment adds no definition and extends the existing guard at imas_codex/standard_names/edit.py:3481 in place; a capability search over imas_codex/standard_names for a docs-stage admission owner found none (families.DOCS_STAGE_ACCEPTED, edit._FOLD_DOCS_STAGE_RANK and the inline-review acceptance check all govern other decisions).\nFINDING imas_codex/standard_names/edit.py:3475 follow-on: the inline comment beside the gate still describes the refused set as 'drafted' (a generate_docs claim) and 'refining' (a review_docs claim), omitting 'reviewed', which the gate at edit.py:3481 also refuses and which the module docstring this commit lands now names; the pool stages are pending (generate_docs), drafted (review_docs) and reviewed (refine_docs), so both the omission and the parenthetical mapping are imprecise. The code is correct and the gate is green; the defect is a comment that disagrees in scope with the module contract beside it, and it is not introduced by this increment.\nVERDICT: SOUND",
+  "review_run_id": "r-20261013T015817692676-review-of-sib-docs-edit-pending-8ec4743b86b7",
+  "reviewed_base": "d5e87ab4a7dc87747d848c192e600107156fa738",
+  "reviewed_base_sha": "d5e87ab4a7dc87747d848c192e600107156fa738",
+  "reviewed_commit": "8ec4743b86b75bf10f963c981e192587a035c53b",
+  "reviewed_head_sha": "8ec4743b86b75bf10f963c981e192587a035c53b",
+  "reviewed_run_id": "r-20261013T005218473863-sib-docs-edit-pending",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T02:20:00+00:00",
+  "total": 115
+}
