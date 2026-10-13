@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-area-children">
+<title>Landing record — sib-area-children</title>
+</head>
+<body>
+<main>
+<h1 id="sib-area-children-landing-title">Landing record: the derivative children of <code>area_of_flux_surface</code> move to its successor; the toroidal-surface child does not</h1>
+
+<p id="sib-area-children-landing-summary">
+Two of the three live structural children of the superseded scalar
+<code>area_of_flux_surface</code> were renamed, through <code>sn edit</code>, onto its
+successor <code>poloidal_plane_cross_sectional_area_of_flux_surface</code> and both
+landed <code>accepted</code> with their sources and their spelling-derived parent
+carried. The third child, <code>surface_area_of_flux_surface</code>, is the toroidal
+surface area — a different quantity — and is <strong>not</strong> renamed. This record
+establishes where its wrong parent edge comes from and why <strong>no sanctioned
+route removes it</strong>: the derivation re-mints it from the spelling, so a
+release cannot hold. That is the one precondition §21&rsquo;s done-when still needs,
+and it needs a code change, not a graph write.
+</p>
+
+<p id="sib-area-children-landing-change">
+Both derivative children were renamed with the sanctioned surface
+<code>imas-codex sn edit &lt;name&gt; --rename &lt;new&gt; --reason &hellip;</code> at base
+revision <code>aa25ca574e</code>. Dry run and apply output were captured for each.
+</p>
+<ul>
+<li id="sib-area-children-rename-poloidal">
+<code>derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</code>
+&rarr; <code>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</code>.
+Dry run: &ldquo;would carry 1 producing source(s) &hellip; would rename &hellip;&rdquo;
+(<code>EXIT=0</code>). Apply: renamed, entering name review inline
+(<code>run_id=sn-edit-20261013T063152Z</code> the then-current run); inline review
+<strong>accepted, score 1.00</strong>, <code>edit_status=applied</code>.
+</li>
+<li id="sib-area-children-rename-toroidal">
+<code>derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>
+&rarr; <code>derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_*coordinate</code>.
+Dry run: same shape, <code>EXIT=0</code>. Apply: renamed and reviewed inline
+(<code>names_reviewed=2</code> in the reviewing run); accepted,
+<strong>score 0.96875</strong>, <code>edit_status=applied</code>.
+</li>
+</ul>
+<p id="sib-area-children-landing-carried">
+Each renamed name carries its <code>PRODUCED_NAME</code> source after the rename
+(<code>dd:equilibrium/time_slice/profiles_1d/darea_dpsi</code> and
+<code>&hellip;/darea_drho_tor</code>, both <code>composed</code>) and its derived parent
+is the successor: <code>derive_edges()</code> returns
+<code>&hellip; &rarr; poloidal_plane_cross_sectional_area_of_flux_surface</code>
+(<code>operator_kind=unary_prefix</code>), and the graph edge agrees. The two old
+spellings are now <code>superseded</code> and no longer live children.
+</p>
+
+<p id="sib-area-children-landing-toroidal-child">
+<strong><code>surface_area_of_flux_surface</code> &mdash; where its parent comes from.</strong>
+ISN parses the spelling as qualifier <code>surface</code> (<code>category=geometry</code>)
+on base quantity <code>area</code> with locus <code>of flux_surface</code>. The
+derived-parent derivation peels the outer qualifier and recomposes
+<code>area_of_flux_surface</code>, so
+<code>derive_edges('surface_area_of_flux_surface')</code> returns
+<code>&rarr; area_of_flux_surface</code> (<code>operator_kind=qualifier</code>,
+<code>operator=surface</code>). The edge is therefore a pure function of the
+spelling, re-derived on every structural reconcile.
+</p>
+
+<p id="sib-area-children-landing-correct-parent">
+<strong>Its correct parent.</strong> The name denotes the toroidal surface area, a
+distinct quantity from the poloidal cross-section the catalog now attaches to
+<code>area_of_flux_surface</code>. Its natural decomposition is the locus
+<code>of flux_surface</code> on a generic <em>surface-area</em> quantity, but the
+grammar exposes only <code>area</code> as a base token, so <code>surface</code>
+rides as a qualifier and the peel lands on the retired generic. No live,
+semantically-correct structural parent exists for it: the only name that could
+serve — a neutral &ldquo;area of flux surface&rdquo; — is precisely
+<code>area_of_flux_surface</code>, which the catalog is retiring.
+</p>
+
+<p id="sib-area-children-landing-no-route">
+<strong>Why no sanctioned route removes it.</strong> Three candidate paths were
+checked against the code:
+</p>
+<ul>
+<li id="sib-area-children-route-edit">
+<strong><code>sn edit</code></strong> offers <code>h2&nbsp;hint / rename / docs / kind</code>
+only; none releases a derived parent. Renaming is ruled out by the lead.
+</li>
+<li id="sib-area-children-route-reconcile">
+<strong>The reconcile path</strong> (<code>NO</code>) —
+<code>rederive_structural_edges</code> &rarr; <code>_write_standard_name_edges</code>
+(re-derives and re-mints from the spelling) and <code>_rewire_has_parent_off_superseded</code>
+(migrates an edge off a superseded parent only onto a <em>true-rename</em> successor
+that <code>derive_edges(child)</code> authorises). Here the tip
+<code>poloidal_plane_cross_sectional_area_of_flux_surface</code> differs in
+<code>component</code> (<code>poloidal</code> vs <code>None</code>) so it is not a true
+rename, and <code>derive_edges('surface_area_of_flux_surface')</code> authorises
+<code>area_of_flux_superseded</code>, not the tip. The edge is neither migrated nor
+dropped — it is left in place and re-minted. The function&rsquo;s own comment
+prescribes the remedy for exactly this shape: un-supersede <code>old</code>, it is
+the legitimate generic parent.
+</li>
+<li id="sib-area-children-route-release">
+<strong>The signed structural release</strong>
+(<code>apply_signed_manifest</code> with a <code>recompute_projection</code> row whose
+<code>new_end_id</code> is null) exists and is exercised on exactly this child/parent
+pair by <code>tests/standard_names/test_structural_release.py</code> — but only
+against a <em>disposable</em> graph, and it is not durable: the release deletes the
+edge and then calls <code>_apply_structural_edge_reconcile</code> &rarr;
+<code>_write_standard_name_edges</code>, which re-derives the edge from the spelling
+and writes it back within the same transaction. A release cannot hold.
+</li>
+</ul>
+
+<p id="sib-area-children-landing-needed-change">
+<strong>What change it would need.</strong> One of two, both outside this
+node&rsquo;s fragment-only scope:
+either (1) a lifecycle veto in the parent-admission gate
+(<code>imas_codex/standard_names/parents.py::is_admissible_parent_name</code>), so
+<code>_write_standard_name_edges</code> does not emit a <code>HAS_PARENT</code> edge
+onto a <code>superseded</code> target — which
+<code>area_of_flux_surface</code> is — and therefore stops re-minting it; or (2) keep
+<code>area_of_flux_surface</code> un-retired as the legitimate generic parent and
+exclude it from §16&rsquo;s removal, which is what
+<code>_rewire_has_parent_off_superseded</code>&rsquo;s comment already names as the
+correct remedy when a successor is not a true rename of the old.
+</p>
+
+<p id="sib-area-children-landing-bounded-read">
+<code>area_of_flux_surface</code> live (<code>name_stage &ne; superseded</code>)
+<code>HAS_PARENT</code> children after the renames: <strong>one</strong> —
+<code>surface_area_of_flux_surface</code> (<code>accepted</code>, qualifier
+<code>surface</code>), the child with no sanctioned route above. Two others remain
+as edges to the retired name but are <code>superseded</code> themselves and so do
+not count: <code>&hellip;darea_dpsi</code>&rsquo;s old spelling and
+<code>&hellip;darea_drho_tor</code>&rsquo;s old spelling.
+</p>
+
+<p id="sib-area-children-landing-gate">
+<strong>Gate.</strong> The edit tests
+(<code>rg -l "standard_names.edit|from imas_codex.standard_names import edit" tests/</code>)
+run from the worktree with the main checkout&rsquo;s environment:
+<strong>414 passed, 10 deselected</strong> (<code>&hellip; test_source_refresh_docs_*</code>&hellip; markers),
+exit 0, at revision <code>aa25ca574e</code>. This node changed no source file, so
+the base revision and the head are the same tree and the baseline run is the
+after run by construction.
+</p>
+</main>
+</body>
+</html>
