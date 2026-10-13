@@ -18,7 +18,12 @@ stubbed, so what they assert is the orchestration, not a mock of it:
 * over a scope of several families, one whose member is refused makes the dry
   run report the whole apply as refused — zero calls, zero cost, the refusing
   family named and the others not reported as running — with the per-family
-  refusal under ``--force``.
+  refusal under ``--force``;
+* the apply compares each member's documentation-axis score before the reset
+  against its post-drain score and names, with both scores, every member whose
+  score fell below acceptance and every member that fell — a family in which
+  no score fell names none, and removing the comparison makes the
+  below-threshold test fail (the second negative control logged beside the run).
 """
 
 from __future__ import annotations
@@ -147,9 +152,18 @@ class _DocsPipeline:
 class _ApplyHarness:
     """Injected runner operations recording the batches and drain order."""
 
-    def __init__(self, accepted_after: set[str], pipeline: _DocsPipeline):
+    def __init__(
+        self,
+        accepted_after: set[str],
+        pipeline: _DocsPipeline,
+        *,
+        graph: _FamilyGraph | None = None,
+        after_scores: dict[str, float | None] | None = None,
+    ):
         self.accepted_after = accepted_after
         self.pipeline = pipeline
+        self.graph = graph
+        self.after_scores = after_scores or {}
         self.marked_batches: list[list[str]] = []
         self.drained: list[str] = []
 
@@ -164,7 +178,17 @@ class _ApplyHarness:
         return len(batch)
 
     def drain_fn(self, run_id: str, cost_limit: float) -> float | None:
+        """Drain the scope, standing in for the review rewriting the docs.
+
+        The stub review writes each name's post-refresh documentation score
+        onto the fixture graph, so the apply's post-drain read sees what a
+        real review would have recorded.
+        """
         self.drained.append(run_id)
+        if self.graph is not None:
+            for node in self.graph.nodes:
+                if node["id"] in self.after_scores:
+                    node["reviewer_score_docs"] = self.after_scores[node["id"]]
         return 0.0
 
     def fetch_refreshed_fn(self, gc: Any, batch: list[str]) -> list[dict[str, Any]]:
@@ -472,7 +496,148 @@ def test_dry_run_counts_both_families_under_force(monkeypatch: Any) -> None:
     assert result.exit_code == 0, result.output
     assert "decision=forced" in result.output
     assert "decision=blocked" not in result.output
-    # 2 families × 2 members, all counted.
     assert "4 planned call(s)" in result.output
     assert graph.writes() == []
     assert pipeline.revisions == {}
+
+
+# ── Documentation-score regression report ───────────────────────────────────
+
+
+def _regressions_or_removed(monkeypatch: Any) -> None:
+    """Disable the score comparison when the declared mutation is set.
+
+    The declared negative control removes the before/after comparison, so the
+    below-threshold member is never named and the assertions in
+    :func:`test_apply_names_a_member_below_threshold` fail.
+    """
+    if os.environ.get("SHC_NO_SCORE_COMPARISON"):
+        from imas_codex.standard_names import harmonize
+
+        monkeypatch.setattr(
+            harmonize,
+            "docs_score_regressions",
+            lambda before, after, **kw: {"below_threshold": [], "fell": []},
+        )
+
+
+def _scored_family_nodes() -> list[dict[str, Any]]:
+    """A family whose members all start accepted and scored."""
+    return [
+        _node(_ANCHOR, "accepted", 0.90, name_stage="accepted"),
+        _node(_MEMBERS[0], "accepted", 0.90, name_stage="accepted"),
+        _node(_MEMBERS[1], "accepted", 0.88, name_stage="accepted"),
+    ]
+
+
+def test_apply_names_a_member_below_threshold(monkeypatch: Any) -> None:
+    """A member whose rewritten docs score below threshold is named with both scores."""
+    nodes = _scored_family_nodes()
+    pipeline = _DocsPipeline(nodes)
+    _install_docs_pipeline(monkeypatch, pipeline)
+    graph = _FamilyGraph(nodes)
+    harness = _ApplyHarness(
+        accepted_after={_ANCHOR, *_MEMBERS},
+        pipeline=pipeline,
+        graph=graph,
+        after_scores={_MEMBERS[0]: 0.60},
+    )
+    _regressions_or_removed(monkeypatch)
+
+    outcome = _apply(graph, harness)
+
+    regressions = outcome["applied"][0]["score_regressions"]
+    below = regressions["below_threshold"]
+    assert [i["id"] for i in below] == [_MEMBERS[0]]
+    assert below[0]["before"] == 0.90
+    assert below[0]["after"] == 0.60
+    fell = regressions["fell"]
+    assert [i["id"] for i in fell] == [_MEMBERS[0]]
+    assert fell[0]["before"] == 0.90
+    assert fell[0]["after"] == 0.60
+
+
+def test_apply_reports_no_fall_when_no_member_scores_worse(
+    monkeypatch: Any,
+) -> None:
+    """A family in which no score fell reports neither below threshold nor fell."""
+    nodes = _scored_family_nodes()
+    pipeline = _DocsPipeline(nodes)
+    _install_docs_pipeline(monkeypatch, pipeline)
+    graph = _FamilyGraph(nodes)
+    harness = _ApplyHarness(
+        accepted_after={_ANCHOR, *_MEMBERS},
+        pipeline=pipeline,
+        graph=graph,
+        after_scores={_MEMBERS[0]: 0.92, _MEMBERS[1]: 0.88},
+    )
+    _regressions_or_removed(monkeypatch)
+
+    outcome = _apply(graph, harness)
+
+    regressions = outcome["applied"][0]["score_regressions"]
+    assert regressions["below_threshold"] == []
+    assert regressions["fell"] == []
+
+
+def test_score_comparison_reports_below_threshold_and_fall() -> None:
+    """The comparison classifies a fell-below member and ignores unscored ones."""
+    from imas_codex.standard_names.harmonize import docs_score_regressions
+
+    regressions = docs_score_regressions(
+        {"below_and_fell": 0.90, "rose": 0.60, "fell_only": 0.95, "same": 0.90},
+        {"below_and_fell": 0.60, "rose": 0.70, "fell_only": 0.90, "same": 0.90},
+    )
+
+    assert [i["id"] for i in regressions["below_threshold"]] == [
+        "below_and_fell",
+        "rose",
+    ]
+    assert [i["id"] for i in regressions["fell"]] == ["below_and_fell", "fell_only"]
+
+
+def test_apply_report_names_member_in_cli_output(monkeypatch: Any) -> None:
+    """`--apply` prints the below-threshold member with both scores."""
+    from imas_codex.cli.sn import sn
+    from imas_codex.graph import client as graph_client
+    from imas_codex.standard_names import harmonize
+
+    class _Result:
+        halted = False
+        batches_run = 2
+        total_accepted = 3
+        total_touched = 3
+        halt_reasons: list[str] = []
+
+        def summary(self) -> dict[str, Any]:
+            return {"halted": False}
+
+    crafted = {
+        "applied": [
+            {
+                "physical_base": "base",
+                "decision": "apply",
+                "anchor": _ANCHOR,
+                "applied": True,
+                "stamped": True,
+                "result": _Result(),
+                "score_regressions": {
+                    "below_threshold": [
+                        {"id": _MEMBERS[0], "before": 0.90, "after": 0.60}
+                    ],
+                    "fell": [{"id": _MEMBERS[0], "before": 0.90, "after": 0.60}],
+                },
+            }
+        ]
+    }
+    graph = _FamilyGraph([])
+    monkeypatch.setattr(harmonize, "plan_family_applies", lambda *a, **k: [])
+    monkeypatch.setattr(harmonize, "apply_families", lambda *a, **k: crafted)
+    monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
+
+    result = CliRunner().invoke(sn, ["harmonize", "--family", _ANCHOR, "--apply"])
+
+    assert result.exit_code == 0, result.output
+    assert _MEMBERS[0] in result.output
+    assert "0.900" in result.output
+    assert "0.600" in result.output

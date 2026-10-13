@@ -1,0 +1,89 @@
+<section>
+  <h2 id="shc-score-regression">Naming the members whose documentation score fell or dropped below acceptance</h2>
+  <p id="shc-score-regression-scope">
+    Builds the documentation-score report of <code>sn harmonize</code> (§4 of
+    this plan): an apply that rewrites a family reports, by name, every member
+    whose post-rewrite documentation score is below the acceptance threshold and
+    every member whose score fell, each with its before and after value. Write
+    paths:
+    <code>imas_codex/standard_names/harmonize.py</code>,
+    <code>imas_codex/cli/sn.py</code>,
+    <code>tests/standard_names/test_harmonize_apply.py</code>.
+  </p>
+
+  <h3 id="shc-score-regression-mechanism">Before, from the family rows already read; after, from the same query</h3>
+  <p id="shc-score-regression-mechanism-text">
+    The acceptance threshold is the pipeline's own
+    <code>DEFAULT_MIN_SCORE</code> (0.85), not a new constant.
+    <code>plan_family_applies</code> already reads each family through
+    <code>fetch_pattern_families</code>, whose member rows carry
+    <code>reviewer_score_docs</code>; the plan now keeps those as
+    <code>member_scores</code>, captured before the reset replaces each member's
+    docs to pending. After the family drains, <code>apply_families</code>
+    re-reads the same family through the same query and
+    <code>docs_score_regressions</code> compares the two maps. A member newer
+    than the plan, or one with no measured score on either side, is skipped
+    rather than reported as a fall. The report rides the snapshot-and-reset the
+    campaign runner already takes — no second snapshot and no new query family.
+  </p>
+  <table id="shc-score-regression-classes">
+    <caption>What the comparison reports, per member</caption>
+    <thead>
+      <tr><th>Class</th><th>Condition</th><th>Carries</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>below_threshold</code></td>
+        <td>After score is measured and below the acceptance threshold.</td>
+        <td>id, before, after</td>
+      </tr>
+      <tr>
+        <td><code>fell</code></td>
+        <td>Both scores measured and the after score is lower.</td>
+        <td>id, before, after</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-score-regression-chain">
+    The command prints each such member by name, per family and across the
+    scope, with its two scores; the scope summary counts them, and an apply in
+    which nothing fell prints <code>docs scores: no member below threshold, none
+    fell</code>. A member can appear in both classes — a rewrite that drops a
+    member from 0.90 to 0.60 both fell and lands below acceptance, and the
+    report says so twice rather than collapsing the two readings.
+  </p>
+
+  <h3 id="shc-score-regression-gates">Gates and the negative control</h3>
+  <p id="shc-score-regression-gates-text">
+    The gate is the harmonize, guard and campaign suite
+    (<code>test_harmonize.py</code>, <code>test_harmonize_apply.py</code>,
+    <code>test_harmonize_command.py</code>, <code>test_harmonize_guard.py</code>,
+    <code>test_campaign.py</code>, <code>test_campaign_pricing.py</code>,
+    <code>test_campaign_manifest_schema.py</code>,
+    <code>test_quarantine_instrument_roles.py</code>). Baseline at the
+    orientation base revision: 144 passed, exit 0. After the change: 148 passed
+    (+4, the new score tests), exit 0 — no added failure. The fixture harness
+    drains through a graph whose member scores the test supplies, so the
+    comparison is exercised end to end rather than at the helper alone:
+    <code>test_apply_names_a_member_below_threshold</code> rewrites
+    <code>base_at_boundary</code> from 0.90 to 0.60 and asserts it is named in
+    both classes with those two values, and
+    <code>test_apply_reports_no_fall_when_no_member_scores_worse</code> asserts
+    a family with no fall names none.
+  </p>
+  <p id="shc-score-regression-negative-control">
+    The negative control removes the score comparison
+    (<code>SHC_NO_SCORE_COMPARISON</code> makes
+    <code>docs_score_regressions</code> return two empty lists).
+    <code>test_apply_names_a_member_below_threshold</code> then fails — the
+    apply reports no member below threshold for a member that scored 0.60 — so
+    the test is measuring the comparison and not the fixture. Log:
+    <code>negative_control.log</code> beside the run.
+  </p>
+  <p id="shc-score-regression-cypher">
+    No Cypher was added: the post-drain read reuses
+    <code>fetch_pattern_families</code>, the query the plan already reads
+    through, so <code>tests/graph/test_cypher_property_check.py</code> has no
+    new statement to check.
+  </p>
+</section>

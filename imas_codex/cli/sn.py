@@ -6182,6 +6182,12 @@ def sn_harmonize(
 
         applied_n = sum(1 for e in outcome["applied"] if e["applied"])
         stamped_n = sum(1 for e in outcome["applied"] if e["stamped"])
+
+        def _score(value: float | None) -> str:
+            return "—" if value is None else f"{value:.3f}"
+
+        scope_below: list[dict[str, Any]] = []
+        scope_fell: list[dict[str, Any]] = []
         for entry in outcome["applied"]:
             result = entry.get("result")
             if result is None:
@@ -6197,7 +6203,38 @@ def sn_harmonize(
                 f"accepted={result.total_accepted}/{result.total_touched}  "
                 f"{status}{tail}"
             )
+            regressions = entry.get("score_regressions") or {}
+            below = regressions.get("below_threshold") or []
+            fell = regressions.get("fell") or []
+            scope_below.extend({"family": entry["physical_base"], **i} for i in below)
+            scope_fell.extend({"family": entry["physical_base"], **i} for i in fell)
+            for item in below:
+                console.print(
+                    f"    below threshold {item['id']}  "
+                    f"before={_score(item['before'])}  after={_score(item['after'])}"
+                )
+            for item in fell:
+                console.print(
+                    f"    fell {item['id']}  "
+                    f"before={_score(item['before'])}  after={_score(item['after'])}"
+                )
+            if not below and not fell:
+                console.print("    docs scores: no member below threshold, none fell")
         console.print(f"apply: {applied_n} family(ies) applied, {stamped_n} stamped.")
+        console.print(
+            f"docs scores: {len(scope_below)} member(s) below the acceptance "
+            f"threshold, {len(scope_fell)} fell."
+        )
+        for item in scope_below:
+            console.print(
+                f"    below threshold [{item['family']}] {item['id']}  "
+                f"before={_score(item['before'])}  after={_score(item['after'])}"
+            )
+        for item in scope_fell:
+            console.print(
+                f"    fell [{item['family']}] {item['id']}  "
+                f"before={_score(item['before'])}  after={_score(item['after'])}"
+            )
         return
 
     with GraphClient() as gc:
