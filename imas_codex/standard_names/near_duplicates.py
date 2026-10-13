@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -42,8 +44,6 @@ def _differences(left: str, right: str) -> dict[str, dict[str, Any]]:
 
 def _overlap_key(changes: Mapping[str, Mapping[str, Any]]) -> str:
     """Group the same grammar substitution across different quantity names."""
-    import json
-
     substitutions = [
         (
             segment,
@@ -57,6 +57,42 @@ def _overlap_key(changes: Mapping[str, Mapping[str, Any]]) -> str:
         for segment, change in sorted(changes.items())
     ]
     return json.dumps(substitutions, separators=(",", ":"))
+
+
+def _group_overlaps(pairs: list[dict[str, Any]]) -> None:
+    """A shared name or grammar substitution puts pairs in one ruling group."""
+    parent = list(range(len(pairs)))
+
+    def root(index: int) -> int:
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    def join(left: int, right: int) -> None:
+        parent[root(right)] = root(left)
+
+    name_owner: dict[str, int] = {}
+    substitution_owner: dict[str, int] = {}
+    for index, pair in enumerate(pairs):
+        for name in (pair["left"], pair["right"]):
+            if name in name_owner:
+                join(index, name_owner[name])
+            name_owner[name] = index
+        substitution = pair["overlap"]
+        if substitution in substitution_owner:
+            join(index, substitution_owner[substitution])
+        substitution_owner[substitution] = index
+
+    groups: dict[int, list[dict[str, Any]]] = {}
+    for index, pair in enumerate(pairs):
+        groups.setdefault(root(index), []).append(pair)
+    for members in groups.values():
+        identities = sorted((pair["left"], pair["right"]) for pair in members)
+        digest = hashlib.sha256(json.dumps(identities).encode()).hexdigest()[:12]
+        for pair in members:
+            pair["overlap"] = f"overlap-{digest}"
+            pair["overlap_size"] = len(members)
 
 
 def build_worklist(
@@ -103,6 +139,7 @@ def build_worklist(
             }
             scope = "west" if left in west_names or right in west_names else "other"
             worklist[scope].append(pair)
+    _group_overlaps(worklist["west"] + worklist["other"])
     return worklist
 
 

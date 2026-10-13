@@ -106,3 +106,17 @@ def test_synonym_check_preserves_default_and_can_select_worklist_threshold():
     assert (
         len(synonym_check(candidate, [identical], threshold=1.0, inclusive=True)) == 1
     )
+
+
+def test_pairs_sharing_a_name_form_one_overlap():
+    names = [
+        _name("fast_electron_density", "m^-3", [1, 0]),
+        _name("thermal_electron_density", "m^-3", [1, 0]),
+        _name("total_electron_density", "m^-3", [1, 0]),
+    ]
+    worklist = build_worklist(names, west_names={"fast_electron_density"})
+    pairs = worklist["west"] + worklist["other"]
+    assert len(worklist["west"]) == 2
+    assert len(worklist["other"]) == 1
+    assert len({pair["overlap"] for pair in pairs}) == 1
+    assert all(pair["overlap_size"] == 3 for pair in pairs)

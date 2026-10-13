@@ -83,6 +83,11 @@ async def run() -> None:
                 "Live pair set changed since the last judgment checkpoint"
             )
         judged = progress["judged"]
+        current_pairs = {(pair["left"], pair["right"]): pair for pair in all_pairs}
+        for item in judged:
+            current = current_pairs[item["left"], item["right"]]
+            item["overlap"] = current["overlap"]
+            item["overlap_size"] = current["overlap_size"]
         spent = progress["spent"]
         pilot_cost = progress["pilot_cost"]
     else:
@@ -158,6 +163,7 @@ async def run() -> None:
         "live_names": len(names),
         "west_names": len(west_names),
         "west_pairs": len(west),
+        "west_overlaps": len({pair["overlap"] for pair in west}),
         "other_pairs": len(other),
         "overlaps": len({pair["overlap"] for pair in judged}),
         "pilot_cost_usd": pilot_cost,
@@ -165,7 +171,7 @@ async def run() -> None:
         "pairs": other,
     }
     (HERE / "scg-near-duplicate-worklist.json").write_text(
-        json.dumps(payload, indent=2) + "\n"
+        json.dumps(payload, indent=1) + "\n"
     )
     (RUN / "west-worklist.json").write_text(json.dumps(west, indent=2) + "\n")
     print(
