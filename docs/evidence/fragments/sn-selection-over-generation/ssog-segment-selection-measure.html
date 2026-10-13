@@ -20,7 +20,11 @@
     and the composer's agreement and per-slot accuracy
     (<code>_figures</code>, <code>_slot_accuracy</code>, <code>_aggregate</code>),
     and family agreement (<code>_family_agreement</code>), all in
-    <code>ssog-segment-selection-measure-run.py</code>.
+    <code>ssog-segment-selection-measure-run.py</code>. Per-slot accuracy is
+    computed by the driver's <code>_slot_accuracy</code>, which delegates the
+    slot comparison to <code>benchmark_roles.exact_match_accuracy</code>
+    (<code>imas_codex/standard_names/benchmark_roles.py</code>) rather than
+    re-implementing it, so the per-slot figures use the project's own match.
   </p>
 
   <h3 id="ssog-segment-selection-measure-cohort-heading">Cohort and exclusions</h3>
@@ -89,19 +93,38 @@
 
   <h3 id="ssog-segment-selection-measure-family-heading">Family agreement</h3>
   <p id="ssog-segment-selection-measure-family-body">
-    Grouping the golden positives into species families (the target's slot tokens
-    with the subject removed), <strong>101 families carry more than one member,
-    and 81 of them receive a uniform (physical_base, operator, locus) triple
-    across all members</strong> — an agreement rate of 0.802. The seventeen-member
-    boundary-density family is the exception the plan names: only <strong>8 of
-    its 17 members carry a DD source</strong> (the other 9 are among the 618
-    exclusions), and those 8 do <strong>not</strong> agree — they split across
-    four distinct
-    <code>(number_density, operator, locus)</code> triples
+    Family agreement groups records into species families (the target's slot
+    tokens with the subject removed) and asks whether every member of a
+    multi-member family receives a uniform <code>(physical_base, operator,
+    locus)</code> triple. <strong>The record reports two cohorts</strong>, because
+    the driver's family filter (every record with <code>label == 1</code>) is
+    wider than the plan's phrase "the positives", and the two give different
+    family counts:
+  </p>
+  <ul id="ssog-segment-selection-measure-family-cohorts">
+    <li><strong>Golden positives only — 167 records in 135 families.</strong>
+      15 families carry more than one member and 7 of those are uniform, an
+      agreement rate of <strong>0.467</strong>
+      (<code>family_agreement.golden_positives</code> in the results JSON).
+      <em>This is the cohort the plan's generator rule reads, since the rule is
+      stated over "the positives".</em></li>
+    <li><strong>Every label-positive record — 341 records in 182 families</strong>
+      (the 167 golden positives plus the 174 human-edit targets). 101 families
+      carry more than one member and 81 of those are uniform, an agreement rate of
+      <strong>0.802</strong> (<code>family_agreement.label_1_all</code>). This is
+      the natural reading of "<code>label == 1</code>" and is the wider cohort.</li>
+  </ul>
+  <p id="ssog-segment-selection-measure-family-boundary">
+    The seventeen-member boundary-density family is the exception the plan names:
+    among the measured rows only <strong>8 of its 17 members carry a DD
+    source</strong> (the other 9 are among the 618 exclusions), and those 8 do
+    <strong>not</strong> agree — they split across four distinct
+    <code>(number_density, operator, locus)</code> appearance combinations
     (<code>flux_surface_averaged</code>/<code>separatrix</code>,
     <code>flux_surface_averaged</code>/none, none/<code>isotope</code>,
-    <code>number_density</code>/none/none), so Jev does not render the boundary
-    densities uniform.
+    none/none), so Jev does not render the boundary densities uniform. The 0.467
+    and 0.802 figures above both count that disagreement the same way; only the
+    cohort they are computed over differs.
   </p>
 
   <h3 id="ssog-segment-selection-measure-crosscheck-heading">Cross-check separation</h3>
@@ -150,8 +173,11 @@
     condition fails: Jev's exact-name match on the positives is 0.0299 against the
     composer's, which is 1.0 by construction for those rows (the fixture's
     positives are composer output), and 0.0299 is not within 0.02 of it. Family
-    agreement (0.802) is not in question because the generator's other conjunct
-    already fails. Neither deployment is supported on this evidence.
+    agreement is read on the golden-positives cohort the rule names (0.467 on 167
+    records in 135 families). It is not in question either way because the
+    generator's exact-name conjunct already fails, so the verdict does not turn on
+    which cohort the family figure is taken over. Neither deployment is supported
+    on this evidence.
   </p>
   <p id="ssog-segment-selection-measure-caveat">
     The controlling caveat is the exclusion rate: 618 of 1073 rows have no DD

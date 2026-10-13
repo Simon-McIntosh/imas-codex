@@ -12,9 +12,10 @@ the composer-against-Jev disagreement AUC with its bootstrap interval.
 Metrics drawn from :mod:`imas_codex.discovery.base.evaluation`:
 ``load_labelled_fixture`` (the golden A cohort), ``paired_auc`` and
 ``bootstrap_interval`` (the cross-check separation), and
-``cost_latency_summary`` (cost and latency).  The remaining figures are
-driver-local helpers: exact-name match and per-slot accuracy
-(:func:`_figures`, :func:`_slot_accuracy`), family agreement
+``cost_latency_summary`` (cost and latency).  Per-slot accuracy delegates its
+slot comparison to :func:`imas_codex.standard_names.benchmark_roles.exact_match_accuracy`,
+the project's own match, rather than re-implementing it.  The remaining figures
+are driver-local helpers: exact-name match (:func:`_figures`), family agreement
 (:func:`_family_agreement`), and the composer's agreement and per-slot accuracy
 (:func:`_aggregate`).  Nothing here writes graph state.
 
@@ -219,9 +220,9 @@ async def measure(limit: int | None, pilot: bool, out_path: str) -> dict[str, An
             prior = json.loads(Path(out_path).read_text())
             pr = prior.get("records", [])
             # A written record carries ``jev_chosen``; the artifact omits the
-            # derived ``gold``/``slot_match``/``composer_segments``, so a resume
-            # re-derives them from the written ``target`` and ``composer`` rather
-            # than re-paying for the selection.
+            # derived ``gold`` and ``composer_segments``, so a resume re-derives
+            # them from the written ``target`` and ``composer`` rather than
+            # re-paying for the selection.
             if pr and "jev_chosen" in pr[0]:
                 for r in pr:
                     _rederive_record(r)
@@ -258,9 +259,6 @@ async def measure(limit: int | None, pilot: bool, out_path: str) -> dict[str, An
                     "composer": c["composer"],
                     "composer_segments": composer_gold,
                     "exact_match": (item.name == c["target"]) if item.name else False,
-                    "slot_match": {
-                        s: (chosen.get(s) or None) == gold.get(s) for s in SLOTS
-                    },
                     "agreement_with_composer": (
                         _agreement(chosen, composer_gold) if composer_gold else None
                     ),
@@ -287,30 +285,42 @@ async def measure(limit: int | None, pilot: bool, out_path: str) -> dict[str, An
 def _rederive_record(r: dict[str, Any]) -> dict[str, Any]:
     """Reconstruct a written record's derived fields in place.
 
-    The artifact keeps only the measured fields; ``gold``, ``slot_match`` and
-    ``composer_segments`` are re-derived here from the written ``target``,
-    ``jev_chosen`` and ``composer`` so a resumed run needs no further paid call.
+    The artifact keeps only the measured fields; ``gold`` and
+    ``composer_segments`` are re-derived here from the written ``target`` and
+    ``composer`` so a resumed run needs no further paid call.
     """
-    gold = _gold_segments(r["target"])
-    chosen = r.get("jev_chosen")
-    r["gold"] = gold
+    r["gold"] = _gold_segments(r["target"])
     r["composer_segments"] = (
         _gold_segments(r["composer"]) if r.get("composer") else None
     )
-    r["slot_match"] = {
-        s: (chosen.get(s) if chosen else None) == (gold.get(s) if gold else None)
-        for s in SLOTS
-    }
     return r
 
 
-def _slot_accuracy(records: list[dict[str, Any]]) -> dict[str, float]:
-    if not records:
+def _slot_accuracy(
+    pairs: list[tuple[dict[str, Any] | None, dict[str, Any] | None]],
+) -> dict[str, float]:
+    """Per-slot accuracy over (predicted, expected) segment-dict pairs.
+
+    Delegates the slot comparison to
+    :func:`imas_codex.standard_names.benchmark_roles.exact_match_accuracy`, the
+    project's own match, rather than re-implementing it.  A missing predicted
+    segment counts as incorrect, so a pair whose prediction is ``None`` matches
+    no slot.
+    """
+    from imas_codex.standard_names.benchmark_roles import exact_match_accuracy
+
+    if not pairs:
         return dict.fromkeys(SLOTS, 0.0)
-    return {
-        s: round(sum(1 for r in records if r["slot_match"][s]) / len(records), 4)
-        for s in SLOTS
-    }
+    out: dict[str, float] = {}
+    for s in SLOTS:
+        hits = [
+            exact_match_accuracy(
+                {s: (p.get(s) if p else None)}, {s: (g.get(s) if g else None)}
+            )[0]
+            for p, g in pairs
+        ]
+        out[s] = round(sum(hits) / len(hits), 4)
+    return out
 
 
 def _figures(records: list[dict[str, Any]], label: int | None) -> dict[str, Any]:
@@ -322,28 +332,48 @@ def _figures(records: list[dict[str, Any]], label: int | None) -> dict[str, Any]
         "exact_match_rate": round(
             sum(1 for r in subset if r["exact_match"]) / len(subset), 4
         ),
-        "slot_accuracy": _slot_accuracy(subset),
+        "slot_accuracy": _slot_accuracy([(r["jev_chosen"], r["gold"]) for r in subset]),
     }
 
 
 def _family_agreement(records: list[dict[str, Any]]) -> dict[str, Any]:
-    """Within each species family, do all members receive the same base/operator/locus?"""
-    families: dict[str, list[dict[str, Any]]] = {}
-    for r in records:
-        if r["label"] != 1:
-            continue
-        families.setdefault(_family_key(r["gold"]), []).append(r)
-    multi = {k: v for k, v in families.items() if len(v) > 1}
-    agree = 0
-    for members in multi.values():
-        combos = {
-            tuple(
-                m["jev_chosen"].get(s) or None
-                for s in ("physical_base", "operator", "locus")
+    """Within each species family, does every member get the same base/operator/locus?
+
+    Reported for the two cohorts the record needs.  ``golden_positives`` is the
+    plan's "positives"; ``label_1_all`` is every record labelled positive, which
+    is the golden positives plus the human-edit targets.  The plan's generator
+    rule is stated over "the positives", so it reads ``golden_positives``; the
+    wider cohort is reported because it is the natural reading of "label == 1"
+    and the two give different family counts.
+    """
+
+    def _stats(subset: list[dict[str, Any]]) -> dict[str, Any]:
+        families: dict[str, list[dict[str, Any]]] = {}
+        for r in subset:
+            families.setdefault(_family_key(r["gold"]), []).append(r)
+        multi = {k: v for k, v in families.items() if len(v) > 1}
+        agree = sum(
+            1
+            for members in multi.values()
+            if len(
+                {
+                    tuple(
+                        m["jev_chosen"].get(s) or None
+                        for s in ("physical_base", "operator", "locus")
+                    )
+                    for m in members
+                }
             )
-            for m in members
+            == 1
+        )
+        return {
+            "records": len(subset),
+            "families": len(families),
+            "families_with_multiple_members": len(multi),
+            "families_uniform": agree,
+            "agreement_rate": round(agree / len(multi), 4) if multi else None,
         }
-        agree += 1 if len(combos) == 1 else 0
+
     boundary = [r for r in records if r["target"].endswith(BOUNDARY_FAMILY_SIGNATURE)]
     boundary_uniform = None
     if boundary:
@@ -356,9 +386,10 @@ def _family_agreement(records: list[dict[str, Any]]) -> dict[str, Any]:
         }
         boundary_uniform = len(combos) == 1
     return {
-        "families_with_multiple_members": len(multi),
-        "families_uniform": agree,
-        "agreement_rate": round(agree / len(multi), 4) if multi else None,
+        "golden_positives": _stats(
+            [r for r in records if r["kind"] == "golden" and r["label"] == 1]
+        ),
+        "label_1_all": _stats([r for r in records if r["label"] == 1]),
         "boundary_density_family_n": len(boundary),
         "boundary_density_uniform": boundary_uniform,
         "boundary_density_combos": sorted(
@@ -428,15 +459,8 @@ def _aggregate(
     # A composer spelling that does not parse canonically supplies no segment,
     # so it matches no slot: those rows stay in the denominator rather than
     # being dropped, and the parsable subset is reported beside the full set.
-    composer_edits = []
-    composer_edits_parsable = []
-    for r in edits:
-        cs = r["composer_segments"]
-        matched = {s: (cs.get(s) if cs else None) == r["gold"].get(s) for s in SLOTS}
-        row = {**r, "slot_match": matched}
-        composer_edits.append(row)
-        if cs is not None:
-            composer_edits_parsable.append(row)
+    composer_pairs = [(r["composer_segments"], r["gold"]) for r in edits]
+    composer_pairs_parsable = [(p, g) for p, g in composer_pairs if p is not None]
 
     return {
         "cohort_size": cohort_size,
@@ -452,10 +476,10 @@ def _aggregate(
             )
             if edits
             else 0.0,
-            "slot_accuracy": _slot_accuracy(composer_edits),
-            "n_parsed": len(composer_edits_parsable),
-            "n_unparsed": len(edits) - len(composer_edits_parsable),
-            "slot_accuracy_parsable": _slot_accuracy(composer_edits_parsable),
+            "slot_accuracy": _slot_accuracy(composer_pairs),
+            "n_parsed": len(composer_pairs_parsable),
+            "n_unparsed": len(composer_pairs) - len(composer_pairs_parsable),
+            "slot_accuracy_parsable": _slot_accuracy(composer_pairs_parsable),
         },
         "family_agreement": _family_agreement(records),
         "cross_check": _cross_check(records),
@@ -468,11 +492,11 @@ def _aggregate(
     }
 
 
-#: Per-record fields the artifact omits because they are derivable: ``gold`` by
-#: parsing ``target``, ``slot_match`` from ``jev_chosen`` against ``gold``, and
-#: ``composer_segments`` by parsing ``composer``.  Dropping them keeps the
-#: committed results stay under the data-file size the repository allows.
-_DERIVED_RECORD_FIELDS = ("gold", "slot_match", "composer_segments")
+#: Per-record fields the artifact omits because each is derivable from a written
+#: field: ``gold`` by parsing ``target``, and ``composer_segments`` by parsing
+#: ``composer``.  Omitting them keeps the committed artifact under the data-file
+#: size the repository allows.
+_DERIVED_RECORD_FIELDS = ("gold", "composer_segments")
 
 
 def _write_results(result: dict[str, Any], out_path: str) -> None:
@@ -482,9 +506,8 @@ def _write_results(result: dict[str, Any], out_path: str) -> None:
         for r in result.get("records", [])
     ]
     slim["_note"] = (
-        "_note: gold, slot_match and composer_segments are omitted as derivable: "
-        "gold by parsing target, slot_match from jev_chosen vs gold, "
-        "composer_segments by parsing composer."
+        "_note: gold and composer_segments are omitted as derivable: "
+        "gold by parsing target, composer_segments by parsing composer."
     )
     Path(out_path).write_text(json.dumps(slim, separators=(",", ":"), default=str))
 
