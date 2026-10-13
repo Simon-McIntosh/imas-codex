@@ -135,6 +135,11 @@
     <p><code>tests/standard_names/test_edit_scope_skips_maintenance.py</code> now drives the real <code>sn run</code> command through Click's <code>CliRunner</code>. Its assertions that a scoped run skips <code>_auto_sync_grammar</code> and <code>_note_pipeline_version_drift</code> therefore observe <code>sn_run</code>'s own skip guard, where they previously patched helpers the tested path never called. Its forwarding assertions on the pool call are unchanged. Removing each of the four named behaviours in a scratch copy fails its assertion (EXIT=1 each). The 36-file <code>sn run</code> gate passes 525 at base and head (merge <code>442f5ac26</code>). Independent review 115/120. Its note: the two startup-step assertions overlap <code>tests/standard_names/test_scoped_global_maintenance.py</code>, which already drives <code>--skip-global-maintenance</code> through the CLI.</p>
   </section>
 
+  <section id="s7-docs-edit-pending">
+    <h2>§7 — sn edit --docs seeds documentation onto a pending docs axis</h2>
+    <p><code>apply_edit</code>'s docs precondition in <code>imas_codex/standard_names/edit.py</code> now admits <code>docs_stage='pending'</code> beside <code>accepted</code> and <code>exhausted</code>. An accepted name with no documentation can therefore have it seeded by <code>sn edit --docs</code>. The edit's own compare-and-set claim moves the axis to <code>refining</code> under a fresh token, which keeps the docs pool out. A docs axis a worker holds (<code>drafted</code>, <code>reviewed</code>, <code>refining</code>) is still refused, and the module docstring states the rule as the claim (merge <code>9fe3cfb4a</code>). Two tests: pending seeds documentation and takes the claim, and refining is still refused. The first fails with the old stage set restored. The edit gate goes from 412 to 414 passed. Reviews 112 and 115/120. The second notes that the inline comment beside the gate omits <code>reviewed</code> from the refused stages; that is folded into the next node that edits this file.</p>
+  </section>
+
 </main>
 </body>
 </html>

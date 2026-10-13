@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-selection-over-generation-landed">
+  <meta name="plan-title" content="Select, Don&#x27;t Generate: New Jev Patterns For Standard Names — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Select, Don&#x27;t Generate: New Jev Patterns For Standard Names: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="sn-selection-over-generation">
+  <meta name="plan-verdict" content="qualified">
+  <title>Select, Don&#x27;t Generate: New Jev Patterns For Standard Names — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Select, Don&#x27;t Generate: New Jev Patterns For Standard Names — landed record</h1>
+  <p>Closure synthesis for Select, Don&#x27;t Generate: New Jev Patterns For Standard Names: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s2-segment-selection">
+    <h2>§2 — Jev selects each grammar segment from the closed vocabulary</h2>
+    <p><code>imas_codex/standard_names/segment_selection.py</code> is an unwired prototype. For each grammar slot it asks Jev one Choice over that slot's closed ISN vocabulary, read through <code>grammar_tokens_by_segment</code>. Large vocabularies are walked as a beam of three, scored by the geometric mean of the per-level choices. The chosen tokens render through <code>compose_canonical_ir</code>, so a token the grammar lacks is recorded as that item's failure and never repaired (merge <code>00a070a95</code>).</p><p>Its first review found a blocking defect: when every expansion of a beam node failed, the node was re-queued and asked again without bound, past 200 calls in a stubbed run. The repair narrows the beam instead. A second round moved rendering onto the existing <code>compose_canonical_ir</code> and put the new test file into the gate. Reviews 95, 112 and 118/120; the gate passes 39 at head. A follow-on test drives an empty slot through <code>select_segments</code> and shows the item records the failure with no rendered name (merge <code>22e130c4a</code>, review 118/120). The measurement on golden A is in flight.</p>
+  </section>
+
+</main>
+</body>
+</html>
