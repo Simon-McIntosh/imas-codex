@@ -25,7 +25,7 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="58ad9b1a4e61408b2da7c9e8232bcb6bccb21c1f,38f0a7336ce3b86ab37ebf5cb353a00363c32274,5c666533b9b786ec14259e85d0a6eb42cae1125c,17f084e2d28d7145d9288c8a5a542d03a7519f4a,aea797386d61d8b3703afbad957f4ff707ea9fab">
 </head>
@@ -119,9 +119,10 @@
       <thead><tr><th>Check</th><th>Live names</th></tr></thead>
       <tbody>
         <tr><td>No <code>physics_domain</code></td><td>212</td></tr>
-        <tr><td>No <code>HAS_PHYSICS_DOMAIN</code> edge</td><td>984</td></tr>
-        <tr><td>More than one <code>HAS_PHYSICS_DOMAIN</code> edge</td><td>123</td></tr>
-        <tr><td>Edge names a different domain from the scalar</td><td>150</td></tr>
+        <tr><td>No <code>HAS_PHYSICS_DOMAIN</code> edge (746 of them carry <code>source_domains</code>)</td><td>984</td></tr>
+        <tr><td><code>HAS_PHYSICS_DOMAIN</code> edges differ from <code>source_domains</code></td><td>777</td></tr>
+        <tr><td><code>physics_domain</code> is not among its own edges</td><td>29</td></tr>
+        <tr><td><code>physics_domain</code> is not in its own <code>source_domains</code></td><td>26</td></tr>
         <tr><td>Domain is none of its DD sources' domains</td><td>560</td></tr>
         <tr><td><code>source_domains</code> differs from its DD sources' domains</td><td>1,147</td></tr>
       </tbody>
@@ -141,6 +142,27 @@
       children's most frequent domain, and further sites in
       <code>imas_codex/standard_names/graph_ops.py</code> coalesce or copy whatever value is to hand.
     </p>
+    <p>
+      <strong>Edges carry every source domain, by design.</strong> The edge writer in
+      <code>_write_standard_name_edges</code> writes one <code>HAS_PHYSICS_DOMAIN</code> edge per
+      entry of <code>source_domains</code>, so a name stays discoverable from every domain it draws
+      on; 123 live names carry more than one edge, which is correct. The catalog-edit writer behind
+      <code>sn reclassify</code> instead deletes all of a name's edges and leaves one, and the
+      derived-parent writers set the scalar without writing edges at all. The defect is the
+      disagreement between writers, not the multiplicity.
+    </p>
+    <p>
+      <strong>Why the DD domains echo their IDS.</strong> Diagnosed on 2026-10-13
+      (<code>scg-dd-domain-diagnosis</code>). The DD build MERGEs every path and SETs
+      <code>physics_domain</code> to its IDS default unconditionally
+      (<code>build_dd.py</code>, the path upsert), without clearing <code>domain_source</code> or
+      <code>domain_classified_at</code>. The classifier then selects only paths whose
+      <code>domain_source</code> is null, so it never revisits them. The 12,011 classifications of
+      2026-06-18 were overwritten by the rebuild of 2026-07-22, which re-classified only 23 paths.
+      Separately, the classifier prompt's vocabulary table lists 21 of the 32 domains, omitting
+      <code>core_plasma_physics</code> among others, and its worked example maps electron
+      temperature in <code>core_profiles</code> to <code>transport</code>.
+    </p>
     <p><strong>The design.</strong></p>
     <ol>
       <li><strong>One source of truth.</strong> <code>IMASNode.physics_domain</code>, written only
@@ -150,20 +172,35 @@
         DD sources of the 170 labelled names in
         <code>docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet.json</code>
         (the twenty the lead approved and the 150 the coordinator labelled) before and after the
-        fix. Then re-classify the DD paths that are standard-name sources, recording
-        <code>domain_source</code>.</li>
+        fix. The fix has two parts: the build writes the IDS default only on a path that carries
+        no classification, so a rebuild never discards one; and the prompt's vocabulary is
+        rendered from the <code>PhysicsDomain</code> enum, so it cannot fall behind it, with the
+        worked example corrected. Then re-classify the DD paths that are standard-name sources,
+        recording <code>domain_source</code>. The re-classification spends LLM budget and runs
+        only on the lead's approval of its ceiling.</li>
       <li><strong>One derivation.</strong> A name's <code>source_domains</code> is exactly the set
         of its current DD sources' domains, and its <code>physics_domain</code> is the one domain
-        a single function selects from that set. A name with no DD source, a derived parent,
-        takes its domain from its children by the same function. The function lives with the
-        domain owner (<code>domain_ranking.py</code> and <code>domain_priority.py</code>).
-        Compose, consolidation and every graph-ops writer call it; none computes its own. The
-        scalar and the <code>HAS_PHYSICS_DOMAIN</code> edge are written together, by one writer,
-        so they cannot disagree.</li>
+        a single function selects from that set. The selection depends on the set alone, never on
+        the order sources arrived or on the value the name held before. A name with no DD source,
+        a derived parent, takes the union of its children's domains through the same function.
+        Today there are three selectors: <code>pick_primary_domain</code> (cluster-weighted
+        index, alphabetical fallback), <code>domain_rank</code> with
+        <code>maybe_promote_domain</code> (cluster-weighted index, declared fallback table,
+        order-dependent ties), and the derived parents' most-frequent-child rule. They become one,
+        in <code>domain_ranking.py</code>, ranked by one declared order that covers every
+        <code>PhysicsDomain</code> member. A rank read from the graph's clusters would move the
+        derivation's answer whenever cluster relevance changes, and the audit could never settle.
+        Compose, consolidation, catalog import, export and every graph-ops writer call it; none
+        computes its own. One writer sets <code>physics_domain</code>,
+        <code>source_domains</code> and the <code>HAS_PHYSICS_DOMAIN</code> edges together, one
+        edge per entry of <code>source_domains</code>, so the three cannot disagree.
+        <code>sn reclassify</code> no longer sets a name's domain: a wrong domain is corrected at
+        its DD source, through <code>path_domain_overrides.json</code>, and the name inherits it.</li>
       <li><strong>A consistency audit</strong> in the standard-name audits. For every live name
-        it checks that the domain is set, equals the derivation's result, is mirrored by exactly
-        one <code>HAS_PHYSICS_DOMAIN</code> edge, and that <code>source_domains</code> equals its
-        sources' set. Its counts are the instrument for the repair.</li>
+        it checks that <code>physics_domain</code> is set and equals the derivation's result, that
+        <code>source_domains</code> equals its sources' set (its children's, for a derived
+        parent), and that its <code>HAS_PHYSICS_DOMAIN</code> edges are exactly
+        <code>source_domains</code>. Its counts are the instrument for the repair.</li>
       <li><strong>Repair through the derivation</strong>, as an ordinary graph-ops operation with
         no hand Cypher. It runs after the DD re-classification, so the names inherit the
         corrected domains.</li>
@@ -172,10 +209,13 @@
       <strong>Done when:</strong> the DD classifier, measured on the DD sources of the labelled
       names, reproduces all twenty lead-approved domains and reports its accuracy on the 150.
       The standard-name DD source paths are re-classified with <code>domain_source</code>
-      recorded. Every writer of a name's domain goes through the one derivation, shown by a test
-      that fails when a writer computes its own. The consistency audit reports zero on every check
-      over the live names, against the census above, and <code>core_plasma_physics</code> is no
-      longer empty. No standard-name-level domain classifier exists in the code.
+      recorded. A DD rebuild over a classified path leaves its domain and
+      <code>domain_source</code> unchanged, shown by a test that fails with the old upsert. Every
+      writer of a name's domain goes through the one derivation, shown by a test that fails when
+      a writer computes its own. The consistency audit reports zero on every check over the live
+      names, against the census above, and <code>core_plasma_physics</code> is no longer empty.
+      No standard-name-level domain classifier or name-level domain override exists in the
+      code.
     </p>
 
     <h2 id="s4">§4 — Near-duplicate spellings, adjudicated once</h2>
