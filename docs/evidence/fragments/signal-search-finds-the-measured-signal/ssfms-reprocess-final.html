@@ -1,0 +1,62 @@
+<section id="ssfms-reprocess-final-section" data-reckon="fragment">
+  <h2 id="ssfms-reprocess-final-section-title">§12 — final reprocess, node ssfms-reprocess-final (128 residue + role backfill)</h2>
+
+  <p id="ssfms-reprocess-final-section-what">
+    The last JT-60SA residue left by <code>ssfms-reprocess-bulk-7</code> is cleared. A first
+    census read <strong>128</strong> signals still at <code>discovered</code> (103
+    <code>h060029</code> + 25 <code>UDDB</code>) and <strong>6911</strong> described signals
+    carrying no <code>signal_role</code>. The 128 were enriched with
+    <code>imas-codex discover run jt-60sa --only signals --flush --focus focus-128.json</code>
+    on code carrying the underspecified-members fix <code>29c1694ba</code>, with <em>no reset</em>
+    (their descriptions were already cleared by bulk-7). The role backfill
+    <code>backfill_signal_roles(facility='jt-60sa')</code> then ran one pass over the 6948
+    candidates. Final census: 15111 signals, <strong>0</strong> at <code>discovered</code>,
+    <strong>0</strong> role-less, <strong>0</strong> embedding-hash mismatch.
+  </p>
+
+  <figure id="ssfms-reprocess-final-section-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-final/final-census.svg"
+         alt="Lollipop comparing four JT-60SA signal counts at the first census and the final census" />
+    <figcaption>
+      Four measures at the first census (17:01:42Z) and the final census (17:29:22Z). Enrichment
+      drove <code>discovered</code> and the embedding mismatch from 128 to 0; the role backfill
+      drove described-without-role from 6911 to 0. Enriched-before-the-individualisation-fix was
+      already 0 and stays 0, the section's negative control.
+    </figcaption>
+  </figure>
+
+  <table id="ssfms-reprocess-final-section-table">
+    <caption>JT-60SA census, every count read live from the graph</caption>
+    <thead>
+      <tr><th>measure</th><th>first census 17:01:42Z</th><th>final census 17:29:22Z</th><th>source call</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>total signals</td><td>15111</td><td>15111</td><td>count(FacilitySignal)</td></tr>
+      <tr><td>at <code>discovered</code></td><td>128</td><td>0</td><td><code>status='discovered'</code></td></tr>
+      <tr><td>embedding-hash mismatch</td><td>128</td><td>0</td><td><code>census_signal_embeddings</code></td></tr>
+      <tr><td>described, no role</td><td>6911</td><td>0</td><td><code>census_signal_roles</code></td></tr>
+      <tr><td>enriched before 2026-10-11T21:16:46Z</td><td>0</td><td>0</td><td><code>enriched_at &lt; fix</code></td></tr>
+      <tr><td>enriched at/after 2026-10-13T11:53:35Z</td><td>—</td><td>15111</td><td><code>enriched_at &gt;= start</code></td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-reprocess-final-section-control">
+    <strong>Negative control.</strong> The declared control is a first census that records the 128
+    at <code>discovered</code> and the role-less signals before any enrichment — a first census
+    reading zero would mean the scope or the predicate is wrong. The first census read
+    <code>discovered=128</code> and <code>described_no_role=6911</code>, both non-zero, so the
+    control holds. The declared figure was 7114; the 6911 is the census predicate's own count,
+    which additionally bounds <code>status IN ('enriched','checked')</code> — the section-wide
+    looser count of described-but-role-less signals (any status) is 210 at the final census, the
+    non-enriched statuses the sweep's predicate does not select. The 0 enriched-before-the-fix
+    count is the section's own negative control, recorded here at 0 against the sample node's
+    starting 1441.
+  </p>
+
+  <p id="ssfms-reprocess-final-section-cost">
+    <strong>Cost.</strong> The 128-signal enrichment ran on the local lane (describe seat
+    <code>deepseek-v4.1-flash</code>) at <strong>$0.04</strong>; the role backfill judged 6948
+    candidates at <strong>$0.184</strong>. Total Jev spend <strong>$0.224</strong> against the
+    $2.00 ceiling. Enrichment took 849.4s; the backfill 515.8s.
+  </p>
+</section>

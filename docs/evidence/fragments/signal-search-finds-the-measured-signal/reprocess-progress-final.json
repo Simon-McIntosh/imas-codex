@@ -1,0 +1,63 @@
+{
+  "node": "ssfms-reprocess-final",
+  "run_id": "r-20261013T165707872752-ssfms-reprocess-final",
+  "reprocess_start": "2026-10-13T11:53:35Z",
+  "member_individualisation_fix": "2026-10-13T21:16:46Z",
+  "underspecified_members_fix": "29c1694ba",
+  "run_dir": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T165707872752-ssfms-reprocess-final",
+  "first_census": {
+    "captured_at": "2026-10-13T17:01:42Z",
+    "log": "logs/first-census.log",
+    "total": 15111,
+    "discovered": 128,
+    "discovered_note": "103 h060029 + 25 UDDB, the member set of underspecified SignalSources left by ssfms-reprocess-bulk-7",
+    "described_no_role": 6911,
+    "embedding_census": {"n": 15111, "mismatch": 128, "missing_hash": 0, "differing": 128},
+    "enriched_before_fix": 0,
+    "enriched_before_reprocess_start": 0
+  },
+  "enrichment": {
+    "command": "imas-codex discover run jt-60sa --only signals --flush --focus logs/focus-128.json (no reset)",
+    "log": "logs/enrich-128.log",
+    "focused_signals": 128,
+    "elapsed_seconds": 849.4,
+    "cost_usd": 0.04,
+    "backend": "local deepseek-v4.1-flash (98dci4-gpu-0003:18802)"
+  },
+  "role_backfill": {
+    "command": "backfill_signal_roles(facility='jt-60sa')",
+    "log": "logs/role-backfill.log",
+    "passes": 1,
+    "candidates": 6948,
+    "written": 6948,
+    "cost_usd": 0.1842,
+    "elapsed_seconds": 515.8,
+    "missing_after": 0
+  },
+  "final_census": {
+    "captured_at": "2026-10-13T17:29:22Z",
+    "log": "logs/final-census.log",
+    "total": 15111,
+    "discovered": 0,
+    "roles_missing": 0,
+    "embedding_census": {"n": 15111, "mismatch": 0, "missing_hash": 0, "differing": 0},
+    "enriched_at_or_after_reprocess_start": 15111,
+    "enriched_before_member_individualisation_fix": 0,
+    "min_enriched_at": "2026-10-13T12:00:02.305000000+00:00",
+    "max_enriched_at": "2026-10-13T17:12:54.894000000+00:00",
+    "described_no_role_any_status": 210,
+    "described_no_role_any_status_note": "described signals whose status is outside ('enriched','checked'), which the sweep's predicate does not select; the census predicate reads 0"
+  },
+  "negative_control": {
+    "declared": "The first census must record the 128 at discovered and the role-less signals before any enrichment; a first census reading zero means the scope or predicate is wrong.",
+    "observed": "First census: discovered=128, described_no_role=6911, both non-zero. Final census: discovered=0, described_no_role=0.",
+    "declared_roleless_figure": 7114,
+    "measured_roleless_figure": 6911,
+    "holds": true
+  },
+  "enrichment_cost": {
+    "total_jev_spend_usd": 0.224,
+    "ceiling_usd": 2.0,
+    "note": "128-signal flush $0.04 + 6948-role backfill $0.184."
+  }
+}
