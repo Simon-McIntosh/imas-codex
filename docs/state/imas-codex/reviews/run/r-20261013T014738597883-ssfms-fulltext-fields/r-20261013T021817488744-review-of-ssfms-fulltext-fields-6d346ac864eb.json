@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/schema.py:330",
+    "imas_codex/graph/client.py:513",
+    "imas_codex/llm/search_tools.py:678"
+  ],
+  "completed_at": "2026-10-13T02:24:17.735Z",
+  "dispatched_at": "2026-10-13T02:18:33Z",
+  "findings": [
+    {
+      "file": "imas_codex/schemas/facility.yaml",
+      "line": "2570",
+      "severity": "follow-on",
+      "text": "follow-on: the widening has no regression guard, so a later edit that drops keywords/aliases/unit/source_description from the annotation would silently restore the defect this node fixes and no test in the repository would fail."
+    },
+    {
+      "file": "imas_codex/llm/search_tools.py",
+      "line": "685",
+      "severity": "follow-on",
+      "text": "follow-on: the _text_search_signals docstring still enumerates the old three full-text fields (name, node_path, description) and is now stale against the widened index; the file is outside this node's write scope, so it is recorded rather than repaired."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/graph/schema.py:330 SchemaIntrospector.fulltext_indexes, imas_codex/graph/client.py:513 GraphClient.ensure_fulltext_indexes (reached from client.py:405 and build_dd.py:3188), imas_codex/llm/search_tools.py:678 _text_search_signals (queries the index at search_tools.py:262 and 929).",
+    "diff": "read commit by commit against base 9b092e8bd; the single commit 6d346ac86 widens the schema annotation, adds 56 fixture labels and writes two evidence fragments, touching no product source and no test file.",
+    "done_when": "the done_when asks the definition to carry the seven fields, the live index rebuilt from it, a query matching only through a newly indexed field to place its target in the top 10 after but not before (both logged), every candidate the widened stream lifts into an arm's top 10 labelled, and the head four-arm table run back to back no lower than 0.7773 beyond the 0.012 spread; the manifest records all five and the cited logs confirm them (rebuild_index.log ONLINE seven properties, alias_control_before.log EXIT=1 target absent, alias_control_after.log EXIT=0 target rank 1, four_arm_after_1/after_2.log current_tool 0.7924).",
+    "goal": "the goal is to widen the facility signal full-text index to the words a searcher types through the schema's index definition; imas_codex/schemas/facility.yaml:2570 changes the FacilitySignal fulltext_index annotation value from facility_signal_text:name,description,node_path to facility_signal_text:name,description,node_path,keywords,aliases,unit,source_description, exactly the seven fields the goal names.",
+    "manifest": "read; it records status complete, commit 6d346ac86, the gate command, baseline_suite/after_suite with revision, exit_status 0, completed true and no failure ids, and negative_control_log logs/alias_control_before.log; every cited log reconciles with the claim.",
+    "write_paths": "declared paths are imas_codex/schemas/facility.yaml, tests/llm/fixtures/signal_search_questions.json, the two docs/evidence fragments and a docs/figures dir; git show --numstat 6d346ac86 changes exactly the first four (+1/-1, +72/-16, +137, +26), all inside the fence and nothing outside it."
+  },
+  "justifications": {
+    "durability": "no test reddens if the annotation at imas_codex/schemas/facility.yaml:2570 is reverted to the narrow three fields, because tests/llm/test_signal_search_goldens.py:713 asserts only that each arm beats the control and a grep of tests/ for facility_signal_text or fulltext_indexes finds no assertion on the index property set.",
+    "evidence": "the five components of the done_when are each recorded in a named on-disk log (rebuild_index.log ONLINE seven properties, alias_control_before.log EXIT=1, alias_control_after.log EXIT=0 rank 1, four_arm_after_1/after_2.log current_tool 0.7924 above the 0.7653 floor).",
+    "fit": "the change edits one value inside the existing fulltext_index annotation block at imas_codex/schemas/facility.yaml:2567-2570, matching the format SchemaIntrospector.fulltext_indexes parses, and introduces no new name.",
+    "goal_fidelity": "imas_codex/schemas/facility.yaml:2570 carries the seven-property value the goal names, and that annotation is the sole definition SchemaIntrospector.fulltext_indexes derives the created index from.",
+    "reuse": "the change extends the existing single owner of this capability (the class-level annotation consumed by imas_codex/graph/schema.py:330 and imas_codex/graph/client.py:513) rather than forking a second index definition or an ad-hoc statement.",
+    "scope_discipline": "git show --numstat 6d346ac86 confines the change to the four declared write paths, and the 56 fixture labels are the candidates the widened stream lifts so the harness stays scoreable, which the goal implies."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261013T014738597883-ssfms-fulltext-fields (imas-codex, plan signal-search-finds-the-measured-signal section 6, node ssfms-fulltext-fields), base 9b092e8bd728d71b32724a3e821831d5500678a4, head 6d346ac864ebd02ac5d54e11aa3ee9a54a3973a1.\nVERDICT goal: the goal is to widen the facility signal full-text index to the words a searcher types through the schema's index definition; imas_codex/schemas/facility.yaml:2570 changes the FacilitySignal fulltext_index annotation value from facility_signal_text:name,description,node_path to facility_signal_text:name,description,node_path,keywords,aliases,unit,source_description, exactly the seven fields the goal names.\nVERDICT done_when: the done_when asks the definition to carry the seven fields, the live index rebuilt from it, a query matching only through a newly indexed field to place its target in the top 10 after but not before (both logged), every candidate the widened stream lifts into an arm's top 10 labelled, and the head four-arm table run back to back no lower than 0.7773 beyond the 0.012 spread; the manifest records all five and the cited logs confirm them (logs/rebuild_index.log drops the narrow index and reports after ONLINE with the seven properties; logs/alias_control_before.log exits 1 with the target absent from the top 10; logs/alias_control_after.log exits 0 with ef5_volpsdc at rank 1; logs/four_arm_after_1.log and four_arm_after_2.log both read current_tool 0.7924).\nVERDICT write_paths: the declared write paths are imas_codex/schemas/facility.yaml, tests/llm/fixtures/signal_search_questions.json, docs/evidence/fragments/signal-search-finds-the-measured-signal/fulltext.html, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-fulltext-fields.html and docs/figures/signal-search-finds-the-measured-signal/ssfms-fulltext-fields; git show --numstat 6d346ac86 changes exactly those first four (+1/-1, +72/-16, +137, +26), all inside the fence and nothing outside it.\nVERDICT manifest: read; it records status complete, commit 6d346ac86, the gate command tests/llm/test_signal_search_goldens.py::test_four_arm_table_matches_the_control_below_every_arm, baseline_suite and after_suite with revision/exit_status 0/completed true and no failure ids, and negative_control_log logs/alias_control_before.log; every cited log on disk reconciles with the claim.\nVERDICT diff: read commit by commit against base 9b092e8bd; the single commit 6d346ac86 widens the schema annotation, adds 56 fixture labels (label totals 1704 to 1760), and writes two evidence fragments, touching no product source and no test file.\nCALL_SITES: imas_codex/graph/schema.py:330 SchemaIntrospector.fulltext_indexes, imas_codex/graph/client.py:513 GraphClient.ensure_fulltext_indexes (reached from client.py:405 and build_dd.py:3188), imas_codex/llm/search_tools.py:678 _text_search_signals (queries the index at search_tools.py:262 and 929)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/schemas/facility.yaml:2570 carries the seven-property value the goal names, and that annotation is the sole definition SchemaIntrospector.fulltext_indexes derives the created index from.\nSCORE evidence: 19\nJUSTIFICATION evidence: the five components of the done_when are each recorded in a named on-disk log (rebuild_index.log ONLINE seven properties, alias_control_before.log EXIT=1, alias_control_after.log EXIT=0 rank 1, four_arm_after_1/after_2.log current_tool 0.7924 above the 0.7653 floor), so the gate measures the done_when and the result is recorded rather than claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --numstat 6d346ac86 confines the change to the four declared write paths, and the 56 fixture labels are the candidates the widened stream lifts so the harness stays scoreable, which the goal implies.\nSCORE durability: 8\nJUSTIFICATION durability: no test reddens if the annotation at imas_codex/schemas/facility.yaml:2570 is reverted to the narrow three fields, because tests/llm/test_signal_search_goldens.py:713 asserts only that each arm beats the control and a grep of tests/ for facility_signal_text or fulltext_indexes finds no assertion on the index property set.\nSCORE fit: 20\nJUSTIFICATION fit: the change edits one value inside the existing fulltext_index annotation block at imas_codex/schemas/facility.yaml:2567-2570, matching the format SchemaIntrospector.fulltext_indexes parses, and introduces no new name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing single owner of this capability (the class-level annotation consumed by imas_codex/graph/schema.py:330 and imas_codex/graph/client.py:513) rather than forking a second index definition or an ad-hoc statement.\nFINDING imas_codex/schemas/facility.yaml:2570 follow-on: the widening has no regression guard, so a later edit that drops keywords/aliases/unit/source_description from the annotation would silently restore the defect this node fixes and no test in the repository would fail.\nFINDING imas_codex/llm/search_tools.py:685 follow-on: the _text_search_signals docstring still enumerates the old three full-text fields (name, node_path, description) and is now stale against the widened index; the file is outside this node's write scope, so it is recorded rather than repaired.",
+  "review_run_id": "r-20261013T021817488744-review-of-ssfms-fulltext-fields-6d346ac864eb",
+  "reviewed_base_sha": "9b092e8bd728d71b32724a3e821831d5500678a4",
+  "reviewed_head_sha": "6d346ac864ebd02ac5d54e11aa3ee9a54a3973a1",
+  "reviewed_run_id": "r-20261013T014738597883-ssfms-fulltext-fields",
+  "scores": {
+    "durability": 8,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T02:22:36.984314+00:00",
+  "total": 107
+}
