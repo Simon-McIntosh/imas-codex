@@ -18,6 +18,7 @@ the check that fails against the null-blind predicate.
 from __future__ import annotations
 
 import hashlib
+import re
 
 import pytest
 
@@ -230,6 +231,35 @@ def test_writer_and_census_share_one_embed_text_derivation(monkeypatch):
     )
 
 
+class _RecordingClient:
+    """Captures each statement and its parameters, answering with no rows."""
+
+    def __init__(self):
+        self.calls: list[tuple[str, dict]] = []
+
+    def query(self, cypher: str, **params):
+        self.calls.append((cypher, params))
+        return []
+
+
+def test_facility_scoped_state_query_separates_joining_clauses_from_return():
+    """The facility clause is whitespace-separated from RETURN and binds $facility.
+
+    Concatenating the WHERE clause directly onto RETURN renders
+    ``... = $facilityRETURN ...`` with no separator, which the server rejects,
+    so ``census_signal_embeddings(facility=...)`` cannot run at all. The
+    facility parameter must also reach the query, so the population is one
+    facility's signals rather than every facility's.
+    """
+    client = _RecordingClient()
+    parallel.census_signal_embeddings(facility="jt-60sa", gc=client)
+
+    assert client.calls, "the census issued no state query"
+    cypher, params = client.calls[0]
+    assert re.search(r"WHERE s\.facility_id = \$facility\s+RETURN", cypher), cypher
+    assert params["facility"] == "jt-60sa", params
+
+
 @pytest.mark.graph
 def test_census_statement_runs_against_the_live_graph():
     """The real read-only census statement runs on the graph and returns counts.
@@ -246,3 +276,19 @@ def test_census_statement_runs_against_the_live_graph():
     assert result["n"] >= 0, result
     assert result["mismatch"] == result["missing_hash"] + result["differing"], result
     assert len(result["mismatch_ids"]) == result["mismatch"], result
+
+
+@pytest.mark.graph
+def test_facility_scoped_census_runs_against_the_live_graph():
+    """The census with the facility scope runs facility-scoped.
+
+    The facility-scoped state query is the one that could not run before the
+    clause separator was restored, so this is the live check that the scope
+    reaches the graph: ``census_signal_embeddings(facility='jt-60sa')`` reads
+    the JT-60SA population. Run with ``-m graph``; the default markers exclude
+    it.
+    """
+    result = parallel.census_signal_embeddings(facility="jt-60sa")
+
+    assert result["n"] == 15111, result
+    assert result["mismatch"] == result["missing_hash"] + result["differing"], result

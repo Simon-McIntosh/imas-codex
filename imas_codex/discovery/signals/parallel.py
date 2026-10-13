@@ -1780,7 +1780,7 @@ def fetch_signal_embed_state(
     where = "WHERE s.facility_id = $facility" if facility else ""
     query = (
         "MATCH (s:FacilitySignal) "
-        f"{where}"
+        f"{where} "
         "RETURN s.id AS id, s.description AS description, "
         "s.embedded_text_hash AS embedded_text_hash, "
         "s.facility_id AS facility_id"
