@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="520" viewBox="0 0 1400 520" font-family="sans-serif">
+  <rect width="1400" height="520" fill="#ffffff"/>
+
+  <!-- axis: value -> x = 180 + v * 0.4696 -->
+  <line x1="180" y1="70" x2="180" y2="440" stroke="#4a4a4a" stroke-width="1.2"/>
+  <line x1="180" y1="440" x2="1260" y2="440" stroke="#4a4a4a" stroke-width="1.2"/>
+  <g fill="#333333" font-size="20" text-anchor="middle">
+    <text x="180" y="470">0</text>
+    <text x="415" y="470">500</text>
+    <text x="650" y="470">1000</text>
+    <text x="885" y="470">1500</text>
+    <text x="1120" y="470">2000</text>
+  </g>
+  <line x1="415" y1="436" x2="415" y2="440" stroke="#4a4a4a" stroke-width="1.2"/>
+  <line x1="650" y1="436" x2="650" y2="440" stroke="#4a4a4a" stroke-width="1.2"/>
+  <line x1="885" y1="436" x2="885" y2="440" stroke="#4a4a4a" stroke-width="1.2"/>
+  <line x1="1120" y1="436" x2="1120" y2="440" stroke="#4a4a4a" stroke-width="1.2"/>
+  <text x="180" y="46" fill="#333333" font-size="22">signals</text>
+
+  <!-- h060029: described 2124 -> 997.3 ; discovered 103 -> 48.4 -->
+  <g>
+    <text x="170" y="136" text-anchor="end" font-size="20" fill="#222222">h060029</text>
+    <rect x="180" y="100" width="997.3" height="60" fill="#4C72B0"/>
+    <rect x="1177.3" y="100" width="48.4" height="60" fill="#C0703A"/>
+    <text x="678" y="136" text-anchor="middle" font-size="20" fill="#ffffff">described 2124</text>
+    <text x="1240" y="136" font-size="20" fill="#C0703A">103 discovered</text>
+  </g>
+
+  <!-- a042181: described 278 -> 278*0.4696 = 130.5 ; discovered 0 -->
+  <g>
+    <text x="170" y="256" text-anchor="end" font-size="20" fill="#222222">a042181</text>
+    <rect x="180" y="220" width="130.5" height="60" fill="#4C72B0"/>
+    <text x="320" y="256" font-size="20" fill="#222222">278 described, none left discovered</text>
+  </g>
+
+  <!-- UDDB: described 164 -> 77.0 bars start at 180 ; discovered 25 -> 11.7, stacked after -->
+  <g>
+    <text x="170" y="376" text-anchor="end" font-size="20" fill="#222222">UDDB</text>
+    <rect x="180" y="340" width="77.0" height="60" fill="#4C72B0"/>
+    <rect x="257.0" y="340" width="11.7" height="60" fill="#C0703A"/>
+    <text x="286" y="376" font-size="20" fill="#C0703A">164 described, 25 discovered</text>
+  </g>
+
+  <g font-size="20">
+    <rect x="180" y="490" width="28" height="14" fill="#4C72B0"/>
+    <text x="218" y="503" fill="#222222">described</text>
+    <rect x="380" y="490" width="28" height="14" fill="#C0703A"/>
+    <text x="418" y="503" fill="#222222">discovered (residue)</text>
+  </g>
+</svg>

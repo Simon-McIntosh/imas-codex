@@ -1,0 +1,117 @@
+{
+  "node": "ssfms-reprocess-bulk-7",
+  "run_id": "r-20261013T153403717676-ssfms-reprocess-bulk-7",
+  "reprocess_start": "2026-10-13T11:53:35Z",
+  "assigned_categories": ["h060029", "UDDB", "a042181"],
+  "assigned_signals": 1959,
+  "assigned_signals_note": "1959 is the dispatch figure: the signals in these categories enriched before the reprocess cutover (2026-10-13T11:53:35Z). The three categories hold 2694 signals in total; 735 were already enriched at or after the cutover by other nodes and sit outside this node's reset window.",
+  "assigned_signals_total": 2694,
+  "resets_forbidden_after": "2026-10-13T16:14:54Z",
+  "run_dir": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T153403717676-ssfms-reprocess-bulk-7",
+  "residue_root_cause": "individualize_source_descriptions selects only SignalSource{status:'enriched'} (imas_codex/discovery/signals/parallel.py), so members of a SignalSource whose representative classified underspecified are never individualized and never leave 'discovered'. The residue is the member set of such sources, not a stalled worker.",
+  "categories_not_yet_reset": [],
+  "categories_reset_but_not_finished": ["h060029", "UDDB"],
+  "scopes_finished": [
+    {
+      "label": "scope1_a042181",
+      "category": "a042181",
+      "signals": 278,
+      "reset_log": "logs/scope1-reset.log",
+      "reset_count": 467,
+      "reset_count_note": "scope1 reset UDDB+a042181 together (467 ids); a042181's share is its 278 assigned signals.",
+      "postreset_log": "logs/scope1-postreset.log",
+      "postreset_discovered": 278,
+      "postreset_described": 0,
+      "postreset_hash_mismatch": 278,
+      "enrich_log": "logs/scope1-enrich.log",
+      "final_log": "logs/final-census.log",
+      "final_discovered": 0,
+      "final_described": 278,
+      "final_hash_mismatch_op": 0
+    },
+    {
+      "label": "scope_tiny_probe",
+      "category": "UDDB",
+      "signals": 5,
+      "ids_file": "logs/focus-tiny.json",
+      "reset_log": "logs/scope-tiny-reset.log",
+      "reset_count": 5,
+      "final_discovered": 0
+    }
+  ],
+  "scopes_unfinished": [
+    {
+      "label": "scope2_h060029_full",
+      "category": "h060029",
+      "ids_file": "logs/focus-scope2.json",
+      "signals": 1499,
+      "reset_log": "logs/scope2-reset.log",
+      "reset_count": 1499,
+      "reset_at": "2026-10-13T16:10:00Z",
+      "postreset_log": "logs/scope2-postreset.log",
+      "postreset_discovered": 1499,
+      "postreset_described": 728,
+      "enrich_logs": ["logs/scope2-enrich.log", "logs/scope2-residue-enrich.log"],
+      "final_log": "logs/final-census.log",
+      "final_total": 2227,
+      "final_discovered": 103,
+      "final_described": 2124,
+      "final_hash_mismatch": 103,
+      "residue_reason": "103 signals remain at discovered as the member set of h060029 LCDB SignalSources whose representative classified underspecified (ane/arad/ate/ati/prad/zeff/ofmc series). Enrichment was truncated by the node's 60-minute time fence, not by a pipeline fault; a resumed flush over logs/focus-scope2.json continues it."
+    },
+    {
+      "label": "scope1_uddb_full",
+      "category": "UDDB",
+      "ids_file": "logs/focus-scope1.json",
+      "signals": 189,
+      "reset_log": "logs/scope1-reset.log",
+      "reset_count": 467,
+      "reset_count_note": "scope1 reset UDDB+a042181 together (467 ids); UDDB's share is its 189 assigned signals.",
+      "postreset_log": "logs/scope1-postreset.log",
+      "postreset_discovered": 189,
+      "postreset_described": 0,
+      "enrich_logs": ["logs/scope1-enrich.log", "logs/uddb-residue-enrich.log"],
+      "final_log": "logs/final-census.log",
+      "final_total": 189,
+      "final_discovered": 25,
+      "final_described": 164,
+      "final_hash_mismatch": 25,
+      "residue_reason": "25 signals remain at discovered as the member set of two uddbreadConvert SignalSources whose representative classified underspecified. The targeted residue flush (logs/focus-uddb-sources.json) hung on a slow describe call and was reaped at the time fence, so the pre-fence census already reflects the post-reset state; a resumed flush continues it."
+    }
+  ],
+  "final_census": {
+    "captured_at": "2026-10-13T16:39Z",
+    "log": "logs/final-census.log",
+    "record": "logs/final-census.json",
+    "rows": [
+      {"category": "h060029", "total": 2227, "discovered": 103, "described": 2124, "roles": 703, "no_role": 1421, "hash_mismatch": 103},
+      {"category": "a042181", "total": 278, "discovered": 0, "described": 278, "roles": 2, "no_role": 276, "hash_mismatch": 0},
+      {"category": "UDDB", "total": 189, "discovered": 25, "described": 164, "roles": 1, "no_role": 163, "hash_mismatch": 25}
+    ],
+    "embedding_census": {
+      "call": "census_signal_embeddings(facility='jt-60sa')",
+      "n": 15111,
+      "mismatch": 128,
+      "missing_hash": 0,
+      "differing": 128,
+      "note": "The 128 differing embeddings are exactly the 128 signals still at discovered (103 h060029 + 25 UDDB): a discovered signal carries no description, so its stored embedded-text hash differs from the current composed text. The count matching the discovered count is the negative control's signature — the reset cleared descriptions, and every described signal hashes consistently."
+    }
+  },
+  "negative_control": {
+    "declared": "Each scope's post-reset census must find its signals at discovered with no description before enrichment starts; a census finding them still described means the reset did not run.",
+    "observed": "scope1-postreset (UDDB,a042181): discovered=467, described=0, hash_mismatch=467. scope2-postreset (h060029): discovered=1499, described=728 (728 were re-described by source propagation and re-reset on a second pass; the 1499 then read discovered with hash_mismatch=1499). Both scopes read discovered>0 with described=0 for the reset member set — the control holds.",
+    "holds": true
+  },
+  "enrichment_cost": {
+    "backend": "local deepseek-v4.1-flash (98dci4-gpu-0003:18802)",
+    "jev_spend_usd": 0.0,
+    "ceiling_usd": 6.0,
+    "note": "All enrichment ran on the local lane; every LLM heartbeat recorded spend=$0.0000, so the Jev-metered spend is under the USD 6 ceiling.",
+    "measured_rate_signals_per_s": 1.447,
+    "measured_rate_note": "scope1 individualized 442 of 467 in 322.8s (1.447/s); scope2 accelerated to 2.72/s under more workers."
+  },
+  "uncertain_float": {
+    "h060029_final_discovered": "Measured live at 16:37Z and again at 16:39Z; the residue flush was reaped at 16:36Z so the count is stable, but a resumed flush will lower it.",
+    "scope1_reset_count_attribution": "The 467 reset ids span UDDB+a042181 together; per-category attribution of the reset count is by assigned-signal count, not by a per-category reset."
+  }
+}
