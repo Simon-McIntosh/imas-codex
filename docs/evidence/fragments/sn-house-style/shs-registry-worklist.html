@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<meta name="reckon-type" content="evidence">
+<title>Registry worklist for the frozen WEST roster</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+<main>
+<h1>Registry worklist for the frozen WEST roster</h1>
+<p id="shs-registry-worklist-intro">
+The conventions registry (<code>concepts.yml</code>, <code>notation.yml</code>,
+<code>templates.yml</code>) lives in ISN. This census parses the 220 names of the
+frozen WEST roster with the public grammar parser and lists every operator,
+qualifier, base, projection axis, locus, locus qualifier and process token the
+parse produces for which the registry holds no entry, plus every name pattern
+whose (base, filled segment kinds) resolves to no template. Sorted by the number
+of roster names that use it, highest first.
+</p>
+
+<h2 id="shs-registry-worklist-totals">Totals</h2>
+<table>
+<thead><tr><th>measure</th><th class="num">value</th></tr></thead>
+<tbody>
+<tr><td>roster names</td><td class="num">220</td></tr>
+<tr><td>parsed</td><td class="num">219</td></tr>
+<tr><td>unparsed (listed in full below)</td><td class="num">1</td></tr>
+<tr><td>concepts: distinct tokens with no entry</td><td class="num">139</td></tr>
+<tr><td>notation: distinct tokens with no entry</td><td class="num">79</td></tr>
+<tr><td>templates: distinct patterns</td><td class="num">125</td></tr>
+<tr><td>templates: distinct bases</td><td class="num">69</td></tr>
+<tr><td>templates: patterns with a template</td><td class="num">4</td></tr>
+<tr><td>templates: patterns with no template</td><td class="num">121</td></tr>
+</tbody>
+</table>
+
+<h2 id="shs-registry-worklist-by-kind">Distinct tokens per segment kind</h2>
+<table>
+<thead><tr><th>segment kind</th>
+<th class="num">concepts: tokens</th><th class="num">with entry</th><th class="num">missing</th>
+<th class="num">notation: tokens</th><th class="num">with entry</th><th class="num">missing</th></tr></thead>
+<tbody>
+<tr><td><code>component</code></td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">4</td><td class="num">0</td><td class="num">4</td></tr>
+<tr><td><code>coordinate</code></td><td class="num">3</td><td class="num">0</td><td class="num">3</td><td class="num">3</td><td class="num">0</td><td class="num">3</td></tr>
+<tr><td><code>geometric_base</code></td><td class="num">8</td><td class="num">0</td><td class="num">8</td><td class="num">8</td><td class="num">0</td><td class="num">8</td></tr>
+<tr><td><code>object</code></td><td class="num">26</td><td class="num">0</td><td class="num">26</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td><code>physical_base</code></td><td class="num">61</td><td class="num">0</td><td class="num">61</td><td class="num">61</td><td class="num">1</td><td class="num">60</td></tr>
+<tr><td><code>position</code></td><td class="num">24</td><td class="num">1</td><td class="num">23</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td><code>region</code></td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td><code>subject</code></td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">5</td><td class="num">0</td><td class="num">5</td></tr>
+<tr><td><code>transformation</code></td><td class="num">18</td><td class="num">1</td><td class="num">17</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+</tbody>
+</table>
+
+<h2 id="shs-registry-worklist-concepts">Concepts — no <code>concepts.yml</code> entry (top 20 of 139)</h2>
+<table>
+<thead><tr><th>token</th><th>segment kind</th><th class="num">names</th><th>sample roster names</th></tr></thead>
+<tbody>
+<tr><td><code>coordinate</code></td><td>geometric_base</td><td class="num">17</td><td><code>toroidal_coordinate_at_detector_pixel</code>, <code>toroidal_coordinate_of_aperture</code>, <code>toroidal_coordinate_of_camera</code>, <code>toroidal_coordinate_of_line_of_sight</code>, <code>vertical_coordinate_of_camera</code></td></tr>
+<tr><td><code>vertical</code></td><td>coordinate</td><td class="num">17</td><td><code>vertical_coordinate_of_camera</code>, <code>vertical_coordinate_of_conductor_cross_section</code>, <code>vertical_coordinate_of_detector_pixel</code>, <code>vertical_coordinate_of_ece_channel</code>, <code>vertical_coordinate_of_flux_loop</code></td></tr>
+<tr><td><code>flux_surface</code></td><td>position</td><td class="num">13</td><td><code>derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>, <code>derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</code>, <code>derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>, <code>elongation_of_flux_surface</code>, <code>lower_triangularity_of_flux_surface</code></td></tr>
+<tr><td><code>radial_coordinate</code></td><td>geometric_base</td><td class="num">13</td><td><code>radial_coordinate_at_inboard_midplane</code>, <code>radial_coordinate_at_outboard_midplane</code>, <code>radial_coordinate_of_camera</code>, <code>radial_coordinate_of_conductor_cross_section</code>, <code>radial_coordinate_of_detector_pixel</code></td></tr>
+<tr><td><code>magnitude</code></td><td>transformation</td><td class="num">10</td><td><code>flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_magnetic_field_magnitude</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code>, <code>flux_surface_averaged_square_of_magnetic_field_magnitude</code></td></tr>
+<tr><td><code>power</code></td><td>physical_base</td><td class="num">10</td><td><code>forward_power_of_ion_cyclotron_heating_antenna</code>, <code>launched_power_of_lower_hybrid_antenna</code>, <code>net_power_due_to_ion_cyclotron_heating</code>, <code>power_of_soft_xray_detector</code>, <code>radiated_power_over_core_region</code></td></tr>
+<tr><td><code>temperature</code></td><td>physical_base</td><td class="num">10</td><td><code>cold_neutral_temperature</code>, <code>coolant_temperature_at_inlet</code>, <code>coolant_temperature_at_outlet</code>, <code>electron_temperature</code>, <code>electron_temperature_at_divertor_target</code></td></tr>
+<tr><td><code>ion_cyclotron_heating_antenna</code></td><td>object</td><td class="num">9</td><td><code>capacitance_of_ion_cyclotron_heating_antenna</code>, <code>forward_power_of_ion_cyclotron_heating_antenna</code>, <code>forward_wave_phase_of_ion_cyclotron_heating_antenna</code>, <code>frequency_of_ion_cyclotron_heating_antenna</code>, <code>pressure_of_ion_cyclotron_heating_antenna</code></td></tr>
+<tr><td><code>magnetic_field</code></td><td>physical_base</td><td class="num">9</td><td><code>flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_magnetic_field_magnitude</code>, <code>flux_surface_averaged_square_of_magnetic_field_magnitude</code>, <code>maximum_magnetic_field_magnitude</code>, <code>minimum_over_flux_surface_magnetic_field_magnitude</code></td></tr>
+<tr><td><code>magnetic_axis</code></td><td>position</td><td class="num">8</td><td><code>electron_density_at_magnetic_axis</code>, <code>electron_temperature_at_magnetic_axis</code>, <code>poloidal_magnetic_flux_at_magnetic_axis</code>, <code>radial_coordinate_of_magnetic_axis</code>, <code>radiative_temperature_at_magnetic_axis</code></td></tr>
+<tr><td><code>magnetic_flux</code></td><td>physical_base</td><td class="num">8</td><td><code>poloidal_magnetic_flux_at_flux_surface</code>, <code>poloidal_magnetic_flux_at_magnetic_axis</code>, <code>poloidal_magnetic_flux_at_measurement_position</code>, <code>poloidal_magnetic_flux_at_plasma_boundary</code>, <code>poloidal_magnetic_flux_of_flux_loop</code></td></tr>
+<tr><td><code>outline</code></td><td>geometric_base</td><td class="num">8</td><td><code>radial_outline_of_antenna_strap</code>, <code>radial_outline_of_limiter_tile</code>, <code>radial_outline_of_plasma_boundary</code>, <code>radial_outline_of_wall</code>, <code>vertical_outline_of_antenna_strap</code></td></tr>
+<tr><td><code>placeholder</code></td><td>physical_base</td><td class="num">8</td><td><code>difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy</code>, <code>difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code>, <code>product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate</code></td></tr>
+<tr><td><code>square</code></td><td>transformation</td><td class="num">8</td><td><code>flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_inverse_of_square_of_major_radius</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code>, <code>flux_surface_averaged_square_of_magnetic_field_magnitude</code></td></tr>
+<tr><td><code>area</code></td><td>physical_base</td><td class="num">7</td><td><code>area_of_diagnostic_aperture</code>, <code>area_of_poloidal_magnetic_field_probe</code>, <code>area_of_toroidal_magnetic_field_probe</code>, <code>derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>, <code>poloidal_plane_cross_sectional_area_of_flux_surface</code></td></tr>
+<tr><td><code>density</code></td><td>physical_base</td><td class="num">7</td><td><code>electron_density_at_divertor_target</code>, <code>electron_density_at_magnetic_axis</code>, <code>electron_density_at_plasma_boundary</code>, <code>line_averaged_electron_density</code>, <code>thermal_electron_density</code></td></tr>
+<tr><td><code>poloidal_magnetic_field_probe</code></td><td>object</td><td class="num">7</td><td><code>area_of_poloidal_magnetic_field_probe</code>, <code>length_of_poloidal_magnetic_field_probe</code>, <code>radial_coordinate_of_poloidal_magnetic_field_probe</code>, <code>toroidal_angle_of_poloidal_magnetic_field_probe</code>, <code>turn_count_of_poloidal_magnetic_field_probe</code></td></tr>
+<tr><td><code>antenna_strap</code></td><td>object</td><td class="num">6</td><td><code>radial_outline_of_antenna_strap</code>, <code>toroidal_angle_of_antenna_strap</code>, <code>toroidal_width_of_antenna_strap</code>, <code>vertical_outline_of_antenna_strap</code>, <code>wave_current_amplitude_of_antenna_strap</code></td></tr>
+<tr><td><code>measurement_position</code></td><td>position</td><td class="num">6</td><td><code>normalized_toroidal_flux_coordinate_at_measurement_position</code>, <code>poloidal_angle_of_measurement_position</code>, <code>poloidal_magnetic_flux_at_measurement_position</code>, <code>radial_coordinate_of_measurement_position</code>, <code>toroidal_angle_of_measurement_position</code></td></tr>
+<tr><td><code>toroidal_magnetic_field_probe</code></td><td>object</td><td class="num">6</td><td><code>area_of_toroidal_magnetic_field_probe</code>, <code>length_of_toroidal_magnetic_field_probe</code>, <code>poloidal_angle_of_toroidal_magnetic_field_probe</code>, <code>toroidal_angle_of_toroidal_magnetic_field_probe</code>, <code>turn_count_of_toroidal_magnetic_field_probe</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="shs-registry-worklist-notation">Notation — no <code>notation.yml</code> entry (top 20 of 79)</h2>
+<table>
+<thead><tr><th>token</th><th>segment kind</th><th class="num">names</th><th>sample roster names</th></tr></thead>
+<tbody>
+<tr><td><code>coordinate</code></td><td>geometric_base</td><td class="num">17</td><td><code>toroidal_coordinate_at_detector_pixel</code>, <code>toroidal_coordinate_of_aperture</code>, <code>toroidal_coordinate_of_camera</code>, <code>toroidal_coordinate_of_line_of_sight</code>, <code>vertical_coordinate_of_camera</code></td></tr>
+<tr><td><code>vertical</code></td><td>coordinate</td><td class="num">17</td><td><code>vertical_coordinate_of_camera</code>, <code>vertical_coordinate_of_conductor_cross_section</code>, <code>vertical_coordinate_of_detector_pixel</code>, <code>vertical_coordinate_of_ece_channel</code>, <code>vertical_coordinate_of_flux_loop</code></td></tr>
+<tr><td><code>electron</code></td><td>subject</td><td class="num">14</td><td><code>electron_density_at_divertor_target</code>, <code>electron_density_at_magnetic_axis</code>, <code>electron_density_at_plasma_boundary</code>, <code>electron_temperature</code>, <code>electron_temperature_at_divertor_target</code></td></tr>
+<tr><td><code>radial_coordinate</code></td><td>geometric_base</td><td class="num">13</td><td><code>radial_coordinate_at_inboard_midplane</code>, <code>radial_coordinate_at_outboard_midplane</code>, <code>radial_coordinate_of_camera</code>, <code>radial_coordinate_of_conductor_cross_section</code>, <code>radial_coordinate_of_detector_pixel</code></td></tr>
+<tr><td><code>toroidal</code></td><td>component</td><td class="num">13</td><td><code>flux_surface_averaged_toroidal_current_density</code>, <code>toroidal_angular_width_of_limiter_tile</code>, <code>toroidal_beta</code>, <code>toroidal_coordinate_at_detector_pixel</code>, <code>toroidal_coordinate_of_aperture</code></td></tr>
+<tr><td><code>power</code></td><td>physical_base</td><td class="num">10</td><td><code>forward_power_of_ion_cyclotron_heating_antenna</code>, <code>launched_power_of_lower_hybrid_antenna</code>, <code>net_power_due_to_ion_cyclotron_heating</code>, <code>power_of_soft_xray_detector</code>, <code>radiated_power_over_core_region</code></td></tr>
+<tr><td><code>temperature</code></td><td>physical_base</td><td class="num">10</td><td><code>cold_neutral_temperature</code>, <code>coolant_temperature_at_inlet</code>, <code>coolant_temperature_at_outlet</code>, <code>electron_temperature</code>, <code>electron_temperature_at_divertor_target</code></td></tr>
+<tr><td><code>magnetic_field</code></td><td>physical_base</td><td class="num">9</td><td><code>flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_magnetic_field_magnitude</code>, <code>flux_surface_averaged_square_of_magnetic_field_magnitude</code>, <code>maximum_magnetic_field_magnitude</code>, <code>minimum_over_flux_surface_magnetic_field_magnitude</code></td></tr>
+<tr><td><code>poloidal</code></td><td>component</td><td class="num">9</td><td><code>poloidal_beta</code>, <code>poloidal_length_of_flux_surface</code>, <code>poloidal_magnetic_field</code>, <code>poloidal_magnetic_flux_at_flux_surface</code>, <code>poloidal_magnetic_flux_at_magnetic_axis</code></td></tr>
+<tr><td><code>magnetic_flux</code></td><td>physical_base</td><td class="num">8</td><td><code>poloidal_magnetic_flux_at_flux_surface</code>, <code>poloidal_magnetic_flux_at_magnetic_axis</code>, <code>poloidal_magnetic_flux_at_measurement_position</code>, <code>poloidal_magnetic_flux_at_plasma_boundary</code>, <code>poloidal_magnetic_flux_of_flux_loop</code></td></tr>
+<tr><td><code>outline</code></td><td>geometric_base</td><td class="num">8</td><td><code>radial_outline_of_antenna_strap</code>, <code>radial_outline_of_limiter_tile</code>, <code>radial_outline_of_plasma_boundary</code>, <code>radial_outline_of_wall</code>, <code>vertical_outline_of_antenna_strap</code></td></tr>
+<tr><td><code>placeholder</code></td><td>physical_base</td><td class="num">8</td><td><code>difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy</code>, <code>difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code>, <code>product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate</code></td></tr>
+<tr><td><code>area</code></td><td>physical_base</td><td class="num">7</td><td><code>area_of_diagnostic_aperture</code>, <code>area_of_poloidal_magnetic_field_probe</code>, <code>area_of_toroidal_magnetic_field_probe</code>, <code>derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>, <code>poloidal_plane_cross_sectional_area_of_flux_surface</code></td></tr>
+<tr><td><code>current</code></td><td>physical_base</td><td class="num">5</td><td><code>current_of_passive_loop</code>, <code>current_of_poloidal_field_coil</code>, <code>ion_current_of_mass_spectrometer_channel</code>, <code>plasma_current</code>, <code>wave_current_amplitude_of_antenna_strap</code></td></tr>
+<tr><td><code>neutral</code></td><td>subject</td><td class="num">5</td><td><code>cold_neutral_fraction</code>, <code>cold_neutral_temperature</code>, <code>hot_neutral_fraction</code>, <code>hot_neutral_temperature</code>, <code>total_neutral_source_rate_due_to_gas_injection</code></td></tr>
+<tr><td><code>phase</code></td><td>physical_base</td><td class="num">5</td><td><code>forward_wave_phase_of_ion_cyclotron_heating_antenna</code>, <code>reflected_phase_of_ion_cyclotron_heating_antenna</code>, <code>wave_phase_of_antenna_strap</code>, <code>wave_phase_of_ion_cyclotron_heating_antenna</code>, <code>wave_phase_of_wave_beam</code></td></tr>
+<tr><td><code>radius</code></td><td>physical_base</td><td class="num">5</td><td><code>flux_surface_averaged_inverse_of_major_radius</code>, <code>flux_surface_averaged_inverse_of_square_of_major_radius</code>, <code>flux_surface_averaged_major_radius</code>, <code>minor_radius_of_plasma_boundary</code>, <code>reference_major_radius</code></td></tr>
+<tr><td><code>triangularity</code></td><td>physical_base</td><td class="num">5</td><td><code>lower_triangularity_of_flux_surface</code>, <code>lower_triangularity_of_plasma_boundary</code>, <code>triangularity_of_plasma_boundary</code>, <code>upper_triangularity_of_flux_surface</code>, <code>upper_triangularity_of_plasma_boundary</code></td></tr>
+<tr><td><code>wavelength</code></td><td>physical_base</td><td class="num">5</td><td><code>lower_wavelength_of_filter</code>, <code>spectral_wavelength_of_optical_element</code>, <code>upper_wavelength_of_filter</code>, <code>wavelength_of_spectral_line</code>, <code>wavelength_of_wave_beam</code></td></tr>
+<tr><td><code>length</code></td><td>physical_base</td><td class="num">4</td><td><code>length_of_poloidal_magnetic_field_probe</code>, <code>length_of_toroidal_magnetic_field_probe</code>, <code>length_variation_of_interferometer_beam</code>, <code>poloidal_length_of_flux_surface</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="shs-registry-worklist-templates">Templates — pattern with no template (top 20 of 121)</h2>
+<table>
+<thead><tr><th>pattern (base + segments)</th><th>keyed by</th><th class="num">names</th><th>sample roster names</th></tr></thead>
+<tbody>
+<tr><td><code>coordinate (coordinate, geometric_base, position)</code></td><td>template</td><td class="num">10</td><td><code>toroidal_coordinate_at_detector_pixel</code>, <code>toroidal_coordinate_of_line_of_sight</code>, <code>vertical_coordinate_of_detector_pixel</code>, <code>vertical_coordinate_of_ece_channel</code>, <code>vertical_coordinate_of_geometric_axis</code></td></tr>
+<tr><td><code>radial_coordinate (geometric_base, position)</code></td><td>template</td><td class="num">9</td><td><code>radial_coordinate_at_inboard_midplane</code>, <code>radial_coordinate_at_outboard_midplane</code>, <code>radial_coordinate_of_detector_pixel</code>, <code>radial_coordinate_of_geometric_axis</code>, <code>radial_coordinate_of_line_of_sight</code></td></tr>
+<tr><td><code>placeholder (physical_base, transformation)</code></td><td>template</td><td class="num">8</td><td><code>difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy</code>, <code>difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code>, <code>product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate</code></td></tr>
+<tr><td><code>coordinate (coordinate, geometric_base, object)</code></td><td>template</td><td class="num">7</td><td><code>toroidal_coordinate_of_aperture</code>, <code>toroidal_coordinate_of_camera</code>, <code>vertical_coordinate_of_camera</code>, <code>vertical_coordinate_of_conductor_cross_section</code>, <code>vertical_coordinate_of_flux_loop</code></td></tr>
+<tr><td><code>outline (coordinate, geometric_base, object)</code></td><td>template</td><td class="num">5</td><td><code>radial_outline_of_antenna_strap</code>, <code>radial_outline_of_limiter_tile</code>, <code>vertical_outline_of_antenna_strap</code>, <code>vertical_outline_of_limiter_tile</code>, <code>vertical_outline_of_plasma_facing_component</code></td></tr>
+<tr><td><code>phase (object, physical_base, qualifier)</code></td><td>template</td><td class="num">5</td><td><code>forward_wave_phase_of_ion_cyclotron_heating_antenna</code>, <code>reflected_phase_of_ion_cyclotron_heating_antenna</code>, <code>wave_phase_of_antenna_strap</code>, <code>wave_phase_of_ion_cyclotron_heating_antenna</code>, <code>wave_phase_of_wave_beam</code></td></tr>
+<tr><td><code>magnetic_field (physical_base, transformation)</code></td><td>template</td><td class="num">4</td><td><code>flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_magnetic_field_magnitude</code>, <code>flux_surface_averaged_square_of_magnetic_field_magnitude</code>, <code>minimum_over_flux_surface_magnetic_field_magnitude</code></td></tr>
+<tr><td><code>magnetic_flux (component, physical_base, position)</code></td><td>template</td><td class="num">4</td><td><code>poloidal_magnetic_flux_at_flux_surface</code>, <code>poloidal_magnetic_flux_at_magnetic_axis</code>, <code>poloidal_magnetic_flux_at_measurement_position</code>, <code>poloidal_magnetic_flux_at_plasma_boundary</code></td></tr>
+<tr><td><code>radial_coordinate (geometric_base, object)</code></td><td>template</td><td class="num">4</td><td><code>radial_coordinate_of_camera</code>, <code>radial_coordinate_of_conductor_cross_section</code>, <code>radial_coordinate_of_flux_loop</code>, <code>radial_coordinate_of_poloidal_magnetic_field_probe</code></td></tr>
+<tr><td><code>temperature (physical_base, position, qualifier)</code></td><td>template</td><td class="num">4</td><td><code>coolant_temperature_at_inlet</code>, <code>coolant_temperature_at_outlet</code>, <code>radiative_temperature_at_ece_channel</code>, <code>radiative_temperature_at_magnetic_axis</code></td></tr>
+<tr><td><code>triangularity (physical_base, position, zone)</code></td><td>template</td><td class="num">4</td><td><code>lower_triangularity_of_flux_surface</code>, <code>lower_triangularity_of_plasma_boundary</code>, <code>upper_triangularity_of_flux_surface</code>, <code>upper_triangularity_of_plasma_boundary</code></td></tr>
+<tr><td><code>area (object, physical_base)</code></td><td>template</td><td class="num">3</td><td><code>area_of_diagnostic_aperture</code>, <code>area_of_poloidal_magnetic_field_probe</code>, <code>area_of_toroidal_magnetic_field_probe</code></td></tr>
+<tr><td><code>beta (component, physical_base)</code></td><td>template</td><td class="num">3</td><td><code>normalized_toroidal_beta</code>, <code>poloidal_beta</code>, <code>toroidal_beta</code></td></tr>
+<tr><td><code>outline (coordinate, geometric_base, position)</code></td><td>template</td><td class="num">3</td><td><code>radial_outline_of_plasma_boundary</code>, <code>radial_outline_of_wall</code>, <code>vertical_outline_of_plasma_boundary</code></td></tr>
+<tr><td><code>power (aggregation, physical_base, process)</code></td><td>template</td><td class="num">3</td><td><code>net_power_due_to_ion_cyclotron_heating</code>, <code>total_power_due_to_ion_cyclotron_heating</code>, <code>total_power_due_to_ohmic_dissipation</code></td></tr>
+<tr><td><code>power (object, physical_base, qualifier)</code></td><td>template</td><td class="num">3</td><td><code>forward_power_of_ion_cyclotron_heating_antenna</code>, <code>launched_power_of_lower_hybrid_antenna</code>, <code>reflected_power_of_ion_cyclotron_heating_antenna</code></td></tr>
+<tr><td><code>radius (physical_base, qualifier, transformation)</code></td><td>template</td><td class="num">3</td><td><code>flux_surface_averaged_inverse_of_major_radius</code>, <code>flux_surface_averaged_inverse_of_square_of_major_radius</code>, <code>flux_surface_averaged_major_radius</code></td></tr>
+<tr><td><code>toroidal_angle (geometric_base, object)</code></td><td>template</td><td class="num">3</td><td><code>toroidal_angle_of_antenna_strap</code>, <code>toroidal_angle_of_poloidal_magnetic_field_probe</code>, <code>toroidal_angle_of_toroidal_magnetic_field_probe</code></td></tr>
+<tr><td><code>area (physical_base, position, qualifier, section_plane)</code></td><td>template</td><td class="num">2</td><td><code>poloidal_plane_cross_sectional_area_of_flux_surface</code>, <code>poloidal_plane_cross_sectional_area_of_plasma_boundary</code></td></tr>
+<tr><td><code>confinement_time (physical_base, qualifier)</code></td><td>template</td><td class="num">2</td><td><code>energy_confinement_time</code>, <code>ipb98y2_confinement_time</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="shs-registry-worklist-unparsed">Unparsed roster names</h2>
+<ul>
+<li><code>inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width</code> — ParseError: residue &#x27;inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width&#x27; does not match any physical_base or geometry_carrier; nearest candidates: [&#x27;normalized_toroidal_flux_coordinate&#x27;]</li>
+</ul>
+
+<h2 id="shs-registry-worklist-order">Reading order</h2>
+<p id="shs-registry-worklist-order-note">
+The registry's live entries are <code>flux_surface_averaged</code>,
+<code>plasma_boundary</code> (concepts), <code>density</code> (notation) and one
+template, base <code>density</code> with the <code>subject</code> segment filled.
+<code>density</code> with <code>subject</code> filled therefore resolves to that
+template and does not appear in the templates worklist; the satisfied patterns are
+recorded separately in the results JSON. With the
+<code>flux_surface_averaged</code> concept entry removed from a scratch copy of the
+registry, the census lists that token (kind <code>transformation</code>, 12 roster
+names) as missing — the control showing the census can report a gap.
+</p>
+</main>
+</body>
+</html>
