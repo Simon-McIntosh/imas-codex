@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "baseline_suite 6 files (126 passed, EXIT=0) at base 6b5f1d573596f9cb91f98977e092efa380bbd3d2; after_suite 7 files (130 passed, EXIT=0) at head 8254d80bc0a643770643107c97b332ebb25a4082; the four added tests are the whole delta, zero added failures.",
+  "backend": "local",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:3735",
+    "imas_codex/standard_names/benchmark.py:966",
+    "imas_codex/standard_names/benchmark.py:1045"
+  ],
+  "completed_at": "2026-10-13T14:47:34.523Z",
+  "dispatched_at": "2026-10-13T14:33:38Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_benchmark_comparator_arms.py",
+      "line": 157,
+      "severity": "follow-on",
+      "text": "test_block_off_render_matches_the_base_revision rebuilds the expected prompt by calling render_prompt with the live template instead of comparing to the base revision's recorded bytes, so a template or prompt_loader change moves both sides together and the test cannot redden; it also has no recorded negative control, so its \"byte-identical to the base revision\" claim rests only on the off path adding no user-context key."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-benchmark-comparator-arms.html",
+      "line": 25,
+      "severity": "follow-on",
+      "text": "the fragment ends at </section> with no trailing newline, unlike its sibling fragments in docs/evidence/fragments/sn-selection-over-generation/, so it drifts from the surrounding file convention."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit 8254d80bc against parent 6b5f1d573 commit by commit; it adds two BenchmarkConfig fields, one source_paths branch in _extract_candidates, one comparator_block branch in _run_model, the new test file and the evidence fragment, all inside the declared scope.",
+    "done_when": "the brief's done-when names the six gate files plus the new test file judged by delta; the manifest records base_gate.log (126 passed, EXIT=0 at 6b5f1d573596f9cb91f98977e092efa380bbd3d2) and head_gate.log (130 passed, EXIT=0 at 8254d80bc0a643770643107c97b332ebb25a4082), and both negative-control logs redden the added tests.",
+    "goal": "the node's goal is to give the benchmark harness an opt-in production comparator block and a named source list; imas_codex/standard_names/benchmark.py:55 adds BenchmarkConfig.comparator_block (default False) and :62 adds source_paths, and _run_model at benchmark.py:1644 carries the block through the production helpers when the field is on.",
+    "manifest": "read the parsed record; it states status complete, the two gate logs, negative_control.log (2 failed, EXIT=1) and negative_control_source_paths.log (1 failed, EXIT=1), and its changed_paths match the diff.",
+    "write_paths": "the manifest declares imas_codex/standard_names/benchmark.py, tests/standard_names/test_benchmark_comparator_arms.py and the fragment HTML; the commit diff touches exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_benchmark_comparator_arms.py:81 and :97 are shown failing with the carry removed (negative_control.log 2 failed, EXIT=1) and :172 with the source branch removed (negative_control_source_paths.log 1 failed, EXIT=1), but :146 has no red arm.",
+    "evidence": "the manifest records both gate runs to disk (logs/base_gate.log 126 passed, logs/head_gate.log 130 passed, both EXIT=0) and the done-when's six files plus the new file are the command that ran.",
+    "fit": "the added fields and comments at imas_codex/standard_names/benchmark.py:55-64 follow the surviving dataclass and comment idiom, and the names comparator_block and source_paths carry no plan or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/benchmark.py:1644 carries the production block only when comparator_block is on and leaves the off path byte-identical, which is exactly the goal.",
+    "reuse": "benchmark.py:1652 imports _collect_nearby_name_comparators and _rerank_comparators_for_compose directly from imas_codex/standard_names/workers.py:1901,1976 rather than forking retrieval or rerank, and _extract_candidates reuses extract_dd_candidates via its existing explicit_paths argument.",
+    "scope_discipline": "the diff touches only the three declared paths, and the unused docs/figures entry in the manifest's orientation_write_paths contributed no file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to give the benchmark harness an opt-in production comparator block and a named source list; imas_codex/standard_names/benchmark.py:55 adds BenchmarkConfig.comparator_block (default False) and :62 adds source_paths, and _run_model at benchmark.py:1644 carries the block through the production helpers when the field is on.\nVERDICT done_when: the brief's done-when names the six gate files plus the new test file judged by delta; the manifest records base_gate.log (126 passed, EXIT=0 at 6b5f1d573596f9cb91f98977e092efa380bbd3d2) and head_gate.log (130 passed, EXIT=0 at 8254d80bc0a643770643107c97b332ebb25a4082), and both negative-control logs redden the added tests.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/benchmark.py, tests/standard_names/test_benchmark_comparator_arms.py and the fragment HTML; the commit diff touches exactly those three paths and nothing else.\nVERDICT manifest: read the parsed record; it states status complete, the two gate logs, negative_control.log (2 failed, EXIT=1) and negative_control_source_paths.log (1 failed, EXIT=1), and its changed_paths match the diff.\nVERDICT diff: read commit 8254d80bc against parent 6b5f1d573 commit by commit; it adds two BenchmarkConfig fields, one source_paths branch in _extract_candidates, one comparator_block branch in _run_model, the new test file and the evidence fragment, all inside the declared scope.\nCALL_SITES: imas_codex/cli/sn.py:3735, imas_codex/standard_names/benchmark.py:966, imas_codex/standard_names/benchmark.py:1045\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/benchmark.py:1644 carries the production block only when comparator_block is on and leaves the off path byte-identical, which is exactly the goal.\nSCORE evidence: 17\nJUSTIFICATION evidence: the manifest records both gate runs to disk (logs/base_gate.log 126 passed, logs/head_gate.log 130 passed, both EXIT=0) and the done-when's six files plus the new file are the command that ran.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only the three declared paths, and the unused docs/figures entry in the manifest's orientation_write_paths contributed no file.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_benchmark_comparator_arms.py:81 and :97 are shown failing with the carry removed (negative_control.log 2 failed, EXIT=1) and :172 with the source branch removed (negative_control_source_paths.log 1 failed, EXIT=1), but :146 has no red arm.\nSCORE fit: 18\nJUSTIFICATION fit: the added fields and comments at imas_codex/standard_names/benchmark.py:55-64 follow the surviving dataclass and comment idiom, and the names comparator_block and source_paths carry no plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: benchmark.py:1652 imports _collect_nearby_name_comparators and _rerank_comparators_for_compose directly from imas_codex/standard_names/workers.py:1901,1976 rather than forking retrieval or rerank, and _extract_candidates reuses extract_dd_candidates via its existing explicit_paths argument.\nFINDING tests/standard_names/test_benchmark_comparator_arms.py:157 follow-on: test_block_off_render_matches_the_base_revision rebuilds the expected prompt by calling render_prompt with the live template instead of comparing to the base revision's recorded bytes, so a template or prompt_loader change moves both sides together and the test cannot redden; it also has no recorded negative control, so its \"byte-identical to the base revision\" claim rests only on the off path adding no user-context key.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-benchmark-comparator-arms.html:25 follow-on: the fragment ends at </section> with no trailing newline, unlike its sibling fragments in docs/evidence/fragments/sn-selection-over-generation/, so it drifts from the surrounding file convention.\n",
+  "review_run_id": "r-20261013T143321462884-review-of-ssog-benchmark-comparator-arms-8254d80bc0a6",
+  "reviewed_base_sha": "6b5f1d573596f9cb91f98977e092efa380bbd3d2",
+  "reviewed_head_sha": "8254d80bc0a643770643107c97b332ebb25a4082",
+  "reviewed_run_id": "r-20261013T140632236585-ssog-benchmark-comparator-arms",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T14:43:42Z",
+  "total": 110
+}
