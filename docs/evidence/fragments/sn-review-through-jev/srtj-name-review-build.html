@@ -1,0 +1,16 @@
+<section id="srtj-name-review-build">
+  <h2 id="srtj-name-review-build-title">The name-axis Jev review, built as builders nothing calls</h2>
+  <p id="srtj-name-review-build-landing">
+    <code>imas_codex/standard_names/review/jev_review.py</code> builds one
+    judgement state and one question table from the review-check taxonomy. The
+    state carries the candidate name, its grammar segments, kind, unit,
+    description, source DD paths with their documentation, and sibling names,
+    with every neighbourhood field recording whether it was observed. The
+    question table is generated from the taxonomy: a category Choice per review
+    dimension present, and one Noul or Choice per check that carries a question;
+    a check the audit already decides contributes its finding and no question.
+    Each dimension's decision is derived in code from its category answer, and
+    sibling names are ordered through the comparator reranker, which keeps the
+    embedding order on failure. Nothing in the pipeline calls it yet.
+  </p>
+</section>
