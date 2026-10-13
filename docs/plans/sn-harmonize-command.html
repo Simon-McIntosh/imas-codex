@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -256,7 +256,10 @@
     <div class="r-comment-body"><p><strong>The live apply is refused, correctly, and needs the lead's ruling.</strong> Run <code>r-20261012T234608403861-shc-live-apply</code> found the family as specified: 17 members, all accepted, anchor <code>flux_surface_averaged_iron_density_at_plasma_boundary</code>. Before the apply it counted 62 lint findings (34 convention violations, 9 dead links, 19 missing reverse links), 17 distinct openings and 17 distinct flux-surface-average equation forms. <code>sn harmonize --apply</code> exits 1 before any reset or snapshot because one member, <code>flux_surface_averaged_electron_density_at_plasma_boundary</code>, is in the frozen roster <code>v0.3.0rc1+west-task-2e</code> (catalog PR #3). PR #3 <strong>merged on 2026-09-01</strong>, but its request was never folded back into the graph. So the member still reads <code>name_stage=accepted</code> rather than <code>approved</code>, and the roster is the only record that its text is in the published catalog. The guard therefore matches the ruling: the text has already been reviewed.</p><p><strong>Question for the lead:</strong> do you (a) authorise <code>--force &lt;reason&gt;</code> for this family, which rewrites the electron member's merged catalog text along with its 16 siblings; (b) have PR #3 folded back first and then decide, which does not change the refusal because the name becomes <code>approved</code>; or (c) retarget the §3 live done-when to a family with no committed member, and leave this one for the next catalog cut? The run is acknowledged and resumable. Under (a) it resumes with the reason, and under (c) it is discarded.</p><p>A second finding is buildable now. <code>--apply --dry-run</code> returns before <code>apply_families</code> runs, so it reported <code>decision=apply calls=17 cost=$0.85</code> for a scope that the real apply refuses. A dry run must run the same guard.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261012T234548025982-shc-guard-test-naming" data-who="reckon-build" data-when="2026-10-12T23:54:45.816Z">
-    <div class="r-comment-body"><p>shc-guard-test-naming — renamed the harmonize guard test&#x27;s negative-control seam by mechanism: removed the SHC_NO_RECOMMENDED_GUARD env-var seam and the _guard_or_removed helper, restated the docstring&#x27;s three protection classes as the rule itself; measure: rg -n &quot;SHC_|lead ruled&quot; finds nothing, file: 5 passed (base 5/EXIT=0, after 5/EXIT=0, no added failures), guard-removed arm 4 failed/EXIT=1.</p></div>
+    <div class="r-comment-body"><p>shc-guard-test-naming — renamed the harmonize guard test's negative-control seam by mechanism: removed the SHC_NO_RECOMMENDED_GUARD env-var seam and the _guard_or_removed helper, restated the docstring's three protection classes as the rule itself; measure: rg -n "SHC_|lead ruled" finds nothing, file: 5 passed (base 5/EXIT=0, after 5/EXIT=0, no added failures), guard-removed arm 4 failed/EXIT=1.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s3-guard-test-naming" data-who="reckon-build" data-when="2026-10-13T00:08:00Z">
+    <div class="r-comment-body"><p>The guard test now names its negative control by mechanism (merge <code>f919e6760</code>); review 100/120. §3 stays open: the live apply awaits the lead's ruling on catalog PR #3, and the dry-run guard is in flight. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s3-guard-test-naming">evidence</a></p></div>
 </div>
 </section>
 </main>
