@@ -1,0 +1,28 @@
+<section id="ssfms-fusion-measure-node" data-reckon="fragment">
+  <h2 id="ssfms-fusion-measure-node-title">Fusion measured: signal arms and the docs and code pool</h2>
+
+  <p id="ssfms-fusion-measure-node-what">
+    The measurement node for §4 scored the fused ranking against the frozen additive rule on the
+    §3 golden signal fixture and on the docs and code question set, and re-placed the census
+    answers the retrieval left below the top 30. Every element id of that record carries the
+    <code>ssfms-fusion-measure</code> prefix here, in this node's fragment.
+  </p>
+
+  <p id="ssfms-fusion-measure-node-signal">
+    Signal harness at the fused head: <code>current_tool</code> (fused) &mdash; mean nDCG@10
+    <strong>0.7920</strong>, grade-3 precision@5 <strong>0.7182</strong>, no question lacking a
+    grade-3 hit in its top 30 &mdash; against the frozen <code>additive_rule</code> 0.5605 /
+    0.5182 / 2 such questions. The fused arm beats the frozen rule on both metrics.
+  </p>
+
+  <p id="ssfms-fusion-measure-node-docs">
+    Docs and code, Jev rerank at pool 60, outside pytest: labelled-only nDCG@10
+    <strong>0.5136</strong> at the fused head, in the improving direction, its negative control
+    (the same measurement with the additive rule restored) <strong>0.3297</strong>. This is
+    0.0315 above the recorded 0.4821, outside the ±0.02 band, because the recorded baseline is no
+    longer reproducible today (the additive rule itself now scores 0.3297). Detail, the four
+    census answer ranks and the drift caveat are in
+    <a href="/imas-codex/evidence/fragments/signal-search-finds-the-measured-signal/fusion.html">the
+    fusion measurement record</a>.
+  </p>
+</section>

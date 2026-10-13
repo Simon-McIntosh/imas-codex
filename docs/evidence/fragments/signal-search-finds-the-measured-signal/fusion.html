@@ -1,0 +1,101 @@
+<section id="ssfms-fusion-measure" data-reckon="fused-search-measurement">
+  <h2 id="ssfms-fusion-measure-title">One rank fusion measured against the additive rule</h2>
+
+  <p id="ssfms-fusion-measure-what">
+    The fused ranking (<code>imas_codex/search/fusion.py</code>) is scored at the head that
+    replaced the additive blend, against the frozen additive-rule arm the §3 harness carries.
+    Two measurements ran: the signal harness over the 22 graded questions on the eligible
+    population of 14312, and the docs and code question set at pool 60 with its Jev rerank, run
+    outside pytest. Every figure below was produced on node <code>98dci4-clu-2002</code> at
+    revision <code>29c0d1eda</code>, the fused head.
+  </p>
+
+  <table id="ssfms-fusion-measure-signal-arms">
+    <caption>
+      Signal arms on §3's pooled labels, 22 questions, eligible population 14312.
+      <code>current_tool</code> is the product ranking, now the fused order; <code>additive_rule</code>
+      is the product's additive formula frozen in the harness; <code>vector_only</code> is the
+      100-candidate vector pool; <code>rrf</code> fuses the 100-vector and 50-full-text pools the
+      harness builds itself; the control is a seeded permutation of each question's labelled pool.
+    </caption>
+    <thead>
+      <tr><th>Arm</th><th>mean nDCG@10</th><th>grade-3 precision@5</th><th>grade-3 recall@30</th><th>questions with no grade-3 in top 30</th></tr>
+    </thead>
+    <tbody>
+      <tr id="ssfms-fusion-measure-arm-current"><td><code>current_tool</code> (fused)</td><td>0.7920</td><td>0.7182</td><td>0.6968</td><td>0</td></tr>
+      <tr id="ssfms-fusion-measure-arm-additive"><td><code>additive_rule</code> (frozen)</td><td>0.5605</td><td>0.5182</td><td>0.3829</td><td>2</td></tr>
+      <tr id="ssfms-fusion-measure-arm-vector"><td><code>vector_only</code></td><td>0.6798</td><td>0.5545</td><td>0.5624</td><td>0</td></tr>
+      <tr id="ssfms-fusion-measure-arm-rrf"><td><code>rrf</code></td><td>0.7920</td><td>0.7182</td><td>0.7224</td><td>0</td></tr>
+      <tr id="ssfms-fusion-measure-arm-control"><td><code>random_control</code></td><td>0.4718</td><td>0.2909</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-fusion-measure-signal-read">
+    The fused product arm (<code>current_tool</code>) beats the frozen additive rule on mean
+    nDCG@10 (0.7920 against 0.5605) and on grade-3 precision@5 (0.7182 against 0.5182), and no
+    question lacks a grade-3 hit in its top 30 (0 against the additive rule's 2). The fused arm
+    equals the harness's own <code>rrf</code> arm on nDCG@10 and precision@5 because the product
+    now fuses the same 100-vector and 50-full-text pools with the same <code>rrf_fuse</code>; the
+    two differ only in <code>recall@30</code>, where the harness's arm filters the eligible
+    population before the cut while the product cuts at 30 first, so the harness reaches the
+    next eligible candidate and the product does not. The control sits below every arm.
+  </p>
+
+  <table id="ssfms-fusion-measure-docs-code">
+    <caption>
+      Labelled-only nDCG@10 on the 18 JT-60SA docs and code questions, Jev rerank at pool 60,
+      run outside pytest. Both arms run at pool 60; the recorded figure is the 2026-10-07 pool sweep.
+    </caption>
+    <thead>
+      <tr><th>Arm</th><th>labelled-only nDCG@10 @ pool 60</th></tr>
+    </thead>
+    <tbody>
+      <tr id="ssfms-fusion-measure-docs-fused"><td>fused head (this run)</td><td>0.5136</td></tr>
+      <tr id="ssfms-fusion-measure-docs-additive"><td>additive rule restored (negative control, this run)</td><td>0.3297</td></tr>
+      <tr id="ssfms-fusion-measure-docs-recorded"><td>recorded baseline, 2026-10-07 pool sweep</td><td>0.4821</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-fusion-measure-docs-read">
+    The fused head scores 0.5136, which is <strong>0.0315 above</strong> the recorded 0.4821 —
+    outside the ±0.02 band, but in the improving direction: fusion did not regress the docs and
+    code search, it raised it. The band cannot be applied cleanly because the recorded baseline is
+    no longer reproducible: with the additive rule restored in a scratch copy, run the same day
+    through the same judge, the same measurement gives 0.3297, not 0.4821. The retrieval and label
+    population have drifted since 2026-10-07. On the like-for-like comparison that the two arms do
+    support — same head, same day, same judge, same labels, only the ranking arithmetic differing —
+    fusion lifts labelled-only nDCG@10 from 0.3297 to 0.5136, and on the prototype's own label set
+    from 0.3297 to 0.4025.
+  </p>
+
+  <table id="ssfms-fusion-measure-census">
+    <caption>
+      Re-placement of the census answers the retrieval left below the top 30 (census ranks from
+      <a href="/imas-codex/evidence/fragments/discovery-judgments-through-jev/retrieval-miss-census.html">the
+      miss census</a>). Ranks are 1-based positions in the fused embedding order at pool 60.
+    </caption>
+    <thead>
+      <tr><th>Question</th><th>Answer</th><th>census rank</th><th>fused embedding rank @60</th><th>after Jev rerank @60</th></tr>
+    </thead>
+    <tbody>
+      <tr id="ssfms-fusion-measure-census-q05"><td>q05</td><td><code>eqequb.f</code></td><td>159</td><td>not retrieved in top 60</td><td>not retrieved</td></tr>
+      <tr id="ssfms-fusion-measure-census-q12"><td>q12</td><td><code>shtrd.f</code></td><td>below 200</td><td>not retrieved in top 60</td><td>not retrieved</td></tr>
+      <tr id="ssfms-fusion-measure-census-q14"><td>q14</td><td><code>use_compiler-en.html</code></td><td>181</td><td>1</td><td>22</td></tr>
+      <tr id="ssfms-fusion-measure-census-q18"><td>q18</td><td><code>use_login-en.html</code></td><td>163</td><td>1</td><td>2</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-fusion-measure-census-read">
+    Two of the four census answers move to the very top of the fused order: <code>use_compiler-en.html</code>
+    from rank 181 to rank 1, and <code>use_login-en.html</code> from rank 163 to rank 1. The Jev rerank
+    then reorders them (q14 to rank 22, q18 to rank 2), which is the judge's business. The two code
+    answers (<code>eqequb.f</code>, <code>shtrd.f</code>) are still not retrieved inside the top 60:
+    those are ingestion and ranking-depth gaps below the fusion, not repaired by it, and they remain
+    for the census's OTHER dispositions.
+  </p>
+
+  <p id="ssfms-fusion-measure-logs">
+    <strong>Logs.</strong> Signal arms: <code>/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/signal-fusion-measure/signal_arms.log</code>.
+    Docs and code, fused: <code>.../docs_code_pool60.log</code>. Negative control (additive restored): <code>.../negative_control_docs_code_additive.log</code>.
+  </p>
+</section>
