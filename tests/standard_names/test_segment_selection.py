@@ -30,7 +30,10 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import segment_selection as ss
+from imas_codex.standard_names import (
+    segment_selection as ss,
+    vocabulary_definitions as vocabulary_source,
+)
 
 QUESTION = ss.QUESTION_NAME
 NONE = ss.NONE
@@ -170,6 +173,7 @@ def _mutation(monkeypatch: pytest.MonkeyPatch):
         )
 
     yield
+    monkeypatch.undo()
     ss._build_tree.cache_clear()
     ss._admissible_cached.cache_clear()
 
@@ -242,7 +246,11 @@ def test_every_offered_option_carries_its_meaning():
         if leaf.key == NONE:
             continue
         assert leaf.description != leaf.key, f"{leaf.key} was offered unexplained"
-        assert leaf.description == ss.option_text(leaf.key)
+        definition = vocabulary_source.vocabulary_definitions(include_loci=True).get(
+            leaf.key
+        )
+        if definition:
+            assert leaf.description == f"{leaf.key} — {definition}"
 
 
 def test_definition_coverage_reports_the_slots_that_lack_definitions():

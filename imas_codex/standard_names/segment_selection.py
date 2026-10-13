@@ -41,12 +41,12 @@ well:
 
 Slots and how each maps onto ISN
 -------------------------------
-The plan names six slots; ISN keeps its vocabulary and its intermediate
+Selection uses six slots; ISN keeps its vocabulary and its intermediate
 representation under different keys, so the mapping is stated once here and
 nowhere else:
 
 ======================  ==============================  ==============================
-plan slot               ISN vocabulary (segment class)  IR field of ``StandardNameIR``
+selection slot          ISN vocabulary (segment class)  IR field of ``StandardNameIR``
 ======================  ==============================  ==============================
 ``physical_base``       ``SEGMENT_TOKEN_MAP['physical_base']``
                                                         ``base`` (``BaseKind.QUANTITY``)
@@ -76,7 +76,7 @@ Asking order and render order
 remaining five slots in the order ISN renders them. The renderer's own order is
 projection, qualifiers, base, locus, mechanism with the operator stack wrapped
 around that core, so the module derives its asking order from the renderer
-rather than from the plan's listing.
+rather than from a separate listing.
 
 Large vocabularies as a tree
 ----------------------------
@@ -113,6 +113,7 @@ from functools import lru_cache
 from typing import Any
 
 from imas_codex.discovery.base.judgment import decide_batch
+from imas_codex.standard_names import vocabulary_definitions as vocabulary_source
 from imas_codex.standard_names.grammar_adapter import compose_canonical_ir
 from imas_codex.standard_names.segments import (
     OPERATOR_SEGMENT,
@@ -144,7 +145,7 @@ QUESTION_NAME = "segment"
 #: How many base tokens the embedding shortlist offers, ranked by similarity.
 SHORTLIST_SIZE = 20
 
-#: Plan slot → the ISN segment class whose vocabulary fills it. ``locus`` and
+#: Selection slot → the ISN segment class whose vocabulary fills it. ``locus`` and
 #: ``operator`` are absent here because their vocabulary is a registry rather
 #: than a flat ``SEGMENT_TOKEN_MAP`` slot.
 SLOT_PHYSICAL_BASE = "physical_base"
@@ -262,34 +263,9 @@ class SelectionRun:
 # ---------------------------------------------------------------------------
 
 
-@lru_cache(maxsize=1)
 def _vocabulary_definitions() -> dict[str, str]:
-    """Token → definition for the vocabulary entries ISN declares one on.
-
-    Read from the public loaders at call time, so a definition added to ISN's
-    vocabulary reaches the options without a change here. Returns an empty
-    mapping when ISN is unavailable, so the option text then falls through to
-    the concept registry and the aliases rather than to a stale copy.
-    """
-    try:
-        from imas_standard_names.grammar.vocab_loaders import (
-            load_geometry_carriers,
-            load_locus_registry,
-            load_physical_bases,
-        )
-    except ImportError:  # pragma: no cover - ISN absent
-        return {}
-    definitions: dict[str, str] = {}
-    try:
-        for token, entry in load_locus_registry().loci.items():
-            definitions[token] = entry.definition
-        for token, entry in load_physical_bases().bases.items():
-            definitions[token] = entry.definition
-        for token, entry in load_geometry_carriers().carriers.items():
-            definitions[token] = entry.definition
-    except Exception:  # pragma: no cover - ISN restructured
-        return {}
-    return {token: text for token, text in definitions.items() if text}
+    """Token definitions offered by selection, including loci."""
+    return vocabulary_source.vocabulary_definitions(include_loci=True)
 
 
 @lru_cache(maxsize=1)
@@ -375,9 +351,8 @@ def option_text(token: str) -> str:
 def definition_coverage() -> dict[str, dict[str, int]]:
     """Per slot, how many offered tokens carry a definition and how many do not.
 
-    The count is the honest one the plan asks for: a token whose only meaning is
-    its registered aliases is reported as carrying none, because an alias is a
-    second spelling rather than a definition.
+    A token whose only meaning is its registered aliases is reported as carrying
+    none, because an alias is a second spelling rather than a definition.
     """
     coverage: dict[str, dict[str, int]] = {}
     for slot in SLOT_ORDER:

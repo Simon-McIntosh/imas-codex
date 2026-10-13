@@ -27,6 +27,7 @@ from functools import cache as _cache, lru_cache
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.graph.models import RefineStopReason
+from imas_codex.standard_names import vocabulary_definitions as vocabulary_source
 from imas_codex.standard_names.budget import (
     bind_attempt_exposure,
     charge_billable_exception,
@@ -8491,26 +8492,7 @@ async def _run_rd_quorum_cycles(
     }
 
 
-@lru_cache(maxsize=1)
-def _closed_vocabulary_definitions() -> dict[str, str]:
-    """Map every closed-vocabulary base and carrier token to its definition.
-
-    Physical bases and geometry carriers both carry an optional normative
-    ``definition``; tokens that declare none are absent from the mapping so a
-    caller can tell "defined" from "empty".
-    """
-    from imas_standard_names.grammar import vocab_loaders
-
-    definitions: dict[str, str] = {}
-    for token, entry in vocab_loaders.load_physical_bases().bases.items():
-        text = (entry.definition or "").strip()
-        if text:
-            definitions[token] = text
-    for token, entry in vocab_loaders.load_geometry_carriers().carriers.items():
-        text = (entry.definition or "").strip()
-        if text:
-            definitions[token] = text
-    return definitions
+_closed_vocabulary_definitions = vocabulary_source.vocabulary_definitions
 
 
 def semantic_gate_name_text(name: str) -> str:
@@ -8538,7 +8520,7 @@ def semantic_gate_name_text(name: str) -> str:
         return name
     if ir.operators or ir.qualifiers or ir.projection or ir.locus or ir.mechanism:
         return name
-    return _closed_vocabulary_definitions().get(ir.base.token) or name
+    return vocabulary_source.vocabulary_definitions().get(ir.base.token) or name
 
 
 async def process_review_name_batch(
