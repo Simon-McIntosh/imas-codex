@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c">
 </head>
@@ -614,7 +614,10 @@
     <div class="r-comment-body"><p>Review of r-20261013T005826086865-ssfms-post-reembed-harness stored as a parsed six-dimension record (total 105: goal_fidelity 19, evidence 14, scope_discipline 19, durability 15, fit 18, reuse 20), reading base 9f53972b2 and head 83c08fd4c, added_failure_count 0, two follow-on findings (the four-arm test never asserts the done_when's 0.012-spread clause; the explicitly required psc_cref3snu label is unguarded because no arm places it in a top 10).</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261013T013532838739-review-of-ssfms-embed-text-one-owner-177406c48eee" data-who="reckon-build" data-when="2026-10-13T01:43:59.965Z">
-    <div class="r-comment-body"><p>attached an independent six-dimension review of run r-20261013T011641454886-ssfms-embed-text-one-owner at head 177406c48 (base 39b8a36ae): scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 17, fit 19, reuse 20 (total 111); CALL_SITES 5; 0 added failures; one follow-on finding (the graph-marked census test asserts only n&gt;=0, so its live-graph passage is evidenced by the run&#x27;s printed census reading rather than an assertion)</p></div>
+    <div class="r-comment-body"><p>attached an independent six-dimension review of run r-20261013T011641454886-ssfms-embed-text-one-owner at head 177406c48 (base 39b8a36ae): scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 17, fit 19, reuse 20 (total 111); CALL_SITES 5; 0 added failures; one follow-on finding (the graph-marked census test asserts only n&gt;=0, so its live-graph passage is evidenced by the run's printed census reading rather than an assertion)</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261013T011641454886-ssfms-embed-text-one-owner" data-who="reckon-build" data-when="2026-10-13T01:34:48.704Z">
+    <div class="r-comment-body"><p>Consolidated the signal embed-text choice into `signal_embed_text` as the single derivation shared by the description writer (default `embed_text`), the re-embed sweep and the census predicate; removed the duplicate `_default_embed_text`; live census reads n=61983, mismatch=0, tests/discovery/ adds zero failures (head 1562 passed / base 1561 passed) and the declared mutation fails the shared-derivation test.</p></div>
 </div>
 </section>
 </main>
