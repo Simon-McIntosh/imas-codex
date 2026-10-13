@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s7&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-harmonize-command#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -62,7 +62,7 @@
     </p>
 
     <h2 id="s2">§2 — Grammar segments chosen from the vocabulary</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       Given a DD path, its documentation and its enriched description, Jev answers one Choice
       per grammar slot over that slot's closed ISN vocabulary: physical base, subject, component,
@@ -214,6 +214,9 @@
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-10-13T05:22:00Z">
     <div class="r-comment-body"><p>§2 closed with a negative result. Jev choosing each grammar segment from the closed vocabulary does not earn a deployment: 0.50 to 0.80 per slot, 0.03 of whole names, and a cross-check AUC of 0.480. By the fixed rule the recommendation is neither cross-check nor generator (merges <code>00a070a95</code>, <code>22e130c4a</code>, <code>dd9e0df53</code>; USD 0.59). The module stays on main, unwired, as the measured prototype. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s2-measured">evidence</a></p></div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-s2-reopened-arm-2" data-who="lead" data-when="2026-10-13T08:10:00Z">
+    <div class="r-comment-body"><p><strong>Reopened (lead, 2026-10-13) for a second design arm.</strong> The first arm's 'neither' measured our design more than Jev. Of 434 items:</p><ul><li>68 failed because every Choice offered 'none', including the mandatory base;</li><li>52 failed because the six slots were asked independently and formed combinations the grammar refuses;</li><li>the base was one flat Choice over the whole vocabulary, not the tree with a beam this section specifies, with every option the bare token and no definition, so near-synonyms (<code>density</code>/<code>number_density</code>, <code>vertical_coordinate</code>/<code>height</code>, <code>toroidal_angle</code>/<code>angle</code>) were indistinguishable;</li><li>an operator or process was added 173 times where the name has none;</li><li>scoring against the composer's exact spelling counted valid alternatives as errors.</li></ul><p>A minority of errors are genuine model misreads. <strong>Arm 2</strong> makes the base mandatory, shows each option's definition, narrows the base to an embedding shortlist of about 20 candidates before asking, asks the slots in sequence offering only grammar-valid continuations, and scores acceptance against grammar-equivalent spellings. The same fixed rule decides the recommendation.</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T012137597192-review-of-ssog-comparator-rerank-4a1e53c1c23b" data-who="reckon-build" data-when="2026-10-13T01:30:27.987Z">
     <div class="r-comment-body"><p>Review stored for r-20261013T005036802056-ssog-comparator-rerank at base c98a0d42d head 4a1e53c1c: goal_fidelity 19, evidence 14, scope_discipline 19, durability 16, fit 18, reuse 20 (total 106); 0 added failures (base 0 vs head 0); three follow-on findings, no blocking findings.</p></div>
 </div>
@@ -242,7 +245,7 @@
     <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T051848429980-ssog-link-label-sheet" data-who="reckon-build" data-when="2026-10-13T05:36:56.962Z">
-    <div class="r-comment-body"><p>Self-link detection (find_name_links/find_self_links) and the link-label Jev state added to doc_links.py; the sheet ssog-link-label-sheet.json holds 180 links (all 74 self-links, 19 domains), each with Jev&#x27;s probability; run spend USD 0.0037.</p></div>
+    <div class="r-comment-body"><p>Self-link detection (find_name_links/find_self_links) and the link-label Jev state added to doc_links.py; the sheet ssog-link-label-sheet.json holds 180 links (all 74 self-links, 19 domains), each with Jev's probability; run spend USD 0.0037.</p></div>
 </div>
 </section>
 </main>

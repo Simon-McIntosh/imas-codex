@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="102">
+<meta name="plan-version" content="103">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -371,6 +371,9 @@
 <div class="r-comment" data-section="s21" data-id="c-run-sib-scalar-only-backfill" data-who="reckon-build" data-when="2026-10-12T21:48:00Z">
     <div class="r-comment-body"><p>Two of three signed edges written (merge <code>8511a72f0</code>). <code>area_of_flux_surface</code> is refused by the structural-legitimacy guard: it is superseded but still parents three accepted names. Decision for the lead: reparent those three children to its successor first and then sign its edge, or keep its scalar and exclude it from §16's removal. Until then §21 and §16 stay open, and the run is held resumable. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s21-partial">evidence</a></p></div>
 </div>
+<div class="r-comment" data-section="s21" data-id="c-s21-lead-ruling-rename" data-who="lead" data-when="2026-10-13T08:10:00Z">
+    <div class="r-comment-body"><p><strong>Ruling (2026-10-13):</strong> rename the children. <code>area_of_flux_surface</code> is the poloidal cross-sectional area, the same quantity as its successor <code>poloidal_plane_cross_sectional_area_of_flux_surface</code>. Its two derivative children (dA/dψ and dA/dΦ, whose descriptions name the cross-sectional area) are renamed to the successor's spelling through <code>sn edit</code>. <code>surface_area_of_flux_surface</code> is the toroidal surface area, a different quantity, and is given its correct parent rather than the successor. The signed successor edge is then written and §16 can retire the scalar. Moving only the parent link was rejected, because derived parents are recomputed from the spelling and the old parent would return.</p></div>
+</div>
 <div class="r-comment" data-section="s25" data-id="c-close-s25" data-who="reckon-build" data-when="2026-10-12T22:16:00Z">
     <div class="r-comment-body"><p>§25 landed: the fifteen export and catalog tests were stale fixtures missing producer topology, repaired in fixtures only; the eight files pass 60 of 60 (merge <code>f15f55e47</code>); review 108/120. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s25">evidence</a></p></div>
 </div>
@@ -451,6 +454,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-docs-pending-landed" data-who="reckon-build" data-when="2026-10-13T02:16:00Z">
     <div class="r-comment-body"><p>The docs-at-pending hole is closed: <code>sn edit --docs</code> seeds documentation onto an accepted name whose docs axis has not started, under the edit's existing claim (merge <code>9fe3cfb4a</code>); review 115/120. Two of §7's three holes are now closed. The third, renaming onto a dead tombstone's spelling, awaits the lead's ruling in <code>c-s7-holes-decided</code>. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s7-docs-edit-pending">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-tombstone" data-who="lead" data-when="2026-10-13T08:10:00Z">
+    <div class="r-comment-body"><p><strong>Ruling (2026-10-13):</strong> renaming onto a dead tombstone's spelling stays refused. The refusal becomes stage-aware and names the routes: rename the tombstone itself to bring it back (the route the sn-edit skill documents, which works), or return it to draft with a signed transition and fold the other name into it. Resurrecting the tombstone in place was rejected, because its recorded spend and reviews would become attached to different content.</p></div>
 </div>
 <div class="r-comment" data-section="s29" data-id="c-run-r-20261013T003700617029-sib-maintenance-test-asserts" data-who="reckon-build" data-when="2026-10-13T01:01:18.610Z">
     <div class="r-comment-body"><p>Reworked tests/standard_names/test_edit_scope_skips_maintenance.py to drive the real `sn run` command via CliRunner so both startup-step assertions observe sn_run's skip guard; each of the four named behaviours is shown to redden its assertion under a scratch-copy mutation (EXIT=1 each) and the 36-file sn-run gate adds no failure against base (525 passed both arms).</p></div>
