@@ -1,0 +1,51 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T09:43:30.218Z",
+  "dispatched_at": "2026-10-13T09:25:40Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:210",
+      "id": "reasoning-1",
+      "reason": "without reconciling the target against the measured baseline the node either lowers the bar silently or spends the re-classification budget on a prompt fix that the cited measurement says cannot close a 9/20 gap on its own.",
+      "text": "\u00a73's done-when requires \"the DD classifier, measured on the DD sources of the labelled names, reproduces all twenty lead-approved domains\", yet the run \u00a73 cites as its diagnosis (scg-dd-domain-diagnosis) measured exactly that and reports lead stored 11/20, fresh 11/20, derived 1/20 (coordinator stored 63/150, fresh/derived 67/150); the fresh arm is the classifier \u00a73 keeps as the source of truth and the derived arm is the name-level reduction \u00a73 rewrites, so the plan asserts a 20/20 target its own cited evidence shows the retained mechanism reaching 11/20, and its declared rank order (transport at index 2 outranking core_plasma_physics at index 3 in FALLBACK_RANK_TABLE) is the same order the diagnosis confusion shows mapping lead-approved core_plasma_physics labels onto transport",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:156",
+      "id": "anchors_resolve-1",
+      "reason": "a plan whose central diagnosis points at an unlanded run gives the build node no artifact to check its census or its classifier baseline against, and the cited diagnosis is also the source of the accuracy numbers the done-when needs.",
+      "text": "\u00a73 names `scg-dd-domain-diagnosis` as the 2026-10-13 diagnosis behind its root cause and its seven-row graph census, but the run's evidence artifacts (scg-dd-domain-diagnosis.html, -results.json, -run.py) are not in HEAD \u2014 they exist only in that node's unmerged worktree, and no committed path, commit or section resolves the citation; a later reader cannot open the evidence the census rests on",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "55204d295c273d3f51e46727f6a21e8448a5aa5736a9d0f5e1058a7de850fab4",
+  "plan_slug": "sn-catalog-grouping",
+  "plan_version": 27,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T092515621533-plan-review-of-sn-catalog-grouping",
+  "reviewed_blob_sha": "3de56bb7b4e837dc6bc4efeb7b91db713e6ea970",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a73 cites `scg-dd-domain-diagnosis` as the run that diagnosed its root cause, but that run's evidence artifacts are not landed in the repository.",
+    "done_when": "pass \u2014 \u00a73's done-when names two declared negative controls (\"a test that fails with the old upsert\", \"a test that fails when a writer computes its own\") and its remaining items are falsifiable live-graph counts, unlike the review's earlier done_when finding which was acted on.",
+    "evidence_paths": "pass \u2014 \u00a73 writes its evidence under docs/evidence/fragments/sn-catalog-grouping/ (the label sheet and incumbent file both resolve there), not a scratchpad.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach \u00a73's symbols; the worktree heads (`6a72a98fe`, `198040e1e`) and evidence names are data, not code.",
+    "reasoning": "a finding \u2014 \u00a73's done-when asserts the classifier reproduces all twenty lead-approved domains, but the diagnosis it cites as its basis measured the fresh classifier at 11/20 and the derived name domain at 1/20.",
+    "single_goal": "pass \u2014 \u00a73 delivers one mechanism (the DD graph as the single domain source) with its audit and repair; the four numbered design items are facets of that one verdict, not two deliverables.",
+    "wiring": "pass \u2014 \u00a73's declared depends-on (sn-judgment-evaluation#s3) resolves to a done section, and the earlier findings against \u00a73's wiring (the retired conventions/domains.yml rule table, the Jev Choice arm) are gone from the redesigned text; no \u00a73 relationship points at a node that does not exist."
+  },
+  "section_digests": {
+    "_document": "502a2bfa69c4863a9cd34bcc0968e350e314683f2c0e58fd0858bdf994c91f0e",
+    "s1": "6bc3b44a7fd794158b4e454dd07668ea7d805f53ea1a5e11fac0c4b9a32edd70",
+    "s2": "badc6d06874b81a42ccd8772957595e0e1e9cb7d1a7fe7c9f3ade7c219cb3b72",
+    "s3": "52e12eee85624c737456d8876bf22436eb872b1a322ae528d2e32d891119b082",
+    "s4": "7cd0454d13ab9a70c3e44752b5b15dcc7a96f90ed71f0fe117a7874db5ca5459",
+    "s5": "6a583a112984f320b52d30c670be604713b3d4204e41c7dd12230c311f9ff0e3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T09:45:05.076437+00:00"
+}
