@@ -1,30 +1,55 @@
 <!-- Reprocess of a stratified JT-60SA sample through the description pipeline.
-     Sample: 202 signals, stratified by data_source_name, all grouped
-     catalogue members. Reset once to discovered, re-enriched without a reset.
+     Sample: 202 signals, stratified by data_source_name, drawn by a
+     deterministic stride over each category's sorted ids. 17 are members of a
+     multi-member source, 185 single-member. Reset once to discovered,
+     re-enriched without a reset.
      Commands and logs: ~/.config/reckon/crew/runs/r-20261013T113938701940-ssfms-reprocess-sample
      (reset2.log, enrich1.log). Machine-readable record: reprocess-sample-ids.json. -->
 <section id="ssfms-reprocess-sample" data-reckon="evidence">
   <h2 id="ssfms-reprocess-sample-heading">Reprocessing a stratified JT-60SA signal sample</h2>
 
   <p id="ssfms-reprocess-sample-intro">
-    202 JT-60SA signals were drawn at random within each source
-    category — LCDB, edas, UDDB, G-EQDSK and EQDB — so the sample carries every
-    scanner the facility has. All 202 are grouped
-    catalogue members. The sample was reset to <code>discovered</code> once,
-    re-enriched through the current pipeline, and then checked signal by signal.
+    202 JT-60SA signals were drawn by a deterministic stride over each source
+    category's sorted ids — LCDB, edas, UDDB, G-EQDSK and EQDB — so the sample
+    carries every scanner the facility has. Seventeen of the 202 are members of
+    a source carrying more than one member; the other 185 are single-member
+    sources. The sample was reset to <code>discovered</code> once, re-enriched
+    through the current pipeline, and then checked signal by signal. The
+    reprocess ran from 2026-10-13T11:53:35Z, the first reset the sample issued.
   </p>
 
   <p id="ssfms-reprocess-sample-negative-control">
     The reset is the one step that could have silently done nothing, so it carries
     a negative control. Before the fix whose effect this node measures,
     1441 JT-60SA signals were enriched
-    before 2026-10-11T21:16:46Z. A census taken immediately after the
-    reset found 202 of the
-    sample's signals at <code>discovered</code> and
-    0 with a description — the
-    complement of the control, so a census that had found them still described
-    would have meant the reset never ran.
+    before 2026-10-11T21:16:46Z. The reset's own log asserts
+    <code>Reset 202 signals</code>, and that line is the whole record of the
+    sample's post-reset state: no separate post-reset census artifact was
+    captured for it, so the post-reset reading is asserted from the reset log
+    rather than measured by a census. It is the complement of the control, so a
+    census that had found them still described would have meant the reset never
+    ran.
   </p>
+
+  <h3 id="ssfms-reprocess-bulk-1-progress-heading">The bulk reprocess: every scope this node reset and finished</h3>
+  <p id="ssfms-reprocess-bulk-1-progress-prose">
+    A later node reset two scopes and drove each to completion — no signal left
+    at <code>discovered</code>, every one described, every description's
+    <code>embedded_text_hash</code> matching a hash recomputed from its own
+    text, and every one carrying a <code>signal_role</code> after
+    <code>backfill_signal_roles</code>. The figures below are read from the
+    per-scope census results at run time, never typed in; the machine-readable
+    record is
+    <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress.json</code>.
+  </p>
+
+  <table id="ssfms-reprocess-bulk-1-progress-table">
+    <caption>Each scope reset, its enrichment cost record and its final census (jt-60sa)</caption>
+    <tr><th>scope</th><th>categories</th><th>signals</th><th>engine enriched</th><th>spend</th><th>seconds</th><th>discovered left</th><th>hash mismatch</th><th>roles missing</th></tr>
+    <tr><td>small-catalogue-families</td><td>30</td><td>180</td><td>336</td><td>$0.16</td><td>446.8</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>coil-and-vessel-instrumentation</td><td>24</td><td>553</td><td>1126</td><td>$0.08</td><td>270.4</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td><strong>total</strong></td><td><strong>54</strong></td><td><strong>733</strong></td><td><strong>1462</strong></td><td><strong>$0.24</strong></td><td><strong>717.2</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+  </table>
 
   <table id="ssfms-reprocess-sample-steps-table">
     <caption>The two pipeline stages, their commands and their cost records</caption>

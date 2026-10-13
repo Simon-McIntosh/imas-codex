@@ -1,0 +1,55 @@
+<!-- Bulk reprocess of JT-60SA signal categories through the current pipeline.
+     Two scopes reset and finished: 54 categories, 733 signals. Machine-readable
+     record: reprocess-progress.json beside this fragment. Census and cost logs
+     under ~/.config/reckon/crew/runs/r-20261013T124508004015-ssfms-reprocess-bulk-1. -->
+<section id="ssfms-reprocess-bulk-1" data-reckon="evidence">
+  <h2 id="ssfms-reprocess-bulk-1-heading">Reprocessing JT-60SA categories in bulk</h2>
+
+  <p id="ssfms-reprocess-bulk-1-outcome">
+    Two scopes were reset to <code>discovered</code> and driven to completion
+    within one node: <strong>54 categories</strong> holding
+    <strong>733 signals</strong>. Every signal finished — none is left at
+    <code>discovered</code>, all 733 carry a description, every description's
+    <code>embedded_text_hash</code> matches a hash recomputed from its own text
+    (0 mismatches, confirmed facility-wide by
+    <code>census_signal_embeddings(facility='jt-60sa')</code>: 15111 signals,
+    0 mismatches), and every one carries a <code>signal_role</code> after
+    <code>backfill_signal_roles</code>. Engine spend was <strong>$0.24</strong>
+    over 1462 engine-signals at 717.2s of enrichment wall time.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-1-method">
+    A scope was reset only when the node's measured rate said it could finish in
+    the remaining time. Enrichment runs at roughly 45 engine-signals per minute
+    and $0.000476 per engine-signal, so the second scope was sized to 553
+    signals rather than the whole facility. No scope was reset after 13:25:25Z
+    (40 minutes into the node); the node ended at 13:45:25Z.
+  </p>
+
+  <table id="ssfms-reprocess-bulk-1-scopes-table">
+    <caption>Each scope: reset size, enrichment cost record, and final census</caption>
+    <tr><th>scope</th><th>categories</th><th>signals</th><th>engine enriched</th><th>spend</th><th>seconds</th><th>discovered</th><th>hash mismatch</th><th>roles missing</th></tr>
+    <tr><td>small-catalogue-families</td><td>30</td><td>180</td><td>336</td><td>$0.16</td><td>446.8</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>coil-and-vessel-instrumentation</td><td>24</td><td>553</td><td>1126</td><td>$0.08</td><td>270.4</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td><strong>total</strong></td><td><strong>54</strong></td><td><strong>733</strong></td><td><strong>1462</strong></td><td><strong>$0.24</strong></td><td><strong>717.2</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+  </table>
+
+  <p id="ssfms-reprocess-bulk-1-negative-control">
+    The reset is the step that could have silently done nothing, so the second
+    scope carries one. Its post-reset census, taken immediately after the reset
+    and before enrichment, found all 553 of its signals at
+    <code>discovered</code> with <code>described=0</code> — the complement of
+    the control, so a census that had found them still described would have meant
+    the reset never ran. That census is captured at
+    <code>census-chunk2-postreset.json</code> under the run directory.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-1-sample-correction">
+    This node also corrected the earlier sample's record: the 202-signal sample
+    was drawn by a deterministic stride over each category's sorted ids, not at
+    random; 17 of the 202 are members of a multi-member source and the other 185
+    single-member; the reprocess started at 2026-10-13T11:53:35Z; and the
+    sample's post-reset census is asserted from its reset log rather than a
+    captured census artifact.
+  </p>
+</section>

@@ -1,0 +1,132 @@
+{
+  "facility": "jt-60sa",
+  "pipeline": "imas-codex discover run jt-60sa --only signals",
+  "reprocess_start": "2026-10-13T11:53:35Z",
+  "negative_control_enriched_before_fix": 1416,
+  "negative_control_cutover": "2026-10-11T21:16:46Z",
+  "scopes": [
+    {
+      "scope": "small-catalogue-families",
+      "mode": "combined reset+enrich",
+      "n_categories": 30,
+      "categories": [
+        "LFPPCC",
+        "TCTIU",
+        "UFPPCC",
+        "Cryo",
+        "EF1",
+        "EF2",
+        "EF5",
+        "EF6",
+        "d240034",
+        "CHEASE",
+        "TFC",
+        "SELENE",
+        "SA",
+        "LIUQE",
+        "TOPICS",
+        "CO2",
+        "DB",
+        "SXR",
+        "DSMS",
+        "EF4",
+        "TFTIME",
+        "CryoCP",
+        "EF3",
+        "GAS",
+        "CS1",
+        "CS2",
+        "CS3",
+        "CS4",
+        "GAU",
+        "GLW"
+      ],
+      "signals": 180,
+      "enrichment": {
+        "signals": 336,
+        "spend_usd": 0.16,
+        "seconds": 446.8
+      },
+      "post_reset_census": null,
+      "final_census": {
+        "total": 180,
+        "discovered": 0,
+        "described": 180,
+        "roles": 180,
+        "no_role": 0,
+        "emb": 180,
+        "hash_mismatch": 0
+      },
+      "log_post_reset": null,
+      "log_enrich": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T124508004015-ssfms-reprocess-bulk-1/scratch/batch1.log",
+      "log_final_census": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T124508004015-ssfms-reprocess-bulk-1/scratch/census-batch1-final.json"
+    },
+    {
+      "scope": "coil-and-vessel-instrumentation",
+      "mode": "reset then enrich",
+      "n_categories": 24,
+      "categories": [
+        "TCIFW",
+        "CryoMC",
+        "MAG",
+        "PRB",
+        "N2GAS",
+        "TF03",
+        "TF07",
+        "TF10",
+        "TF13",
+        "TF16",
+        "TF01",
+        "TF02",
+        "TF04",
+        "TF05",
+        "TF06",
+        "TF08",
+        "TF09",
+        "TF11",
+        "TF12",
+        "TF14",
+        "TF15",
+        "TF17",
+        "TF18",
+        "TCUD"
+      ],
+      "signals": 553,
+      "enrichment": {
+        "signals": 1126,
+        "spend_usd": 0.08,
+        "seconds": 270.4
+      },
+      "post_reset_census": {
+        "total": 553,
+        "discovered": 553,
+        "described": 0,
+        "roles": 0,
+        "no_role": 0,
+        "emb": 553,
+        "hash_mismatch": 553
+      },
+      "final_census": {
+        "total": 553,
+        "discovered": 0,
+        "described": 553,
+        "roles": 553,
+        "no_role": 0,
+        "emb": 553,
+        "hash_mismatch": 0
+      },
+      "log_post_reset": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T124508004015-ssfms-reprocess-bulk-1/scratch/census-chunk2-postreset.json",
+      "log_enrich": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T124508004015-ssfms-reprocess-bulk-1/scratch/chunk2-enrich.log",
+      "log_final_census": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T124508004015-ssfms-reprocess-bulk-1/scratch/census-chunk2-final.json"
+    }
+  ],
+  "totals": {
+    "scopes": 2,
+    "categories": 54,
+    "signals": 733,
+    "enrich_signals": 1462,
+    "spend_usd": 0.24,
+    "hash_mismatch": 0,
+    "discovered_left": 0
+  }
+}
