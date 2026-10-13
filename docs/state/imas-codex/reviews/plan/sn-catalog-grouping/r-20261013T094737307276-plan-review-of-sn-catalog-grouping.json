@@ -1,0 +1,34 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T10:00:42.582Z",
+  "dispatched_at": "2026-10-13T09:47:55Z",
+  "findings": [],
+  "plan_fingerprint": "c6a5f969b6acb21c8e55ee71446675785d6ef3cb7daa140ba2f6521deb0ef6cb",
+  "plan_slug": "sn-catalog-grouping",
+  "plan_version": 28,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T094737307276-plan-review-of-sn-catalog-grouping",
+  "reviewed_blob_sha": "3c0961b5841b74de8d322084f509f84aff8dc802",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 each cited file resolves (imas_codex/graph/dd_domain_classifier.py, imas_codex/definitions/physics/path_domain_overrides.json, imas_codex/standard_names/domain_ranking.py, imas_codex/graph/build_dd.py, docs/research/sn-catalog-consistency-census.html), commit 5b31377c7 resolves as a commit object in this clone, and every extensionless href resolves once .html is appended.",
+    "done_when": "pass \u2014 \u00a73 carries two explicit negative controls (\"a test that fails with the old upsert\" for the DD rebuild preserving a classified path, and \"a test that fails when a writer computes its own\" for the one derivation), so each declared guard can fail.",
+    "evidence_paths": "pass \u2014 \u00a73's evidence and gate targets sit on durable repo paths (docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet.json, docs/evidence/archive/sn-catalog-grouping-landed.html), never a scratchpad or node-local temp.",
+    "naming": "pass \u2014 \u00a73 introduces mechanism names (domain_ranking.py, pick_primary_domain, domain_rank, maybe_promote_domain) and cites no ticket number, version tag or stage label; the section-number references (\u00a74, \u00a75) are the plan's own section map, not code symbols.",
+    "reasoning": "pass \u2014 \u00a73's stated root cause matches the cited code (build_dd.py MERGEs each IMASNode and sets physics_domain to the IDS default unconditionally with no domain_source guard, while dd_domain_classifier.py selects paths by domain_source IS NULL, so a rebuild clobbers a classified domain and the classifier never revisits it); the mechanism (fix the build guard, render the prompt vocabulary from the PhysicsDomain enum, re-classify source paths, one derivation, consistency audit, repair) can produce the done-when; and the production callers are named (build_dd.py path upsert for the classifier, compose/consolidation/catalog-import/export/graph-ops writers for the one derivation).",
+    "single_goal": "pass \u2014 \u00a73 delivers one deliverable, a name's physics domain derived one way from the DD graph; its four design steps (classifier fix, one derivation, consistency audit, repair) are sub-parts of that single goal and close on one verdict.",
+    "wiring": "pass \u2014 \u00a73 declares depends-on sn-judgment-evaluation#s3 (resolves to \"\u00a73 \u2014 The evaluation module\"), \u00a74 declares sn-integrity-backlog#s6 and sn-house-style#s2 (both resolve), and plan-blocks sn-harmonize-command and sn-west-prototype-release exist; every declared depends-on points at a node that exists."
+  },
+  "section_digests": {
+    "_document": "502a2bfa69c4863a9cd34bcc0968e350e314683f2c0e58fd0858bdf994c91f0e",
+    "s1": "6bc3b44a7fd794158b4e454dd07668ea7d805f53ea1a5e11fac0c4b9a32edd70",
+    "s2": "badc6d06874b81a42ccd8772957595e0e1e9cb7d1a7fe7c9f3ade7c219cb3b72",
+    "s3": "8563f393c8d5efdd392704e76e6e0415ab2900270b63b743c92a3985e0fae1b6",
+    "s4": "7cd0454d13ab9a70c3e44752b5b15dcc7a96f90ed71f0fe117a7874db5ca5459",
+    "s5": "6a583a112984f320b52d30c670be604713b3d4204e41c7dd12230c311f9ff0e3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:01:45.443403+00:00"
+}
