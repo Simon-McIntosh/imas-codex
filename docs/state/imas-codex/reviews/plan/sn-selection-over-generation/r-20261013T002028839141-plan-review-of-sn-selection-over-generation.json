@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T00:28:06.078Z",
+  "dispatched_at": "2026-10-13T00:20:41Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-selection-over-generation.html#s2",
+      "id": "thin_wrapper-1",
+      "reason": "the plan must state why extending the composer is insufficient, or \u00a72 becomes a forked name-producer whose disagreement with the composer is the very thing \u00a72 then measures.",
+      "text": "the plan proposes Jev grammar-slot selection as a cross-check \"beside the composer\" but does not say why the composer itself cannot be constrained to the closed vocabulary; the composer already renders through ISN and round-trip-validates its tokens (imas_codex/standard_names/grammar_adapter.py:144 compose_canonical_ir, imas_codex/standard_names/error_siblings.py:236 ISN round-trip), so the honest change may be to tighten the composer's own slot choice, not to add a parallel selector",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/doc_links.py:49",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owner turns \u00a73 into an extension (add a wrong-target predicate to the existing reference extractor) instead of a parallel link checker that drifts from doc_links.",
+      "text": "\u00a73 adds link-label checking (deterministic self-link detection plus a Jev wrong-neighbour judgment) without naming the module that already owns link analysis: find_name_references resolves standard-name references and link targets, and imas_codex/standard_names/docs_gates.py:485 _links_are_hygienic already gates link syntax from it; the plan should extend find_name_references / the docs_gates link gate rather than open a second link reader",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/families.py:479",
+      "id": "duplicate_owner-2",
+      "reason": "a Jev selector added beside families.select_anchor forks the anchor owner and drifts the docs prompt and harmonize command, which the current design avoids by sharing one function.",
+      "text": "\u00a77 states select_anchor \"in imas_codex/standard_names/harmonize.py picks it by heuristic\", but select_anchor is defined in families.py:479 and imported into harmonize.py:32, and it already selects by the highest reviewer_score_docs among accepted members (not a bare heuristic); the plan should replace that rule inside families.select_anchor rather than add a Jev selector that harmonize's five call sites (harmonize.py:270, 291, 381, 435, 595) would have to choose between",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/discovery/test_judgment.py:207",
+      "id": "duplicate_owner-3",
+      "reason": "dropping an already-existing deliverable removes a redundant node and records the guard's real location.",
+      "text": "\u00a74's done-when asks for \"A test shows the embedding order survives a failed rerank\", but that guarantee is built into rerank_pool and already covered by test_rerank_pool_keeps_the_pool_order_when_every_judgement_fails (test_judgment.py:207) and by test_a_failed_batch_returns_the_embedding_order_with_a_note (tests/llm/test_search_tools.py:2483); the item should cite the existing test, not propose it as new work",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ae4549c382d05320bc945c191f642e893b70035a54aff1e00e32cc46939ae3af",
+  "plan_slug": "sn-selection-over-generation",
+  "plan_version": 5,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T002028839141-plan-review-of-sn-selection-over-generation",
+  "reviewed_blob_sha": "99304a644b18d00cd6c44fb2cf124b380e762beb",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a72 hides the closed-vocabulary beam walk and the ISN rendering behind a single Choice-per-slot interface, which is behaviour larger than the interface it exposes.",
+    "duplicate_owner": "a finding \u2014 \u00a73 and \u00a77 each propose a mechanism whose owner already exists in the repo (doc_links.py for link analysis; families.select_anchor for anchor selection) without naming either owner.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section names what it retires or merges, or states why nothing can be, while \u00a72/\u00a74/\u00a77 add public judgment fragments and change the behaviour of the existing `sn harmonize` command.",
+    "reuse_search": "pass \u2014 the plan names the mechanisms it extends (rerank_pool in discovery/base/judgment.py, select_anchor, the composer, dd_domain_classifier.py); the owners it did not open (doc_links, families) are reported under duplicate_owner.",
+    "thin_wrapper": "a finding \u2014 \u00a72 adds a Jev segment selector \"beside the composer\" without stating why the composer, which already renders and validates through ISN, cannot be constrained instead."
+  },
+  "section_digests": {
+    "_document": "16280216355910f67230a865f1d8d964083dfd45c53d85f0c1a977dababcd0ca",
+    "s1": "5b0f0bda5a0305717d18f0c91fc939366d9371e6d9ead898aeca9a8d22db6fb0",
+    "s2": "6e3447947a67c8ebbe42cd25514d49e893e06b8fb7ce75523fd213ab833bc2d9",
+    "s3": "6bd1cb5a61c975f8a7dacc638b359d81bbf9f97eed7d98347f9c9407366f9754",
+    "s4": "24e3d317dc460c0c7a08ad57a3d23e2c29be0cb6ec178d884d5261b51f6396f9",
+    "s5": "a85f15537b765d486ba7279ea2262f869f03cfeccef8236c966091051ad7627d",
+    "s6": "63f9cc3fcb84e3261c6f8b56b0bb53e43944a11b370667adc5e19f2aeb60dea4",
+    "s7": "a74958e14b9802102ecb62fff48bd4c17a28bb68e0acd77c642348c1fef8e690"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:30:34.255728+00:00"
+}
