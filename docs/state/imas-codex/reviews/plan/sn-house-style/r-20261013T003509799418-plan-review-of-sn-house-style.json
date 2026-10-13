@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T00:47:16.661Z",
+  "dispatched_at": "2026-10-13T00:35:21Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-house-style.html:276",
+      "id": "reasoning-1",
+      "reason": "the same clause's explicit \"and the new one as not canonical\" resolves the ambiguity, so the wording would not send a node down a different path.",
+      "text": "`\u00a713`'s done-when describes the new fixture as \"a correct last-closed-flux-surface gloss that also calls the boundary the separatrix\" and then requires it be classified \"not canonical\"; calling the fixture \"correct\" contradicts the non-canonical verdict, so a node building the criterion could read \"correct\" as canonical and author a criterion that accepts the very equating the section exists to forbid",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sn-house-style.html:276",
+      "id": "done_when-1",
+      "reason": "the same done-when's deterministic test (\"the equated-separatrix option maps to the forbidden verdict\", with the synonym clause restored as the negative control) pins the forbid path independently, so the looser live arm changes no implementation decision.",
+      "text": "`\u00a713`'s live-run arm measures the equated fixture only as \"not canonical\", but the section's rule is that \"any equating of the boundary with the separatrix is forbidden\"; a model returning ABSENT (not_described) instead of FORBIDDEN would pass the live arm without the forbid path being exercised",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "e1e371213cfe01083226f3af53582902f660211732375f3da94a77b45d7b0120",
+  "plan_slug": "sn-house-style",
+  "plan_version": 43,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T003509799418-plan-review-of-sn-house-style",
+  "reviewed_blob_sha": "999a8e8c6882aaf5cfbbb1d9bec64cd7dd7b5b12",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 all four changed-unit claims resolve: `judge_stage.py` exists and its `_CONCEPT_FORMS[\"plasma_boundary\"].criteria[\"last_closed_flux_surface\"]` (line 113\u2013114) ends verbatim \"It may also give the diverted-configuration name for that same surface as a synonym\"; `docs/evidence/fragments/sn-judgment-evaluation/flux-surface-average-smoke.py` exists and its `boundary_gloss` criteria are exactly \"As the last closed flux surface, without calling it the separatrix\" and \"It equates the plasma boundary with the separatrix\"; the ISN registry's `plasma_boundary.forbidden_variants` (imas-standard-names `grammar/vocabularies/conventions/concepts.yml` line 45) lists `the separatrix`; the four `plan-commits` shas and each extensionless href resolve as `<path>.html`.",
+    "done_when": "a finding \u2014 `\u00a713`'s live-run arm measures only \"not canonical\" for the equated-separatrix fixture, weaker than the section's stated rule that equating is forbidden.",
+    "evidence_paths": "pass \u2014 `\u00a713`'s live run commits its driver and raw decisions \"beside the record\", i.e. under the durable `docs/evidence/fragments/sn-house-style/` path its sibling `\u00a712` established (`shs-judge-calibration.html`), never a scratch or temporary path.",
+    "naming": "pass \u2014 `\u00a713` introduces no plan label, ticket number or version tag into code or prose; the criterion it cites (`_CONCEPT_FORMS`, `last_closed_flux_surface`, `diverted_name_alone`) is named by mechanism, and no changelog prose names a tracker entry.",
+    "reasoning": "a finding \u2014 `\u00a713` labels its new fixture \"a correct last-closed-flux-surface gloss\" while its own done-when requires that fixture to be judged non-canonical, and \"correct\" reads against the verdict the section demands.",
+    "single_goal": "pass \u2014 the changed `\u00a713` carries one deliverable (correct the judge stage's plasma-boundary criterion to the smoke read's framing), and the section element declares it once.",
+    "wiring": "pass \u2014 the changed units declare no wrong relationship: `plan-section-depends-on` still maps only `s2`\u2192the ISN registry, `s13` declares no dependency the plan leaves unsatisfied (its in-plan dependency on `\u00a712` is already `done`, and its criterion edits `judge_stage.py`'s authored `_CONCEPT_FORMS`, not a cross-plan artefact), and the resolved followup `f-shs-001` points at no dead section."
+  },
+  "section_digests": {
+    "_document": "fcdea7025d8be4b744a5e23136d72bd634acbe17bed1ff95c7f2dc8b59a96ba5",
+    "s1": "a5bede55b1e1d656205449268c342f510a77d8c6e30f478a687f0c88cd995bd8",
+    "s10": "56c8e08b66e65b8ece8e4714fa4b9f9089b83585768885aea771dfba922b2975",
+    "s11": "40dbcfa9b353fecf593a6d891775677b873bb98529073f97a916054f9528cfbd",
+    "s12": "e6eb4d8f2c193a9476db93b99f5512264202b1205e73bcd661346bf08b7b70ae",
+    "s13": "1039788885461975b6575c93cc104f5bffa19194126a5850e061438a0760c40b",
+    "s2": "a68b18b0a4122caff66d27ab77f0d6f94f3c046d2a034c6ef489ffc38f438ddb",
+    "s3": "50e289cff8fb10f82f4114f3e51de9e7d184bd4777b80c4f5ee7e617bbdd3c56",
+    "s4": "dca02964189096d0d6a3fb9f0ee3c9931308addf7be8f667cad98d98ca36d3a7",
+    "s5": "de1246fd734195b238de2d370de129477d7b7977b048d533e4044874a80187cd",
+    "s6": "a226c4f5474df3d4e84d408951190044062c34272e97142029c1359b6326ec78",
+    "s7": "5be478ef6ae9f348a0e617cfdb5bc8b20b3a18fd8c8e652a1d97e2393f5681c3",
+    "s8": "91c69e8a7ada6945ec08807258d2ee9be051f27dd4bc9939d6da7046c479741a",
+    "s9": "e80c85c856bfde4820702edd9280d989ec350bede9a5f566bd19d06d32026f51"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T00:48:16.625143+00:00"
+}
