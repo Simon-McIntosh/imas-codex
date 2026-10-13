@@ -700,6 +700,44 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "36ef1523524cd9b8a2e2d3b7d228dd6a68bfe692",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 5021,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261013T135728357633-sib-area-children-release",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5021,
+        "path": "/tmp/reckon-crew-scratch/r-20261013T135728357633-sib-area-children-release"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-area-children-release",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "the release needs a product change to signed_manifest.py admission; the apply reruns as a new node on that change, so this session's worktree base has nothing left to continue",
     "session_id": "01a1358e-72c8-7772-b401-1a12bd642e3a",
