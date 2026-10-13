@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": "ea633f0528d1b2f68412d6c88ce518bd802d8a7d",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T01:38:29.243Z",
+  "dispatched_at": "2026-10-13T01:30:33Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003139740510-ssog-segment-selection/after_suite.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: neither gate arm runs tests/standard_names/test_segment_selection.py, so the tests/standard_names half of the brief's named gate is in neither baseline_suite nor after_suite and the added-failure count derived from that pair says nothing about the file the repair changed; its only pass record is the head arm of negative_control.log (4 passed, EXIT=0)."
+    },
+    {
+      "file": "tests/standard_names/test_segment_selection.py",
+      "line": "231",
+      "severity": "follow-on",
+      "text": "follow-on: the new test drives _search_slot directly and stops at ranked[0]==[], so the commit message's claim that the missing slot is recorded as the item's failure in select_segments is not asserted end-to-end; the empty-beam-to-recorded-failure path (segment_selection.py:748-756) has no test of its own."
+    }
+  ],
+  "head_log_revision": "5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against 548064a1f9320a8fa69c29638b9676b1fe310902; the single commit 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b removes the `if not kept: kept = list(paths)` fallback at imas_codex/standard_names/segment_selection.py:513-517 so an interior node whose expansion failed is never re-queued, adds a terminating test at tests/standard_names/test_segment_selection.py:231, and extends the fragment paragraph at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html:47.",
+    "done_when": "the done_when's gate names tests/standard_names/test_segment_selection.py plus the evaluation module's tests recorded as baseline_suite and after_suite with revision, exit_status and completed; the gained commit adds a fourth unit test and a round-2 negative control, but both gate arms at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003139740510-ssog-segment-selection/after_suite.log:1 still run only tests/discovery/test_evaluation.py, tests/discovery/test_path_category_gate.py and tests/standard_names/test_judgment_goldens.py and never the new file.",
+    "goal": "the goal is a module taking a list of sources and returning per-item selections, per-slot path scores and the call layer's cost; the gained commit leaves that entry point intact \u2014 imas_codex/standard_names/segment_selection.py:687 select_segments still returns SelectionRun with one SourceSelection per source and cost_usd read back from decide_batch \u2014 and only narrows the beam so a failed expansion cannot hang it.",
+    "manifest": "read; it records status complete, commits 548064a1f and 5e19b0fb9, the four guarded tests, negative_control_round2.log as the negative-control log, and the round-2 note; its claims of a 4-passed head arm and a red round-2 log survive a check of the logs it cites.",
+    "write_paths": "the brief's scope is imas_codex/standard_names/segment_selection.py, tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html; git diff 548064a1f9320a8fa69c29638b9676b1fe310902..5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b touches exactly those three (+59/-5) and nothing outside the fence."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_segment_selection.py:270 asserts calls[\"n\"] <= 4 against a stub-incremented counter and negative_control_round2.log:24-26 shows restoring kept = list(paths) reddens that test, so it fails on the very regression it guards.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003139740510-ssog-segment-selection/negative_control_round2.log:40-42 shows the repair's red arm and after_suite.log:27 shows 35 passed EXIT=0, but after_suite.log:1 still omits tests/standard_names/test_segment_selection.py from the gate the done_when names.",
+    "fit": "the repair follows the module's own idiom \u2014 imas_codex/standard_names/segment_selection.py:448-455 docstring updated with the mechanism and :517-523 commenting by mechanism \u2014 with no plan, gate or author label introduced.",
+    "goal_fidelity": "imas_codex/standard_names/segment_selection.py:687 select_segments still returns SelectionRun(items=items, cost_usd=sum(spent)) with per-source paths and scores, unchanged by the repair.",
+    "reuse": "the gained commit adds only a test and deletes a fallback, adding no definition; a search over imas_codex/standard_names for a tree-walk or beam owner found _search_slot (segment_selection.py:432) as the sole owner of that capability, and nothing is forked.",
+    "scope_discipline": "git diff 548064a1f9320a8fa69c29638b9676b1fe310902..5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b touches only imas_codex/standard_names/segment_selection.py, tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html, every one inside the brief's write scope."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261013T003139740510-ssog-segment-selection (imas-codex, plan sn-selection-over-generation section 2, node ssog-segment-selection), covering the single commit gained since the prior review, base 548064a1f9320a8fa69c29638b9676b1fe310902, head 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b.\nreviewed_base_sha: 548064a1f9320a8fa69c29638b9676b1fe310902\nreviewed_head_sha: 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b\nVERDICT goal: the goal is a module taking a list of sources and returning per-item selections, per-slot path scores and the call layer's cost; the gained commit leaves that entry point intact \u2014 imas_codex/standard_names/segment_selection.py:687 select_segments still returns SelectionRun with one SourceSelection per source and cost_usd read back from decide_batch \u2014 and only narrows the beam so a failed expansion cannot hang it.\nVERDICT done_when: the done_when's gate names tests/standard_names/test_segment_selection.py plus the evaluation module's tests recorded as baseline_suite and after_suite with revision, exit_status and completed; the gained commit adds a fourth unit test and a round-2 negative control, but both gate arms at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003139740510-ssog-segment-selection/after_suite.log:1 still run only tests/discovery/test_evaluation.py, tests/discovery/test_path_category_gate.py and tests/standard_names/test_judgment_goldens.py and never the new file.\nVERDICT write_paths: the brief's scope is imas_codex/standard_names/segment_selection.py, tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html; git diff 548064a1f9320a8fa69c29638b9676b1fe310902..5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b touches exactly those three (+59/-5) and nothing outside the fence.\nVERDICT manifest: read; it records status complete, commits 548064a1f and 5e19b0fb9, the four guarded tests, negative_control_round2.log as the negative-control log, and the round-2 note; its claims of a 4-passed head arm and a red round-2 log survive a check of the logs it cites.\nVERDICT diff: read commit by commit against 548064a1f9320a8fa69c29638b9676b1fe310902; the single commit 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b removes the `if not kept: kept = list(paths)` fallback at imas_codex/standard_names/segment_selection.py:513-517 so an interior node whose expansion failed is never re-queued, adds a terminating test at tests/standard_names/test_segment_selection.py:231, and extends the fragment paragraph at docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html:47.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/segment_selection.py:687 select_segments still returns SelectionRun(items=items, cost_usd=sum(spent)) with per-source paths and scores, unchanged by the repair.\nSCORE evidence: 15\nJUSTIFICATION evidence: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003139740510-ssog-segment-selection/negative_control_round2.log:40-42 shows the repair's red arm and after_suite.log:27 shows 35 passed EXIT=0, but after_suite.log:1 still omits tests/standard_names/test_segment_selection.py from the gate the done_when names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 548064a1f9320a8fa69c29638b9676b1fe310902..5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b touches only imas_codex/standard_names/segment_selection.py, tests/standard_names/test_segment_selection.py and docs/evidence/fragments/sn-selection-over-generation/ssog-segment-selection.html, every one inside the brief's write scope.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_segment_selection.py:270 asserts calls[\"n\"] <= 4 against a stub-incremented counter and negative_control_round2.log:24-26 shows restoring kept = list(paths) reddens that test, so it fails on the very regression it guards.\nSCORE fit: 19\nJUSTIFICATION fit: the repair follows the module's own idiom \u2014 imas_codex/standard_names/segment_selection.py:448-455 docstring updated with the mechanism and :517-523 commenting by mechanism \u2014 with no plan, gate or author label introduced.\nSCORE reuse: 20\nJUSTIFICATION reuse: the gained commit adds only a test and deletes a fallback, adding no definition; a search over imas_codex/standard_names for a tree-walk or beam owner found _search_slot (segment_selection.py:432) as the sole owner of that capability, and nothing is forked.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T003139740510-ssog-segment-selection/after_suite.log:1 follow-on: neither gate arm runs tests/standard_names/test_segment_selection.py, so the tests/standard_names half of the brief's named gate is in neither baseline_suite nor after_suite and the added-failure count derived from that pair says nothing about the file the repair changed; its only pass record is the head arm of negative_control.log (4 passed, EXIT=0).\nFINDING tests/standard_names/test_segment_selection.py:231 follow-on: the new test drives _search_slot directly and stops at ranked[0]==[], so the commit message's claim that the missing slot is recorded as the item's failure in select_segments is not asserted end-to-end; the empty-beam-to-recorded-failure path (segment_selection.py:748-756) has no test of its own.\nFINAL: SOUND WITH FINDINGS. The gained commit answers the one blocking finding of the prior review and does so cleanly: it deletes the kept = list(paths) fallback so an interior node whose every expansion failed is never re-queued, and the walk narrows to an empty beam and terminates, which select_segments then records as the item's failure through render_name's refusal. The termination fix is guarded by an independent negative control \u2014 restoring the fallback reddens test_a_failed_expansion_narrows_the_beam_and_terminates \u2014 and the diff stays inside the three declared write paths. What remains is not a defect in this commit: the gate arms still never run the new test file, and the empty-beam-to-failure hand-off at the select_segments boundary is asserted only indirectly.",
+  "review_run_id": "r-20261013T013016302079-review-of-ssog-segment-selection-5e19b0fb99b7",
+  "reviewed_base_sha": "548064a1f9320a8fa69c29638b9676b1fe310902",
+  "reviewed_head_sha": "5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b",
+  "reviewed_run_id": "r-20261013T003139740510-ssog-segment-selection",
+  "scores": {
+    "durability": 19,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T01:37:45.807804+00:00",
+  "total": 112,
+  "verdict": "SOUND WITH FINDINGS"
+}

@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -177,6 +177,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261013T011326093499-review-of-ssog-segment-selection-548064a1f932" data-who="reckon-build" data-when="2026-10-13T01:25:51.293Z">
     <div class="r-comment-body"><p>an independent review of r-20261013T003139740510-ssog-segment-selection (head 548064a1f9320a8fa69c29638b9676b1fe310902) is stored: SOUND WITH FINDINGS, six dimensions 19/14/19/15/17/11, total 95, four findings of which the unbounded re-expansion at imas_codex/standard_names/segment_selection.py:513 is blocking.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261013T013016302079-review-of-ssog-segment-selection-5e19b0fb99b7" data-who="reckon-build" data-when="2026-10-13T01:38:29.243Z">
+    <div class="r-comment-body"><p>Independently reviewed run r-20261013T003139740510-ssog-segment-selection at head 5e19b0fb99b73d5d7d2b22ee48c6508b496f7a9b over base 548064a1f9320a8fa69c29638b9676b1fe310902 (the single commit gained since its prior review): the commit deletes the `kept = list(paths)` frontier-restore fallback so a failed expansion narrows the beam and terminates, answering the prior blocking finding, and the change is guarded by an independent negative control; verdict SOUND WITH FINDINGS, total 112/120, two follow-on findings.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T012137597192-review-of-ssog-comparator-rerank-4a1e53c1c23b" data-who="reckon-build" data-when="2026-10-13T01:30:27.987Z">
     <div class="r-comment-body"><p>Review stored for r-20261013T005036802056-ssog-comparator-rerank at base c98a0d42d head 4a1e53c1c: goal_fidelity 19, evidence 14, scope_discipline 19, durability 16, fit 18, reuse 20 (total 106); 0 added failures (base 0 vs head 0); three follow-on findings, no blocking findings.</p></div>
