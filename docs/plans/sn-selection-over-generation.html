@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="42">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -264,6 +264,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-rerank-ndcg-landed" data-who="reckon-build" data-when="2026-10-13T08:45:00Z">
     <div class="r-comment-body"><p>Measured: the comparator rerank lifts labelled-only nDCG@10 from 0.749 to 0.925 on 30 graded items, +0.176 (95% interval 0.114 to 0.243), with 23 wins and 5 losses (merge <code>822396e9b</code>, review 104/120). That is the positive measurement this section adopts on. §4 stays open for its held-out batch run, which measures first-pass review acceptance both ways. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s4-rerank-ndcg">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261013T122114496722-ssog-rerank-batch-acceptance" data-who="reckon-build" data-when="2026-10-13T12:35:42.745Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-batch-acceptance.html — measured first-pass review acceptance of a held-out compose batch with the comparator rerank off versus on; blocked at the positive control because the benchmark harness renders no comparator block, so the switch leaves the harness compose prompt byte-identical (both arms hash 9e369f27), 0 of the 2 arms run, spend USD 0.00 of USD 3.00</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e" data-who="reckon-build" data-when="2026-10-13T05:56:49.621Z">
     <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
