@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest names its two arms under test_logs (logs/base_gate.log at 175 passed, logs/head_gate_repair.log at 180 passed) rather than under baseline_suite/after_suite, so the count was derived directly from those two logs: zero failing ids in either arm, zero added.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6098",
+    "imas_codex/cli/sn.py:6154",
+    "imas_codex/cli/sn.py:6241"
+  ],
+  "completed_at": "2026-10-13T17:35:52.081Z",
+  "dispatched_at": "2026-10-13T17:14:16Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "865",
+      "severity": "blocking",
+      "text": "blocking: the file is outside the node's declared write paths (the brief says \"graph_ops.py is too large to be a write path, so do not edit it\"), and `reckon crew check-manifest` on the reviewed run reports \"changed paths outside the write scope: imas_codex/standard_names/graph_ops.py\", so the run is refused at promotion; the optional-client extension is sound but needs the scope widened or the hunk landed separately."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T145943345276-shc-pin-anchor/manifest.md",
+      "line": "59",
+      "severity": "blocking",
+      "text": "blocking: negative_control_log is a YAML list of mappings rather than the bare path the contract requires, and check-manifest reports it \"does not resolve to a readable file, so the mutation it was to evidence was never shown to fail\" \u2014 the five mutation logs exist and each shows the expected FAILED line, but as written none is readable by the gate."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T145943345276-shc-pin-anchor/manifest.md",
+      "line": "53",
+      "severity": "blocking",
+      "text": "blocking: every path under test_logs lacks its literal command near the head and its trailing EXIT= line (check-manifest: \"carries no command near its head\" and \"ends with no EXIT=<n> line\"), so a later reader cannot tell a complete gate run from a truncated one."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1119",
+      "severity": "follow-on",
+      "text": "follow-on: the force branch is unreachable from the CLI because imas_codex/cli/sn.py:6098 builds plans without force and passes plan=plans to apply_families at sn.py:6154, so apply_families never re-plans and a --force apply keeps the pinned anchor instead of selecting fresh."
+    },
+    {
+      "file": "imas_codex/schemas/standard_name.yaml",
+      "line": "910",
+      "severity": "follow-on",
+      "text": "follow-on: the change persists and reads a new StandardName property harmonized_anchor (harmonize.py:765, families.py:662) that is not declared in the LinkML schema, unlike its siblings run_id at line 1122 and harmonized_group_signature at line 1388, and the repository's Cypher property check stays silent because the write is f-string-built and the family read is on an alias it cannot resolve to a label."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against base 48c569aff; f60614237 adds the anchor pin and the report read, and 4ae756c85 removes the duplicate families.existing_name_ids and extends graph_ops.get_existing_standard_names with an optional client.",
+    "done_when": "the done_when names tests/standard_names/test_harmonize_anchor_pin.py; the manifest records that gate at base and head with the four required behaviours each carried by a named test, and every added test has a recorded negative control.",
+    "goal": "the node's goal is to keep a harmonize run's anchor until its family is stamped; imas_codex/standard_names/harmonize.py:848 (the pinned block in plan_family_applies) reuses the recorded harmonized_anchor on the unstamped family and harmonize.py:1153 records it before the first batch, which is the stated deliverable.",
+    "manifest": "read; it reports 180 passed / 12 deselected at head against 175 at base, records five negative-control logs, and itself discloses the graph_ops.py scope deviation.",
+    "write_paths": "the source brief declares imas_codex/standard_names/harmonize.py, imas_codex/standard_names/families.py, tests/standard_names/test_harmonize_anchor_pin.py and the evidence fragment; the diff touches all four and also imas_codex/standard_names/graph_ops.py, which the brief names out of scope."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize_anchor_pin.py fails when the pin is removed (line 136) and when the release is removed (line 161), each shown by a recorded negative control, though the force path carries no test.",
+    "evidence": "head_gate_repair.log records 180 passed and base_gate.log 175 with zero failures in either arm, but neither log carries its command or a trailing EXIT= line, so check-manifest refuses both as evidence.",
+    "fit": "harmonize.py:765 and harmonize.py:790 follow the module's existing property-and-helper idiom and introduce no plan, sprint or ticket label.",
+    "goal_fidelity": "harmonize.py:848 reuses pinned_family_anchor while the family is unstamped and harmonize.py:966 clears it on the stamp, but a --force apply from the CLI cannot reach the re-selection that harmonize.py:1119 intends.",
+    "reuse": "harmonize.py:528 now calls graph_ops.get_existing_standard_names, the single owner of the all-name read, and the anchor rides the member nodes that already carry run_id and harmonized_group_signature rather than a second store.",
+    "scope_discipline": "imas_codex/standard_names/graph_ops.py:865 is edited although the source brief names it out of scope, and check-manifest reports it as a changed path outside the write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to keep a harmonize run's anchor until its family is stamped; imas_codex/standard_names/harmonize.py:848 (the pinned block in plan_family_applies) reuses the recorded harmonized_anchor on the unstamped family and harmonize.py:1153 records it before the first batch, which is the stated deliverable.\nVERDICT done_when: the done_when names tests/standard_names/test_harmonize_anchor_pin.py; the manifest records that gate at base and head with the four required behaviours each carried by a named test, and every added test has a recorded negative control.\nVERDICT write_paths: the source brief declares imas_codex/standard_names/harmonize.py, imas_codex/standard_names/families.py, tests/standard_names/test_harmonize_anchor_pin.py and the evidence fragment; the diff touches all four and also imas_codex/standard_names/graph_ops.py, which the brief names out of scope.\nVERDICT manifest: read; it reports 180 passed / 12 deselected at head against 175 at base, records five negative-control logs, and itself discloses the graph_ops.py scope deviation.\nVERDICT diff: read commit by commit against base 48c569aff; f60614237 adds the anchor pin and the report read, and 4ae756c85 removes the duplicate families.existing_name_ids and extends graph_ops.get_existing_standard_names with an optional client.\nCALL_SITES: imas_codex/cli/sn.py:6098, imas_codex/cli/sn.py:6154, imas_codex/cli/sn.py:6241\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: harmonize.py:848 reuses pinned_family_anchor while the family is unstamped and harmonize.py:966 clears it on the stamp, but a --force apply from the CLI cannot reach the re-selection that harmonize.py:1119 intends.\nSCORE evidence: 14\nJUSTIFICATION evidence: head_gate_repair.log records 180 passed and base_gate.log 175 with zero failures in either arm, but neither log carries its command or a trailing EXIT= line, so check-manifest refuses both as evidence.\nSCORE scope_discipline: 8\nJUSTIFICATION scope_discipline: imas_codex/standard_names/graph_ops.py:865 is edited although the source brief names it out of scope, and check-manifest reports it as a changed path outside the write scope.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_harmonize_anchor_pin.py fails when the pin is removed (line 136) and when the release is removed (line 161), each shown by a recorded negative control, though the force path carries no test.\nSCORE fit: 18\nJUSTIFICATION fit: harmonize.py:765 and harmonize.py:790 follow the module's existing property-and-helper idiom and introduce no plan, sprint or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: harmonize.py:528 now calls graph_ops.get_existing_standard_names, the single owner of the all-name read, and the anchor rides the member nodes that already carry run_id and harmonized_group_signature rather than a second store.\nFINDING imas_codex/standard_names/graph_ops.py:865 blocking: the file is outside the node's declared write paths (the brief says \"graph_ops.py is too large to be a write path, so do not edit it\"), and `reckon crew check-manifest` on the reviewed run reports \"changed paths outside the write scope: imas_codex/standard_names/graph_ops.py\", so the run is refused at promotion; the optional-client extension is sound but needs the scope widened or the hunk landed separately.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T145943345276-shc-pin-anchor/manifest.md:59 blocking: negative_control_log is a YAML list of mappings rather than the bare path the contract requires, and check-manifest reports it \"does not resolve to a readable file, so the mutation it was to evidence was never shown to fail\" \u2014 the five mutation logs exist and each shows the expected FAILED line, but as written none is readable by the gate.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T145943345276-shc-pin-anchor/manifest.md:53 blocking: every path under test_logs lacks its literal command near the head and its trailing EXIT= line (check-manifest: \"carries no command near its head\" and \"ends with no EXIT=<n> line\"), so a later reader cannot tell a complete gate run from a truncated one.\nFINDING imas_codex/standard_names/harmonize.py:1119 follow-on: the force branch is unreachable from the CLI because imas_codex/cli/sn.py:6098 builds plans without force and passes plan=plans to apply_families at sn.py:6154, so apply_families never re-plans and a --force apply keeps the pinned anchor instead of selecting fresh.\nFINDING imas_codex/schemas/standard_name.yaml:910 follow-on: the change persists and reads a new StandardName property harmonized_anchor (harmonize.py:765, families.py:662) that is not declared in the LinkML schema, unlike its siblings run_id at line 1122 and harmonized_group_signature at line 1388, and the repository's Cypher property check stays silent because the write is f-string-built and the family read is on an alias it cannot resolve to a label.\nreviewed_base_sha: 48c569aff3430879dd3c777a236b09526b230d7d\nreviewed_head_sha: 4ae756c8581cf670ae0ec97b16029cb4516e837f",
+  "review_run_id": "r-20261013T171404238103-review-of-shc-pin-anchor-4ae756c8581c",
+  "reviewed_base_sha": "48c569aff3430879dd3c777a236b09526b230d7d",
+  "reviewed_head_sha": "4ae756c8581cf670ae0ec97b16029cb4516e837f",
+  "reviewed_run_id": "r-20261013T145943345276-shc-pin-anchor",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 8
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T17:37:03.708918+00:00",
+  "total": 92
+}
