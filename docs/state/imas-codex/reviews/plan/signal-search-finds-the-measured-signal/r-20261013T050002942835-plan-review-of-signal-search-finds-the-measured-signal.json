@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T05:09:13.627Z",
+  "dispatched_at": "2026-10-13T05:00:25Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:323",
+      "id": "reasoning-1",
+      "reason": "a coordinator following the prose would set the switch on a node that runs no measurement, shipping the flag before the passes the decision rests on.",
+      "text": "the switch paragraph states \"Once the measurement passes, the third node sets it to follow the server mode\", but the node table at line 340 states \"The fourth, after the third, runs the module's three passes and sets the switch\"; the third node only builds the measurement module and runs no pass, so the two statements name different owners for flipping the flag",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "1cfb91dfd4f140f76186416e24345a602c3f570a3bacae2bac305492d6ecbb46",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 69,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T050002942835-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "ef63fa06200a458fbe5ea676a70ecdaae54a1f58",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 rerank_candidates, _RERANK_QUESTION, _ROLE_RERANK_QUESTION, _rerank_dd_paths and the \u00a74/\u00a75 fragments (fusion.html, embeddings.html) all resolve in the tree; rerank.html is the section's own not-yet-written target, not a renamed pointer.",
+    "done_when": "pass \u2014 node three's inline done-when names the pool-label removal test as its negative control, and the section done-when owned by node four is a measurable three-pass decision against the fusion comparator; both can fail.",
+    "evidence_paths": "pass \u2014 \u00a77's figures go to docs/evidence/fragments/signal-search-finds-the-measured-signal/rerank.html and to node three's ported \u00a74 and \u00a75 fragments, all durable repository paths.",
+    "naming": "pass \u2014 the cited symbols (_signal_rerank_state, _ROLE_RERANK_QUESTION, _rerank_signals) are mechanism-named and no plan label or ticket number reaches code.",
+    "reasoning": "a finding \u2014 \u00a77 attributes setting the switch to the plan's third node while the same section assigns it to the fourth.",
+    "single_goal": "pass \u2014 labelling, the product change, the measurement module, and scoring-plus-switch are each a single deliverable.",
+    "wiring": "pass \u2014 the followup's \u00a75/\u00a76 sequencing concern was answered (both landed) and \u00a77 enumerates its four nodes with names; no declared relationship points at a missing or wrong node."
+  },
+  "section_digests": {
+    "_document": "6696124ebd584b8301282dba9ed1faa4ea8816e65a64a881eaaa5dc88d764ffe",
+    "s1": "e58a341feafcdbbe4c2e547cf50a1fb5e759d1c331f09b8777ce5142efc9daed",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "5a77efb737bcf64e7fd5b30aaa71ed3ff5a27b6c8e7b4d33023f03292a98fb15",
+    "s4": "31e1b80d34ee0473acbbff8894edb94dee236159b67ee202ce8891143f015e9a",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "16b54e2a36c0ab21b604dfbb3ab8786e924214cea3a75fba8e49ca9688493fe9",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "37a1002a450850d41b5c609a5a3ea2a4591ba2f6fb3e3bc91d6cfee5d3cd82ee"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T05:10:18.693430+00:00"
+}
