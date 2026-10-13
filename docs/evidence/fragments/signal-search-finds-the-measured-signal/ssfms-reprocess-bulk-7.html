@@ -1,0 +1,72 @@
+<section id="ssfms-reprocess-bulk-7-section" data-reckon="fragment">
+  <h2 id="ssfms-reprocess-bulk-7-section-title">§12 — bulk reprocess, node ssfms-reprocess-bulk-7 (h060029, UDDB, a042181)</h2>
+
+  <p id="ssfms-reprocess-bulk-7-section-what">
+    This node reset and re-enriched three JT-60SA categories — <code>h060029</code>,
+    <code>UDDB</code> and <code>a042181</code> — through the current signal pipeline, so each
+    member carries a fresh description and an embedding over that description. The three hold
+    <strong>2694</strong> signals; 1959 of them had been enriched before the reprocess cutover
+    (2026-10-13T11:53:35Z) and are the node's assignment, the remaining 735 already belonging to
+    peers' windows. Reset ran through the pipeline's own <code>reset_to_status</code> with the
+    CLI's focus predicate because the facility SSH host was unreachable; enrichment then ran
+    through <code>discover run jt-60sa --only signals --flush</code>, which skips the scan
+    preflight. The node's 60-minute fence closed with <code>a042181</code> finished and
+    <code>h060029</code> and <code>UDDB</code> carrying residue.
+  </p>
+
+  <figure id="ssfms-reprocess-bulk-7-section-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-7/final-state.svg"
+         alt="Per-category counts of described and still-discovered signals after the node's reset and enrichment" />
+    <figcaption>
+      Final state of the three assigned JT-60SA categories at 2026-10-13T16:39Z. Each bar is one
+      category's total signal count; the filled portion is described and the open remainder is
+      still at <code>discovered</code>. <code>a042181</code> reprocessed cleanly;
+      <code>h060029</code> and <code>UDDB</code> carry 103 and 25 signals respectively, whose
+      <code>SignalSource</code> representative classified underspecified so the members were never
+      individualized.
+    </figcaption>
+  </figure>
+
+  <table id="ssfms-reprocess-bulk-7-section-table">
+    <caption>Final census, 2026-10-13T16:39Z — every count read live from the graph</caption>
+    <thead>
+      <tr><th>category</th><th>total</th><th>discovered</th><th>described</th><th>roles</th><th>no role</th><th>hash mismatch</th><th>scope</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>h060029</td><td>2227</td><td>103</td><td>2124</td><td>703</td>1421</td><td>103</td><td>unfinished</td></tr>
+      <tr><td>a042181</td><td>278</td><td>0</td><td>278</td><td>2</td><td>276</td><td>0</td><td><strong>finished</strong></td></tr>
+      <tr><td>UDDB</td><td>189</td><td>25</td><td>164</td><td>1</td><td>163</td><td>25</td><td>unfinished</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-reprocess-bulk-7-section-control">
+    <strong>Negative control.</strong> A scope's post-reset census must find its signals at
+    <code>discovered</code> with no description before enrichment begins; a census finding them
+    <em>still described</em> means the reset did not run. Scope 1 (UDDB+a042181) read back
+    <code>discovered=467, described=0</code>. Scope 2 (h060029) first read back 22 propagated
+    members re-described by a peer's source-level write, was re-reset, and then read
+    <code>discovered=1499, described=728</code> for the reset member set. The control holds for
+    both.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-7-section-residue">
+    <strong>Residue, and why it is not a stalled worker.</strong> The 128 signals still at
+    <code>discovered</code> (103 h060029 + 25 UDDB) are the members of LCDB
+    <code>SignalSource</code> nodes whose representative classified <em>underspecified</em>.
+    <code>individualize_source_descriptions</code> selects only
+    <code>SignalSource{status:'enriched'}</code>, so those members are never individualized and
+    never leave <code>discovered</code> — the same residue class node
+    <code>ssfms-reprocess-bulk-2</code> recorded for <code>b260008</code>. The embedding census
+    confirms the reading: <code>census_signal_embeddings(facility='jt-60sa')</code> returns
+    <code>n=15111, mismatch=128, differing=128</code>, and 128 is exactly the discovered count —
+    every described signal hashes consistently, and the 128 differing are the un-described
+    residue. A resumed flush over the scope focus files continues from here.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-7-section-cost">
+    <strong>Cost.</strong> All enrichment ran on the local lane; the Jev-metered spend is
+    <strong>$0.00</strong> against the $6.00 ceiling (every LLM heartbeat recorded
+    <code>spend=$0.0000</code>). Measured throughput was 1.447 signals/s on scope 1 and 2.72
+    signals/s on scope 2.
+  </p>
+</section>
