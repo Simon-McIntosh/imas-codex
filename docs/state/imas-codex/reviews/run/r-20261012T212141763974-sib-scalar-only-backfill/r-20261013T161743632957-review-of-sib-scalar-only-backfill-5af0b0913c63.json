@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:7573",
+    "imas_codex/cli/sn.py:8914"
+  ],
+  "completed_at": "2026-10-13T16:16:52.747Z",
+  "dispatched_at": "2026-10-12T21:21:54Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html",
+      "line": "125",
+      "severity": "follow-on",
+      "text": "follow-on: re-applying the whole authority under the fresh digest re-stamped the two already-applied edges' receipt_id from 38c5ce50... to f579546898..., so the receipt recorded by the first apply (apply.log change_ids 38c5ce50:38809319c84957b9f3f4ce5d and 38c5ce50:518817ed9d700a13476cb9dd) no longer corresponds to any live edge; the fragment discloses the re-stamp but leaves the earlier receipt dangling in the record for a later reader."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html",
+      "line": "56",
+      "severity": "follow-on",
+      "text": "follow-on: the node was granted a docs/figures/sn-integrity-backlog path and the graphics mandate covers evidence documents, but no figure was produced for the graph change it records (the instrument 3 -> 0 and the scoped HAS_SUCCESSOR split 34 DDVersion / 19 StandardName), so the before/after edge population is readable only as a text pre-block."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the two production sites the write ran through: apply_signed_manifest at imas_codex/standard_names/signed_manifest.py:7573 and its CLI caller at imas_codex/cli/sn.py:8914; the landed file is a doc fragment reached by no runtime code, so these name the code paths of the operation, not readers of the diff.",
+    "diff": "read commit by commit against base 6ab4a1991: 0a543c988 adds the fragment (the first apply's record) and 5af0b0913 rewrites it to the completed apply (105 insertions / 54 deletions); the only path changed base..head is docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html, inside the declared scope.",
+    "done_when": "the done_when needs the instrument to list the 3 names before and none after, the live HAS_SUCCESSOR/REFINED_FROM counts, and the applied manifest+receipt recorded in the fragment dir; readback.log's INSTRUMENT: [] with EDGES_SKIP (three stamped edges) and apply2.log changed:3/refused:0/manifest f579546898 record every measure, not merely claim it.",
+    "goal": "the node's goal (\u00a721) is to give each of the three scalar-only superseded names a signed HAS_SUCCESSOR edge through the signed supersede path; the landed fragment's read-back names all three edges stamped 2026-10-13T15:55:08Z with minting receipt ids (docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html:116-121), so the goal is met.",
+    "manifest": "read; status complete, commits 0a543c988 and 5af0b0913, baseline_suite and after_suite empty (a live-graph write with no test file), records the instrument 3->0 and the scoped edge counts, and openly discloses that a re-apply re-admits the two already-applied rows and re-stamps their receipts.",
+    "write_paths": "the manifest declares the fragment path plus docs/figures/sn-integrity-backlog and the signed manifest if written; git diff --stat 6ab4a1991..5af0b0913 changes exactly docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html and nothing else."
+  },
+  "justifications": {
+    "durability": "no test or product file was changed and the fragment adds no assertion that could fail, so the change carries no regression guard; readback.log's read-back would redden if an edge vanished but runs once, not as a test.",
+    "evidence": "every done_when measure is recorded in a log the fragment cites \u2014 readback.log INSTRUMENT: [] and EDGES_SKIP, apply2.log changed:3/refused:0/manifest f579546898, preview.log, repreview.log \u2014 recorded not claimed; the plan's 48/1850 control is corrected (HAS_SUCCESSOR is scope-contaminated) rather than reproduced.",
+    "fit": "the fragment follows the sibling evidence-fragment shape (sib-area-children-apply.html) with reckon-type/plan-slug/node-id meta and landing-* section ids, carrying no plan or ticket label.",
+    "goal_fidelity": "the read-back at sib-scalar-only-backfill.html:116-121 shows all three HAS_SUCCESSOR edges stamped with their minting receipt ids (readback.log EDGES_SKIP), matching the \u00a721 goal.",
+    "reuse": "the diff adds no definition and no graph query of its own (the write ran through the existing apply_signed_manifest; a search over imas_codex found no new successor-edge query owner), so there is no capability to fork.",
+    "scope_discipline": "git diff --stat 6ab4a1991..5af0b0913 lists only docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html, wholly inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal (\u00a721) is to give each of the three scalar-only superseded names a signed HAS_SUCCESSOR edge through the signed supersede path; the landed fragment's read-back names all three edges stamped 2026-10-13T15:55:08Z with minting receipt ids (docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html:116-121), so the goal is met.\nVERDICT done_when: the done_when needs the instrument to list the 3 names before and none after, the live HAS_SUCCESSOR/REFINED_FROM counts, and the applied manifest+receipt recorded in the fragment dir; readback.log's INSTRUMENT: [] with EDGES_SKIP (three stamped edges) and apply2.log changed:3/refused:0/manifest f579546898 record every measure, not merely claim it.\nVERDICT write_paths: the manifest declares the fragment path plus docs/figures/sn-integrity-backlog and the signed manifest if written; git diff --stat 6ab4a1991..5af0b0913 changes exactly docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html and nothing else.\nVERDICT manifest: read; status complete, commits 0a543c988 and 5af0b0913, baseline_suite and after_suite empty (a live-graph write with no test file), records the instrument 3->0 and the scoped edge counts, and openly discloses that a re-apply re-admits the two already-applied rows and re-stamps their receipts.\nVERDICT diff: read commit by commit against base 6ab4a1991: 0a543c988 adds the fragment (the first apply's record) and 5af0b0913 rewrites it to the completed apply (105 insertions / 54 deletions); the only path changed base..head is docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html, inside the declared scope.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:7573, imas_codex/cli/sn.py:8914\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the read-back at sib-scalar-only-backfill.html:116-121 shows all three HAS_SUCCESSOR edges stamped with their minting receipt ids (readback.log EDGES_SKIP), matching the \u00a721 goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: every done_when measure is recorded in a log the fragment cites \u2014 readback.log INSTRUMENT: [] and EDGES_SKIP, apply2.log changed:3/refused:0/manifest f579546898, preview.log, repreview.log \u2014 recorded not claimed; the plan's 48/1850 control is corrected (HAS_SUCCESSOR is scope-contaminated) rather than reproduced.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 6ab4a1991..5af0b0913 lists only docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html, wholly inside the declared write paths.\nSCORE durability: 8\nJUSTIFICATION durability: no test or product file was changed and the fragment adds no assertion that could fail, so the change carries no regression guard; readback.log's read-back would redden if an edge vanished but runs once, not as a test.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the sibling evidence-fragment shape (sib-area-children-apply.html) with reckon-type/plan-slug/node-id meta and landing-* section ids, carrying no plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition and no graph query of its own (the write ran through the existing apply_signed_manifest; a search over imas_codex found no new successor-edge query owner), so there is no capability to fork.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html:125 follow-on: re-applying the whole authority under the fresh digest re-stamped the two already-applied edges' receipt_id from 38c5ce50... to f579546898..., so the receipt recorded by the first apply (apply.log change_ids 38c5ce50:38809319c84957b9f3f4ce5d and 38c5ce50:518817ed9d700a13476cb9dd) no longer corresponds to any live edge; the fragment discloses the re-stamp but leaves the earlier receipt dangling in the record for a later reader.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-scalar-only-backfill.html:56 follow-on: the node was granted a docs/figures/sn-integrity-backlog path and the graphics mandate covers evidence documents, but no figure was produced for the graph change it records (the instrument 3 -> 0 and the scoped HAS_SUCCESSOR split 34 DDVersion / 19 StandardName), so the before/after edge population is readable only as a text pre-block.",
+  "review_run_id": "r-20261013T161743632957-review-of-sib-scalar-only-backfill-5af0b0913c63",
+  "reviewed_base_sha": "6ab4a19911ea0b928502187ad668c45057be9a02",
+  "reviewed_head_sha": "5af0b0913c6336d7b10833ed197783408b79e35d",
+  "reviewed_run_id": "r-20261012T212141763974-sib-scalar-only-backfill",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T16:55:54.426273+00:00",
+  "total": 103
+}
