@@ -1,0 +1,54 @@
+<!-- Landing record for node ssfms-description-writer, plan
+     signal-search-finds-the-measured-signal §5. One writer sets a
+     FacilitySignal description together with its embedding and text hash, and
+     never records an absent vector as a current one. Changes at revs
+     6bd69f40c and c71a38be9. Counts and evidence:
+     docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-description-writer.html -->
+<section id="ssfms-description-writer-landing" data-reckon="evidence">
+  <h2 id="ssfms-description-writer-landing-heading">Every signal description write re-embeds its text in the same statement</h2>
+  <p id="ssfms-description-writer-landing-what">
+    <code>write_signal_descriptions</code> in
+    <code>imas_codex/discovery/signals/parallel.py</code> is now the one place a
+    <code>FacilitySignal</code> description is written. It takes the description,
+    composes the text to embed (a caller may supply <code>embed_text</code>,
+    otherwise it defaults to the description), embeds it, and sets
+    <code>description</code>, <code>embedding</code>, <code>embedded_at</code>
+    and <code>embedded_text_hash</code> together in one <code>UNWIND</code>
+    statement. <code>embedded_text_hash</code> is a declared
+    <code>FacilitySignal</code> slot in
+    <code>imas_codex/schemas/facility.yaml</code>, so a vector whose text has
+    moved is visible as a hash that no longer matches. The three description
+    writes in the signals package route through the writer:
+    <code>mark_signals_enriched</code> and <code>mark_signals_underspecified</code>
+    write their description through it before their separate status update, and
+    <code>propagate_source_enrichment</code> and
+    <code>individualize_source_descriptions</code> write their descriptions
+    through it instead of their own Cypher.
+  </p>
+  <p id="ssfms-description-writer-landing-absent-vector">
+    An absent vector is never recorded as a current one. When the embedding
+    service fails, <code>embed_descriptions_batch</code> sets the pending
+    embedding to <code>None</code>; the writer splits the batch on that and
+    writes such an item's description alone, leaving its
+    <code>embedding</code>, <code>embedded_at</code> and
+    <code>embedded_text_hash</code> as they were, so the stored vector stays in
+    vector search and the description no longer matching its hash marks the row
+    for the re-embed sweep. The count left unembedded is logged as a warning
+    rather than failing the enrichment.
+  </p>
+  <p id="ssfms-description-writer-landing-measure">
+    Measure: the individualisation write leaves each member holding an embedding
+    of its own description rather than the representative's copy it was
+    propagated, and each member's <code>embedded_text_hash</code> follows that
+    description. Against the writer with its embed call removed — a
+    description-only write with no re-embed, the defect — the same test fails:
+    <code>EXIT=1</code>, 3 failed, naming
+    <code>test_individualization_write_reembeds_each_member</code>. The
+    absent-vector test <code>test_unembedded_item_keeps_its_vector_and_hash</code>
+    passes at head and fails <code>EXIT=1</code> against the writer before the
+    repair, which nulls the vector and stamps a current hash. The discovery
+    suite reaches 1562 passed at head against 1559 passed with
+    <code>parallel.py</code> at the base revision, so the change adds no
+    failures.
+  </p>
+</section>

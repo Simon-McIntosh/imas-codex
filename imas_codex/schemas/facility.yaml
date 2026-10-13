@@ -2727,6 +2727,11 @@ classes:
       embedded_at:
         description: When the description embedding was last computed
         range: datetime
+      embedded_text_hash:
+        description: >-
+          sha256 of the text that produced the stored embedding. A hash that
+          is missing or differs from the current embed text marks the vector
+          as stale.
       unit:
         description: >-
           Physical unit of the signal data. Extracted from MDSplus node.units,
