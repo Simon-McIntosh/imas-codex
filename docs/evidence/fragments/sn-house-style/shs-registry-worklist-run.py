@@ -5,10 +5,10 @@ conventions registry lacks.
 The conventions registry lives in ISN (imas-standard-names) beside the
 vocabularies it is keyed by. This driver reads the frozen roster, parses every
 name with the public grammar parser, and reports the tokens and patterns the
-parse produces for which the registry carries no entry. It writes the four
-worklists the plan's section-2 table asks for — concepts, notation, templates —
-and lists every name the parser refuses. It never decides which kinds truly
-need an entry; that is the coordinator's call.
+parse produces for which the registry carries no entry. It writes one worklist
+per registry file — concepts, notation, templates — and lists every name the
+parser refuses. It never decides which kinds truly need an entry; that is the
+coordinator's call.
 
 Run against the live registry (writes the results JSON beside this script):
 
@@ -19,9 +19,14 @@ Point it at a scratch copy of the registry to prove the census can report a gap:
     uv run --no-sync python .../shs-registry-worklist-run.py \\
         --conventions-dir /scratch/conventions
 
-The token-to-segment-kind split mirrors the accessor's own reading of a parse
-(``imas_standard_names.grammar.terms``), so the census and the accessor agree
-about which token fills which segment.
+Whether a name has a template is decided by the selector the pipeline calls,
+``imas_standard_names.grammar.terms.select_conventions``: a name has a template
+exactly when the selection's ``templates`` is non-empty. The census holds no
+template matcher of its own, so a template the selector learns to match (a
+binary operator, a fused operator) is counted without a change here. The
+pattern key reads the filled segment kinds through the accessor's own
+``_ir_segments``, and the token walk the concepts and notation lists need reads
+the accessor's ``_qualifier_segment_kind``.
 """
 
 from __future__ import annotations
@@ -34,7 +39,11 @@ from pathlib import Path
 
 import yaml
 from imas_standard_names.grammar import parse
-from imas_standard_names.grammar.terms import _qualifier_segment_kind
+from imas_standard_names.grammar.terms import (
+    _ir_segments,
+    _qualifier_segment_kind,
+    select_conventions,
+)
 from imas_standard_names.grammar.vocab_loaders import load_conventions
 
 SCRIPT = Path(__file__).resolve()
@@ -44,10 +53,10 @@ ROSTER = (
     / "imas_codex/standard_names/manifests/reviews"
     / "v0.4.0rc7+west-task-2e.sn_names.yaml"
 )
-DEFAULT_RESULTS = SCRIPT.with_name("shs-registry-worklist-results.json")
+DEFAULT_RESULTS = SCRIPT.with_name("shs-registry-worklist-rerun-results.json")
 
-# Segment kinds each registry file is keyed by, following the plan's section-2
-# table. A token's kind decides which worklist it can appear in.
+# Segment kinds each registry file is keyed by. A token's kind decides which
+# worklist it can appear in.
 CONCEPT_KINDS = frozenset(
     {
         "transformation",  # operators
@@ -104,32 +113,6 @@ def _walk(ir):
         yield ("process", "process", ir.mechanism.token)
 
 
-def _filled_segments(ir) -> frozenset[str]:
-    """The segment kinds the parse of a name fills — the pattern key that
-    selects a template, matching ``terms._ir_segments``."""
-    kinds: set[str] = set()
-    if ir.operators:
-        kinds.add("transformation")
-    if ir.projection is not None:
-        kinds.add(
-            "component" if ir.projection.shape.name == "COMPONENT" else "coordinate"
-        )
-    kinds.update(_qualifier_segment_kind(q.token) for q in ir.qualifiers)
-    kinds.add("physical_base" if ir.base.kind.name == "QUANTITY" else "geometric_base")
-    if ir.locus is not None:
-        kinds.add(_locus_segment_kind(ir.locus.type))
-    if ir.mechanism is not None:
-        kinds.add("process")
-    return frozenset(kinds)
-
-
-def _template_matches(ir, templates) -> bool:
-    return any(
-        entry.base == ir.base.token and set(entry.segments) <= _filled_segments(ir)
-        for entry in templates
-    )
-
-
 def _token_in_concepts(reg, token: str) -> bool:
     return token in reg.concepts.concepts
 
@@ -154,7 +137,7 @@ def census(registry_dir: Path | None) -> dict:
     concept_hits: dict[str, set[str]] = defaultdict(set)
     notation_hits: dict[str, set[str]] = defaultdict(set)
     patterns_use: dict[tuple, dict] = defaultdict(lambda: {"count": 0, "names": set()})
-    template_hit_patterns: set[tuple] = set()
+    template_names: dict[tuple, set[str]] = defaultdict(set)
     unparsed: list[str] = []
     parsed = 0
 
@@ -182,20 +165,29 @@ def census(registry_dir: Path | None) -> dict:
                     notation_use[token]["count"] += 1
                     notation_use[token]["names"].add(name)
                     notation_use[token]["kind"] = kind
-        pattern = (ir.base.token, tuple(sorted(_filled_segments(ir))))
+        pattern = (ir.base.token, tuple(sorted(_ir_segments(ir))))
         patterns_use[pattern]["count"] += 1
         patterns_use[pattern]["names"].add(name)
-        if _template_matches(ir, reg.templates.templates):
-            template_hit_patterns.add(pattern)
+        if select_conventions(name, registry=reg).templates:
+            template_names[pattern].add(name)
 
-    def _pattern_row(pattern: str, info: dict) -> dict:
+    def _pattern_row(pattern: tuple, info: dict) -> dict:
         return {
             "base": pattern[0],
             "segments": list(pattern[1]),
             "count": info["count"],
+            "names_with_template": len(template_names.get(pattern, set())),
             "names": sorted(info["names"])[:5],
         }
 
+    # A pattern has a template when every roster name it holds selects one. A
+    # pattern whose names disagree stays in the gap list, with the number of its
+    # names that do select a template beside the count.
+    template_hit_patterns = {
+        p
+        for p, info in patterns_use.items()
+        if len(template_names.get(p, set())) == info["count"]
+    }
     templates_gap = [
         _pattern_row(p, info)
         for p, info in patterns_use.items()
@@ -245,6 +237,7 @@ def census(registry_dir: Path | None) -> dict:
     distinct_base = len({p[0] for p in patterns_use})
     return {
         "framework": "conventions-registry-gap-census",
+        "template_selector": "imas_standard_names.grammar.terms.select_conventions",
         "registry_dir": str(registry_dir) if registry_dir else "(live: ISN default)",
         "roster": str(ROSTER.relative_to(REPO_ROOT)),
         "totals": {
@@ -264,6 +257,9 @@ def census(registry_dir: Path | None) -> dict:
                 "distinct_bases": distinct_base,
                 "with_template": len(template_hit_patterns),
                 "missing": len(patterns_use) - len(template_hit_patterns),
+                "names_with_template": sum(len(v) for v in template_names.values()),
+                "names_without_template": parsed
+                - sum(len(v) for v in template_names.values()),
             },
         },
         "concepts": concepts_rows,
