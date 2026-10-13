@@ -6,9 +6,38 @@ description), Jev answers one Choice per grammar slot over that slot's closed
 ISN vocabulary, and code renders the chosen tokens through the ISN renderer.
 Two properties follow from that order rather than from a filter. The result can
 never hold a token the grammar lacks, because every option offered is a
-vocabulary token and a slot left empty is ``none`` rather than a guessed word.
-And the same source yields the same tokens for the same answer, because nothing
-between the answer and the name invents a segment.
+vocabulary token and an optional slot left empty is ``none`` rather than a
+guessed word. And the same source yields the same tokens for the same answer,
+because nothing between the answer and the name invents a segment.
+
+Selection design
+----------------
+Four rules shape every question, so the model is asked only what it can answer
+well:
+
+- **The base is mandatory.** Every grammar name carries a physical base, so the
+  base Choice offers no ``none``.
+- **Every option shows its meaning.** An option's text is the token together
+  with its definition, read from ISN's public vocabulary loaders (physical
+  bases, geometry carriers, the locus registry) or, where none of those carries
+  one, from the concept registry's one-sentence definition or the source
+  token's registered aliases. Near-synonyms a bare token leaves
+  indistinguishable (``density`` against ``number_density``) are told apart by
+  their definitions. :func:`definition_coverage` reports, per slot, how many
+  offered tokens carry no definition from any of those sources.
+- **The base comes from an embedding shortlist.** ISN's base vocabulary is
+  ranked against the shortlisted source's description by embedding similarity
+  through the project's embedding client, and the base Choice is offered over
+  the top :data:`SHORTLIST_SIZE` only. A base the shortlist missed is a
+  retrieval miss, recorded on the item so it can be told apart from a judgement
+  miss: the item carries both the shortlist and whether its expected base was
+  in it.
+- **The slots are asked in sequence, grammar-valid only.** The base is chosen
+  first; each later slot then offers only tokens that compose with the tokens
+  already chosen, checked through
+  :func:`imas_codex.standard_names.grammar_adapter.compose_canonical_ir`, the
+  one module that decides what the grammar accepts. Optional slots keep
+  ``none``, and their question says most names leave the slot empty.
 
 Slots and how each maps onto ISN
 -------------------------------
@@ -19,7 +48,6 @@ nowhere else:
 ======================  ==============================  ==============================
 plan slot               ISN vocabulary (segment class)  IR field of ``StandardNameIR``
 ======================  ==============================  ==============================
-
 ``physical_base``       ``SEGMENT_TOKEN_MAP['physical_base']``
                                                         ``base`` (``BaseKind.QUANTITY``)
 ``subject``             ``SEGMENT_TOKEN_MAP['subject']``
@@ -38,7 +66,17 @@ Every vocabulary token set is read from
 :func:`imas_codex.standard_names.segments.grammar_tokens_by_segment` (and its
 :func:`~imas_codex.standard_names.segments.locus_types` accessor for the locus
 registry), which read ISN live. This module holds no vocabulary snapshot, so it
-cannot drift from the grammar it renders through.
+cannot drift from the grammar it renders through. The same rule governs the
+definitions offered as option text: they are read from ISN's loaders at call
+time, never copied here.
+
+Asking order and render order
+-----------------------------
+:data:`SLOT_ORDER` is the order the Choices are asked: the base first, then the
+remaining five slots in the order ISN renders them. The renderer's own order is
+projection, qualifiers, base, locus, mechanism with the operator stack wrapped
+around that core, so the module derives its asking order from the renderer
+rather than from the plan's listing.
 
 Large vocabularies as a tree
 ----------------------------
@@ -51,14 +89,13 @@ its tokens. The tree comes from structure the vocabulary carries; nothing here
 authors a taxonomy over an unpartitioned enum.
 
 A path is scored by the geometric mean of the per-level choice probabilities,
-and a beam of :data:`BEAM` keeps the best paths at each level, which is the
-hierarchical-classification method the plan fixes.
+and a path's score becomes a slot selection's score.
 
 Rendering, and refusal
 ----------------------
 The chosen tokens build a :class:`StandardNameIR`, which
-:func:`imas_codex.standard_names.grammar_adapter.compose_canonical_ir` renders and
-proves — it composes, canonicalises and requires the parse to preserve the
+:func:`imas_codex.standard_names.grammar_adapter.compose_canonical_ir` renders
+and proves — it composes, canonicalises and requires the parse to preserve the
 semantic IR. That adapter is the one module that decides what the grammar
 accepts, so the refusal rule is stated once there rather than re-derived here. A
 name the grammar refuses is recorded as a failure for that source and never
@@ -72,6 +109,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Any
 
 from imas_codex.discovery.base.judgment import decide_batch
@@ -93,15 +131,18 @@ COST_STEP = "sn_segment_selection"
 #: The seat whose model answers the segment Choices.
 MODEL_SEAT = "sn-judge"
 
-#: Paths kept by the beam at each level.
+#: Paths kept at each level of a slot's tree.
 BEAM = 3
 
 #: The option that leaves a slot empty. A Choice always offers it, so an absent
-#: segment is an answer rather than a token the model invented.
+#: optional segment is an answer rather than a token the model invented.
 NONE = "none"
 
 #: Question name the answer to one tree node comes back under.
 QUESTION_NAME = "segment"
+
+#: How many base tokens the embedding shortlist offers, ranked by similarity.
+SHORTLIST_SIZE = 20
 
 #: Plan slot → the ISN segment class whose vocabulary fills it. ``locus`` and
 #: ``operator`` are absent here because their vocabulary is a registry rather
@@ -113,14 +154,16 @@ SLOT_OPERATOR = "operator"
 SLOT_LOCUS = "locus"
 SLOT_PROCESS = "process"
 
-#: Slot order, outermost name fragment first; also the order the Choices are asked.
+#: Slot asking order: the mandatory base first, then every other slot in the
+#: order ISN renders it (component, subject, locus, process, with the operator
+#: wrapping the core last).
 SLOT_ORDER: tuple[str, ...] = (
     SLOT_PHYSICAL_BASE,
-    SLOT_SUBJECT,
     SLOT_COMPONENT,
-    SLOT_OPERATOR,
+    SLOT_SUBJECT,
     SLOT_LOCUS,
     SLOT_PROCESS,
+    SLOT_OPERATOR,
 )
 
 _SEGMENT_CLASS: dict[str, str] = {
@@ -132,6 +175,11 @@ _SEGMENT_CLASS: dict[str, str] = {
 
 #: Locus registry ``type`` values, in the order the tree offers them.
 _LOCUS_TYPE_ORDER: tuple[str, ...] = ("entity", "position", "region", "geometry")
+
+#: The source key carrying the item's expected base, when the caller knows it.
+#: Used only to record whether that base reached the shortlist — a retrieval
+#: miss — so it never changes which options are offered.
+EXPECTED_BASE_KEY = "expected_base"
 
 
 class SegmentRefusal(RuntimeError):
@@ -179,11 +227,20 @@ class SourceSelection:
 
     A slot the model never answered (its call failed) is absent from ``slots``.
     A ``name`` is ``None`` exactly when ``failure`` is set.
+
+    ``shortlist`` is the ranked base shortlist the base Choice was offered over,
+    and ``base_in_shortlist`` says whether the item's expected base (carried on
+    the source under :data:`EXPECTED_BASE_KEY`) appeared in it. That is the
+    retrieval miss; a name whose base was offered and not chosen is a judgement
+    miss, and the two are told apart by this field rather than by the miss count
+    alone.
     """
 
     source: Mapping[str, Any]
     slots: dict[str, SlotSelection] = field(default_factory=dict)
     name: str | None = None
+    shortlist: tuple[str, ...] = ()
+    base_in_shortlist: bool | None = None
     failure: str | None = None
 
     def chosen(self) -> dict[str, str | None]:
@@ -193,10 +250,145 @@ class SourceSelection:
 
 @dataclass
 class SelectionRun:
-    """Every source's selection plus the decisions cost the run booked."""
+    """Every source's selection plus the decisions cost the run booked.
+    """
 
     items: list[SourceSelection]
     cost_usd: float
+
+
+# ---------------------------------------------------------------------------
+# What each option means
+# ---------------------------------------------------------------------------
+
+
+@lru_cache(maxsize=1)
+def _vocabulary_definitions() -> dict[str, str]:
+    """Token → definition for the vocabulary entries ISN declares one on.
+
+    Read from the public loaders at call time, so a definition added to ISN's
+    vocabulary reaches the options without a change here. Returns an empty
+    mapping when ISN is unavailable, so the option text then falls through to
+    the concept registry and the aliases rather than to a stale copy.
+    """
+    try:
+        from imas_standard_names.grammar.vocab_loaders import (
+            load_geometry_carriers,
+            load_locus_registry,
+            load_physical_bases,
+        )
+    except ImportError:  # pragma: no cover - ISN absent
+        return {}
+    definitions: dict[str, str] = {}
+    try:
+        for token, entry in load_locus_registry().loci.items():
+            definitions[token] = entry.definition
+        for token, entry in load_physical_bases().bases.items():
+            definitions[token] = entry.definition
+        for token, entry in load_geometry_carriers().carriers.items():
+            definitions[token] = entry.definition
+    except Exception:  # pragma: no cover - ISN restructured
+        return {}
+    return {token: text for token, text in definitions.items() if text}
+
+
+@lru_cache(maxsize=1)
+def _token_aliases() -> dict[str, tuple[str, ...]]:
+    """Token → its registered aliases and abbreviations, from ISN's loaders."""
+    try:
+        from imas_standard_names.grammar.vocab_loaders import (
+            load_geometry_carriers,
+            load_locus_registry,
+            load_physical_bases,
+        )
+    except ImportError:  # pragma: no cover - ISN absent
+        return {}
+    aliases: dict[str, tuple[str, ...]] = {}
+    try:
+        for token, entry in load_locus_registry().loci.items():
+            registered = set(entry.abbreviations)
+            aliases[token] = tuple(sorted(registered))
+        for token, entry in load_physical_bases().bases.items():
+            aliases[token] = tuple(sorted(entry.aliases))
+        for token, entry in load_geometry_carriers().carriers.items():
+            aliases[token] = tuple(sorted(entry.aliases))
+    except Exception:  # pragma: no cover - ISN restructured
+        return {}
+    return {token: names for token, names in aliases.items() if names}
+
+
+@lru_cache(maxsize=1)
+def _concept_entries() -> dict[str, tuple[str, str]]:
+    """Token → ``(definition, phrase)`` for tokens the concept registry covers.
+
+    The registry carries a phrase for every token it covers and a definition
+    only for a token whose vocabulary entry has none (operators carry none), so
+    this is where an operator's meaning comes from. Returns an empty mapping
+    when the registry cannot be read, and the option text then falls through to
+    the aliases.
+    """
+    try:
+        from imas_standard_names.grammar.vocab_loaders import load_concepts
+    except ImportError:  # pragma: no cover - ISN absent
+        return {}
+    try:
+        concepts = load_concepts().concepts
+    except Exception:  # pragma: no cover - the concept registry is optional
+        return {}
+    return {
+        token: (entry.definition, entry.phrase) for token, entry in concepts.items()
+    }
+
+
+def _has_definition(token: str) -> bool:
+    """Whether any ISN source carries meaning for ``token``."""
+    if _vocabulary_definitions().get(token):
+        return True
+    definition, phrase = _concept_entries().get(token, ("", ""))
+    return bool(definition or phrase)
+
+
+def option_text(token: str) -> str:
+    """The text a Choice offers for ``token``: the token and what it means.
+
+    The meaning is taken, in order, from the token's vocabulary definition, the
+    concept registry's definition, the concept registry's phrase, and the
+    token's registered aliases. A token with none of those still appears, as its
+    own words, so the option set is never silently narrowed — but it is counted
+    by :func:`definition_coverage` as an option the model must judge from its
+    spelling.
+    """
+    definition = _vocabulary_definitions().get(token)
+    if definition:
+        return f"{token} — {definition}"
+    concept_definition, phrase = _concept_entries().get(token, ("", ""))
+    if concept_definition:
+        return f"{token} — {' '.join(concept_definition.split())}"
+    if phrase:
+        return f"{token} — {phrase}"
+    aliases = _token_aliases().get(token)
+    if aliases:
+        return f"{token} (also called {', '.join(aliases)})"
+    return token.replace("_", " ")
+
+
+def definition_coverage() -> dict[str, dict[str, int]]:
+    """Per slot, how many offered tokens carry a definition and how many do not.
+
+    The count is the honest one the plan asks for: a token whose only meaning is
+    its registered aliases is reported as carrying none, because an alias is a
+    second spelling rather than a definition.
+    """
+    coverage: dict[str, dict[str, int]] = {}
+    for slot in SLOT_ORDER:
+        tokens = _slot_tokens(slot)
+        missing = [token for token in tokens if not _has_definition(token)]
+        coverage[slot] = {
+            "offered": len(tokens),
+            "with_definition": len(tokens) - len(missing),
+            "without_definition": len(missing),
+        }
+    return coverage
 
 
 # ---------------------------------------------------------------------------
@@ -232,10 +424,14 @@ def _none_leaf() -> _Node:
     return _Node(NONE, "none of the offered tokens fits this slot")
 
 
-def _leaf_nodes(tokens: Sequence[str]) -> tuple[_Node, ...]:
-    """Token leaves plus the ``none`` leaf every choice offers."""
-    leaves = [_Node(token, token) for token in tokens]
-    leaves.append(_none_leaf())
+def _leaf_nodes(tokens: Sequence[str], *, include_none: bool = True) -> tuple[_Node, ...]:
+    """Token leaves, each carrying its meaning, plus the ``none`` leaf.
+
+    ``include_none`` is False for the base slot, which every name must fill.
+    """
+    leaves = [_Node(token, option_text(token)) for token in tokens]
+    if include_none:
+        leaves.append(_none_leaf())
     return tuple(leaves)
 
 
@@ -296,8 +492,11 @@ def _slot_tokens(slot: str) -> list[str]:
     return sorted(vocabulary.get(_SEGMENT_CLASS[slot], ()))
 
 
-def build_slot_tree(slot: str) -> _Node:
-    """The choice tree for one slot, built from the structure its vocabulary carries.
+@lru_cache(maxsize=512)
+def _build_tree(
+    slot: str, allowed: tuple[str, ...] | None, include_none: bool
+) -> _Node:
+    """Build the choice tree for one slot over ``allowed`` (or its whole vocabulary).
 
     A slot ISN partitions (operator by ``kind``, locus by ``type``) becomes a
     two-level tree: a Choice over the partitions, then a Choice over each
@@ -305,7 +504,7 @@ def build_slot_tree(slot: str) -> _Node:
     single Choice over its tokens. The root is only a container; the first asked
     question is over the root's children.
     """
-    tokens = _slot_tokens(slot)
+    tokens = list(allowed) if allowed is not None else _slot_tokens(slot)
     if slot == SLOT_OPERATOR:
         groups = _group_by(tokens, _operator_kinds(), _RENDERABLE_OPERATOR_KINDS)
         description = "the operator's arity and position in the rendered name"
@@ -316,13 +515,30 @@ def build_slot_tree(slot: str) -> _Node:
         groups = []
 
     if not groups:
-        return _Node(slot, slot, _leaf_nodes(tokens))
+        return _Node(slot, slot, _leaf_nodes(tokens, include_none=include_none))
 
     partitions = tuple(
-        _Node(key, f"{key} ({description})", _leaf_nodes(members))
+        _Node(key, f"{key} ({description})", _leaf_nodes(members, include_none=include_none))
         for key, members in groups
     )
+    if include_none:
+        # An optional slot is answered "none" at its first Choice too, so a
+        # source that uses none of the partitions is never forced into one.
+        partitions = (*partitions, _none_leaf())
     return _Node(slot, slot, partitions)
+
+
+def build_slot_tree(
+    slot: str, *, allowed: Sequence[str] | None = None, include_none: bool = True
+) -> _Node:
+    """The choice tree for one slot, over ``allowed`` when given.
+
+    ``allowed`` is the grammar-filtered token set a caller computed for a
+    specific source; ``None`` means the slot's whole vocabulary. ``include_none``
+    is False only for the mandatory base.
+    """
+    key = tuple(allowed) if allowed is not None else None
+    return _build_tree(slot, key, include_none)
 
 
 # ---------------------------------------------------------------------------
@@ -330,16 +546,29 @@ def build_slot_tree(slot: str) -> _Node:
 # ---------------------------------------------------------------------------
 
 
-def _node_question(node: _Node) -> dict[str, Any]:
-    """The one Choice asked at ``node``: which child fits the source."""
+def _node_question(node: _Node, *, mandatory: bool) -> dict[str, Any]:
+    """The one Choice asked at ``node``: which child fits the source.
+
+    The instructions differ by whether the slot may be left empty. The base slot
+    offers no ``none`` at all, so its instructions must not mention one; every
+    other slot offers it and says so, because most names leave most slots empty.
+    """
     criteria = {child.key: child.description for child in node.children}
+    if mandatory:
+        instructions = (
+            "Choose the option that best fits the source described in the state. "
+            "Every standard name carries a base, so one option must be chosen."
+        )
+    else:
+        instructions = (
+            "Choose the option that best fits the source described in the state. "
+            "Choose 'none' when no offered token applies — most standard names "
+            "leave this slot empty."
+        )
     return {
         QUESTION_NAME: {
             "type": "choice",
-            "instructions": (
-                "Choose the option that best fits the source described in the "
-                "state. Answer 'none' when no token fits the slot."
-            ),
+            "instructions": instructions,
             "criteria": criteria,
         }
     }
@@ -366,6 +595,7 @@ async def _expand(
     *,
     slot: str,
     route: Sequence[str],
+    mandatory: bool,
     model: str,
     cost: Any | None,
     spent: list[float],
@@ -375,16 +605,17 @@ async def _expand(
     """Ask ``node``'s Choice once per source; return each source's child weights.
 
     One :func:`decide_batch` call carries every source at this node, because
-    they share the node's question. A source whose call failed (``None). Every
-    child's probability is returned, sorted high to low, so the caller prunes to
-    the beam; the endpoint's chosen option is the first of them. The call's
-    summed reported cost is appended to ``spent``, so the caller can report the
-    run's cost whether or not a tracker was supplied.
+    they share the node's question. A source whose call failed is reported by
+    ``judgment.py`` as ``None``. Every child's probability is returned, sorted
+    high to low, so the caller prunes to the beam; the endpoint's chosen option
+    is the first of them. The call's summed reported cost is appended to
+    ``spent``, so the caller can report the run's cost whether or not a tracker
+    was supplied.
     """
     states = [_node_state(source, slot, route) for source in sources]
     results, batch_cost = await decide_batch(
         states,
-        _node_question(node),
+        _node_question(node, mandatory=mandatory),
         model=model,
         service=SERVICE,
         concurrency=concurrency,
@@ -393,10 +624,7 @@ async def _expand(
         step=COST_STEP,
     )
     spent.append(batch_cost)
-    weights: list[list[tuple[str, float]] | None] = []
-    for result in results:
-        weights.append(_child_weights(node, result))
-    return weights
+    return [_child_weights(node, result) for result in results]
 
 
 def _child_weights(
@@ -457,14 +685,13 @@ async def _search_slot(
     so a decisions owner that reports failure for every call costs one pass and
     never re-asks the same Choice.
     """
-    # frontier[i] = list of (node, probability product, route)
+    mandatory = root.key == SLOT_PHYSICAL_BASE
     frontier: list[list[tuple[_Node, float, tuple[str, ...]]]] = [
         [(root, 1.0, ())] for _ in sources
     ]
     depth = 0
 
     while True:
-        # Which (node, sources) to expand: every interior node in a frontier.
         by_node: dict[
             str, tuple[_Node, list[int], list[float], list[tuple[str, ...]]]
         ] = {}
@@ -480,7 +707,6 @@ async def _search_slot(
             break
         depth += 1
 
-        # Answers land here, keyed by source, as new (node, probability, route).
         grown: list[list[tuple[_Node, float, tuple[str, ...]]]] = [[] for _ in sources]
         for node, indices, probabilities, routes in by_node.values():
             answers = await _expand(
@@ -488,6 +714,7 @@ async def _search_slot(
                 [sources[i] for i in indices],
                 slot=root.key,
                 route=routes[0],
+                mandatory=mandatory,
                 model=model,
                 cost=cost,
                 spent=spent,
@@ -510,7 +737,6 @@ async def _search_slot(
                         )
                     )
 
-        # Carry leaf paths forward and prune each source's beam.
         next_frontier: list[list[tuple[_Node, float, tuple[str, ...]]]] = []
         for index, paths in enumerate(frontier):
             kept = [path for path in paths if path[0].is_leaf]
@@ -520,7 +746,7 @@ async def _search_slot(
             # path left. Re-queuing those nodes would re-ask the same Choice on
             # every pass without ever narrowing, so the beam narrows to empty:
             # the source carries no selection for this slot, and the caller
-            # records the missing slot as the failure it is.
+            # records the missing slot as the empty-beam failure.
             kept.sort(key=lambda item: (-item[1], item[0].key))
             next_frontier.append(kept[:BEAM])
         frontier = next_frontier
@@ -542,6 +768,219 @@ async def _search_slot(
         leaves.sort(key=lambda path: -path.score)
         ranked.append(leaves[:BEAM])
     return ranked
+
+
+# ---------------------------------------------------------------------------
+# Grammar-valid tokens only
+# ---------------------------------------------------------------------------
+
+
+def _composes(
+    chosen: Mapping[str, str | None], slot: str, token: str
+) -> bool:
+    """Whether ``token`` composes with the tokens already chosen for ``chosen``.
+
+    The test is the grammar's own: the trial token set is rendered through
+    :func:`imas_codex.standard_names.grammar_adapter.compose_canonical_ir` by way
+    of :func:`render_name`, so a token is admitted only when the adapter accepts
+    the name it produces. Nothing else is consulted, and no rule is re-derived
+    here.
+    """
+    trial = dict(chosen)
+    trial[slot] = token
+    try:
+        render_name(trial)
+    except SegmentRefusal:
+        return False
+    return True
+
+
+@lru_cache(maxsize=4096)
+def _admissible_cached(
+    slot: str, chosen_items: tuple[tuple[str, str | None], ...]
+) -> tuple[str, ...]:
+    chosen = dict(chosen_items)
+    return tuple(
+        token for token in _slot_tokens(slot) if _composes(chosen, slot, token)
+    )
+
+
+def admissible(slot: str, chosen: Mapping[str, str | None]) -> tuple[str, ...]:
+    """The slot's tokens that compose with the tokens already chosen.
+
+    Cached on the (slot, chosen tokens) pair because the same pair recurs across
+    a batch: every source whose earlier answers matched shares one computation,
+    and the token list is the slot's whole vocabulary each time.
+    """
+    items = tuple(sorted((key, value) for key, value in chosen.items() if value))
+    return _admissible_cached(slot, items)
+
+
+# ---------------------------------------------------------------------------
+# The base shortlist
+# ---------------------------------------------------------------------------
+
+
+def _embed(texts: list[str]) -> Sequence[Sequence[float]]:
+    """Embed ``texts`` through the project's embedding client.
+
+    One indirection so the retrieval can be stubbed in a test without loading a
+    model: the identity of the client is this function, not every embedded
+    choice. Raises whatever the client raises — a retrieval that cannot be done
+    is not silently turned into an empty shortlist.
+    """
+    from imas_codex.embeddings.embed import get_encoder
+
+    return get_encoder().embed_texts(texts)
+
+
+def _source_text(source: Mapping[str, Any]) -> str:
+    """The text a source is retrieved by: its description, then documentation."""
+    parts = [
+        str(source.get("description") or ""),
+        str(source.get("documentation") or ""),
+    ]
+    text = " ".join(part for part in parts if part).strip()
+    return text or str(source.get("path") or "").replace("/", " ").strip()
+
+
+def _retrieval_text(token: str) -> str:
+    """The text a base token is retrieved by: its words and what it means."""
+    words = token.replace("_", " ")
+    definition = _vocabulary_definitions().get(token)
+    if definition:
+        return f"{words}: {definition}"
+    concept_definition, phrase = _concept_entries().get(token, ("", ""))
+    if concept_definition:
+        return f"{words}: {' '.join(concept_definition.split())}"
+    if phrase:
+        return f"{words}: {phrase}"
+    return words
+
+
+def base_shortlists(
+    sources: Sequence[Mapping[str, Any]], *, size: int = SHORTLIST_SIZE
+) -> list[list[str]]:
+    """Rank the base vocabulary against each source; return the top ``size`` each.
+
+    The ranking is the cosine similarity of the source's description against
+    each base token's meaning, taken as a dot product because the encoder
+    normalises its vectors. The shortlist is a *retrieval* step and nothing more:
+    it narrows what the base Choice is offered over, and the caller records
+    whether the item's expected base survived it, so a base the retrieval missed
+    is never confused with one the model passed over.
+    """
+    tokens = _slot_tokens(SLOT_PHYSICAL_BASE)
+    if not tokens:
+        return [[] for _ in sources]
+    size = max(1, min(size, len(tokens)))
+    texts = [_retrieval_text(token) for token in tokens]
+    queries = [_source_text(source) for source in sources]
+    vectors = [
+        [float(value) for value in vector] for vector in _embed([*texts, *queries])
+    ]
+    base_vectors = vectors[: len(tokens)]
+    query_vectors = vectors[len(tokens) :]
+    shortlists: list[list[str]] = []
+    for query in query_vectors:
+        scored = [
+            (sum(left * right for left, right in zip(query, vector)), token)
+            for vector, token in zip(base_vectors, tokens)
+        ]
+        scored.sort(key=lambda pair: (-pair[0], pair[1]))
+        shortlists.append([token for _, token in scored[:size]])
+    return shortlists
+
+
+# ---------------------------------------------------------------------------
+# The asking sequence
+# ---------------------------------------------------------------------------
+
+
+async def _search_groups(
+    slot: str,
+    sources: Sequence[Mapping[str, Any]],
+    allowed_per_source: Sequence[Sequence[str]],
+    *,
+    include_none: bool,
+    model: str,
+    cost: Any | None,
+    spent: list[float],
+    concurrency: int,
+    budget_seconds: float | None,
+) -> list[list[Path]]:
+    """Walk ``slot``'s tree for each source over its own allowed tokens.
+
+    Sources whose allowed sets are identical share one tree and one set of
+    Choices, so a batch pays for the common cases once rather than once per
+    source. Results are scattered back into input order.
+    """
+    groups: dict[tuple[str, ...], list[int]] = {}
+    for index, allowed in enumerate(allowed_per_source):
+        groups.setdefault(tuple(allowed), []).append(index)
+
+    ranked: list[list[Path]] = [[] for _ in sources]
+    for allowed, indices in groups.items():
+        tree = build_slot_tree(slot, allowed=allowed, include_none=include_none)
+        subset = await _search_slot(
+            tree,
+            [sources[index] for index in indices],
+            model=model,
+            cost=cost,
+            spent=spent,
+            concurrency=concurrency,
+            budget_seconds=budget_seconds,
+        )
+        for position, index in enumerate(indices):
+            ranked[index] = subset[position]
+    return ranked
+
+
+async def _select_sequence(
+    sources: Sequence[Mapping[str, Any]],
+    *,
+    shortlists: Sequence[Sequence[str]],
+    model: str,
+    cost: Any | None,
+    spent: list[float],
+    concurrency: int,
+    budget_seconds: float | None,
+) -> tuple[dict[str, list[list[Path]]], list[dict[str, str | None]]]:
+    """Ask every slot in sequence, each offering only grammar-valid tokens.
+
+    The base is asked first, over ``shortlists``. Each later slot's allowed set
+    is then derived from that source's own chosen tokens so far, so a token is
+    offered only when it composes with them. The pick at each slot feeds the
+    next slot's filter, which is what makes the sequence conditional rather than
+    six independent questions.
+    """
+    chosen: list[dict[str, str | None]] = [{} for _ in sources]
+    selections: dict[str, list[list[Path]]] = {}
+    for slot in SLOT_ORDER:
+        if slot == SLOT_PHYSICAL_BASE:
+            allowed_per_source: list[Sequence[str]] = list(shortlists)
+            include_none = False
+        else:
+            allowed_per_source = [
+                admissible(slot, entry) for entry in chosen
+            ]
+            include_none = True
+        ranked = await _search_groups(
+            slot,
+            sources,
+            allowed_per_source,
+            include_none=include_none,
+            model=model,
+            cost=cost,
+            spent=spent,
+            concurrency=concurrency,
+            budget_seconds=budget_seconds,
+        )
+        selections[slot] = ranked
+        for index, paths in enumerate(ranked):
+            if paths:
+                chosen[index][slot] = paths[0].token
+    return selections, chosen
 
 
 # ---------------------------------------------------------------------------
@@ -688,15 +1127,20 @@ async def select_segments(
     cost: Any | None = None,
     concurrency: int = 8,
     budget_seconds: float | None = None,
+    shortlist_size: int = SHORTLIST_SIZE,
 ) -> SelectionRun:
     """Select every grammar slot for each source and render the name.
 
     Each source is a mapping carrying ``path``, ``description`` (its enriched
-    description) and ``documentation``. Every slot's tree is walked for the
+    description) and ``documentation``; it may also carry ``expected_base`` when
+    the caller knows the base the source should select, which is recorded on the
+    item rather than used to steer the offer. Every slot's tree is walked for the
     whole batch through the shared decisions owner
     (:func:`imas_codex.discovery.base.judgment.decide_batch`) under the
     ``sn-judge`` seat and the ``standard-names`` service, so the retry policy,
-    the concurrency bound and the cost booking live in one place.
+    the concurrency bound and the cost booking live in one place. The base is
+    asked first over an embedding shortlist; every later slot offers only tokens
+    that compose with the tokens already chosen.
 
     Args:
         sources: The DD sources to select segments for.
@@ -705,6 +1149,8 @@ async def select_segments(
             to it under ``sn_segment_selection``.
         concurrency: Maximum judgements in flight at once.
         budget_seconds: Wall-time budget per Choice node; ``None`` waits.
+        shortlist_size: How many base tokens the shortlist offers the base
+            Choice.
 
     Returns:
         A :class:`SelectionRun` whose ``items`` are one
@@ -713,7 +1159,7 @@ async def select_segments(
 
     Raises:
         SegmentRefusal: Only from an explicitly invoked render; a rendering
-            refusal is recorded on the item's ``failure``, never raised here.
+            is recorded on the item's ``failure``, never raised here.
     """
     if model is None:
         from imas_codex.settings import get_model
@@ -725,22 +1171,23 @@ async def select_segments(
         return SelectionRun(items=[], cost_usd=0.0)
 
     spent: list[float] = []
-
-    trees = {slot: build_slot_tree(slot) for slot in SLOT_ORDER}
-    selections: dict[str, list[list[Path]]] = {}
-    for slot in SLOT_ORDER:
-        ranked = await _search_slot(
-            trees[slot],
-            sources,
-            model=model,
-            cost=cost,
-            spent=spent,
-            concurrency=concurrency,
-            budget_seconds=budget_seconds,
-        )
-        selections[slot] = ranked
+    shortlists = base_shortlists(sources, size=shortlist_size)
+    selections, _ = await _select_sequence(
+        sources,
+        shortlists=shortlists,
+        model=model,
+        cost=cost,
+        spent=spent,
+        concurrency=concurrency,
+        budget_seconds=budget_seconds,
+    )
 
     for index, item in enumerate(items):
+        item.shortlist = tuple(shortlists[index])
+        expected = sources[index].get(EXPECTED_BASE_KEY)
+        item.base_in_shortlist = (
+            None if not expected else expected in item.shortlist
+        )
         for slot in SLOT_ORDER:
             paths = selections[slot][index]
             if not paths:
