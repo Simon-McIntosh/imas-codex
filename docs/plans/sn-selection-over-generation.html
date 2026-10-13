@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -212,7 +212,10 @@
     <div class="r-comment-body"><p>Recorded an independent review of r-20261013T005036802056-ssog-comparator-rerank at head 400416975 (base c98a0d42): scores goal_fidelity 19, evidence 18, scope_discipline 16, durability 18, fit 18, reuse 19 (total 108), zero added failures against the reviewed run's own base arm, three follow-on findings (two files beyond the brief's declared write scope; a stale negative-control test id; an unpinned seat-on-no-call contract) and no blocking defect.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T005036802056-ssog-comparator-rerank" data-who="reckon-build" data-when="2026-10-13T03:04:57.341Z">
-    <div class="r-comment-body"><p>The compose comparator block can be reranked by Jev through rerank_pool behind a default-off switch that fuses the item orders through the repository&#x27;s single rank-fusion owner, books the spend under the judge seat it was billed by through a lease at both compose sites, and leaves the embedding order on any failure; gate 845 passed/1 skipped/0 failed at head against 827 passed/1 skipped/0 failed at base, so the rerank, its booking and the fusion reuse add no failures.</p></div>
+    <div class="r-comment-body"><p>The compose comparator block can be reranked by Jev through rerank_pool behind a default-off switch that fuses the item orders through the repository's single rank-fusion owner, books the spend under the judge seat it was billed by through a lease at both compose sites, and leaves the embedding order on any failure; gate 845 passed/1 skipped/0 failed at head against 827 passed/1 skipped/0 failed at base, so the rerank, its booking and the fusion reuse add no failures.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-rerank-landed" data-who="reckon-build" data-when="2026-10-13T03:22:00Z">
+    <div class="r-comment-body"><p>The comparator rerank is on main behind a default-off switch, fused through the rank-fusion owner and charged on both compose paths (merge <code>2112da115</code>); final review 108/120. §4 stays open on its measurement: nDCG@10 before and after on a 30-item set I label, and first-pass acceptance on a held-out batch run both ways. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s4-comparator-rerank">evidence</a></p></div>
 </div>
 </section>
 </main>
