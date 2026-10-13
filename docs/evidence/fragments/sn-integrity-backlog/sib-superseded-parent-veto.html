@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-superseded-parent-veto">
+<title>Superseded derived-parent admission veto</title>
+</head>
+<body>
+<main>
+<h1 id="sib-superseded-parent-veto-title">Superseded names cannot parent derived names</h1>
+<p id="sib-superseded-parent-veto-rule">A target with
+<code>name_stage='superseded'</code> is refused before catalog or accepted-name
+protection. <code>parents.superseded_parent_names</code> supplies the lifecycle
+lookup. The ordinary edge writer reuses its existing target projection in
+<code>_filter_admissible_parents</code>; the signed lifecycle-less-stub admission
+site queries through the same helper before
+<code>is_admissible_parent_name</code>.</p>
+<p id="sib-superseded-parent-veto-reconcile">The signed structural reconcile
+calls <code>_write_standard_name_edges</code> for the requested child. That writer
+deletes a derived <code>HAS_PARENT</code> edge when its target is absent from the
+new admitted set. A fake-graph test starts with
+<code>surface_area_of_flux_surface → area_of_flux_surface</code> and confirms the
+edge is gone after reconcile; no separate deletion was added.</p>
+<p id="sib-superseded-parent-veto-measure">The two new tests failed against
+the base code (<code>EXIT=1</code>): legacy protection retained the superseded
+target, and reconcile retained its edge. The gate went from 148 passed at base
+to 151 passed at head, with zero added failures; the Cypher property check
+passed in both arms.</p>
+</main>
+</body>
+</html>
