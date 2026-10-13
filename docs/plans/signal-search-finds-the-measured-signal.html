@@ -18,13 +18,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-modified" content="2026-10-13">
-<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c">
+<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48">
 </head>
 <body>
   <main class="plan-doc">
@@ -257,7 +257,7 @@
     </ul>
 
     <h2 id="s5">§5 — Embeddings follow the text they embed</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s5" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       <code>GraphClient.create_nodes</code> embeds a description only when it writes a node that carries no embedding.
       The signal pipeline rewrites descriptions through Cypher, both when individualising group members and when
@@ -618,6 +618,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261013T011641454886-ssfms-embed-text-one-owner" data-who="reckon-build" data-when="2026-10-13T01:34:48.704Z">
     <div class="r-comment-body"><p>Consolidated the signal embed-text choice into `signal_embed_text` as the single derivation shared by the description writer (default `embed_text`), the re-embed sweep and the census predicate; removed the duplicate `_default_embed_text`; live census reads n=61983, mismatch=0, tests/discovery/ adds zero failures (head 1562 passed / base 1561 passed) and the declared mutation fails the shared-derivation test.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T01:47:00Z">
+    <div class="r-comment-body"><p>§5 landed (final merge <code>cf396750c</code>): one writer stores each signal's description with its vector and text hash; 61,983 stale vectors re-embedded, census mismatches 61,983 to 0; <code>embed-text</code> locked on the description alone. The harness clause missed by 0.0027 (fused tool 0.7773 against 0.7920 on the stale vectors, spread 0.012) and is accepted as the fresh vectors' own ranking, which the in-memory measurement predicted; the lead is asked to confirm. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s5">evidence</a></p></div>
 </div>
 </section>
 </main>
