@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite/after_suite gate log (a docs-only node ran no suite), so the added-failure count was not taken",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T17:04:46.550Z",
+  "dispatched_at": "2026-10-13T16:47:36Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-8.json",
+      "line": "39",
+      "severity": "blocking",
+      "text": "blocking: scopeB.log_final_census names scratch/census-scopeB-final.json as the scope's final census, but that file reads discovered 43 / described 1555 / embedded 1555 (reproduced: cat scratch/census-scopeB-final.json), taken before the second pass scopeB-enrich2, directly contradicting the final_census block at :35 (discovered 0 / described 1598); the genuinely final numbers exist only in scratch/final-census.json, which this record does not cite, so a later reader opening the named receipt sees the record's own claim falsified and the done_when clause \"each scope's ... final census ... captured to logs\" is not met by the artifact named."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-8.json",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "follow-on: scopeA.log_final_census names scratch/census-scopeA-final.json, which reads with_role 346 while the final_census block at :23 claims with_role 1029; the named log predates the role backfill recorded at :42-46, so it is not the scope's final census."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-8.html",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "follow-on: the narrative and reprocess-progress-bulk-8.json:15 report a measured rate of \"roughly 200 signals per minute\", but the enrichment records show scope A at 1029 signals / 590 s = about 105/min and scope B at 1598 / 1164 s = about 82/min, so the rate used to size the scopes is not the rate the run's own records show."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-8.html",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's headline reports 2627 signals in these four categories while the node's done_when assigns them at 1902 signals, and the record never reconciles the difference; the peer progress files show the four categories' totals are genuinely 2627 and the 1902 describes the remaining work this node took over (bulk-4 left 898 of a048717 unreset; bulk-5 left CryoCTB and b240064 unstretched), so the artifact overstates this node's share of new work by re-resetting whole categories without saying so."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit \u2014 056eea413 adds the progress JSON and fragment html, 110147e83 adds the 1288-line SVG; 1429 insertions and 0 deletions, all inside the declared scope, touching no product source and no test.",
+    "done_when": "the done_when's measures are none-at-discovered, each described with a matching embedded_text_hash, captured to logs, spend under $6; scratch/final-census.json records 2627 total / 0 discovered / 2627 described / roles 2627 with scope_embedding_census mismatch 0 and $0.07 spend, so the measure is recorded and passes, but two of its named receipts are pre-completion snapshots.",
+    "goal": "the goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; the four categories (a048717, CryoCTB, b240064, CryoIL) reach 0 discovered / 2627 described / 2627 embedded / 2627 roled per scratch/final-census.json, so the headline holds, but the landed artifact's own per-scope final-census pointer contradicts it (reprocess-progress-bulk-8.json:39).",
+    "manifest": "read; status complete, names commits 056eea413 and 110147e83, two scopes, the post-reset negative control, spend $0.07 of $6, and no pytest gate with negative_control_log \"none\" because the write paths reach no test path.",
+    "write_paths": "the manifest declares the progress JSON, the fragment html and the figure directory; git diff --stat 9248d027..110147e83 lists exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "the change is docs only so no test can redden on its regression, and the one guard present \u2014 the post-reset census \u2014 is shown able to fire by scratch/census-cryoil-partial.json reading 188 described before its reset, but the final-census logs the record cites are stale, so the guard's own receipt is unreliable.",
+    "evidence": "the done_when's measure is recorded in scratch/final-census.json (2627 total, 0 discovered, 2627 described, scoped hash mismatch 0), but the per-scope final_census blocks at reprocess-progress-bulk-8.json:23 and :35 are contradicted by the very logs those blocks name at :26 and :39.",
+    "fit": "the fragment follows the reckon evidence convention with node-scoped element ids and no plan label in a symbol, but the table header \"role-store spend\" at ssfms-reprocess-bulk-8.html:38 labels enrichment spend values ($0.0094, $0.0151), not the role-backfill spend of $0.0451.",
+    "goal_fidelity": "scratch/final-census.json shows every assigned category at discovered 0 with 2627 described/embedded/roled, but the progress JSON at reprocess-progress-bulk-8.json:39 names a final-census log that reads 43 still discovered, so the artifact does not cleanly demonstrate the goal it claims.",
+    "reuse": "the change adds no code \u2014 a fragment, a progress JSON and a figure \u2014 and no capability the repository already owns is forked.",
+    "scope_discipline": "git diff --stat 9248d027..110147e83 changes exactly the three declared paths with 1429 insertions and 0 deletions."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to reprocess the assigned JT-60SA categories through the current pipeline, finishing every scope it resets; the four categories (a048717, CryoCTB, b240064, CryoIL) reach 0 discovered / 2627 described / 2627 embedded / 2627 roled per scratch/final-census.json, so the headline holds, but the landed artifact's own per-scope final-census pointer contradicts it (reprocess-progress-bulk-8.json:39).\nVERDICT done_when: the done_when's measures are none-at-discovered, each described with a matching embedded_text_hash, captured to logs, spend under $6; scratch/final-census.json records 2627 total / 0 discovered / 2627 described / roles 2627 with scope_embedding_census mismatch 0 and $0.07 spend, so the measure is recorded and passes, but two of its named receipts are pre-completion snapshots.\nVERDICT write_paths: the manifest declares the progress JSON, the fragment html and the figure directory; git diff --stat 9248d027..110147e83 lists exactly those three paths and nothing else.\nVERDICT manifest: read; status complete, names commits 056eea413 and 110147e83, two scopes, the post-reset negative control, spend $0.07 of $6, and no pytest gate with negative_control_log \"none\" because the write paths reach no test path.\nVERDICT diff: read commit by commit \u2014 056eea413 adds the progress JSON and fragment html, 110147e83 adds the 1288-line SVG; 1429 insertions and 0 deletions, all inside the declared scope, touching no product source and no test.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: scratch/final-census.json shows every assigned category at discovered 0 with 2627 described/embedded/roled, but the progress JSON at reprocess-progress-bulk-8.json:39 names a final-census log that reads 43 still discovered, so the artifact does not cleanly demonstrate the goal it claims.\nSCORE evidence: 12\nJUSTIFICATION evidence: the done_when's measure is recorded in scratch/final-census.json (2627 total, 0 discovered, 2627 described, scoped hash mismatch 0), but the per-scope final_census blocks at reprocess-progress-bulk-8.json:23 and :35 are contradicted by the very logs those blocks name at :26 and :39.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 9248d027..110147e83 changes exactly the three declared paths with 1429 insertions and 0 deletions.\nSCORE durability: 12\nJUSTIFICATION durability: the change is docs only so no test can redden on its regression, and the one guard present \u2014 the post-reset census \u2014 is shown able to fire by scratch/census-cryoil-partial.json reading 188 described before its reset, but the final-census logs the record cites are stale, so the guard's own receipt is unreliable.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment follows the reckon evidence convention with node-scoped element ids and no plan label in a symbol, but the table header \"role-store spend\" at ssfms-reprocess-bulk-8.html:38 labels enrichment spend values ($0.0094, $0.0151), not the role-backfill spend of $0.0451.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no code \u2014 a fragment, a progress JSON and a figure \u2014 and no capability the repository already owns is forked.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-8.json:39 blocking: scopeB.log_final_census names scratch/census-scopeB-final.json as the scope's final census, but that file reads discovered 43 / described 1555 / embedded 1555 (reproduced: cat scratch/census-scopeB-final.json), taken before the second pass scopeB-enrich2, directly contradicting the final_census block at :35 (discovered 0 / described 1598); the genuinely final numbers exist only in scratch/final-census.json, which this record does not cite, so a later reader opening the named receipt sees the record's own claim falsified and the done_when clause \"each scope's ... final census ... captured to logs\" is not met by the artifact named.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress-bulk-8.json:26 follow-on: scopeA.log_final_census names scratch/census-scopeA-final.json, which reads with_role 346 while the final_census block at :23 claims with_role 1029; the named log predates the role backfill recorded at :42-46, so it is not the scope's final census.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-8.html:31 follow-on: the narrative and reprocess-progress-bulk-8.json:15 report a measured rate of \"roughly 200 signals per minute\", but the enrichment records show scope A at 1029 signals / 590 s = about 105/min and scope B at 1598 / 1164 s = about 82/min, so the rate used to size the scopes is not the rate the run's own records show.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-8.html:16 follow-on: the fragment's headline reports 2627 signals in these four categories while the node's done_when assigns them at 1902 signals, and the record never reconciles the difference; the peer progress files show the four categories' totals are genuinely 2627 and the 1902 describes the remaining work this node took over (bulk-4 left 898 of a048717 unreset; bulk-5 left CryoCTB and b240064 unstretched), so the artifact overstates this node's share of new work by re-resetting whole categories without saying so.\n",
+  "review_run_id": "r-20261013T164722801224-review-of-ssfms-reprocess-bulk-8-110147e83d47",
+  "reviewed_base_sha": "9248d0277e1f17f2b23b3493b0b18d6ad16a4cfc",
+  "reviewed_head_sha": "110147e83d47e1dede272d44f4226ce4d452cf6b",
+  "reviewed_run_id": "r-20261013T155400265115-ssfms-reprocess-bulk-8",
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T17:05:32.479853+00:00",
+  "total": 95
+}
