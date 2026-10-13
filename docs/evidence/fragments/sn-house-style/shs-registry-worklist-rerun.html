@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<meta name="reckon-type" content="evidence">
+<title>Registry worklist for the frozen WEST roster, rerun through the selector</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+<main>
+<h1>Registry worklist for the frozen WEST roster, rerun through the selector</h1>
+
+<p id="shs-registry-worklist-rerun-intro">
+The worklist driver no longer decides whether a pattern has a template with
+copies of its own. A roster name has a template exactly when
+<code>imas_standard_names.grammar.terms.select_conventions(name, registry=…).templates</code>
+is non-empty, with the registry from <code>load_conventions</code> or the
+<code>--conventions-dir</code> copy. Run against the live registry (ISN
+<code>main</code>, carrying the binary-operator templates and the fused-operator
+splitter) it lists <strong>0</strong> template gaps
+for 125 patterns; the same census with the
+driver's own matcher listed one, the binary-operator pattern, on the same
+registry. The first run is
+<code>docs/evidence/fragments/sn-house-style/shs-registry-worklist.html</code>.
+</p>
+
+<h2 id="shs-registry-worklist-rerun-totals">Totals beside the first run</h2>
+<table>
+<thead><tr><th>measure</th><th class="num">first run</th><th class="num">rerun</th></tr></thead>
+<tbody>
+<tr><td>roster names</td><td class="num">220</td><td class="num">220</td></tr>
+<tr><td>parsed</td><td class="num">219</td><td class="num">219</td></tr>
+<tr><td>unparsed</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td>concepts: distinct tokens with no entry</td><td class="num">139</td><td class="num">96</td></tr>
+<tr><td>notation: distinct tokens with no entry</td><td class="num">79</td><td class="num">1</td></tr>
+<tr><td>templates: distinct patterns</td><td class="num">125</td><td class="num">125</td></tr>
+<tr><td>templates: distinct bases</td><td class="num">69</td><td class="num">69</td></tr>
+<tr><td>templates: patterns with a template</td><td class="num">4</td><td class="num">125</td></tr>
+<tr><td>templates: patterns with no template</td><td class="num">121</td><td class="num">0</td></tr>
+<tr><td>templates: roster names with a template</td><td class="num">not recorded</td><td class="num">219</td></tr>
+<tr><td>templates: roster names with no template</td><td class="num">not recorded</td><td class="num">0</td></tr>
+</tbody>
+</table>
+<p id="shs-registry-worklist-rerun-totals-note">
+The roster is the same 220 names in both runs, so every difference is the
+registry changing or the selector changing. Between the two runs the registry
+gained entries beyond the binary-operator templates: the concepts and notation
+lists shrank for that reason and not because of the selector.
+</p>
+
+<h2 id="shs-registry-worklist-rerun-by-kind">Distinct tokens per segment kind</h2>
+<table>
+<thead><tr><th>list</th><th>segment kind</th><th class="num">tokens</th><th class="num">missing, first run</th><th class="num">missing, rerun</th></tr></thead>
+<tbody>
+<tr><td>concepts</td><td><code>coordinate</code></td><td class="num">3</td><td class="num">3</td><td class="num">0</td></tr>
+<tr><td>concepts</td><td><code>geometric_base</code></td><td class="num">8</td><td class="num">8</td><td class="num">2</td></tr>
+<tr><td>concepts</td><td><code>object</code></td><td class="num">26</td><td class="num">26</td><td class="num">26</td></tr>
+<tr><td>concepts</td><td><code>physical_base</code></td><td class="num">61</td><td class="num">61</td><td class="num">51</td></tr>
+<tr><td>concepts</td><td><code>position</code></td><td class="num">24</td><td class="num">23</td><td class="num">14</td></tr>
+<tr><td>concepts</td><td><code>region</code></td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td>concepts</td><td><code>transformation</code></td><td class="num">18</td><td class="num">17</td><td class="num">2</td></tr>
+<tr><td>notation</td><td><code>component</code></td><td class="num">4</td><td class="num">4</td><td class="num">0</td></tr>
+<tr><td>notation</td><td><code>coordinate</code></td><td class="num">3</td><td class="num">3</td><td class="num">0</td></tr>
+<tr><td>notation</td><td><code>geometric_base</code></td><td class="num">8</td><td class="num">8</td><td class="num">0</td></tr>
+<tr><td>notation</td><td><code>physical_base</code></td><td class="num">61</td><td class="num">60</td><td class="num">1</td></tr>
+<tr><td>notation</td><td><code>subject</code></td><td class="num">5</td><td class="num">5</td><td class="num">0</td></tr>
+</tbody>
+</table>
+
+<h2 id="shs-registry-worklist-rerun-templates-closed">Template gaps the binary templates closed</h2>
+<p id="shs-registry-worklist-rerun-templates-closed-note">
+Of the first run's 121 template gaps, 1 pattern
+closes through the binary-operator templates and
+120 close through entries other than those. The split is
+measured, not inferred: with <code>ratio</code>, <code>difference</code> and
+<code>product</code> deleted from a scratch copy, exactly
+1 pattern is listed, the same one. Names in that pattern open with
+a binary operator or contain one; the parse gives them the base
+<code>placeholder</code>, so no base-keyed template can match them and only the
+operator-keyed templates do.
+</p>
+<table>
+<thead><tr><th>pattern (base + segments)</th><th class="num">names</th><th class="num">select a template, binary templates deleted</th><th class="num">select a template, live</th><th>sample roster names</th></tr></thead>
+<tbody>
+<tr><td><code>placeholder (physical_base, transformation)</code></td><td class="num">8</td><td class="num">0</td><td class="num">8</td><td><code>difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy</code>, <code>difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code>, <code>product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="shs-registry-worklist-rerun-gap-control">Gap control</h2>
+<p id="shs-registry-worklist-rerun-gap-control-note">
+A scratch copy of the conventions directory, outside the repository, with the
+named templates deleted, read through <code>--conventions-dir</code>. The
+live run lists no template gap; the copy without <code>ratio</code> lists the
+binary-operator pattern, and of its 8 names the 5 that use a
+<code>ratio</code> operator lose their template while the 3 that use
+<code>difference</code> or <code>product</code> keep theirs.
+</p>
+<table>
+<thead><tr><th>registry read</th><th>pattern listed as a gap</th><th class="num">names in pattern</th><th class="num">roster names with no template</th><th>sample roster names</th></tr></thead>
+<tbody>
+<tr><td>live registry</td><td>none</td><td class="num">0</td><td class="num">0</td><td></td></tr>
+<tr><td><code>ratio</code> template deleted</td><td><code>placeholder (physical_base, transformation)</code></td><td class="num">8</td><td class="num">5</td><td><code>difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy</code>, <code>difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code></td></tr>
+<tr><td><code>ratio</code>, <code>difference</code>, <code>product</code> templates deleted</td><td><code>placeholder (physical_base, transformation)</code></td><td class="num">8</td><td class="num">8</td><td><code>difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy</code>, <code>difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="shs-registry-worklist-rerun-templates-remaining">Template gaps that remain</h2>
+<p id="shs-registry-worklist-rerun-templates-remaining-note">
+None: 0 of the first run's 121 pattern gaps are still
+listed, and 219 of
+219 parsed roster names select at least one template.
+</p>
+
+<h2 id="shs-registry-worklist-rerun-concepts-remaining">Concepts that remain (top 20 of 96)</h2>
+<p id="shs-registry-worklist-rerun-concepts-note">
+43 of the first run's 139 concept
+tokens now have an entry and 0 are new. 44 of the
+96 are used by one roster name. Sorted by the
+number of roster names, highest first; the rank column is the token's position
+in the first run's list.
+</p>
+<table>
+<thead><tr><th>token</th><th>segment kind</th><th class="num">names</th><th class="num">first-run rank</th><th>sample roster names</th></tr></thead>
+<tbody>
+<tr><td><code>coordinate</code></td><td>geometric_base</td><td class="num">17</td><td class="num">1</td><td><code>toroidal_coordinate_at_detector_pixel</code>, <code>toroidal_coordinate_of_aperture</code>, <code>toroidal_coordinate_of_camera</code></td></tr>
+<tr><td><code>power</code></td><td>physical_base</td><td class="num">10</td><td class="num">6</td><td><code>forward_power_of_ion_cyclotron_heating_antenna</code>, <code>launched_power_of_lower_hybrid_antenna</code>, <code>net_power_due_to_ion_cyclotron_heating</code></td></tr>
+<tr><td><code>temperature</code></td><td>physical_base</td><td class="num">10</td><td class="num">7</td><td><code>cold_neutral_temperature</code>, <code>coolant_temperature_at_inlet</code>, <code>coolant_temperature_at_outlet</code></td></tr>
+<tr><td><code>ion_cyclotron_heating_antenna</code></td><td>object</td><td class="num">9</td><td class="num">8</td><td><code>capacitance_of_ion_cyclotron_heating_antenna</code>, <code>forward_power_of_ion_cyclotron_heating_antenna</code>, <code>forward_wave_phase_of_ion_cyclotron_heating_antenna</code></td></tr>
+<tr><td><code>magnetic_field</code></td><td>physical_base</td><td class="num">9</td><td class="num">9</td><td><code>flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_magnetic_field_magnitude</code>, <code>flux_surface_averaged_square_of_magnetic_field_magnitude</code></td></tr>
+<tr><td><code>magnetic_flux</code></td><td>physical_base</td><td class="num">8</td><td class="num">11</td><td><code>poloidal_magnetic_flux_at_flux_surface</code>, <code>poloidal_magnetic_flux_at_magnetic_axis</code>, <code>poloidal_magnetic_flux_at_measurement_position</code></td></tr>
+<tr><td><code>outline</code></td><td>geometric_base</td><td class="num">8</td><td class="num">12</td><td><code>radial_outline_of_antenna_strap</code>, <code>radial_outline_of_limiter_tile</code>, <code>radial_outline_of_plasma_boundary</code></td></tr>
+<tr><td><code>placeholder</code></td><td>physical_base</td><td class="num">8</td><td class="num">13</td><td><code>difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy</code>, <code>difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code></td></tr>
+<tr><td><code>area</code></td><td>physical_base</td><td class="num">7</td><td class="num">15</td><td><code>area_of_diagnostic_aperture</code>, <code>area_of_poloidal_magnetic_field_probe</code>, <code>area_of_toroidal_magnetic_field_probe</code></td></tr>
+<tr><td><code>density</code></td><td>physical_base</td><td class="num">7</td><td class="num">16</td><td><code>electron_density_at_divertor_target</code>, <code>electron_density_at_magnetic_axis</code>, <code>electron_density_at_plasma_boundary</code></td></tr>
+<tr><td><code>poloidal_magnetic_field_probe</code></td><td>object</td><td class="num">7</td><td class="num">17</td><td><code>area_of_poloidal_magnetic_field_probe</code>, <code>length_of_poloidal_magnetic_field_probe</code>, <code>radial_coordinate_of_poloidal_magnetic_field_probe</code></td></tr>
+<tr><td><code>antenna_strap</code></td><td>object</td><td class="num">6</td><td class="num">18</td><td><code>radial_outline_of_antenna_strap</code>, <code>toroidal_angle_of_antenna_strap</code>, <code>toroidal_width_of_antenna_strap</code></td></tr>
+<tr><td><code>measurement_position</code></td><td>position</td><td class="num">6</td><td class="num">19</td><td><code>normalized_toroidal_flux_coordinate_at_measurement_position</code>, <code>poloidal_angle_of_measurement_position</code>, <code>poloidal_magnetic_flux_at_measurement_position</code></td></tr>
+<tr><td><code>toroidal_magnetic_field_probe</code></td><td>object</td><td class="num">6</td><td class="num">20</td><td><code>area_of_toroidal_magnetic_field_probe</code>, <code>length_of_toroidal_magnetic_field_probe</code>, <code>poloidal_angle_of_toroidal_magnetic_field_probe</code></td></tr>
+<tr><td><code>current</code></td><td>physical_base</td><td class="num">5</td><td class="num">21</td><td><code>current_of_passive_loop</code>, <code>current_of_poloidal_field_coil</code>, <code>ion_current_of_mass_spectrometer_channel</code></td></tr>
+<tr><td><code>phase</code></td><td>physical_base</td><td class="num">5</td><td class="num">23</td><td><code>forward_wave_phase_of_ion_cyclotron_heating_antenna</code>, <code>reflected_phase_of_ion_cyclotron_heating_antenna</code>, <code>wave_phase_of_antenna_strap</code></td></tr>
+<tr><td><code>radius</code></td><td>physical_base</td><td class="num">5</td><td class="num">24</td><td><code>flux_surface_averaged_inverse_of_major_radius</code>, <code>flux_surface_averaged_inverse_of_square_of_major_radius</code>, <code>flux_surface_averaged_major_radius</code></td></tr>
+<tr><td><code>wavelength</code></td><td>physical_base</td><td class="num">5</td><td class="num">27</td><td><code>lower_wavelength_of_filter</code>, <code>spectral_wavelength_of_optical_element</code>, <code>upper_wavelength_of_filter</code></td></tr>
+<tr><td><code>length</code></td><td>physical_base</td><td class="num">4</td><td class="num">28</td><td><code>length_of_poloidal_magnetic_field_probe</code>, <code>length_of_toroidal_magnetic_field_probe</code>, <code>length_variation_of_interferometer_beam</code></td></tr>
+<tr><td><code>line_of_sight</code></td><td>position</td><td class="num">4</td><td class="num">29</td><td><code>radial_coordinate_of_line_of_sight</code>, <code>spectral_calibration_factor_at_line_of_sight</code>, <code>toroidal_coordinate_of_line_of_sight</code></td></tr>
+</tbody>
+</table>
+
+<h3 id="shs-registry-worklist-rerun-concepts-first-top">The first run's top 10</h3>
+<table>
+<thead><tr><th class="num">first-run rank</th><th>token</th><th>segment kind</th><th class="num">names</th><th>state in the rerun</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td><code>coordinate</code></td><td>geometric_base</td><td class="num">17</td><td>still listed, rank 1</td></tr>
+<tr><td class="num">2</td><td><code>vertical</code></td><td>coordinate</td><td class="num">17</td><td>entry present</td></tr>
+<tr><td class="num">3</td><td><code>flux_surface</code></td><td>position</td><td class="num">13</td><td>entry present</td></tr>
+<tr><td class="num">4</td><td><code>radial_coordinate</code></td><td>geometric_base</td><td class="num">13</td><td>entry present</td></tr>
+<tr><td class="num">5</td><td><code>magnitude</code></td><td>transformation</td><td class="num">10</td><td>entry present</td></tr>
+<tr><td class="num">6</td><td><code>power</code></td><td>physical_base</td><td class="num">10</td><td>still listed, rank 2</td></tr>
+<tr><td class="num">7</td><td><code>temperature</code></td><td>physical_base</td><td class="num">10</td><td>still listed, rank 3</td></tr>
+<tr><td class="num">8</td><td><code>ion_cyclotron_heating_antenna</code></td><td>object</td><td class="num">9</td><td>still listed, rank 4</td></tr>
+<tr><td class="num">9</td><td><code>magnetic_field</code></td><td>physical_base</td><td class="num">9</td><td>still listed, rank 5</td></tr>
+<tr><td class="num">10</td><td><code>magnetic_axis</code></td><td>position</td><td class="num">8</td><td>entry present</td></tr>
+</tbody>
+</table>
+
+<h2 id="shs-registry-worklist-rerun-notation-remaining">Notation that remains (1 of 79 in the first run)</h2>
+<table>
+<thead><tr><th>token</th><th>segment kind</th><th class="num">names</th><th>sample roster names</th></tr></thead>
+<tbody>
+<tr><td><code>placeholder</code></td><td>physical_base</td><td class="num">8</td><td><code>difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy</code>, <code>difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude</code>, <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code>, <code>product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate</code></td></tr>
+</tbody>
+</table>
+<p id="shs-registry-worklist-rerun-placeholder-note">
+<code>placeholder</code> is the base the parser assigns to names opened by a
+binary operator. The selector omits it from the token set it matches
+(<code>_ir_tokens</code> skips a <code>placeholder</code> base), so no
+concepts or notation entry can ever select on it, although the census's token
+walk lists it in both lists (8 names, concepts rank 8). Whether it stays
+listed is the coordinator's call; the driver was not changed for it.
+</p>
+
+<h2 id="shs-registry-worklist-rerun-unparsed">Unparsed roster names</h2>
+<ul>
+<li><code>inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width</code> — ParseError: residue &#x27;inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width&#x27; does not match any physical_base or geometry_carrier; nearest candidates: [&#x27;normalized_toroidal_flux_coordinate&#x27;]</li>
+</ul>
+
+<h2 id="shs-registry-worklist-rerun-reproduction">Reproduction</h2>
+<p id="shs-registry-worklist-rerun-reproduction-note">
+Two consecutive runs of the driver against the live registry wrote
+byte-identical results JSON, both <code>EXIT=0</code>. The driver defines no
+template matcher; <code>grep -c '_filled_segments\|_template_matches'</code>
+returns 0. Results:
+<code>docs/evidence/fragments/sn-house-style/shs-registry-worklist-rerun-results.json</code>.
+</p>
+</main>
+</body>
+</html>
