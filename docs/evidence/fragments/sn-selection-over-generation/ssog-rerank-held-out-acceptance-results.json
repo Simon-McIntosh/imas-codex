@@ -1,0 +1,102 @@
+{
+  "status": "blocked",
+  "reason": "the locally served compose seat stalled on every attempt: a single LLM call stayed in flight past 150 s without completion, so neither the positive control nor either arm completed inside the node's time fence",
+  "seed": 20261014,
+  "switch_env": "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS",
+  "compose_seat": "local/deepseek-v4.1-flash",
+  "reviewer_seat": "local/deepseek-v4.1-flash",
+  "n_source_paths": 40,
+  "population_size": 7692,
+  "excluded_size": 60,
+  "excluded_breakdown": {
+    "label_sheet": 30,
+    "boundary_density": 30
+  },
+  "draw_reproduced_by": "ssog-rerank-held-out-acceptance-run.py --draw-only",
+  "source_paths": [
+    "waves/coherent_wave/profiles_1d/e_field_n_tor/parallel/amplitude",
+    "distributions/distribution/ggd/orbit_frequency_tor/values",
+    "dataset_description/simulation/time_current",
+    "summary/local/divertor_plate/n_i/hydrogen/value",
+    "summary/local/pedestal/velocity_phi/carbon/value",
+    "reflectometer_profile/channel/line_of_sight_emission/second_point/r",
+    "equilibrium/time_slice/boundary_separatrix/triangularity_upper",
+    "summary/heating_current_drive/nbi/tangency_radius/value",
+    "plasma_initiation/b_field_lines/townsend_or_closed_grid_positions/z",
+    "em_coupling/field_probes_active",
+    "distribution_sources/vacuum_toroidal_field/b0",
+    "ntms/time_slice/mode/detailed_evolution/deltaw/value",
+    "langmuir_probes/probe/mach_number_parallel",
+    "neutron_diagnostic/detector/geometry/radius",
+    "summary/gas_injection_accumulated/xenon/value",
+    "pulse_schedule/density_control/n_e_line_of_sight/second_point/phi",
+    "wall/description_2d/vessel/unit/annular/outline_outer/r",
+    "neutron_diagnostic/detectors/test_generator/fall_time",
+    "cryostat/description_2d/thermal_shield/unit/element/outline/r",
+    "distributions/distribution/global_quantities/collisions/electrons/power_fast",
+    "gyrokinetics_local/species_all/shearing_rate_norm",
+    "lh_antennas/antenna/row/n_pol",
+    "workflow/time",
+    "dataset_description/simulation/time_end",
+    "langmuir_probes/embedded/fluence",
+    "summary/local/pedestal/momentum_phi/value",
+    "ece/channel/beam_tracing/beam/wave_vector/k_phi",
+    "equilibrium/time_slice/constraints/j_tor/time_measurement",
+    "summary/pedestal_fits/linear/b_field_pol_pedestal_top_hfs/value",
+    "plasma_initiation/global_quantities/ion/element/atoms_n",
+    "magnetics/flux_loop/gm9",
+    "tf/b_field_tor_vacuum_r",
+    "ntms/time_slice/mode/detailed_evolution/phase",
+    "langmuir_probes/reciprocating/plunge/position_average/r",
+    "neutron_diagnostic/detectors/aperture/outline/x2",
+    "pellets/time_slice/pellet/propellant_gas/element/z_n",
+    "pulse_schedule/time",
+    "wall/description_ggd/ggd/e_field/r",
+    "bolometer/camera/channel/aperture/centre/z",
+    "breeding_blanket/time_slice/tritium_breeding_ratio"
+  ],
+  "extraction": {
+    "admitted_sources": 29,
+    "not_admitted": 11,
+    "not_admitted_paths": [
+      "dataset_description/simulation/time_current",
+      "dataset_description/simulation/time_end",
+      "em_coupling/field_probes_active",
+      "equilibrium/time_slice/boundary_separatrix/triangularity_upper",
+      "equilibrium/time_slice/constraints/j_tor/time_measurement",
+      "langmuir_probes/probe/mach_number_parallel",
+      "neutron_diagnostic/detectors/aperture/outline/x2",
+      "neutron_diagnostic/detectors/test_generator/fall_time",
+      "summary/local/divertor_plate/n_i/hydrogen/value",
+      "tf/b_field_tor_vacuum_r",
+      "waves/coherent_wave/profiles_1d/e_field_n_tor/parallel/amplitude"
+    ]
+  },
+  "positive_control": {
+    "switch_changes_harness_compose_prompt": null,
+    "note": "not reached: the compose/judge calls it depends on stalled before any batch hash was produced"
+  },
+  "arm_a": {
+    "records": []
+  },
+  "arm_b": {
+    "records": []
+  },
+  "summary": {
+    "n_items_common": 0,
+    "acceptance_rate_interval": null
+  },
+  "stall_evidence": {
+    "signature": "LLM possible stall: 1 call(s) in flight, no completion for 151s / 166s \u2014 provider or governor",
+    "attempts": 3,
+    "attempt_logs": [
+      "acceptance-run.log",
+      "acceptance-run2.log",
+      "acceptance-run3.log"
+    ],
+    "note": "the same single-in-flight signature recurred on every attempt; a diagnostic rerank probe through the judge seat completed in 0.7 s, so the judge path is not the stall and the compose seat is the suspect"
+  },
+  "spend_usd": 9.9e-05,
+  "spend_note": "no arm or control call completed, so no arm spend was incurred; the figure is one diagnostic comparator-rerank probe through the paid judge seat (typesafe/jev-1.13). Ceiling was USD 3.00.",
+  "next_action": "redispatch when the locally served compose seat answers; re-run the driver unchanged (--out ...-results.json), it reproduces the same fixed draw from seed 20261014"
+}
