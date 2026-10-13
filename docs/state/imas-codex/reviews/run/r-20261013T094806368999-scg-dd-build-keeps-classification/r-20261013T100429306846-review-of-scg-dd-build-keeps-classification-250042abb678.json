@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own suite logs. baseline_suite (baseline-gate.log, revision ef9f7126130a20680aea80208a762bd3ddadc74f, EXIT=0, completed true, failure_count 0, 277 passed) and after_suite (head-gate.log, revision 6e6ce6f52, EXIT=0, completed true, failure_count 0, 278 passed). Both arms green, so added failures are 0 and added_failure_ids is empty; the +1 pass is the node's own new test.",
+  "backend": "local",
+  "base_log_revision": "ef9f7126130a20680aea80208a762bd3ddadc74f",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/build_dd.py:1903 (phase_build calls _batch_create_path_nodes carrying the changed statement)",
+    "imas_codex/graph/dd_workers.py:316 (the DD build's phase_build caller in the production build path)",
+    "imas_codex/graph/build_dd.py:4787 (phase_build exported)"
+  ],
+  "completed_at": "2026-10-13T10:21:16.230Z",
+  "dispatched_at": "2026-10-13T10:04:47Z",
+  "findings": [],
+  "head_log_revision": "6e6ce6f52",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read ef9f712..250042abb commit by commit; 2cf9a323 adds the recording-client test, 6e6ce6f5 changes only the path upsert at build_dd.py:3583-3586, and 250042ab adds the audit fragment, with nothing outside the declared scope.",
+    "done_when": "the done_when names tests/graph/test_dd_path_domain_upsert.py, an EXPLAIN of the modified statement, tests/graph/test_cypher_property_check.py, and the build_dd-importer gate at base and head judged by delta; the manifest records all four and the retained logs reproduce them.",
+    "goal": "the node's goal is that a DD rebuild never discards a path's classified domain; imas_codex/graph/build_dd.py:3583-3586 now writes the IDS default only when path.domain_source IS NULL, so a classified path keeps its physics_domain and its classification metadata through a rebuild.",
+    "manifest": "read; status complete, its after_suite records 278 passed EXIT=0 at 6e6ce6f52 and its baseline_suite records 277 passed EXIT=0 at ef9f712, both completed true with failure_count 0.",
+    "write_paths": "the manifest declares imas_codex/graph/build_dd.py, tests/graph/test_dd_path_domain_upsert.py and docs/evidence/fragments/sn-catalog-grouping/scg-dd-build-keeps-classification.html; every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_dd_path_domain_upsert.py:69-72 reddens on the base upsert (negative-control.log, EXIT=1, physics_domain drifted core_plasma_physics to transport) and raises on any unrecognized assignment text at :48, but the recording client models the CASE in Python at :41-46 rather than executing the Cypher, so the guard pins the statement text and leaves the graph semantics to the parse check in upsert-explain-retry.log (EXPLAIN_PARSE=passed), which proves parse alone.",
+    "evidence": "the manifest's gate covers all 14 files that import imas_codex.graph.build_dd plus test_cypher_property_check.py, and the retained baseline-gate.log (277 passed EXIT=0) and head-gate.log (278 passed EXIT=0) give the delta; docked because the EXPLAIN receipt's header names revision working-tree-after-2cf9a3234 rather than the fix commit, so its own revision binding is loose.",
+    "fit": "imas_codex/graph/build_dd.py:3583-3586 mirrors the path.status CASE already written in the same statement at :3610-3613, the commits use conventional subjects with bodies, and no plan, sprint, ticket or author label appears in the change.",
+    "goal_fidelity": "imas_codex/graph/build_dd.py:3583-3586 assigns p.physics_domain only when path.domain_source IS NULL, so a classified path is retained and a new path still receives the IDS default, exactly the goal the source brief states.",
+    "reuse": "the upsert extends the existing statement rather than forking a helper, and the domain_source-IS-NULL predicate matches the convention its owner imas_codex/graph/dd_domain_classifier.py:367 (_needs_classification_clause) the classifier selects on; no second conditional-preserve mechanism exists to extend.",
+    "scope_discipline": "the diff ef9f712..250042abb touches only build_dd.py, tests/graph/test_dd_path_domain_upsert.py and the audit fragment, all named in the manifest's write paths, with no unrelated payload."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a DD rebuild never discards a path's classified domain; imas_codex/graph/build_dd.py:3583-3586 now writes the IDS default only when path.domain_source IS NULL, so a classified path keeps its physics_domain and its classification metadata through a rebuild.\nVERDICT done_when: the done_when names tests/graph/test_dd_path_domain_upsert.py, an EXPLAIN of the modified statement, tests/graph/test_cypher_property_check.py, and the build_dd-importer gate at base and head judged by delta; the manifest records all four and the retained logs reproduce them.\nVERDICT write_paths: the manifest declares imas_codex/graph/build_dd.py, tests/graph/test_dd_path_domain_upsert.py and docs/evidence/fragments/sn-catalog-grouping/scg-dd-build-keeps-classification.html; every path in the diff is inside them.\nVERDICT manifest: read; status complete, its after_suite records 278 passed EXIT=0 at 6e6ce6f52 and its baseline_suite records 277 passed EXIT=0 at ef9f712, both completed true with failure_count 0.\nVERDICT diff: read ef9f712..250042abb commit by commit; 2cf9a323 adds the recording-client test, 6e6ce6f5 changes only the path upsert at build_dd.py:3583-3586, and 250042ab adds the audit fragment, with nothing outside the declared scope.\nCALL_SITES: imas_codex/graph/build_dd.py:1903 (phase_build calls _batch_create_path_nodes carrying the changed statement), imas_codex/graph/dd_workers.py:316 (the DD build's phase_build caller in the production build path), imas_codex/graph/build_dd.py:4787 (phase_build exported)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/graph/build_dd.py:3583-3586 assigns p.physics_domain only when path.domain_source IS NULL, so a classified path is retained and a new path still receives the IDS default, exactly the goal the source brief states.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest's gate covers all 14 files that import imas_codex.graph.build_dd plus test_cypher_property_check.py, and the retained baseline-gate.log (277 passed EXIT=0) and head-gate.log (278 passed EXIT=0) give the delta; docked because the EXPLAIN receipt's header names revision working-tree-after-2cf9a3234 rather than the fix commit, so its own revision binding is loose.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff ef9f712..250042abb touches only build_dd.py, tests/graph/test_dd_path_domain_upsert.py and the audit fragment, all named in the manifest's write paths, with no unrelated payload.\nSCORE durability: 17\nJUSTIFICATION durability: tests/graph/test_dd_path_domain_upsert.py:69-72 reddens on the base upsert (negative-control.log, EXIT=1, physics_domain drifted core_plasma_physics to transport) and raises on any unrecognized assignment text at :48, but the recording client models the CASE in Python at :41-46 rather than executing the Cypher, so the guard pins the statement text and leaves the graph semantics to the parse check in upsert-explain-retry.log (EXPLAIN_PARSE=passed), which proves parse alone.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/graph/build_dd.py:3583-3586 mirrors the path.status CASE already written in the same statement at :3610-3613, the commits use conventional subjects with bodies, and no plan, sprint, ticket or author label appears in the change.\nSCORE reuse: 19\nJUSTIFICATION reuse: the upsert extends the existing statement rather than forking a helper, and the domain_source-IS-NULL predicate matches the convention its owner imas_codex/graph/dd_domain_classifier.py:367 (_needs_classification_clause) the classifier selects on; no second conditional-preserve mechanism exists to extend.",
+  "review_run_id": "r-20261013T100429306846-review-of-scg-dd-build-keeps-classification-250042abb678",
+  "reviewed_base_sha": "ef9f7126130a20680aea80208a762bd3ddadc74f",
+  "reviewed_head_sha": "250042abb678e88229e4e71534b27e5481af7fd1",
+  "reviewed_run_id": "r-20261013T094806368999-scg-dd-build-keeps-classification",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:19:18.263467+00:00",
+  "total": 111,
+  "verdict": "SOUND"
+}
