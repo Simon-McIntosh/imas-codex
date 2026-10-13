@@ -3158,12 +3158,40 @@ def _apply_rename(
 
     # 2. Collision check on the literal requested id — it will eventually
     #    become a live StandardName id whether created directly (only_self)
-    #    or via cascade (family-mapped).
+    #    or via cascade (family-mapped). The occupant's stage decides the
+    #    occupant's own route: a successor-less superseded tombstone owns the
+    #    spelling as history, so the refusal names the two ways to reach it
+    #    rather than restating bare id uniqueness.
     coll = gc.query(
-        "// EDIT_CHECK_COLLISION\nMATCH (sn:StandardName {id: $id}) RETURN count(sn) AS n",
+        """
+        // EDIT_CHECK_COLLISION
+        MATCH (sn:StandardName {id: $id})
+        RETURN count(sn) AS n,
+               head(collect(sn.name_stage)) AS occupant_stage,
+               head(collect(
+                 EXISTS { (succ:StandardName)-[:REFINED_FROM]->(sn) }
+               )) AS occupant_has_successor
+        """,
         id=new_name,
     )
     if coll and coll[0].get("n"):
+        if coll[0].get("occupant_stage") == "superseded" and not coll[0].get(
+            "occupant_has_successor"
+        ):
+            return _blocked(
+                target,
+                "rename",
+                "name",
+                scope,
+                f"a StandardName {new_name!r} already exists as a successor-less "
+                "superseded tombstone — renaming onto it is refused (the id and "
+                "the tombstone's recorded history are protected). Two routes: "
+                f"(1) bring the tombstone back by renaming it to a free spelling "
+                f"(sn edit {new_name!r} --rename <free spelling>); or (2) return "
+                "it to draft with a signed transition in "
+                "imas_codex/standard_names/signed_manifest.py, then fold this "
+                f"name into it with sn supersede",
+            )
         return _blocked(
             target,
             "rename",
@@ -3471,12 +3499,12 @@ def _apply_docs(
     # Docs-edit claim precondition: the write below is the protection, not
     # this test — it moves docs_stage to 'refining' under a fresh
     # claim_token, the compare-and-set that excludes every docs-pool writer.
-    # So this gate only has to refuse the stages a pool worker may be
-    # holding: 'drafted' (a generate_docs claim) and 'refining' (a
-    # review_docs claim). 'pending' is the un-started state — an identity
-    # carrying no documentation yet, which is exactly what a docs edit
-    # seeds — and 'accepted'/'exhausted' are the settled states. All three
-    # are admitted.
+    # So this gate only has to refuse the docs stages a pool worker may be
+    # holding: 'drafted' (a generate_docs claim), 'refining' (a review_docs
+    # claim) and 'reviewed' (a review mid-flight). It admits the rest —
+    # 'pending' (the un-started state, an identity carrying no documentation
+    # yet, which is exactly what a docs edit seeds) and the settled
+    # 'accepted'/'exhausted'.
     docs_stage = target_row.get("docs_stage")
     if docs_stage not in ("pending", "accepted", "exhausted"):
         return _blocked(

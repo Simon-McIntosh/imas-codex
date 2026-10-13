@@ -1,0 +1,11 @@
+<section id="sib-tombstone-refusal">
+  <p>Renaming onto a spelling already held by a StandardName is refused. The refusal now reads the occupant's stage: a successor-less superseded tombstone yields a message naming the two sanctioned routes (rename the tombstone itself to a free spelling, or return it to draft with a signed transition and fold the incoming name into it); a live occupant, or a superseded one carrying a successor, keeps the bare id-uniqueness message. The docs-edit gate's inline comment now states its refused set as the code applies it (<code>drafted</code>, <code>refining</code>, <code>reviewed</code>).</p>
+  <table id="sib-tombstone-refusal-measure">
+    <tbody>
+      <tr><th>Base arm (27 edit-importing gate files, base revision aa25ca574)</th><td>414 passed, 10 deselected; EXIT=0.</td></tr>
+      <tr><th>After arm (same files, head e366c4057)</th><td>418 passed, 10 deselected; EXIT=0 — four new tests, zero added failures.</td></tr>
+      <tr><th>Stage-aware branch removed (negative control)</th><td><code>test_collision_with_dead_tombstone_names_both_routes</code> FAILED, 2 passed; EXIT=1.</td></tr>
+    </tbody>
+  </table>
+  <p>Logs: <code>base-arm.log</code>, <code>after-arm.log</code>, <code>negative-control-stage-branch-removed.log</code> in the run directory.</p>
+</section>
