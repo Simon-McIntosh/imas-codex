@@ -1602,10 +1602,29 @@ def write_signal_descriptions(
 
     embed_descriptions_batch(payload, text_field="embed_text")
 
+    # A missing vector means the embedding service did not answer for that
+    # text, not that the signal has no text. Writing it would null a stored
+    # vector that still describes a nearby description and stamp a current hash
+    # on it, so the node would leave vector search and read as up to date. The
+    # description is stored either way; the vector, its timestamp and its hash
+    # are written only where a fresh vector exists, and a hash left behind by a
+    # rewritten description marks the row for the re-embed sweep.
+    embedded = [item for item in payload if item.get("embedding") is not None]
+    unembedded = [item for item in payload if item.get("embedding") is None]
+    if unembedded:
+        logger.warning(
+            "Left %d of %d signal descriptions without a fresh embedding: the "
+            "embedding service returned no vector, so each stored vector, its "
+            "timestamp and its hash are untouched and the description mismatch "
+            "marks the row for re-embedding",
+            len(unembedded),
+            len(payload),
+        )
+
     extra = sorted(set().union(*(set(p) for p in payload)) - _DESCRIPTION_WRITER_KEYS)
     extra_clause = "".join(f",\n            s.{key} = item.{key}" for key in extra)
 
-    params: dict[str, Any] = {"items": payload}
+    base_params: dict[str, Any] = {}
     if followers_of is None:
         match = "MATCH (s:FacilitySignal {id: item.id})"
         where = ""
@@ -1619,27 +1638,57 @@ def write_signal_descriptions(
             "        MATCH (s:FacilitySignal)-[:MEMBER_OF]->(sg)"
         )
         where = "\n        WHERE s.id <> $rep_id"
-        params["rep_id"] = followers_of
+        base_params["rep_id"] = followers_of
         if followers_status is not None:
             where += " AND s.status = $followers_status"
-            params["followers_status"] = followers_status
+            base_params["followers_status"] = followers_status
     if extra_params:
-        params.update(extra_params)
+        base_params.update(extra_params)
 
-    statement = f"""
-        UNWIND $items AS item
-        {match}{where}
-        SET s.description = item.description,
-            s.embedding = item.embedding,
-            s.embedded_at = datetime(),
-            s.embedded_text_hash = item.embedded_text_hash{extra_clause}
-        RETURN count(s) AS updated
-    """
+    def _params(rows: list[dict[str, Any]]) -> dict[str, Any]:
+        return {**base_params, "items": rows}
 
     if gc is None:
         with GraphClient() as client:
-            return _run_description_write(client, statement, params)
-    return _run_description_write(gc, statement, params)
+            return _write_description_arms(
+                client, match, where, extra_clause, embedded, unembedded, _params
+            )
+    return _write_description_arms(
+        gc, match, where, extra_clause, embedded, unembedded, _params
+    )
+
+
+def _write_description_arms(
+    gc: GraphClient,
+    match: str,
+    where: str,
+    extra_clause: str,
+    embedded: list[dict[str, Any]],
+    unembedded: list[dict[str, Any]],
+    params_for: Callable[[list[dict[str, Any]]], dict[str, Any]],
+) -> int:
+    """Write the embedded and unembedded arms, summing the rows they touch."""
+    written = 0
+    if embedded:
+        statement = f"""
+            UNWIND $items AS item
+            {match}{where}
+            SET s.description = item.description,
+                s.embedding = item.embedding,
+                s.embedded_at = datetime(),
+                s.embedded_text_hash = item.embedded_text_hash{extra_clause}
+            RETURN count(s) AS updated
+        """
+        written += _run_description_write(gc, statement, params_for(embedded))
+    if unembedded:
+        statement = f"""
+            UNWIND $items AS item
+            {match}{where}
+            SET s.description = item.description{extra_clause}
+            RETURN count(s) AS updated
+        """
+        written += _run_description_write(gc, statement, params_for(unembedded))
+    return written
 
 
 def _run_description_write(

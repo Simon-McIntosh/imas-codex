@@ -262,3 +262,103 @@ def test_writer_embeds_the_text_the_caller_supplies(monkeypatch):
     assert written[0]["embedding"] == _embedding_of(composed)
     assert written[0]["embedded_text_hash"] == _text_hash(composed)
     assert written[0]["description"] == "Plasma current"
+
+
+class _NodeGraph:
+    """A stateful model of the description fields on one signal. The writer's
+    arms are told apart by whether their statement carries the vector fields:
+    the arm that has a fresh embedding sets them, the arm that does not sets
+    only the description.
+    """
+
+    def __init__(self, nodes: dict[str, dict]):
+        self.nodes = nodes
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def query(self, cypher: str, **params):
+        carrying_vector = "s.embedding = item.embedding" in cypher
+        for item in params["items"]:
+            node = self.nodes[item["id"]]
+            node["description"] = item["description"]
+            if carrying_vector:
+                node["embedding"] = item["embedding"]
+                node["embedded_text_hash"] = item["embedded_text_hash"]
+                node["embedded_at"] = "now"
+        return [{"updated": len(params["items"])}]
+
+
+def _known_signal(signal_id: str, description: str) -> dict:
+    """A signal already holding a vector for its current description."""
+    return {
+        "id": signal_id,
+        "description": description,
+        "embedding": _embedding_of(description),
+        "embedded_text_hash": _text_hash(description),
+        "embedded_at": "earlier",
+    }
+
+
+def test_unembedded_item_keeps_its_vector_and_hash(monkeypatch):
+    """A signal the embedder cannot answer for keeps its stored vector.
+
+    The embedding service returns no vector for one item. The description is
+    still rewritten, but the prior embedding, its timestamp and its hash are
+    left as they were, so the vector is not nulled out of search and the now
+    mismatched hash marks the row for re-embedding. A writer that stores the
+    absent embedding unconditionally nulls the vector and stamps a current
+    hash on it, and this test fails.
+    """
+    nodes = {"tcv:ip": _known_signal("tcv:ip", "Plasma current")}
+    monkeypatch.setattr(parallel, "GraphClient", lambda: _NodeGraph(nodes))
+
+    def _embed_nothing(items, text_field="embed_text", embedding_field="embedding"):
+        for item in items:
+            item[embedding_field] = None
+        return items
+
+    monkeypatch.setattr(parallel, "embed_descriptions_batch", _embed_nothing)
+
+    parallel.write_signal_descriptions(
+        [{"id": "tcv:ip", "description": "Plasma current (A)"}]
+    )
+
+    node = nodes["tcv:ip"]
+    assert node["description"] == "Plasma current (A)"
+    assert node["embedding"] == _embedding_of("Plasma current")
+    assert node["embedded_text_hash"] == _text_hash("Plasma current")
+    assert node["embedded_at"] == "earlier"
+
+
+def test_only_the_embedded_item_receives_a_fresh_vector(monkeypatch):
+    """In a mixed batch the embedded item is re-vectored and the other is not."""
+    nodes = {
+        "tcv:ip": _known_signal("tcv:ip", "Plasma current"),
+        "tcv:q95": _known_signal("tcv:q95", "Edge safety factor"),
+    }
+    monkeypatch.setattr(parallel, "GraphClient", lambda: _NodeGraph(nodes))
+
+    def _embed_first_only(items, text_field="embed_text", embedding_field="embedding"):
+        items[0][embedding_field] = _embedding_of(items[0][text_field])
+        items[1][embedding_field] = None
+        return items
+
+    monkeypatch.setattr(parallel, "embed_descriptions_batch", _embed_first_only)
+
+    parallel.write_signal_descriptions(
+        [
+            {"id": "tcv:ip", "description": "Plasma current (A)"},
+            {"id": "tcv:q95", "description": "Edge safety factor (new)"},
+        ]
+    )
+
+    assert nodes["tcv:ip"]["embedding"] == _embedding_of("Plasma current (A)")
+    assert nodes["tcv:ip"]["embedded_text_hash"] == _text_hash("Plasma current (A)")
+    assert nodes["tcv:q95"]["description"] == "Edge safety factor (new)"
+    assert nodes["tcv:q95"]["embedding"] == _embedding_of("Edge safety factor")
+    assert nodes["tcv:q95"]["embedded_text_hash"] == _text_hash("Edge safety factor")
+    assert nodes["tcv:q95"]["embedded_at"] == "earlier"
