@@ -1,0 +1,70 @@
+<section id="scg-domain-selector-consumer-gate">
+<h2>Consumer gate: does the declared-order domain selector break a standard-name caller</h2>
+
+<p id="scg-domain-selector-consumer-gate-summary">
+The declared-order selector was measured against the whole <code>tests/standard_names/</code>
+directory at the base revision (before the selector change) and at its head. Twelve test
+ids that pass at the base fail at the head. Every one fails the same way: the new
+<code>select_primary_domain</code> raises <code>ValueError</code> on a domain string that
+is not a <code>PhysicsDomain</code> member &mdash; eleven refuse <code>core_profiles</code>
+(an IDS name), one refuses <code>magnetics</code>.
+</p>
+
+<h3 id="scg-domain-selector-consumer-gate-runs">Runs</h3>
+<table id="scg-domain-selector-consumer-gate-totals">
+<tr><th>arm</th><th>revision</th><th>result</th></tr>
+<tr><td>base</td><td><code>ef9f7126130a20680aea80208a762bd3ddadc74f</code></td>
+<td>20 failed, 7695 passed, 9 skipped, 330 deselected, 112 errors</td></tr>
+<tr><td>head</td><td><code>1a3ac300a80bf82ae04a7be0162d68482e24d308</code></td>
+<td>32 failed, 7673 passed, 8 skipped, 330 deselected, 117 errors</td></tr>
+</table>
+
+<p id="scg-domain-selector-consumer-gate-method">
+Both arms ran the same test set (<code>tests/standard_names/</code>, default markers,
+330 deselected) in one process per test file, sharded across four parallel pytest runs
+per arm, from the tree named in each log header. The base tree was extracted with
+<code>git archive</code> to <code>/home/ITER/mcintos/Code/.gate-trees/ef9f71261/</code>
+with the five generated files copied in and <code>PYTHONPATH</code> pointing at it; the
+run's isolation guard asserted <code>imas_codex.__file__</code> resolved under the archive
+and exited 98 otherwise. <code>SOURCE_DATE_EPOCH=1760000000</code> was set for both arms.
+</p>
+
+<h3 id="scg-domain-selector-consumer-gate-added">Added failures (present at head, absent at base)</h3>
+<p id="scg-domain-selector-consumer-gate-classification">
+Classification for all twelve: <em>the selector refusing an unknown domain</em>, value in
+brackets. No failure matched the empty-list &rarr; <code>None</code> or deleted-symbol
+class.
+</p>
+<ul id="scg-domain-selector-consumer-gate-failure-list">
+<li><code>test_graph_ops.py::TestWriteStandardNames::test_dd_relationship_created</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_graph_ops.py::TestWriteStandardNames::test_rich_fields_in_batch</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_graph_ops.py::TestWriteStandardNames::test_signal_relationship_created</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_graph_ops.py::TestWriteStandardNames::test_unit_relationship_created</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_graph_ops.py::TestWriteStandardNames::test_write_coalesce_preserves_existing</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_metadata_invariants.py::TestDDVersionConsistency::test_dd_version_uses_coalesce_in_write</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_metadata_invariants.py::TestWriteCypherInvariants::test_unit_in_batch_payload</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_metadata_invariants.py::TestWritePathRelationships::test_has_standard_name_created_for_dd_source</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_metadata_invariants.py::TestWritePathRelationships::test_has_unit_self_heals_before_merge</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_metadata_invariants.py::TestWritePathRelationships::test_has_unit_uses_merge</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_metadata_invariants.py::TestWritePathRelationships::test_unit_batch_includes_all_non_null_units</code> &mdash; unknown domain <code>core_profiles</code></li>
+<li><code>test_review_pipeline.py::test_audit_duplicate_candidates</code> &mdash; unknown domain <code>magnetics</code></li>
+</ul>
+
+<p id="scg-domain-selector-consumer-gate-traceback">
+Representative traceback (head, <code>test_write_coalesce_preserves_existing</code>):
+</p>
+<pre id="scg-domain-selector-consumer-gate-traceback-body">
+imas_codex/standard_names/domain_ranking.py:70: in maybe_promote_domain
+    return select_primary_domain(domain for domain in (current, candidate) if domain)
+imas_codex/standard_names/domain_ranking.py:64: in select_primary_domain
+    raise ValueError(f"Unknown physics domain: {sorted(map(str, unknown))}")
+E   ValueError: Unknown physics domain: ['core_profiles']
+</pre>
+
+<p id="scg-domain-selector-consumer-gate-caveat">
+Caveat: the two arms ran concurrently against the one live graph, so shared-state or
+timing differences are not excluded in general. They are excluded for these twelve,
+whose failure is a deterministic <code>ValueError</code> raised in-process before any
+graph call.
+</p>
+</section>
