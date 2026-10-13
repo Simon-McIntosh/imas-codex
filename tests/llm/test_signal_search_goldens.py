@@ -5,12 +5,12 @@ Four ranking arms and a seeded random control are scored on the questions in
 
 ``current_tool``  the product ranking (``_rank_signals`` in ``search_tools``):
                   vector on descriptions boosted by a full-text keyword match.
-``additive_rule`` that same additive rule frozen here (vector and full-text,
-                  0.7 of the cosine plus 0.3 of the text score plus 0.1 for a
-                  signal found by both, the text score alone for a text-only
-                  signal, cut at ``K``), so the arm goes on measuring the rule
-                  the product ships today even after the product ranking is
-                  rewritten.
+``additive_rule`` the additive rule the product used before it moved to rank
+                  fusion, frozen here (vector and full-text, 0.7 of the cosine
+                  plus 0.3 of the text score plus 0.1 for a signal found by
+                  both, the text score alone for a text-only signal, cut at
+                  ``K``), so the arm goes on measuring the pre-fusion order
+                  after the product ranking was rewritten.
 ``vector_only``   vector on descriptions alone, pool 100.
 ``rrf``           reciprocal rank fusion of the 100-candidate vector pool and
                   the 50-candidate full-text pool.
@@ -254,22 +254,24 @@ def _rf_ranks(ids: list[str]) -> list[dict]:
     return [{"id": sid} for sid in ids]
 
 
-def _additive_rank(gc, embedding, question: Question, k: int) -> list[str]:
-    """The additive rule, frozen here rather than read from ``_rank_signals``.
+def _additive_rank(
+    vector_ids: list[str],
+    vector_scores: dict[str, float],
+    text_rows: list[dict],
+    k: int,
+) -> list[str]:
+    """The additive rule, frozen here rather than read from the product.
 
-    Vector search on descriptions over ``k`` candidates, then each full-text
-    hit over ``k`` candidates: a signal found by both takes ``0.7`` of its
-    cosine plus ``0.3`` of its text score plus ``0.1``; a text-only signal
-    takes its text score alone and is appended. The result is a stable sort by
-    descending score, so ties keep the vector order first and the text-only
-    appends after, cut at ``k``. Freezing the rule here is what lets the arm
-    keep measuring the product's current ranking after the product rewrote it.
+    A signal found by both streams takes ``0.7`` of its cosine plus ``0.3`` of
+    its text score plus ``0.1``; a text-only signal takes its text score alone
+    and is appended. The result is a stable sort by descending score, so ties
+    keep the vector order first and the text-only appends after, cut at ``k``.
+    Freezing the rule here is what lets the arm keep measuring the pre-fusion
+    additive order after the product ranking moved to rank fusion.
     """
-    from imas_codex.llm.search_tools import _text_search_signals, _vector_search_signals
-
-    facility = json_fixture["eligibility"]["facility"]
-    signal_ids, scores = _vector_search_signals(gc, embedding, facility, k, None, None)
-    for row in _text_search_signals(gc, question.query, facility, k):
+    scores = dict(vector_scores)
+    signal_ids = list(vector_ids)
+    for row in text_rows:
         sid = row["id"]
         text_score = round(row["score"], 3)
         if sid in scores:
@@ -278,6 +280,18 @@ def _additive_rank(gc, embedding, question: Question, k: int) -> list[str]:
             scores[sid] = text_score
             signal_ids.append(sid)
     return sorted(set(signal_ids), key=lambda sid: scores.get(sid, 0), reverse=True)[:k]
+
+
+def _additive_streams(gc, embedding, question: Question, k: int):
+    """The vector and full-text streams the frozen additive rule consumes."""
+    from imas_codex.llm.search_tools import _text_search_signals, _vector_search_signals
+
+    facility = json_fixture["eligibility"]["facility"]
+    vector_ids, vector_scores = _vector_search_signals(
+        gc, embedding, facility, k, None, None
+    )
+    text_rows = _text_search_signals(gc, question.query, facility, k)
+    return vector_ids, vector_scores, text_rows
 
 
 def eligible_signal_ids(gc=None) -> set[str]:
@@ -331,9 +345,12 @@ def arm_ranking(question: Question, ctx) -> list[str]:
         return keep(ids)[:K]
     if arm == "additive_rule":
         # The frozen rule cuts at K before the filter, exactly as the product
-        # ranking does, so the two are the same order while the product still
-        # carries this rule.
-        return keep(_additive_rank(ctx.gc, ctx.embedding, question, K))[:K]
+        # ranking did before it moved to rank fusion, so the arm keeps measuring
+        # the pre-fusion additive order.
+        vector_ids, vector_scores, text_rows = _additive_streams(
+            ctx.gc, ctx.embedding, question, K
+        )
+        return keep(_additive_rank(vector_ids, vector_scores, text_rows, K))[:K]
     vec_ids, text_ids = _fusion_streams(ctx.gc, ctx.embedding, question)
     if arm == "vector_only":
         return keep(vec_ids)[:K]
@@ -717,32 +734,34 @@ def test_four_arm_table_matches_the_control_below_every_arm() -> None:
         assert table[arm] > control, (arm, table[arm], control)
 
 
-@pytest.mark.graph
-def test_the_frozen_additive_rule_reproduces_the_product_ranking() -> None:
-    """``additive_rule`` and ``current_tool`` order every question identically.
+# ---------------------------------------------------------------------------
+# The frozen additive rule (no graph)
+# ---------------------------------------------------------------------------
 
-    The frozen rule is a copy of the product ranking's arithmetic, so on the
-    head where it was copied the two arms must return the same order on every
-    question — if they differ, the copy is wrong. When the product ranking is
-    rewritten the frozen arm keeps measuring the old rule and this pin is
-    retired: a divergence here is then the product change, not a defect.
+
+def test_the_frozen_additive_rule_ranks_fixed_streams_by_its_formula() -> None:
+    """The frozen rule orders fixed vector and text streams by its own formula.
+
+    A signal found by both streams takes ``0.7`` of its cosine plus ``0.3`` of
+    its text score plus ``0.1``; a text-only signal takes its text score alone
+    and is appended. Feeding the rule fixed streams pins it to the formula
+    itself rather than to a live ranking, so it stays measurable now the
+    product ranking has moved to rank fusion.
     """
-    from imas_codex.embeddings import Encoder
-    from imas_codex.embeddings.config import EncoderConfig
-    from imas_codex.graph.client import GraphClient
+    vector_ids = ["sig:v1", "sig:v2", "sig:v3"]
+    vector_scores = {"sig:v1": 0.9, "sig:v2": 0.5, "sig:v3": 0.4}
+    text_rows = [
+        {"id": "sig:v1", "score": 0.8},  # shared: 0.9*0.7 + 0.8*0.3 + 0.1 = 0.97
+        {"id": "sig:t1", "score": 2.0},  # text-only: 2.0
+        {"id": "sig:v2", "score": 0.1},  # shared: 0.5*0.7 + 0.1*0.3 + 0.1 = 0.48
+    ]
 
-    gc = GraphClient()
-    encoder = Encoder(EncoderConfig())
-    eligible = eligible_signal_ids(gc)
-    current_ctx = _open_context(
-        "current_tool", gc=gc, encoder=encoder, eligible=eligible
-    )
-    frozen_ctx = _open_context(
-        "additive_rule", gc=gc, encoder=encoder, eligible=eligible
-    )
-    for question in QUESTIONS:
-        current_ctx.embedding = current_ctx.embedding_for(question)
-        frozen_ctx.embedding = frozen_ctx.embedding_for(question)
-        assert arm_ranking(question, frozen_ctx) == arm_ranking(
-            question, current_ctx
-        ), question.id
+    ranked = _additive_rank(vector_ids, vector_scores, text_rows, k=4)
+    assert ranked == ["sig:t1", "sig:v1", "sig:v2", "sig:v3"]
+
+    # The cut at k drops the vector-only tail and keeps the text-only head.
+    assert _additive_rank(vector_ids, vector_scores, text_rows, k=3) == [
+        "sig:t1",
+        "sig:v1",
+        "sig:v2",
+    ]
