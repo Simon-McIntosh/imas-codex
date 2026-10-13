@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="66">
+<meta name="plan-version" content="67">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e">
 </head>
@@ -644,6 +644,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261013T034222829883-review-of-ssfms-rerank-product-0807206ea13e" data-who="reckon-build" data-when="2026-10-13T03:56:39.460Z">
     <div class="r-comment-body"><p>Review stored for r-20261013T031720286299-ssfms-rerank-product at base f37b72b67 head 0807206ea: goal_fidelity 18, evidence 17, scope_discipline 20, durability 16, fit 19, reuse 20 (total 110); 0 added failures (base 114 passed vs head 119 passed, both 0 failed); one follow-on finding, no blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261013T031720286299-ssfms-rerank-product" data-who="reckon-build" data-when="2026-10-13T03:41:37.158Z">
+    <div class="r-comment-body"><p>Signal search routes through the shared Jev rerank behind a server switch left off: _search_signals reranks its fused pool of 60 with a signal state builder (name, description cut at 1200 chars, unit, data class, accessor) on the role-aware question moved beside _RERANK_QUESTION, and the switch leaves the fused order when off and calls the shared rerank once when on (gate: 119 passed, 8 skipped).</p></div>
 </div>
 </section>
 </main>
