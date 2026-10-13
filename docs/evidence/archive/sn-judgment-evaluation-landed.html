@@ -40,6 +40,11 @@
     <p>Merged at <code>f22cdaf27</code> (commits <code>9caea975f</code>, <code>03559dfe5</code>, <code>439ced57f</code>, repaired by <code>2f9e46540</code>). <code>imas_codex/standard_names/judgment_goldens.py</code> builds three fixtures under this directory. Golden A (name acceptable): 737 rows on 720 item-level canonical units, 446 negative and 291 positive, no label source above 200; human-edit source and target spellings count as two label sources (194 each) and share copy groups, so resampling treats each pair as one unit. Golden C (description names the right object): 204 rows, WEST 100. Golden D (near-duplicate pair): 15 distinct pairs only. The leak test fails when a row labelled from a reviewer score is planted. The first review (103/120) found canonical units equal to rows and 140 WEST-correct positives outside golden A's sanctioned pool; the repair (108/120) fixed both. Shortfalls carried to §5: golden C is 96 rows under its target of about 300, and golden D's distinct side is 96 pairs under its target, because the ISN duplicate-path families mostly no longer resolve to two live names.</p>
   </section>
 
+  <section id="s5-docs-labels">
+    <h2>§5 — 400 documentation labels, inside the balance bounds</h2>
+    <p>The coordinator labelled the 400 blind sheet rows and 88 reserve rows against the DD sources and the conventions registry, with the written rubric <code>golden-documentation-acceptable-rubric.md</code>. As drawn, 118 of 400 passed (29.5%), below the 35% floor; 28 acceptable reserve rows were swapped in for matched not-acceptable sheet rows (17 by pattern family, 10 by domain, 1 unmatched), leaving every lead-overlap row in place. The golden holds 146 of 400 acceptable (36.5%), 74 of 184 in validation and 72 of 216 in calibration. <code>golden-documentation-acceptable-rebalance.py --write</code> reproduces it byte for byte from the committed labels. Of the 254 rejections, 207 (81.5%) fail a deterministic check (template opening, registry symbol, unresolved link) and 47 (18.5%) fail subject, physics or scope. The record lists five registry defects and four unit defects the labelling exposed. Commit <code>22706df55</code>. <a href="/imas-codex/evidence/fragments/sn-judgment-evaluation/sje-docs-labels.html">fragment</a></p>
+  </section>
+
 </main>
 </body>
 </html>

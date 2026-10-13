@@ -24,7 +24,7 @@
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 <meta name="plan-modified" content="2026-10-13">
 <meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2,e000241de910e5a4d0d21825593e12ecd6934ec5,d7e3860a7c6e85a5fbfde1103dc0bded5af7203e,77815e0ea71be4c94a0dd52d386dc0987045dc9b,f2b9d9ee2e77922cd107952e8f51a2602519218d,9caea975fe223505bddf301dd8747709159232f2,03559dfe552d88192815516b3a12e3e9916f74ff,439ced57fd4422969f004797d2402211851de29a,2f9e46540ec7f67fe92969c4dd76e41aa9ad7ecb">
 </head>
@@ -406,6 +406,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261013T065809061523-sje-docs-label-sheet" data-who="reckon-build" data-when="2026-10-13T07:28:47.574Z">
     <div class="r-comment-body"><p>Built the blind documentation-acceptability label sheet in imas_codex/standard_names/judgment_goldens.py::build_documentation_sheet, and its live build draws 600 rows (400 sheet, 200 reserve, 50 lead-overlap, 6 parse-refused), gates 20 passed at head against 14 at base with the four sheet mechanisms each failing its test under mutation.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261013T1145-docs-labels" data-who="reckon-build" data-when="2026-10-13T11:45:00Z">
+    <div class="r-comment-body"><p>Golden B holds 400 labels within the bounds: 146 acceptable (36.5%) after a matched swap from the reserve (commit <code>22706df55</code>). 81.5% of rejections are deterministic. §5 stays open on the lead's blind labels for the 50-row overlap (kappa and adjudication) and on golden D's lead-ruled synonym pairs. <a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s5-docs-labels">evidence</a></p></div>
 </div>
 </section>
 </main>
