@@ -79,10 +79,21 @@ def test_separatrix_gloss_is_flagged_for_a_boundary_name() -> None:
 def test_forbidden_symbol_spelling_is_flagged() -> None:
     documentation = _documentation(_SURFACE_FORM).replace(
         "The flux-surface average of the local argon number density.",
-        "The flux-surface average of the local argon density $\\rho$.",
+        "The flux-surface average of the local argon density $N_s$.",
     )
     findings = conformance_findings(_ARGON, documentation=documentation)
     assert HouseStyleFindingClass.FORBIDDEN_SYMBOL_SPELLING in {
+        finding.finding_class for finding in findings
+    }
+
+
+def test_density_documentation_allows_rho_symbol() -> None:
+    documentation = _documentation(_SURFACE_FORM).replace(
+        "The flux-surface average of the local argon number density.",
+        r"The flux-surface average of the local argon density $\rho$.",
+    )
+    findings = conformance_findings(_ARGON, documentation=documentation)
+    assert HouseStyleFindingClass.FORBIDDEN_SYMBOL_SPELLING not in {
         finding.finding_class for finding in findings
     }
 
