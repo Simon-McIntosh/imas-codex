@@ -2415,6 +2415,7 @@ class AgentsServer:
                 facility: str,
                 diagnostic: str | None = None,
                 physics_domain: str | None = None,
+                role: str | None = None,
                 check_status: str | None = None,
                 error_type: str | None = None,
                 include_check_details: bool = False,
@@ -2435,6 +2436,11 @@ class AgentsServer:
                         (e.g. "magnetics", "thomson_scattering").
                     physics_domain: Keep only signals in this physics domain
                         (e.g. "magnetics", "kinetics", "equilibrium").
+                    role: Keep only signals whose stored role is this one. One of:
+                        measured, commanded, reference_or_setpoint, status_or_flag,
+                        configuration_parameter, derived_or_computed. A role outside
+                        the six is refused with the list. Use "measured" to exclude
+                        references and commands from a measurement search.
                     check_status: Filter by data-access check outcome.
                         Values: "passed", "failed", "unchecked".
                     error_type: Filter by check error classification
@@ -2456,6 +2462,7 @@ class AgentsServer:
                     facility,
                     diagnostic=diagnostic,
                     physics_domain=physics_domain,
+                    role=role,
                     check_status=check_status,
                     error_type=error_type,
                     include_check_details=include_check_details,

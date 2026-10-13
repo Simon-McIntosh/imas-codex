@@ -3,7 +3,13 @@
 from imas_codex.llm.search_formatters import format_signals_report
 
 
-def _signal(name: str, category: str, *, checked: bool = False) -> dict:
+def _signal(
+    name: str,
+    category: str,
+    *,
+    checked: bool = False,
+    role: str | None = None,
+) -> dict:
     return {
         "id": f"facility:{category.lower()}/{name.lower().replace(' ', '_')}",
         "name": name,
@@ -14,6 +20,7 @@ def _signal(name: str, category: str, *, checked: bool = False) -> dict:
         "data_class": "time_series",
         "checked": checked,
         "example_shot": 101173 if checked else None,
+        "signal_role": role,
         "accessor": f"read('{category}', '{name}')",
         "access_methods": [
             {
@@ -75,3 +82,30 @@ def test_report_keeps_fused_rank_after_a_rerank() -> None:
     report = format_signals_report([signal], [], {}, ranks={signal["id"]: 7})
 
     assert "Rank: 7" in report
+
+
+def test_row_shows_the_stored_role_when_present() -> None:
+    signal = _signal("EF2 Booster BPS Voltage", "MMSYS", role="measured")
+
+    report = format_signals_report([signal], [], {})
+
+    assert "Role: measured" in report
+
+
+def test_row_omits_the_role_when_the_signal_carries_none() -> None:
+    signal = _signal("EF2 Booster BPS Voltage", "MMSYS")
+
+    report = format_signals_report([signal], [], {})
+
+    assert "Role:" not in report
+
+
+def test_row_lists_every_distinct_role_in_a_family() -> None:
+    signals = [
+        _signal("EF6 Booster BPS Voltage", "MMSYS", role="measured"),
+        _signal("EF5 Booster BPS Voltage", "MMSYS", role="reference_or_setpoint"),
+    ]
+
+    report = format_signals_report(signals, [], {})
+
+    assert "Role: measured, reference_or_setpoint" in report

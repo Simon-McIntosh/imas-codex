@@ -1,0 +1,73 @@
+<section id="ssfms-role-filter" data-reckon="fragment">
+  <h2 id="ssfms-role-filter-title">Search narrows to a signal's stored role</h2>
+
+  <p id="ssfms-role-filter-intro">
+    A signal now stores the role the judge accepted for it, but nothing read that
+    slot back, so a searcher could not ask for the measured channels and skip the
+    setpoints, status flags and configuration parameters that describe them. This
+    change gives <code>search_signals</code> a <code>role=</code>
+    argument that keeps only signals whose stored <code>signal_role</code> is that
+    role, and leaves <code>diagnostic=</code> and <code>physics_domain=</code>
+    exactly as they were.
+  </p>
+
+  <p id="ssfms-role-filter-predicate">
+    The predicate is applied in <strong>both</strong> streams the fusion draws
+    from, before the rank cut. The vector stream gains the clause in
+    <code>signal_vector_search_block</code> — the single owner of the
+    <code>facility_signal_desc_embedding</code> query — and the full-text stream
+    gains the same clause inside each of its branches. Because
+    <code>signal_role</code> is not a registered index property, it stays a
+    post-filter over the returned rows, so the ANN limit is widened to
+    <code>max(k*2, 50)</code> whenever any post-filter is present: a
+    <code>role=</code> search that would otherwise lose its matches to the cut
+    still returns up to <code>k</code> signals. A role outside the six is refused
+    by name rather than answered with an empty report.
+  </p>
+
+  <p id="ssfms-role-filter-refusal">
+    The six roles come from <code>SignalRole</code>, the schema's own enum, so the
+    accepted set and the stored set cannot drift. A value outside it returns
+    <code>Unknown role 'x'. A signal role is one of: measured, commanded,
+    reference_or_setpoint, status_or_flag, configuration_parameter,
+    derived_or_computed.</code>
+  </p>
+
+  <p id="ssfms-role-filter-rerank">
+    The rerank state now carries the stored role when the candidate has one, so
+    the judgement that reorders the candidates sees the measured role beside the
+    raw name, description, unit, data class and accessor. A candidate with no
+    stored role carries no role key, which keeps the existing exact-equality
+    assertions on the rerank payload intact.
+  </p>
+
+  <p id="ssfms-role-filter-tests">
+    The behaviour is covered in <code>tests/llm/test_search_tools.py</code> with
+    the graph mocked, through a client that answers each stream from canned rows
+    and inspects the query text it was handed: a <code>role=</code> search returns
+    only signals of that role, both streams carry the predicate, an unfiltered
+    search keeps every role, the ANN cut widens, an unknown role is refused by
+    name, and each of the six values is accepted. The rerank-state tests assert
+    the role is carried when present and omitted when absent.
+    <code>tests/llm/test_signal_report_rows.py</code> asserts each row shows the
+    stored role when present, omits the line when the signal carries none, and
+    lists every distinct role in a family.
+  </p>
+
+  <p id="ssfms-role-filter-gate">
+    The scoped gate over the two files is <strong>130 passed, 8 skipped</strong>,
+    <code>EXIT=0</code>. The negative control removes the
+    <code>signal_role = $role</code> clause from
+    <code>signal_vector_search_block</code> and re-runs the strictest test: it
+    fails, leaving the reference signal <code>jt-60sa:ps/refip</code> in a
+    <code>role='measured'</code> result, <code>EXIT=1</code>, so the passing head
+    is caused by the reason claimed and not by a detached assertion.
+  </p>
+
+  <p id="ssfms-role-filter-caveat">
+    This measures the filter's behaviour against a mocked graph — that the
+    predicate reaches both queries and the right rows survive. It does not run a
+    live role-filtered search against Neo4j, which would also measure
+    how many signals currently carry a stored role.
+  </p>
+</section>
