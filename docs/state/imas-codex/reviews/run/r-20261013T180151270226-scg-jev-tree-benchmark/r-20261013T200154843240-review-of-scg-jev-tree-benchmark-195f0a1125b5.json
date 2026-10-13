@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded no gate pair: its manifest.md and classification.json carry baseline_suite: null and after_suite: null, and the only gate arms it names are gate-head.log (134 passed, EXIT=0) and test-new.log (2 passed, EXIT=0), both at head and neither naming the revision it ran at. So no base-minus-head delta is derivable and the added count is bounded by the green head arm rather than measured: zero failures were observed, no failure id exists to carry, and the base arm the brief's gate clause requires was never run (the run's own follow_ons record it).",
+  "backend": "clive",
+  "base_log_revision": null,
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:3327"
+  ],
+  "completed_at": "2026-10-13T20:41:01.038Z",
+  "dispatched_at": "2026-10-13T20:02:12Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-jev-tree-benchmark-run.py",
+      "line": "488",
+      "severity": "follow-on",
+      "text": "follow-on: the pilot extrapolation scales the tree's per-path spend by before['name_count'] (170 names) instead of the 856 source paths the run classifies, so the printed estimate 0.0254 understates the realized 0.119258 by 4.7x even though per-path spend is flat (pilot 0.000149 against realized 0.000139), and docs/evidence/fragments/sn-catalog-grouping/scg-jev-tree-benchmark.html:152 repeats the figure as \"$0.025 for all 856 paths\" and explains the gap as each tree call paying for its re-judged paths, which the flat per-path cost contradicts."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-jev-tree-benchmark-run.py",
+      "line": "245",
+      "severity": "follow-on",
+      "text": "follow-on: _paired_accuracy_interval re-implements, under the same policy constants (1000 resamples, seed 123, central 95%) and the same output keys, the percentile bootstrap that imas_codex/discovery/base/evaluation.py:144 bootstrap_interval already owns, rather than extending that owner with a statistic hook; the fork is justified because the owner's statistic is fixed to roc_auc and it raises when one label class is absent, and because the owner's file lies outside this node's six declared write paths, so the reuse the brief asked for was not reachable in scope."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T175619216554-scg-jev-tree-benchmark/manifest.md",
+      "line": "7",
+      "severity": "follow-on",
+      "text": "follow-on: commits and landing name only b715cd431 as the worktree head, and checkpoint repeats it, while the reviewed head 195f0a1125 carries three commits - b5f215d17 added the --negative-control mode and 195f0a112 the gold-preservation fix, landing at 20:52:42 and 20:55:24 after the manifest was written at 20:51:57 - so a reader matching the manifest against the promoted head sees the manifest describe one commit of three, and the manifest is the only place the run's gate and control logs are named."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180151270226-scg-jev-tree-benchmark/gate-head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log's first line names the command but neither the revision nor the tree it ran at, and no base-arm log exists, so the done_when's \"run at base and head and judged by delta\" cannot be checked at all; the timestamps put the run at 20:50:24, before the head's two later commits, and the manifest contract requires the first line to name the revision, the tree and the command."
+    },
+    {
+      "file": "tests/standard_names/test_role_bench_classifier_tree.py",
+      "line": "74",
+      "severity": "follow-on",
+      "text": "follow-on: the accuracy assertion is not independent of the value it checks - the test's own stub at :57 supplies the labels it later asserts the metric equals (pytest.approx(1.0)), and :99 has the same shape with the stub's all-\"general\" answers fixing the expected 0.0 - so neither assertion reddens on a scoring defect, and each only restates the routing already asserted independently by the counter guards at :72-73 and :96-97."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180151270226-scg-jev-tree-benchmark/full-run.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when's \"show both runs, with EXIT=\" is half met - the paid fresh run's log ends in a KeyError: 'derived_domain' traceback with no EXIT= line at all, and the only arm with a recorded exit code is the free rescore (rescore.log, EXIT=0) - so the reproduction the fragment claims rests on a log whose exit status is unrecorded."
+    }
+  ],
+  "gate_log_revision": null,
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read all three commits against base 3fe14e03a: b715cd431 adds the use_tree option and the previously-unimported DEFAULT_BATCH_SIZE to run_classifier_bench, b5f215d17 adds the driver's --negative-control mode, 195f0a112 carries the gold block through a cache-only rescore; six paths, 3872 insertions and 4 deletions, with no product change outside benchmark_roles.py.",
+    "done_when": "the done_when names the fragment, the results JSON, one SVG under docs/figures/sn-catalog-grouping/scg-jev-tree-benchmark/, a rescoring pass shown with EXIT=, and the three gate files run at base and head judged by delta; the fragment, the results JSON and the SVG are present and rescore.log records EXIT=0 with a stable RESULT_SHA256, but no base-arm gate log exists (the manifest's test_logs name gate-head.log and test-new.log only), gate-head.log:1 names the command without the revision it ran at, and the paid arm's exit code is recorded nowhere, so the delta clause is unmet.",
+    "goal": "the node goal is to measure the two-level Jev category-then-domain Choice against the flat chat classifier on two held-out sets under a rule fixed before the run, and to settle the probability threshold; imas_codex/standard_names/benchmark_roles.py:1475 run_classifier_bench gained a keyword-only use_tree that routes each batch to _classify_batch_tree while leaving chat the default (:1529), the driver runs the 209-path gold set through that option for both arms (scg-jev-tree-benchmark-run.py:403) and the 77 validation names through decide_domain_tree over a calibration-chosen threshold, so the results JSON reports validation tree 0.5974 against chat 0.6104 at 55% of the spend and the fixed rule yields adopt.",
+    "manifest": "read at runs/r-20261013T175619216554-scg-jev-tree-benchmark/manifest.md, the path the reviewed run's live pointer names; status complete, tests, test_logs, negative_control_log and evidence_inputs recorded, but commits/landing/checkpoint name only b715cd431.",
+    "write_paths": "the brief declares five files plus the directory docs/figures/sn-catalog-grouping/scg-jev-tree-benchmark; git show --stat over the three commits b715cd431, b5f215d17 and 195f0a112 changes exactly those six paths (benchmark_roles.py, test_role_bench_classifier_tree.py, the fragment html, the driver, the results JSON and the one SVG) and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_role_bench_classifier_tree.py:72-73 and :96-97 are independent guards that redden on a swapped route or a dropped option, but :74 asserts an accuracy fixed by the labels the test itself hands its own stub, and no recorded red run exists for either test in the file.",
+    "evidence": "the gate result is recorded (gate-head.log: 134 passed, EXIT=0) but was run at head only, its first line names no revision and neither log in the manifest's test_logs carries a base arm, while the fragment's pilot figure at scg-jev-tree-benchmark.html:152 is wrong by 4.7x; the live negative control (negative-control.log, EXIT=1) and the reproducible rescore (rescore.log, EXIT=0) are sound.",
+    "fit": "the option follows the module's existing keyword-only style at imas_codex/standard_names/benchmark_roles.py:1475 with a docstring naming the mechanism, each commit carries a conventional subject and a body with no AI attribution, and the driver states its reason for calling decide_domain_tree rather than _classify_batch_tree at scg-jev-tree-benchmark-run.py:11-13.",
+    "goal_fidelity": "imas_codex/standard_names/benchmark_roles.py:1529 routes a use_tree batch to _classify_batch_tree with the tree seat passed through unchanged and ensure_model_prefix left on the chat arm, and the gold run records both arms (gold.log: tree 0.3876, chat 0.1914), so both halves of the goal land.",
+    "reuse": "the routing reuses _classifier_batch entry points, ensure_model_prefix and get_model rather than re-deriving them, but _paired_accuracy_interval at scg-jev-tree-benchmark-run.py:245 forks the percentile-bootstrap policy owned by imas_codex/discovery/base/evaluation.py:144 because that owner's statistic is fixed to roc_auc and its file was outside the node's write scope.",
+    "scope_discipline": "git show --stat 3fe14e03a..195f0a112 lists only the six write paths the brief declares, and no commit touches a file outside them."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: 3fe14e03a5aadd17f42289ce73a81ce1c021416a\nreviewed_head_sha: 195f0a1125b584fb2cd5aad212743481bd410950\nVERDICT goal: the node goal is to measure the two-level Jev category-then-domain Choice against the flat chat classifier on two held-out sets under a rule fixed before the run, and to settle the probability threshold; imas_codex/standard_names/benchmark_roles.py:1475 run_classifier_bench gained a keyword-only use_tree that routes each batch to _classify_batch_tree while leaving chat the default (:1529), the driver runs the 209-path gold set through that option for both arms (scg-jev-tree-benchmark-run.py:403) and the 77 validation names through decide_domain_tree over a calibration-chosen threshold, so the results JSON reports validation tree 0.5974 against chat 0.6104 at 55% of the spend and the fixed rule yields adopt.\nVERDICT done_when: the done_when names the fragment, the results JSON, one SVG under docs/figures/sn-catalog-grouping/scg-jev-tree-benchmark/, a rescoring pass shown with EXIT=, and the three gate files run at base and head judged by delta; the fragment, the results JSON and the SVG are present and rescore.log records EXIT=0 with a stable RESULT_SHA256, but no base-arm gate log exists (the manifest's test_logs name gate-head.log and test-new.log only), gate-head.log:1 names the command without the revision it ran at, and the paid arm's exit code is recorded nowhere, so the delta clause is unmet.\nVERDICT write_paths: the brief declares five files plus the directory docs/figures/sn-catalog-grouping/scg-jev-tree-benchmark; git show --stat over the three commits b715cd431, b5f215d17 and 195f0a112 changes exactly those six paths (benchmark_roles.py, test_role_bench_classifier_tree.py, the fragment html, the driver, the results JSON and the one SVG) and nothing outside them.\nVERDICT manifest: read at runs/r-20261013T175619216554-scg-jev-tree-benchmark/manifest.md, the path the reviewed run's live pointer names; status complete, tests, test_logs, negative_control_log and evidence_inputs recorded, but commits/landing/checkpoint name only b715cd431.\nVERDICT diff: read all three commits against base 3fe14e03a: b715cd431 adds the use_tree option and the previously-unimported DEFAULT_BATCH_SIZE to run_classifier_bench, b5f215d17 adds the driver's --negative-control mode, 195f0a112 carries the gold block through a cache-only rescore; six paths, 3872 insertions and 4 deletions, with no product change outside benchmark_roles.py.\nCALL_SITES: imas_codex/cli/sn.py:3327\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/benchmark_roles.py:1529 routes a use_tree batch to _classify_batch_tree with the tree seat passed through unchanged and ensure_model_prefix left on the chat arm, and the gold run records both arms (gold.log: tree 0.3876, chat 0.1914), so both halves of the goal land.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate result is recorded (gate-head.log: 134 passed, EXIT=0) but was run at head only, its first line names no revision and neither log in the manifest's test_logs carries a base arm, while the fragment's pilot figure at scg-jev-tree-benchmark.html:152 is wrong by 4.7x; the live negative control (negative-control.log, EXIT=1) and the reproducible rescore (rescore.log, EXIT=0) are sound.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 3fe14e03a..195f0a112 lists only the six write paths the brief declares, and no commit touches a file outside them.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_role_bench_classifier_tree.py:72-73 and :96-97 are independent guards that redden on a swapped route or a dropped option, but :74 asserts an accuracy fixed by the labels the test itself hands its own stub, and no recorded red run exists for either test in the file.\nSCORE fit: 18\nJUSTIFICATION fit: the option follows the module's existing keyword-only style at imas_codex/standard_names/benchmark_roles.py:1475 with a docstring naming the mechanism, each commit carries a conventional subject and a body with no AI attribution, and the driver states its reason for calling decide_domain_tree rather than _classify_batch_tree at scg-jev-tree-benchmark-run.py:11-13.\nSCORE reuse: 15\nJUSTIFICATION reuse: the routing reuses _classifier_batch entry points, ensure_model_prefix and get_model rather than re-deriving them, but _paired_accuracy_interval at scg-jev-tree-benchmark-run.py:245 forks the percentile-bootstrap policy owned by imas_codex/discovery/base/evaluation.py:144 because that owner's statistic is fixed to roc_auc and its file was outside the node's write scope.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-jev-tree-benchmark-run.py:488 follow-on: the pilot extrapolation scales the tree's per-path spend by before['name_count'] (170 names) instead of the 856 source paths the run classifies, so the printed estimate 0.0254 understates the realized 0.119258 by 4.7x even though per-path spend is flat (pilot 0.000149 against realized 0.000139), and docs/evidence/fragments/sn-catalog-grouping/scg-jev-tree-benchmark.html:152 repeats the figure as \"$0.025 for all 856 paths\" and explains the gap as each tree call paying for its re-judged paths, which the flat per-path cost contradicts.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-jev-tree-benchmark-run.py:245 follow-on: _paired_accuracy_interval re-implements, under the same policy constants (1000 resamples, seed 123, central 95%) and the same output keys, the percentile bootstrap that imas_codex/discovery/base/evaluation.py:144 bootstrap_interval already owns, rather than extending that owner with a statistic hook; the fork is justified because the owner's statistic is fixed to roc_auc and it raises when one label class is absent, and because the owner's file lies outside this node's six declared write paths, so the reuse the brief asked for was not reachable in scope.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T175619216554-scg-jev-tree-benchmark/manifest.md:7 follow-on: commits and landing name only b715cd431 as the worktree head, and checkpoint repeats it, while the reviewed head 195f0a1125 carries three commits - b5f215d17 added the --negative-control mode and 195f0a112 the gold-preservation fix, landing at 20:52:42 and 20:55:24 after the manifest was written at 20:51:57 - so a reader matching the manifest against the promoted head sees the manifest describe one commit of three, and the manifest is the only place the run's gate and control logs are named.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180151270226-scg-jev-tree-benchmark/gate-head.log:1 follow-on: the gate log's first line names the command but neither the revision nor the tree it ran at, and no base-arm log exists, so the done_when's \"run at base and head and judged by delta\" cannot be checked at all; the timestamps put the run at 20:50:24, before the head's two later commits, and the manifest contract requires the first line to name the revision, the tree and the command.\nFINDING tests/standard_names/test_role_bench_classifier_tree.py:74 follow-on: the accuracy assertion is not independent of the value it checks - the test's own stub at :57 supplies the labels it later asserts the metric equals (pytest.approx(1.0)), and :99 has the same shape with the stub's all-\"general\" answers fixing the expected 0.0 - so neither assertion reddens on a scoring defect, and each only restates the routing already asserted independently by the counter guards at :72-73 and :96-97.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T180151270226-scg-jev-tree-benchmark/full-run.log:1 follow-on: the done_when's \"show both runs, with EXIT=\" is half met - the paid fresh run's log ends in a KeyError: 'derived_domain' traceback with no EXIT= line at all, and the only arm with a recorded exit code is the free rescore (rescore.log, EXIT=0) - so the reproduction the fragment claims rests on a log whose exit status is unrecorded.\n",
+  "review_run_id": "r-20261013T200154843240-review-of-scg-jev-tree-benchmark-195f0a1125b5",
+  "reviewed_base_sha": "3fe14e03a5aadd17f42289ce73a81ce1c021416a",
+  "reviewed_head_sha": "195f0a1125b584fb2cd5aad212743481bd410950",
+  "reviewed_run_id": "r-20261013T180151270226-scg-jev-tree-benchmark",
+  "rubric": "code",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T20:38:33.638477+00:00",
+  "total": 99,
+  "verdict": "SOUND WITH FINDINGS"
+}
