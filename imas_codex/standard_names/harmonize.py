@@ -765,18 +765,15 @@ ESTIMATED_DOC_CALL_COST_USD = 0.05
 _FAMILY_ANCHOR_PROPERTY = "harmonized_anchor"
 
 
-def pinned_family_anchor(
-    members: list[dict[str, Any]], *, force: bool = False
-) -> str | None:
+def pinned_family_anchor(members: list[dict[str, Any]]) -> str | None:
     """The anchor a prior apply recorded for this family, or ``None``.
 
     One ``harmonized_anchor`` shared by the members is the family's recorded
     choice. A family whose members disagree, or carry none, has no pin and
-    selects normally — as does every family under *force*, which starts a
-    fresh choice.
+    selects normally. The pin is released by the family's harmonization stamp
+    and by nothing else: a forced apply waives the recommended-name refusal,
+    it does not move the run onto a different anchor.
     """
-    if force:
-        return None
     recorded = {
         m.get(_FAMILY_ANCHOR_PROPERTY)
         for m in members
@@ -809,7 +806,6 @@ def plan_family_applies(
     *,
     seeds: list[str] | None = None,
     min_size: int = 1,
-    force: bool = False,
 ) -> list[dict[str, Any]]:
     """Read-only plan of the anchor-gated applies over the families in scope.
 
@@ -842,10 +838,10 @@ def plan_family_applies(
         anchor = select_anchor(None, None, None, members)
         # A family not yet stamped harmonized reuses the anchor its run
         # recorded, even after that member's reset left it mid-pipeline and
-        # another accepted member outscores it. A stamped family, or a forced
-        # apply, selects normally.
+        # another accepted member outscores it. A stamped family selects
+        # normally; only the stamp releases the pin.
         if not (member_ids and stored == {signature}):
-            pinned = pinned_family_anchor(members, force=force)
+            pinned = pinned_family_anchor(members)
             if pinned is not None and pinned in member_ids:
                 anchor = pinned
         if member_ids and stored == {signature}:
@@ -1116,7 +1112,6 @@ def apply_families(
             resolved_gc,
             seeds=seeds,
             min_size=min_size,
-            force=force is not None,
         )
     )
     spec = CampaignSpec(raw="harmonize-pattern-family")

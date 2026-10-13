@@ -27,12 +27,19 @@
       anchor precedes any reset the run performs.
     </li>
     <li>
-      <code>pinned_family_anchor(members, force=False)</code> reads it back. The
-      family read carries the column: <code>_family_member_collect</code> in
-      <code>families.py</code> now selects <code>m.harmonized_anchor</code>
+      <code>pinned_family_anchor(members)</code> reads it back. The family read
+      carries the column: <code>_family_member_collect</code> in
+      <code>families.py</code> selects <code>m.harmonized_anchor</code>
       alongside <code>harmonized_group_signature</code>.
     </li>
   </ul>
+  <p>
+    The property's slot declaration in
+    <code>imas_codex/schemas/standard_name.yaml</code> is not part of this
+    change: that file is held by another node, and the coordinator folds the
+    <code>harmonized_anchor</code> slot declaration into a later node. Until
+    that lands, the property is written and read untyped by the helpers above.
+  </p>
 
   <h3 id="shc-pin-reuse">When it is reused, and when it is released</h3>
   <p>
@@ -48,11 +55,12 @@
     <code>_stamp_applied_family</code> calls
     <code>_clear_family_anchor(gc, member_ids)</code> once
     <code>stamp_harmonized_families</code> reports success, removing the
-    property. A later apply over that family therefore selects normally. A
-    forced apply does the same — <code>apply_families</code> passes
-    <code>force=True</code> to its own <code>plan_family_applies</code> when a
-    force reason is given, and <code>pinned_family_anchor</code> returns
-    <code>None</code> under force, so a fresh choice is made.
+    property. A later apply over that family therefore selects normally. The
+    stamp is the pin's only release. A force reason waives the
+    recommended-name refusal for the names an apply rewrites; it does not move
+    the run onto another member, so a forced re-apply of a family still holding
+    a pin keeps that anchor — which is what the forced re-apply of the
+    boundary-density family depends on.
   </p>
 
   <h3 id="shc-pin-report">The report's name-id read has one owner</h3>
