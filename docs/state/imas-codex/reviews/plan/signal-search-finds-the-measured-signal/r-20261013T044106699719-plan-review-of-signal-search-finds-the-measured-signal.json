@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-13T04:53:33.405Z",
+  "dispatched_at": "2026-10-13T04:41:23Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:519",
+      "id": "wiring-1",
+      "reason": "\u00a75 and \u00a76 are both `done`, so no node ordering actually re-sequences; the omission is a stale note, not a live gap.",
+      "text": "the followup states \"\u00a77 follows \u00a74\" but omits \u00a75 and \u00a76, though \u00a77's third node ports \u00a75's measurement script and \u00a77's labelling of RRF's top 60 is taken on \u00a76's widened full-text ranking; a coordinator reading the sequencing could dispatch \u00a77 against stale vectors or the pre-\u00a76 index",
+      "type": "wiring",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:338",
+      "id": "single_goal-1",
+      "reason": "this bundle grew past what the prior review declined (it now adds a vendored fixture and three harness changes beside the scoring), so the author would plausibly split node three or fold the harness work into its own done-when.",
+      "text": "node three's single stated goal is \"scores the arms and decides the switch\", yet the paragraph at lines 343\u2013354 also puts on it porting the \u00a74 and \u00a75 measurement scripts, vendoring \u00a74's queries and labels into a fixture, the frozen-arm tie-break, the arm-table regression floor, a pool-of-60 test and moving the pool refusal into the harness, so one verdict cannot close the node",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:349",
+      "id": "naming-1",
+      "reason": "the pool-of-60 assertion is restated verbatim in the done-when and at lines 352\u2013354, so the node's scope is unambiguous despite the miscount.",
+      "text": "the text says \"The node also makes two harness fixes\" then lists the tie-break, the arm-table regression floor and the switch-on pool-of-60 test, three changes, so a worker reading the count cannot tell which two are in scope",
+      "type": "naming",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "244205368640bf63c1564133fac4515101a520761c68b52d456326724d50291f",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 69,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261013T044106699719-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "9a5d3726217e2b6ea9d7a0c31e7c7225c16b0a3e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every symbol \u00a77 names resolves in the tree (`rerank_candidates` at `imas_codex/llm/search_tools.py:235`, `_ROLE_RERANK_QUESTION` at :118, `_signal_rerank_state` at :191, `_rerank_signals` at `imas_codex/llm/server.py:187`, `RERANK_POOL = 60` at :71), and the cited prototype directory `~/.config/reckon/crew/reports/imas-codex/search-rerank-prototype/` holds `queries.json` and `labels.json`.",
+    "done_when": "pass \u2014 the switch decision, the pool-of-60 precondition, the p95 ceiling and the three-pass means are all measurable, and a mutation control (\"a test that removes one pool label shows the refusal naming it\") is declared.",
+    "evidence_paths": "pass \u2014 the measurement figures land on `docs/evidence/fragments/signal-search-finds-the-measured-signal/rerank.html` and the measurement run is a repository module, both durable.",
+    "naming": "a finding \u2014 \"two harness fixes\" enumerates three.",
+    "reasoning": "pass \u2014 the \"labels RRF's top 60 because the rerank may lift any of its pool into the top 10\" root cause matches the code (`pool = max(k, RERANK_POOL)` at `imas_codex/llm/search_tools.py:384` feeds `rerank_candidates`), and the mechanism reaches the real path with the caller named (`_search_signals` \u2192 `rerank_candidates`).",
+    "single_goal": "a finding \u2014 \u00a77 says the section is three nodes and gives node three one stated goal (\"s7\", line 338), yet the same paragraph assigns it two script ports, a vendored fixture and three harness changes.",
+    "wiring": "a finding \u2014 \u00a77 sequences after \u00a74 in the followup, but its mechanism also rests on \u00a75's re-embedded vectors and \u00a76's widened full-text index, neither declared as a \u00a77 dependency."
+  },
+  "section_digests": {
+    "_document": "6696124ebd584b8301282dba9ed1faa4ea8816e65a64a881eaaa5dc88d764ffe",
+    "s1": "e58a341feafcdbbe4c2e547cf50a1fb5e759d1c331f09b8777ce5142efc9daed",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "5a77efb737bcf64e7fd5b30aaa71ed3ff5a27b6c8e7b4d33023f03292a98fb15",
+    "s4": "31e1b80d34ee0473acbbff8894edb94dee236159b67ee202ce8891143f015e9a",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "de70a704389a14bb7976c0b9f71479e690be64a458798a773f426cf102729e0e",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "37a1002a450850d41b5c609a5a3ea2a4591ba2f6fb3e3bc91d6cfee5d3cd82ee"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T04:55:09.985648+00:00"
+}
