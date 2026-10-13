@@ -27,6 +27,7 @@ protocol so tests can substitute a stub.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -65,6 +66,36 @@ class _TopologyProbe(Protocol):
     """
 
     def query(self, cypher: str, **params): ...  # pragma: no cover
+
+
+def superseded_parent_names(
+    gc: _TopologyProbe,
+    targets: Iterable[str],
+    *,
+    lifecycle_rows: Iterable[dict[str, Any]] | None = None,
+) -> set[str]:
+    """Find retired parents, reusing a caller's lifecycle projection if present."""
+    ids = sorted(set(targets))
+    if not ids:
+        return set()
+    if lifecycle_rows is not None:
+        return {
+            str(row["name"])
+            for row in lifecycle_rows
+            if row.get("name") in ids and row.get("name_stage") == "superseded"
+        }
+    return {
+        str(row["id"])
+        for row in gc.query(
+            """
+            UNWIND $ids AS id
+            MATCH (sn:StandardName {id: id})
+            WHERE sn.name_stage = 'superseded'
+            RETURN sn.id AS id
+            """,
+            ids=ids,
+        )
+    }
 
 
 def _has_valid_standard_name_identity(name: str) -> tuple[bool, str]:

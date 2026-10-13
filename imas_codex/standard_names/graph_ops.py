@@ -2692,8 +2692,8 @@ def _filter_admissible_parents(
          both already-in-graph projections and the current batch.
 
     Skips legacy entries: if a parent has ``origin='catalog_edit'`` or
-    is already ``name_stage='accepted'``, the edge is preserved
-    regardless of admission verdict (catalog is authoritative).
+    is already ``name_stage='accepted'``, the edge is preserved unless the
+    parent is superseded.
 
     ``full_rebuild`` (set by ``rederive_structural_edges``, which passes the
     COMPLETE set of live names) makes admission **batch-authoritative**: Clause
@@ -2708,6 +2708,7 @@ def _filter_admissible_parents(
     from imas_codex.standard_names.parents import (
         is_admissible_parent_name,
         is_algebraic_decomposition_edge,
+        superseded_parent_names,
     )
 
     if not co_batch:
@@ -2771,10 +2772,11 @@ def _filter_admissible_parents(
                 names=list(targets),
             )
         )
-    except Exception as exc:  # pragma: no cover - defensive
-        logger.warning("Parent-admission topology probe failed: %s; admitting all", exc)
-        return co_batch
+    except Exception:  # pragma: no cover - defensive
+        logger.exception("Parent-admission topology probe failed; aborting reconcile")
+        raise
 
+    superseded_targets = superseded_parent_names(gc, targets, lifecycle_rows=rows)
     for r in rows:
         nm = r.get("name")
         if not nm:
@@ -2878,6 +2880,8 @@ def _filter_admissible_parents(
         return True, f"single-child shadow of {info['child_id']}"
 
     def _admit(target: str) -> tuple[bool, str]:
+        if target in superseded_targets:
+            return False, "superseded parent"
         # Legacy protection: don't disturb catalog-authoritative entries.
         if target in legacy_protected:
             return True, "legacy (catalog_edit or accepted)"
