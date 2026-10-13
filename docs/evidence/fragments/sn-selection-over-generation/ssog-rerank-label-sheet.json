@@ -18,91 +18,91 @@
           "description": "Electron number density averaged over the entire last closed magnetic flux surface, giving the separatrix value across the confined-plasma and scrape-off-layer interface.",
           "embedding_rank": 1,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "electron_pressure_at_separatrix",
           "description": "Local kinetic pressure carried by the electron population at the magnetic separatrix, marking the boundary between confined plasma and open-field-line scrape-off-layer plasma.",
           "embedding_rank": 2,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "electron_density_at_plasma_boundary",
           "description": "Number density of electrons at the plasma boundary, evaluated as the local, intensive particle count per physical volume on the last closed magnetic flux surface.",
           "embedding_rank": 3,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "ion_density_at_plasma_boundary",
           "description": "Number density of charged ions at the plasma boundary, with each specialization defining whether the value is local or averaged over the last closed magnetic flux surface.",
           "embedding_rank": 4,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "electron_decay_length_over_scrape_off_layer",
           "description": "Characteristic outward distance over which electron number density decreases by one e-folding in the scrape-off layer.",
           "embedding_rank": 5,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "electron_density_at_limiter",
           "description": "Electron number density in the boundary plasma immediately adjacent to a plasma-facing limiter surface, evaluated on the plasma side of the magnetic presheath or sheath entrance.",
           "embedding_rank": 6,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "neon_density_at_plasma_boundary",
           "description": "Number density of neon ions at the plasma boundary, evaluated locally on the last closed magnetic flux surface and summed over all ionization stages.",
           "embedding_rank": 7,
           "rerank_rank": 13,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "flux_surface_averaged_ion_density_at_plasma_boundary",
           "description": "Number density of ions at the plasma boundary, averaged over the last closed flux surface to represent the separatrix population rather than a single local value.",
           "embedding_rank": 8,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "density_at_divertor_target",
           "description": "Local number density of a specified plasma species or species group immediately upstream of a divertor-target sheath, with ion charge states summed and neutral populations excluded unless explicitly named.",
           "embedding_rank": 9,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "flux_surface_averaged_neon_density_at_plasma_boundary",
           "description": "Flux-surface-averaged number density of neon ions at the plasma boundary (separatrix), summed over all ionization stages from Ne+ through fully stripped Ne10+.",
           "embedding_rank": 10,
           "rerank_rank": 14,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "density_at_plasma_boundary",
           "description": "Particle number density of a selected plasma population evaluated at the plasma boundary, the last closed magnetic flux surface separating confined plasma from the scrape-off layer.",
           "embedding_rank": 12,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "electron_density_at_outboard_midplane",
           "description": "Electron particle number density at the low-field-side intersection of a magnetic flux surface with the equatorial midplane.",
           "embedding_rank": 13,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "hydrogen_density_at_plasma_boundary",
           "description": "Number density of hydrogen ions at the plasma boundary, evaluated locally on the last closed magnetic flux surface and summed over all hydrogen ion charge states.",
           "embedding_rank": 16,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 2
         }
       ]
     },
@@ -119,98 +119,98 @@
           "description": "Local number density of ionized beryllium at the top of the H-mode edge pedestal, summed over all beryllium ion charge states and excluding neutral beryllium.",
           "embedding_rank": 1,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "neutral_beam_charge_number",
           "description": "Charge number of the ion species from which a diagnostic neutral beam particle is produced, specifying its pre-neutralization ionization state rather than the neutral particle's net charge.",
           "embedding_rank": 2,
           "rerank_rank": 14,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "helium_3_density_at_pedestal_top",
           "description": "Helium-3 ion number density at the top of the H-mode edge pedestal, summed over all helium-3 ion charge states.",
           "embedding_rank": 3,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "boron_density_at_pedestal_top",
           "description": "Boron ion number density at the top of the H-mode edge pedestal, summed over all boron ionization states and excluding neutral boron.",
           "embedding_rank": 4,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "beryllium_source_rate_due_to_gas_injection",
           "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
           "embedding_rank": 5,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "neutral_state_diamagnetic_momentum_diffusivity",
           "description": "Diamagnetic component of the momentum diffusion coefficient for a neutral species in a given internal state.",
           "embedding_rank": 6,
           "rerank_rank": 13,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "particle_temperature",
           "description": null,
           "embedding_rank": 7,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_state_diamagnetic_momentum_diffusivity",
           "description": "Diamagnetic component of the momentum diffusion coefficient for a specified ion charge state.",
           "embedding_rank": 8,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_tritium_velocity",
           "description": null,
           "embedding_rank": 9,
           "rerank_rank": 17,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_beryllium_velocity_at_internal_transport_barrier",
           "description": "Density-weighted toroidal bulk-flow velocity of beryllium ions at the internal transport barrier, combining all beryllium ionization states.",
           "embedding_rank": 10,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "beryllium_density_at_internal_transport_barrier",
           "description": "Particle number density of beryllium ions evaluated on the flux surface assigned to an internal transport barrier, summed over all beryllium ion charge states and excluding neutral beryllium.",
           "embedding_rank": 16,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "ratio_of_volume_averaged_beryllium_density_to_volume_averaged_electron_density",
           "description": "Dimensionless beryllium abundance formed by dividing the volume-averaged beryllium density by the volume-averaged electron density.",
           "embedding_rank": 12,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "ion_charge",
           "description": "Dimensionless density-weighted mean ionic charge number for a specified ion species, combining its represented ionic charge states into one mean value.",
           "embedding_rank": 13,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_species_atomic_mass",
           "description": "Mass parameter assigned to a specified neutral particle species, encoding its isotope or constituent composition for inertial and transport calculations.",
           "embedding_rank": 14,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -227,84 +227,84 @@
           "description": "Elemental boron number density, summed over neutral atoms and all ionic charge states through fully stripped B5+.",
           "embedding_rank": 1,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "boron_density_at_pedestal_top",
           "description": "Boron ion number density at the top of the H-mode edge pedestal, summed over all boron ionization states and excluding neutral boron.",
           "embedding_rank": 2,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "ratio_of_volume_averaged_boron_density_to_volume_averaged_electron_density",
           "description": "Dimensionless global boron abundance ratio using separately volume-averaged boron and electron number densities, with neutral boron and every ionic charge state included.",
           "embedding_rank": 3,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "neutral_beam_charge_number",
           "description": "Charge number of the ion species from which a diagnostic neutral beam particle is produced, specifying its pre-neutralization ionization state rather than the neutral particle's net charge.",
           "embedding_rank": 4,
           "rerank_rank": 13,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "beryllium_source_rate_due_to_gas_injection",
           "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
           "embedding_rank": 5,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "boron_density_at_divertor_target",
           "description": "Boron density at the divertor target is the local number density of boron ions immediately upstream of the electrostatic sheath at the target-facing plasma boundary.",
           "embedding_rank": 6,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "beryllium_density_at_pedestal_top",
           "description": "Local number density of ionized beryllium at the top of the H-mode edge pedestal, summed over all beryllium ion charge states and excluding neutral beryllium.",
           "embedding_rank": 7,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "boron_density_at_limiter",
           "description": "Boron ion number density in the boundary plasma immediately adjacent to a plasma-facing limiter surface, summed over all positive ionization states and excluding neutral boron atoms.",
           "embedding_rank": 8,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "ratio_of_volume_averaged_beryllium_density_to_volume_averaged_electron_density",
           "description": "Dimensionless beryllium abundance formed by dividing the volume-averaged beryllium density by the volume-averaged electron density.",
           "embedding_rank": 9,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "ion_charge",
           "description": "Dimensionless density-weighted mean ionic charge number for a specified ion species, combining its represented ionic charge states into one mean value.",
           "embedding_rank": 10,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "boron_density_at_magnetic_axis",
           "description": "Particle number density of the boron ion population evaluated at the magnetic axis is the local boron-ion count per physical volume, summed over all boron ionic charge states.",
           "embedding_rank": 16,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "line_averaged_boron_density",
           "description": "Line-averaged boron density is the total elemental boron number density averaged along a chord through the plasma. It includes neutral boron and all boron ionization states, giving a chord-averaged measure of elemental boron impurity content.",
           "embedding_rank": 13,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 3
         }
       ]
     },
@@ -321,84 +321,84 @@
           "description": null,
           "embedding_rank": 1,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "accumulated_carbon_count_due_to_gas_injection",
           "description": "Cumulative post-breakdown carbon inventory from gas injection, expressed as six equivalent-electron counts for every injected neutral carbon atom.",
           "embedding_rank": 2,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "accumulated_total_gas_count",
           "description": "Cumulative equivalent-electron inventory of all gas species delivered by injection after plasma breakdown, summed across species.",
           "embedding_rank": 3,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "deuterium_tritium_flux",
           "description": "Total neutron emission rate from deuterium-tritium fusion reactions, including thermal, beam-thermal, and beam-beam contributions.",
           "embedding_rank": 4,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "cold_neutral_fraction",
           "description": "Dimensionless fraction of the cold recycled component of a hydrogen-isotope neutral population relative to the total neutral atom population.",
           "embedding_rank": 5,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "coolant_transit_time_of_plant_component_port",
           "description": "Elapsed time for coolant to traverse the associated plant component from inlet to outlet, defining the thermal delay between the two coolant states.",
           "embedding_rank": 6,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "total_energy_of_calorimetry_component",
           "description": "Total energy extracted from a calorimetry component over the whole discharge.",
           "embedding_rank": 7,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "accumulated_prefill_gas_count",
           "description": "Accumulated prefill gas count injected from all valves near the top of the vacuum chamber, expressed in equivalent electrons",
           "embedding_rank": 8,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "carbon_prefill_count_due_to_gas_injection",
           "description": "Cumulative equivalent-electron inventory introduced as carbon gas during plasma prefill, with six count units assigned to each injected carbon atom.",
           "embedding_rank": 9,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "ion_charge_state_energy_velocity_due_to_convection",
           "description": "Effective velocity associated with convective plasma-energy transport, relating the convective energy flux to the energy content being transported.",
           "embedding_rank": 10,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_charge_state_energy_diffusion_coefficient_due_to_diffusion",
           "description": "Fickian coefficient for diffusive thermal-energy transport of a specified ion charge state.",
           "embedding_rank": 13,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "energy_flux_at_limiter",
           "description": "Plasma energy deposition rate per unit area on the plasma-facing surface of a limiter, without implying a maximum or other surface aggregation.",
           "embedding_rank": 11,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -415,84 +415,84 @@
           "description": "Total neutron emission rate from deuterium-tritium fusion reactions, including thermal, beam-thermal, and beam-beam contributions.",
           "embedding_rank": 1,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "deuterium_source_rate_due_to_injection",
           "description": "Instantaneous rate of deuterium particles supplied by active injection, expressed on a common equivalent-electron basis.",
           "embedding_rank": 2,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "deuterium_tritium_density",
           "description": "Deuterium-tritium density is the local ion number density of the deuterium-tritium fuel-ion pseudo-species, treating deuterium and tritium as one effective species.",
           "embedding_rank": 3,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "cold_neutral_fraction",
           "description": "Dimensionless fraction of the cold recycled component of a hydrogen-isotope neutral population relative to the total neutral atom population.",
           "embedding_rank": 4,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "neutral_beam_charge_number",
           "description": "Charge number of the ion species from which a diagnostic neutral beam particle is produced, specifying its pre-neutralization ionization state rather than the neutral particle's net charge.",
           "embedding_rank": 5,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_total_hydrogenic_density",
           "description": "Dimensionless hydrogen-isotope fraction equal to the volume-averaged protium-ion density divided by the volume-averaged density of all hydrogenic ions.",
           "embedding_rank": 6,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "volume_averaged_deuterium_tritium_density",
           "description": "Deuterium-tritium density is the volume-averaged ion number density of the combined deuterium-tritium fuel pseudo-species, treating deuterium and tritium as one effective species.",
           "embedding_rank": 7,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "neutral_state_diamagnetic_momentum_diffusivity",
           "description": "Diamagnetic component of the momentum diffusion coefficient for a neutral species in a given internal state.",
           "embedding_rank": 8,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_state_diamagnetic_momentum_source",
           "description": "Diamagnetic component of the momentum source term for a neutral species in a given internal state.",
           "embedding_rank": 9,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "helium_3_density_at_pedestal_top",
           "description": "Helium-3 ion number density at the top of the H-mode edge pedestal, summed over all helium-3 ion charge states.",
           "embedding_rank": 10,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "deuterated_methane_source_rate",
           "description": "Instantaneous injection rate of deuterated methane (CD4), counted as equivalent electrons rather than molecules.",
           "embedding_rank": 11,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_tritium_velocity",
           "description": null,
           "embedding_rank": 13,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -509,98 +509,98 @@
           "description": "Mass parameter assigned to a specified ion species, encoding its isotope or constituent composition for inertial and transport calculations.",
           "embedding_rank": 1,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_species_atomic_mass",
           "description": "Mass parameter assigned to a specified neutral particle species, encoding its isotope or constituent composition for inertial and transport calculations.",
           "embedding_rank": 2,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_internal_state_source_rate",
           "description": "Net volumetric rate of particle creation or destruction for a neutral species in a specified internal state, serving as a source term in its density balance.",
           "embedding_rank": 3,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "radial_neutral_internal_state_momentum_diffusion_coefficient",
           "description": "Radial component of the momentum diffusion coefficient for neutral particles in a specified internal quantum or energy state.",
           "embedding_rank": 4,
           "rerank_rank": 18,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_state_source_rate",
           "description": "Net local particle creation or destruction rate per unit volume for one specified ion charge state in a plasma.",
           "embedding_rank": 5,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ratio_of_particle_count_to_particle_simulated_count",
           "description": "Dimensionless statistical weight assigning each Monte Carlo marker the number of real particles it represents, expressed as a real-particle count divided by the simulated marker count.",
           "embedding_rank": 6,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "parallel_neutral_energy_diffusion_coefficient",
           "description": "Parallel diffusion coefficient for neutral species energy transport on the GGD grid",
           "embedding_rank": 7,
           "rerank_rank": 19,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "volume_averaged_total_xenon_fraction",
           "description": "Volume-averaged density of xenon summed over all charge states divided by volume-averaged electron density.",
           "embedding_rank": 8,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "ion_charge_state_energy_diffusion_coefficient_due_to_diffusion",
           "description": "Fickian coefficient for diffusive thermal-energy transport of a specified ion charge state.",
           "embedding_rank": 9,
           "rerank_rank": 15,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_state_diamagnetic_momentum_diffusivity",
           "description": "Diamagnetic component of the momentum diffusion coefficient for a neutral species in a given internal state.",
           "embedding_rank": 10,
           "rerank_rank": 20,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "atomic_mass",
           "description": "Mass parameter assigned to a specified ion or neutral particle species, encoding its isotope or constituent composition for inertial and transport calculations.",
           "embedding_rank": 17,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "deuterium_tritium_flux",
           "description": "Total neutron emission rate from deuterium-tritium fusion reactions, including thermal, beam-thermal, and beam-beam contributions.",
           "embedding_rank": 16,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_state_particle_convection_velocity",
           "description": "Effective velocity multiplying selected particle density in the density-proportional convective part of particle transport.",
           "embedding_rank": 13,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_state_energy_diffusivity",
           "description": "Energy diffusion coefficient for a specific ion charge state",
           "embedding_rank": 14,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -617,42 +617,42 @@
           "description": "Dimensionless fraction of the cold recycled component of a hydrogen-isotope neutral population relative to the total neutral atom population.",
           "embedding_rank": 1,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "hot_neutral_fraction",
           "description": "Dimensionless fraction of the hot charge-exchange-born component of a hydrogen-isotope neutral population relative to the total neutral atom population.",
           "embedding_rank": 2,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "helium_3_density_at_pedestal_top",
           "description": "Helium-3 ion number density at the top of the H-mode edge pedestal, summed over all helium-3 ion charge states.",
           "embedding_rank": 3,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "neutral_beam_charge_number",
           "description": "Charge number of the ion species from which a diagnostic neutral beam particle is produced, specifying its pre-neutralization ionization state rather than the neutral particle's net charge.",
           "embedding_rank": 4,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "accumulated_helium_3_count_due_to_gas_injection",
           "description": "Cumulative equivalent-electron inventory of helium-3 atoms delivered by gas injection after plasma breakdown, assigning two count units to each atom.",
           "embedding_rank": 5,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_total_hydrogenic_density",
           "description": "Dimensionless hydrogen-isotope fraction equal to the volume-averaged protium-ion density divided by the volume-averaged density of all hydrogenic ions.",
           "embedding_rank": 6,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -669,35 +669,35 @@
           "description": "Dimensionless fraction of the cold recycled component of a hydrogen-isotope neutral population relative to the total neutral atom population.",
           "embedding_rank": 1,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "hot_neutral_fraction",
           "description": "Dimensionless fraction of the hot charge-exchange-born component of a hydrogen-isotope neutral population relative to the total neutral atom population.",
           "embedding_rank": 2,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_beam_charge_number",
           "description": "Charge number of the ion species from which a diagnostic neutral beam particle is produced, specifying its pre-neutralization ionization state rather than the neutral particle's net charge.",
           "embedding_rank": 3,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "helium_4_density",
           "description": "Local number density of helium-4 ions per unit plasma volume, the principal measure of fusion ash concentration in deuterium-tritium burning plasmas.",
           "embedding_rank": 4,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "helium_3_density_at_pedestal_top",
           "description": "Helium-3 ion number density at the top of the H-mode edge pedestal, summed over all helium-3 ion charge states.",
           "embedding_rank": 5,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         }
       ]
     },
@@ -714,91 +714,91 @@
           "description": "Dimensionless fraction of the cold recycled component of a hydrogen-isotope neutral population relative to the total neutral atom population.",
           "embedding_rank": 1,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "particle_temperature",
           "description": null,
           "embedding_rank": 2,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_beam_charge_number",
           "description": "Charge number of the ion species from which a diagnostic neutral beam particle is produced, specifying its pre-neutralization ionization state rather than the neutral particle's net charge.",
           "embedding_rank": 3,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "accumulated_hydrogen_prefill_count",
           "description": "Cumulative equivalent-electron inventory of hydrogen atoms introduced by gas injection during prefill before plasma breakdown; hydrogen contributes one count per atom.",
           "embedding_rank": 4,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "hydrogen_density_at_pedestal_top",
           "description": "Local number density of hydrogen ions at the core-side shoulder of the H-mode edge pedestal, summed over all hydrogen ion charge states and excluding neutral hydrogen.",
           "embedding_rank": 5,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "hydrogen_source_rate_due_to_gas_injection",
           "description": "Instantaneous equivalent-electron hydrogen source rate delivered to the plasma vessel by gas injection systems; each hydrogen atom contributes one equivalent-electron count.",
           "embedding_rank": 6,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "deuterium_tritium_flux",
           "description": "Total neutron emission rate from deuterium-tritium fusion reactions, including thermal, beam-thermal, and beam-beam contributions.",
           "embedding_rank": 7,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_tritium_velocity",
           "description": null,
           "embedding_rank": 8,
           "rerank_rank": 15,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "accumulated_hydrogen_count_due_to_gas_injection",
           "description": "Cumulative post-breakdown equivalent-electron inventory of neutral hydrogen delivered by gas injection, with one count unit assigned to each hydrogen atom.",
           "embedding_rank": 9,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "hot_neutral_fraction",
           "description": "Dimensionless fraction of the hot charge-exchange-born component of a hydrogen-isotope neutral population relative to the total neutral atom population.",
           "embedding_rank": 10,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_total_hydrogenic_density",
           "description": "Dimensionless hydrogen-isotope fraction equal to the volume-averaged protium-ion density divided by the volume-averaged density of all hydrogenic ions.",
           "embedding_rank": 13,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "helium_3_density_at_pedestal_top",
           "description": "Helium-3 ion number density at the top of the H-mode edge pedestal, summed over all helium-3 ion charge states.",
           "embedding_rank": 15,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "neutral_state_diamagnetic_momentum_source",
           "description": "Diamagnetic component of the momentum source term for a neutral species in a given internal state.",
           "embedding_rank": 12,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -815,49 +815,49 @@
           "description": "Total neutron count rate from neutron-producing beam-beam fusion reactions, summed over represented fast-ion fuel channels in which both reactants are nonthermal ions from neutral beam injection.",
           "embedding_rank": 1,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "normalized_beam_power",
           "description": "Fraction of the total launched neutral beam power for each energy component (full, half, one-third).",
           "embedding_rank": 2,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "current_due_to_neutral_beam_injection",
           "description": "Net toroidal plasma current driven by neutral-beam injection, combining the fast-ion current and collisional electron return current after beam ionization.",
           "embedding_rank": 3,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "pedestal_thermal_electron_energy",
           "description": "Volume-integrated kinetic energy of bulk thermal electrons contained within the plasma pedestal, excluding suprathermal electrons and non-electron populations.",
           "embedding_rank": 4,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "pedestal_thermal_ion_energy",
           "description": "Volume-integrated thermal energy stored by ion populations within the H-mode pedestal, excluding electron and nonthermal energy contributions.",
           "embedding_rank": 5,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "perpendicular_power_normalized_of_beam_tracing_beam",
           "description": "Non-negative fraction of a beam\u2019s local time-averaged electromagnetic power flow perpendicular to the local magnetic field, normalized to its initial launch power.",
           "embedding_rank": 6,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "absorbed_power_due_to_neutral_beam_injection",
           "description": "Total neutral-beam injection power deposited in the plasma through beam ionization and thermalization, after excluding shine-through and fast-ion orbit losses.",
           "embedding_rank": 7,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -874,70 +874,70 @@
           "description": "Elapsed duration of the confined-plasma phase in a single discharge, from plasma breakdown until termination of the confined plasma.",
           "embedding_rank": 1,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "breakdown_initial_time",
           "description": "Timestamp at which plasma breakdown begins and discharge current starts to flow.",
           "embedding_rank": 2,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "coolant_transit_time_of_plant_component_port",
           "description": "Elapsed time for coolant to traverse the associated plant component from inlet to outlet, defining the thermal delay between the two coolant states.",
           "embedding_rank": 3,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "sawtooth_period",
           "description": "Time interval between successive sawtooth crash events, representing the duration of one complete sawtooth oscillation cycle in a tokamak plasma.",
           "embedding_rank": 4,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "launched_wave_duration",
           "description": "Duration of a single frequency sweep during which a probing electromagnetic wave is launched.",
           "embedding_rank": 5,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "exposure_time_of_spectrometer_channel",
           "description": "Temporal duration over which a spectrometer channel accumulates incident photons to form one spectral measurement.",
           "embedding_rank": 6,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "energy_confinement_time",
           "description": "Characteristic timescale for loss of confined plasma thermal energy, defined as stored thermal energy divided by the net power leaving that energy reservoir.",
           "embedding_rank": 7,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "current_of_rogowski_coil",
           "description": "Signed conventional current threading a Rogowski-coil winding contour, with orientation set by the coil's assigned normal.",
           "embedding_rank": 8,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "reference_frequency_of_wave_beam",
           "description": "Reference temporal carrier frequency of a probing electromagnetic wave beam, specified before frequency conversion or modulation and used as the phase-measurement baseline.",
           "embedding_rank": 9,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "time",
           "description": "Temporal measure expressing an elapsed interval or characteristic duration, including the time denominator used to define a physical rate.",
           "embedding_rank": 10,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         }
       ]
     },
@@ -954,77 +954,77 @@
           "description": "Timestamp at which plasma breakdown begins and discharge current starts to flow.",
           "embedding_rank": 1,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "reference_frequency_of_wave_beam",
           "description": "Reference temporal carrier frequency of a probing electromagnetic wave beam, specified before frequency conversion or modulation and used as the phase-measurement baseline.",
           "embedding_rank": 2,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "pulse_duration",
           "description": "Elapsed duration of the confined-plasma phase in a single discharge, from plasma breakdown until termination of the confined plasma.",
           "embedding_rank": 3,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "coolant_transit_time_of_plant_component_port",
           "description": "Elapsed time for coolant to traverse the associated plant component from inlet to outlet, defining the thermal delay between the two coolant states.",
           "embedding_rank": 4,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "ratio_of_particle_count_to_particle_simulated_count",
           "description": "Dimensionless statistical weight assigning each Monte Carlo marker the number of real particles it represents, expressed as a real-particle count divided by the simulated marker count.",
           "embedding_rank": 5,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "total_energy_of_calorimetry_component",
           "description": "Total energy extracted from a calorimetry component over the whole discharge.",
           "embedding_rank": 6,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "accumulated_particle_count_at_pellet_path_due_to_pellet_injection",
           "description": "Cumulative number of particles released by ablation from an injected pellet up to a specified position along its trajectory.",
           "embedding_rank": 7,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "sawtooth_period",
           "description": "Time interval between successive sawtooth crash events, representing the duration of one complete sawtooth oscillation cycle in a tokamak plasma.",
           "embedding_rank": 8,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "exposure_time_of_spectrometer_channel",
           "description": "Temporal duration over which a spectrometer channel accumulates incident photons to form one spectral measurement.",
           "embedding_rank": 9,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "normalized_gyrokinetic_time",
           "description": "Dimensionless independent time coordinate that orders nonlinear gyrokinetic evolution and indexes time-resolved turbulent fields, fluxes, and moments.",
           "embedding_rank": 10,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "launched_wave_duration",
           "description": "Duration of a single frequency sweep during which a probing electromagnetic wave is launched.",
           "embedding_rank": 11,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -1041,105 +1041,105 @@
           "description": "Electron number density averaged over the entire last closed magnetic flux surface, giving the separatrix value across the confined-plasma and scrape-off-layer interface.",
           "embedding_rank": 1,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "electron_power_at_outer_divertor_target",
           "description": "Electron power deposited on the outer divertor target by incident electrons, integrated over the wetted strike-zone surface.",
           "embedding_rank": 2,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "electron_density_at_divertor_target",
           "description": "Number density of the electron species at the divertor target is the local particle count per volume for free electrons at the sheath entrance immediately upstream of the target-facing plasma boundary.",
           "embedding_rank": 3,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "effective_charge_at_divertor_target",
           "description": "Effective ionic charge of the plasma immediately upstream of a divertor-target sheath, combining all positive ion species through charge moments.",
           "embedding_rank": 4,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "decay_length_over_scrape_off_layer",
           "description": "Characteristic outward distance over which a decaying plasma quantity decreases by one e-folding in the scrape-off layer.",
           "embedding_rank": 5,
           "rerank_rank": 13,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "power_of_divertor_due_to_convection",
           "description": "Power deposited on all divertor targets by convective plasma particle flux, comprising thermal enthalpy and directed kinetic energy carried by streaming ions and electrons from the scrape-off layer.",
           "embedding_rank": 6,
           "rerank_rank": 15,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "density_at_divertor_target",
           "description": "Local number density of a specified plasma species or species group immediately upstream of a divertor-target sheath, with ion charge states summed and neutral populations excluded unless explicitly named.",
           "embedding_rank": 7,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "power_at_wall_due_to_convection",
           "description": "Power deposited on plasma-facing wall and divertor surfaces by convective plasma particle flux, comprising thermal enthalpy and directed kinetic energy carried by streaming ions and electrons from the scrape-off layer.",
           "embedding_rank": 8,
           "rerank_rank": 14,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "electron_decay_length_over_scrape_off_layer",
           "description": "Characteristic outward distance over which electron number density decreases by one e-folding in the scrape-off layer.",
           "embedding_rank": 9,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "deuterium_density_at_divertor_target",
           "description": "Number density of deuterium ions at the divertor target is the local particle count per volume at the sheath entrance immediately upstream of the target-facing plasma boundary.",
           "embedding_rank": 10,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "density_at_plasma_boundary",
           "description": "Particle number density of a selected plasma population evaluated at the plasma boundary, the last closed magnetic flux surface separating confined plasma from the scrape-off layer.",
           "embedding_rank": 13,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "electron_density_at_plasma_boundary",
           "description": "Number density of electrons at the plasma boundary, evaluated as the local, intensive particle count per physical volume on the last closed magnetic flux surface.",
           "embedding_rank": 16,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "total_ion_density_at_divertor_target",
           "description": "Total positive-ion number density at the divertor target, summed over all ionic species and charge states at the entrance to the electrostatic sheath.",
           "embedding_rank": 11,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "electron_temperature_at_divertor_target",
           "description": "Electron temperature at the divertor target is the thermal energy per particle of the electron population evaluated at the plasma side of a divertor-target sheath, distinct from the target material temperature.",
           "embedding_rank": 15,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "power_at_divertor_target_due_to_convection",
           "description": "Power deposited on a single divertor target by convective plasma particle flux, comprising thermal enthalpy and directed kinetic energy carried by streaming ions and electrons from the scrape-off layer.",
           "embedding_rank": 12,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -1156,98 +1156,98 @@
           "description": "Volume-averaged thermal pressure of electrons in the scrape-off layer, the open-field-line region between the last closed flux surface and material plasma-facing components.",
           "embedding_rank": 1,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "neutral_pressure_over_scrape_off_layer",
           "description": "Volume-averaged thermal pressure of neutral atoms and molecules in the scrape-off layer, the open-field-line region between the last closed flux surface and material plasma-facing components.",
           "embedding_rank": 2,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "total_electron_pressure",
           "description": "Kinetic pressure associated with the entire electron population, combining thermal and suprathermal contributions in the isotropic electron stress.",
           "embedding_rank": 3,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "pressure_over_scrape_off_layer",
           "description": "Thermal pressure of a plasma constituent or neutral-gas population in the open-field-line scrape-off layer, the region between the last closed flux surface and the material plasma-facing components.",
           "embedding_rank": 4,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "fast_electron_pressure",
           "description": "Kinetic pressure associated with the fast electron population, retaining directional momentum transport rather than imposing an isotropic thermal approximation.",
           "embedding_rank": 5,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "thermal_electron_pressure_at_post_sawtooth_crash",
           "description": "Isotropic kinetic pressure produced by random motion of bulk thermal electrons, evaluated in the plasma state immediately after a sawtooth crash.",
           "embedding_rank": 6,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "electron_heat_decay_length_over_scrape_off_layer",
           "description": "Radial e-folding decay length of the electron heat flux in the scrape-off layer, defined by the inverse magnitude of its outward logarithmic gradient.",
           "embedding_rank": 7,
           "rerank_rank": 16,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "electron_temperature_at_limiter",
           "description": "Kinetic temperature of the electron population evaluated at the plasma-facing side of a limiter, where open scrape-off-layer field lines terminate.",
           "embedding_rank": 8,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "thermal_plasma_pressure",
           "description": "Thermal plasma pressure is the isotropic kinetic pressure of thermal electrons and ions, summed over represented species and excluding fast-particle contributions.",
           "embedding_rank": 9,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "ion_field_line_average_temperature_over_scrape_off_layer",
           "description": "Ion temperature averaged along an open magnetic field line between upstream and downstream locations in the scrape-off layer.",
           "embedding_rank": 10,
           "rerank_rank": 15,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "electron_pressure_at_separatrix",
           "description": "Local kinetic pressure carried by the electron population at the magnetic separatrix, marking the boundary between confined plasma and open-field-line scrape-off-layer plasma.",
           "embedding_rank": 14,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "total_thermal_ion_pressure",
           "description": "Species- and charge-state-summed isotropic kinetic pressure of the thermal ion population, excluding contributions from fast nonthermal ions.",
           "embedding_rank": 16,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "line_averaged_electron_temperature",
           "description": "Thermal energy of the bulk electron population expressed as an energy-equivalent temperature, averaged along a plasma chord.",
           "embedding_rank": 13,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "electron_field_line_average_temperature_over_scrape_off_layer",
           "description": "Electron temperature averaged along an open magnetic field line between upstream and downstream locations in the scrape-off layer.",
           "embedding_rank": 11,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -1264,91 +1264,91 @@
           "description": "Major-radius coordinate locating a geometric point or reference position by perpendicular distance from the toroidal symmetry axis.",
           "embedding_rank": 1,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_flux_surface",
           "description": "Major-radius coordinate assigned to the selected flux surface, defined as the midpoint between its minimum and maximum cylindrical R values.",
           "embedding_rank": 2,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_line_of_sight",
           "description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 3,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "radial_coordinate_of_diagnostic_aperture",
           "description": "Major-radius (R) coordinate of the geometric center of a diagnostic aperture in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 4,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_conductor_cross_section",
           "description": "Major-radius coordinate of the designated reference point associated with a conductor cross-section, measured from the toroidal symmetry axis.",
           "embedding_rank": 5,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_spectrometer_channel",
           "description": "Major-radius coordinate of an interpolated geometry point associated with a spectrometer channel, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 6,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "inverse_of_major_radius",
           "description": "Reciprocal major-radius coordinate for a geometric point or specified location, serving as a positive geometric factor in toroidal equilibrium relations.",
           "embedding_rank": 7,
           "rerank_rank": 13,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_coordinate_of_plasma_filament",
           "description": "Radial coordinate of a plasma filament is the major-radius coordinate, in the right-handed cylindrical (R, \u03c6, Z) frame, of the oblique reference point anchoring one current-carrying filament element's rectangular cross-section.",
           "embedding_rank": 8,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_plasma_boundary_gap_reference_point",
           "description": "Major radius (R) coordinate of the reference point defining the gap between the plasma boundary and the wall.",
           "embedding_rank": 9,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_outline_of_flux_surface",
           "description": "Major-radius coordinate of a point on a poloidal magnetic-flux level-set contour, expressed in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 10,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_outline_of_wall",
           "description": "Major-radius coordinate of every point on a wall boundary outline, measured from the machine symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 11,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_coordinate_of_coil_conductor_element",
           "description": "Major-radius coordinate of the geometric center associated with a coil-conductor element, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 13,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_geometric_axis",
           "description": "Major-radius coordinate locating the midpoint of the plasma boundary's radial extrema, thereby specifying the horizontal position of its geometric axis.",
           "embedding_rank": 14,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 2
         }
       ]
     },
@@ -1365,84 +1365,84 @@
           "description": "Parallel component of the fast-ion pressure for a specific ion charge state, measuring suprathermal ion stress along the local magnetic field.",
           "embedding_rank": 1,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "parallel_fast_neutral_state_pressure",
           "description": "Parallel component of the kinetic pressure tensor for fast (suprathermal) neutral particles in a specified internal quantum or excitation state, directed along the local magnetic field.",
           "embedding_rank": 2,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "spectral_calibration_factor_of_spectrometer_channel",
           "description": "Wavelength-coordinate factor scaling a spectrometer-channel instrument function to detector count rate.",
           "embedding_rank": 3,
           "rerank_rank": 15,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "radial_neutral_internal_state_momentum_diffusion_coefficient",
           "description": "Radial component of the momentum diffusion coefficient for neutral particles in a specified internal quantum or energy state.",
           "embedding_rank": 4,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "voltage_of_wall",
           "description": "Electric potential (bias voltage) applied to each wall element in the GGD representation.",
           "embedding_rank": 5,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_state_energy_diffusivity",
           "description": "Energy diffusion coefficient for a specific ion charge state",
           "embedding_rank": 6,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "thermal_ion_energy",
           "description": "Volume-integrated internal energy of the thermal-ion ensemble over a specified plasma region, excluding electron, fast-ion, and suprathermal contributions.",
           "embedding_rank": 7,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_coordinate_of_spectrometer",
           "description": null,
           "embedding_rank": 8,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_charge_state_average_charge_number",
           "description": "Density-weighted mean ionic charge number for an ion charge-state bundle, combining resolved charge states into one measure of ionization.",
           "embedding_rank": 9,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "perturbed_plasma_magnetic_vector_potential",
           "description": "Vector-potential perturbation associated with a change in the plasma magnetic field relative to a reference state, retaining radial, poloidal, and toroidal components.",
           "embedding_rank": 10,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "ion_state_vibrational_level",
           "description": "Vibrational quantum level of the ion species state, may represent a bundled range",
           "embedding_rank": 14,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "total_ion_energy_diffusion_coefficient",
           "description": "Diffusion coefficient for total ion energy transport on an unstructured grid",
           "embedding_rank": 15,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -1459,105 +1459,105 @@
           "description": "Charge-state-summed local number density of argon ions at the H-mode edge pedestal top, excluding neutral argon.",
           "embedding_rank": 1,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "toroidal_tritium_velocity",
           "description": null,
           "embedding_rank": 2,
           "rerank_rank": 18,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "particle_temperature",
           "description": null,
           "embedding_rank": 3,
           "rerank_rank": 15,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_beam_charge_number",
           "description": "Charge number of the ion species from which a diagnostic neutral beam particle is produced, specifying its pre-neutralization ionization state rather than the neutral particle's net charge.",
           "embedding_rank": 4,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_state_diamagnetic_momentum_diffusivity",
           "description": "Diamagnetic component of the momentum diffusion coefficient for a neutral species in a given internal state.",
           "embedding_rank": 5,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_diamagnetic_momentum_diffusivity",
           "description": "Diamagnetic component of the momentum diffusion coefficient for neutral species in the edge plasma.",
           "embedding_rank": 6,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "xenon_source_rate_due_to_gas_injection",
           "description": "Instantaneous equivalent-electron source rate for xenon atoms supplied by gas injection, assigning 54 equivalent electrons to each xenon atom.",
           "embedding_rank": 7,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_charge_state_diamagnetic_momentum_damping_rate",
           "description": "Neoclassical damping rate of the diamagnetic momentum component for a specified ion charge state.",
           "embedding_rank": 8,
           "rerank_rank": 14,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "deuterium_tritium_flux",
           "description": "Total neutron emission rate from deuterium-tritium fusion reactions, including thermal, beam-thermal, and beam-beam contributions.",
           "embedding_rank": 9,
           "rerank_rank": 19,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_diamagnetic_momentum_flux",
           "description": "Diamagnetic component of momentum flux for neutral species.",
           "embedding_rank": 10,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "argon_prefill_count",
           "description": "Argon prefill count is the total amount of neutral argon (Ar) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 per atom.",
           "embedding_rank": 11,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_neutral_internal_state_velocity_due_to_diamagnetic_drift",
           "description": "Radial component of the diamagnetic drift velocity of a neutral species in a given quantum state on GGD grid subsets.",
           "embedding_rank": 19,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_state_diamagnetic_momentum_diffusivity",
           "description": "Diamagnetic component of the momentum diffusion coefficient for a specified ion charge state.",
           "embedding_rank": 16,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_state_diamagnetic_momentum_source",
           "description": "Diamagnetic component of the momentum source term for a neutral species in a given internal state.",
           "embedding_rank": 15,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "hot_neutral_temperature_at_plasma_boundary",
           "description": "Energy-equivalent translational temperature of hot neutral atoms at the plasma boundary, characterizing their random motion after removal of bulk flow.",
           "embedding_rank": 12,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -1574,70 +1574,70 @@
           "description": "Breakdown magnetic-field strength associated with local magnetic induction during plasma initiation, without selecting a particular source contribution or field-strength representation.",
           "embedding_rank": 1,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "stray_breakdown_magnetic_field_magnitude",
           "description": "Magnitude of the residual magnetic field at the plasma position during initiation, whose incomplete cancelation can inhibit electron-avalanche breakdown.",
           "embedding_rank": 2,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "stray_breakdown_magnetic_field",
           "description": "Residual magnetic-field strength at the plasma position during initiation, produced by imperfect cancelation of external coil fields and capable of inhibiting electron-avalanche breakdown.",
           "embedding_rank": 3,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "diamagnetic_current_density_due_to_perpendicular_viscosity",
           "description": "Diamagnetic component of the current density generated by perpendicular viscous stress in a magnetized plasma, projected along the local diamagnetic direction.",
           "embedding_rank": 4,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "magnetic_field_magnitude_at_pedestal_top_high_field_side",
           "description": "Euclidean magnitude of the total magnetic induction at the high-field-side pressure-pedestal top, including all local directional components.",
           "embedding_rank": 5,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_current_density_due_to_perpendicular_viscosity",
           "description": "Radial component of the electric-current contribution generated by the divergence of perpendicular viscous stress in a magnetized charged plasma.",
           "embedding_rank": 6,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "field_line_length",
           "description": "Arclength of an individually traced magnetic field line during plasma initiation, resolving the field-line length distribution rather than reporting an average connection length.",
           "embedding_rank": 7,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_current_density",
           "description": "Radial component of the electric current density generated by parallel viscosity in the edge plasma.",
           "embedding_rank": 8,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "current_density_due_to_perpendicular_viscosity",
           "description": "Vector electric current-density contribution generated by the divergence of perpendicular viscous stress in a magnetized charged plasma.",
           "embedding_rank": 9,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "parallel_electric_field_at_separatrix",
           "description": "Parallel electric field at the separatrix is the electric field projected along the local magnetic field on the separatrix. It fixes the field-aligned projection and separatrix locus, while more specific names may add an aggregation over that locus.",
           "embedding_rank": 10,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -1654,91 +1654,91 @@
           "description": "Major-radius coordinate assigned to the selected flux surface, defined as the midpoint between its minimum and maximum cylindrical R values.",
           "embedding_rank": 1,
           "rerank_rank": 14,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate",
           "description": "Major-radius coordinate locating a geometric point or reference position by perpendicular distance from the toroidal symmetry axis.",
           "embedding_rank": 2,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_line_of_sight",
           "description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 3,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_conductor_cross_section",
           "description": "Major-radius coordinate of the designated reference point associated with a conductor cross-section, measured from the toroidal symmetry axis.",
           "embedding_rank": 4,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_diagnostic_aperture",
           "description": "Major-radius (R) coordinate of the geometric center of a diagnostic aperture in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 5,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_reflectometer_antenna",
           "description": "Major radius (R) coordinate of a reflectometer antenna center from the toroidal symmetry axis.",
           "embedding_rank": 6,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_spectrometer_channel",
           "description": "Major-radius coordinate of an interpolated geometry point associated with a spectrometer channel, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 7,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_optical_element",
           "description": "Major-radius coordinate of an optical element\u2019s geometric center or local-geometry origin, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 8,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "inverse_of_major_radius",
           "description": "Reciprocal major-radius coordinate for a geometric point or specified location, serving as a positive geometric factor in toroidal equilibrium relations.",
           "embedding_rank": 9,
           "rerank_rank": 15,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_coordinate_of_coil_conductor_element",
           "description": "Major-radius coordinate of the geometric center associated with a coil-conductor element, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 10,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_measurement_position",
           "description": "Major-radius coordinate locating a measurement position by perpendicular distance from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 12,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "radial_coordinate_of_geometric_axis",
           "description": "Major-radius coordinate locating the midpoint of the plasma boundary's radial extrema, thereby specifying the horizontal position of its geometric axis.",
           "embedding_rank": 15,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_rogowski_coil",
           "description": "Radial coordinate of a Rogowski coil position, equal to the major-radius coordinate of the coil's designated geometric point in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 13,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 2
         }
       ]
     },
@@ -1755,91 +1755,91 @@
           "description": "Toroidal component of the ferritic-element magnetization vector: the signed projection of the effective magnetization assigned to a discrete ferritic element onto the positive toroidal direction in the right-handed cylindrical (R, \u03c6, Z) frame. This is the element-level convention, not a pointwise bulk-material magnetization field.",
           "embedding_rank": 1,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "toroidal_magnetic_field_at_ferritic_element_centroid",
           "description": "Signed projection of the magnetic-field vector onto the toroidal direction at a ferritic element\u2019s geometric centroid.",
           "embedding_rank": 2,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_magnetization_of_ferritic_element",
           "description": "Signed radial component of the effective magnetization vector assigned to a ferritic element in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 3,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_magnetic_field_at_ferritic_element_centroid",
           "description": "Radial magnetic-field component at the geometric centroid of a ferritic element, projected onto the outward major-radius direction in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 4,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "toroidal_current_density_due_to_perpendicular_viscosity",
           "description": "Toroidal component of the current density generated when perpendicular viscous stress acts on the charged-particle fluid in a magnetized plasma.",
           "embedding_rank": 5,
           "rerank_rank": 19,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "vertical_magnetic_field_at_ferritic_element_centroid",
           "description": "Signed vertical component of the magnetic-field vector at a ferritic element\u2019s centroid in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 6,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface",
           "description": "Toroidal diamagnetic magnetic flux at an inside flux surface is the diamagnetic contribution to the toroidal magnetic flux through the poloidal cross-section enclosed by a selected closed flux surface.",
           "embedding_rank": 7,
           "rerank_rank": 15,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "radial_magnetization_of_iron_core_segment",
           "description": "Magnetization of an iron-core segment expressed as magnetic flux density, projected onto the outward major-radius direction and uniform within the segment.",
           "embedding_rank": 8,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "vertical_magnetization_of_ferritic_element",
           "description": "Signed vertical component of the effective magnetization vector assigned to a ferritic element in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 9,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "toroidal_volumetric_force",
           "description": "Toroidal component of the electromagnetic body-force density vector acting on plasma volumes or conducting wall and structural elements, projected onto increasing toroidal angle \u03c6 in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 10,
           "rerank_rank": 16,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_magnetic_field",
           "description": "Signed toroidal component of the local total magnetic induction, resolved along increasing toroidal angle in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 15,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_magnetic_flux",
           "description": "Toroidal magnetic flux is the signed surface integral of the magnetic field over the poloidal cross-section enclosed by a nested magnetic flux surface.",
           "embedding_rank": 14,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_vacuum_magnetic_vector_potential",
           "description": "Toroidal (\u03c6) component of the gage-dependent vacuum magnetic vector potential produced solely by toroidal-field coil currents in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 13,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -1856,84 +1856,84 @@
           "description": "Instantaneous angular acceleration of a neoclassical tearing-mode magnetic island, indicating whether its helical rotation is accelerating or decelerating.",
           "embedding_rank": 1,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "frequency_of_neoclassical_tearing_mode",
           "description": "Signed cyclic rotation rate of an individual neoclassical tearing-mode magnetic island, indicating toroidal advance or regression at its resonant flux surface.",
           "embedding_rank": 2,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "reference_frequency_of_wave_beam",
           "description": "Reference temporal carrier frequency of a probing electromagnetic wave beam, specified before frequency conversion or modulation and used as the phase-measurement baseline.",
           "embedding_rank": 3,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_tritium_velocity",
           "description": null,
           "embedding_rank": 4,
           "rerank_rank": 13,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "radial_ion_state_energy_convection_velocity",
           "description": "Effective radial convection velocity (pinch velocity) for ion charge state energy transport on GGD grid subsets.",
           "embedding_rank": 5,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "normalized_toroidal_flux_coordinate_at_measurement_position",
           "description": "Dimensionless normalized toroidal-flux label that maps a physical measurement position onto a nested magnetic surface between the magnetic axis and equilibrium boundary.",
           "embedding_rank": 6,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neoclassical_tearing_mode_phase",
           "description": "Angular phase of a neoclassical tearing-mode magnetic island, specifying its helical orientation on the resonant flux surface at a given time.",
           "embedding_rank": 7,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "orbit_integral",
           "description": "Dimensionless orbit average of a specified function along a marker's final transit or trapping orbit.",
           "embedding_rank": 8,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "normalized_gyrokinetic_time",
           "description": "Dimensionless independent time coordinate that orders nonlinear gyrokinetic evolution and indexes time-resolved turbulent fields, fluxes, and moments.",
           "embedding_rank": 9,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_width_time_derivative_of_neoclassical_tearing_mode",
           "description": "Instantaneous radial expansion or contraction rate of the full magnetic-island width associated with one neoclassical tearing mode.",
           "embedding_rank": 10,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "poloidal_ion_energy_convection_velocity",
           "description": "Poloidal convective velocity for ion energy transport on the GGD grid.",
           "embedding_rank": 11,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "deuterium_tritium_flux",
           "description": "Total neutron emission rate from deuterium-tritium fusion reactions, including thermal, beam-thermal, and beam-beam contributions.",
           "embedding_rank": 13,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -1950,35 +1950,35 @@
           "description": "Absolute thermodynamic temperature of a neutron detector assembly or converter material, describing its thermal state independently of neutron-counting response.",
           "embedding_rank": 1,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "spectral_rate_of_spectrometer_channel",
           "description": "Detected photoelectron rate assigned to each wavelength pixel of a spectrometer channel after electronic gain compensation and relative calibration, but before absolute radiometric calibration.",
           "embedding_rank": 2,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "spectral_efficiency_of_hard_xray_detector",
           "description": "Energy-dependent probability that a photon impacting a hard X-ray detector is registered by its detection system.",
           "embedding_rank": 3,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "spectral_efficiency_of_neutron_detector",
           "description": "Energy-dependent probability that an incident neutron within a specified energy band is recorded as an accepted count by the neutron detector.",
           "embedding_rank": 4,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "intensity_at_spectral_line",
           "description": "Uncalibrated photoelectron detection rate obtained by integrating the measured emission signal across an identified spectral line.",
           "embedding_rank": 5,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -1995,35 +1995,35 @@
           "description": "Fusion-neutron number flux incident on the neutron detector\u2019s active surface, giving the rate at which neutrons cross each unit of that surface.",
           "embedding_rank": 1,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "neutron_maximum_energy_of_neutron_detector",
           "description": "High-energy endpoint of the neutron kinetic-energy interval assigned to a neutron detector energy band.",
           "embedding_rank": 2,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "neutron_rate_due_to_beam_beam_fusion",
           "description": "Total neutron count rate from neutron-producing beam-beam fusion reactions, summed over represented fast-ion fuel channels in which both reactants are nonthermal ions from neutral beam injection.",
           "embedding_rank": 3,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "spectral_efficiency_of_neutron_detector",
           "description": "Energy-dependent probability that an incident neutron within a specified energy band is recorded as an accepted count by the neutron detector.",
           "embedding_rank": 4,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "total_rate_due_to_fusion",
           "description": "Rate of neutron production by the plasma, formed by aggregating neutron-generating source contributions over the relevant emitting volume.",
           "embedding_rank": 5,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -2040,91 +2040,91 @@
           "description": "Signed velocity component of an individual shattered pellet fragment along the vertical Z direction in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 1,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "radial_velocity_of_pellet",
           "description": "Major-radius component of a shattered-pellet fragment velocity, resolved along the R direction of the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 2,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "toroidal_velocity_of_pellet",
           "description": "Signed toroidal component of a shattered-pellet fragment velocity in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 3,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "z_direction_unit_vector_of_pellet_injector",
           "description": "Z component of the unit vector aligned with the unshattered pellet velocity immediately before shattering, resolved in the right-handed Cartesian (x, y, z) frame.",
           "embedding_rank": 4,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "x_unit_vector_of_pellet_injector",
           "description": "Cartesian x component of the unit vector along the unshattered pellet velocity immediately before shattering, resolved in the right-handed Cartesian (x, y, z) frame.",
           "embedding_rank": 5,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "y_unit_vector_of_pellet_injector",
           "description": "Cartesian y component of the unit vector aligned with the unshattered pellet velocity direction immediately before shattering.",
           "embedding_rank": 6,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "toroidal_coordinate_at_shattering_position",
           "description": "Toroidal azimuthal coordinate of the point where the pellet center-of-mass trajectory intersects the shattering element.",
           "embedding_rank": 7,
           "rerank_rank": 13,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "vertical_coordinate_of_shattering_position",
           "description": "Vertical coordinate of the shattering position is the Z coordinate of the shatter-cone origin relative to the equatorial plane Z = 0 in the right-handed cylindrical (R, \u03c6, Z) frame, locating the pellet-fragmentation point.",
           "embedding_rank": 8,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "minor_angle_of_pellet_injector",
           "description": "Minor directional half-opening angle of the elliptic fragment-dispersion cone formed by a shattered pellet injector.",
           "embedding_rank": 9,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "volume_of_pellet_fragment",
           "description": "Geometric volume occupied by the material of an individual shattered pellet fragment, distinguishing fragment size from the intact pellet and surrounding propellant.",
           "embedding_rank": 10,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "bulk_neutral_internal_state_velocity",
           "description": "Bulk translational velocity vector of neutral particles in one specified internal quantum or energy state, given by the first moment of their velocity distribution.",
           "embedding_rank": 13,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_internal_state_velocity",
           "description": "Bulk translational velocity vector of neutral particles in one specified internal quantum or energy state, given by the first moment of their velocity distribution.",
           "embedding_rank": 12,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "toroidal_coordinate_of_pellet_fragment",
           "description": "Azimuthal location of a shattered-pellet fragment\u2019s center of mass around the machine symmetry axis, expressed in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 11,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -2141,84 +2141,84 @@
           "description": "Temporal carrier frequency of an electron-cyclotron electromagnetic beam, setting the cyclotron-resonance condition for plasma heating and current drive.",
           "embedding_rank": 1,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "maximum_angle_of_electron_cyclotron_launcher_mirror",
           "description": "Maximum allowed value of the signed rotation angle of an electron-cyclotron launcher mirror within its mechanical travel range.",
           "embedding_rank": 2,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "normalized_beam_power",
           "description": "Fraction of the total launched neutral beam power for each energy component (full, half, one-third).",
           "embedding_rank": 3,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "radial_coordinate_of_launching_position",
           "description": "Major-radius coordinate locating the electron-cyclotron beam launching position relative to the toroidal symmetry axis.",
           "embedding_rank": 4,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "reference_frequency_of_wave_beam",
           "description": "Reference temporal carrier frequency of a probing electromagnetic wave beam, specified before frequency conversion or modulation and used as the phase-measurement baseline.",
           "embedding_rank": 5,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "voltage_amplitude_of_ion_cyclotron_heating_antenna",
           "description": "Peak magnitude of the radio-frequency voltage waveform on a single transmission-line feed of an ion-cyclotron-heating antenna module.",
           "embedding_rank": 6,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "energy_flux_maximum_at_divertor_target",
           "description": "Peak local energy-deposition rate per unit area on one divertor target surface, combining incident plasma-particle and radiative energy-carrying channels.",
           "embedding_rank": 7,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "energy_flux_at_limiter",
           "description": "Plasma energy deposition rate per unit area on the plasma-facing surface of a limiter, without implying a maximum or other surface aggregation.",
           "embedding_rank": 8,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "net_power_due_to_ion_cyclotron_heating",
           "description": "Net ion-cyclotron radio-frequency power launched into the vacuum vessel by a specified heating launcher before absorption by plasma particles.",
           "embedding_rank": 9,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "wave_current_amplitude_of_antenna_strap",
           "description": "Peak magnitude of the radio-frequency current at a specified position along an ion-cyclotron-heating antenna strap.",
           "embedding_rank": 10,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "second_local_tangential_width_of_electron_cyclotron_launcher_mirror",
           "description": "Full lateral extent of a rectangular electron-cyclotron launcher mirror measured along its designated second local tangential (X2) axis.",
           "embedding_rank": 12,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "vertical_coordinate_of_ece_channel",
           "description": "Signed vertical coordinate of an electron-cyclotron-emission channel\u2019s measurement position in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 11,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -2235,91 +2235,91 @@
           "description": "Cumulative net count of neutral particles deposited into the wall through plasma\u2013wall exchange, referenced to zero at the start of accumulation.",
           "embedding_rank": 1,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "incident_neutral_particle_flux_at_wall",
           "description": "Incident neutral particle flux at the wall is the wall-integrated arrival rate of neutral particles of one specified species moving from the plasma side toward plasma-facing material. It excludes neutral particles emitted by the wall.",
           "embedding_rank": 2,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "neutral_particle_flux_at_wall_due_to_pumping",
           "description": "Rate at which particles of a specified neutral species are removed from the plasma region by wall pumping, giving global neutral-particle exhaust throughput.",
           "embedding_rank": 3,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "total_neutral_particle_rate_at_wall_due_to_surface_emission",
           "description": "Wall-integrated neutral-particle number rate emitted into the plasma by surface-emission processes, with cold, thermal, and fast energy categories represented separately.",
           "embedding_rank": 4,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "neutral_internal_state_particle_flux_at_wall_due_to_recombination",
           "description": "Outgoing neutral internal-state particle number flux density at a plasma-facing wall due to recombination, resolved by neutral product species and internal quantum state.",
           "embedding_rank": 5,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "accumulated_total_prefill_gas_count",
           "description": "Cumulative equivalent-electron inventory of all gas species introduced by injection during the plasma prefill phase, summed over species.",
           "embedding_rank": 6,
           "rerank_rank": 14,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "prefill_count",
           "description": "Cumulative equivalent-electron inventory of neutral atomic and molecular gas introduced during prefill before plasma breakdown, weighted by bound-electron count.",
           "embedding_rank": 7,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "neutral_particle_flux_at_wall_due_to_recombination",
           "description": "Outgoing neutral-particle number flux density from recombination at a plasma-facing wall, summed over emitted neutral species and internal states.",
           "embedding_rank": 8,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "incident_neutral_particle_flux_at_wall_due_to_recombination",
           "description": "Incident number flux density of neutral recombination products arriving at a plasma-facing wall, summed over neutral species and internal states.",
           "embedding_rank": 9,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "neutral_internal_state_particle_flux_at_wall",
           "description": "Incident number flux density of neutral atoms and molecules arriving at a plasma-facing wall, resolved by a specified internal state.",
           "embedding_rank": 10,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "rate_due_to_pumping",
           "description": "Rate of particle removal from the plasma through a wall by pumping, expressed as particle-number throughput rather than energy transport.",
           "embedding_rank": 13,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "neutral_source_rate",
           "description": "Net local volumetric rate at which neutral particles are created or removed through all included source and loss processes.",
           "embedding_rank": 11,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_particle_flux_at_wall_due_to_surface_emission",
           "description": "Neutral particle number flux emanating from a plasma-facing wall surface through surface-emission processes and directed from the wall material into the plasma.",
           "embedding_rank": 14,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -2336,77 +2336,77 @@
           "description": "Full end-to-end physical size of a soft X-ray detector along the applicable horizontal or vertical detector-plane direction.",
           "embedding_rank": 1,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "first_local_tangential_width_of_hard_xray_detector",
           "description": "Full physical extent of a hard X-ray detector aperture measured along its first local tangential axis for rectangular aperture geometry.",
           "embedding_rank": 2,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "height_of_hard_xray_detector",
           "description": "Full physical extent of a hard X-ray detector aperture along the detector's second local tangential direction, for rectangular aperture geometry.",
           "embedding_rank": 3,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radius_of_soft_xray_detector",
           "description": null,
           "embedding_rank": 4,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "angular_width_of_camera",
           "description": "Beta angular field-of-view extent of a visible camera channel, defined as the range between the minimum and maximum beta viewing angles in the local aperture frame.",
           "embedding_rank": 5,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "etendue_of_soft_xray_detector",
           "description": "Geometric optical throughput of a soft X-ray detector channel, set by the collecting area and accepted solid angle of its optical system.",
           "embedding_rank": 6,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "first_local_tangential_coordinate_of_soft_xray_detector",
           "description": "Signed coordinate of a soft X-ray detector outline vertex along the first local tangential (X1) axis of the detector-local two-dimensional Cartesian frame.",
           "embedding_rank": 7,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "first_local_tangential_width_of_diagnostic_aperture",
           "description": "Full clear-opening extent of a rectangular diagnostic aperture along its object-local first tangential axis, used to define the aperture geometry for \u00e9tendue calculations.",
           "embedding_rank": 8,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "second_local_tangential_coordinate_of_hard_xray_detector",
           "description": "Signed coordinate of a hard X-ray detector outline vertex along the second local tangential axis of the right-handed detector-local Cartesian basis (first local tangential, second local tangential, local normal).",
           "embedding_rank": 9,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "x_coordinate_of_diagnostic_aperture",
           "description": "Signed x coordinate of the geometric center of a diagnostic aperture, measured from the origin of its right-handed camera Cartesian (x, y, z) frame.",
           "embedding_rank": 10,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "wavelength_of_detector_pixel",
           "description": "Wavelength assigned to incoming photons at an X-ray crystal spectrometer detector pixel, including Bragg dispersion and curvature-induced variation across the detector face.",
           "embedding_rank": 11,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -2423,98 +2423,98 @@
           "description": "Major radius (R) coordinate of each point on the outer outline of the cryostat vessel layer in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 1,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "vertical_coordinate_of_cryostat",
           "description": "Signed vertical coordinate of each point on the centerline representing the middle of an annular cryostat vessel layer, expressed in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 2,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "thickness_of_cryostat",
           "description": "Local through-wall distance across the cryostat structural vessel, measured along the wall normal between its inner and outer material faces.",
           "embedding_rank": 3,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "vertical_coordinate_of_annulus_center",
           "description": "Vertical (Z) coordinate locating the geometric center of an annulus in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 4,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "vertical_coordinate_of_passive_loop_element",
           "description": "Signed vertical coordinate of the second endpoint defining a passive-loop element\u2019s thick-line cross-section in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 5,
           "rerank_rank": 13,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "inner_radius_of_passive_loop",
           "description": "Inner radius of the annular cross-section of a passive conducting loop element is the Euclidean distance from the cross-section center to its inner conducting boundary. It is nonnegative.",
           "embedding_rank": 6,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_coordinate_of_arc_of_circle_center",
           "description": "Major-radius coordinate of an iron-core segment\u2019s annular cross-section center in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 7,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "thickness_of_breeder_blanket_layer",
           "description": "Non-negative geometric separation between the inner and outer material interfaces of a breeder blanket layer along the specified thickness direction.",
           "embedding_rank": 8,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "radial_coordinate_of_poloidal_field_coil",
           "description": "Center major-radius coordinate of an annular poloidal-field coil cross-section, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 9,
           "rerank_rank": 11,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "vertical_outline_of_antenna_strap",
           "description": "Signed vertical coordinate of each contour point defining an ion-cyclotron antenna strap boundary, distinguishing the strap outline from its geometric-center location.",
           "embedding_rank": 10,
           "rerank_rank": 16,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "thickness_of_passive_loop_element",
           "description": "Transverse dimension of the rectangular cross-section used to represent each passive conductor loop element, measured perpendicular to its central segment.",
           "embedding_rank": 11,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "inner_radius_of_iron_core_segment",
           "description": "Non-negative radial distance from the toroidal symmetry axis to the inner boundary of an annular iron-core segment. Together with the outer radius, it fixes the radial extent of the hollow cross section.",
           "embedding_rank": 12,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "outer_radius_of_ferritic_element",
           "description": "Outer radial boundary of the annular cross-section of a ferritic element in the axisymmetric equivalent geometry, defining the external extent of the annulus centered at a reference point in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 15,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "radial_outline_of_vacuum_vessel",
           "description": "Major-radius coordinate of each point on the vacuum-vessel cross-sectional outline, measured from the machine symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 14,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         }
       ]
     },
@@ -2531,98 +2531,98 @@
           "description": "Signed coefficient multiplying total ion particle density to form the implicit contribution to the total ion particle source term.",
           "embedding_rank": 1,
           "rerank_rank": 15,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_charge_state_particle_flux_limiter_coefficient",
           "description": "Dimensionless multiplier that limits particle flux transport for one specified ionization charge state relative to its free-streaming bound.",
           "embedding_rank": 2,
           "rerank_rank": 10,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_state_particle_flux",
           "description": "Signed number flux of neutral particles in a specified internal state through an oriented surface, per unit area and per unit time. It is the surface-normal component of state-resolved neutral particle transport.",
           "embedding_rank": 3,
           "rerank_rank": 12,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_particle_flux_limiter_coefficient",
           "description": "Dimensionless coefficient that limits neutral-particle transport flux to a prescribed fraction of the collisionless free-streaming bound.",
           "embedding_rank": 4,
           "rerank_rank": 13,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "neutral_species_atomic_mass",
           "description": "Mass parameter assigned to a specified neutral particle species, encoding its isotope or constituent composition for inertial and transport calculations.",
           "embedding_rank": 5,
           "rerank_rank": 14,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "ion_particle_flux_limiter_coefficient",
           "description": "Dimensionless scaling factor that limits aggregate ion particle transport to a physically admissible fraction of its collisionless free-streaming reference flux.",
           "embedding_rank": 6,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "poloidal_ion_state_momentum_flux_limiter_coefficient",
           "description": "Dimensionless scalar flux-limiter coefficient that scales the free-streaming upper bound on poloidal momentum-flux density for a specific ion charge state in multi-fluid edge plasma transport models.",
           "embedding_rank": 7,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "parallel_plasma_velocity",
           "description": "Parallel component of the bulk plasma center-of-mass velocity along the local magnetic-field direction, representing field-aligned mass transport of all contributing species.",
           "embedding_rank": 8,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "momentum_flux",
           "description": "Rate of transport of linear momentum per unit area across an oriented surface in the plasma, combining convective, isotropic pressure, and viscous stress contributions from any species or population.",
           "embedding_rank": 9,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "momentum_source_rate",
           "description": "Rate characterizing the addition, removal, or transfer of momentum to a plasma population, expressed relative to its associated momentum content.",
           "embedding_rank": 10,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "parallel_ion_charge_state_momentum_flux_limiter_coefficient",
           "description": "Dimensionless parallel ion charge-state momentum flux-limiter coefficient that scales the collisionless free-streaming bound on field-aligned momentum transport for a specified ion charge state.",
           "embedding_rank": 13,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "poloidal_neutral_state_momentum_flux_limiter_coefficient",
           "description": "Dimensionless poloidal flux-limiter coefficient that scales the free-streaming bound on the poloidal momentum-flux-density component for a specified neutral particle state in edge-plasma transport closures.",
           "embedding_rank": 14,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "normalized_toroidal_flux_coordinate_at_internal_transport_barrier",
           "description": "Dimensionless magnetic-surface coordinate locating the internal transport barrier between the magnetic axis and the last closed flux surface.",
           "embedding_rank": 12,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 0
         },
         {
           "name": "radial_neutral_momentum_flux_limiter_coefficient",
           "description": "Radial component of the momentum flux limiter coefficient for neutral particles in edge transport models.",
           "embedding_rank": 16,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         }
       ]
     },
@@ -2639,63 +2639,63 @@
           "description": "Normalized toroidal plasma-momentum flux contribution driven by the perturbed parallel electromagnetic vector potential in gyrokinetic turbulence, restricted to the perpendicular velocity-space channel.",
           "embedding_rank": 1,
           "rerank_rank": 5,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
           "description": "Dimensionless toroidal plasma-momentum flux contribution driven by the perturbed parallel electromagnetic vector potential in gyrokinetic turbulence, generalized across parallel and perpendicular velocity-space channels.",
           "embedding_rank": 2,
           "rerank_rank": 7,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "particle_flux_normalized_due_to_perturbed_parallel_magnetic_field",
           "description": "Normalized turbulent particle flux due to the perturbed parallel magnetic field is the contribution of parallel magnetic-field fluctuations to particle transport across magnetic flux surfaces. In a linear eigenmode decomposition, it is the corresponding rotating-frame weight when that reference frame is used.",
           "embedding_rank": 3,
           "rerank_rank": 2,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "parallel_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
           "description": "Gyro-Bohm-normalized parallel-velocity component of toroidal momentum flux driven by perturbed parallel magnetic-field fluctuations in gyrokinetic turbulence.",
           "embedding_rank": 4,
           "rerank_rank": 9,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "parallel_momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
           "description": "Normalized toroidal momentum flux contribution from the perturbed parallel electromagnetic vector potential in gyrokinetic turbulence, restricted to the parallel velocity-space channel. Toroidal refers to increasing toroidal angle \u03c6 in the right-handed cylindrical (R, \u03c6, Z) frame.",
           "embedding_rank": 5,
           "rerank_rank": 6,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "perpendicular_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
           "description": "Gyro-Bohm-normalized perpendicular-velocity component of toroidal momentum flux driven by perturbed parallel magnetic-field fluctuations in gyrokinetic turbulence.",
           "embedding_rank": 6,
           "rerank_rank": 8,
-          "grade": null
+          "grade": 1
         },
         {
           "name": "particle_flux_normalized_due_to_perturbed_parallel_vector_potential",
           "description": "Dimensionless gyro-Bohm-normalized contribution to turbulent radial particle transport produced by fluctuations of the perturbed parallel vector potential.",
           "embedding_rank": 7,
           "rerank_rank": 1,
-          "grade": null
+          "grade": 3
         },
         {
           "name": "energy_flux_normalized_due_to_perturbed_parallel_vector_potential",
           "description": "Dimensionless electromagnetic contribution of perturbed parallel vector-potential fluctuations to turbulent energy transport across magnetic flux surfaces.",
           "embedding_rank": 8,
           "rerank_rank": 3,
-          "grade": null
+          "grade": 2
         },
         {
           "name": "normalized_perturbed_parallel_magnetic_field_magnitude",
           "description": "Normalized perturbed parallel magnetic-field magnitude is the nonnegative amplitude of a magnetic-field perturbation projected along the local equilibrium magnetic-field direction and divided by a reference magnetic-field magnitude. More specific names may add averaging conventions.",
           "embedding_rank": 9,
           "rerank_rank": 4,
-          "grade": null
+          "grade": 1
         }
       ]
     }
