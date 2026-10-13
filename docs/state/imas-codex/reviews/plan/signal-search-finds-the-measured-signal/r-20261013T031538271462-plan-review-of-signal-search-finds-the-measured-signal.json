@@ -76,6 +76,13 @@
       "finding": "done_when-1",
       "reason": "the fusion arm is the explicit comparator, scored over the same passes, and the switch decision can fail against it; a separate mutation control would add nothing the comparison does not already show",
       "when": "2026-10-13T03:32:26.459425+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "porting the two scripts is a mechanical step in building the measurement module the third node already builds, so one verdict covers it",
+      "when": "2026-10-13T03:32:33.084743+00:00"
     }
   ],
   "responses": {
@@ -96,6 +103,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-13T03:32:12.653270+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "porting the two scripts is a mechanical step in building the measurement module the third node already builds, so one verdict covers it",
+      "when": "2026-10-13T03:32:33.084743+00:00"
     },
     "wiring-1": {
       "action": "declined",
