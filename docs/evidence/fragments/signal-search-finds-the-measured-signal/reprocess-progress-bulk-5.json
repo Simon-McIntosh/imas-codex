@@ -1,0 +1,131 @@
+{
+  "facility": "jt-60sa",
+  "node": "ssfms-reprocess-bulk-5",
+  "pipeline": "imas-codex discover run jt-60sa --only signals (--scan-only --reset-to discovered / --flush), --category scope",
+  "reprocess_start": "2026-10-13T11:53:35Z",
+  "negative_control_cutover": "2026-10-11T21:16:46Z",
+  "negative_control_enriched_before_fix": 342,
+  "assigned_categories": [
+    "h060029",
+    "CryoMag",
+    "CryoCTB",
+    "b240064",
+    "PSRC"
+  ],
+  "scopes": [
+    {
+      "scope": "psrc",
+      "mode": "reset then enrich",
+      "categories": [
+        "PSRC"
+      ],
+      "signals": 325,
+      "enrichment": {
+        "signals": 619,
+        "spend_usd": 0.03,
+        "seconds": 572.6
+      },
+      "post_reset_census": null,
+      "post_reset_note": "the reset log asserts 'Reset 325 signals to discovered (categories: PSRC)'; no separate post-reset census artifact was captured for this scope",
+      "final_census": {
+        "total": 325,
+        "discovered": 0,
+        "described": 325,
+        "roles": 325,
+        "no_role": 0,
+        "emb": 325,
+        "since_start": 325,
+        "hash_mismatch": 0
+      },
+      "log_post_reset": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143026452558-ssfms-reprocess-bulk-5/scratch/scope1-psrc-reset.log",
+      "log_enrich": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143026452558-ssfms-reprocess-bulk-5/scratch/scope1-psrc-enrich.log",
+      "log_final_census": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143026452558-ssfms-reprocess-bulk-5/scratch/census-assigned-final.json"
+    },
+    {
+      "scope": "cryomag",
+      "mode": "reset then enrich",
+      "categories": [
+        "CryoMag"
+      ],
+      "signals": 413,
+      "enrichment": {
+        "signals": 2090,
+        "spend_usd": 0.02,
+        "seconds": 620.6
+      },
+      "post_reset_census": {
+        "total": 413,
+        "discovered": 413,
+        "described": 0,
+        "roles": 0,
+        "no_role": 0,
+        "emb": 413,
+        "hash_mismatch": 413
+      },
+      "final_census": {
+        "total": 413,
+        "discovered": 0,
+        "described": 413,
+        "roles": 413,
+        "no_role": 0,
+        "emb": 413,
+        "since_start": 413,
+        "hash_mismatch": 0
+      },
+      "log_post_reset": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143026452558-ssfms-reprocess-bulk-5/scratch/scope2-cryomag-reset.log",
+      "log_enrich": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143026452558-ssfms-reprocess-bulk-5/scratch/scope2-cryomag-enrich.log",
+      "log_final_census": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T143026452558-ssfms-reprocess-bulk-5/scratch/census-assigned-final.json"
+    }
+  ],
+  "assigned_categories_not_yet_reset": [
+    {
+      "category": "h060029",
+      "total": 2227,
+      "need": 1499,
+      "since_start": 728,
+      "no_role": 2173
+    },
+    {
+      "category": "CryoCTB",
+      "total": 379,
+      "need": 374,
+      "since_start": 5,
+      "no_role": 374
+    },
+    {
+      "category": "b240064",
+      "total": 364,
+      "need": 360,
+      "since_start": 4,
+      "no_role": 360
+    }
+  ],
+  "role_backfill": {
+    "categories": [
+      "PSRC",
+      "CryoMag"
+    ],
+    "stored": 400,
+    "spend_usd": 0.0107
+  },
+  "totals": {
+    "scopes": 2,
+    "categories": 2,
+    "signals": 738,
+    "enrich_signals": 2709,
+    "spend_usd": 0.05,
+    "hash_mismatch": 0,
+    "discovered_left": 0,
+    "roles_missing": 0
+  },
+  "facility_embedding_census": {
+    "n": 15111,
+    "mismatch": 13,
+    "note": "the 13 mismatches are in category lcdb_b260008, not an assigned category"
+  },
+  "facility_role_census": {
+    "n": 15111,
+    "missing": 10163,
+    "note": "facility-wide role sweep belongs to the bulk node that resets the remaining categories"
+  }
+}

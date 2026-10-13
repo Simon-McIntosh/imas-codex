@@ -1,0 +1,68 @@
+<!-- Bulk reprocess of assigned JT-60SA signal categories through the current
+     pipeline. Two scopes finished: PSRC (325) and CryoMag (413), 738 signals.
+     Machine-readable record: reprocess-progress-bulk-5.json beside this fragment.
+     Census and run logs under
+     ~/.config/reckon/crew/runs/r-20261013T143026452558-ssfms-reprocess-bulk-5
+     (scratch/). Figure drawn from census results at run time from
+     scratch/census-assigned-final.json. -->
+<section id="ssfms-reprocess-bulk-5" data-reckon="evidence">
+  <h2 id="ssfms-reprocess-bulk-5-heading">Reprocessing assigned JT-60SA categories (bulk node 5)</h2>
+
+  <p id="ssfms-reprocess-bulk-5-outcome">
+    Two assigned categories were reset to <code>discovered</code> and driven to
+    completion within the node: <strong>PSRC</strong> (325 signals) and
+    <strong>CryoMag</strong> (413 signals), <strong>738 signals</strong> in
+    total. Each finished with none left at <code>discovered</code>, every signal
+    described, every description's <code>embedded_text_hash</code> matching a
+    hash recomputed from its own text (0 mismatches, confirmed by
+    <code>census_signal_embeddings(facility='jt-60sa')</code>), and a
+    <code>signal_role</code> after <code>backfill_signal_roles</code>. Engine
+    spend from the two runs' own cost records was <strong>$0.05</strong> over
+    2709 engine-signals at 1193.2s of enrichment wall time.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-5-method">
+    A scope was reset only when the node's measured rate said it could finish in
+    the remaining time. The first scope (PSRC) measured that rate: 325 reset
+    signals re-enriched in 0.8 engine-signals per second, so a later scope was
+    sized to about 400 signals rather than the whole assigned set. No scope was
+    reset after 15:10:47Z (40 minutes into the node, launched 14:30:47Z); the
+    node ended at 15:30:47Z. The remaining assigned categories were too large
+    for the time left and are recorded below for a continue node.
+  </p>
+
+  <table id="ssfms-reprocess-bulk-5-scopes-table">
+    <caption>Each scope: reset size, enrichment cost record, and final census (jt-60sa, reprocess start 2026-10-13T11:53:35Z)</caption>
+    <tr><th>scope</th><th>categories</th><th>signals</th><th>engine enriched</th><th>spend</th><th>seconds</th><th>discovered</th><th>hash mismatch</th><th>roles missing</th></tr>
+    <tr><td>psrc</td><td>PSRC</td><td>325</td><td>619</td><td>$0.03</td><td>572.6</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>cryomag</td><td>CryoMag</td><td>413</td><td>2090</td><td>$0.02</td><td>620.6</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td><strong>total</strong></td><td><strong>2</strong></td><td><strong>738</strong></td><td><strong>2709</strong></td><td><strong>$0.05</strong></td><td><strong>1193.2</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+  </table>
+
+  <p id="ssfms-reprocess-bulk-5-negative-control">
+    The reset is the step that could have silently done nothing, so the second
+    scope carries one. Its post-reset census, taken immediately after the reset
+    and before enrichment, found all 413 of its signals at
+    <code>discovered</code> with <code>described=0</code> — the complement of
+    the control, so a census that had found them still described would have meant
+    the reset never ran. That census is captured at
+    <code>census-cryomag-postreset.json</code> under the run directory. The
+    facility-wide negative control — signals enriched before
+    2026-10-11T21:16:46Z, the member-individualisation fix — read 342 before this
+    node's resets, still non-zero.
+  </p>
+
+  <p id="ssfms-reprocess-bulk-5-remaining">
+    Not yet reset by this node, for a continue node: <strong>h060029</strong>
+    (1499 of 2227 signals still needing reprocess), <strong>CryoCTB</strong>
+    (374) and <strong>b240064</strong> (360). h060029 is far larger than the
+    node's remaining time and should be split into id subsets passed with
+    <code>--focus</code>.
+  </p>
+
+  <figure id="ssfms-reprocess-bulk-5-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-bulk-5/assigned-category-coverage.svg"
+         alt="Horizontal bars, one per assigned JT-60SA category, split into signals reprocessed this node and signals not yet reset">
+    <figcaption>A census of the five assigned categories: PSRC and CryoMag fully reprocessed, h060029, CryoCTB and b240064 still to run. h060029 is the facility's largest category at 2227 signals.</figcaption>
+  </figure>
+</section>
