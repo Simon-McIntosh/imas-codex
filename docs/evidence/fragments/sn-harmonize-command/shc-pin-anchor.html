@@ -55,15 +55,19 @@
     <code>None</code> under force, so a fresh choice is made.
   </p>
 
-  <h3 id="shc-pin-report">The report's name-id read follows the same owner</h3>
+  <h3 id="shc-pin-report">The report's name-id read has one owner</h3>
   <p>
     The dead-link test resolves a link target against every name the graph
-    holds, not against the scoped members alone. <code>harmonize.py</code> no
-    longer defines its own name-id query: <code>known_name_ids(gc)</code> reads
-    through <code>families.existing_name_ids</code> when a client is in hand,
-    and with no client it calls the owner directly —
-    <code>graph_ops.get_existing_standard_names()</code>. Neither path falls
-    back to the scope, so a report invoked without a client still counts an
+    holds, not against the scoped members alone. The all-name read now has
+    exactly one definition, <code>graph_ops.get_existing_standard_names</code>,
+    which takes an optional client: <code>harmonize.known_name_ids(gc)</code>
+    calls the owner with whatever client it holds, so a report driven against
+    an already-open session (or a test double) rides that session, and a report
+    invoked with no client has the owner open one. The copy that earlier lived
+    in <code>families.py</code> is deleted — a second statement of
+    <code>MATCH (sn:StandardName) RETURN sn.id AS id</code> would be a second
+    source of truth for which names the graph holds. Neither path falls back to
+    the scope, so a report invoked without a client still counts an
     out-of-scope link to a name the graph holds as live.
   </p>
 </section>

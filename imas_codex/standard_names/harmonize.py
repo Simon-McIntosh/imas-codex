@@ -28,7 +28,6 @@ from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 from imas_codex.standard_names.families import (
     DOCS_STAGE_ACCEPTED,
     _pattern_family_rows_query as _pattern_family_rows_query,
-    existing_name_ids,
     fetch_pattern_families,
     fetch_pattern_family,
     select_anchor,
@@ -522,17 +521,15 @@ def _domain_scoped_finding(name_id: str) -> str | None:
 
 
 #: Dead-link resolution reads the whole catalog, not the scope under report:
-#: a target is dead only when no ``StandardName`` anywhere carries it. The
-#: read is owned by ``graph_ops.get_existing_standard_names``; a caller holding
-#: an open client reads through it, and with no client the owner opens its own.
-#: Bounded either way, because the read names its row set (every name id).
+#: a target is dead only when no ``StandardName`` anywhere carries it. The read
+#: has exactly one definition, ``graph_ops.get_existing_standard_names``, called
+#: here for both callers — with a client it rides that session, without one the
+#: owner opens its own. Bounded either way: the read names its row set.
 def known_name_ids(gc: Any | None) -> set[str]:
     """Every ``StandardName`` id the graph holds, for dead-link resolution."""
-    if gc is not None:
-        return existing_name_ids(gc)
     from imas_codex.standard_names.graph_ops import get_existing_standard_names
 
-    return get_existing_standard_names()
+    return get_existing_standard_names(gc)
 
 
 def report_family_rows(

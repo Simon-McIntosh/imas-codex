@@ -602,18 +602,6 @@ def pattern_signature(segments: dict[str, Any]) -> tuple[str, ...]:
     return tuple(_segment_value(segments, seg) for seg in PATTERN_INVARIANT_SEGMENTS)
 
 
-def existing_name_ids(gc: Any) -> set[str]:
-    """Every ``StandardName`` id the graph holds, read through *gc*.
-
-    The same all-name read :func:`imas_codex.standard_names.graph_ops.
-    get_existing_standard_names` owns, spelled so a caller reading through its
-    own open session — or a test double — resolves a link target against the
-    whole graph rather than against the scoped names under report.
-    """
-    rows = gc.query("MATCH (sn:StandardName) RETURN sn.id AS id") or []
-    return {row["id"] for row in rows if row.get("id")}
-
-
 def fetch_pattern_family(sn_id: str, gc: Any) -> list[dict[str, Any]]:
     """Return the live pattern-family rows of *sn_id* (the seed included).
 

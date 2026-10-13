@@ -182,7 +182,7 @@ def test_report_without_a_client_counts_an_out_of_scope_link_live(
     monkeypatch.setattr(
         graph_ops,
         "get_existing_standard_names",
-        lambda: {n["id"] for n in nodes} | {target},
+        lambda gc=None: {n["id"] for n in nodes} | {target},
     )
     if os.environ.get("SHC_SCOPE_ONLY_DEAD_LINKS"):
         monkeypatch.setattr(
@@ -194,3 +194,45 @@ def test_report_without_a_client_counts_an_out_of_scope_link_live(
     rows = harmonize.report_family_rows()
 
     assert rows[0]["lint"].get("link_dead_link", 0) == 0
+
+
+_OWNED_NAME_QUERY = 'MATCH (sn:StandardName) RETURN sn.id AS id"'
+
+
+def test_the_graph_wide_name_read_has_one_definition() -> None:
+    """No module beside graph_ops restates the graph-wide all-name read.
+
+    The read is owned by ``graph_ops.get_existing_standard_names``; a second
+    statement is a second source of truth for which names the graph holds, and
+    the dead-link test then answers from whichever copy its caller reached.
+    """
+    from pathlib import Path
+
+    package = Path(_harmonize().__file__).parent
+    offenders = sorted(
+        path.name
+        for path in package.glob("*.py")
+        if path.name != "graph_ops.py" and _OWNED_NAME_QUERY in path.read_text()
+    )
+
+    assert offenders == [], f"all-name read restated in {offenders}"
+
+
+def test_the_report_reads_the_all_name_set_through_the_owner(
+    monkeypatch: Any,
+) -> None:
+    """A client in hand is passed to the caller's owner, not forked from it."""
+    from imas_codex.standard_names import graph_ops
+
+    harmonize = _harmonize()
+    seen: list[Any] = []
+    client = object()
+
+    def _owner(gc: Any = None) -> set[str]:
+        seen.append(gc)
+        return {"only_name"}
+
+    monkeypatch.setattr(graph_ops, "get_existing_standard_names", _owner)
+
+    assert harmonize.known_name_ids(client) == {"only_name"}
+    assert seen == [client], "the caller's client must reach the owner"
