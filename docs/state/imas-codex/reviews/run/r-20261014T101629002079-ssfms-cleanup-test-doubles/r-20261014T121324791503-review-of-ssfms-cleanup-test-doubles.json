@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101456912610-ssfms-cleanup-test-doubles/logs. Baseline arm: base-default.log ends \"9 passed, 2 deselected\" EXIT=0 and base-graph.log ends \"2 passed, 5 deselected\" EXIT=0, so the baseline failure set is empty. After arm: head-default.log ends \"9 passed, 2 deselected\" EXIT=0 and head-graph.log ends \"2 passed, 5 deselected\" EXIT=0, so the after failure set is also empty. added_failure_count = |after - baseline| = 0 with added_failure_ids = []. Both base arms now genuinely ran (EXIT=0), which resolves the prior review's blocking finding that the base arms ended EXIT=4 with no tests collected.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-14T12:34:17.524Z",
+  "dispatched_at": "2026-10-14T12:13:39Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_role.py",
+      "line": "82",
+      "severity": "blocking",
+      "text": "blocking: the accepted-row check was rewritten from a whole-list literal equality to per-field checks. At base 7bbf44b56 tests/discovery/test_signal_role.py:61 asserted `accepted == [{\"id\": \"observed\", \"signal_role\": \"measured\", \"cost_usd\": 0.002}, {\"id\": \"target\", \"signal_role\": \"reference_or_setpoint\", \"cost_usd\": 0.002}]`, pinning each row's cost_usd. The new test asserts only set(accepted_by_id), each row's signal_role, and the batch total `cost == 0.004` (line 89), so a regression that sets a row's cost_usd to 0.0 while leaving the batch total intact now passes where the base failed it \u2014 a durability regression inside the very guards this node was chartered to strengthen."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles.html",
+      "line": "6",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states that three checks in the role suite \"compared production output against the value production had just produced \u2014 a fake judge that returned whatever the assertion then read, and a criteria set compared against the module's own constant\", and that \"[t]hose checks pass whatever the code does\". That is false at the reviewed base: at 7bbf44b56 the criteria comparison (test_signal_role.py:30), the accepted-row comparison (:61) and the cost comparison (:69) already compare against literal expectations the test supplies, not the module's constant or the judge's return \u2014 the rewrite landed at f189eae9d, which `git merge-base --is-ancestor` confirms is an ancestor of the base. The record therefore describes a defect that no longer existed and overstates what this node repaired; nc-01 and nc-02 would have reddened the base assertions too."
+    },
+    {
+      "file": "logs/base-default.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: every gate log header names the worktree path and the pytest command but not the revision it ran at, so no log can be tied to a revision without the manifest \u2014 the reviewed_base_sha/reviewed_head_sha pair is carried only in the manifest, and the base and head logs are textually identical in their header."
+    },
+    {
+      "file": "tests/standard_names/test_embedding_preflight_stamping.py",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: a same-capability recording graph-client double (`_RecordingGraphClient`, capturing persisted rows and modelling the timestamp side effect) remains private to this file rather than extending the new shared owner tests/recording_graph_client.py; tests/graph/test_dd_graph_ops.py:4 `_FakeGraphClient` is a second remainder. Both are outside the node's declared scope, so this records the reuse gap rather than a landing defect."
+    },
+    {
+      "file": "tests/discovery/test_signal_embedding_sweep.py",
+      "line": "290",
+      "severity": "follow-on",
+      "text": "follow-on: the facility-scoped live census check still asserts the frozen literal `result[\"n\"] == 15111`, which drifts with the corpus; the same file's line 272 shows the independent-count pattern the node added elsewhere, so the frozen literal is a missed opportunity in a file the node rewrote."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all five commits against base 7bbf44b56 (ad2c87a7b, c8cb6fd44, 06beb17c0, 33134fe28, 612105f19); the net diff is eight files \u2014 tests/recording_graph_client.py (new shared double), the two signal suites, tests/graph/test_dd_path_domain_upsert.py, tests/graph/__init__.py, tests/llm/measure_signal_role.py, the evidence fragment and its figure \u2014 all inside the declared write paths, and 33134fe28 restored a judge name-guard that an earlier commit of the same node had dropped.",
+    "done_when": "the done_when names the shared double, three role mutations and the live census assertion with the gate green and zero added failures against base; the gate logs now carry four arms \u2014 baseline_suite (base-default.log \"9 passed\" EXIT=0, base-graph.log \"2 passed\" EXIT=0) and after_suite (head-default.log \"9 passed\" EXIT=0, head-graph.log \"2 passed\" EXIT=0) \u2014 plus five mutation logs (nc-01..nc-05) each ending EXIT=1, so the measure is asserted and the delta is genuinely zero.",
+    "goal": "the node's goal is to replace the signal tests' unfalsifiable checks with checks a regression fails, sharing one statement-capturing graph double; the diff lands tests/recording_graph_client.py:18 shared by both signal suites and repairs the genuinely unfalsifiable census assertion (base test_signal_embedding_sweep.py:275 `isinstance(result[\"n\"], int)` / `>= 0` \u2192 head:272 `result[\"n\"] == independent`), but the three role-suite checks it also rewrites were already falsifiable at base.",
+    "manifest": "read; status complete, five commits, and it records base \"9 passed / 2 passed\" with the matching base logs now present (EXIT=0), so the prior review's contradiction is resolved; it also documents two repair rounds, the second restoring the judge name-guard.",
+    "write_paths": "read the manifest's declared paths; every path in the net diff is inside them \u2014 no product source, no file outside the fence."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_signal_role.py:50 reddens under the criteria mutation (nc-01), :87-88 under the role mutation (nc-02), :89 under the cost mutation (nc-03), and tests/discovery/test_signal_embedding_sweep.py:272 under the population mutation (nc-04), each against an independent literal; but :82 narrows the base's per-row cost_usd guard to a batch total, so one field is no longer protected.",
+    "evidence": "the four gate arms and five mutation logs are recorded with real EXIT lines in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101456912610-ssfms-cleanup-test-doubles/logs (base and head both \"9 passed\"/\"2 passed\" EXIT=0), so the done_when's gate is genuinely measured; the record is discounted because its evidence fragment (line 6) misstates the base state the node repaired.",
+    "fit": "tests/recording_graph_client.py:18 follows the surrounding test-double idiom, the new names (DEFAULT_FIXTURE, load_fixture, RecordingGraphClient) carry no plan, version or ticket identifier, and the file docstrings describe mechanism rather than changelog.",
+    "goal_fidelity": "tests/recording_graph_client.py:31 is the one statement-capturing double both signal suites import, and the census assertion is genuinely strengthened; but the role-suite half of the goal was already satisfied at base by f189eae9d, so this node's rewrite there is redundant and, at :82, net-negative.",
+    "reuse": "tests/recording_graph_client.py:18 is the new shared owner of the statement-capturing double and tests/graph/test_dd_path_domain_upsert.py now extends it via _DomainCompletingClient(RecordingGraphClient); a same-capability double nevertheless remains at tests/standard_names/test_embedding_preflight_stamping.py:10 and tests/graph/test_dd_graph_ops.py:4.",
+    "scope_discipline": "the net diff 7bbf44b56..612105f19 lists exactly the eight declared paths (five test files, the shared double, the evidence fragment and the figure) and no product source."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to replace the signal tests' unfalsifiable checks with checks a regression fails, sharing one statement-capturing graph double; the diff lands tests/recording_graph_client.py:18 shared by both signal suites and repairs the genuinely unfalsifiable census assertion (base test_signal_embedding_sweep.py:275 `isinstance(result[\"n\"], int)` / `>= 0` \u2192 head:272 `result[\"n\"] == independent`), but the three role-suite checks it also rewrites were already falsifiable at base.\nVERDICT done_when: the done_when names the shared double, three role mutations and the live census assertion with the gate green and zero added failures against base; the gate logs now carry four arms \u2014 baseline_suite (base-default.log \"9 passed\" EXIT=0, base-graph.log \"2 passed\" EXIT=0) and after_suite (head-default.log \"9 passed\" EXIT=0, head-graph.log \"2 passed\" EXIT=0) \u2014 plus five mutation logs (nc-01..nc-05) each ending EXIT=1, so the measure is asserted and the delta is genuinely zero.\nVERDICT write_paths: read the manifest's declared paths; every path in the net diff is inside them \u2014 no product source, no file outside the fence.\nVERDICT manifest: read; status complete, five commits, and it records base \"9 passed / 2 passed\" with the matching base logs now present (EXIT=0), so the prior review's contradiction is resolved; it also documents two repair rounds, the second restoring the judge name-guard.\nVERDICT diff: read all five commits against base 7bbf44b56 (ad2c87a7b, c8cb6fd44, 06beb17c0, 33134fe28, 612105f19); the net diff is eight files \u2014 tests/recording_graph_client.py (new shared double), the two signal suites, tests/graph/test_dd_path_domain_upsert.py, tests/graph/__init__.py, tests/llm/measure_signal_role.py, the evidence fragment and its figure \u2014 all inside the declared write paths, and 33134fe28 restored a judge name-guard that an earlier commit of the same node had dropped.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: tests/recording_graph_client.py:31 is the one statement-capturing double both signal suites import, and the census assertion is genuinely strengthened; but the role-suite half of the goal was already satisfied at base by f189eae9d, so this node's rewrite there is redundant and, at :82, net-negative.\nSCORE evidence: 14\nJUSTIFICATION evidence: the four gate arms and five mutation logs are recorded with real EXIT lines in logs/ (base and head both \"9 passed\"/\"2 passed\" EXIT=0), so the done_when's gate is genuinely measured; the record is discounted because its evidence fragment (line 6) misstates the base state the node repaired.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the net diff 7bbf44b56..612105f19 lists exactly the eight declared paths (five test files, the shared double, the evidence fragment and the figure) and no product source.\nSCORE durability: 14\nJUSTIFICATION durability: tests/discovery/test_signal_role.py:50 reddens under the criteria mutation (nc-01), :87-88 under the role mutation (nc-02), :89 under the cost mutation (nc-03), and tests/discovery/test_signal_embedding_sweep.py:272 under the population mutation (nc-04), each against an independent literal; but :82 narrows the base's per-row cost_usd guard to a batch total, so one field is no longer protected.\nSCORE fit: 19\nJUSTIFICATION fit: tests/recording_graph_client.py:18 follows the surrounding test-double idiom, the new names (DEFAULT_FIXTURE, load_fixture, RecordingGraphClient) carry no plan, version or ticket identifier, and the file docstrings describe mechanism rather than changelog.\nSCORE reuse: 18\nJUSTIFICATION reuse: tests/recording_graph_client.py:18 is the shared owner and tests/graph/test_dd_path_domain_upsert.py now extends it, but a same-capability double remains at tests/standard_names/test_embedding_preflight_stamping.py:10 and tests/graph/test_dd_graph_ops.py:4, both outside the node's scope.\nFINDING tests/discovery/test_signal_role.py:82 blocking: the accepted-row check was rewritten from a whole-list literal equality to per-field checks; the base pinned each row's cost_usd (test_signal_role.py:61) while the new test checks only ids, per-row signal_role and the batch total (line 89), so a regression setting a row's cost_usd to 0.0 with the total intact now passes \u2014 a durability regression inside the guards this node was chartered to strengthen.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles.html:6 follow-on: the fragment claims the role suite's three checks \"pass whatever the code does\", but at the reviewed base 7bbf44b56 test_signal_role.py:30, :61 and :69 already compare against literal expectations the test supplies (the rewrite landed at f189eae9d, an ancestor of the base), so the record describes a defect that no longer existed and overstates this node's repair.\nFINDING logs/base-default.log:1 follow-on: the gate log header names the worktree path and command but not the revision it ran at, so no log can be tied to a revision without the manifest.\nFINDING tests/standard_names/test_embedding_preflight_stamping.py:10 follow-on: a same-capability recording graph-client double remains outside the shared owner tests/recording_graph_client.py; tests/graph/test_dd_graph_ops.py:4 is a second remainder.\nFINDING tests/discovery/test_signal_embedding_sweep.py:290 follow-on: the facility-scoped live census check still asserts the frozen literal result[\"n\"] == 15111, which drifts with the corpus, where line 272 shows the independent-count pattern the node applied elsewhere.",
+  "review_run_id": "r-20261014T121324791503-review-of-ssfms-cleanup-test-doubles",
+  "reviewed_base_sha": "7bbf44b5663c71078d6f94f84901867ba98430b8",
+  "reviewed_head_sha": "612105f19fba38855af48392502afc7d5b020113",
+  "reviewed_run_id": "r-20261014T101629002079-ssfms-cleanup-test-doubles",
+  "reviewer": "review-of-ssfms-cleanup-test-doubles",
+  "rubric": "code",
+  "scores": {
+    "durability": 14,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 14,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T12:24:22.737107+00:00",
+  "total": 99
+}
