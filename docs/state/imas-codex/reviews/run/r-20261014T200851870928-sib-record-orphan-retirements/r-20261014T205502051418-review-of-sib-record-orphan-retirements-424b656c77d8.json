@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:7566",
+    "imas_codex/standard_names/signed_manifest.py:4245"
+  ],
+  "completed_at": "2026-10-14T21:18:03.986Z",
+  "dispatched_at": "2026-10-14T20:55:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py",
+      "line": "251",
+      "severity": "follow-on",
+      "text": "follow-on: write_authority, with _authority_header at :68 and build_row at :86, hand-rolls the signed repair-authority build that imas_codex/standard_names/repair_authority.py:135 already owns, duplicating the capability without extending it; the owner validates schema, selection, receipt_policy and the RepairAuthorityArtifact and serializes with sort_keys, none of which the fork does."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-record-orphan-retirements/census-split.svg",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the figure carries no citation of its log, though the reviewed done_when requires each figure to cite its log; the fragment at docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements.html:52 asserts this figure cites 01-census-read.log."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements.html",
+      "line": "27",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states the graph URI as bolt://98d4-gpu-0002:7687 while the run's own log 01-census-read.log:4 records bolt://98dci4-gpu-0002:7687, a mis-citation."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py",
+      "line": "34",
+      "severity": "follow-on",
+      "text": "follow-on: the constant is misspelled SUPERSESION_OPS for supersession, and the error is carried to its two uses at :163 and :218."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s): the signed-manifest write path and its replay, which read the written cohort by authority_file_sha256; the instrument itself is a manual docs script that no production module imports",
+    "diff": "read the single commit 424b656c7 against base 8b30f6526; it adds four files, the fragment HTML, the 184-row authority JSON, the run.py instrument and the census-split figure, and no product code or test.",
+    "done_when": "the done_when requires the fragment to record the split, the mutation kind, the preview with 183 admitted and 1 refused, the apply digest and receipt count, the readback and the replay; docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements.html records each and the six logs under the run directory each end EXIT=0 with those counts.",
+    "goal": "the goal is to record the retirement the 183 source-less superseded names lack; commit 424b656c7 stamps one supersede mutation with no signed successor onto each through imas_codex/standard_names/signed_manifest.py:7566 apply_signed_manifest, and my re-read of the live graph finds all 183 carrying one supersede_exhausted_orphan receipt and still superseded.",
+    "manifest": "read; it records status complete, commit 424b656c7, writes to the fragment, the authority and the figure, runs no test because the node is docs-only, and names 03-preview.log as the negative control carrying the refused control row.",
+    "write_paths": "the fence at prompt.txt:195-199 names the fragment, the authority JSON, the run.py and the docs/figures/sn-integrity-backlog/sib-record-orphan-retirements directory; every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "the diff adds no test and no assertion and the manifest records tests none, so nothing reddens if the retirement instrument regresses; the preview's refusal of the control row at 03-preview.log:13 is a runtime guard, not a regression test.",
+    "evidence": "logs 01-census-read.log:212, 04-apply.log:52 and 05-readback.log:20 record the counts, digest and readback each ending EXIT=0, and an independent graph read reproduces 183 receipts and still_superseded=183; the done_when's figure-citation condition is unmet.",
+    "fit": "run.py matches the sibling docs/evidence/fragments/*/*-run.py evidence-instrument idiom and introduces no plan label, but the constant at run.py:34 is misspelled SUPERSESION_OPS.",
+    "goal_fidelity": "imas_codex/standard_names/signed_manifest.py:7566 apply_signed_manifest stamped the 183 receipts the fragment records at docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements.html:125, and my independent read confirms 183 names still superseded.",
+    "reuse": "run.py:251 write_authority and run.py:86 build_row re-implement the signed repair-authority builder owned by imas_codex/standard_names/repair_authority.py:135 build_repair_authority, which already emits the same imas-codex.repair-authority.v1 artifact with a canonical sort_keys serializer.",
+    "scope_discipline": "git diff --name-status 8b30f6526 424b656c7 lists exactly the four files inside the fence at prompt.txt:195-199."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to record the retirement the 183 source-less superseded names lack; commit 424b656c7 stamps one supersede mutation with no signed successor onto each through imas_codex/standard_names/signed_manifest.py:7566 apply_signed_manifest, and my re-read of the live graph finds all 183 carrying one supersede_exhausted_orphan receipt and still superseded.\nVERDICT done_when: the done_when requires the fragment to record the split, the mutation kind, the preview with 183 admitted and 1 refused, the apply digest and receipt count, the readback and the replay; docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements.html records each and the six logs under the run directory each end EXIT=0 with those counts.\nVERDICT write_paths: the fence at prompt.txt:195-199 names the fragment, the authority JSON, the run.py and the docs/figures/sn-integrity-backlog/sib-record-orphan-retirements directory; every path in the diff is inside them.\nVERDICT manifest: read; it records status complete, commit 424b656c7, writes to the fragment, the authority and the figure, runs no test because the node is docs-only, and names 03-preview.log as the negative control carrying the refused control row.\nVERDICT diff: read the single commit 424b656c7 against base 8b30f6526; it adds four files, the fragment HTML, the 184-row authority JSON, the run.py instrument and the census-split figure, and no product code or test.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:7566, imas_codex/standard_names/signed_manifest.py:4245\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/signed_manifest.py:7566 apply_signed_manifest stamped the 183 receipts the fragment records at docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements.html:125, and my independent read confirms 183 names still superseded.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs 01-census-read.log:212, 04-apply.log:52 and 05-readback.log:20 record the counts, digest and readback each ending EXIT=0, and an independent graph read reproduces 183 receipts and still_superseded=183; the done_when's figure-citation condition is unmet.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status 8b30f6526 424b656c7 lists exactly the four files inside the fence at prompt.txt:195-199.\nSCORE durability: 5\nJUSTIFICATION durability: the diff adds no test and no assertion and the manifest records tests none, so nothing reddens if the retirement instrument regresses; the preview's refusal of the control row at 03-preview.log:13 is a runtime guard, not a regression test.\nSCORE fit: 17\nJUSTIFICATION fit: run.py matches the sibling docs/evidence/fragments/*/*-run.py evidence-instrument idiom and introduces no plan label, but the constant at run.py:34 is misspelled SUPERSESION_OPS.\nSCORE reuse: 4\nJUSTIFICATION reuse: run.py:251 write_authority and run.py:86 build_row re-implement the signed repair-authority builder owned by imas_codex/standard_names/repair_authority.py:135 build_repair_authority, which already emits the same imas-codex.repair-authority.v1 artifact with a canonical sort_keys serializer.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py:251 follow-on: write_authority, with _authority_header at :68 and build_row at :86, hand-rolls the signed repair-authority build that imas_codex/standard_names/repair_authority.py:135 already owns, duplicating the capability without extending it; the owner validates schema, selection, receipt_policy and the RepairAuthorityArtifact and serializes with sort_keys, none of which the fork does.\nFINDING docs/figures/sn-integrity-backlog/sib-record-orphan-retirements/census-split.svg:1 follow-on: the figure carries no citation of its log, though the reviewed done_when requires each figure to cite its log; the fragment at docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements.html:52 asserts this figure cites 01-census-read.log.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements.html:27 follow-on: the fragment states the graph URI as bolt://98d4-gpu-0002:7687 while the run's own log 01-census-read.log:4 records bolt://98dci4-gpu-0002:7687, a mis-citation.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py:34 follow-on: the constant is misspelled SUPERSESION_OPS for supersession, and the error is carried to its two uses at :163 and :218.\n",
+  "review_run_id": "r-20261014T205502051418-review-of-sib-record-orphan-retirements-424b656c77d8",
+  "reviewed_base_sha": "8b30f65265325207503bb5928bd1858657251d9b",
+  "reviewed_head_sha": "424b656c77d8b687d9b40d55477b69609e7fca4b",
+  "reviewed_run_id": "r-20261014T200851870928-sib-record-orphan-retirements",
+  "scores": {
+    "durability": 5,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "subject": "r-20261014T200851870928-sib-record-orphan-retirements",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T21:19:54.522177+00:00",
+  "total": 79
+}
