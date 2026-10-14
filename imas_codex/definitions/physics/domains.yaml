@@ -169,6 +169,23 @@ domains:
       - the equilibrium reconstruction itself — the currents and coils fitted to it
       - coordinate systems and the mapping between real space and flux space — `equilibrium/time_slice/profiles_1d/rho_tor`, `equilibrium/grids_ggd`
     excludes:
+      - quantity: a ferritic field-shaping object
+        neighbour: magnetic_field_systems
+        rule: >-
+          A ferritic field-shaping object is magnetic_field_systems; equilibrium
+          owns the field and its surfaces, and structural_components the
+          load-bearing structure.
+      - quantity: a fitted pedestal position
+        neighbour: edge_plasma_physics
+        rule: >-
+          A fitted pedestal position is a property of the pedestal region, so it
+          is edge_plasma_physics; the flux-surface geometry it is expressed in
+          stays equilibrium.
+      - quantity: an electron cyclotron emission channel position
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          An ECE channel position is radiation_measurement_diagnostics; the flux
+          surface it is expressed against is equilibrium.
       - quantity: a heat, particle or momentum flux, a diffusivity or a confinement time
         neighbour: transport
         rule: >-
@@ -202,6 +219,17 @@ domains:
       - flux-surface-averaged transport and the transport solver's own parameters — `plasma_transport/*`
       - heat and particle confinement times
     excludes:
+      - quantity: a source term for a suprathermal distribution
+        neighbour: fast_particles
+        rule: >-
+          A source term with a distribution source in the distribution_sources IDS
+          is fast_particles; a flux or diffusivity is transport.
+      - quantity: a global loss-power scalar
+        neighbour: core_plasma_physics
+        rule: >-
+          A global loss-power scalar is a core energy-balance quantity, so it is
+          core_plasma_physics; a flux or diffusivity is transport, and an edge
+          resolution is edge_plasma_physics.
       - quantity: a static shape property of the magnetic field, such as the safety factor or the separatrix position
         neighbour: equilibrium
         rule: >-
@@ -234,6 +262,23 @@ domains:
       - moments of the distribution function — density, mean velocity, pressure tensor
       - global scalars integrated from the profiles — stored energy, plasma current, line-averaged density
     excludes:
+      - quantity: a charge-exchange channel's ion concentration and charge state
+        neighbour: spectroscopy
+        rule: >-
+          A charge-exchange channel's ion concentration and charge state are
+          spectroscopy; the charge_exchange IDS is a spectroscopic diagnostic.
+      - quantity: an interferometer's electron line density
+        neighbour: electromagnetic_wave_diagnostics
+        rule: >-
+          An interferometer's electron line density is
+          electromagnetic_wave_diagnostics; the interferometer IDS is the
+          wave-probe family.
+      - quantity: power radiated, taken as an integral over the plasma
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          Power radiated as an integral over the plasma is
+          radiation_measurement_diagnostics; a bolometer's own quantity is the
+          family's, not core_plasma_physics.
       - quantity: a transport coefficient, flux or source term
         neighbour: transport
         rule: >-
@@ -387,6 +432,12 @@ domains:
       - absorption, damping and mode-conversion coefficients
       - the wave's effect through quasilinear or wave-particle interaction terms
     excludes:
+      - quantity: a normalised flux coordinate along a wave-code ray
+        neighbour: equilibrium
+        rule: >-
+          A normalised flux coordinate along a wave-code ray is both a
+          flux-surface mapping and a quantity the wave code computes; precedence
+          puts equilibrium first and settles the overlap.
       - quantity: a launcher, antenna or its delivered power
         neighbour: auxiliary_heating
         rule: >-
@@ -417,6 +468,18 @@ domains:
       - radial electric field, edge flows and edge currents
       - the edge's own sources and sinks — `edge_sources/*`
     excludes:
+      - quantity: a visible spectrometer's emissive channel
+        neighbour: spectroscopy
+        rule: >-
+          A visible spectrometer's isotope density ratio and hot-neutral velocity
+          are spectroscopy; the emissive channel is a spectroscopic diagnostic,
+          whatever plasma region it observes.
+      - quantity: a global loss-power scalar
+        neighbour: core_plasma_physics
+        rule: >-
+          A global loss-power scalar is a core energy-balance quantity, so it is
+          core_plasma_physics; a flux or diffusivity is transport, and an edge
+          resolution is edge_plasma_physics.
       - quantity: a plasma-wall interaction on a material surface
         neighbour: plasma_wall_interactions
         rule: >-
@@ -447,6 +510,35 @@ domains:
       - fuel retention and recycling at the surface
       - first-wall and plasma-facing-component temperatures and fluxes
     excludes:
+      - quantity: nuclear power deposited in a wall unit
+        neighbour: neutronics
+        rule: >-
+          Nuclear power deposited in a wall unit is neutronics; the wall-surface
+          erosion and retention that plasma_wall_interactions owns is a different
+          quantity.
+      - quantity: an edge-transport model's flux-limiter coordinate
+        neighbour: transport
+        rule: >-
+          An edge-transport model's flux-limiter coordinate is transport; the
+          model's own quantity in machine coordinates is not gyrokinetics, and a
+          wall surface property is plasma_wall_interactions.
+      - quantity: a disruption halo-current wall point
+        neighbour: magnetohydrodynamics
+        rule: >-
+          A disruption halo-current wall point is part of the disruption
+          evolution, so it is magnetohydrodynamics; plasma_wall_interactions owns
+          the surface's erosion and retention.
+      - quantity: an infrared camera's target-image coordinate
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          An infrared camera's target-image coordinate is
+          radiation_measurement_diagnostics; the wall surface's own response is
+          plasma_wall_interactions.
+      - quantity: an edge-transport model's flux-limiter coordinate
+        neighbour: transport
+        rule: >-
+          An edge-transport model's flux-limiter coordinate is transport; a
+          surface property is plasma_wall_interactions.
       - quantity: the plasma's behaviour in the scrape-off layer
         neighbour: edge_plasma_physics
         rule: >-
@@ -593,6 +685,24 @@ domains:
       - mass-spectrometer and neutral particle measurement
       - the diagnostic's own configuration — channels, geometry, calibration
     excludes:
+      - quantity: a neutron detector's aperture geometry
+        neighbour: neutronics
+        rule: >-
+          A neutron detector's aperture geometry is neutronics;
+          particle_measurement_diagnostics owns a scattering or particle-counting
+          instrument.
+      - quantity: a barometry gauge's gas pressure
+        neighbour: mechanical_measurement_diagnostics
+        rule: >-
+          A barometry gauge's gas pressure is mechanical_measurement_diagnostics;
+          particle_measurement_diagnostics owns a scattering or particle-counting
+          instrument.
+      - quantity: a neutron detector's aperture geometry
+        neighbour: neutronics
+        rule: >-
+          A neutron detector's aperture geometry is neutronics and, being a
+          particle counter, also particle_measurement_diagnostics; neutronics owns
+          the neutron-detection family, so the label follows the family.
       - quantity: a spectrum that measures emission rather than scattering
         neighbour: spectroscopy
         rule: >-
@@ -624,6 +734,42 @@ domains:
       - reflectometry and refractometry profiles and fluctuation spectra — `reflectometer_profile/*`, `reflectometer_fluctuation/*`
       - the diagnostic's own frequencies, chords and calibration
     excludes:
+      - quantity: a heating actuator's own launch geometry, such as an antenna module position
+        neighbour: auxiliary_heating
+        rule: >-
+          An antenna module's mechanical position is auxiliary_heating;
+          electromagnetic_wave_diagnostics owns a probe that transmits a wave and
+          measures its phase, not the launcher's own hardware.
+      - quantity: a line-density constraint on the equilibrium
+        neighbour: equilibrium
+        rule: >-
+          A measured or reconstructed line-density constraint on the equilibrium
+          is equilibrium; it is an equilibrium constraint, not a wave diagnostic
+          or an assembled data product.
+      - quantity: electron cyclotron emission and the position correction of its channels
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          Electron cyclotron emission is radiated power the plasma emits, so its
+          position correction is radiation_measurement_diagnostics; a probe that
+          transmits a wave is electromagnetic_wave_diagnostics.
+      - quantity: a normalised flux coordinate along a ray path
+        neighbour: equilibrium
+        rule: >-
+          A normalised flux coordinate along a ray path is a flux-surface mapping,
+          so it is equilibrium; a probe that transmits a wave is
+          electromagnetic_wave_diagnostics.
+      - quantity: an electron cyclotron emission channel position
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          An ECE channel position is radiation_measurement_diagnostics; an ECE
+          diagnostic records emitted cyclotron radiation rather than transmitting
+          a probe wave.
+      - quantity: a constraint on the equilibrium stored under equilibrium/time_slice/constraints
+        neighbour: equilibrium
+        rule: >-
+          A line-density constraint stored under
+          equilibrium/time_slice/constraints is a constraint on the equilibrium;
+          the interferometer that measured it is electromagnetic_wave_diagnostics.
       - quantity: a wave propagating in the plasma as physics
         neighbour: waves
         rule: >-
@@ -687,6 +833,12 @@ domains:
       - Rogowski coil and the current it measures
       - diamagnetic-loop and saddle-loop measurements
     excludes:
+      - quantity: an MSE channel's detector geometry
+        neighbour: spectroscopy
+        rule: >-
+          An MSE channel's detector geometry is spectroscopy; the motional Stark
+          effect on the emitted light is a spectroscopic measurement, not
+          neutronics or a magnetic sensor.
       - quantity: the equilibrium reconstructed from the measurements
         neighbour: equilibrium
         rule: >-
@@ -745,6 +897,53 @@ domains:
       - diagnostic instruments whose subject is a plasma parameter and whose method does not fix a more specific family
       - the configuration and calibration of such a general instrument
     excludes:
+      - quantity: a bolometer channel's geometry and sight line
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          A bolometer's channel geometry and sightline is
+          radiation_measurement_diagnostics, the family that owns bolometry;
+          plasma_measurement_diagnostics holds only an instrument no specific
+          family owns.
+      - quantity: a Langmuir probe's ion saturation current
+        neighbour: particle_measurement_diagnostics
+        rule: >-
+          A Langmuir probe's ion saturation current is
+          particle_measurement_diagnostics; plasma_measurement_diagnostics holds
+          only an instrument no family owns.
+      - quantity: a barometry gauge's position
+        neighbour: mechanical_measurement_diagnostics
+        rule: >-
+          A barometry gauge's position is mechanical_measurement_diagnostics;
+          computational_workflow owns geometry definitions and tooling, not
+          instrument hardware.
+      - quantity: an electron cyclotron emission channel position
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          An ECE channel position is radiation_measurement_diagnostics; an ECE
+          diagnostic records emitted cyclotron radiation rather than transmitting
+          a probe wave.
+      - quantity: an electron cyclotron emission channel position
+        neighbour: radiation_measurement_diagnostics
+        rule: >-
+          An ECE channel position is radiation_measurement_diagnostics; the flux
+          surface it is expressed against is equilibrium.
+      - quantity: a neutron detector's aperture width
+        neighbour: neutronics
+        rule: >-
+          A neutron detector's aperture width is neutronics;
+          plasma_measurement_diagnostics holds only an instrument no family owns.
+      - quantity: a neutron detector's aperture geometry
+        neighbour: neutronics
+        rule: >-
+          A neutron detector's aperture geometry is neutronics and, being a
+          particle counter, also particle_measurement_diagnostics; neutronics owns
+          the neutron-detection family, so the label follows the family.
+      - quantity: a charge-exchange channel's optical cone diameter
+        neighbour: spectroscopy
+        rule: >-
+          A charge-exchange channel's optical cone diameter is spectroscopy
+          (charge_exchange/*); plasma_measurement_diagnostics holds only an
+          instrument no family owns.
       - quantity: a measurement that a more specific diagnostic domain already owns
         neighbour: magnetic_field_diagnostics
         rule: >-
@@ -806,6 +1005,17 @@ domains:
       - neutron activation and dose quantities
       - the neutron flux and spectrum at a measurement location
     excludes:
+      - quantity: an MSE channel's detector geometry
+        neighbour: spectroscopy
+        rule: >-
+          An MSE channel's detector geometry is spectroscopy; the motional Stark
+          effect on the emitted light is a spectroscopic measurement, not
+          neutronics or a magnetic sensor.
+      - quantity: an MSE channel's detector geometry
+        neighbour: spectroscopy
+        rule: >-
+          An MSE channel's detector geometry is spectroscopy (mse/*); neutronics
+          owns a neutron detection or activation quantity.
       - quantity: an electromagnetic-radiation measurement
         neighbour: radiation_measurement_diagnostics
         rule: >-
@@ -863,6 +1073,12 @@ domains:
       - operational configuration that is not physics — `real_time_data/*`
       - dataset description and fair-metadata records tied to an operation
     excludes:
+      - quantity: a sensor attachment-point coordinate
+        neighbour: mechanical_measurement_diagnostics
+        rule: >-
+          A sensor attachment-point coordinate is the mechanical state of a
+          component, so it is mechanical_measurement_diagnostics;
+          machine_operations owns scheduling, not hardware geometry.
       - quantity: a plasma-control reference during the discharge
         neighbour: plasma_control
         rule: >-
@@ -949,6 +1165,12 @@ domains:
       - breeding-blanket structures and component geometry — `breeding_blanket/*`
       - component material and geometry definitions
     excludes:
+      - quantity: a ferritic field-shaping object
+        neighbour: magnetic_field_systems
+        rule: >-
+          A ferritic field-shaping object is magnetic_field_systems; equilibrium
+          owns the field and its surfaces, and structural_components the
+          load-bearing structure.
       - quantity: an interaction of plasma with a surface
         neighbour: plasma_wall_interactions
         rule: >-
@@ -1005,6 +1227,12 @@ domains:
       - dataset description, provenance and FAIR metadata — `dataset_description/*`, `dataset_fair/*`
       - archives and derived products intended for downstream use
     excludes:
+      - quantity: a line-density constraint on the equilibrium
+        neighbour: equilibrium
+        rule: >-
+          A measured or reconstructed line-density constraint on the equilibrium
+          is equilibrium; it is an equilibrium constraint, not a wave diagnostic
+          or an assembled data product.
       - quantity: a directly measured or modelled plasma state
         neighbour: core_plasma_physics
         rule: >-
@@ -1034,6 +1262,17 @@ domains:
       - generic and temporary containers — `temporary/*`
       - solver numerics and workflow tooling that carry no physics subject
     excludes:
+      - quantity: a passive loop element's own geometry
+        neighbour: magnetic_field_systems
+        rule: >-
+          A passive loop element's geometry is magnetic_field_systems; it is a
+          machine component, not a computational geometry definition.
+      - quantity: a barometry gauge's position
+        neighbour: mechanical_measurement_diagnostics
+        rule: >-
+          A barometry gauge's position is mechanical_measurement_diagnostics;
+          computational_workflow owns geometry definitions and tooling, not
+          instrument hardware.
       - quantity: a physics quantity that a numeric or profile container happens to hold
         neighbour: core_plasma_physics
         rule: >-
@@ -1093,6 +1332,12 @@ domains:
       - linear eigenmodes and their frequencies and growth rates
       - the gyrokinetic simulation's own input and output quantities
     excludes:
+      - quantity: an edge-transport model's flux-limiter coordinate
+        neighbour: transport
+        rule: >-
+          An edge-transport model's flux-limiter coordinate is transport; the
+          model's own quantity in machine coordinates is not gyrokinetics, and a
+          wall surface property is plasma_wall_interactions.
       - quantity: a broadband turbulence spectrum measured in the machine
         neighbour: turbulence
         rule: >-

@@ -1,0 +1,924 @@
+{
+  "generated_from": "scg-domain-path-measure-results.json",
+  "guidance": "imas_codex/definitions/physics/domains.yaml",
+  "pair_count": 82,
+  "distinct_pair_count": 64,
+  "verdicts": [
+    {
+      "pair": "plasma_measurement_diagnostics -> radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "winner": "radiation_measurement_diagnostics",
+      "rule": "A bolometer's channel geometry and sightline is radiation_measurement_diagnostics, the family that owns bolometry; plasma_measurement_diagnostics holds only an instrument no specific family owns."
+    },
+    {
+      "pair": "auxiliary_heating -> waves",
+      "verdict": "defect",
+      "winner": [
+        [
+          "waves/*",
+          "waves"
+        ],
+        [
+          "*",
+          "auxiliary_heating"
+        ]
+      ],
+      "rule": "An antenna or launcher and the refractive index it launches are auxiliary_heating; a wave field inside the plasma and its absorbed power density are waves."
+    },
+    {
+      "pair": "equilibrium -> core_plasma_physics",
+      "verdict": "defect",
+      "winner": [
+        [
+          "core_profiles/global_quantities/ip",
+          "core_plasma_physics"
+        ],
+        [
+          "*",
+          "equilibrium"
+        ]
+      ],
+      "rule": "The plasma current is a global state of the plasma, core_plasma_physics; a profile or constraint that states the field's shape is equilibrium."
+    },
+    {
+      "pair": "radiation_measurement_diagnostics -> spectroscopy",
+      "verdict": "defect",
+      "winner": [
+        [
+          "spectrometer_*",
+          "spectroscopy"
+        ],
+        [
+          "charge_exchange/*",
+          "spectroscopy"
+        ],
+        [
+          "mse/*",
+          "spectroscopy"
+        ],
+        [
+          "*",
+          "radiation_measurement_diagnostics"
+        ]
+      ],
+      "rule": "A spectrometer's line-of-sight emission resolved in wavelength is spectroscopy; a bolometric power, a bremsstrahlung filter band or a camera image is radiation_measurement_diagnostics."
+    },
+    {
+      "pair": "core_plasma_physics -> edge_plasma_physics",
+      "verdict": "defect",
+      "winner": "edge_plasma_physics",
+      "rule": "The same quantity resolved in the scrape-off layer, the pedestal or an edge profile is edge_plasma_physics; only the core resolution is core_plasma_physics."
+    },
+    {
+      "pair": "general -> computational_workflow",
+      "verdict": "defect",
+      "winner": "computational_workflow",
+      "rule": "Atomic and molecular reference data is computational_workflow; general is for a physical quantity with no single subject, not for a reference-data service."
+    },
+    {
+      "pair": "general -> core_plasma_physics",
+      "verdict": "defect",
+      "winner": "core_plasma_physics",
+      "rule": "A quantity whose subject is knowable takes the subject's own domain; general is a last resort, not a default for a core-plasma quantity."
+    },
+    {
+      "pair": "core_plasma_physics -> spectroscopy",
+      "verdict": "defect",
+      "winner": "spectroscopy",
+      "rule": "A charge-exchange channel's ion concentration and charge state are spectroscopy; the charge_exchange IDS is a spectroscopic diagnostic."
+    },
+    {
+      "pair": "core_plasma_physics -> transport",
+      "verdict": "defect",
+      "winner": [
+        [
+          "bolometer/*",
+          "radiation_measurement_diagnostics"
+        ],
+        [
+          "summary/global_quantities/power_radiated/*",
+          "core_plasma_physics"
+        ],
+        [
+          "*",
+          "core_plasma_physics"
+        ]
+      ],
+      "rule": "Radiated power measured by bolometry is radiation_measurement_diagnostics; a global energy-balance scalar is core_plasma_physics; a flux or diffusivity is transport."
+    },
+    {
+      "pair": "edge_plasma_physics -> spectroscopy",
+      "verdict": "defect",
+      "winner": "spectroscopy",
+      "rule": "A visible spectrometer's isotope density ratio and hot-neutral velocity are spectroscopy; the emissive channel is a spectroscopic diagnostic, whatever plasma region it observes."
+    },
+    {
+      "pair": "neutronics -> plasma_wall_interactions",
+      "verdict": "defect",
+      "winner": "neutronics",
+      "rule": "Nuclear power deposited in a wall unit is neutronics; the wall-surface erosion and retention that plasma_wall_interactions owns is a different quantity."
+    },
+    {
+      "pair": "neutronics -> structural_components",
+      "verdict": "defect",
+      "winner": "neutronics",
+      "rule": "The neutron power and escaping flux in a breeding blanket are neutronics; the blanket's structure is structural_components."
+    },
+    {
+      "pair": "structural_components -> equilibrium",
+      "verdict": "defect",
+      "winner": "magnetic_field_systems",
+      "rule": "A ferritic field-shaping object is magnetic_field_systems; equilibrium owns the field and its surfaces, and structural_components the load-bearing structure."
+    },
+    {
+      "pair": "auxiliary_heating -> electromagnetic_wave_diagnostics",
+      "verdict": "defect",
+      "winner": "auxiliary_heating",
+      "rule": "An antenna module's mechanical position is auxiliary_heating; electromagnetic_wave_diagnostics owns a probe that transmits a wave and measures its phase, not the launcher's own hardware."
+    },
+    {
+      "pair": "current_drive -> core_plasma_physics",
+      "verdict": "defect",
+      "winner": "current_drive",
+      "rule": "The part of the current driven by fusion reactions and its efficiency is current_drive, even when stored beside the plasma current in a summary product."
+    },
+    {
+      "pair": "edge_plasma_physics -> core_plasma_physics",
+      "verdict": "defect",
+      "winner": "edge_plasma_physics",
+      "rule": "A quantity in the SOL or pedestal region is edge_plasma_physics; only a core resolution is core_plasma_physics."
+    },
+    {
+      "pair": "electromagnetic_wave_diagnostics -> data_management",
+      "verdict": "defect",
+      "winner": "equilibrium",
+      "rule": "A measured or reconstructed line-density constraint on the equilibrium is equilibrium; it is an equilibrium constraint, not a wave diagnostic or an assembled data product."
+    },
+    {
+      "pair": "electromagnetic_wave_diagnostics -> radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "winner": "radiation_measurement_diagnostics",
+      "rule": "Electron cyclotron emission is radiated power the plasma emits, so its position correction is radiation_measurement_diagnostics; a probe that transmits a wave is electromagnetic_wave_diagnostics."
+    },
+    {
+      "pair": "equilibrium -> edge_plasma_physics",
+      "verdict": "defect",
+      "winner": "edge_plasma_physics",
+      "rule": "A fitted pedestal position is a property of the pedestal region, so it is edge_plasma_physics; the flux-surface geometry it is expressed in stays equilibrium."
+    },
+    {
+      "pair": "equilibrium -> electromagnetic_wave_diagnostics",
+      "verdict": "defect",
+      "winner": "equilibrium",
+      "rule": "A normalised flux coordinate along a ray path is a flux-surface mapping, so it is equilibrium; a probe that transmits a wave is electromagnetic_wave_diagnostics."
+    },
+    {
+      "pair": "equilibrium -> magnetic_field_systems",
+      "verdict": "overlap",
+      "winner": "equilibrium",
+      "rule": "A reference major radius defining B0 is both a coordinate of the equilibrium coordinate system and a property of the toroidal field; precedence puts equilibrium first and settles the overlap."
+    },
+    {
+      "pair": "equilibrium -> plasma_control",
+      "verdict": "defect",
+      "winner": "plasma_control",
+      "rule": "A gap-direction angle used as a position-control reference is plasma_control; the achieved equilibrium it targets is equilibrium."
+    },
+    {
+      "pair": "equilibrium -> waves",
+      "verdict": "overlap",
+      "winner": "equilibrium",
+      "rule": "A normalised flux coordinate along a wave-code ray is both a flux-surface mapping and a quantity the wave code computes; precedence puts equilibrium first and settles the overlap."
+    },
+    {
+      "pair": "fast_particles -> core_plasma_physics",
+      "verdict": "defect",
+      "winner": "fast_particles",
+      "rule": "Orbit frequency of a suprathermal distribution is fast_particles; the thermal bulk is core_plasma_physics."
+    },
+    {
+      "pair": "fast_particles -> transport",
+      "verdict": "defect",
+      "winner": "fast_particles",
+      "rule": "A source term with a distribution source in the distribution_sources IDS is fast_particles; a flux or diffusivity is transport."
+    },
+    {
+      "pair": "fueling -> core_plasma_physics",
+      "verdict": "defect",
+      "winner": "fueling",
+      "rule": "A pellet's own atom inventory is fueling; the plasma density it produces is core_plasma_physics."
+    },
+    {
+      "pair": "magnetic_field_diagnostics -> equilibrium",
+      "verdict": "defect",
+      "winner": "equilibrium",
+      "rule": "The outline geometry of a flux-loop reconstruction is equilibrium; the coils' signals are magnetic_field_diagnostics."
+    },
+    {
+      "pair": "magnetic_field_systems -> computational_workflow",
+      "verdict": "defect",
+      "winner": "magnetic_field_systems",
+      "rule": "A passive loop element's geometry is magnetic_field_systems; it is a machine component, not a computational geometry definition."
+    },
+    {
+      "pair": "magnetohydrodynamics -> gyrokinetics",
+      "verdict": "defect",
+      "winner": "magnetohydrodynamics",
+      "rule": "A shear Alfven continuum in a linear MHD stability analysis is magnetohydrodynamics; a gyrokinetic eigenmode is gyrokinetics."
+    },
+    {
+      "pair": "mechanical_measurement_diagnostics -> machine_operations",
+      "verdict": "defect",
+      "winner": "mechanical_measurement_diagnostics",
+      "rule": "A sensor attachment-point coordinate is the mechanical state of a component, so it is mechanical_measurement_diagnostics; machine_operations owns scheduling, not hardware geometry."
+    },
+    {
+      "pair": "neutronics -> core_plasma_physics",
+      "verdict": "defect",
+      "winner": "neutronics",
+      "rule": "The neutron emission rate and its measurement are neutronics; the plasma's energy state is core_plasma_physics."
+    },
+    {
+      "pair": "neutronics -> magnetic_field_diagnostics",
+      "verdict": "defect",
+      "winner": "spectroscopy",
+      "rule": "An MSE channel's detector geometry is spectroscopy; the motional Stark effect on the emitted light is a spectroscopic measurement, not neutronics or a magnetic sensor."
+    },
+    {
+      "pair": "neutronics -> particle_measurement_diagnostics",
+      "verdict": "defect",
+      "winner": "neutronics",
+      "rule": "A neutron detector's aperture geometry is neutronics; particle_measurement_diagnostics owns a scattering or particle-counting instrument."
+    },
+    {
+      "pair": "neutronics -> spectroscopy",
+      "verdict": "defect",
+      "winner": "spectroscopy",
+      "rule": "An MSE channel's detector geometry is spectroscopy (mse/*); neutronics owns a neutron detection or activation quantity."
+    },
+    {
+      "pair": "particle_measurement_diagnostics -> mechanical_measurement_diagnostics",
+      "verdict": "defect",
+      "winner": "mechanical_measurement_diagnostics",
+      "rule": "A barometry gauge's gas pressure is mechanical_measurement_diagnostics; particle_measurement_diagnostics owns a scattering or particle-counting instrument."
+    },
+    {
+      "pair": "particle_measurement_diagnostics -> plasma_measurement_diagnostics",
+      "verdict": "defect",
+      "winner": "particle_measurement_diagnostics",
+      "rule": "A Langmuir probe's ion saturation current is particle_measurement_diagnostics; plasma_measurement_diagnostics holds only an instrument no family owns."
+    },
+    {
+      "pair": "plasma_control -> equilibrium",
+      "verdict": "defect",
+      "winner": "equilibrium",
+      "rule": "The current-centre vertical velocity is a global equilibrium quantity; the command that aims the control loop is plasma_control."
+    },
+    {
+      "pair": "plasma_control -> magnetohydrodynamics",
+      "verdict": "defect",
+      "winner": "equilibrium",
+      "rule": "A global current-centre velocity is an equilibrium state; plasma_control owns the control response, and magnetohydrodynamics a coherent mode."
+    },
+    {
+      "pair": "plasma_initiation -> magnetic_field_systems",
+      "verdict": "defect",
+      "winner": "plasma_initiation",
+      "rule": "The stray field at the plasma position during breakdown is a start-up physics quantity, so it is plasma_initiation; the coils that produce it are magnetic_field_systems."
+    },
+    {
+      "pair": "plasma_measurement_diagnostics -> computational_workflow",
+      "verdict": "defect",
+      "winner": "mechanical_measurement_diagnostics",
+      "rule": "A barometry gauge's position is mechanical_measurement_diagnostics; computational_workflow owns geometry definitions and tooling, not instrument hardware."
+    },
+    {
+      "pair": "plasma_measurement_diagnostics -> electromagnetic_wave_diagnostics",
+      "verdict": "defect",
+      "winner": "radiation_measurement_diagnostics",
+      "rule": "An ECE channel position is radiation_measurement_diagnostics; an ECE diagnostic records emitted cyclotron radiation rather than transmitting a probe wave."
+    },
+    {
+      "pair": "plasma_measurement_diagnostics -> equilibrium",
+      "verdict": "defect",
+      "winner": "radiation_measurement_diagnostics",
+      "rule": "An ECE channel position is radiation_measurement_diagnostics; the flux surface it is expressed against is equilibrium."
+    },
+    {
+      "pair": "plasma_measurement_diagnostics -> mechanical_measurement_diagnostics",
+      "verdict": "defect",
+      "winner": "mechanical_measurement_diagnostics",
+      "rule": "A barometry gauge's position is mechanical_measurement_diagnostics; plasma_measurement_diagnostics owns a plasma-parameter instrument."
+    },
+    {
+      "pair": "plasma_measurement_diagnostics -> neutronics",
+      "verdict": "defect",
+      "winner": "neutronics",
+      "rule": "A neutron detector's aperture width is neutronics; plasma_measurement_diagnostics holds only an instrument no family owns."
+    },
+    {
+      "pair": "plasma_measurement_diagnostics -> particle_measurement_diagnostics",
+      "verdict": "defect",
+      "winner": "neutronics",
+      "rule": "A neutron detector's aperture geometry is neutronics and, being a particle counter, also particle_measurement_diagnostics; neutronics owns the neutron-detection family, so the label follows the family."
+    },
+    {
+      "pair": "plasma_measurement_diagnostics -> spectroscopy",
+      "verdict": "defect",
+      "winner": "spectroscopy",
+      "rule": "A charge-exchange channel's optical cone diameter is spectroscopy (charge_exchange/*); plasma_measurement_diagnostics holds only an instrument no family owns."
+    },
+    {
+      "pair": "plasma_wall_interactions -> divertor_physics",
+      "verdict": "defect",
+      "winner": "divertor_physics",
+      "rule": "A divertor target's own extent is divertor_physics; the erosion of its surface is plasma_wall_interactions."
+    },
+    {
+      "pair": "plasma_wall_interactions -> gyrokinetics",
+      "verdict": "defect",
+      "winner": "transport",
+      "rule": "An edge-transport model's flux-limiter coordinate is transport; the model's own quantity in machine coordinates is not gyrokinetics, and a wall surface property is plasma_wall_interactions."
+    },
+    {
+      "pair": "plasma_wall_interactions -> magnetohydrodynamics",
+      "verdict": "defect",
+      "winner": "magnetohydrodynamics",
+      "rule": "A disruption halo-current wall point is part of the disruption evolution, so it is magnetohydrodynamics; plasma_wall_interactions owns the surface's erosion and retention."
+    },
+    {
+      "pair": "plasma_wall_interactions -> radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "winner": "radiation_measurement_diagnostics",
+      "rule": "An infrared camera's target-image coordinate is radiation_measurement_diagnostics; the wall surface's own response is plasma_wall_interactions."
+    },
+    {
+      "pair": "plasma_wall_interactions -> transport",
+      "verdict": "defect",
+      "winner": "transport",
+      "rule": "An edge-transport model's flux-limiter coordinate is transport; a surface property is plasma_wall_interactions."
+    },
+    {
+      "pair": "structural_components -> magnetic_field_systems",
+      "verdict": "defect",
+      "winner": "magnetic_field_systems",
+      "rule": "A passive conductor loop's poloidal geometry is magnetic_field_systems; structural_components owns the load-bearing structure that supports a magnet."
+    },
+    {
+      "pair": "transport -> gyrokinetics",
+      "verdict": "defect",
+      "winner": "transport",
+      "rule": "A plasma_transport model's neutral parallel velocity is transport; gyrokinetics owns the gyrokinetic model's own coordinates."
+    },
+    {
+      "pair": "waves -> auxiliary_heating",
+      "verdict": "defect",
+      "winner": "auxiliary_heating",
+      "rule": "An EC launcher beam's phase-front curvature is a launcher hardware quantity, so it is auxiliary_heating; a wave field inside the plasma is waves."
+    },
+    {
+      "pair": "particle_measurement_diagnostics -> electromagnetic_wave_diagnostics",
+      "verdict": "defect",
+      "winner": "particle_measurement_diagnostics",
+      "rule": "A Thomson-scattering laser end point is particle_measurement_diagnostics (thomson_scattering/*); electromagnetic_wave_diagnostics owns a probe that transmits a wave to measure its propagation."
+    },
+    {
+      "pair": "waves -> electromagnetic_wave_diagnostics",
+      "verdict": "defect",
+      "winner": "waves",
+      "rule": "An ECE beam's parallel refractive index is a wave-field quantity propagating in the plasma, so it is waves; a probe instrument is electromagnetic_wave_diagnostics."
+    },
+    {
+      "pair": "general -> data_management",
+      "verdict": "defect",
+      "winner": "computational_workflow",
+      "rule": "Atomic and molecular reference data is computational_workflow; general is for a physical quantity with no single subject, and data_management for an assembled data product."
+    },
+    {
+      "pair": "core_plasma_physics -> equilibrium",
+      "verdict": "defect",
+      "winner": "equilibrium",
+      "rule": "A density constraint stored under equilibrium/time_slice/constraints is a constraint on the equilibrium, so it is equilibrium even though the quantity it constrains is a core-plasma density."
+    },
+    {
+      "pair": "electromagnetic_wave_diagnostics -> equilibrium",
+      "verdict": "defect",
+      "winner": "equilibrium",
+      "rule": "A line-density constraint stored under equilibrium/time_slice/constraints is a constraint on the equilibrium; the interferometer that measured it is electromagnetic_wave_diagnostics."
+    },
+    {
+      "pair": "auxiliary_heating -> current_drive",
+      "verdict": "defect",
+      "winner": "auxiliary_heating",
+      "rule": "A launcher's own launched refractive index and reference-point geometry are auxiliary_heating; current_drive owns the current the launch drives, not the launcher."
+    },
+    {
+      "pair": "core_plasma_physics -> electromagnetic_wave_diagnostics",
+      "verdict": "defect",
+      "winner": "electromagnetic_wave_diagnostics",
+      "rule": "An interferometer's electron line density is electromagnetic_wave_diagnostics; the interferometer IDS is the wave-probe family."
+    },
+    {
+      "pair": "core_plasma_physics -> radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "winner": "radiation_measurement_diagnostics",
+      "rule": "Power radiated as an integral over the plasma is radiation_measurement_diagnostics; a bolometer's own quantity is the family's, not core_plasma_physics."
+    },
+    {
+      "pair": "edge_plasma_physics -> transport",
+      "verdict": "defect",
+      "winner": "core_plasma_physics",
+      "rule": "A global loss-power scalar is a core energy-balance quantity, so it is core_plasma_physics; a flux or diffusivity is transport, and an edge resolution is edge_plasma_physics."
+    },
+    {
+      "pair": "equilibrium -> magnetohydrodynamics",
+      "verdict": "defect",
+      "winner": "magnetohydrodynamics",
+      "rule": "A disruption's radial profile is part of the MHD instability evolution, so it is magnetohydrodynamics; equilibrium owns the pre-disruption equilibrium."
+    }
+  ],
+  "changed_labels": [
+    {
+      "path": "amns_data/a",
+      "old": "general",
+      "new": "computational_workflow",
+      "verdict": "defect",
+      "rule": "Atomic and molecular reference data is computational_workflow; general is for a physical quantity with no single subject, not for a reference-data service."
+    },
+    {
+      "path": "amns_data/process/products/element/atoms_n",
+      "old": "general",
+      "new": "computational_workflow",
+      "verdict": "defect",
+      "rule": "Atomic and molecular reference data is computational_workflow; general is for a physical quantity with no single subject, not for a reference-data service."
+    },
+    {
+      "path": "amns_data/process/reactants/element/atoms_n",
+      "old": "general",
+      "new": "computational_workflow",
+      "verdict": "defect",
+      "rule": "Atomic and molecular reference data is computational_workflow; general is for a physical quantity with no single subject, not for a reference-data service."
+    },
+    {
+      "path": "barometry/gauge/position/phi",
+      "old": "plasma_measurement_diagnostics",
+      "new": "mechanical_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "A barometry gauge's position is mechanical_measurement_diagnostics; computational_workflow owns geometry definitions and tooling, not instrument hardware."
+    },
+    {
+      "path": "barometry/gauge/pressure",
+      "old": "particle_measurement_diagnostics",
+      "new": "mechanical_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "A barometry gauge's gas pressure is mechanical_measurement_diagnostics; particle_measurement_diagnostics owns a scattering or particle-counting instrument."
+    },
+    {
+      "path": "bolometer/camera/channel/aperture/surface",
+      "old": "plasma_measurement_diagnostics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "A bolometer's channel geometry and sightline is radiation_measurement_diagnostics, the family that owns bolometry; plasma_measurement_diagnostics holds only an instrument no specific family owns."
+    },
+    {
+      "path": "bolometer/camera/channel/aperture/x1_width",
+      "old": "plasma_measurement_diagnostics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "A bolometer's channel geometry and sightline is radiation_measurement_diagnostics, the family that owns bolometry; plasma_measurement_diagnostics holds only an instrument no specific family owns."
+    },
+    {
+      "path": "bolometer/camera/channel/detector/surface",
+      "old": "plasma_measurement_diagnostics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "A bolometer's channel geometry and sightline is radiation_measurement_diagnostics, the family that owns bolometry; plasma_measurement_diagnostics holds only an instrument no specific family owns."
+    },
+    {
+      "path": "bolometer/camera/channel/line_of_sight/first_point/r",
+      "old": "plasma_measurement_diagnostics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "A bolometer's channel geometry and sightline is radiation_measurement_diagnostics, the family that owns bolometry; plasma_measurement_diagnostics holds only an instrument no specific family owns."
+    },
+    {
+      "path": "bolometer/camera/channel/line_of_sight/first_point/z",
+      "old": "plasma_measurement_diagnostics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "A bolometer's channel geometry and sightline is radiation_measurement_diagnostics, the family that owns bolometry; plasma_measurement_diagnostics holds only an instrument no specific family owns."
+    },
+    {
+      "path": "bolometer/camera/channel/line_of_sight/second_point/r",
+      "old": "plasma_measurement_diagnostics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "A bolometer's channel geometry and sightline is radiation_measurement_diagnostics, the family that owns bolometry; plasma_measurement_diagnostics holds only an instrument no specific family owns."
+    },
+    {
+      "path": "bolometer/camera/channel/line_of_sight/second_point/z",
+      "old": "plasma_measurement_diagnostics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "A bolometer's channel geometry and sightline is radiation_measurement_diagnostics, the family that owns bolometry; plasma_measurement_diagnostics holds only an instrument no specific family owns."
+    },
+    {
+      "path": "bolometer/power_radiated_total",
+      "old": "core_plasma_physics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "Power radiated as an integral over the plasma is radiation_measurement_diagnostics; a bolometer's own quantity is the family's, not core_plasma_physics."
+    },
+    {
+      "path": "camera_ir/channel/target_surface_center/y",
+      "old": "plasma_wall_interactions",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "An infrared camera's target-image coordinate is radiation_measurement_diagnostics; the wall surface's own response is plasma_wall_interactions."
+    },
+    {
+      "path": "charge_exchange/channel/cone_diameter",
+      "old": "plasma_measurement_diagnostics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "A charge-exchange channel's optical cone diameter is spectroscopy (charge_exchange/*); plasma_measurement_diagnostics holds only an instrument no family owns."
+    },
+    {
+      "path": "charge_exchange/channel/ion/n_i_over_n_e",
+      "old": "core_plasma_physics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "A charge-exchange channel's ion concentration and charge state are spectroscopy; the charge_exchange IDS is a spectroscopic diagnostic."
+    },
+    {
+      "path": "charge_exchange/channel/ion/z_ion",
+      "old": "core_plasma_physics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "A charge-exchange channel's ion concentration and charge state are spectroscopy; the charge_exchange IDS is a spectroscopic diagnostic."
+    },
+    {
+      "path": "core_profiles/global_quantities/ip",
+      "old": "equilibrium",
+      "new": "core_plasma_physics",
+      "verdict": "defect",
+      "rule": "The plasma current is a global state of the plasma, core_plasma_physics; a profile or constraint that states the field's shape is equilibrium."
+    },
+    {
+      "path": "core_profiles/profiles_1d/ion/element/a",
+      "old": "general",
+      "new": "core_plasma_physics",
+      "verdict": "defect",
+      "rule": "A quantity whose subject is knowable takes the subject's own domain; general is a last resort, not a default for a core-plasma quantity."
+    },
+    {
+      "path": "core_profiles/profiles_1d/ion/element/z_n",
+      "old": "general",
+      "new": "core_plasma_physics",
+      "verdict": "defect",
+      "rule": "A quantity whose subject is knowable takes the subject's own domain; general is a last resort, not a default for a core-plasma quantity."
+    },
+    {
+      "path": "core_profiles/profiles_1d/neutral/element/z_n",
+      "old": "general",
+      "new": "core_plasma_physics",
+      "verdict": "defect",
+      "rule": "A quantity whose subject is knowable takes the subject's own domain; general is a last resort, not a default for a core-plasma quantity."
+    },
+    {
+      "path": "disruption/halo_currents/active_wall_point/r",
+      "old": "plasma_wall_interactions",
+      "new": "magnetohydrodynamics",
+      "verdict": "defect",
+      "rule": "A disruption halo-current wall point is part of the disruption evolution, so it is magnetohydrodynamics; plasma_wall_interactions owns the surface's erosion and retention."
+    },
+    {
+      "path": "disruption/profiles_1d/grid/psi",
+      "old": "equilibrium",
+      "new": "magnetohydrodynamics",
+      "verdict": "defect",
+      "rule": "A disruption's radial profile is part of the MHD instability evolution, so it is magnetohydrodynamics; equilibrium owns the pre-disruption equilibrium."
+    },
+    {
+      "path": "divertors/divertor/target/extension_r",
+      "old": "plasma_wall_interactions",
+      "new": "divertor_physics",
+      "verdict": "defect",
+      "rule": "A divertor target's own extent is divertor_physics; the erosion of its surface is plasma_wall_interactions."
+    },
+    {
+      "path": "ec_launchers/beam/phase/curvature",
+      "old": "waves",
+      "new": "auxiliary_heating",
+      "verdict": "defect",
+      "rule": "An EC launcher beam's phase-front curvature is a launcher hardware quantity, so it is auxiliary_heating; a wave field inside the plasma is waves."
+    },
+    {
+      "path": "ece/channel/delta_position_suprathermal/theta",
+      "old": "electromagnetic_wave_diagnostics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "Electron cyclotron emission is radiated power the plasma emits, so its position correction is radiation_measurement_diagnostics; a probe that transmits a wave is electromagnetic_wave_diagnostics."
+    },
+    {
+      "path": "ece/channel/position/phi",
+      "old": "plasma_measurement_diagnostics",
+      "new": "radiation_measurement_diagnostics",
+      "verdict": "defect",
+      "rule": "An ECE channel position is radiation_measurement_diagnostics; an ECE diagnostic records emitted cyclotron radiation rather than transmitting a probe wave."
+    },
+    {
+      "path": "edge_profiles/ggd/e_field/parallel",
+      "old": "core_plasma_physics",
+      "new": "edge_plasma_physics",
+      "verdict": "defect",
+      "rule": "The same quantity resolved in the scrape-off layer, the pedestal or an edge profile is edge_plasma_physics; only the core resolution is core_plasma_physics."
+    },
+    {
+      "path": "edge_profiles/ggd/electrons/temperature/values",
+      "old": "core_plasma_physics",
+      "new": "edge_plasma_physics",
+      "verdict": "defect",
+      "rule": "The same quantity resolved in the scrape-off layer, the pedestal or an edge profile is edge_plasma_physics; only the core resolution is core_plasma_physics."
+    },
+    {
+      "path": "edge_profiles/ggd/ion/velocity_over_b_field/phi",
+      "old": "core_plasma_physics",
+      "new": "edge_plasma_physics",
+      "verdict": "defect",
+      "rule": "The same quantity resolved in the scrape-off layer, the pedestal or an edge profile is edge_plasma_physics; only the core resolution is core_plasma_physics."
+    },
+    {
+      "path": "edge_profiles/profiles_1d/q",
+      "old": "equilibrium",
+      "new": "edge_plasma_physics",
+      "verdict": "defect",
+      "rule": "A fitted pedestal position is a property of the pedestal region, so it is edge_plasma_physics; the flux-surface geometry it is expressed in stays equilibrium."
+    },
+    {
+      "path": "edge_profiles/profiles_1d/rotation_frequency_tor_sonic",
+      "old": "core_plasma_physics",
+      "new": "edge_plasma_physics",
+      "verdict": "defect",
+      "rule": "The same quantity resolved in the scrape-off layer, the pedestal or an edge profile is edge_plasma_physics; only the core resolution is core_plasma_physics."
+    },
+    {
+      "path": "edge_transport/model/ggd/ion/momentum/flux_limiter/phi",
+      "old": "plasma_wall_interactions",
+      "new": "transport",
+      "verdict": "defect",
+      "rule": "An edge-transport model's flux-limiter coordinate is transport; the model's own quantity in machine coordinates is not gyrokinetics, and a wall surface property is plasma_wall_interactions."
+    },
+    {
+      "path": "equilibrium/time_slice/constraints/n_e/measured",
+      "old": "core_plasma_physics",
+      "new": "equilibrium",
+      "verdict": "defect",
+      "rule": "A density constraint stored under equilibrium/time_slice/constraints is a constraint on the equilibrium, so it is equilibrium even though the quantity it constrains is a core-plasma density."
+    },
+    {
+      "path": "equilibrium/time_slice/constraints/n_e/reconstructed",
+      "old": "core_plasma_physics",
+      "new": "equilibrium",
+      "verdict": "defect",
+      "rule": "A density constraint stored under equilibrium/time_slice/constraints is a constraint on the equilibrium, so it is equilibrium even though the quantity it constrains is a core-plasma density."
+    },
+    {
+      "path": "equilibrium/time_slice/constraints/n_e_line/measured",
+      "old": "electromagnetic_wave_diagnostics",
+      "new": "equilibrium",
+      "verdict": "defect",
+      "rule": "A line-density constraint stored under equilibrium/time_slice/constraints is a constraint on the equilibrium; the interferometer that measured it is electromagnetic_wave_diagnostics."
+    },
+    {
+      "path": "equilibrium/time_slice/constraints/n_e_line/reconstructed",
+      "old": "electromagnetic_wave_diagnostics",
+      "new": "equilibrium",
+      "verdict": "defect",
+      "rule": "A measured or reconstructed line-density constraint on the equilibrium is equilibrium; it is an equilibrium constraint, not a wave diagnostic or an assembled data product."
+    },
+    {
+      "path": "equilibrium/time_slice/global_quantities/current_centre/velocity_z",
+      "old": "plasma_control",
+      "new": "equilibrium",
+      "verdict": "defect",
+      "rule": "The current-centre vertical velocity is a global equilibrium quantity; the command that aims the control loop is plasma_control."
+    },
+    {
+      "path": "ferritic/object/axisymmetric/outline/r",
+      "old": "structural_components",
+      "new": "magnetic_field_systems",
+      "verdict": "defect",
+      "rule": "A ferritic field-shaping object is magnetic_field_systems; equilibrium owns the field and its surfaces, and structural_components the load-bearing structure."
+    },
+    {
+      "path": "ferritic/object/centroid/y",
+      "old": "structural_components",
+      "new": "magnetic_field_systems",
+      "verdict": "defect",
+      "rule": "A ferritic field-shaping object is magnetic_field_systems; equilibrium owns the field and its surfaces, and structural_components the load-bearing structure."
+    },
+    {
+      "path": "focs/outline/z",
+      "old": "magnetic_field_diagnostics",
+      "new": "equilibrium",
+      "verdict": "defect",
+      "rule": "The outline geometry of a flux-loop reconstruction is equilibrium; the coils' signals are magnetic_field_diagnostics."
+    },
+    {
+      "path": "interferometer/electrons_n",
+      "old": "core_plasma_physics",
+      "new": "electromagnetic_wave_diagnostics",
+      "verdict": "defect",
+      "rule": "An interferometer's electron line density is electromagnetic_wave_diagnostics; the interferometer IDS is the wave-probe family."
+    },
+    {
+      "path": "mse/channel/detector/radius",
+      "old": "neutronics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "An MSE channel's detector geometry is spectroscopy; the motional Stark effect on the emitted light is a spectroscopic measurement, not neutronics or a magnetic sensor."
+    },
+    {
+      "path": "neutron_diagnostic/detector/geometry/x1_width",
+      "old": "plasma_measurement_diagnostics",
+      "new": "neutronics",
+      "verdict": "defect",
+      "rule": "A neutron detector's aperture width is neutronics; plasma_measurement_diagnostics holds only an instrument no family owns."
+    },
+    {
+      "path": "pf_passive/loop/element/geometry/oblique/alpha",
+      "old": "structural_components",
+      "new": "magnetic_field_systems",
+      "verdict": "defect",
+      "rule": "A passive conductor loop's poloidal geometry is magnetic_field_systems; structural_components owns the load-bearing structure that supports a magnet."
+    },
+    {
+      "path": "pulse_schedule/position_control/gap/angle",
+      "old": "equilibrium",
+      "new": "plasma_control",
+      "verdict": "defect",
+      "rule": "A gap-direction angle used as a position-control reference is plasma_control; the achieved equilibrium it targets is equilibrium."
+    },
+    {
+      "path": "spectrometer_uv/channel/detector/outline/x1",
+      "old": "radiation_measurement_diagnostics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "A spectrometer's line-of-sight emission resolved in wavelength is spectroscopy; a bolometric power, a bremsstrahlung filter band or a camera image is radiation_measurement_diagnostics."
+    },
+    {
+      "path": "spectrometer_visible/channel/isotope_ratios/isotope/density_ratio",
+      "old": "edge_plasma_physics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "A visible spectrometer's isotope density ratio and hot-neutral velocity are spectroscopy; the emissive channel is a spectroscopic diagnostic, whatever plasma region it observes."
+    },
+    {
+      "path": "spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals",
+      "old": "edge_plasma_physics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "A visible spectrometer's isotope density ratio and hot-neutral velocity are spectroscopy; the emissive channel is a spectroscopic diagnostic, whatever plasma region it observes."
+    },
+    {
+      "path": "spectrometer_x_ray_crystal/channel/crystal/radius",
+      "old": "radiation_measurement_diagnostics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "A spectrometer's line-of-sight emission resolved in wavelength is spectroscopy; a bolometric power, a bremsstrahlung filter band or a camera image is radiation_measurement_diagnostics."
+    },
+    {
+      "path": "spectrometer_x_ray_crystal/channel/crystal/thickness",
+      "old": "radiation_measurement_diagnostics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "A spectrometer's line-of-sight emission resolved in wavelength is spectroscopy; a bolometric power, a bremsstrahlung filter band or a camera image is radiation_measurement_diagnostics."
+    },
+    {
+      "path": "spectrometer_x_ray_crystal/channel/reflector/x2_curvature",
+      "old": "radiation_measurement_diagnostics",
+      "new": "spectroscopy",
+      "verdict": "defect",
+      "rule": "A spectrometer's line-of-sight emission resolved in wavelength is spectroscopy; a bolometric power, a bremsstrahlung filter band or a camera image is radiation_measurement_diagnostics."
+    },
+    {
+      "path": "summary/global_quantities/power_loss/value",
+      "old": "edge_plasma_physics",
+      "new": "core_plasma_physics",
+      "verdict": "defect",
+      "rule": "A global loss-power scalar is a core energy-balance quantity, so it is core_plasma_physics; a flux or diffusivity is transport, and an edge resolution is edge_plasma_physics."
+    },
+    {
+      "path": "waves/coherent_wave/profiles_1d/ion/state/power_density_fast",
+      "old": "auxiliary_heating",
+      "new": "waves",
+      "verdict": "defect",
+      "rule": "An antenna or launcher and the refractive index it launches are auxiliary_heating; a wave field inside the plasma and its absorbed power density are waves."
+    },
+    {
+      "path": "waves/coherent_wave/profiles_1d/power_inside",
+      "old": "auxiliary_heating",
+      "new": "waves",
+      "verdict": "defect",
+      "rule": "An antenna or launcher and the refractive index it launches are auxiliary_heating; a wave field inside the plasma and its absorbed power density are waves."
+    },
+    {
+      "path": "waves/coherent_wave/profiles_2d/ion/state/power_density_fast",
+      "old": "auxiliary_heating",
+      "new": "waves",
+      "verdict": "defect",
+      "rule": "An antenna or launcher and the refractive index it launches are auxiliary_heating; a wave field inside the plasma and its absorbed power density are waves."
+    }
+  ],
+  "changed_count": 56,
+  "scores": {
+    "by_split": {
+      "calibration": {
+        "tree": {
+          "correct": 66,
+          "total": 80,
+          "accuracy": 0.825
+        },
+        "chat": {
+          "correct": 66,
+          "total": 80,
+          "accuracy": 0.825
+        },
+        "label": {
+          "correct": 60,
+          "total": 80,
+          "accuracy": 0.75
+        }
+      },
+      "reference": {
+        "tree": {
+          "correct": 33,
+          "total": 40,
+          "accuracy": 0.825
+        },
+        "chat": {
+          "correct": 35,
+          "total": 40,
+          "accuracy": 0.875
+        },
+        "label": {
+          "correct": 19,
+          "total": 40,
+          "accuracy": 0.475
+        }
+      },
+      "validation": {
+        "tree": {
+          "correct": 60,
+          "total": 81,
+          "accuracy": 0.7407
+        },
+        "chat": {
+          "correct": 65,
+          "total": 81,
+          "accuracy": 0.8025
+        },
+        "label": {
+          "correct": 66,
+          "total": 81,
+          "accuracy": 0.8148
+        }
+      }
+    },
+    "overall": {
+      "tree": {
+        "correct": 159,
+        "total": 201,
+        "accuracy": 0.791
+      },
+      "chat": {
+        "correct": 166,
+        "total": 201,
+        "accuracy": 0.8259
+      },
+      "label": {
+        "correct": 145,
+        "total": 201,
+        "accuracy": 0.7214
+      }
+    },
+    "contested": {
+      "tree": {
+        "correct": 51,
+        "total": 93,
+        "accuracy": 0.5484
+      },
+      "chat": {
+        "correct": 58,
+        "total": 93,
+        "accuracy": 0.6237
+      },
+      "label": {
+        "correct": 37,
+        "total": 93,
+        "accuracy": 0.3978
+      }
+    }
+  }
+}
