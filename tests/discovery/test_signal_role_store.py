@@ -105,11 +105,17 @@ class _RoleGraph:
                 self.nodes[item["id"]]["signal_role"] = item["signal_role"]
             return [{"updated": len(params["items"]) if params["items"] else 0}]
 
-        if "SET s.status = $status" in cypher and "s.signal_role = null" in cypher:
+        if "SET s.status = $status" in cypher and "UNWIND $signals AS sig" in cypher:
+            # Applies what the statement carries: the status change always, and
+            # the role clear only when the Cypher clears it. A statement that
+            # dropped the clear then leaves a stored role standing, which is
+            # what the clearing test is there to see.
+            clears_role = "s.signal_role = null" in cypher
             for sig in params["signals"]:
                 node = self.nodes[sig["id"]]
                 node["status"] = params["status"]
-                node["signal_role"] = None
+                if clears_role:
+                    node["signal_role"] = None
                 if sig.get("description") is not None:
                     node["description"] = sig["description"]
             return []
