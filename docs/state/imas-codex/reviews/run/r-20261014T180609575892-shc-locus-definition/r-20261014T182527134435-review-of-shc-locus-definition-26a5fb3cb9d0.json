@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/workers.py:9964",
+    "imas_codex/standard_names/workers.py:11171",
+    "imas_codex/standard_names/workers.py:10713",
+    "imas_codex/standard_names/review/audits.py:712"
+  ],
+  "completed_at": "2026-10-14T18:36:11.357Z",
+  "dispatched_at": "2026-10-14T18:25:40Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_docs_locus_definition.py",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: line 57 compares the rendered output against locus_definition_sentence's own output, so a regression inside that helper (dropping the equation and symbols clause) leaves lines 57 and 58 green and the sentence's registry content is guarded only by the literal assertions at lines 66-68."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "952",
+      "severity": "follow-on",
+      "text": "follow-on: house_style_findings now emits LOCUS_DEFINITION, but its production consumer imas_codex/standard_names/review/audits.py:712 and its tests (tests/standard_names/test_house_style_checks.py) are outside the gate the brief named, so an added failure there would be invisible to the recorded gate."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit 26a5fb3cb against base bc5acb919; four files changed, all inside the declared scope, carrying the insertion and the check together.",
+    "done_when": "the done-when names two stubbed behaviours and their red arms; the manifest records the head gate passing and a negative_control.log in which both tests fail with the mechanisms removed.",
+    "goal": "the goal is that a locus's defining sentence is drawn once from the ISN registry; imas_codex/standard_names/docs_gates.py:614 renders it and imas_codex/standard_names/workers.py:9739 appends it.",
+    "manifest": "read; it records head 31 passed / base 25 passed / 0 added failures, the four log paths, and the verbatim registry-definition caveat.",
+    "write_paths": "read the manifest's declared paths (workers.py, docs_gates.py, the new test file, the evidence fragment); every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "negative_control.log shows tests/standard_names/test_docs_locus_definition.py:57 and :78 failing at 26a5fb3cb with both mechanisms removed, so each required behaviour reddens its own test.",
+    "evidence": "the manifest records tests/standard_names/test_docs_locus_definition.py at head_gate.log \"31 passed\" against base_gate.log \"25 passed\" and negative_control.log reading EXIT=1 with two failing ids.",
+    "fit": "imas_codex/standard_names/docs_gates.py:657 follows the neighbouring _non_canonical_equation_findings pattern and adds no plan or ticket label to any name.",
+    "goal_fidelity": "imas_codex/standard_names/docs_gates.py:614 builds the sentence from the concept definition select_conventions joins from the registry, and workers.py:9739 appends it for every registered locus token.",
+    "reuse": "imas_codex/standard_names/vocabulary_definitions.py:9 already maps locus tokens to their registry definitions, so _locus_registry_tokens reads the same registry a second time instead of extending that accessor.",
+    "scope_discipline": "every path in the diff (imas_codex/standard_names/workers.py, imas_codex/standard_names/docs_gates.py, tests/standard_names/test_docs_locus_definition.py, docs/evidence/fragments/sn-harmonize-command/shc-locus-definition.html) is inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that a locus's defining sentence is drawn once from the ISN registry; imas_codex/standard_names/docs_gates.py:614 renders it and imas_codex/standard_names/workers.py:9739 appends it.\nVERDICT done_when: the done-when names two stubbed behaviours and their red arms; the manifest records the head gate passing and a negative_control.log in which both tests fail with the mechanisms removed.\nVERDICT write_paths: read the manifest's declared paths (workers.py, docs_gates.py, the new test file, the evidence fragment); every path in the diff is inside them.\nVERDICT manifest: read; it records head 31 passed / base 25 passed / 0 added failures, the four log paths, and the verbatim registry-definition caveat.\nVERDICT diff: read commit 26a5fb3cb against base bc5acb919; four files changed, all inside the declared scope, carrying the insertion and the check together.\nCALL_SITES: imas_codex/standard_names/workers.py:9964, imas_codex/standard_names/workers.py:11171, imas_codex/standard_names/workers.py:10713, imas_codex/standard_names/review/audits.py:712\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/docs_gates.py:614 builds the sentence from the concept definition select_conventions joins from the registry, and workers.py:9739 appends it for every registered locus token.\nSCORE evidence: 17\nJUSTIFICATION evidence: the manifest records tests/standard_names/test_docs_locus_definition.py at head_gate.log \"31 passed\" against base_gate.log \"25 passed\" and negative_control.log reading EXIT=1 with two failing ids.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff (imas_codex/standard_names/workers.py, imas_codex/standard_names/docs_gates.py, tests/standard_names/test_docs_locus_definition.py, docs/evidence/fragments/sn-harmonize-command/shc-locus-definition.html) is inside the manifest's declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: negative_control.log shows tests/standard_names/test_docs_locus_definition.py:57 and :78 failing at 26a5fb3cb with both mechanisms removed, so each required behaviour reddens its own test.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/docs_gates.py:657 follows the neighbouring _non_canonical_equation_findings pattern and adds no plan or ticket label to any name.\nSCORE reuse: 16\nJUSTIFICATION reuse: imas_codex/standard_names/vocabulary_definitions.py:9 already maps locus tokens to their registry definitions, so _locus_registry_tokens reads the same registry a second time instead of extending that accessor.\nFINDING tests/standard_names/test_docs_locus_definition.py:57 follow-on: line 57 compares the rendered output against locus_definition_sentence's own output, so a regression inside that helper (dropping the equation and symbols clause) leaves lines 57 and 58 green and the sentence's registry content is guarded only by the literal assertions at lines 66-68.\nFINDING imas_codex/standard_names/docs_gates.py:952 follow-on: house_style_findings now emits LOCUS_DEFINITION, but its production consumer imas_codex/standard_names/review/audits.py:712 and its tests (tests/standard_names/test_house_style_checks.py) are outside the gate the brief named, so an added failure there would be invisible to the recorded gate.\n",
+  "review_run_id": "r-20261014T182527134435-review-of-shc-locus-definition-26a5fb3cb9d0",
+  "reviewed_base_sha": "bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85",
+  "reviewed_head_sha": "26a5fb3cb9d0ca6c562c18a9d82e2b191ebffac2",
+  "reviewed_run_id": "r-20261014T180609575892-shc-locus-definition",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T18:37:56.721070+00:00",
+  "total": 105
+}
