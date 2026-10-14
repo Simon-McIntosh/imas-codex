@@ -85,6 +85,16 @@
     <p>When an apply starts on a family, its anchor is recorded on the family's members, beside the scope run id that <code>mark_members_for_regen</code> already stamps. Until the family is stamped harmonized, every plan reuses that anchor, even when another member outscores it or the anchor is mid-reset. So an interrupted apply or a score tie can no longer move it. <code>--force REASON</code> waives only the recommended-name refusal and never releases the pin.</p><p>The report's two reuse follow-ons are folded in. The graph-wide name set is read through <code>get_existing_standard_names</code>, which gained an optional client. The duplicate query in <code>harmonize.py</code> and the scope-only dead-link fallback are gone.</p><p>The gate is 185 passed at head, and each test fails with its mechanism removed. The pin went through three reviews: 92, 92 and 107/120. The <code>harmonized_anchor</code> property is not yet declared in the LinkML schema; that is a follow-on.</p>
   </section>
 
+  <section id="s8-family-cost-cap">
+    <h2>§8 — one cost cap covers a whole family apply</h2>
+    <p>A family's anchor and its members share one cap, and the members get what the anchor leaves (merge <code>b5a58934f</code>, review 110/120). A stubbed test fails when the cap returns to per-batch.</p><p>Follow-on for §12: the family wrapper advances its spend only when the drain returns a figure. When a batch returns none, <code>CampaignRunner.run</code> falls back to <code>cost_fn(run_id)</code>, and that spend escapes the family total. So the cap can still leak on such a batch.</p>
+  </section>
+
+  <section id="s11-locus-definition">
+    <h2>§11 — the locus is defined once, from the registry</h2>
+    <p>Documentation now carries the locus definition sentence for every registered locus (merge <code>bbfc184ae</code>, review 105/120). It is rendered from the ISN locus registry's <code>definition</code> and the conventions entry's equation and symbols. The conformance check refines a member whose locus sentence departs from the registry or uses a forbidden variant. Both tests fail with their mechanism removed.</p><p>Follow-ons from the review:</p><ul><li>The new finding class reaches <code>review/audits.py</code>, whose tests (<code>test_house_style_checks.py</code>) were outside the recorded gate. The next harmonize node runs them.</li><li>The identical-sentence test compares against the helper's own output.</li></ul>
+  </section>
+
 </main>
 </body>
 </html>

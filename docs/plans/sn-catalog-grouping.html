@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-presentation">
   <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-integrity-backlog#s6&quot;,&quot;sn-house-style#s2&quot;],&quot;s7&quot;:[&quot;sn-catalog-grouping#s6&quot;]}">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 <meta name="plan-modified" content="2026-10-14">
 <meta name="plan-commits" content="58ad9b1a4e61408b2da7c9e8232bcb6bccb21c1f,38f0a7336ce3b86ab37ebf5cb353a00363c32274,5c666533b9b786ec14259e85d0a6eb42cae1125c,17f084e2d28d7145d9288c8a5a542d03a7519f4a,aea797386d61d8b3703afbad957f4ff707ea9fab,c5e94c099ff238c7925e506686016698bdb04b64,178cfa68ba0e7aae45c0b76ea3ccc0511eb8c07d">
 </head>
@@ -301,7 +301,7 @@
     </p>
 
     <h2 id="s6">§6 — One domain precedence, kept in the guidance and used by the classifier</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>The DD-path measure (<code>scg-domain-path-measure</code>, merged at <code>14a60fdcc</code>) found that the Jev tree and the chat classifier make the same mistakes, at the same rates. Across both classifiers' confusions there are 82 confused domain pairs. In 43 of them the guidance is silent; in the other 39 it separates the pair. The lead's ruling of 2026-10-14: <em>"our categorization of our categories is wrong if we cannot sort them, or we need to better define a tie-break strategy with a preferred node, such as preferring equilibrium over balance of plant."</em></p><p>A precedence already exists. <code>FALLBACK_RANK_TABLE</code> in <code>imas_codex/standard_names/domain_ranking.py</code> ranks every domain:</p><ul><li>core physics first, with equilibrium at the top;</li><li>then heating and current drive;</li><li>then edge;</li><li>then diagnostics;</li><li>then operations and plant;</li><li>then data management;</li><li>then general.</li></ul><p><code>select_primary_domain</code> uses it to choose a name's domain from its source paths. The path classifier never sees it, so the two disagree on exactly the paths where two domains fit.</p><p>Make one precedence the classifier's tie-break, kept in one place:</p><ul><li>Move the order into <code>imas_codex/definitions/physics/domains.yaml</code> as <code>precedence</code>, with a one-line rationale for each band.</li><li><code>domain_ranking</code> reads it.</li><li>The guidance loader in <code>imas_codex/definitions/physics/__init__.py</code> refuses an order that misses or repeats a domain of ISN's vocabulary.</li><li>The tree's questions, rendered in <code>imas_codex/graph/dd_domain_classifier.py</code> (the category and domain question builders that <code>decide_domain_tree</code> calls), state the rule: when more than one option's scope fits the path, choose the one earliest in the precedence. Render each level's options in precedence order.</li><li>Keep the order as it stands. The lead adjusts it on reading the fragment; this section does not re-rank.</li></ul><p><strong>Done when:</strong> stubbed tests show the following.</p><ul><li><code>select_primary_domain</code> and the rendered domain question read the same order from the guidance file.</li><li>The loader refuses an order with a missing or repeated domain.</li><li>The rendered questions carry the tie-break rule and list options in that order.</li><li>Each test fails with its mechanism removed.</li></ul><p>The fragment prints the order beside its bands' rationale.</p>
 
     <h2 id="s7">§7 — Domain scopes that sort, and path labels by rule</h2>
@@ -493,6 +493,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261014T180703200185-scg-domain-precedence" data-who="reckon-build" data-when="2026-10-14T18:26:38.215Z">
     <div class="r-comment-body"><p>the precedence lives in imas_codex/definitions/physics/domains.yaml as a ranked `precedence` block (7 bands, one rationale each); load_domain_precedence() in imas_codex/definitions/physics/__init__.py reads and validates it, domain_ranking derives its table from that loader, and both the rendered classifier questions and the chat prompt state the tie-break over the same order — docs/evidence/fragments/sn-catalog-grouping/scg-domain-precedence.html</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-14T19:15:00Z">
+    <div class="r-comment-body"><p>§6 closed. One precedence, kept in <code>domains.yaml</code>, is the tie-break for both the classifier and name selection (<code>f43ad4a0c</code>, review 107/120). The order is the existing one, for the lead to adjust. <a href="/imas-codex/evidence/archive/sn-catalog-grouping-landed.html#s6-domain-precedence">evidence</a></p></div>
 </div>
 </section>
 </main>
