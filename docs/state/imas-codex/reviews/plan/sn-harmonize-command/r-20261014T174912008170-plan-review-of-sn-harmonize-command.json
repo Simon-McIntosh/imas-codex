@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-14T17:58:47.698Z",
+  "dispatched_at": "2026-10-14T17:49:27Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:225",
+      "id": "reasoning-1",
+      "reason": "the wrong locus sends \u00a78's node at a fallback constructor while the CLI's own construction and the per-batch pass-through, which is what overspent USD 6.26 against a USD 5.00 cap, is untouched; the section's stubbed done-when passes either way, so only the locus sentence governs where the node works.",
+      "text": "\u00a78 states \"The repair belongs where the drain's `CampaignBudget` is built for an apply (`harmonize.py` ~1099)\", but that line is the `CampaignBudget` import and `harmonize.py:1106` (`budget = budget or CampaignBudget()`) is only the fallback used when no budget is passed; the live apply builds it at `imas_codex/cli/sn.py:6164` (`CampaignBudget(per_batch_cost_cap=cost_limit, campaign_cost_ceiling=cost_limit)`) and the defect \u2014 each batch receiving the whole cap \u2014 is at `imas_codex/standard_names/campaign.py:1016` (`drain_fn(run_id, self.budget.per_batch_cost_cap)`), so a node repairing at ~1099 changes a default the production path never reaches and the per-batch split stays intact",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:241",
+      "id": "reasoning-2",
+      "reason": "the recorded costs already exist as `LLMCost` rows (`budget.py` phase `generate|regen|review_docs`), so the node can locate both the constant and a graph reader from the done-when alone; pinning the reader would tidy the section without changing what it builds.",
+      "text": "\u00a712 asks the estimator to read \"the recorded per-call spend of recent documentation regenerations and of the reviews that follow them\" but names no reader for those records (the constant it replaces is `ESTIMATED_DOC_CALL_COST_USD`, `harmonize.py:758`, consumed in the dry-run branch at `imas_codex/cli/sn.py:6146`), unlike \u00a78, \u00a710 and \u00a711 which each name a callable or a file",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "d0f687d8d97f6bfccfa2eb9bdcbc44e9043621ac7d257534555231d169176592",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 64,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261014T174912008170-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "ed441d7d4eae021598c195b8f7f8d224f71eebe8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/standard_names/harmonize.py` line 1099, `locus_registry.yml` and `conventions/concepts.yml` all resolve (the last two under the ISN checkout `imas-standard-names/`), and the cited accessor exists (`select_conventions` builds `AppliedConcept.definition` from `_vocabulary_definitions()`, which loads locus definitions \u2014 `terms.py:275`, `vocab_loaders.py:718`).",
+    "done_when": "pass \u2014 each changed section names a controllable negative: \u00a78 \"fails if the cap returns to per-batch\", \u00a711 \"each test fails with its mechanism removed\", \u00a712 \"fails with the constant restored\" plus the no-measurement case, and \u00a73 keeps the failed-anchor, guard-removal and snapshot controls it already carried.",
+    "evidence_paths": "pass \u2014 \u00a79's diagnostic fragment is named at a durable repo path (`docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html`), and the changed sections cite repo code or registry paths, none in a scratch or temp location.",
+    "naming": "pass \u2014 the changed units add no plan labels, stage names, ticket numbers or changelog prose; the figures (USD 6.26, 0.85, 12 findings) are data the section is about.",
+    "reasoning": "a finding \u2014 \u00a78's cited repair locus does not hold the code path the defect lives on: `harmonize.py ~1099` is the `CampaignBudget` import and line 1106 is only the `budget or CampaignBudget()` fallback, while the apply's budget is built by the caller at `imas_codex/cli/sn.py:6164` and the whole-cap-per-batch application is at `imas_codex/standard_names/campaign.py:1016`.",
+    "single_goal": "pass \u2014 the earlier two-deliverable \u00a78 is split: \u00a78 now carries only the family-scoped cap and \u00a712 only the measured-cost estimator, each with one done-when.",
+    "wiring": "pass \u2014 `_document`'s `plan-section-depends-on` now gives `s3` every section its done-when names (`s5`\u2013`s12`), matching the \"after \u00a75 to \u00a712 have landed\" in \u00a73; the declarations map carries a status for each new section, and \u00a711's dependency on the done \u00a76 is satisfied rather than missing."
+  },
+  "section_digests": {
+    "_document": "9272addb92ad525a1f7e76cb1ca436e30166ba774cd73ad4c3319d5d39dd7bae",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s10": "d1bb9bb9dfcae650a5653ea3bbdb319e3ecf676ab9a3cc351968b46d2f10607a",
+    "s11": "cb00438301915812ef678ff6517b2477e98180338b6d1863e1a73e87af25a889",
+    "s12": "364d3d4cc7b369bc817d1c5a2fe25017858d2f2c6eb697aa423742b8a0a35707",
+    "s2": "767a2fe2b092486b6f4c5277a919edca224cd3a5f242f4bf747c1657bda4d5af",
+    "s3": "9416801e555c3ed92b47ddba985fbf47123b22c7ddd20d69a46baa82f2840272",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa",
+    "s5": "ebb66a7ebb10c4aad132f61567b089ce315607a670a86403166cdf201a496bbf",
+    "s6": "74bec4f3403c9293f29290ca6de60b070dd4973bb9e04aef58c53838d9ca9932",
+    "s7": "2eed016a7c36b87fbd866c3a21ae396d57071d75eebb6222595db5e505dd8701",
+    "s8": "345fe63d8f7ea0bb56a4f78e4cb7221dd3156370ca60496ff0137249e3855ac7",
+    "s9": "a56a7ae67d3f4140a7d38abbe65fb56d981b5b3bff3ced30fa63005c9dfebcb3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T18:03:13.282449+00:00"
+}
