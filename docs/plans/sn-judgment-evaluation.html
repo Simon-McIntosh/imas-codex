@@ -20,13 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
   <meta name="plan-blocks" content="sn-review-through-jev,sn-selection-over-generation,sn-catalog-grouping">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
   <title>Measure Every Standard-Name Judgment Before It Moves To Jev | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-modified" content="2026-10-14">
-<meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2,e000241de910e5a4d0d21825593e12ecd6934ec5,d7e3860a7c6e85a5fbfde1103dc0bded5af7203e,77815e0ea71be4c94a0dd52d386dc0987045dc9b,f2b9d9ee2e77922cd107952e8f51a2602519218d,9caea975fe223505bddf301dd8747709159232f2,03559dfe552d88192815516b3a12e3e9916f74ff,439ced57fd4422969f004797d2402211851de29a,2f9e46540ec7f67fe92969c4dd76e41aa9ad7ecb">
+<meta name="plan-commits" content="428878833dd1df6259686167e6e823241120cff4,b4c509140ef92a37138ad29ed7b337b27e67815a,7b336be5e83bf87555a755917af477f2001b46e1,b6038aa0235780593dc353f3a1511fbc6f8625c2,e000241de910e5a4d0d21825593e12ecd6934ec5,d7e3860a7c6e85a5fbfde1103dc0bded5af7203e,77815e0ea71be4c94a0dd52d386dc0987045dc9b,f2b9d9ee2e77922cd107952e8f51a2602519218d,9caea975fe223505bddf301dd8747709159232f2,03559dfe552d88192815516b3a12e3e9916f74ff,439ced57fd4422969f004797d2402211851de29a,2f9e46540ec7f67fe92969c4dd76e41aa9ad7ecb,600fdd64b31603236c6f2d2a7ae73163dcb64c1c">
 </head>
 <body>
   <main class="plan-doc">
@@ -227,7 +227,7 @@
     </p>
 
     <h2 id="s5">§5 — The goldens nobody has labelled yet</h2>
-    <section data-reckon="section" data-id="s5" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s5" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       <strong>B — documentation acceptable</strong> cannot be assembled from what exists.
       Fewer than 300 independent items carry a docs label, almost all negative, against 16,282
@@ -412,6 +412,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-labels-delegated" data-who="reckon-build" data-when="2026-10-14T19:50:00Z">
     <div class="r-comment-body"><p><strong>The lead delegated the remaining labelling to the coordinator on 2026-10-14.</strong></p><ul><li><strong>Golden B.</strong> The coordinator's 400 balanced labels already exist, built from 488 under the written rubric. The 50-item overlap existed only to measure agreement between two independent readers. A second set of labels from the coordinator would measure self-agreement, so the independent check is waived by the lead's delegation and no Cohen's kappa is reported. Golden B stands on the coordinator's labels and its rubric, and that limit is stated wherever it is used.</li><li><strong>Golden D.</strong> The coordinator rules the synonym shortlist, pre-screened from the 687 candidate pairs at cosine 0.92.</li></ul></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-14T20:36:00Z">
+    <div class="r-comment-body"><p>§5 closed. Golden B holds 400 balanced coordinator labels; the kappa overlap is waived under the lead's delegation. Golden D holds 47 coordinator-ruled synonym pairs (7 synonym, 40 distinct) beside its 15 path pairs, ruled by hand with no model (<code>eb66420e4</code>, <code>600fdd64b</code>, review 103/120). Follow-on: freeze golden D's split before any judge is fitted on it. <a href="/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s5-goldens-labelled">evidence</a></p></div>
 </div>
 </section>
 </main>
