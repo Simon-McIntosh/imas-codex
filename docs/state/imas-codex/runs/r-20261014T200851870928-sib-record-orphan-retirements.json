@@ -1,0 +1,716 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "8b30f65265325207503bb5928bd1858657251d9b",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T200851870928-sib-record-orphan-retirements/brief.md",
+    "sha256": "f9a3428a044e05a18d22a302e71994dcea820e2d8feb1ad89e2c6cae567f98e5"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 16864207,
+      "input_tokens_cumulative": 16864207,
+      "output_tokens": 65414,
+      "output_tokens_cumulative": 65414,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 9430,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 121,
+        "name": "_authority",
+        "path": "tests/standard_names/test_archive_reconstruction.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "_authority_header",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 72
+    },
+    {
+      "existing_function": {
+        "line": 594,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "_authority_header",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 72
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "_authority_header",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 72
+    },
+    {
+      "existing_function": {
+        "line": 376,
+        "name": "test_export_emits_generic_source_bindings_and_preserves_accounting",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "_authority_header",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 72
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 2503,
+        "name": "test_search_docs_includes_matching_signals",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_enrich_populates_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_enrich_populates_dd_source_docs_and_aliases",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_row",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_row",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_row",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 440,
+        "name": "test_build_process_table_multi_node",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 668,
+        "name": "test_text_only_match_uses_text_score",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 706,
+        "name": "test_dual_match_boosted",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 746,
+        "name": "test_enrichment_includes_lifecycle",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "build_row",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py"
+      },
+      "window_line": 99
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "424b656c77d8b687d9b40d55477b69609e7fca4b"
+  ],
+  "completed_at": "2026-10-14T20:51:40.798Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-14T20:09:09Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8846153846153846,
+    "plan": "sn-integrity-backlog",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-14T21:08:53.208932+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-14T20:08:53Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 10,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 7,
+    "headroom": 4,
+    "mean_context": 91429,
+    "observed_at": "2026-10-14T20:08:45Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 10,
+      "aggregate_tokens_per_second": 397.517,
+      "detail": "",
+      "mean_tokens_per_second": 49.69,
+      "observed_at": "2026-10-14T20:08:45Z",
+      "runs": 8.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-14T20:51:40.798Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T200851870928-sib-record-orphan-retirements/manifest.md",
+  "member": "disposable-r-20261014T200851870928-sib-record-orphan-retirements",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-record-orphan-retirements",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/sib-record-orphan-retirements.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T200851870928-sib-record-orphan-retirements/brief.md",
+    "brief_sha256": "f9a3428a044e05a18d22a302e71994dcea820e2d8feb1ad89e2c6cae567f98e5",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 955,
+          "cached_input_tokens": 307495,
+          "input_tokens": 308452,
+          "output_tokens": 816,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 309268,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "the fragment records the re-read split of 183 and 25, the mutation kind, a preview of 183 admitted and 1 control row refused, the apply digest with 183 receipts, a readback of 183 names each carrying one retirement change and still superseded, and a replay preview admitting 0, with the excluded count summing with the census and both witnesses excluded, each citing a log ending in EXIT=",
+    "estimated_hours": null,
+    "goal": "Record a signed retirement change on the 183 superseded names no source produces",
+    "id": "sib-record-orphan-retirements",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-14T20:08:53Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 10,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 7,
+      "headroom": 4,
+      "mean_context": 91429,
+      "observed_at": "2026-10-14T20:08:45Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 10,
+        "aggregate_tokens_per_second": 397.517,
+        "detail": "",
+        "mean_tokens_per_second": 49.69,
+        "observed_at": "2026-10-14T20:08:45Z",
+        "runs": 8.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T200851870928-sib-record-orphan-retirements/manifest.md",
+    "negative_control": "the authority's control row, a name outside the class, must be refused in the preview and left untouched by the apply",
+    "plan": "sn-integrity-backlog",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§31",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements.html",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-authority.json",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py",
+      "docs/figures/sn-integrity-backlog/sib-record-orphan-retirements"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 7428944.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-record-orphan-retirements",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-14T20:09:01.910113+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "s31 content is covered by the v146 content review, whose findings are all answered; only s33 changed since and its review is composing; s33 does not dispatch until that review is answered",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:state-render",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5005.555,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 245.13,
+      "context-estimate": 4.846,
+      "records": 283.781,
+      "verdict-inputs": 115.759
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.8846153846153846,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "424b656c77d8b687d9b40d55477b69609e7fca4b",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8b30f65265325207503bb5928bd1858657251d9b",
+    "reviewed_head_sha": "424b656c77d8b687d9b40d55477b69609e7fca4b",
+    "scores": {
+      "durability": 5,
+      "evidence": 16,
+      "fit": 17,
+      "goal_fidelity": 18,
+      "reuse": 4,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 79
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261014T200851870928-sib-record-orphan-retirements",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§31",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "d6c6a005-4415-4b0c-aba7-2413788237b8",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 17036660,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2539.408,
+    "generated_tokens": 71959,
+    "generation_seconds": 2109.486,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 74.4,
+    "machine_seconds": 429.922,
+    "peak_input_tokens": 171153,
+    "tokens_per_second": 34.11,
+    "wall_tokens_per_second": 28.34
+  },
+  "time_budget": "60m",
+  "tool_steps": 131.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2551,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-14T20:51:44Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-14T20:09:16Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261014T200851870928-sib-record-orphan-retirements",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 11157,
+    "worker_pid": 414209
+  },
+  "worker_seconds": 2525,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
