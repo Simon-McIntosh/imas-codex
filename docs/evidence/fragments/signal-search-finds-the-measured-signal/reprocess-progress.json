@@ -2,8 +2,9 @@
   "facility": "jt-60sa",
   "pipeline": "imas-codex discover run jt-60sa --only signals",
   "reprocess_start": "2026-10-13T11:53:35Z",
-  "negative_control_enriched_before_fix": 1416,
+  "negative_control_enriched_before_fix": 1441,
   "negative_control_cutover": "2026-10-11T21:16:46Z",
+  "negative_control_source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T113938701940-ssfms-reprocess-sample/manifest.md",
   "scopes": [
     {
       "scope": "small-catalogue-families",

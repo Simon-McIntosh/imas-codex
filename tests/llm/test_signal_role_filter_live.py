@@ -9,18 +9,24 @@ reads its own serving path: ``_search_signals`` with the rerank off, which is
 what the ``search_signals`` tool calls.
 
 Each question is searched twice: once with ``role="measured"`` and once with no
-role, and the top :data:`TOP_N` of each is read. The graded fixture states, per
-question, whether a candidate is a measurement of the quantity (grade 3), a
-commanded or reference value of it or the same quantity at an adjacent point
-(grade 2), related hardware (grade 1), or read and judged irrelevant (grade 0).
-The three properties this module checks:
+role, and the top :data:`MEASUREMENT_REACH_DEPTH` of each is read. The graded
+fixture states, per question, whether a candidate is a measurement of the
+quantity (grade 3), a commanded or reference value of it or the same quantity at
+an adjacent point (grade 2), related hardware (grade 1), or read and judged
+irrelevant (grade 0). The four properties this module checks:
 
-* every signal a filtered call returns carries the stored role ``measured``;
+* every signal a filtered call returns carries the stored role ``measured``,
+  read over the filtered top :data:`TOP_N`;
 * no filtered top :data:`TOP_N` holds a candidate the fixture grades 2 whose
   stored role is ``commanded`` or ``reference_or_setpoint``;
 * on at least one question the unfiltered top :data:`TOP_N` does hold such a
   grade-2 commanded or reference candidate, so the filter is shown to remove
-  something the unfiltered search keeps.
+  something the unfiltered search keeps;
+* every question's filtered top :data:`MEASUREMENT_REACH_DEPTH` holds at least
+  one candidate the fixture grades 3, so the filter reaches the measurement it
+  should rather than returning nothing on most questions. This reach is read
+  deeper than the three checks above: it asks whether the filter finds the
+  measurement at all, not whether a command crowds it out of the served page.
 
 Marked ``graph``: it needs the live database and the production embedding model
 the stored signal vectors were built with.
@@ -35,7 +41,13 @@ from unittest import mock
 import pytest
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "signal_search_questions.json"
+
+# The depth the served page is read to. The three control checks read the top
+# ``TOP_N``; the reach check reads deeper, to ``MEASUREMENT_REACH_DEPTH``, since
+# it asks whether the filter finds the measurement at all rather than whether a
+# command crowds it out of the page a user sees.
 TOP_N = 5
+MEASUREMENT_REACH_DEPTH = 10
 
 _FIXTURE = json.loads(FIXTURE_PATH.read_text())
 FACILITY = _FIXTURE["eligibility"]["facility"]
@@ -59,7 +71,9 @@ def _use_production_embeddings(monkeypatch):
     monkeypatch.delenv("IMAS_CODEX_EMBEDDING_MODEL", raising=False)
 
 
-def _served_top(query: str, role: str | None, k: int = TOP_N) -> list[dict]:
+def _served_top(
+    query: str, role: str | None, k: int = MEASUREMENT_REACH_DEPTH
+) -> list[dict]:
     """Call the served signal search with the rerank off; return its ranked rows.
 
     The served tool body is ``_search_signals``, which the ``search_signals``
@@ -68,6 +82,10 @@ def _served_top(query: str, role: str | None, k: int = TOP_N) -> list[dict]:
     stored ``signal_role`` are read from the call the tool actually made rather
     than re-derived. An error reply is refused here rather than scored, so a
     serving failure cannot read as an empty result.
+
+    Reads ``k`` rows, by default the deeper :data:`MEASUREMENT_REACH_DEPTH`, so
+    one call serves both the control checks (which slice to :data:`TOP_N`) and
+    the reach check.
     """
     from imas_codex.llm import search_tools
 
@@ -103,7 +121,7 @@ _TABLE: list[dict] | None = None
 
 
 def _live_table() -> list[dict]:
-    """The 22 questions, each with its filtered and unfiltered top ``TOP_N``."""
+    """The 22 questions, each with its filtered and unfiltered top ``MEASUREMENT_REACH_DEPTH``."""
     global _TABLE
     if _TABLE is not None:
         return _TABLE
@@ -130,11 +148,11 @@ def _live_table() -> list[dict]:
 
 @pytest.mark.graph
 def test_filtered_call_returns_only_measured_signals():
-    """Every signal a ``role=measured`` call returns carries the stored role."""
+    """Every signal in a ``role=measured`` call's top :data:`TOP_N` carries the stored role."""
     offenders = [
         (entry["id"], row["id"], row["stored_role"])
         for entry in _live_table()
-        for row in entry["filtered"]
+        for row in entry["filtered"][:TOP_N]
         if row["stored_role"] != "measured"
     ]
     assert not offenders, f"filtered search returned non-measured signals: {offenders}"
@@ -142,11 +160,11 @@ def test_filtered_call_returns_only_measured_signals():
 
 @pytest.mark.graph
 def test_filtered_top_holds_no_grade2_command_or_reference():
-    """No filtered top ``TOP_N`` holds a graded-2 commanded or reference signal."""
+    """No filtered top :data:`TOP_N` holds a graded-2 commanded or reference signal."""
     offenders = [
         (entry["id"], row["id"], row["stored_role"])
         for entry in _live_table()
-        for row in entry["filtered"]
+        for row in entry["filtered"][:TOP_N]
         if row["grade"] == 2 and row["stored_role"] in COMMAND_OR_REFERENCE
     ]
     assert not offenders, (
@@ -156,11 +174,11 @@ def test_filtered_top_holds_no_grade2_command_or_reference():
 
 @pytest.mark.graph
 def test_unfiltered_control_holds_a_grade2_command_or_reference():
-    """The unfiltered search keeps a graded-2 command or reference on some question."""
+    """The unfiltered top :data:`TOP_N` keeps a graded-2 command or reference on some question."""
     hits = [
         (entry["id"], row["id"], row["stored_role"])
         for entry in _live_table()
-        for row in entry["unfiltered"]
+        for row in entry["unfiltered"][:TOP_N]
         if row["grade"] == 2 and row["stored_role"] in COMMAND_OR_REFERENCE
     ]
     assert hits, (
@@ -171,22 +189,28 @@ def test_unfiltered_control_holds_a_grade2_command_or_reference():
 
 
 @pytest.mark.graph
-def test_filtered_arm_returns_rows_including_a_grade3_measurement():
-    """Every filtered top 5 is non-empty and the arm reaches a graded-3 signal.
+def test_every_question_returns_a_grade3_measurement_in_its_filtered_top():
+    """Every question's filtered top :data:`MEASUREMENT_REACH_DEPTH` holds a graded-3 measurement.
 
-    A role predicate that returned no signals would satisfy the two claims above
-    vacuously — both offender lists would be empty and the suite green — so the
-    filtered arm is also shown to return rows: every question's filtered top
-    :data:`TOP_N` holds at least one candidate, and across the questions the
-    filtered calls return at least one signal the fixture grades 3, a
-    measurement of the queried quantity.
+    A role predicate that returned no signals would satisfy the two offender
+    checks above vacuously, and a single graded-3 hit anywhere across the
+    questions would let the rest return none, so the reach is checked per
+    question: every question's filtered top :data:`MEASUREMENT_REACH_DEPTH` must
+    hold at least one candidate the fixture grades 3, a measurement of the
+    queried quantity. Read deeper than the control checks' :data:`TOP_N`: this
+    asks whether the filter finds the measurement at all. A question with no
+    graded-3 hit at that depth is named here, not exempted.
     """
     table = _live_table()
     empty = [entry["id"] for entry in table if not entry["filtered"]]
     assert not empty, f"filtered search returned no signals for: {empty}"
 
-    grade3 = sum(1 for entry in table for row in entry["filtered"] if row["grade"] == 3)
-    assert grade3 >= 1, (
-        "filtered search returned no graded-3 measurement on any of the "
-        f"{len(table)} questions, so it is not reaching the signals it should"
+    missing = [
+        entry["id"]
+        for entry in table
+        if not any(row["grade"] == 3 for row in entry["filtered"])
+    ]
+    assert not missing, (
+        f"{len(missing)} of {len(table)} question(s) return no graded-3 "
+        f"measurement in their filtered top {MEASUREMENT_REACH_DEPTH}: {missing}"
     )

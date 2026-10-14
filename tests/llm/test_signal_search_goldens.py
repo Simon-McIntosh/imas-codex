@@ -43,6 +43,7 @@ nDCG@10; a control that does not means the labels are wrong.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import random
@@ -88,6 +89,23 @@ _ROLE_RERANK_LEVELS = _ROLE_RERANK_QUESTION["relevance_grade"]["criteria"]
 _ROLE_RERANK_INSTRUCTIONS = _ROLE_RERANK_QUESTION["relevance_grade"]["instructions"]
 
 json_fixture = json.loads(FIXTURE_PATH.read_text())
+
+# A digest over every (question, signal, grade) triple in the fixture. The
+# grade totals below catch a mass re-grade that moves one of them, but a swap
+# between two grades leaves every total unchanged, so the digest is pinned too.
+FIXTURE_LABEL_DIGEST = (
+    "d3383edb5faa738dfb1bc35fc239caa9b9134aff46fdf6dcab90fee377fafd8e"
+)
+
+
+def _fixture_label_digest() -> str:
+    triples = sorted(
+        (q["id"], sid, grade)
+        for q in json_fixture["questions"]
+        for sid, grade in q["relevant"].items()
+    )
+    blob = "\n".join(f"{qid}\t{sid}\t{grade}" for qid, sid, grade in triples)
+    return hashlib.sha256(blob.encode()).hexdigest()
 
 
 @pytest.fixture(autouse=True)
@@ -144,12 +162,22 @@ class UnlabelledCandidates(Exception):
     what made the prototype's figures a reading rather than a verdict.
     """
 
-    def __init__(self, arm: str, question_id: str, candidates: list[str]):
+    def __init__(
+        self,
+        arm: str,
+        question_id: str,
+        candidates: list[str],
+        *,
+        depth: int,
+        scope: str,
+    ):
         self.arm = arm
         self.question_id = question_id
         self.candidates = candidates
+        self.depth = depth
+        self.scope = scope
         super().__init__(
-            f"arm {arm!r} on question {question_id!r} top {TOP_K} holds "
+            f"arm {arm!r} on question {question_id!r} {scope} {depth} holds "
             f"{len(candidates)} unlabelled candidate(s): " + ", ".join(candidates)
         )
 
@@ -209,7 +237,7 @@ def require_labelled(arm: str, question: Question, ranked_ids: list[str]) -> Non
     """Refuse an arm whose top ``k`` holds an arm-unlabelled candidate, naming it."""
     missing = unlabelled_in_top_k(question, ranked_ids, TOP_K)
     if missing:
-        raise UnlabelledCandidates(arm, question.id, missing)
+        raise UnlabelledCandidates(arm, question.id, missing, depth=TOP_K, scope="top")
 
 
 def require_labelled_pool(arm: str, question: Question, pool_ids: list[str]) -> None:
@@ -222,7 +250,9 @@ def require_labelled_pool(arm: str, question: Question, pool_ids: list[str]) -> 
     """
     missing = unlabelled_in_top_k(question, pool_ids, RERANK_POOL)
     if missing:
-        raise UnlabelledCandidates(arm, question.id, missing)
+        raise UnlabelledCandidates(
+            arm, question.id, missing, depth=RERANK_POOL, scope="pool of"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -535,10 +565,14 @@ def test_fixture_holds_draft_and_held_out_questions() -> None:
 
 
 def test_fixture_label_population_is_pinned() -> None:
-    """The committed fixture carries an exact count of labels by grade.
+    """The committed fixture carries an exact count of labels by grade and a digest.
 
     A silent mass re-grade moves one of these totals, so the test names the
-    population rather than letting a rewritten fixture pass unseen.
+    population rather than letting a rewritten fixture pass unseen. A total
+    alone cannot see a swap between two grades, so every (question, signal,
+    grade) triple is pinned by digest as well: a changed label is read under the
+    fixture's grading rule and the digest updated in the same commit, so the
+    change is a stated act rather than a silent one.
     """
     totals = {0: 0, 1: 0, 2: 0, 3: 0}
     for q in json_fixture["questions"]:
@@ -547,6 +581,13 @@ def test_fixture_label_population_is_pinned() -> None:
             totals[grade] += 1
     assert sum(totals.values()) == 2914, sum(totals.values())
     assert totals == {0: 1019, 1: 792, 2: 461, 3: 642}, totals
+    digest = _fixture_label_digest()
+    assert digest == FIXTURE_LABEL_DIGEST, (
+        "the fixture's (question, signal, grade) triples changed — a changed "
+        "label is read under the fixture's grading rule and the digest updated "
+        f"in the same commit, or the change is a lost label. computed {digest!r}, "
+        f"pinned {FIXTURE_LABEL_DIGEST!r}"
+    )
 
 
 def test_every_question_is_phrased_without_facility_or_source_vocabulary() -> None:
@@ -706,6 +747,27 @@ def test_a_rerank_arm_refuses_an_unlabelled_candidate_anywhere_in_its_pool() -> 
         require_labelled_pool("rrf_rerank_role", q, pool)
     assert removed in excinfo.value.candidates
     assert "rrf_rerank_role" in str(excinfo.value)
+
+
+def test_the_refusal_names_the_depth_it_checked() -> None:
+    """The refusal reports the depth it checked, not a fixed top 10.
+
+    ``require_labelled`` checks the top ``TOP_K``, and ``require_labelled_pool``
+    checks the whole rerank pool of ``RERANK_POOL``. A message that always read
+    *top 10* would understate the pool check by fifty and send a reader looking
+    for the missing label in the wrong place.
+    """
+    q, pool = _pool_of_sixty()
+    del q.relevant[pool[-1]]
+    with pytest.raises(UnlabelledCandidates) as pool_exc:
+        require_labelled_pool("rrf_rerank_role", q, pool)
+    assert f"pool of {RERANK_POOL}" in str(pool_exc.value)
+
+    top_q = _gate_toy_question()
+    del top_q.relevant["sig:c"]
+    with pytest.raises(UnlabelledCandidates) as top_exc:
+        require_labelled("current_tool", top_q, ["sig:a", "sig:b", "sig:c", "sig:d"])
+    assert f"top {TOP_K}" in str(top_exc.value)
 
 
 # ---------------------------------------------------------------------------

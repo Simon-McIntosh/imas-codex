@@ -1,0 +1,95 @@
+<!-- The golden-set guards and reprocess records tightened: the unlabelled
+     refusal names the depth it checked, the label population is pinned by
+     digest as well as by totals, the live role filter asserts a graded-3
+     measurement per question, and the reprocess records agree on their
+     negative-control count and its source. -->
+<section id="ssfms-cleanup-goldens" data-reckon="evidence">
+  <h2 id="ssfms-cleanup-goldens-heading">Guards and records the review left open</h2>
+
+  <p id="ssfms-cleanup-goldens-intro">
+    Four items, each a guard that could not fail or a record that disagreed
+    with its check. Every change below carries the check that fails without it,
+    shown by reverting the change in a scratch copy and reading the failure.
+  </p>
+
+  <table id="ssfms-cleanup-goldens-changes-table">
+    <caption>Each change, its file, its check, and how the check was shown to fire</caption>
+    <tr><th>change</th><th>file</th><th>check</th><th>shown to fire by</th></tr>
+    <tr><td>the refusal names the depth it checked (top 10, or the pool of 60)</td><td><code>tests/llm/test_signal_search_goldens.py</code></td><td><code>test_the_refusal_names_the_depth_it_checked</code></td><td>reinstating the fixed top-10 message makes it fail on <code>f"pool of {RERANK_POOL}" in …</code></td></tr>
+    <tr><td>the label population is pinned by a sha256 over every (question, signal, grade) triple, beside its grade totals</td><td><code>tests/llm/test_signal_search_goldens.py</code></td><td><code>test_fixture_label_population_is_pinned</code></td><td>swapping a grade 3 and a grade 0 in a scratch copy leaves the totals unchanged and fails on the digest</td></tr>
+    <tr><td>a graded-3 measurement is asserted in every question's filtered top 10, not summed across questions</td><td><code>tests/llm/test_signal_role_filter_live.py</code></td><td><code>test_every_question_returns_a_grade3_measurement_in_its_filtered_top</code></td><td>reading the filtered call as <code>role="commanded"</code> fails that check itself, 3 failed with <code>EXIT=1</code> (<code>scratch/grade3-negative-control.log</code>)</td></tr>
+    <tr><td>the reprocess records carry the same negative-control count, instant and source</td><td><code>reprocess.html</code>, <code>reprocess-progress.json</code></td><td>both read <strong>1,441</strong> at <code>2026-10-11T21:16:46Z</code> from the sample node's run record</td><td>the two files disagreed before (1,441 against 1,416 with no source)</td></tr>
+    <tr><td>the grouped-member pass is described as a re-read, not a re-grade</td><td><code>ssfms-reprocess-relabel.html</code></td><td>the harness heading, table caption and arm-order paragraph say <em>re-read</em></td><td>the digest pin above is the re-read's own guard</td></tr>
+  </table>
+
+  <p id="ssfms-cleanup-goldens-depth">
+    <strong>The refusal named the wrong depth.</strong> <code>UnlabelledCandidates</code>
+    always interpolated <code>TOP_K</code> (10), so a pool check that had
+    searched all 60 candidates reported <em>top 10 holds …</em> — a reader told
+    the wrong depth would look in the wrong place for the gap. The exception now
+    carries the depth and the scope word, <code>require_labelled</code> reporting
+    the top 10 and <code>require_labelled_pool</code> the pool of 60.
+    <code>test_the_refusal_names_the_depth_it_checked</code> asserts both
+    messages by name.
+  </p>
+
+  <p id="ssfms-cleanup-goldens-digest">
+    <strong>Grade totals could not see a swap.</strong> The pin compared the
+    count of labels at each grade, so moving one label from grade 3 to 0 and
+    another from 0 to 3 left every total in place. The test now also pins a
+    sha256 over the sorted (question, signal, grade) triples:
+    <code>d3383edb5faa738dfb1bc35fc239caa9b9134aff46fdf6dcab90fee377fafd8e</code>
+    over <strong>2,914</strong> triples. Its failure message states that a
+    changed label is read under the fixture's grading rule and the digest
+    updated in the same commit. Swapping
+    <code>jt-60sa:general/dhc_obsip</code> 3→0 and
+    <code>jt-60sa:general/glw_curglw3</code> 0→3 in the question
+    <code>plasma-current-total</code> leaves the totals at
+    1,019 / 792 / 461 / 642 and moves the digest to
+    <code>24d35fa65af530065c3613b8cb183e9060a8c556ef85f70615c286387ea546d7</code>,
+    so the test fails on the digest where the totals alone would pass.
+  </p>
+
+  <p id="ssfms-cleanup-goldens-live">
+    <strong>The live role filter summed across questions.</strong> It required a
+    single graded-3 hit anywhere across the 22 questions, so 21 of them could
+    return none and it would still pass. It now asserts a graded-3 measurement
+    in every question's filtered top 10 and names any question that has none.
+    Read against the live graph, all 22 questions return a graded-3 measurement
+    in their filtered top 10, so no question is exempted. The reach check reads
+    deeper than the three control checks, which read the served page: the
+    controls keep <code>TOP_N = 5</code>, the depth of the page the tool serves,
+    and the reach check carries its own <code>MEASUREMENT_REACH_DEPTH = 10</code>.
+  </p>
+
+  <p id="ssfms-cleanup-goldens-records">
+    <strong>The reprocess records disagreed.</strong>
+    <code>reprocess.html</code> stated the pre-fix negative control as
+    <strong>1,441</strong> JT-60SA signals enriched before
+    <code>2026-10-11T21:16:46Z</code>, while
+    <code>reprocess-progress.json</code> recorded <strong>1,416</strong> with no
+    source. The figure the sample node read before its reset is 1,441, recorded
+    in its run record
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T113938701940-ssfms-reprocess-sample/manifest.md</code>.
+    Both files now carry 1,441, the cutover instant and that source, checked to
+    agree on all three.
+  </p>
+
+  <p id="ssfms-cleanup-goldens-relabel-prose">
+    <strong>The relabel record said re-graded.</strong> The grouped-member pass
+    re-read 1,321 labels from the signals' current text; a re-grade was reverted
+    and replaced by the re-read. The harness heading, the arm table caption and
+    the arm-order paragraph called it a re-grade, and now say <em>re-read</em>.
+  </p>
+
+  <p id="ssfms-cleanup-goldens-evidence">
+    <strong>Evidence.</strong> The combined gate
+    <code>pytest -m 'graph or not graph' tests/llm/test_signal_search_goldens.py
+    tests/llm/test_signal_role_filter_live.py</code> passes, 20 tests, on this
+    node's own change, against 19 at base <code>7bbf44b56</code> so the one
+    added test is the delta. The RRF arm's mean nDCG@10 reads
+    <strong>0.8473</strong>, the figure the relabel node recorded. This gate
+    measures only this node's change; verifying the merged result belongs to a
+    separately dispatched test node.
+  </p>
+</section>
