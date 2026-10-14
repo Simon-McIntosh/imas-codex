@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-14T20:47:20.938Z",
+  "dispatched_at": "2026-10-14T20:36:37Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-judgment-evaluation.html#s8",
+      "id": "reasoning-1",
+      "reason": "without the caller and the passed prior assignment named, a node implements the preservation inside `assign_group_splits`, where the committed golden is unreachable, and the done-when cannot be met as written.",
+      "text": "\u00a78 directs that \"A rebuild keeps the split every existing copy group already has in the committed golden file\", but the named function `assign_group_splits` (`imas_codex/standard_names/judgment_goldens.py:80`) takes only `(rows, group_key)` and has no access to the committed golden; the prior assignment must be read and threaded by its only production caller `_finish` (`judgment_goldens.py:197`, call at `:231`), whose signature \u00a78 does not mention",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-judgment-evaluation.html#s8",
+      "id": "reasoning-2",
+      "reason": "the mechanism does satisfy the done-when it states, and the over-claim is prose, not a measure a node is graded on.",
+      "text": "\u00a78 states the new rule makes \"the two splits stay balanced\", but preserving existing groups and alternating only the new ones cannot correct an imbalance already in the file, and its own done-when measures only the new groups (\"splits the new groups within one of balance\"), so the prose asserts a whole-file balance the section never measures",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-judgment-evaluation.html#_document",
+      "id": "reasoning-3",
+      "reason": "the figure is an authored planning estimate and reckon derives `impl` from the section records independently, so no node's mechanism or measure turns on it.",
+      "text": "the document declares `plan-effort-hours` 16.0 while its six section records now sum to 17.5 (s2 1.5 + s3 4.0 + s4 3.0 + s5 5.0 + s6 2.5 + s8 1.5): 16.0 is exactly the pre-s8 sum, so adding \u00a78 (`c9da233da`) left the total stale by 1.5 h",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "b1d077d93f681de169cac6f1972ca1dc9cb18ec7c453a70e737f6fb6ccb4acb7",
+  "plan_slug": "sn-judgment-evaluation",
+  "plan_version": 36,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261014T203619556342-plan-review-of-sn-judgment-evaluation",
+  "reviewed_blob_sha": "7386c33309d9b4c563481de720621a725ee126b6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/standard_names/judgment_goldens.py` and `tests/standard_names/test_judgment_goldens.py` exist; `assign_group_splits` is defined at judgment_goldens.py:80; the href `/imas-codex/evidence/archive/sn-judgment-evaluation-landed.html#s5-goldens-labelled` resolves to `<section id=\"s5-goldens-labelled\">` in that archived file, and its text (\"adding groups moved 10 of the 15 existing rows between calibration and validation\") matches \u00a78's cited figure.",
+    "done_when": "pass \u2014 \u00a78's done-when is measurable (existing rows' splits unchanged; new groups within one of balance) and names its control explicitly (\"The test fails with the preservation removed\"), which the golden-D move (10 of 15 rows) shows is a control that can actually fire.",
+    "evidence_paths": "pass \u2014 \u00a78 asserts no evidence a later reader must open; its gate is the repository test file and the live rebuild, both durable.",
+    "naming": "pass \u2014 \u00a78 introduces no symbol, filename or comment carrying a plan label, stage name, ticket number or version tag, and its prose states the mechanism rather than a changelog.",
+    "reasoning": "a finding \u2014 \u00a78's mechanism cannot run inside the function it names: `assign_group_splits(rows, group_key)` receives only rows and never sees \"the committed golden file\" the preservation must read, so the read-and-thread has to happen in its sole production caller `_finish`, which \u00a78 never names.",
+    "single_goal": "pass \u2014 \u00a78 carries one deliverable, split preservation across rebuilds.",
+    "wiring": "pass \u2014 \u00a78's target `assign_group_splits` (`imas_codex/standard_names/judgment_goldens.py:80`) and its test file `tests/standard_names/test_judgment_goldens.py` both resolve; the goldens it rebuilds (A\u2013D) are the fixtures \u00a74/\u00a75 landed; the plan carries no per-section `data-links` anywhere, so \u00a78's empty `data-links` matches the house form rather than omitting a declared dependency."
+  },
+  "section_digests": {
+    "_document": "936fe808a85d711be51a56756d3a3ba293b89ece9fab03f1623123e3bfcbb5be",
+    "s1": "5114b8af1e76d8a510b61c2e503198fd87fa18973725482c4142adbab2c2a31d",
+    "s2": "bf86aec1961d22f900873e8ececc21774e93aaaaa5b9ef447c73c1f41c995b53",
+    "s3": "e050c3a4a19a5b58f2ffb23ee0511cb7ae3a3999fa0ab3fe65bf9500cab4dab7",
+    "s4": "0de7d56aa7d37f7fd786c38ecdfd65ca83e1d4fab9f539dd851f5d4a3893981e",
+    "s5": "e96e2a5e957303794e4ca627cfbf4cb728fe0986d32392c589be55e2069a5231",
+    "s6": "d9cd2ca796b17134ec671bed226f04646abc40471521cbf7864f1479b6d55543",
+    "s7": "f7e6c5fa222a8d7b8423efc56b40e7719908581039312fdd6e1b178113433e11",
+    "s8": "e20b7bd6d0582c4b4a1a609fc65d7297744dbc3ae8bcd74c1de65177c6936fbb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T20:49:18.826495+00:00"
+}
