@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:5221",
+    "imas_codex/discovery/signals/parallel.py:2020",
+    "imas_codex/cli/discover/signals.py:383"
+  ],
+  "completed_at": "2026-10-14T12:46:18.535Z",
+  "dispatched_at": "2026-10-14T12:33:57Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_role_store.py",
+      "line": "480",
+      "severity": "follow-on",
+      "text": "follow-on: the second half of the assertion compares the id the worker passed to mark_signals_underspecified (marked[0][0][\"id\"]) with the id the test supplied (signals[0][\"id\"]); both are copied from the same claim batch, so that half holds whatever the worker does and survives an id regression \u2014 the same shape the prior review flagged at :418 \u2014 while the load-bearing guards are the preceding 'assert marked' and the following 'assert not judged', each carried by a recorded red arm."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read against base 46531f08872427305b01d67dd9082e3dc2a06751 through head b7038eacd65f68547dc4578b539e3351fade8e16; ca33a8696 reverts the predicate, removes the enrich judgement and adds the role clear, 34d95ec04 teaches the graph double the status statement, and b7038eacd rewrites the fragment around the failed blind gate, the tests inverted to the no-role invariant.",
+    "done_when": "the source node's done_when measures role storage against a 27-of-30 agreement bar and a census that reads zero; the gained commits carry no such measure, their gate being three red-armed store tests and the base/head suite pair (1573 and 1576 passed, EXIT=0), and the 26-of-30 blind verdict that reversed the change is recorded in the manifest's evidence_inputs and the fragment at docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-underspecified-roles.html:145.",
+    "goal": "the node goal is to store a judged signal_role on every underspecified signal that carries a description; the three commits gained since the prior review reverse it \u2014 imas_codex/discovery/signals/parallel.py:1918 now admits only 'enriched' and 'checked', the enrich branch at parallel.py:5221 judges nothing for a signal it marks underspecified, and parallel.py:2223 clears signal_role \u2014 so the landed change delivers the opposite of the goal sentence.",
+    "manifest": "read; status complete, changed_paths the three declared paths, commits 6e02044bb..b7038eacd, tests 'tests/discovery/test_signal_role_store.py \u2014 8 passed' (re-run on disk: 8 passed, EXIT=0), baseline_suite base 1573 passed and after_suite head 1576 passed both EXIT=0, and negative_control_log logs/red-arm-predicate.log reading 1 failed EXIT=1.",
+    "write_paths": "the manifest declares imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_role_store.py and the fragment; the diff from 46531f088 to b7038eacd touches exactly those three, so every changed path is inside the fence."
+  },
+  "justifications": {
+    "durability": "each inverted test reddens under its recorded mutation (logs/red-arm-clear.log fails test_mark_signals_underspecified_clears_a_stored_role on the surviving role), but the assertion at tests/discovery/test_signal_role_store.py:480 compares a value that moves with the value under test.",
+    "evidence": "the gained commits' gate is recorded and re-read \u2014 the three red arms (logs/red-arm-predicate.log, red-arm-judge.log, red-arm-clear.log, each 1 failed EXIT=1) and the base/head suite pair (logs/gate-discovery-base.log 1573 passed, logs/gate-discovery-head.log 1576 passed, both EXIT=0) \u2014 while the original done_when's agreement measure is superseded by the blind verdict rather than met.",
+    "fit": "the reverted comment at parallel.py:1909 states the mechanism (the judge disagreed with a blind hand-read on 4 of 30) with no plan or ticket identifier, and the fragment's prose follows its sibling records' style.",
+    "goal_fidelity": "the landed change at parallel.py:1918 and parallel.py:2223 does the opposite of the goal sentence \u2014 an underspecified signal carries no role and is excluded from the predicate \u2014 a reversal the plan's \u00a713 authorising gate (its failed blind re-measurement, 26 of 30) licenses but which does not deliver the stated deliverable.",
+    "reuse": "the change returns to the shared predicate owner _SIGNAL_ROLE_MISSING_WHERE (parallel.py:1917) and removes the forked judgement path; the added _RoleGraph status branch (tests/discovery/test_signal_role_store.py:108) models FacilitySignal state rather than capturing statements, so it extends no owner that exists and tests/recording_graph_client.py is absent.",
+    "scope_discipline": "every path in the diff from 46531f088 to b7038eacd is one of the three declared write paths in the manifest, and no other file is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to store a judged signal_role on every underspecified signal that carries a description; the three commits gained since the prior review reverse it \u2014 imas_codex/discovery/signals/parallel.py:1918 now admits only 'enriched' and 'checked', the enrich branch at parallel.py:5221 judges nothing for a signal it marks underspecified, and parallel.py:2223 clears signal_role \u2014 so the landed change delivers the opposite of the goal sentence.\nVERDICT done_when: the source node's done_when measures role storage against a 27-of-30 agreement bar and a census that reads zero; the gained commits carry no such measure, their gate being three red-armed store tests and the base/head suite pair (1573 and 1576 passed, EXIT=0), and the 26-of-30 blind verdict that reversed the change is recorded in the manifest's evidence_inputs and the fragment at docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-underspecified-roles.html:145.\nVERDICT write_paths: the manifest declares imas_codex/discovery/signals/parallel.py, tests/discovery/test_signal_role_store.py and the fragment; the diff from 46531f088 to b7038eacd touches exactly those three, so every changed path is inside the fence.\nVERDICT manifest: read; status complete, changed_paths the three declared paths, commits 6e02044bb..b7038eacd, tests 'tests/discovery/test_signal_role_store.py \u2014 8 passed' (re-run on disk: 8 passed, EXIT=0), baseline_suite base 1573 passed and after_suite head 1576 passed both EXIT=0, and negative_control_log logs/red-arm-predicate.log reading 1 failed EXIT=1.\nVERDICT diff: read against base 46531f08872427305b01d67dd9082e3dc2a06751 through head b7038eacd65f68547dc4578b539e3351fade8e16; ca33a8696 reverts the predicate, removes the enrich judgement and adds the role clear, 34d95ec04 teaches the graph double the status statement, and b7038eacd rewrites the fragment around the failed blind gate, the tests inverted to the no-role invariant.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:5221, imas_codex/discovery/signals/parallel.py:2020, imas_codex/cli/discover/signals.py:383\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: the landed change at parallel.py:1918 and parallel.py:2223 does the opposite of the goal sentence \u2014 an underspecified signal carries no role and is excluded from the predicate \u2014 a reversal the plan's \u00a713 authorising gate (its failed blind re-measurement, 26 of 30) licenses but which does not deliver the stated deliverable.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gained commits' gate is recorded and re-read \u2014 the three red arms (logs/red-arm-predicate.log, red-arm-judge.log, red-arm-clear.log, each 1 failed EXIT=1) and the base/head suite pair (logs/gate-discovery-base.log 1573 passed, logs/gate-discovery-head.log 1576 passed, both EXIT=0) \u2014 while the original done_when's agreement measure is superseded by the blind verdict rather than met.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff from 46531f088 to b7038eacd is one of the three declared write paths in the manifest, and no other file is touched.\nSCORE durability: 17\nJUSTIFICATION durability: each inverted test reddens under its recorded mutation (logs/red-arm-clear.log fails test_mark_signals_underspecified_clears_a_stored_role on the surviving role), but the assertion at tests/discovery/test_signal_role_store.py:480 compares a value that moves with the value under test.\nSCORE fit: 19\nJUSTIFICATION fit: the reverted comment at parallel.py:1909 states the mechanism (the judge disagreed with a blind hand-read on 4 of 30) with no plan or ticket identifier, and the fragment's prose follows its sibling records' style.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change returns to the shared predicate owner _SIGNAL_ROLE_MISSING_WHERE (parallel.py:1917) and removes the forked judgement path; the added _RoleGraph status branch (tests/discovery/test_signal_role_store.py:108) models FacilitySignal state rather than capturing statements, so it extends no owner that exists and tests/recording_graph_client.py is absent.\nFINDING tests/discovery/test_signal_role_store.py:480 follow-on: the second half of the assertion compares the id the worker passed to mark_signals_underspecified (marked[0][0][\"id\"]) with the id the test supplied (signals[0][\"id\"]); both are copied from the same claim batch, so that half holds whatever the worker does and survives an id regression \u2014 the same shape the prior review flagged at :418 \u2014 while the load-bearing guards are the preceding 'assert marked' and the following 'assert not judged', each carried by a recorded red arm.\n",
+  "review_run_id": "r-20261014T123225007544-review-of-ssfms-underspecified-roles-b7038eacd65f",
+  "reviewed_base_sha": "46531f08872427305b01d67dd9082e3dc2a06751",
+  "reviewed_head_sha": "b7038eacd65f68547dc4578b539e3351fade8e16",
+  "reviewed_run_id": "r-20261014T104258578484-ssfms-underspecified-roles",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 8,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T12:45:04.866791+00:00",
+  "total": 100,
+  "verdict": "SOUND WITH FINDINGS"
+}
