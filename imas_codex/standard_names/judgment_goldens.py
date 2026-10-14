@@ -500,8 +500,56 @@ def build_description_object(graph: GraphClient) -> list[dict[str, Any]]:
     return _finish(rows, graph)
 
 
+SYNONYM_RULINGS = OUTPUT / "golden-synonym-rulings.json"
+
+
+def _synonym_ruling_rows() -> list[dict[str, Any]]:
+    """One row per ruled name pair; pairs sharing a name share a copy group.
+
+    The label is the ruling's own (1: one quantity, 0: distinct quantities).
+    A group is a connected component of the name graph, named by its
+    alphabetically first name, so no name sits on both sides of the split.
+    """
+    rulings = json.loads(SYNONYM_RULINGS.read_text())["rows"]
+    pairs = [
+        (tuple(sorted((ruling["left"], ruling["right"]))), ruling) for ruling in rulings
+    ]
+    parent: dict[str, str] = {}
+
+    def root(name: str) -> str:
+        parent.setdefault(name, name)
+        while parent[name] != name:
+            parent[name] = parent[parent[name]]
+            name = parent[name]
+        return name
+
+    for (left, right), _ in pairs:
+        low, high = sorted((root(left), root(right)))
+        parent[high] = low
+    members: dict[str, list[str]] = defaultdict(list)
+    for name in list(parent):
+        members[root(name)].append(name)
+    group_of = {name: min(names) for names in members.values() for name in names}
+    rows = []
+    for (left, right), ruling in pairs:
+        unit = f"{left}::{right}"
+        rows.append(
+            _row(
+                unit,
+                int(ruling["label"]),
+                "coordinator_synonym_ruling",
+                f"{SYNONYM_RULINGS.name}:pair={ruling['pair']}",
+                name=left,
+                group=group_of[left],
+                canonical=unit,
+            )
+            | {"name": left}
+        )
+    return rows
+
+
 def build_near_duplicate(graph: GraphClient) -> list[dict[str, Any]]:
-    """Distinct-name pairs from explicit split and duplicate-path verdicts."""
+    """Name pairs: split and duplicate-path verdicts plus ruled synonym pairs."""
     rows = []
     text = (WEST / "west-name-shared-identities.md").read_text()
     for number, name, verdict in re.findall(
@@ -579,6 +627,7 @@ def build_near_duplicate(graph: GraphClient) -> list[dict[str, Any]]:
             )
             | {"name": names[0]}
         )
+    rows.extend(_synonym_ruling_rows())
     return _finish(rows, graph)
 
 
