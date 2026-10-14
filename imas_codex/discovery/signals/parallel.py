@@ -1909,10 +1909,12 @@ def census_signal_embeddings(
 # over the ``s`` alias, it selects both the rows the sweep judges and the rows
 # the census counts. A signal the judge could not answer for, or whose answer
 # fell outside the six roles, keeps no role and is selected again on the next
-# sweep. The status bound keeps the sweep off signals that are not yet enriched
-# and off skipped ones the pipeline filtered out.
+# sweep. An underspecified signal has a description a searcher reads and a role
+# of its own, so ``role=`` must find it; the status bound admits it beside the
+# enriched and checked ones while keeping the sweep off signals with no
+# description yet and off skipped ones the pipeline filtered out.
 _SIGNAL_ROLE_MISSING_WHERE = (
-    "s.status IN ['enriched', 'checked'] "
+    "s.status IN ['enriched', 'checked', 'underspecified'] "
     "AND s.description IS NOT NULL AND trim(s.description) <> '' "
     "AND s.signal_role IS NULL"
 )
@@ -5223,6 +5225,24 @@ async def enrich_worker(
                 "Marked %d signals as underspecified (low context)",
                 len(underspecified),
             )
+
+            # Judge each underspecified signal's role from its stored text, as
+            # for an enriched one. An underspecified signal carries the same
+            # description a searcher reads, so a ``role=`` search must find it.
+            try:
+                role_written, role_cost = await judge_and_store_signal_roles(
+                    underspecified
+                )
+                if role_written:
+                    logger.info(
+                        "Stored %d signal roles (cost $%.6f)",
+                        role_written,
+                        role_cost,
+                    )
+                if role_cost and hasattr(state.enrich_stats, "cost"):
+                    state.enrich_stats.cost += role_cost
+            except Exception as exc:
+                logger.warning("Signal role judgement failed (non-fatal): %s", exc)
 
         # Update graph with enrichment cost for historical tracking
         if enriched:
