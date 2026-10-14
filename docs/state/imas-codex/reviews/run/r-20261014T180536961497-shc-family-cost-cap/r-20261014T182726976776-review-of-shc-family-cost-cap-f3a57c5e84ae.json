@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "clive",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6154"
+  ],
+  "completed_at": "2026-10-14T18:36:22.116Z",
+  "dispatched_at": "2026-10-14T18:27:41Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1091",
+      "severity": "follow-on",
+      "text": "follow-on: the wrapper advances its `spent` accumulator only when the base drain returns a float, but CampaignRunner.run falls back to cost_fn(run_id) and adds that to result.total_cost when the drain returns None (campaign.py:1021-1024), so a None-returning batch lets a later batch in the same family be handed a remaining that ignores spend the runner already counted; the exposure is bounded by the runner's own ceiling check at campaign.py:996 and the production drain returns a float on a non-dry run, so this is a narrowing gap rather than a live overspend."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/newtest-head.log",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest lists this log under test_logs as the head run of the new test, but its header line reads `head_sha: bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85` \u2014 the base revision \u2014 so a later reader comparing the log's named revision against the record sees the base, not the head f3a57c5e8; the passing result is not in doubt because gate-head.log names f3a57c5e8 and includes the same file."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read commit by commit against base bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85; the single commit f3a57c5e84ae032f266b66b3edd70421f76e933e adds _family_budget_drain (harmonize.py:1069), its one call site family_drain at harmonize.py:1181 handed to the runner at harmonize.py:1190, the 162-line test file and the fragment, 256 insertions with no product file touched but harmonize.py.",
+    "done_when": "the brief's done_when names a stubbed test showing an anchor that spends 60% of the cap leaving its members exactly the remaining 40%, a recorded red run when the cap returns to per-batch, a base/head gate judged by delta, and the fragment; tests/standard_names/test_harmonize_cost_cap.py::test_family_cap_is_shared_between_anchor_and_members asserts drain.calls[1][1] == pytest.approx(0.4 * _CAP) and result.total_cost == pytest.approx(_CAP), and negative-control-per-batch.log records that same test FAILED (member batch handed 5.0 instead of 2.0, 1 failed 1 passed, exit 1), while gate-base.log (bc5acb919a70) reads 285 passed and gate-head.log (f3a57c5e8) reads 287 passed, both EXIT=0.",
+    "goal": "the reviewed node's goal is to make one cost cap cover a family's anchor and its members, including the review that follows each regeneration; imas_codex/standard_names/harmonize.py:1181 wraps the per-family drain with _family_budget_drain(drain_fn, budget.campaign_cost_ceiling) so every batch is handed the family's remaining budget rather than the whole cap again.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/manifest.md; status complete, one commit f3a57c5e8, changed_paths the same three files the diff carries, tests the harmonize-grep files plus test_campaign.py, test_budget_*.py and the new test with base 285 passed / head 287 passed / 0 added failures, and negative_control_log naming negative-control-per-batch.log.",
+    "write_paths": "the reviewed brief declares imas_codex/cli/sn.py, imas_codex/standard_names/harmonize.py, imas_codex/standard_names/budget.py, tests/standard_names/test_harmonize_cost_cap.py and docs/evidence/fragments/sn-harmonize-command/shc-family-cost-cap.html; git diff --stat bc5acb919a70..f3a57c5e8 returns exactly harmonize.py (+35/-1), the new test (162 lines) and the new fragment (60 lines), all inside that set, with sn.py and budget.py left untouched because the live apply already passes campaign_cost_ceiling=cost_limit (sn.py:6161-6164)."
+  },
+  "justifications": {
+    "durability": "the negative-control log shows test_family_cap_is_shared_between_anchor_and_members reddens when harmonize.py:1090 reverts to batch_cost_cap alone, so the guard is real, but the wrapper's spent accumulator at harmonize.py:1091-1092 is not advanced when the drain returns None and test_family_cap_bounds_the_family_not_each_batch also passes without the wrapper.",
+    "evidence": "the done_when's measure is asserted at tests/standard_names/test_harmonize_cost_cap.py:113 (drain.calls[1][1] == 0.4 * _CAP) with its red counterpart recorded in negative-control-per-batch.log, and gate-base.log/gate-head.log carry the delta 285->287 with EXIT=0, though newtest-head.log:3 names the base sha as its head_sha.",
+    "fit": "_family_budget_drain (harmonize.py:1069) is a private module helper with a mechanism docstring matching the surrounding private-helper idiom of harmonize.py:1066, and carries no plan, gate or ticket label.",
+    "goal_fidelity": "harmonize.py:1181 wraps drain_fn with the family's campaign_cost_ceiling so each batch at harmonize.py:1090 receives min(batch_cost_cap, remaining), and both the live CLI apply (sn.py:6154) and the fallback CampaignBudget() (harmonize.py:1135) route through the one wrapper.",
+    "reuse": "the wrapper extends the existing CampaignBudget.campaign_cost_ceiling (imas_codex/standard_names/campaign.py:490) and delegates the actual spend ceiling to BudgetManager(cost_limit) (imas_codex/cli/sn.py:3122); a search over imas_codex/standard_names and imas_codex/cli/sn.py found no existing per-batch remaining-budget wrapper to fork.",
+    "scope_discipline": "git diff --stat bc5acb919a70 vs f3a57c5e8 lists only harmonize.py, tests/standard_names/test_harmonize_cost_cap.py and the fragment, each a declared write path, with sn.py and budget.py carrying no change."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to make one cost cap cover a family's anchor and its members, including the review that follows each regeneration; imas_codex/standard_names/harmonize.py:1181 wraps the per-family drain with _family_budget_drain(drain_fn, budget.campaign_cost_ceiling) so every batch is handed the family's remaining budget rather than the whole cap again.\nVERDICT done_when: the brief's done_when names a stubbed test showing an anchor that spends 60% of the cap leaving its members exactly the remaining 40%, a recorded red run when the cap returns to per-batch, a base/head gate judged by delta, and the fragment; tests/standard_names/test_harmonize_cost_cap.py::test_family_cap_is_shared_between_anchor_and_members asserts drain.calls[1][1] == pytest.approx(0.4 * _CAP) and result.total_cost == pytest.approx(_CAP), and negative-control-per-batch.log records that same test FAILED (member batch handed 5.0 instead of 2.0, 1 failed 1 passed, exit 1), while gate-base.log (bc5acb919a70) reads 285 passed and gate-head.log (f3a57c5e8) reads 287 passed, both EXIT=0.\nVERDICT write_paths: the reviewed brief declares imas_codex/cli/sn.py, imas_codex/standard_names/harmonize.py, imas_codex/standard_names/budget.py, tests/standard_names/test_harmonize_cost_cap.py and docs/evidence/fragments/sn-harmonize-command/shc-family-cost-cap.html; git diff --stat bc5acb919a70..f3a57c5e8 returns exactly harmonize.py (+35/-1), the new test (162 lines) and the new fragment (60 lines), all inside that set, with sn.py and budget.py left untouched because the live apply already passes campaign_cost_ceiling=cost_limit (sn.py:6161-6164).\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/manifest.md; status complete, one commit f3a57c5e8, changed_paths the same three files the diff carries, tests the harmonize-grep files plus test_campaign.py, test_budget_*.py and the new test with base 285 passed / head 287 passed / 0 added failures, and negative_control_log naming negative-control-per-batch.log.\nVERDICT diff: read commit by commit against base bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85; the single commit f3a57c5e84ae032f266b66b3edd70421f76e933e adds _family_budget_drain (harmonize.py:1069), its one call site family_drain at harmonize.py:1181 handed to the runner at harmonize.py:1190, the 162-line test file and the fragment, 256 insertions with no product file touched but harmonize.py.\nCALL_SITES: imas_codex/cli/sn.py:6154\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: harmonize.py:1181 wraps drain_fn with the family's campaign_cost_ceiling so each batch at harmonize.py:1090 receives min(batch_cost_cap, remaining), and both the live CLI apply (sn.py:6154) and the fallback CampaignBudget() (harmonize.py:1135) route through the one wrapper.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done_when's measure is asserted at tests/standard_names/test_harmonize_cost_cap.py:113 (drain.calls[1][1] == 0.4 * _CAP) with its red counterpart recorded in negative-control-per-batch.log, and gate-base.log/gate-head.log carry the delta 285->287 with EXIT=0, though newtest-head.log:3 names the base sha as its head_sha.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat bc5acb919a70 vs f3a57c5e8 lists only harmonize.py, tests/standard_names/test_harmonize_cost_cap.py and the fragment, each a declared write path, with sn.py and budget.py carrying no change.\nSCORE durability: 17\nJUSTIFICATION durability: the negative-control log shows test_family_cap_is_shared_between_anchor_and_members reddens when harmonize.py:1090 reverts to batch_cost_cap alone, so the guard is real, but the wrapper's spent accumulator at harmonize.py:1091-1092 is not advanced when the drain returns None and test_family_cap_bounds_the_family_not_each_batch also passes without the wrapper.\nSCORE fit: 18\nJUSTIFICATION fit: _family_budget_drain (harmonize.py:1069) is a private module helper with a mechanism docstring matching the surrounding private-helper idiom of harmonize.py:1066, and carries no plan, gate or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the wrapper extends the existing CampaignBudget.campaign_cost_ceiling (imas_codex/standard_names/campaign.py:490) and delegates the actual spend ceiling to BudgetManager(cost_limit) (imas_codex/cli/sn.py:3122); a search over imas_codex/standard_names and imas_codex/cli/sn.py found no existing per-batch remaining-budget wrapper to fork.\nFINDING imas_codex/standard_names/harmonize.py:1091 follow-on: the wrapper advances its `spent` accumulator only when the base drain returns a float, but CampaignRunner.run falls back to cost_fn(run_id) and adds that to result.total_cost when the drain returns None (campaign.py:1021-1024), so a None-returning batch lets a later batch in the same family be handed a remaining that ignores spend the runner already counted; the exposure is bounded by the runner's own ceiling check at campaign.py:996 and the production drain returns a float on a non-dry run, so this is a narrowing gap rather than a live overspend.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/newtest-head.log:3 follow-on: the manifest lists this log under test_logs as the head run of the new test, but its header line reads `head_sha: bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85` \u2014 the base revision \u2014 so a later reader comparing the log's named revision against the record sees the base, not the head f3a57c5e8; the passing result is not in doubt because gate-head.log names f3a57c5e8 and includes the same file.",
+  "review_run_id": "r-20261014T182726976776-review-of-shc-family-cost-cap-f3a57c5e84ae",
+  "reviewed_base_sha": "bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85",
+  "reviewed_head_sha": "f3a57c5e84ae032f266b66b3edd70421f76e933e",
+  "reviewed_run_id": "r-20261014T180536961497-shc-family-cost-cap",
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T18:34:40.831503+00:00",
+  "total": 110,
+  "verdict": "SOUND WITH FINDINGS"
+}
