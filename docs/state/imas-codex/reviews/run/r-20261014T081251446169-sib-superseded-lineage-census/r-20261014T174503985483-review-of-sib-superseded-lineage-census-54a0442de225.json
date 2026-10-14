@@ -8,6 +8,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-14T17:58:16.036Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "the census is a one-time read whose classes go to the lead for a ruling; the remedy node that follows the ruling re-runs the classification and commits its instrument beside the remedy evidence, so the derivation becomes durable there",
+      "recorded_at": "2026-10-14T18:00:03.271903+00:00"
+    }
+  },
   "dispatched_at": "2026-10-14T17:45:19Z",
   "findings": [
     {
