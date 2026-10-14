@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-14T18:00:41.818Z",
+  "dispatched_at": "2026-10-14T17:51:08Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:305",
+      "id": "reasoning-1",
+      "reason": "the count is the section's motivating measurement; corrected, \u00a76 reads 82 pairs with 43 silent and \u00a77's \"other half\" (39) reconciles with it, whereas the node reading \"40\" would hunt for a smaller set than the fragment defines.",
+      "text": "\u00a76 states \"In about half of 40 confused domain pairs the guidance is silent\", but the run it cites (scg-domain-path-measure) records 39 separating pairs and 43 silent pairs \u2014 82 confused pairs in all, 43 of them silent (\u2248half). The total \"40\" matches neither the pair count (82) nor the silent count (43), and \u00a77 then calls the complement \"the other half\" of the same set, so both sections' arithmetic rests on a total the evidence does not contain.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:23",
+      "id": "wiring-1",
+      "reason": "without the s7\u2192s6 depends-on edge a scheduler may start \u00a77 against an absent loader, turning a correct plan into a node that cannot satisfy its own done-when.",
+      "text": "\u00a77's done-when requires the revised domains.yaml to \"pass the \u00a76 loader\" and its scope repairs to be \"resolved by \u00a76's precedence\", yet plan-section-depends-on lists only s3 and s4, so \u00a77 can be dispatched before the loader and precedence it consumes exist.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:305",
+      "id": "anchors_resolve-1",
+      "reason": "a later reader cannot open the measure the section's numbers rest on; the plan already set the pattern of naming the commit until the fragment lands, and this citation needs the same.",
+      "text": "\u00a76 cites the run scg-domain-path-measure as the source of its figures, but that run's evidence artifacts (scg-domain-path-measure.html, -results.json, -run.py) are committed only in the node's unmerged worktree at 152ff25b7 and do not exist in HEAD; the plan gives no commit pointer for it, unlike the diagnosis it cites, whose commit 5b31377c7 is named until the fragment lands.",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-grouping.html:305",
+      "id": "reasoning-2",
+      "reason": "an unnamed caller leaves the node to find the render and loader sites itself, the drift the reasoning check on \"the mechanism runs on the real code path, with the caller named\" exists to catch.",
+      "text": "\u00a76 describes its classifier-side mechanism as \"The tree's questions state the rule\" and \"the rendered domain question\" but names no module that renders those questions, nor the \"loader\" that must refuse an order missing or repeating a domain; the render site is imas_codex/graph/dd_domain_classifier.py and the domains.yaml reader lives in imas_codex/definitions/physics/__init__.py.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ce715e4342766aee4ebf8e17ab7e558e6790a5b7948fddefd82381759372f9eb",
+  "plan_slug": "sn-catalog-grouping",
+  "plan_version": 64,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261014T175049754603-plan-review-of-sn-catalog-grouping",
+  "reviewed_blob_sha": "29323a308aaf0afd4f9e64a9ce0b125b61d3de1c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a76 cites the run scg-domain-path-measure as the source of its figures, but that run's evidence artifacts are committed only in its unmerged worktree and are absent from HEAD, with no commit pointer (unlike the diagnosis it cites, which names 5b31377c7); the file, module and enum anchors it names do resolve.",
+    "done_when": "pass \u2014 \u00a76 declares \"Each test fails with its mechanism removed\" for every arm, and \u00a77's done-when is measurable (the revised domains.yaml must pass the \u00a76 loader, which refuses a bad order, so the positive post-embedding arm is falsifiable and the \u00a77 re-score reports accuracy against the tree's saved answers).",
+    "evidence_paths": "pass \u2014 both sections write their evidence under docs/evidence/fragments/sn-catalog-grouping/, a durable in-repo path, not a scratch or node-local directory.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach code; the symbols it names (FALLBACK_RANK_TABLE, select_primary_domain, precedence) are named by mechanism.",
+    "reasoning": "a finding \u2014 \u00a76's \"about half of 40 confused domain pairs\" does not match the measure it cites, which reports 82 pairs (39 separating, 43 silent); and \u00a76's mechanism names no module for the classifier side, leaving the crucial caller unnamed.",
+    "single_goal": "pass \u2014 \u00a76 makes one precedence the classifier's tie-break; \u00a77 repairs the scopes and applies them by rule, one coupled mechanism carried to one verdict.",
+    "wiring": "a finding \u2014 \u00a77 consumes \u00a76's precedence and \"the \u00a76 loader\" but plan-section-depends-on declares no s6/s7 entry, so \u00a77's two hard prerequisites are undeclared."
+  },
+  "section_digests": {
+    "_document": "5e08912f1329ab7aa99252f85efc8b3589b7bb68d5431c06caf1f692c95f9ca0",
+    "s1": "6bc3b44a7fd794158b4e454dd07668ea7d805f53ea1a5e11fac0c4b9a32edd70",
+    "s2": "badc6d06874b81a42ccd8772957595e0e1e9cb7d1a7fe7c9f3ade7c219cb3b72",
+    "s3": "8563f393c8d5efdd392704e76e6e0415ab2900270b63b743c92a3985e0fae1b6",
+    "s4": "7cd0454d13ab9a70c3e44752b5b15dcc7a96f90ed71f0fe117a7874db5ca5459",
+    "s5": "6a583a112984f320b52d30c670be604713b3d4204e41c7dd12230c311f9ff0e3",
+    "s6": "4c11965ead002ad9b53585e0d51f86e242fc9f4497bddf10632047ee02e4d069",
+    "s7": "8c19383950568386380118b77e104633356ec62f2c812ce3995e466fd9f75c91"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T18:03:55.267470+00:00"
+}
