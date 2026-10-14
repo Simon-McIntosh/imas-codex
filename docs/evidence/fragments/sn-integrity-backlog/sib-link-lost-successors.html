@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-link-lost-successors">
+<title>Signed successor lineage readback</title>
+</head>
+<body>
+<main>
+<h1 id="sib-link-lost-successors-title">Signed successor lineage readback</h1>
+<p id="sib-link-lost-successors-summary">The live cohort still matches the census:
+2,166 superseded names, 1,649 excluded by an outgoing <code>HAS_SUCCESSOR</code>
+or incoming <code>REFINED_FROM</code> relation, and 517 with neither. Four of the
+14 names have a live successor explicitly named by their history. A signed
+authority applied those four links with four receipts. Ten refine products have
+no adjudicated live successor. The replay preview still admits the four applied
+rows, so the requested zero-admission replay gate is unresolved.</p>
+
+<h2 id="sib-link-lost-successors-method">Cohort and evidence</h2>
+<p id="sib-link-lost-successors-method-body">The committed reader
+<code>sib-link-lost-successors-run.py</code> selects superseded names with neither
+successor relation, then selects 12 with <code>refine</code> or
+<code>backfill_refine</code> and no <code>supersede_exhausted_orphan</code>, plus the
+two remaining <code>supersede_legacy_spelling</code> names. It follows
+<code>REFINED_FROM</code> up to 12 hops in both directions, reads each name's
+<code>HAS_INTERNAL_CHANGE</code> log, and searches change logs that cite it as
+<code>from_name</code>. A positive control finds <code>particle_atomic_count</code>
+cited by the known <code>atomic_count_of_ion_state</code> refine. The 14-name set,
+the population check, each change, and each chain are in
+<code>read-targets-final.log</code> (EXIT=0). The graph field and relation names
+are declared in <code>imas_codex/schemas/standard_name.yaml</code>:
+<code>name_stage</code>, <code>status</code>, <code>source_paths</code>,
+<code>HAS_SUCCESSOR</code>, <code>REFINED_FROM</code>, and
+<code>HAS_INTERNAL_CHANGE</code>; <code>StandardNameChange</code> declares
+<code>operation</code>, <code>from_name</code>, <code>to_name</code>,
+<code>reason</code>, and <code>row_id</code> is the signed receipt's row identity.</p>
+
+<table id="sib-link-lost-successors-adjudication">
+<thead><tr><th>superseded name</th><th>target</th><th>decisive evidence</th></tr></thead>
+<tbody>
+<tr><td><code>atomic_count_of_ion_state</code></td><td><code>atomic_count</code> (accepted)</td><td>Its accepted ancestor has a <code>supersede_into_ancestor</code> change with <code>from_name=atomic_count_of_ion_state</code> and <code>to_name=atomic_count</code>.</td></tr>
+<tr><td><code>minimum_of_safety_factor</code></td><td><code>minimum_safety_factor</code> (accepted)</td><td>The <code>supersede_legacy_spelling</code> receipt row is <code>minimum_of_safety_factor=&gt;minimum_safety_factor</code>.</td></tr>
+<tr><td><code>parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift</code></td><td><code>parallel_neutral_state_velocity_due_to_diamagnetic_drift</code> (accepted)</td><td>Its <code>supersede_legacy_spelling</code> receipt row names that target; an earlier <code>backfill_refine</code> records its predecessor.</td></tr>
+<tr><td><code>toroidal_neutral_state_momentum_diffusivity</code></td><td><code>toroidal_neutral_internal_state_momentum_diffusion_coefficient</code> (accepted)</td><td>The <code>supersede_legacy_spelling</code> receipt row names that canonical identity.</td></tr>
+<tr><td><code>beam_area_of_neutral_beam_injector</code></td><td>unadjudicated</td><td><code>backfill_refine</code> names <code>surface_area_of_neutral_beam_injector</code> as its predecessor; <code>retire_signed_dual_authority_target</code> withdraws its authority. No later live target is named.</td></tr>
+<tr><td><code>equilibrium_weight_of_poloidal_magnetic_field_probe</code></td><td>unadjudicated</td><td><code>refine</code> names <code>weight_of_poloidal_magnetic_field_probe</code> as predecessor; retirement changes cite an ineligible fit-artifact source. No later live target is named.</td></tr>
+<tr><td><code>initial_incident_wave_stokes_parameter_at_line_of_sight</code></td><td>unadjudicated</td><td><code>refine</code> names <code>initial_wave_polarization_stokes_parameter_at_line_of_sight</code> as predecessor; no descendant or later target is recorded.</td></tr>
+<tr><td><code>ion_vibrational_level</code></td><td>unadjudicated</td><td><code>backfill_refine</code> names <code>vibrational_level_of_ion_state</code> as predecessor; a separate attachment was detached. No descendant or later target is recorded.</td></tr>
+<tr><td><code>radial_outline_of_plasma_facing_component</code></td><td>unadjudicated</td><td><code>refine</code> names <code>radial_outline</code> as predecessor; no descendant or later target is recorded.</td></tr>
+<tr><td><code>radial_plasma_momentum_source</code></td><td>unadjudicated</td><td><code>refine</code> names <code>radial_momentum_source</code> as predecessor; <code>retire_signed_dual_authority_target</code> withdraws its authority. No later live target is named.</td></tr>
+<tr><td><code>ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density</code></td><td>unadjudicated</td><td><code>refine</code> names <code>neutral_isotope_fraction</code> as predecessor; no descendant or later target is recorded.</td></tr>
+<tr><td><code>time_derivative_of_bremsstrahlung_count_at_detector_pixel</code></td><td>unadjudicated</td><td><code>backfill_refine</code> names <code>bremsstrahlung_rate</code> as predecessor; <code>retire_signed_dual_authority_target</code> withdraws its authority. No later live target is named.</td></tr>
+<tr><td><code>toroidal_plasma_beta</code></td><td>unadjudicated</td><td><code>refine</code> names <code>beta</code> as predecessor. A source-binding change names <code>normalized_toroidal_plasma_beta</code>, but that identity is superseded, so it is not a live target.</td></tr>
+<tr><td><code>wave_power_at_measurement_position</code></td><td>unadjudicated</td><td><code>refine</code> names <code>poloidal_magnetic_flux_at_measurement_position</code> as predecessor; no descendant or later target is recorded.</td></tr>
+</tbody>
+</table>
+<p id="sib-link-lost-successors-target-note"><code>to_name</code> on each name's own
+refine change is the name itself; the table never treats it as a successor.</p>
+
+<h2 id="sib-link-lost-successors-mutation">Signed mutation and control</h2>
+<p id="sib-link-lost-successors-mutation-body">The committed authority has five
+rows, each with two <code>StandardName</code> participants, a
+<code>supersede</code> mutation whose sole argument is <code>successor_id</code>,
+and structural and collateral guards. The signed mutation writes
+<code>HAS_SUCCESSOR</code> and its receipt's <code>receipt_id</code> in one
+transaction. The control row is the already-linked
+<code>flux_surface_averaged_deuterium_tritium_density</code>. The existing edge
+points to <code>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary</code>.
+The predecessor's bound DD path and target's empty path set make the signed
+supersede guard refuse this row; the control is unchanged. The existing edge
+and path sets are in <code>controls.log</code> (EXIT=0).</p>
+
+<h2 id="sib-link-lost-successors-measure">Preview, apply, readback, replay</h2>
+<table id="sib-link-lost-successors-measure-table">
+<thead><tr><th>step</th><th>observed result</th><th>run log</th></tr></thead>
+<tbody>
+<tr><td>authority</td><td>Five rows; committed file SHA-256 <code>af8abaf7390ed14168b5089b2374e6d83a943ce94a79bfe939708e805b31c6f4</code>, payload SHA-256 <code>ea7b7dec43a34ce10effa0d93d0dca2bf91d25d4fb52ef879d34d30385a0f684</code>.</td><td><code>authority-final.log</code> (EXIT=0)</td></tr>
+<tr><td>preview</td><td>Four admitted, one control refused; digest <code>6f13bb80dc0dc3795b1866d6135e6f6c1cecdb26a6f9e89501491713ffca99e2</code>.</td><td><code>preview-final.log</code> (EXIT=0)</td></tr>
+<tr><td>apply</td><td><code>applied</code> under that digest: four mutations, four receipts, one refused control row.</td><td><code>apply.log</code> (EXIT=0)</td></tr>
+<tr><td>readback</td><td>Exactly one edge and matching change receipt on each admitted name; control edge remains unstamped with no new receipt. Excluded count 1,649 &rarr; 1,653; superseded population 2,166.</td><td><code>readback.log</code> (EXIT=0)</td></tr>
+<tr><td>second preview</td><td><strong>Unmet:</strong> four rows re-admitted, one control refused, <code>would_change=4</code>, despite the four receipts. It performed no write.</td><td><code>replay-preview.log</code> (EXIT=0)</td></tr>
+</tbody>
+</table>
+<p id="sib-link-lost-successors-log-location">All named logs reside in
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T205317956687-sib-link-lost-successors/</code>;
+each begins with its command and ends with <code>EXIT=</code>. The first preview
+attempt, <code>preview.log</code> (EXIT=1), failed in the authority builder before
+graph validation because <code>RepairParticipant</code> rejects an extra
+<code>expected_name_stage</code> field; the builder was corrected before the
+committed authority and successful preview. The second preview's re-admission
+requires a replay-aware preview check in the signed path or a ruling that an
+<code>already_applied</code> apply receipt is the acceptance measure. Both are outside
+this node's write scope or fixed acceptance criterion.</p>
+</main>
+</body>
+</html>

@@ -288,11 +288,16 @@ def readback(digest: str, before_excluded: int) -> None:
             UNWIND $ids AS id
             MATCH (name:StandardName {id: id})
             OPTIONAL MATCH (name)-[edge:HAS_SUCCESSOR]->(successor:StandardName)
-            WITH id, collect({target: successor.id,
-                              receipt_id: edge.receipt_id}) AS edges
-            RETURN id, edges ORDER BY id LIMIT 10
+            WITH name, id, collect({target: successor.id,
+                                    receipt_id: edge.receipt_id}) AS edges
+            OPTIONAL MATCH (name)-[:HAS_INTERNAL_CHANGE]->(change:StandardNameChange {
+              manifest_sha256: $digest, operation: 'link_signed_successor'
+            })
+            RETURN id, edges, collect(change.id) AS change_ids
+            ORDER BY id LIMIT 10
             """,
             ids=[*TARGETS, CONTROL[0]],
+            digest=digest,
         )
         counts = graph.query(
             """
@@ -308,15 +313,13 @@ def readback(digest: str, before_excluded: int) -> None:
             if row["id"] == CONTROL[0]:
                 assert len(row["edges"]) == 1, row
                 assert row["edges"][0]["target"] == CONTROL[1], row
-                assert row["edges"][0]["receipt_id"] != digest, row
+                assert row["edges"][0]["receipt_id"] is None, row
+                assert not row["change_ids"], row
             else:
-                assert row["edges"] == [
-                    {
-                        "target": TARGETS[row["id"]],
-                        "receipt_id": row["edges"][0]["receipt_id"],
-                    }
-                ], row
-                assert digest in row["edges"][0]["receipt_id"], row
+                assert len(row["edges"]) == len(row["change_ids"]) == 1, row
+                assert row["edges"][0]["target"] == TARGETS[row["id"]], row
+                assert row["edges"][0]["receipt_id"] == row["change_ids"][0], row
+                assert digest in row["change_ids"][0], row
         assert len(rows) == len(TARGETS) + 1, len(rows)
         print(
             json.dumps(
