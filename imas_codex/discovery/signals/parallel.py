@@ -1909,12 +1909,13 @@ def census_signal_embeddings(
 # over the ``s`` alias, it selects both the rows the sweep judges and the rows
 # the census counts. A signal the judge could not answer for, or whose answer
 # fell outside the six roles, keeps no role and is selected again on the next
-# sweep. An underspecified signal has a description a searcher reads and a role
-# of its own, so ``role=`` must find it; the status bound admits it beside the
-# enriched and checked ones while keeping the sweep off signals with no
-# description yet and off skipped ones the pipeline filtered out.
+# sweep. An underspecified description carries too little context for the role
+# judge, which disagreed with a blind hand-read on 4 of 30 signals the worker
+# had marked underspecified, so an underspecified signal is not judged for a
+# role and its status is not admitted here; the status bound keeps the sweep on
+# the enriched and checked signals with no role yet.
 _SIGNAL_ROLE_MISSING_WHERE = (
-    "s.status IN ['enriched', 'checked', 'underspecified'] "
+    "s.status IN ['enriched', 'checked'] "
     "AND s.description IS NOT NULL AND trim(s.description) <> '' "
     "AND s.signal_role IS NULL"
 )
@@ -2219,6 +2220,7 @@ def mark_signals_underspecified(
                     s.analysis_code = coalesce(nullIf(sig.analysis_code, ''), s.analysis_code),
                     s.keywords = coalesce(sig.keywords, s.keywords),
                     s.sign_convention = coalesce(nullIf(sig.sign_convention, ''), s.sign_convention),
+                    s.signal_role = null,
                     s.enrichment_source = 'direct_underspecified',
                     s.llm_cost = $per_signal_cost,
                     s.enriched_at = datetime(),
@@ -5225,24 +5227,6 @@ async def enrich_worker(
                 "Marked %d signals as underspecified (low context)",
                 len(underspecified),
             )
-
-            # Judge each underspecified signal's role from its stored text, as
-            # for an enriched one. An underspecified signal carries the same
-            # description a searcher reads, so a ``role=`` search must find it.
-            try:
-                role_written, role_cost = await judge_and_store_signal_roles(
-                    underspecified
-                )
-                if role_written:
-                    logger.info(
-                        "Stored %d signal roles (cost $%.6f)",
-                        role_written,
-                        role_cost,
-                    )
-                if role_cost and hasattr(state.enrich_stats, "cost"):
-                    state.enrich_stats.cost += role_cost
-            except Exception as exc:
-                logger.warning("Signal role judgement failed (non-fatal): %s", exc)
 
         # Update graph with enrichment cost for historical tracking
         if enriched:

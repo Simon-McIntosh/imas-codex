@@ -6,11 +6,18 @@ carries a description but no role, selecting its rows with the same predicate
 its census counts — so a signal the sweep wrote is a signal the census had
 named as missing.
 
-Two behaviours the store must hold to, and this is the only place asserting
+Three behaviours the store must hold to, and this is the only place asserting
 them: a judgement the model could not answer, or that fell outside the six
 roles, stores no role at all and leaves the signal in the sweep's population for
-a later run; and the reset to ``discovered`` clears the stored role so a
-reprocessed signal is re-judged on its new description.
+a later run; the reset to ``discovered`` clears the stored role so a reprocessed
+signal is re-judged on its new description; and marking a signal underspecified
+clears any stored role, because a role judged from a description the worker has
+just rejected must not survive the status change.
+
+An underspecified signal is not a role candidate at all: too thin a description
+is what made the worker mark it underspecified, and a role judged from it
+disagreed with a blind hand-read too often to store. So the predicate that
+selects and counts role candidates admits only the enriched and checked statuses.
 
 The decision call is mocked throughout, so the tests exercise the wiring from
 the judgment layer through the store to the reset, and never touch the network.
@@ -75,12 +82,12 @@ def _selects(where: str, node: dict) -> bool:
 class _RoleGraph:
     """A stateful model of FacilitySignal status, description and role fields.
 
-    Recognises the three statements the store and sweep issue — the candidate
-    read, the population count and the role writer — and mutates the model the
-    way the Cypher would, so a signal's stored role follows whatever the writer
-    set and the next read sees it. The candidate read is answered from the
-    predicate the statement itself carries, so the double never selects by a
-    rule of its own.
+    Recognises the statements the store, sweep and underspecified-marker issue —
+    the candidate read, the population count, the role writer and the status
+    change — and mutates the model the way the Cypher would, so a signal's
+    stored role follows whatever the writer set and the next read sees it. The
+    candidate read is answered from the predicate the statement itself carries,
+    so the double never selects by a rule of its own.
     """
 
     def __init__(self, nodes: dict[str, dict]):
@@ -97,6 +104,15 @@ class _RoleGraph:
             for item in params["items"]:
                 self.nodes[item["id"]]["signal_role"] = item["signal_role"]
             return [{"updated": len(params["items"]) if params["items"] else 0}]
+
+        if "SET s.status = $status" in cypher and "s.signal_role = null" in cypher:
+            for sig in params["signals"]:
+                node = self.nodes[sig["id"]]
+                node["status"] = params["status"]
+                node["signal_role"] = None
+                if sig.get("description") is not None:
+                    node["description"] = sig["description"]
+            return []
 
         if "RETURN count(s) AS n" in cypher:
             facility = params.get("facility")
@@ -242,8 +258,9 @@ def test_sweep_and_census_share_one_predicate(monkeypatch):
     and the sweep judges and stores it. After the sweep the census reads zero,
     which can only happen if both use the same predicate — a sweep that
     selected by its own copy could leave a counted row unwritten. An
-    underspecified signal is a candidate too, so a predicate that dropped the
-    underspecified status would leave it counted and unwritten.
+    underspecified signal is in neither population: a role judged from too thin
+    a description is not trustworthy, so its status is not admitted by the
+    shared bound.
     """
     graph = _RoleGraph(
         {
@@ -253,7 +270,7 @@ def test_sweep_and_census_share_one_predicate(monkeypatch):
                 "status": "enriched",
                 "signal_role": None,
             },
-            # Underspecified, but described: still a role candidate.
+            # Underspecified: not a candidate, however well described.
             "jt-60sa:low": {
                 "name": "Edge density",
                 "description": "Line-integrated density, context thin",
@@ -279,13 +296,14 @@ def test_sweep_and_census_share_one_predicate(monkeypatch):
     monkeypatch.setattr(judgment, "acall_decisions", _answer("measured"))
 
     before = parallel.census_signal_roles(gc=graph)
-    assert before["missing"] == 2, before
-    assert before["missing_ids"] == ["jt-60sa:ip", "jt-60sa:low"], before
+    assert before["missing"] == 1, before
+    assert before["missing_ids"] == ["jt-60sa:ip"], before
 
     result = parallel.backfill_signal_roles(gc=graph)
-    assert result["candidates"] == 2, result
-    assert result["written"] == 2, result
+    assert result["candidates"] == 1, result
+    assert result["written"] == 1, result
 
+    assert graph.nodes["jt-60sa:low"]["signal_role"] is None
     assert parallel.census_signal_roles(gc=graph)["missing"] == 0
 
 
@@ -300,13 +318,15 @@ def test_reset_to_discovered_clears_the_role():
     assert "signal_role" in cleared
 
 
-def test_underspecified_signal_is_a_role_candidate(monkeypatch):
-    """An underspecified signal with a description is a role candidate and is stored.
+def test_underspecified_signal_is_not_a_role_candidate(monkeypatch):
+    """An underspecified signal is not a role candidate, however well described.
 
-    It carries the description a searcher reads, so a ``role=`` search must find
-    it; the predicate admits the underspecified status beside enriched and
-    checked. A predicate without it leaves the signal role-less and unreachable
-    by role — the drop this test exists to catch.
+    A role judged from a description the worker itself found too thin to enrich
+    is not trustworthy, so the predicate does not admit the underspecified
+    status and neither the sweep nor the census names such a signal. A predicate
+    that re-admitted the status would sweep and store roles whose agreement with
+    a blind hand-read is below the threshold worth storing — the change this
+    test exists to catch.
     """
     graph = _RoleGraph(
         {
@@ -321,13 +341,44 @@ def test_underspecified_signal_is_a_role_candidate(monkeypatch):
     )
     monkeypatch.setattr(judgment, "acall_decisions", _answer("measured"))
 
-    assert parallel.census_signal_roles(gc=graph)["missing_ids"] == ["jt-60sa:low"]
+    assert parallel.census_signal_roles(gc=graph)["missing"] == 0
+    assert parallel.census_signal_roles(gc=graph)["missing_ids"] == []
 
     result = parallel.backfill_signal_roles(gc=graph)
-    assert result["candidates"] == 1, result
-    assert result["written"] == 1, result
-    assert graph.nodes["jt-60sa:low"]["signal_role"] == "measured"
-    assert parallel.census_signal_roles(gc=graph)["missing"] == 0
+    assert result["candidates"] == 0, result
+    assert result["written"] == 0, result
+    assert graph.nodes["jt-60sa:low"]["signal_role"] is None
+
+
+def test_mark_signals_underspecified_clears_a_stored_role(monkeypatch):
+    """Marking a signal underspecified clears a role it carried before.
+
+    A signal can be enriched, judged and given a role, then re-processed and
+    found underspecified. Its old role was judged from a description the worker
+    has now rejected, so it must not survive the status change — the same
+    statement that sets the underspecified status clears the role. A statement
+    without the clear leaves the stale role in place, which this test catches.
+    """
+    graph = _RoleGraph(
+        {
+            "jt-60sa:old": {
+                "name": "Edge density",
+                "description": "Line-integrated density",
+                "status": "enriched",
+                "signal_role": "measured",
+            }
+        }
+    )
+    monkeypatch.setattr(parallel, "GraphClient", lambda *a, **k: graph)
+    monkeypatch.setattr(parallel, "write_signal_descriptions", lambda *a, **k: None)
+
+    written = parallel.mark_signals_underspecified(
+        [{"id": "jt-60sa:old", "description": "Edge density, context thin"}]
+    )
+
+    assert written == 1
+    assert graph.nodes["jt-60sa:old"]["status"] == "underspecified"
+    assert graph.nodes["jt-60sa:old"]["signal_role"] is None
 
 
 def _claimed_signal(signal_id: str) -> dict:
@@ -345,13 +396,14 @@ def _claimed_signal(signal_id: str) -> dict:
 
 
 @pytest.mark.asyncio
-async def test_enrichment_judges_an_underspecified_signal():
-    """The enrich worker judges the role of a signal it marks underspecified.
+async def test_enrichment_does_not_judge_an_underspecified_signal():
+    """The enrich worker judges no role for a signal it marks underspecified.
 
-    An underspecified signal carries the text a searcher reads, so enrichment
-    must judge its role exactly as it does for an enriched one. A worker that
-    judges only the enriched branch leaves every underspecified signal
-    role-less until a later sweep, which is the gap this test closes.
+    A signal the worker found too thin to enrich has too thin a description for
+    the role judge, which disagreed with a blind hand-read on 4 of 30 such
+    signals. So the worker marks it underspecified and judges nothing: it does
+    not call the role judge at all. A worker that re-added the judgement call
+    would store a role the gate rejects, which this test catches.
     """
     from unittest.mock import patch
 
@@ -364,6 +416,7 @@ async def test_enrichment_judges_an_underspecified_signal():
     state = parallel.DataDiscoveryState(facility="jt-60sa", scanner_types=["edas"])
     claims = iter([signals])
     judged: list[list[dict]] = []
+    marked: list[list[dict]] = []
 
     def claim(*args, **kwargs):
         batch = next(claims, None)
@@ -371,6 +424,10 @@ async def test_enrichment_judges_an_underspecified_signal():
             state.stop_requested = True
             return []
         return batch
+
+    def mark(signals, *args, **kwargs):
+        marked.append(list(signals))
+        return len(signals)
 
     async def llm(*, messages, **kwargs):
         return (
@@ -402,7 +459,7 @@ async def test_enrichment_judges_an_underspecified_signal():
         patch.object(parallel, "fetch_signal_code_refs", return_value={}),
         patch.object(parallel, "_fetch_code_chunks", return_value=[]),
         patch.object(parallel, "mark_signals_enriched"),
-        patch.object(parallel, "mark_signals_underspecified"),
+        patch.object(parallel, "mark_signals_underspecified", side_effect=mark),
         patch.object(parallel, "propagate_source_enrichment", return_value=0),
         patch.object(parallel, "release_signal_claim"),
         patch.object(parallel, "judge_and_store_signal_roles", side_effect=judge),
@@ -414,5 +471,7 @@ async def test_enrichment_judges_an_underspecified_signal():
     ):
         await parallel.enrich_worker(state)
 
-    assert judged, "an underspecified signal is judged by enrichment"
-    assert judged[0][0]["id"] == signals[0]["id"]
+    assert marked and marked[0][0]["id"] == signals[0]["id"], (
+        "the worker marks the signal underspecified"
+    )
+    assert not judged, "an underspecified signal is not judged for a role"
