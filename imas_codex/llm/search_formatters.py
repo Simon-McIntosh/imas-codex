@@ -132,6 +132,22 @@ def _signal_access_methods(sig: dict[str, Any]) -> list[dict[str, Any]]:
     return methods
 
 
+def _render_data_access_lines(
+    imports: str | None,
+    connection: str | None,
+    access: str | None,
+    *,
+    indent: str = "  ",
+) -> list[str]:
+    """Render a data-access block's imports, connection and access-call lines.
+
+    Blank entries are dropped and ``indent`` sets the depth the block prints
+    at, so a single-member row's own call and a shared template draw the same
+    three lines from one place instead of each restating the order and depth.
+    """
+    return [f"{indent}{line}" for line in (imports, connection, access) if line]
+
+
 def format_signals_report(
     signals: list[dict[str, Any]],
     data_nodes: list[dict[str, Any]],
@@ -243,15 +259,16 @@ def format_signals_report(
                         # Fill the row's own call so no {accessor}-style
                         # placeholder survives in a single-member row.
                         parts.append(f"  Data access ({kind or 'unknown'}):")
-                        for line in (
-                            method.get("imports_template"),
-                            method.get("connection_template"),
-                            _interpolate_template(
-                                method.get("access_template") or "", sig
-                            ),
-                        ):
-                            if line:
-                                parts.append(f"    {line}")
+                        parts.extend(
+                            _render_data_access_lines(
+                                method.get("imports_template"),
+                                method.get("connection_template"),
+                                _interpolate_template(
+                                    method.get("access_template") or "", sig
+                                ),
+                                indent="    ",
+                            )
+                        )
                         continue
                     key = tuple(
                         method.get(field)
@@ -279,9 +296,7 @@ def format_signals_report(
                     str(value) for value in (access_type, method_type) if value
                 )
                 parts.append(f"**Data access {label}** ({kind or 'unknown'}):")
-                for line in (imports, connection, template):
-                    if line:
-                        parts.append(f"  {line}")
+                parts.extend(_render_data_access_lines(imports, connection, template))
                 parts.append("")
 
     if data_nodes:

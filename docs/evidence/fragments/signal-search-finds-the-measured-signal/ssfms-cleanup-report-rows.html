@@ -1,0 +1,61 @@
+<section id="ssfms-cleanup-report-rows" data-plan="signal-search-finds-the-measured-signal" data-node="ssfms-cleanup-report-rows">
+  <h3>ssfms-cleanup-report-rows — one helper renders a data-access block, and three role assertions earn their expectations</h3>
+  <p id="ssfms-cleanup-report-rows-helper">
+    <code>_render_data_access_lines(imports, connection, access, *, indent)</code>
+    in <code>imas_codex/llm/search_formatters.py</code> renders the three lines of
+    a data-access block in one place: it drops blank entries and applies the
+    block's indent. Both layout sites now call it — the single-member row branch
+    of <code>format_signals_report</code>, at indent four, and the shared-template
+    loop under <code>## Data access templates</code>, at indent two. Neither
+    restates the order or the indentation.
+  </p>
+  <p id="ssfms-cleanup-report-rows-diff">
+    Measure — the report text is unchanged. A harness
+    (<code>logs/render_matrix.py</code>) renders sixteen reports through the
+    module under test: every presence combination of the three block lines at
+    single member, a single member with no access method, the top-level
+    access-template shim, two multi-member families (one shared template, two
+    distinct templates), a family mixing roles, units and check flags, a report
+    with data nodes, a reranked order and the empty case. The base revision
+    extracted with
+    <code>git show HEAD:imas_codex/llm/search_formatters.py</code> renders to
+    <code>logs/reports_base.txt</code> and the working tree to
+    <code>logs/reports_head.txt</code>; both are 6375 bytes and <code>diff</code>
+    exits 0 with <code>logs/report_diff.txt</code> empty (0 bytes). Positive
+    control: 16 <code>CASE</code> headers render, 15 <code>Data access</code>
+    lines appear across them.
+  </p>
+  <p id="ssfms-cleanup-report-rows-mutations">
+    Measure — the three rewritten assertions each carry a value the input alone
+    cannot supply, and each fails when the code writes a constant role in place
+    of the stored one. Each runs against a scratch tree at rev
+    <code>7bbf44b5</code> plus these edits, with one constant-role mutation:
+  </p>
+  <ul id="ssfms-cleanup-report-rows-mutation-list">
+    <li>
+      <code>_signal_rerank_state</code> writes <code>"measured"</code> in place of
+      the candidate's stored role → <code>test_state_carries_the_stored_role_when_present</code>
+      fails: <code>assert 'measured' == 'reference_or_setpoint'</code>,
+      <code>1 failed</code>, <code>EXIT=1</code> (<code>logs/mutation_1.log</code>).
+    </li>
+    <li>
+      <code>_vector_search_signals</code> binds a constant <code>"measured"</code>
+      role → <code>test_role_search_narrows_the_vector_and_fulltext_streams</code>
+      fails: <code>assert 'measured' == 'reference_or_setpoint'</code>,
+      <code>1 failed</code>, <code>EXIT=1</code> (<code>logs/mutation_2.log</code>).
+    </li>
+    <li>
+      <code>format_signals_report</code> writes a constant <code>"measured"</code>
+      role → <code>test_row_shows_the_stored_role_when_present</code> fails:
+      <code>1 failed</code>, <code>EXIT=1</code> (<code>logs/mutation_3.log</code>).
+    </li>
+  </ul>
+  <p id="ssfms-cleanup-report-rows-gate">
+    Gate — <code>uv run --no-sync pytest -p no:cacheprovider
+    tests/llm/test_search_tools.py tests/llm/test_signal_report_rows.py</code>
+    reads <code>130 passed, 8 skipped</code>, <code>EXIT=0</code>
+    (<code>logs/head_gate.log</code>). The base arm — the same command over the
+    <code>git archive HEAD</code> tree — reads <code>130 passed, 8 skipped</code>,
+    <code>EXIT=0</code> (<code>logs/base_gate.log</code>): zero added failures.
+  </p>
+</section>
