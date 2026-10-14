@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="130">
+<meta name="plan-version" content="131">
 <meta name="plan-modified" content="2026-10-14">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47,68c603525,97eac4222,b97d4bdf4,3b1e4a193,1e2dc0252,c0a17c176,72eb206e8,fe031856a,ce47976e0,a54ca1a0e,05d22929b,f746278c4,f13f1e582,dd7e64c92,be370b25b">
 </head>
@@ -523,6 +523,15 @@
       <button class="r-opt" data-value="name-description-unit">Name, description and unit composed</button>
       </p>
     <p class="r-dec-rat">Settled by §5&#x27;s measurement, as the plan specifies: over the 14,312 eligible JT-60SA signals embedded in memory, the description alone beats the composed name, description and unit on both arms and every metric (RRF mean nDCG@10 0.776 against 0.762, vector only 0.689 against 0.664, RRF grade-3 precision@5 0.682 against 0.664). Evidence: docs/evidence/fragments/signal-search-finds-the-measured-signal/embeddings.html.</p>
+    </div>
+<div class="r-dec" data-key="signal-rerank-latency" data-choice="budget-cap-meets-latency" data-by="lead" data-when="2026-10-14T08:39:24+00:00" data-sections="s7,s12">
+    <p class="r-dec-q">Does the signal rerank meet section 7&#x27;s latency clause when its p95 sits at the rerank&#x27;s own wall budget?</p>
+    <p class="r-dec-ctx">Over the reprocessed JT-60SA population the role-aware rerank lifts mean nDCG@10 from 0.847 to 0.922 and grade-3 precision@5 from 0.809 to 0.894, worst pass 0.919, but its pool-60 p95 reads 5.022 s against the 5 s clause. Every call over 5 s sits at 5.013 to 5.027 s (13 of 66; the rest 3.997 to 4.985 s) because rerank_candidates stops at its 5.0 s wall budget and keeps unscored candidates in fusion order, so no search waits past the budget plus about 20 ms; the quality figures include those capped calls.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="budget-cap-meets-latency">The 5 s wall budget meets the clause; the rerank stays on</button>
+      <button class="r-opt" data-value="literal-p95">Read the clause literally; switch the rerank off</button>
+      </p>
+    <p class="r-dec-rat">Lead decision, 2026-10-14. The clause exists to bound a searcher&#x27;s wait, and the rerank&#x27;s own 5.0 s wall budget already bounds it: the over-budget calls cluster at 5.013 to 5.027 s, which is the cap plus post-deadline overhead, not a slower search. Switching off would give up 0.075 mean nDCG@10 and 0.085 grade-3 precision@5 for 22 ms. Rejected: lowering the budget to about 4.9 s and re-measuring (one more node, about USD 0.2), and the literal reading. Accepted cost: the decision rests on one measurement on a shared node, and the 13 capped calls are only partly reranked.</p>
     </div>
 </section>
 
