@@ -1,0 +1,93 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-14T19:21:04.742Z",
+  "dispatched_at": "2026-10-14T19:12:27Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:219",
+      "id": "single_goal-1",
+      "reason": "the precedent is in this same plan \u2014 a prior review raised exactly this on \u00a720 (a code change plus a backfill under one gate) and the plan acted by splitting it; \u00a731 repeats the shape at three-way scale.",
+      "text": "\u00a731 bundles three disjoint deliverables under one gate: 183 signed retirement records, 25 stage restorations, and 14 successor edges, each through its own signed authority (\"one authority per class\", line 221), yet the section carries one data-status=\"implementable\" and one done-when, so no single verdict can close it \u2014 a node that lands the 183 and fails the 14 cannot be reviewed on one measure, and the gate proves none of the three",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:221",
+      "id": "evidence_paths-1",
+      "reason": "without a named durable path a later reader cannot open the retirement records, the restored stages or the edges-with-receipts that the section's only measure rests on; a prior review raised the same \"names no path\" finding on \u00a727 and it was acted on.",
+      "text": "\u00a731's done-when requires \"a logged read ending EXIT=0\" for each count and relies on three signed authorities and their receipts, but names no path for the logged reads, for the authorities, or for the receipts, unlike \u00a721's done-when which places its manifest and receipt under docs/evidence/fragments/sn-integrity-backlog/",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:221",
+      "id": "done_when-1",
+      "reason": "the two sibling sections each closed this exact hole with a stated control, and \u00a731 \u2014 the section whose whole value is a zero \u2014 omits it, so its pass condition can be met by a broken query.",
+      "text": "\u00a731's first done-when bullet asserts \"0 superseded names with neither a successor relation nor a recorded supersession event\", a zero with no control that the instrument can see the population it is draining: \u00a730's done-when required the instrument to \"prove it can see the population as well as the gap\" and \u00a719's required a split summing to an independently counted total, but \u00a731's re-run carries no such control, so a query blind to HAS_SUCCESSOR or to the supersession event returns 0 and reads as \"all clear\"",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:221",
+      "id": "reasoning-1",
+      "reason": "a node given \u00a731 cannot tell which 208 names fall into the 183 versus the 25, or which 9 carry superseded_from_stage, from any committed source, so it must re-derive the buckets before it can act, and where it re-derives differs from the remedy the cited census fragment records.",
+      "text": "\u00a731 states \"The \u00a730 census found 208 superseded names with no recorded supersession. On 2026-10-14 the lead ruled to record 183, restore 25 and link 14\", with \"171 of them carry paid reviews\", but the cited \u00a730 census fragment (docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html) holds no producing-source split and no 183/25/171 figure (grep for 183 or 171 there returns nothing); it classifies all 517 by supersession mechanism only, and its remedy column for the 96 maintenance-only and 112 no-change classes reads \"a reclassification out of superseded \u2014 no supersession event exists to justify the stage\", the opposite of the keep-at-superseded-and-stamp instruction \u00a731 carries",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "8368c7fa3790c93bca9ce4433af1e25572b4aefe5e021dde74b20423adaad069",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 143,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261014T191210554700-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "9a87aa58f16773170135a5aa8913e5e94ebd756d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 imas_codex/discovery/AGENTS.md resolves (the file exists), and \"as \u00a730's review asked\" resolves to the \u00a730 review comment (line 599); extensionless hrefs elsewhere resolve as <path>.html per house convention.",
+    "done_when": "a finding \u2014 \u00a731's first done-when bullet is a bare zero with no declared control that the census can see the population it is emptying (line 221), the failure \u00a719 and \u00a730 were each explicitly hardened against.",
+    "evidence_paths": "a finding \u2014 \u00a731 requires logged reads, three signed authorities and their receipts, and names no durable path for any of them (line 221).",
+    "naming": "pass \u2014 \u00a731's heading and symbols carry quantities (183, 25, 14), not plan labels, stage names or ticket numbers; no changelog prose.",
+    "reasoning": "a finding \u2014 \u00a731 attributes to the \u00a730 census a producing-source partition (183 / 25) and a paid-review count (171) that the cited census fragment does not contain, and whose stated remedy for those classes is the opposite instruction (line 221 vs the census class table).",
+    "single_goal": "a finding \u2014 \u00a731 carries three deliverables (record 183, restore 25, link 14) under one section, one status and one gate (lines 219-221).",
+    "wiring": "pass \u2014 no section declares a depends-on/informs/gates link (every data-links is empty), so no declared relationship points at the wrong node; \u00a731's reliance on \u00a730 is carried in prose and \u00a730 is done."
+  },
+  "section_digests": {
+    "_document": "84e6cde3790e50bf9c80327c32042ec7df02f4619c7a489050b509d78d4ad791",
+    "s1": "c5d818234e097cc66d461db952acf180dd9364d0ece43082d00f7b2bfdda19e2",
+    "s10": "84c8bdeb15133e22cd2f08ee96d429ac3f92f85d28d6720d5e2fd0a87a97cbf2",
+    "s11": "499a319e38a73614c326b3607a7d1cae481dac12714fad0562ffe74a78694c89",
+    "s12": "62e459e2a7b4232b44e54b32969fb970620d613ef8797e09b993d36d4b44d757",
+    "s13": "80e90ea7c45053ae6c5de9d69ac1ef80a87289bb80c7afb2f796f3c31b3235d7",
+    "s14": "4981171151a50aafb83f844e0ad63c7df82749d58b56d7fb8590f5ee8cccfb9b",
+    "s15": "0e2bcb71a7aac4d1ddeae8e3a5959c43e1f3e90ae3ea89c3ca3b16303b3f87b2",
+    "s16": "0ea017c6ac78ad295a75878f5d17514576fb4cc4c0b96f3acbde1adf6dbce703",
+    "s17": "32359142ba3b6f1263abefa9f37711fbc5fdefe9548620b20287985e5858d673",
+    "s18": "c6a5bf0492c322e4f1c9ebe6e0e4b880f6312ab30ec62992d8c786d321fa2d82",
+    "s19": "f735f604bc9a9d5ff1664a38976a03f6a4ede1a90baa42b16f38af66702d3c4b",
+    "s2": "af2703cbe346dcd322398505bfee69c50a6bcd1238937227f17cdb6c5fc75c58",
+    "s20": "805e801ca7a749b7317a6427d250b1a67bead66a292735383165c6e4e1877825",
+    "s21": "47e390d3695f9b02e65881501ddd52ecd87022d600dc4e915c6d282fa6da35bd",
+    "s22": "ba8506427fb29722b2940dcd76473585cc4f09fe8f4baa48ecff9fa7a723597a",
+    "s23": "44670189f5cafaaefa0ad448ffffd16b3b33a1cc017a2be6b72d08a2a911b48a",
+    "s24": "9c7844d14a2768bfd77971a05dac1d799cff7466e3e9f6802dd0336fadc6fee1",
+    "s25": "40eced7f771252fb9ab48c78df7b98f91a7c1d3300462bc4ecae8c5d4ccc9908",
+    "s26": "6a0bd41e4ff1e25988259389e8245175eb581650bebc0cddbc945a9929aa9a17",
+    "s27": "585251740b9450d952a7e031af167fe71be5f24dd03ecec62395c2344bdceea4",
+    "s28": "10bfd618b26981d0069214a9c611c9fef9bdb5b3da4e6058d2e7378683d2b3fa",
+    "s29": "82321ad1506f8fcde238b5afa9c7b5261e6260db85f5f99889639095ee424b7a",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s30": "3f04c2991d18b10a9540db81a31f0b4858b5aff2a5173128826ea0f5e9c65bbf",
+    "s31": "ac666e0e6ba4200196ddb041d2717d65a0db3299164d2941867ec24eeb7d48a2",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s6": "e6bf01013b7bd341cf2f86ebf24dc60084ea8cabeb4cf4cd2664c1109ac5ca62",
+    "s7": "1930b98dfc66a2e1f9a1ce5149fbb73fe208b66c3e0c35664330a12e7e945933",
+    "s8": "6b362f87f941f8c95d562c95cdf93e578892ff32c85156fd5565c76548c58eab",
+    "s9": "20748220a6f94f6c422b1b677587d4456ccf3be5fbe204daac414373443327bd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T19:23:20.180198+00:00"
+}
