@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-superseded-lineage-census">
+<title>Landing record — sib-superseded-lineage-census</title>
+</head>
+<body>
+<main>
+<h1 id="sib-superseded-lineage-census-title">Superseded names that point to no successor, classified by the mechanism that produced them</h1>
+
+<p id="sib-superseded-lineage-census-summary">
+Read-only census on the live graph. <strong>2,166</strong> <code>StandardName</code>
+nodes sit at <code>name_stage = 'superseded'</code>; <strong>1,649</strong> of them carry
+a successor relation and are excluded; <strong>517</strong> carry neither an outgoing
+<code>HAS_SUCCESSOR</code> nor an incoming <code>REFINED_FROM</code> and are the census.
+The two counts sum exactly to the population (1,649 + 517 = 2,166). The census equals
+the 517 the §16 close readback found, so there is no difference to state. Every
+statement is a bounded <code>MATCH</code>/<code>count</code>; nothing was written.
+</p>
+
+<h2 id="sib-superseded-lineage-census-method">Method, row set and property-name provenance</h2>
+<p id="sib-superseded-lineage-census-method-body">
+The instrument is <code>instrument.py</code> in the run directory; its log is
+<code>census.log</code> (<code>EXIT=0</code>). It ran from the run worktree against the
+active graph <code>bolt://98dci4-gpu-0002:7687</code> through
+<code>imas_codex.graph.client.GraphClient</code>. The row set is always the
+<code>StandardName</code> label filtered by <code>name_stage = 'superseded'</code>;
+the exclusion predicates are an existence test on the two relations. Each query
+finished well under ten seconds. The stage is carried by <code>name_stage</code>,
+not <code>pipeline_status</code>.
+</p>
+<p id="sib-superseded-lineage-census-schema">
+Every property and relationship name read is declared in
+<code>imas_codex/schemas/standard_name.yaml</code>:
+</p>
+<ul id="sib-superseded-lineage-census-schema-list">
+<li><code>name_stage</code> — declared attribute (line 1308), permissible value
+<code>superseded</code> (line 625, "Replaced by a refined successor node via REFINED_FROM").</li>
+<li><code>origin</code> — declared attribute (line 951, range <code>StandardNameOrigin</code>).</li>
+<li><code>superseded_from_stage</code> — declared attribute (line 1571).</li>
+<li><code>HAS_SUCCESSOR</code> — relationship on <code>successor</code> (line 2033,
+"the receipt-stamped HAS_SUCCESSOR edge written by a signed supersede mutation").</li>
+<li><code>REFINED_FROM</code> — relationship on <code>refined_from</code> (line 2092,
+direction <code>(new)-[:REFINED_FROM]-&gt;(old)</code>).</li>
+<li><code>HAS_INTERNAL_CHANGE</code> — relationship on <code>internal_changes</code> (line 1583).</li>
+<li><code>HAS_REVIEW</code> — relationship on <code>reviews</code> (line 2051).</li>
+<li>StandardNameChange <code>operation</code> (2367), <code>reason</code> (2370),
+<code>to_name</code> (2365, "the linked StandardName id", i.e. the name itself, never the
+successor).</li>
+</ul>
+<p id="sib-superseded-lineage-census-check">
+The repository Cypher-property check
+<code>tests/graph/test_cypher_property_check.py</code> passes (4 passed,
+<code>EXIT=0</code>; log <code>cypher_check.log</code>), confirming no repository literal
+names an undeclared property.
+</p>
+
+<h2 id="sib-superseded-lineage-census-population">Population and the excluded split by branch</h2>
+<table id="sib-superseded-lineage-census-pop-table">
+<thead><tr><th>measure</th><th>count</th></tr></thead>
+<tbody>
+<tr><td>population — names at <code>name_stage = 'superseded'</code></td><td>2,166</td></tr>
+<tr><td>excluded — outgoing <code>HAS_SUCCESSOR</code> <em>only</em> (branch A exclusive)</td><td>6</td></tr>
+<tr><td>excluded — incoming <code>REFINED_FROM</code> <em>only</em> (branch B exclusive)</td><td>1,628</td></tr>
+<tr><td>excluded — both relations (A &cap; B)</td><td>15</td></tr>
+<tr><td>excluded total (branch A &cup; B)</td><td>1,649</td></tr>
+<tr><td>census — superseded with neither relation</td><td>517</td></tr>
+<tr><td>census + excluded = population</td><td>2,166</td></tr>
+</tbody>
+</table>
+<p id="sib-superseded-lineage-census-pop-branch">
+Branch A (outgoing <code>HAS_SUCCESSOR</code>, any) holds <strong>21</strong> names;
+branch B (incoming <code>REFINED_FROM</code>, any) holds <strong>1,643</strong>; the two
+overlap on <strong>15</strong>. So branch B carries the great majority of the exclusions
+(1,628 exclusive). A query blind to one relation, or to the stage property, reads a
+population or excluded count of zero rather than this tidy split.
+</p>
+
+<h3 id="sib-superseded-lineage-census-witnesses">Branch witnesses</h3>
+<table id="sib-superseded-lineage-census-witness-table">
+<thead><tr><th>name</th><th>in census?</th><th>outgoing HAS_SUCCESSOR</th><th>incoming REFINED_FROM</th><th>other incoming edges</th></tr></thead>
+<tbody>
+<tr><td><code>etendue_of_spectrometer_channel</code></td><td>0</td><td>1</td><td>0</td><td><code>FOR_STANDARD_NAME</code> 19</td></tr>
+<tr><td><code>x_direction_unit_vector_of_sensor</code></td><td>0</td><td>0</td><td>1</td><td><code>FOR_STANDARD_NAME</code> 13</td></tr>
+</tbody>
+</table>
+<p id="sib-superseded-lineage-census-witness-note">
+Both witnesses are excluded and absent from the census. Each relation is counted by
+type: <code>etendue_of_spectrometer_channel</code> has exactly one outgoing
+<code>HAS_SUCCESSOR</code> (branch A); <code>x_direction_unit_vector_of_sensor</code> has
+exactly one incoming <code>REFINED_FROM</code> and no outgoing <code>HAS_SUCCESSOR</code>
+(branch B), alongside 13 incoming <code>FOR_STANDARD_NAME</code> edges from cost records —
+so a count that did not partition by relationship type would over-read this name.
+</p>
+
+<h2 id="sib-superseded-lineage-census-classes">Classes by the mechanism that superseded the name</h2>
+<p id="sib-superseded-lineage-census-class-intro">
+Each census name is classified by the operation on its <code>HAS_INTERNAL_CHANGE</code>
+log that set <code>name_stage = 'superseded'</code>, with the refine chain and reviews as
+cross-cutting evidence. The six classes sum exactly to the census (281 + 14 + 12 + 2 + 96
++ 112 = 517). The refine-product cohort (a name carrying an outgoing
+<code>REFINED_FROM</code>) is 177 names distributed across these classes; 91 of them fall
+in the orphan-batch class, which is why the refine-product candidate is not a class of
+its own.
+</p>
+<table id="sib-superseded-lineage-census-class-table">
+<thead><tr><th>class (mechanism)</th><th>count</th><th>remedy</th><th>three named examples</th></tr></thead>
+<tbody>
+<tr>
+<td><strong>orphan_batch_retirement</strong> — the lifecycle policy ran
+<code>supersede_exhausted_orphan</code> ("Source-less exhausted identities are terminal
+under the lifecycle policy).</td>
+<td>281</td>
+<td>nothing — a source-less exhausted identity correctly has no replacement</td>
+<td><code>absorbed_plasma_heating_power</code>, <code>accumulated_energy</code>,
+<code>anomalous_diffusion_coefficient_due_to_neoclassical_tearing_mode</code></td>
+</tr>
+<tr>
+<td><strong>authority_retirement_supersede</strong> — superseded by a signed retirement of
+the name's authority or source
+(<code>retire_signed_dual_authority_target</code>,
+<code>retire_signed_provenance_orphan</code>,
+<code>retire_ineligible_standard_name_sources</code>).</td>
+<td>14</td>
+<td>nothing — the identity's authority was validly withdrawn</td>
+<td><code>bremsstrahlung_count</code>, <code>equilibrium_weight_of_flux_loop</code>,
+<code>parallel_neutral_energy_convection_velocity</code></td>
+</tr>
+<tr>
+<td><strong>refine_product_successor_compacted</strong> — the change log holds a
+<code>refine</code>/<code>backfill_refine</code> change (the name is itself a refine
+product) but no <code>REFINED_FROM</code> edge from it survives, so its successor was not
+persisted.</td>
+<td>12</td>
+<td>a signed successor edge to the successor, where the refine change names a recoverable
+target (<code>to_name</code> carries the name itself, so the target needs
+adjudication)</td>
+<td><code>atomic_count_of_ion_state</code>,
+<code>equilibrium_weight_of_poloidal_magnetic_field_probe</code>,
+<code>ion_vibrational_level</code></td>
+</tr>
+<tr>
+<td><strong>spelling_or_rename_supersede</strong> — superseded by
+<code>supersede_legacy_spelling</code> into an accepted canonical identity, recording no
+edge.</td>
+<td>2</td>
+<td>a signed successor edge to the canonical accepted identity</td>
+<td><code>minimum_of_safety_factor</code>,
+<code>toroidal_neutral_state_momentum_diffusivity</code></td>
+</tr>
+<tr>
+<td><strong>maintenance_only_change_log</strong> — the change log holds only maintenance
+operations (90 of 96 are <code>realign_grammar_segments</code>); the supersession event
+itself is not recorded on the name.</td>
+<td>96</td>
+<td>a reclassification out of <code>superseded</code> — no supersession event exists to
+justify the stage</td>
+<td><code>accumulated_energy_due_to_fusion</code>, <code>alpha_angle</code>,
+<code>bragg_wavelength_of_bragg_crystal</code></td>
+</tr>
+<tr>
+<td><strong>no_change_recorded</strong> — no <code>HAS_INTERNAL_CHANGE</code> entry and no
+outgoing <code>REFINED_FROM</code>; nothing in the graph records how the name was
+superseded.</td>
+<td>112</td>
+<td>a reclassification out of <code>superseded</code> — no evidence of supersession</td>
+<td><code>average_ion_species_charge_number</code>,
+<code>average_ion_temperature_over_edge_region</code>,
+<code>bulk_velocity_due_to_diamagnetic_drift</code></td>
+</tr>
+</tbody>
+</table>
+<p id="sib-superseded-lineage-census-class-note">
+Candidate classes from the section that do not appear: <em>a fold product</em> — the census
+holds no <code>fold</code> operation, so the fold mechanism produced none of the 517; and
+<em>a name superseded by a rename that recorded no edge</em> — no <code>rename</code>
+operation appears on any census name (the two <code>supersede_legacy_spelling</code> names
+are the spelling variant, classed above).
+</p>
+
+<h3 id="sib-superseded-lineage-census-cross">Cross-cutting evidence</h3>
+<ul id="sib-superseded-lineage-census-cross-list">
+<li><strong>origin</strong>: 323 carry no <code>origin</code>, 194 carry
+<code>pipeline</code>.</li>
+<li><strong>refine chain</strong>: 177 are themselves refined from an earlier name
+(outgoing <code>REFINED_FROM</code>); none has an incoming <code>REFINED_FROM</code>
+(that branch is excluded).</li>
+<li><strong>reviews</strong>: 391 of 517 carry at least one <code>HAS_REVIEW</code> record
+(class coverage: orphan-batch 189/281, authority-retirement 14/14, refine-product 10/12,
+spelling 2/2, maintenance-only 81/96, no-change 95/112).</li>
+<li><strong>superseded_from_stage</strong>: 480 null, 21 <code>accepted</code>, 8
+<code>refining</code>, 5 <code>reviewed</code>, 2 <code>pending</code>, 1
+<code>drafted</code>.</li>
+</ul>
+</main>
+</body>
+</html>
