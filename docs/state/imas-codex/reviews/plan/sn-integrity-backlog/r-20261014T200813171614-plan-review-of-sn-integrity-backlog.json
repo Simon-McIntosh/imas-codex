@@ -16,7 +16,24 @@
   "plan_slug": "sn-integrity-backlog",
   "plan_version": 147,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-14T20:29:24.045648+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-14T20:29:24.045648+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261014T200813171614-plan-review-of-sn-integrity-backlog.json",
   "review_run_id": "r-20261014T200813171614-plan-review-of-sn-integrity-backlog",
   "reviewed_blob_sha": "b997d3c13ce7cb26acd8233bb288a552a60ecac8",
   "rubric": "content",
