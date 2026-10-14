@@ -24,7 +24,24 @@
   "plan_slug": "sn-harmonize-command",
   "plan_version": 64,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-14T18:04:17.043439+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-14T18:04:17.043439+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-harmonize-command/r-20261014T174912008170-plan-review-of-sn-harmonize-command.json",
   "review_run_id": "r-20261014T174912008170-plan-review-of-sn-harmonize-command",
   "reviewed_blob_sha": "ed441d7d4eae021598c195b8f7f8d224f71eebe8",
   "rubric": "content",
