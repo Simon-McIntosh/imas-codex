@@ -1,0 +1,561 @@
+<section id="scg-domain-path-measure">
+<h2>Measuring the domain classifiers at the DD path</h2>
+<p>The two classifiers were measured at the level where they classify: 201 DD paths labelled by the 147 named owners whose source DD paths all lie in the 856-path benchmark set. A path's expected domain is its owner's label, so no derivation sits between the classifier and the label.</p>
+<h3>Path-label set</h3>
+<p>201 paths from 147 names qualified. 23 names were excluded: 22 with no source path bound, 1 whose source paths do not all lie in the benchmark set.</p>
+<h3>Path-level accuracy</h3>
+<table><thead><tr><th>Split</th><th>Paths</th><th>Tree</th><th>Chat</th></tr></thead><tbody>
+<tr><td>calibration</td><td>80</td><td>0.7 (56/80)</td><td>0.7125 (57/80)</td></tr>
+<tr><td>validation</td><td>81</td><td>0.6543 (53/81)</td><td>0.716 (58/81)</td></tr>
+<tr><td>reference</td><td>40</td><td>0.5 (20/40)</td><td>0.5 (20/40)</td></tr>
+</tbody></table>
+<h3>Tree accuracy by probability band</h3>
+<table><thead><tr><th>Band</th><th>Paths</th><th>Tree correct</th><th>Tree accuracy</th></tr></thead><tbody>
+<tr><td>above 0.8</td><td>119</td><td>85</td><td>0.7143</td></tr>
+<tr><td>0.5 to 0.8</td><td>50</td><td>31</td><td>0.62</td></tr>
+<tr><td>below 0.5</td><td>32</td><td>13</td><td>0.4062</td></tr>
+</tbody></table>
+<h3>Validation names derived to no domain</h3>
+<p>Eleven validation names carry no source path at all, so both classifiers derive no domain for them. The cause is the name binding, not the classifier: <code>select_primary_domain</code> in <code>imas_codex/standard_names/domain_ranking.py</code> returns <code>None</code> for an empty domain set (line 65, <code>return min(...) if unique else None</code>), and an empty set is what a name with no bound source path supplies. No path was missing from the classified set and no path was classified to no domain, so the selector's empty-set rule is the step that empties the answer.</p>
+<table><thead><tr><th>Name</th><th>Cause</th><th>Sources</th></tr></thead><tbody>
+<tr><td>beryllium_density</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>current_density_due_to_fast_ion</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>current_density_due_to_non_inductive_current_drive</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>flux_at_limiter</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>mhd_mode_reference_phase</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>normalized_perturbed_parallel_magnetic_field_magnitude</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>plasma_temperature_imaginary_part</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>source_rate_due_to_injection</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>time</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</td><td>no source path is bound to the name</td><td>0</td></tr>
+<tr><td>torque_due_to_collisions</td><td>no source path is bound to the name</td><td>0</td></tr>
+</tbody></table>
+<h3>Confused paths by domain pair</h3>
+<p>Both classifiers are listed per path, with the tree's cell and probability and the guidance verdict for the pair.</p>
+<h4>tree classifier</h4>
+<p><strong>plasma_measurement_diagnostics -> radiation_measurement_diagnostics</strong> (7 paths) &mdash; guidance: silent</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<p><code>radiation_measurement_diagnostics</code> scope: Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.</p>
+<ul>
+<li><code>bolometer/camera/channel/aperture/surface</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.96, diagnostics); chat radiation_measurement_diagnostics; Surface specification of aperture.</li>
+<li><code>bolometer/camera/channel/aperture/x1_width</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.99, diagnostics); chat radiation_measurement_diagnostics; Full width of the bolometer channel aperture in the X1 direction, applicable when the aperture geometry type is rectangular (geometry_type=3). Defines the physical extent of the collimating aperture used in étendue calculations.</li>
+<li><code>bolometer/camera/channel/detector/surface</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.97, diagnostics); chat radiation_measurement_diagnostics; Surface specification of detector.</li>
+<li><code>bolometer/camera/channel/line_of_sight/first_point/r</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.94, diagnostics); chat radiation_measurement_diagnostics; Major radius (R) coordinate of first point.</li>
+<li><code>bolometer/camera/channel/line_of_sight/first_point/z</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.95, diagnostics); chat radiation_measurement_diagnostics; Vertical (Z) coordinate of first point.</li>
+<li><code>bolometer/camera/channel/line_of_sight/second_point/r</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.94, diagnostics); chat radiation_measurement_diagnostics; Major radius (R) coordinate of second point.</li>
+<li><code>bolometer/camera/channel/line_of_sight/second_point/z</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.95, diagnostics); chat radiation_measurement_diagnostics; Vertical (Z) coordinate of second point.</li>
+</ul>
+<p><strong>auxiliary_heating -> waves</strong> (5 paths) &mdash; guidance: separates</p>
+<p><code>auxiliary_heating</code> excludes <code>waves</code>: &ldquo;The antenna and the power it delivers are auxiliary_heating; the wave it launches, its dispersion and its wave-particle interaction inside the plasma are waves.&rdquo;</p>
+<p><code>waves</code> excludes <code>auxiliary_heating</code>: &ldquo;Hardware and launched power are auxiliary_heating; the wave in the plasma and its propagation are waves.&rdquo;</p>
+<ul>
+<li><code>lh_antennas/antenna/row/n_phi</code> &mdash; label auxiliary_heating; tree waves (p=0.81, heating_current_drive); chat current_drive; Toroidal refractive index (n_phi, equivalent to n∥) of the lower hybrid wave spectrum launched by a waveguide row. Determines the parallel wave number and hence the current drive deposition location in the plasma.</li>
+<li><code>summary/heating_current_drive/ic/k_perpendicular/value</code> &mdash; label auxiliary_heating; tree waves (p=0.91, heating_current_drive); chat waves; Main perpendicular wave number (k⊥) of ion cyclotron resonance heating (ICRH) waves launched by an IC antenna. Characterizes the transverse spatial scale of the wave in the plasma.</li>
+<li><code>waves/coherent_wave/profiles_1d/ion/state/power_density_fast</code> &mdash; label auxiliary_heating; tree waves (p=0.88, heating_current_drive); chat auxiliary_heating; Flux-surface-averaged absorbed wave power density deposited on the fast (non-thermal) ion population of a given charge state bundle, as a 1D radial profile. Characterises RF heating power density absorbed by fast ions via wave-particle interactions.</li>
+<li><code>waves/coherent_wave/profiles_1d/power_inside</code> &mdash; label auxiliary_heating; tree waves (p=0.98, heating_current_drive); chat auxiliary_heating; Total absorbed wave power (P_abs) inside a flux surface, cumulative volume integral over electrons, ions, and fast populations of the absorbed power density. Represents the radial profile of wave power deposition up to each flux surface.</li>
+<li><code>waves/coherent_wave/profiles_2d/ion/state/power_density_fast</code> &mdash; label auxiliary_heating; tree waves (p=0.89, heating_current_drive); chat auxiliary_heating; Absorbed RF wave power density deposited on fast (non-thermal) ions of a given charge state in a 2D poloidal cross-section. Represents the spatial distribution of RF wave energy deposited on fast ions per unit volume.</li>
+</ul>
+<p><strong>equilibrium -> core_plasma_physics</strong> (5 paths) &mdash; guidance: separates</p>
+<p><code>equilibrium</code> excludes <code>core_plasma_physics</code>: &ldquo;The amplitude of a temperature or density profile is a property of the plasma, so it is core_plasma_physics; equilibrium owns the surface on which that value sits, not the value.&rdquo;</p>
+<ul>
+<li><code>core_profiles/global_quantities/ip</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.98, core_plasma); chat core_plasma_physics; Total plasma current (Ip), the net toroidal current flowing through the plasma column, as stored in the core_profiles global quantities. A primary global parameter for confinement and stability.</li>
+<li><code>equilibrium/time_slice/constraints/ip/measured</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.50, core_plasma); chat equilibrium; Measured value of ip.</li>
+<li><code>equilibrium/time_slice/profiles_1d/j_phi</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.57, core_plasma); chat equilibrium; Flux-surface averaged toroidal current density (j_phi), defined as ⟨j_tor/R⟩/⟨1/R⟩. This quantity appears directly in the Grad-Shafranov equation and represents the effective current density driving the poloidal flux distribution.</li>
+<li><code>summary/pedestal_fits/linear/n_e/pedestal_position/value</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.36, core_plasma); chat edge_plasma_physics; Pedestal position in normalised poloidal flux.</li>
+<li><code>summary/pedestal_fits/linear/pressure_electron/pedestal_position/value</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.39, core_plasma); chat edge_plasma_physics; Pedestal position in normalised poloidal flux.</li>
+</ul>
+<p><strong>radiation_measurement_diagnostics -> spectroscopy</strong> (4 paths) &mdash; guidance: separates</p>
+<p><code>radiation_measurement_diagnostics</code> excludes <code>spectroscopy</code>: &ldquo;Recording radiated power, photon flux or an image is radiation_measurement_diagnostics; resolving an emission spectrum is spectroscopy. The failing case this file exists to separate: a spectrometer's line-of-sight emission belongs to spectroscopy, not to radiation_measurement_diagnostics.&rdquo;</p>
+<p><code>spectroscopy</code> excludes <code>radiation_measurement_diagnostics</code>: &ldquo;A spectrum resolved in wavelength is spectroscopy; a bolometric power or a camera image is radiation_measurement_diagnostics. The failing case this file exists to separate: a spectrometer's emission is spectroscopy even though a spectrometer measures radiation.&rdquo;</p>
+<ul>
+<li><code>spectrometer_uv/channel/detector/outline/x1</code> &mdash; label radiation_measurement_diagnostics; tree spectroscopy (p=0.94, diagnostics); chat spectroscopy; Positions of the UV spectrometer detector aperture outline vertices along the X1 axis of the local (X1, X2) coordinate system of the detector face. Defines one component of the 2D aperture boundary polygon.</li>
+<li><code>spectrometer_x_ray_crystal/channel/crystal/radius</code> &mdash; label radiation_measurement_diagnostics; tree spectroscopy (p=0.95, diagnostics); chat spectroscopy; Radius of a circular X-ray crystal aperture, applicable only when the geometry type is circular (geometry_type = 2). Defines the physical size of the diffracting crystal used in the X-ray crystal spectrometer channel.</li>
+<li><code>spectrometer_x_ray_crystal/channel/crystal/thickness</code> &mdash; label radiation_measurement_diagnostics; tree spectroscopy (p=0.92, diagnostics); chat spectroscopy; Physical thickness of the Bragg crystal used in an X-ray crystal spectrometer channel. A geometric parameter relevant to X-ray absorption, diffraction efficiency, and spectral resolution.</li>
+<li><code>spectrometer_x_ray_crystal/channel/reflector/x2_curvature</code> &mdash; label radiation_measurement_diagnostics; tree spectroscopy (p=0.97, diagnostics); chat spectroscopy; Radius of curvature of the reflector surface in the X2 direction for an X-ray crystal spectrometer channel. Applicable only for specific curvature types (index 3 or 5) in the reflector geometry description.</li>
+</ul>
+<p><strong>core_plasma_physics -> edge_plasma_physics</strong> (3 paths) &mdash; guidance: separates</p>
+<p><code>edge_plasma_physics</code> excludes <code>core_plasma_physics</code>: &ldquo;A core profile is core_plasma_physics; the same quantity resolved in the scrape-off layer or pedestal region is edge_plasma_physics.&rdquo;</p>
+<ul>
+<li><code>edge_profiles/ggd/electrons/temperature/values</code> &mdash; label core_plasma_physics; tree edge_plasma_physics (p=1.00, edge_divertor); chat edge_plasma_physics; Array of values for temperature.</li>
+<li><code>edge_profiles/ggd/ion/velocity_over_b_field/phi</code> &mdash; label core_plasma_physics; tree edge_plasma_physics (p=0.55, edge_divertor); chat edge_plasma_physics; Toroidal angle (φ) coordinate of velocity over b field.</li>
+<li><code>edge_profiles/profiles_1d/rotation_frequency_tor_sonic</code> &mdash; label core_plasma_physics; tree edge_plasma_physics (p=0.58, edge_divertor); chat edge_plasma_physics; Toroidal angular rotation frequency (Ω_tor,sonic) due to the E×B drift, defined as minus the derivative of the flux-surface-averaged electrostatic potential with respect to poloidal flux. Also referred to as the sonic flow frequency in the edge/SOL region.</li>
+</ul>
+<p><strong>general -> computational_workflow</strong> (3 paths) &mdash; guidance: separates</p>
+<p><code>general</code> excludes <code>computational_workflow</code>: &ldquo;Tooling and reference data are computational_workflow; general is for physical quantities with no single subject.&rdquo;</p>
+<ul>
+<li><code>amns_data/a</code> &mdash; label general; tree computational_workflow (p=0.63, data_computing); chat data_management; Data field in amns_data.</li>
+<li><code>amns_data/process/products/element/atoms_n</code> &mdash; label general; tree computational_workflow (p=0.93, data_computing); chat data_management; Normalized atoms of element.</li>
+<li><code>amns_data/process/reactants/element/atoms_n</code> &mdash; label general; tree computational_workflow (p=0.84, data_computing); chat data_management; Normalized atoms of element.</li>
+</ul>
+<p><strong>general -> core_plasma_physics</strong> (3 paths) &mdash; guidance: separates</p>
+<p><code>general</code> excludes <code>core_plasma_physics</code>: &ldquo;Choose the subject's own domain over general whenever the subject can be named; general is only for what remains after every narrower domain has been considered and rejected.&rdquo;</p>
+<ul>
+<li><code>core_profiles/profiles_1d/ion/element/a</code> &mdash; label general; tree core_plasma_physics (p=0.68, core_plasma); chat core_plasma_physics; Data field in core_profiles.</li>
+<li><code>core_profiles/profiles_1d/ion/element/z_n</code> &mdash; label general; tree core_plasma_physics (p=0.83, core_plasma); chat core_plasma_physics; Normalized z of element.</li>
+<li><code>core_profiles/profiles_1d/neutral/element/z_n</code> &mdash; label general; tree core_plasma_physics (p=0.74, core_plasma); chat core_plasma_physics; Normalized z of element.</li>
+</ul>
+<p><strong>core_plasma_physics -> spectroscopy</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>core_plasma_physics</code> scope: What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.</p>
+<p><code>spectroscopy</code> scope: Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.</p>
+<ul>
+<li><code>charge_exchange/channel/ion/n_i_over_n_e</code> &mdash; label core_plasma_physics; tree spectroscopy (p=0.49, diagnostics); chat spectroscopy; Ion concentration of a given impurity or fuel species expressed as the ratio of ion density (ni) to electron density (ne) at the CXRS channel measurement point. Quantifies fractional abundance of the species relative to the electron population.</li>
+<li><code>charge_exchange/channel/ion/z_ion</code> &mdash; label core_plasma_physics; tree spectroscopy (p=0.83, diagnostics); chat spectroscopy; Ion charge state (z_ion) of the measured ion species in charge exchange recombination spectroscopy (CXRS). Specifies the charge number (e.g., C+6, N+7) used to identify the spectral line and interpret the measurement.</li>
+</ul>
+<p><strong>core_plasma_physics -> transport</strong> (2 paths) &mdash; guidance: separates</p>
+<p><code>core_plasma_physics</code> excludes <code>transport</code>: &ldquo;How the plasma moves energy or particles is transport; the state it is in is core_plasma_physics. A profile's gradient is core; the flux that gradient drives is transport.&rdquo;</p>
+<p><code>transport</code> excludes <code>core_plasma_physics</code>: &ldquo;The plasma's own profile value is core_plasma_physics; a flux or diffusivity derived from it is transport.&rdquo;</p>
+<ul>
+<li><code>bolometer/power_radiated_total</code> &mdash; label core_plasma_physics; tree transport (p=0.42, core_plasma); chat radiation_measurement_diagnostics; Total radiated power (P_rad) reconstructed from bolometry measurements, integrating broadband electromagnetic emission across the entire plasma volume. A key global energy balance quantity for transport analysis and impurity monitoring.</li>
+<li><code>summary/global_quantities/power_radiated/value</code> &mdash; label core_plasma_physics; tree transport (p=0.56, core_plasma); chat core_plasma_physics; Total radiated power (Prad) from the plasma, a key global energy balance quantity. Represents power lost from the plasma via electromagnetic radiation across all spectral ranges and emission processes.</li>
+</ul>
+<p><strong>edge_plasma_physics -> spectroscopy</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>edge_plasma_physics</code> scope: The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.</p>
+<p><code>spectroscopy</code> scope: Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.</p>
+<ul>
+<li><code>spectrometer_visible/channel/isotope_ratios/isotope/density_ratio</code> &mdash; label edge_plasma_physics; tree spectroscopy (p=0.89, diagnostics); chat spectroscopy; Ratio of the neutral density of a given hydrogen isotope to the summed neutral densities of all other isotopes in the measurement channel. Used to quantify the hydrogen fuel isotope composition from visible spectroscopy.</li>
+<li><code>spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals</code> &mdash; label edge_plasma_physics; tree spectroscopy (p=0.80, diagnostics); chat spectroscopy; Line-of-sight projected velocity of hot neutral atoms measured by polarization spectroscopy on a visible spectrometer channel. Positive values correspond to motion from the first to the second point along the line of sight.</li>
+</ul>
+<p><strong>neutronics -> plasma_wall_interactions</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>neutronics</code> scope: Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.</p>
+<p><code>plasma_wall_interactions</code> scope: The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.</p>
+<ul>
+<li><code>wall/description_2d/limiter/unit/midplane_power_density_nuclear</code> &mdash; label neutronics; tree plasma_wall_interactions (p=0.88, edge_divertor); chat neutronics; Nuclear power density deposited in a limiter wall unit at the midplane. Represents volumetric nuclear heating from neutron and gamma interactions at that toroidal location.</li>
+<li><code>wall/description_2d/limiter/unit/power_nuclear</code> &mdash; label neutronics; tree plasma_wall_interactions (p=0.83, edge_divertor); chat neutronics; Nuclear power deposited in a specific limiter or plasma-facing component (PFC) unit of the 2D wall description. Captures the heating contribution from neutron and gamma radiation to the wall structure.</li>
+</ul>
+<p><strong>neutronics -> structural_components</strong> (2 paths) &mdash; guidance: separates</p>
+<p><code>neutronics</code> excludes <code>structural_components</code>: &ldquo;The component is structural_components; the neutronics of activation and dose in it is neutronics.&rdquo;</p>
+<ul>
+<li><code>breeding_blanket/module/layer/time_slice/power_nuclear</code> &mdash; label neutronics; tree structural_components (p=0.54, machine_systems); chat neutronics; Total nuclear power deposited in a specific breeding blanket layer by neutron heating. Represents the volumetric nuclear heat load from fusion neutron interactions with the blanket material.</li>
+<li><code>breeding_blanket/module/time_slice/escape_flux_max</code> &mdash; label neutronics; tree structural_components (p=0.82, machine_systems); chat neutronics; Maximum neutron flux escaping from the rear surface of a breeding blanket module. A key shielding performance metric indicating the blanket's effectiveness in attenuating the neutron flux toward the vessel structure.</li>
+</ul>
+<p><strong>structural_components -> equilibrium</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>structural_components</code> scope: The static engineering structure of the device: vacuum vessel, cryostat, supports and the structural definition of components — materials, geometry and load paths. Judge by whether the quantity describes a structure that holds the machine rather than the plasma physics around it.</p>
+<p><code>equilibrium</code> scope: The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<ul>
+<li><code>ferritic/object/axisymmetric/outline/r</code> &mdash; label structural_components; tree equilibrium (p=0.37, core_plasma); chat structural_components; Major radius (R) coordinate of outline.</li>
+<li><code>ferritic/object/centroid/y</code> &mdash; label structural_components; tree equilibrium (p=0.24, core_plasma); chat structural_components; Y coordinate of centroid.</li>
+</ul>
+<p><strong>auxiliary_heating -> electromagnetic_wave_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>auxiliary_heating</code> scope: The external systems that heat a plasma and their launch and coupling quantities, judged by whether the quantity belongs to a heating actuator or to the power it delivers. The heating method may be beams or waves; what decides the domain is that the quantity is about the injected power, not the transport it later causes.</p>
+<p><code>electromagnetic_wave_diagnostics</code> scope: Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.</p>
+<ul>
+<li><code>ic_antennas/antenna/module/pressure/position/z</code> &mdash; label auxiliary_heating; tree electromagnetic_wave_diagnostics (p=0.27, diagnostics); chat auxiliary_heating; Vertical (Z) coordinate of position.</li>
+</ul>
+<p><strong>current_drive -> core_plasma_physics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>current_drive</code> excludes <code>core_plasma_physics</code>: &ldquo;The total current the plasma carries is a global state of the plasma, core_plasma_physics; the part of it driven externally and its efficiency are current_drive.&rdquo;</p>
+<ul>
+<li><code>summary/fusion/current/value</code> &mdash; label current_drive; tree core_plasma_physics (p=0.53, core_plasma); chat current_drive; Parallel current driven by fusion reactions within the plasma. A minor contribution to the total non-inductive current, associated with fast alpha particles produced by D-T fusion reactions.</li>
+</ul>
+<p><strong>edge_plasma_physics -> core_plasma_physics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>edge_plasma_physics</code> excludes <code>core_plasma_physics</code>: &ldquo;A core profile is core_plasma_physics; the same quantity resolved in the scrape-off layer or pedestal region is edge_plasma_physics.&rdquo;</p>
+<ul>
+<li><code>edge_profiles/ggd/vorticity_over_r/z</code> &mdash; label edge_plasma_physics; tree core_plasma_physics (p=0.29, core_plasma); chat edge_plasma_physics; Vertical (Z) coordinate of vorticity over r.</li>
+</ul>
+<p><strong>electromagnetic_wave_diagnostics -> data_management</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>electromagnetic_wave_diagnostics</code> scope: Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.</p>
+<p><code>data_management</code> scope: Summary data products, integrated analysis results and the archival and FAIR metadata of a dataset. Judge by whether the quantity is a data product assembled from a run, rather than a direct physics measurement or state.</p>
+<ul>
+<li><code>equilibrium/time_slice/constraints/n_e_line/reconstructed</code> &mdash; label electromagnetic_wave_diagnostics; tree data_management (p=0.34, data_computing); chat equilibrium; Reconstructed value of n e line.</li>
+</ul>
+<p><strong>electromagnetic_wave_diagnostics -> radiation_measurement_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>electromagnetic_wave_diagnostics</code> scope: Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.</p>
+<p><code>radiation_measurement_diagnostics</code> scope: Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.</p>
+<ul>
+<li><code>ece/channel/delta_position_suprathermal/theta</code> &mdash; label electromagnetic_wave_diagnostics; tree radiation_measurement_diagnostics (p=0.54, diagnostics); chat electromagnetic_wave_diagnostics; Poloidal angle (θ) component of the position shift of the ECE measurement location induced by suprathermal electrons. Part of the correction vector estimating how non-thermal electrons bias the apparent emission position relative to the thermal resonance layer.</li>
+</ul>
+<p><strong>equilibrium -> edge_plasma_physics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>equilibrium</code> scope: The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<p><code>edge_plasma_physics</code> scope: The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.</p>
+<ul>
+<li><code>edge_profiles/profiles_1d/q</code> &mdash; label equilibrium; tree edge_plasma_physics (p=0.57, edge_divertor); chat equilibrium; Safety factor (q) radial profile in the edge and scrape-off layer (SOL) region, representing the ratio of toroidal to poloidal magnetic flux increments per field-line turn. A fundamental MHD stability parameter governing resonant surfaces and field-line connection lengths.</li>
+</ul>
+<p><strong>equilibrium -> electromagnetic_wave_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>equilibrium</code> scope: The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<p><code>electromagnetic_wave_diagnostics</code> scope: Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.</p>
+<ul>
+<li><code>ece/channel/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; tree electromagnetic_wave_diagnostics (p=0.33, diagnostics); chat electromagnetic_wave_diagnostics; Normalised toroidal flux coordinate (ρ_tor_norm) along the ECE beam or ray path, mapping each propagation position to a flux surface. Used to relate beam-tracing positions to plasma radial structure for Te profile reconstruction.</li>
+</ul>
+<p><strong>equilibrium -> magnetic_field_systems</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>magnetic_field_systems</code> excludes <code>equilibrium</code>: &ldquo;The coils that make the field are magnetic_field_systems; the equilibrium field and its surfaces are equilibrium.&rdquo;</p>
+<ul>
+<li><code>core_profiles/vacuum_toroidal_field/r0</code> &mdash; label equilibrium; tree magnetic_field_systems (p=0.42, machine_systems); chat equilibrium; Reference major radius (R0) at which the vacuum toroidal magnetic field B0 is defined in the core_profiles IDS, typically a fixed geometric position at the vessel equatorial midplane. Used to normalise current densities and define the toroidal flux coordinate rho_tor.</li>
+</ul>
+<p><strong>equilibrium -> plasma_control</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>plasma_control</code> excludes <code>equilibrium</code>: &ldquo;The commanded or reference configuration is plasma_control; the achieved equilibrium is equilibrium.&rdquo;</p>
+<ul>
+<li><code>pulse_schedule/position_control/gap/angle</code> &mdash; label equilibrium; tree plasma_control (p=0.91, control_operations); chat plasma_control; Angle of the plasma boundary gap direction measured clockwise from the radial (grad R) direction in the poloidal cross-section. Defines the orientation of the gap vector used as a reference in plasma position control.</li>
+</ul>
+<p><strong>equilibrium -> waves</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>equilibrium</code> scope: The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<p><code>waves</code> scope: Electromagnetic waves in a plasma: their propagation, dispersion, mode conversion, damping and wave-particle interaction, and the model quantities a wave code computes. Judge by whether the quantity describes a wave field or its interaction rather than the hardware that launched it.</p>
+<ul>
+<li><code>waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; tree waves (p=0.90, heating_current_drive); chat waves; Normalised toroidal flux coordinate (ρ_tor,norm) at each position along the ray or beam path in a wave beam tracing calculation. Maps beam trajectory points to flux surface geometry.</li>
+</ul>
+<p><strong>fast_particles -> core_plasma_physics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>fast_particles</code> excludes <code>core_plasma_physics</code>: &ldquo;The bulk thermal population is core_plasma_physics; the small suprathermal tail is fast_particles.&rdquo;</p>
+<ul>
+<li><code>distributions/distribution/ggd/orbit_frequency_pol/values</code> &mdash; label fast_particles; tree core_plasma_physics (p=0.22, core_plasma); chat transport; Array of values for orbit frequency pol.</li>
+</ul>
+<p><strong>fast_particles -> transport</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>fast_particles</code> scope: Populations of particles far from the thermal bulk — their distribution functions, slowing-down, thermalisation, and the instabilities they drive. Judge by whether the quantity describes a suprathermal population's distribution or its interaction with the plasma.</p>
+<p><code>transport</code> scope: The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it — an equilibrium IDS with a diffusion model still holds transport quantities.</p>
+<ul>
+<li><code>distribution_sources/source/profiles_1d/particles</code> &mdash; label fast_particles; tree transport (p=0.75, core_plasma); chat fast_particles; Particle source term for the density transport equation as a 1D radial profile, representing the net volumetric rate of particle production from the distribution source (e.g., NBI ionization, fusion reactions). Used as input for Fokker-Planck and kinetic transport calculations.</li>
+</ul>
+<p><strong>fueling -> core_plasma_physics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>fueling</code> excludes <code>core_plasma_physics</code>: &ldquo;The delivered particles are fueling; the density the plasma holds as a result is core_plasma_physics.&rdquo;</p>
+<ul>
+<li><code>spi/injector/pellet/core/atoms_n</code> &mdash; label fueling; tree core_plasma_physics (p=0.40, core_plasma); chat fueling; Normalized atoms of core.</li>
+</ul>
+<p><strong>magnetic_field_diagnostics -> equilibrium</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>magnetic_field_diagnostics</code> excludes <code>equilibrium</code>: &ldquo;The coils' signals are magnetic_field_diagnostics; the flux-surface geometry reconstructed from them is equilibrium.&rdquo;</p>
+<ul>
+<li><code>focs/outline/z</code> &mdash; label magnetic_field_diagnostics; tree equilibrium (p=0.62, core_plasma); chat magnetic_field_diagnostics; Vertical (Z) coordinate of outline.</li>
+</ul>
+<p><strong>magnetic_field_systems -> computational_workflow</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>magnetic_field_systems</code> scope: The machines that generate and confine the magnetic field: coil systems, superconducting magnets and the iron or ferritic field-shaping infrastructure. Judge by whether the quantity describes the hardware that produces the field rather than the field it produces or measures.</p>
+<p><code>computational_workflow</code> scope: Computational and auxiliary infrastructure: atomic and molecular data, geometry definitions, generic temporary containers and the numerics that support a solver. Judge by whether the quantity is tooling or reference data rather than physics.</p>
+<ul>
+<li><code>pf_passive/loop/element/geometry/arcs_of_circle/r</code> &mdash; label magnetic_field_systems; tree computational_workflow (p=0.49, data_computing); chat magnetic_field_systems; Major radius (R) coordinate of arcs of circle.</li>
+</ul>
+<p><strong>magnetohydrodynamics -> gyrokinetics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>gyrokinetics</code> excludes <code>magnetohydrodynamics</code>: &ldquo;A fluid-scale coherent instability is magnetohydrodynamics; a gyrokinetic eigenmode is gyrokinetics.&rdquo;</p>
+<ul>
+<li><code>mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary</code> &mdash; label magnetohydrodynamics; tree gyrokinetics (p=0.68, advanced_physics); chat magnetohydrodynamics; Imaginary part of the local shear Alfvén frequency spectrum as a function of radius and root index in linear MHD stability analysis. Represents the damping or growth rate component of Alfvén continuum eigenfrequencies.</li>
+</ul>
+<p><strong>neutronics -> core_plasma_physics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>neutronics</code> excludes <code>core_plasma_physics</code>: &ldquo;The plasma's energy state is core_plasma_physics; the neutron emission and its measurement are neutronics.&rdquo;</p>
+<ul>
+<li><code>summary/fusion/neutron_rates/total/value</code> &mdash; label neutronics; tree core_plasma_physics (p=0.58, core_plasma); chat neutronics; Total neutron emission rate (Sn) from all fusion reactions combined, including DT, DD, and TT reactions. Provides the aggregate neutron production rate used for fusion performance characterization.</li>
+</ul>
+<p><strong>neutronics -> spectroscopy</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>neutronics</code> scope: Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.</p>
+<p><code>spectroscopy</code> scope: Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.</p>
+<ul>
+<li><code>mse/channel/detector/radius</code> &mdash; label neutronics; tree spectroscopy (p=0.98, diagnostics); chat magnetic_field_diagnostics; Radius of the circular detector aperture in the MSE diagnostic channel, applicable only when geometry_type = 2 (circular geometry). Defines the size of the sensitive area for line-of-sight calculations.</li>
+</ul>
+<p><strong>particle_measurement_diagnostics -> mechanical_measurement_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>particle_measurement_diagnostics</code> scope: Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.</p>
+<p><code>mechanical_measurement_diagnostics</code> scope: Diagnostics of mechanical and structural quantities of machine components: strain, vibration, displacement and inertial or pressure measurement. Judge by whether the instrument measures the mechanical state of a component rather than the plasma or its fields.</p>
+<ul>
+<li><code>barometry/gauge/pressure</code> &mdash; label particle_measurement_diagnostics; tree mechanical_measurement_diagnostics (p=0.63, diagnostics); chat mechanical_measurement_diagnostics; Neutral gas pressure measured by a barometry gauge within the vacuum vessel or surrounding vacuum system. Characterizes local gas inventory and vacuum conditions relevant to plasma fuelling, recycling, and neutral gas modelling.</li>
+</ul>
+<p><strong>plasma_control -> magnetohydrodynamics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>plasma_control</code> excludes <code>magnetohydrodynamics</code>: &ldquo;The mode is magnetohydrodynamics; the control response to it is plasma_control.&rdquo;</p>
+<p><code>magnetohydrodynamics</code> excludes <code>plasma_control</code>: &ldquo;What the mode does is magnetohydrodynamics; what the controller commands in response is plasma_control.&rdquo;</p>
+<ul>
+<li><code>equilibrium/time_slice/global_quantities/current_centre/velocity_z</code> &mdash; label plasma_control; tree magnetohydrodynamics (p=0.46, core_plasma); chat equilibrium; Vertical velocity (dZ/dt) of the current centre, representing the rate of change of the vertical position of the centroid of the plasma current distribution. A global scalar equilibrium quantity.</li>
+</ul>
+<p><strong>plasma_initiation -> magnetic_field_systems</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>plasma_initiation</code> excludes <code>magnetic_field_systems</code>: &ldquo;The field-null configuration as a start-up physics quantity is plasma_initiation; the coils that produce it are magnetic_field_systems.&rdquo;</p>
+<ul>
+<li><code>plasma_initiation/global_quantities/b_field_stray</code> &mdash; label plasma_initiation; tree magnetic_field_systems (p=0.52, machine_systems); chat plasma_initiation; Stray magnetic field (Bstray) at the plasma position during plasma initiation. Residual fields from imperfect cancellation of external coil fields can inhibit electron avalanche breakdown.</li>
+</ul>
+<p><strong>plasma_measurement_diagnostics -> computational_workflow</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<p><code>computational_workflow</code> scope: Computational and auxiliary infrastructure: atomic and molecular data, geometry definitions, generic temporary containers and the numerics that support a solver. Judge by whether the quantity is tooling or reference data rather than physics.</p>
+<ul>
+<li><code>barometry/gauge/position/phi</code> &mdash; label plasma_measurement_diagnostics; tree computational_workflow (p=0.54, data_computing); chat mechanical_measurement_diagnostics; Toroidal angle (φ) coordinate of position.</li>
+</ul>
+<p><strong>plasma_measurement_diagnostics -> equilibrium</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<p><code>equilibrium</code> scope: The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<ul>
+<li><code>ece/channel/position/phi</code> &mdash; label plasma_measurement_diagnostics; tree equilibrium (p=0.48, core_plasma); chat electromagnetic_wave_diagnostics; Toroidal angle (φ) coordinate of position.</li>
+</ul>
+<p><strong>plasma_measurement_diagnostics -> neutronics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<p><code>neutronics</code> scope: Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.</p>
+<ul>
+<li><code>neutron_diagnostic/detector/geometry/x1_width</code> &mdash; label plasma_measurement_diagnostics; tree neutronics (p=0.97, diagnostics); chat particle_measurement_diagnostics; Full width of the neutron detector aperture in the X1 direction. This geometric parameter applies only when the aperture geometry type is rectangular (geometry_type = 3).</li>
+</ul>
+<p><strong>plasma_measurement_diagnostics -> spectroscopy</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<p><code>spectroscopy</code> scope: Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.</p>
+<ul>
+<li><code>charge_exchange/channel/cone_diameter</code> &mdash; label plasma_measurement_diagnostics; tree spectroscopy (p=0.96, diagnostics); chat spectroscopy; Diameter of the base of the optical cone at the entrance pupil of a CXRS channel. A geometric parameter characterizing the light collection optics of the charge exchange recombination spectroscopy diagnostic.</li>
+</ul>
+<p><strong>plasma_wall_interactions -> gyrokinetics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_wall_interactions</code> scope: The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.</p>
+<p><code>gyrokinetics</code> scope: The gyrokinetic model's own quantities: gyrocenter moments, the gyrokinetic distribution and its fluxes, expressed in the model's normalised coordinates. Judge by whether the quantity is defined within the gyrokinetic framework rather than in measured machine coordinates.</p>
+<ul>
+<li><code>edge_transport/model/ggd/ion/momentum/flux_limiter/phi</code> &mdash; label plasma_wall_interactions; tree gyrokinetics (p=0.46, advanced_physics); chat transport; Toroidal angle (φ) coordinate of flux limiter.</li>
+</ul>
+<p><strong>plasma_wall_interactions -> radiation_measurement_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_wall_interactions</code> scope: The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.</p>
+<p><code>radiation_measurement_diagnostics</code> scope: Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.</p>
+<ul>
+<li><code>camera_ir/channel/target_surface_center/y</code> &mdash; label plasma_wall_interactions; tree radiation_measurement_diagnostics (p=0.89, diagnostics); chat radiation_measurement_diagnostics; Y coordinate of target surface center.</li>
+</ul>
+<p><strong>structural_components -> magnetic_field_systems</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>structural_components</code> excludes <code>magnetic_field_systems</code>: &ldquo;A magnetic coil system is magnetic_field_systems; the passive structure that supports it is structural_components.&rdquo;</p>
+<ul>
+<li><code>pf_passive/loop/element/geometry/oblique/alpha</code> &mdash; label structural_components; tree magnetic_field_systems (p=0.88, machine_systems); chat magnetic_field_systems; First inclination angle (alpha, α) of the oblique (trapezoidal/parallelogram) cross-sectional geometry of a passive conductor loop element, measured counter-clockwise from the outboard horizontal. Part of the poloidal-plane geometric parameterization.</li>
+</ul>
+<p><strong>transport -> gyrokinetics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>gyrokinetics</code> excludes <code>transport</code>: &ldquo;The model's internal flux is gyrokinetics; the mean transport flux it predicts or that is measured in the plasma is transport.&rdquo;</p>
+<ul>
+<li><code>plasma_transport/model/ggd/neutral/state/momentum/v/parallel</code> &mdash; label transport; tree gyrokinetics (p=0.38, advanced_physics); chat transport; Parallel component of v.</li>
+</ul>
+<p><strong>waves -> auxiliary_heating</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>waves</code> excludes <code>auxiliary_heating</code>: &ldquo;Hardware and launched power are auxiliary_heating; the wave in the plasma and its propagation are waves.&rdquo;</p>
+<p><code>auxiliary_heating</code> excludes <code>waves</code>: &ldquo;The antenna and the power it delivers are auxiliary_heating; the wave it launches, its dispersion and its wave-particle interaction inside the plasma are waves.&rdquo;</p>
+<ul>
+<li><code>ec_launchers/beam/phase/curvature</code> &mdash; label waves; tree auxiliary_heating (p=0.79, heating_current_drive); chat waves; Inverse curvature radii (1/R) of the phase ellipse for an electron cyclotron (EC) launcher beam in Gaussian optics. Positive/negative values indicate divergent/convergent beam wavefronts; the two components describe the principal curvatures of the beam phase front.</li>
+</ul>
+<h4>chat classifier</h4>
+<p><strong>plasma_measurement_diagnostics -> radiation_measurement_diagnostics</strong> (7 paths) &mdash; guidance: silent</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<p><code>radiation_measurement_diagnostics</code> scope: Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.</p>
+<ul>
+<li><code>bolometer/camera/channel/aperture/surface</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.96, diagnostics); chat radiation_measurement_diagnostics; Surface specification of aperture.</li>
+<li><code>bolometer/camera/channel/aperture/x1_width</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.99, diagnostics); chat radiation_measurement_diagnostics; Full width of the bolometer channel aperture in the X1 direction, applicable when the aperture geometry type is rectangular (geometry_type=3). Defines the physical extent of the collimating aperture used in étendue calculations.</li>
+<li><code>bolometer/camera/channel/detector/surface</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.97, diagnostics); chat radiation_measurement_diagnostics; Surface specification of detector.</li>
+<li><code>bolometer/camera/channel/line_of_sight/first_point/r</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.94, diagnostics); chat radiation_measurement_diagnostics; Major radius (R) coordinate of first point.</li>
+<li><code>bolometer/camera/channel/line_of_sight/first_point/z</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.95, diagnostics); chat radiation_measurement_diagnostics; Vertical (Z) coordinate of first point.</li>
+<li><code>bolometer/camera/channel/line_of_sight/second_point/r</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.94, diagnostics); chat radiation_measurement_diagnostics; Major radius (R) coordinate of second point.</li>
+<li><code>bolometer/camera/channel/line_of_sight/second_point/z</code> &mdash; label plasma_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.95, diagnostics); chat radiation_measurement_diagnostics; Vertical (Z) coordinate of second point.</li>
+</ul>
+<p><strong>radiation_measurement_diagnostics -> spectroscopy</strong> (5 paths) &mdash; guidance: separates</p>
+<p><code>radiation_measurement_diagnostics</code> excludes <code>spectroscopy</code>: &ldquo;Recording radiated power, photon flux or an image is radiation_measurement_diagnostics; resolving an emission spectrum is spectroscopy. The failing case this file exists to separate: a spectrometer's line-of-sight emission belongs to spectroscopy, not to radiation_measurement_diagnostics.&rdquo;</p>
+<p><code>spectroscopy</code> excludes <code>radiation_measurement_diagnostics</code>: &ldquo;A spectrum resolved in wavelength is spectroscopy; a bolometric power or a camera image is radiation_measurement_diagnostics. The failing case this file exists to separate: a spectrometer's emission is spectroscopy even though a spectrometer measures radiation.&rdquo;</p>
+<ul>
+<li><code>bremsstrahlung_visible/channel/filter/wavelength_upper</code> &mdash; label radiation_measurement_diagnostics; tree radiation_measurement_diagnostics (p=0.95, diagnostics); chat spectroscopy; Upper bound of the wavelength passband for the optical filter in a visible bremsstrahlung channel. Defines the high-wavelength edge of the spectral window selected for effective charge (Zeff) measurements.</li>
+<li><code>spectrometer_uv/channel/detector/outline/x1</code> &mdash; label radiation_measurement_diagnostics; tree spectroscopy (p=0.94, diagnostics); chat spectroscopy; Positions of the UV spectrometer detector aperture outline vertices along the X1 axis of the local (X1, X2) coordinate system of the detector face. Defines one component of the 2D aperture boundary polygon.</li>
+<li><code>spectrometer_x_ray_crystal/channel/crystal/radius</code> &mdash; label radiation_measurement_diagnostics; tree spectroscopy (p=0.95, diagnostics); chat spectroscopy; Radius of a circular X-ray crystal aperture, applicable only when the geometry type is circular (geometry_type = 2). Defines the physical size of the diffracting crystal used in the X-ray crystal spectrometer channel.</li>
+<li><code>spectrometer_x_ray_crystal/channel/crystal/thickness</code> &mdash; label radiation_measurement_diagnostics; tree spectroscopy (p=0.92, diagnostics); chat spectroscopy; Physical thickness of the Bragg crystal used in an X-ray crystal spectrometer channel. A geometric parameter relevant to X-ray absorption, diffraction efficiency, and spectral resolution.</li>
+<li><code>spectrometer_x_ray_crystal/channel/reflector/x2_curvature</code> &mdash; label radiation_measurement_diagnostics; tree spectroscopy (p=0.97, diagnostics); chat spectroscopy; Radius of curvature of the reflector surface in the X2 direction for an X-ray crystal spectrometer channel. Applicable only for specific curvature types (index 3 or 5) in the reflector geometry description.</li>
+</ul>
+<p><strong>core_plasma_physics -> edge_plasma_physics</strong> (4 paths) &mdash; guidance: separates</p>
+<p><code>edge_plasma_physics</code> excludes <code>core_plasma_physics</code>: &ldquo;A core profile is core_plasma_physics; the same quantity resolved in the scrape-off layer or pedestal region is edge_plasma_physics.&rdquo;</p>
+<ul>
+<li><code>edge_profiles/ggd/e_field/parallel</code> &mdash; label core_plasma_physics; tree core_plasma_physics (p=0.15, core_plasma); chat edge_plasma_physics; Parallel component of e field.</li>
+<li><code>edge_profiles/ggd/electrons/temperature/values</code> &mdash; label core_plasma_physics; tree edge_plasma_physics (p=1.00, edge_divertor); chat edge_plasma_physics; Array of values for temperature.</li>
+<li><code>edge_profiles/ggd/ion/velocity_over_b_field/phi</code> &mdash; label core_plasma_physics; tree edge_plasma_physics (p=0.55, edge_divertor); chat edge_plasma_physics; Toroidal angle (φ) coordinate of velocity over b field.</li>
+<li><code>edge_profiles/profiles_1d/rotation_frequency_tor_sonic</code> &mdash; label core_plasma_physics; tree edge_plasma_physics (p=0.58, edge_divertor); chat edge_plasma_physics; Toroidal angular rotation frequency (Ω_tor,sonic) due to the E×B drift, defined as minus the derivative of the flux-surface-averaged electrostatic potential with respect to poloidal flux. Also referred to as the sonic flow frequency in the edge/SOL region.</li>
+</ul>
+<p><strong>equilibrium -> magnetic_field_systems</strong> (3 paths) &mdash; guidance: separates</p>
+<p><code>magnetic_field_systems</code> excludes <code>equilibrium</code>: &ldquo;The coils that make the field are magnetic_field_systems; the equilibrium field and its surfaces are equilibrium.&rdquo;</p>
+<ul>
+<li><code>pf_plasma/element/geometry/oblique/alpha</code> &mdash; label equilibrium; tree equilibrium (p=0.75, core_plasma); chat magnetic_field_systems; Inclination angle alpha (α) of the first parallelogram side of the oblique cross-sectional element geometry, measured counter-clockwise from the outwardly directed horizontal radial vector (grad R). Defines the orientation of the parallelogram for a discrete plasma current-carrying filament.</li>
+<li><code>pf_plasma/element/geometry/oblique/length_alpha</code> &mdash; label equilibrium; tree equilibrium (p=0.65, core_plasma); chat magnetic_field_systems; Length of the parallelogram side inclined at angle alpha with respect to the major radius axis, describing the oblique cross-sectional geometry of a discrete plasma current filament element.</li>
+<li><code>pf_plasma/element/geometry/rectangle/height</code> &mdash; label equilibrium; tree equilibrium (p=0.34, core_plasma); chat magnetic_field_systems; Vertical full height of the rectangular cross-section describing a discrete plasma current-carrying filament element. Defines the vertical extent of the current element geometry in the pf_plasma filamentary representation.</li>
+</ul>
+<p><strong>general -> core_plasma_physics</strong> (3 paths) &mdash; guidance: separates</p>
+<p><code>general</code> excludes <code>core_plasma_physics</code>: &ldquo;Choose the subject's own domain over general whenever the subject can be named; general is only for what remains after every narrower domain has been considered and rejected.&rdquo;</p>
+<ul>
+<li><code>core_profiles/profiles_1d/ion/element/a</code> &mdash; label general; tree core_plasma_physics (p=0.68, core_plasma); chat core_plasma_physics; Data field in core_profiles.</li>
+<li><code>core_profiles/profiles_1d/ion/element/z_n</code> &mdash; label general; tree core_plasma_physics (p=0.83, core_plasma); chat core_plasma_physics; Normalized z of element.</li>
+<li><code>core_profiles/profiles_1d/neutral/element/z_n</code> &mdash; label general; tree core_plasma_physics (p=0.74, core_plasma); chat core_plasma_physics; Normalized z of element.</li>
+</ul>
+<p><strong>general -> data_management</strong> (3 paths) &mdash; guidance: separates</p>
+<p><code>general</code> excludes <code>data_management</code>: &ldquo;A product assembled from a run is data_management; general is for a physical quantity itself, not a container around many, so a summary product does not default to general.&rdquo;</p>
+<ul>
+<li><code>amns_data/a</code> &mdash; label general; tree computational_workflow (p=0.63, data_computing); chat data_management; Data field in amns_data.</li>
+<li><code>amns_data/process/products/element/atoms_n</code> &mdash; label general; tree computational_workflow (p=0.93, data_computing); chat data_management; Normalized atoms of element.</li>
+<li><code>amns_data/process/reactants/element/atoms_n</code> &mdash; label general; tree computational_workflow (p=0.84, data_computing); chat data_management; Normalized atoms of element.</li>
+</ul>
+<p><strong>auxiliary_heating -> current_drive</strong> (2 paths) &mdash; guidance: separates</p>
+<p><code>auxiliary_heating</code> excludes <code>current_drive</code>: &ldquo;The deposition of heat is auxiliary_heating; the driven current and its efficiency and control are current_drive.&rdquo;</p>
+<p><code>current_drive</code> excludes <code>auxiliary_heating</code>: &ldquo;The energy that was launched is auxiliary_heating; the current it drove is current_drive. Both may come from one beam, and the quantity's subject decides.&rdquo;</p>
+<ul>
+<li><code>lh_antennas/antenna/row/n_phi</code> &mdash; label auxiliary_heating; tree waves (p=0.81, heating_current_drive); chat current_drive; Toroidal refractive index (n_phi, equivalent to n∥) of the lower hybrid wave spectrum launched by a waveguide row. Determines the parallel wave number and hence the current drive deposition location in the plasma.</li>
+<li><code>lh_antennas/reference_point/z</code> &mdash; label auxiliary_heating; tree auxiliary_heating (p=0.40, heating_current_drive); chat current_drive; Vertical (Z) coordinate of reference point.</li>
+</ul>
+<p><strong>core_plasma_physics -> equilibrium</strong> (2 paths) &mdash; guidance: separates</p>
+<p><code>equilibrium</code> excludes <code>core_plasma_physics</code>: &ldquo;The amplitude of a temperature or density profile is a property of the plasma, so it is core_plasma_physics; equilibrium owns the surface on which that value sits, not the value.&rdquo;</p>
+<ul>
+<li><code>equilibrium/time_slice/constraints/n_e/measured</code> &mdash; label core_plasma_physics; tree core_plasma_physics (p=0.61, core_plasma); chat equilibrium; Measured value of n e.</li>
+<li><code>equilibrium/time_slice/constraints/n_e/reconstructed</code> &mdash; label core_plasma_physics; tree core_plasma_physics (p=0.35, core_plasma); chat equilibrium; Reconstructed value of n e.</li>
+</ul>
+<p><strong>core_plasma_physics -> spectroscopy</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>core_plasma_physics</code> scope: What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.</p>
+<p><code>spectroscopy</code> scope: Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.</p>
+<ul>
+<li><code>charge_exchange/channel/ion/n_i_over_n_e</code> &mdash; label core_plasma_physics; tree spectroscopy (p=0.49, diagnostics); chat spectroscopy; Ion concentration of a given impurity or fuel species expressed as the ratio of ion density (ni) to electron density (ne) at the CXRS channel measurement point. Quantifies fractional abundance of the species relative to the electron population.</li>
+<li><code>charge_exchange/channel/ion/z_ion</code> &mdash; label core_plasma_physics; tree spectroscopy (p=0.83, diagnostics); chat spectroscopy; Ion charge state (z_ion) of the measured ion species in charge exchange recombination spectroscopy (CXRS). Specifies the charge number (e.g., C+6, N+7) used to identify the spectral line and interpret the measurement.</li>
+</ul>
+<p><strong>edge_plasma_physics -> spectroscopy</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>edge_plasma_physics</code> scope: The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.</p>
+<p><code>spectroscopy</code> scope: Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.</p>
+<ul>
+<li><code>spectrometer_visible/channel/isotope_ratios/isotope/density_ratio</code> &mdash; label edge_plasma_physics; tree spectroscopy (p=0.89, diagnostics); chat spectroscopy; Ratio of the neutral density of a given hydrogen isotope to the summed neutral densities of all other isotopes in the measurement channel. Used to quantify the hydrogen fuel isotope composition from visible spectroscopy.</li>
+<li><code>spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals</code> &mdash; label edge_plasma_physics; tree spectroscopy (p=0.80, diagnostics); chat spectroscopy; Line-of-sight projected velocity of hot neutral atoms measured by polarization spectroscopy on a visible spectrometer channel. Positive values correspond to motion from the first to the second point along the line of sight.</li>
+</ul>
+<p><strong>electromagnetic_wave_diagnostics -> equilibrium</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>electromagnetic_wave_diagnostics</code> scope: Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.</p>
+<p><code>equilibrium</code> scope: The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<ul>
+<li><code>equilibrium/time_slice/constraints/n_e_line/measured</code> &mdash; label electromagnetic_wave_diagnostics; tree electromagnetic_wave_diagnostics (p=0.71, diagnostics); chat equilibrium; Measured value of n e line.</li>
+<li><code>equilibrium/time_slice/constraints/n_e_line/reconstructed</code> &mdash; label electromagnetic_wave_diagnostics; tree data_management (p=0.34, data_computing); chat equilibrium; Reconstructed value of n e line.</li>
+</ul>
+<p><strong>equilibrium -> edge_plasma_physics</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>equilibrium</code> scope: The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<p><code>edge_plasma_physics</code> scope: The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.</p>
+<ul>
+<li><code>summary/pedestal_fits/linear/n_e/pedestal_position/value</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.36, core_plasma); chat edge_plasma_physics; Pedestal position in normalised poloidal flux.</li>
+<li><code>summary/pedestal_fits/linear/pressure_electron/pedestal_position/value</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.39, core_plasma); chat edge_plasma_physics; Pedestal position in normalised poloidal flux.</li>
+</ul>
+<p><strong>neutronics -> particle_measurement_diagnostics</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>neutronics</code> scope: Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.</p>
+<p><code>particle_measurement_diagnostics</code> scope: Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.</p>
+<ul>
+<li><code>neutron_diagnostic/detector/aperture/radius</code> &mdash; label neutronics; tree neutronics (p=0.99, diagnostics); chat particle_measurement_diagnostics; Radius of a circular collimating aperture in a neutron diagnostic detector, applicable when geometry_type = 2. Defines the geometric acceptance of the neutron detector collimation for flux and emissivity measurements.</li>
+<li><code>neutron_diagnostic/detector/geometry/surface</code> &mdash; label neutronics; tree neutronics (p=0.92, diagnostics); chat particle_measurement_diagnostics; Surface specification of geometry.</li>
+</ul>
+<p><strong>particle_measurement_diagnostics -> plasma_measurement_diagnostics</strong> (2 paths) &mdash; guidance: silent</p>
+<p><code>particle_measurement_diagnostics</code> scope: Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<ul>
+<li><code>langmuir_probes/embedded/ion_saturation_current</code> &mdash; label particle_measurement_diagnostics; tree particle_measurement_diagnostics (p=0.71, diagnostics); chat plasma_measurement_diagnostics; Ion saturation current (I_sat) measured by an embedded Langmuir probe. Proportional to the product of electron density and the Bohm velocity, used to infer local plasma density and heat flux at the plasma-facing target surface.</li>
+<li><code>langmuir_probes/reciprocating/plunge/collector/ion_saturation_current</code> &mdash; label particle_measurement_diagnostics; tree particle_measurement_diagnostics (p=0.99, diagnostics); chat plasma_measurement_diagnostics; Ion saturation current (Isat) measured by a reciprocating Langmuir probe collector during a plunge. Isat is the limiting current at large negative bias, proportional to local plasma density and electron temperature at the probe tip.</li>
+</ul>
+<p><strong>auxiliary_heating -> waves</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>auxiliary_heating</code> excludes <code>waves</code>: &ldquo;The antenna and the power it delivers are auxiliary_heating; the wave it launches, its dispersion and its wave-particle interaction inside the plasma are waves.&rdquo;</p>
+<p><code>waves</code> excludes <code>auxiliary_heating</code>: &ldquo;Hardware and launched power are auxiliary_heating; the wave in the plasma and its propagation are waves.&rdquo;</p>
+<ul>
+<li><code>summary/heating_current_drive/ic/k_perpendicular/value</code> &mdash; label auxiliary_heating; tree waves (p=0.91, heating_current_drive); chat waves; Main perpendicular wave number (k⊥) of ion cyclotron resonance heating (ICRH) waves launched by an IC antenna. Characterizes the transverse spatial scale of the wave in the plasma.</li>
+</ul>
+<p><strong>core_plasma_physics -> electromagnetic_wave_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>core_plasma_physics</code> scope: What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.</p>
+<p><code>electromagnetic_wave_diagnostics</code> scope: Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.</p>
+<ul>
+<li><code>interferometer/electrons_n</code> &mdash; label core_plasma_physics; tree core_plasma_physics (p=0.64, core_plasma); chat electromagnetic_wave_diagnostics; Data field in interferometer.</li>
+</ul>
+<p><strong>core_plasma_physics -> radiation_measurement_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>core_plasma_physics</code> scope: What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.</p>
+<p><code>radiation_measurement_diagnostics</code> scope: Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.</p>
+<ul>
+<li><code>bolometer/power_radiated_total</code> &mdash; label core_plasma_physics; tree transport (p=0.42, core_plasma); chat radiation_measurement_diagnostics; Total radiated power (P_rad) reconstructed from bolometry measurements, integrating broadband electromagnetic emission across the entire plasma volume. A key global energy balance quantity for transport analysis and impurity monitoring.</li>
+</ul>
+<p><strong>edge_plasma_physics -> transport</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>edge_plasma_physics</code> scope: The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.</p>
+<p><code>transport</code> scope: The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it — an equilibrium IDS with a diffusion model still holds transport quantities.</p>
+<ul>
+<li><code>summary/global_quantities/power_loss/value</code> &mdash; label edge_plasma_physics; tree edge_plasma_physics (p=0.65, edge_divertor); chat transport; Total power crossing the separatrix (Psep), representing the net energy loss from the confined plasma through the last closed flux surface into the scrape-off layer.</li>
+</ul>
+<p><strong>equilibrium -> core_plasma_physics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>equilibrium</code> excludes <code>core_plasma_physics</code>: &ldquo;The amplitude of a temperature or density profile is a property of the plasma, so it is core_plasma_physics; equilibrium owns the surface on which that value sits, not the value.&rdquo;</p>
+<ul>
+<li><code>core_profiles/global_quantities/ip</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.98, core_plasma); chat core_plasma_physics; Total plasma current (Ip), the net toroidal current flowing through the plasma column, as stored in the core_profiles global quantities. A primary global parameter for confinement and stability.</li>
+</ul>
+<p><strong>equilibrium -> electromagnetic_wave_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>equilibrium</code> scope: The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<p><code>electromagnetic_wave_diagnostics</code> scope: Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.</p>
+<ul>
+<li><code>ece/channel/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; tree electromagnetic_wave_diagnostics (p=0.33, diagnostics); chat electromagnetic_wave_diagnostics; Normalised toroidal flux coordinate (ρ_tor_norm) along the ECE beam or ray path, mapping each propagation position to a flux surface. Used to relate beam-tracing positions to plasma radial structure for Te profile reconstruction.</li>
+</ul>
+<p><strong>equilibrium -> magnetohydrodynamics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>equilibrium</code> excludes <code>magnetohydrodynamics</code>: &ldquo;A mode that destabilises the configuration is magnetohydrodynamics; a property of the converged, static configuration is equilibrium.&rdquo;</p>
+<p><code>magnetohydrodynamics</code> excludes <code>equilibrium</code>: &ldquo;The shape of the field is equilibrium; a mode that grows on it and its stability is magnetohydrodynamics.&rdquo;</p>
+<ul>
+<li><code>disruption/profiles_1d/grid/psi</code> &mdash; label equilibrium; tree equilibrium (p=0.90, core_plasma); chat magnetohydrodynamics; Poloidal magnetic flux (ψ) used as the radial grid coordinate for 1D disruption profiles. Each value labels the flux surface on which the disruption profile data (current density, power loss, runaway electrons) is evaluated.</li>
+</ul>
+<p><strong>equilibrium -> plasma_control</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>plasma_control</code> excludes <code>equilibrium</code>: &ldquo;The commanded or reference configuration is plasma_control; the achieved equilibrium is equilibrium.&rdquo;</p>
+<ul>
+<li><code>pulse_schedule/position_control/gap/angle</code> &mdash; label equilibrium; tree plasma_control (p=0.91, control_operations); chat plasma_control; Angle of the plasma boundary gap direction measured clockwise from the radial (grad R) direction in the poloidal cross-section. Defines the orientation of the gap vector used as a reference in plasma position control.</li>
+</ul>
+<p><strong>equilibrium -> waves</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>equilibrium</code> scope: The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<p><code>waves</code> scope: Electromagnetic waves in a plasma: their propagation, dispersion, mode conversion, damping and wave-particle interaction, and the model quantities a wave code computes. Judge by whether the quantity describes a wave field or its interaction rather than the hardware that launched it.</p>
+<ul>
+<li><code>waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; tree waves (p=0.90, heating_current_drive); chat waves; Normalised toroidal flux coordinate (ρ_tor,norm) at each position along the ray or beam path in a wave beam tracing calculation. Maps beam trajectory points to flux surface geometry.</li>
+</ul>
+<p><strong>fast_particles -> transport</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>fast_particles</code> scope: Populations of particles far from the thermal bulk — their distribution functions, slowing-down, thermalisation, and the instabilities they drive. Judge by whether the quantity describes a suprathermal population's distribution or its interaction with the plasma.</p>
+<p><code>transport</code> scope: The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it — an equilibrium IDS with a diffusion model still holds transport quantities.</p>
+<ul>
+<li><code>distributions/distribution/ggd/orbit_frequency_pol/values</code> &mdash; label fast_particles; tree core_plasma_physics (p=0.22, core_plasma); chat transport; Array of values for orbit frequency pol.</li>
+</ul>
+<p><strong>mechanical_measurement_diagnostics -> machine_operations</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>mechanical_measurement_diagnostics</code> scope: Diagnostics of mechanical and structural quantities of machine components: strain, vibration, displacement and inertial or pressure measurement. Judge by whether the instrument measures the mechanical state of a component rather than the plasma or its fields.</p>
+<p><code>machine_operations</code> scope: The operation of the machine around a discharge: pulse scheduling, the shot cycle, workflow orchestration and operational metadata. Judge by whether the quantity concerns when and whether the machine runs rather than the physics it produces.</p>
+<ul>
+<li><code>operational_instrumentation/sensor/attachement_points/y</code> &mdash; label mechanical_measurement_diagnostics; tree mechanical_measurement_diagnostics (p=0.88, diagnostics); chat machine_operations; Y coordinate of attachement points.</li>
+</ul>
+<p><strong>neutronics -> magnetic_field_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>neutronics</code> scope: Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.</p>
+<p><code>magnetic_field_diagnostics</code> scope: Diagnostics of the magnetic field and flux: magnetic probes, flux loops, Rogowski coils and diamagnetic loops. Judge by whether the instrument measures the magnetic field, its flux or the current it reveals.</p>
+<ul>
+<li><code>mse/channel/detector/radius</code> &mdash; label neutronics; tree spectroscopy (p=0.98, diagnostics); chat magnetic_field_diagnostics; Radius of the circular detector aperture in the MSE diagnostic channel, applicable only when geometry_type = 2 (circular geometry). Defines the size of the sensitive area for line-of-sight calculations.</li>
+</ul>
+<p><strong>particle_measurement_diagnostics -> electromagnetic_wave_diagnostics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>particle_measurement_diagnostics</code> excludes <code>electromagnetic_wave_diagnostics</code>: &ldquo;Counting particles is particle_measurement_diagnostics; probing with electromagnetic waves and detecting their propagation is electromagnetic_wave_diagnostics.&rdquo;</p>
+<p><code>electromagnetic_wave_diagnostics</code> excludes <code>particle_measurement_diagnostics</code>: &ldquo;A wave probe is electromagnetic_wave_diagnostics; a measurement that counts particles or their scattering is particle_measurement_diagnostics.&rdquo;</p>
+<ul>
+<li><code>thomson_scattering/laser/end_point/r</code> &mdash; label particle_measurement_diagnostics; tree particle_measurement_diagnostics (p=0.92, diagnostics); chat electromagnetic_wave_diagnostics; Major radius (R) coordinate of end point.</li>
+</ul>
+<p><strong>particle_measurement_diagnostics -> mechanical_measurement_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>particle_measurement_diagnostics</code> scope: Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.</p>
+<p><code>mechanical_measurement_diagnostics</code> scope: Diagnostics of mechanical and structural quantities of machine components: strain, vibration, displacement and inertial or pressure measurement. Judge by whether the instrument measures the mechanical state of a component rather than the plasma or its fields.</p>
+<ul>
+<li><code>barometry/gauge/pressure</code> &mdash; label particle_measurement_diagnostics; tree mechanical_measurement_diagnostics (p=0.63, diagnostics); chat mechanical_measurement_diagnostics; Neutral gas pressure measured by a barometry gauge within the vacuum vessel or surrounding vacuum system. Characterizes local gas inventory and vacuum conditions relevant to plasma fuelling, recycling, and neutral gas modelling.</li>
+</ul>
+<p><strong>plasma_control -> equilibrium</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>plasma_control</code> excludes <code>equilibrium</code>: &ldquo;The commanded or reference configuration is plasma_control; the achieved equilibrium is equilibrium.&rdquo;</p>
+<ul>
+<li><code>equilibrium/time_slice/global_quantities/current_centre/velocity_z</code> &mdash; label plasma_control; tree magnetohydrodynamics (p=0.46, core_plasma); chat equilibrium; Vertical velocity (dZ/dt) of the current centre, representing the rate of change of the vertical position of the centroid of the plasma current distribution. A global scalar equilibrium quantity.</li>
+</ul>
+<p><strong>plasma_measurement_diagnostics -> electromagnetic_wave_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<p><code>electromagnetic_wave_diagnostics</code> scope: Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.</p>
+<ul>
+<li><code>ece/channel/position/phi</code> &mdash; label plasma_measurement_diagnostics; tree equilibrium (p=0.48, core_plasma); chat electromagnetic_wave_diagnostics; Toroidal angle (φ) coordinate of position.</li>
+</ul>
+<p><strong>plasma_measurement_diagnostics -> mechanical_measurement_diagnostics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>plasma_measurement_diagnostics</code> excludes <code>mechanical_measurement_diagnostics</code>: &ldquo;A plasma-parameter instrument is plasma_measurement_diagnostics; a component's mechanical state is mechanical_measurement_diagnostics.&rdquo;</p>
+<p><code>mechanical_measurement_diagnostics</code> excludes <code>plasma_measurement_diagnostics</code>: &ldquo;A measurement of a machine component's mechanical state is mechanical_measurement_diagnostics; a measurement of a plasma parameter is plasma_measurement_diagnostics.&rdquo;</p>
+<ul>
+<li><code>barometry/gauge/position/phi</code> &mdash; label plasma_measurement_diagnostics; tree computational_workflow (p=0.54, data_computing); chat mechanical_measurement_diagnostics; Toroidal angle (φ) coordinate of position.</li>
+</ul>
+<p><strong>plasma_measurement_diagnostics -> particle_measurement_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<p><code>particle_measurement_diagnostics</code> scope: Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.</p>
+<ul>
+<li><code>neutron_diagnostic/detector/geometry/x1_width</code> &mdash; label plasma_measurement_diagnostics; tree neutronics (p=0.97, diagnostics); chat particle_measurement_diagnostics; Full width of the neutron detector aperture in the X1 direction. This geometric parameter applies only when the aperture geometry type is rectangular (geometry_type = 3).</li>
+</ul>
+<p><strong>plasma_measurement_diagnostics -> spectroscopy</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_measurement_diagnostics</code> scope: General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.</p>
+<p><code>spectroscopy</code> scope: Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.</p>
+<ul>
+<li><code>charge_exchange/channel/cone_diameter</code> &mdash; label plasma_measurement_diagnostics; tree spectroscopy (p=0.96, diagnostics); chat spectroscopy; Diameter of the base of the optical cone at the entrance pupil of a CXRS channel. A geometric parameter characterizing the light collection optics of the charge exchange recombination spectroscopy diagnostic.</li>
+</ul>
+<p><strong>plasma_wall_interactions -> divertor_physics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>plasma_wall_interactions</code> excludes <code>divertor_physics</code>: &ldquo;The plasma heat flux arriving at the target is divertor_physics; the target surface's erosion from it is plasma_wall_interactions.&rdquo;</p>
+<p><code>divertor_physics</code> excludes <code>plasma_wall_interactions</code>: &ldquo;The plasma arriving at the target is divertor_physics; the surface it erodes is plasma_wall_interactions.&rdquo;</p>
+<ul>
+<li><code>divertors/divertor/target/extension_r</code> &mdash; label plasma_wall_interactions; tree plasma_wall_interactions (p=0.57, edge_divertor); chat divertor_physics; Radial extent (projection on the major radius axis R) of a divertor target. A geometric parameter characterising the target dimensions in the major radius direction.</li>
+</ul>
+<p><strong>plasma_wall_interactions -> magnetohydrodynamics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_wall_interactions</code> scope: The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.</p>
+<p><code>magnetohydrodynamics</code> scope: The stability and macroscopic dynamics of a plasma as a conducting fluid: instabilities, their growth and saturation, magnetic reconnection and the events a loss of stability produces. Judge by whether the quantity describes a coherent mode, its mode numbers and growth, or the evolution of a disruption.</p>
+<ul>
+<li><code>disruption/halo_currents/active_wall_point/r</code> &mdash; label plasma_wall_interactions; tree plasma_wall_interactions (p=0.56, edge_divertor); chat magnetohydrodynamics; Major radius (R) coordinate of active wall point.</li>
+</ul>
+<p><strong>plasma_wall_interactions -> radiation_measurement_diagnostics</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_wall_interactions</code> scope: The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.</p>
+<p><code>radiation_measurement_diagnostics</code> scope: Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.</p>
+<ul>
+<li><code>camera_ir/channel/target_surface_center/y</code> &mdash; label plasma_wall_interactions; tree radiation_measurement_diagnostics (p=0.89, diagnostics); chat radiation_measurement_diagnostics; Y coordinate of target surface center.</li>
+</ul>
+<p><strong>plasma_wall_interactions -> transport</strong> (1 paths) &mdash; guidance: silent</p>
+<p><code>plasma_wall_interactions</code> scope: The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.</p>
+<p><code>transport</code> scope: The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it — an equilibrium IDS with a diffusion model still holds transport quantities.</p>
+<ul>
+<li><code>edge_transport/model/ggd/ion/momentum/flux_limiter/phi</code> &mdash; label plasma_wall_interactions; tree gyrokinetics (p=0.46, advanced_physics); chat transport; Toroidal angle (φ) coordinate of flux limiter.</li>
+</ul>
+<p><strong>structural_components -> magnetic_field_systems</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>structural_components</code> excludes <code>magnetic_field_systems</code>: &ldquo;A magnetic coil system is magnetic_field_systems; the passive structure that supports it is structural_components.&rdquo;</p>
+<ul>
+<li><code>pf_passive/loop/element/geometry/oblique/alpha</code> &mdash; label structural_components; tree magnetic_field_systems (p=0.88, machine_systems); chat magnetic_field_systems; First inclination angle (alpha, α) of the oblique (trapezoidal/parallelogram) cross-sectional geometry of a passive conductor loop element, measured counter-clockwise from the outboard horizontal. Part of the poloidal-plane geometric parameterization.</li>
+</ul>
+<p><strong>waves -> electromagnetic_wave_diagnostics</strong> (1 paths) &mdash; guidance: separates</p>
+<p><code>waves</code> excludes <code>electromagnetic_wave_diagnostics</code>: &ldquo;A wave field inside the plasma is waves; an instrument that probes the plasma with waves and records a signal, such as interferometry, reflectometry or polarimetry, is a diagnostic.&rdquo;</p>
+<p><code>electromagnetic_wave_diagnostics</code> excludes <code>waves</code>: &ldquo;A probe instrument and its measured signal are electromagnetic_wave_diagnostics; the plasma wave physics the probe studies is waves.&rdquo;</p>
+<ul>
+<li><code>ece/channel/beam_tracing/beam/wave_vector/n_parallel</code> &mdash; label waves; tree waves (p=0.96, heating_current_drive); chat electromagnetic_wave_diagnostics; Parallel refractive index (n_∥) of the ECE beam or ray along its propagation path, defined as the wave vector component parallel to the local magnetic field normalized by the free-space wave number.</li>
+</ul>
+<h3>Negative control</h3>
+<p>The chat answers embedded here reproduce the vocabulary run's recorded per-path answers for all 201 paths. Mutating the 20 paths the chat classifier answers correctly, and only those, moves its path accuracy from 0.6716 to 0.5721 &mdash; a drop of exactly 20/201 &mdash; so the scorer reads the answer it claims to read rather than reporting a stored total.</p>
+</section>
