@@ -46,6 +46,13 @@
       "finding": "evidence_paths-1",
       "reason": "",
       "when": "2026-10-14T10:12:42.591958+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "Sections 7 and 12 are landed and closed; the decision signal-rerank-latency is the plan's record of how their latency clause is read, scoped to both sections by data-sections=s7,s12, and section 12's closing comment cites it. Rewriting the done-whens of landed sections would change what their reviews and promotions were judged against.",
+      "when": "2026-10-14T10:12:49.327835+00:00"
     }
   ],
   "responses": {
@@ -54,6 +61,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-14T10:12:42.591958+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Sections 7 and 12 are landed and closed; the decision signal-rerank-latency is the plan's record of how their latency clause is read, scoped to both sections by data-sections=s7,s12, and section 12's closing comment cites it. Rewriting the done-whens of landed sections would change what their reviews and promotions were judged against.",
+      "when": "2026-10-14T10:12:49.327835+00:00"
     },
     "reasoning-2": {
       "action": "acted",
