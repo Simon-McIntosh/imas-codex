@@ -4,50 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-# Declared ordering of PhysicsDomain enum members; the
-# rank is the position in this tuple (lower index = more central).
-#
-# Design intent (lower rank = higher priority):
-#   - Plasma core physics first (equilibrium, transport, MHD)
-#   - Heating & current drive next
-#   - Edge / SOL / divertor
-#   - Diagnostics grouped (magnetics first as backbone)
-#   - Operational / engineering / metadata last
-#   - 'general' acts as the lowest-priority (most generic) domain.
-FALLBACK_RANK_TABLE: tuple[str, ...] = (
-    "equilibrium",
-    "magnetohydrodynamics",
-    "transport",
-    "core_plasma_physics",
-    "turbulence",
-    "gyrokinetics",
-    "fast_particles",
-    "runaway_electrons",
-    "auxiliary_heating",
-    "current_drive",
-    "waves",
-    "edge_plasma_physics",
-    "plasma_wall_interactions",
-    "divertor_physics",
-    "fueling",
-    "magnetic_field_diagnostics",
-    "plasma_measurement_diagnostics",
-    "particle_measurement_diagnostics",
-    "electromagnetic_wave_diagnostics",
-    "radiation_measurement_diagnostics",
-    "mechanical_measurement_diagnostics",
-    "spectroscopy",
-    "neutronics",
-    "plasma_control",
-    "plasma_initiation",
-    "machine_operations",
-    "magnetic_field_systems",
-    "structural_components",
-    "plant_systems",
-    "data_management",
-    "computational_workflow",
-    "general",
-)
+from imas_codex.definitions.physics import load_domain_precedence
+
+# The declared precedence over the physics domains, read from the guidance file
+# (imas_codex/definitions/physics/domains.yaml). The rank is the position in
+# this order — lower index = more central. This is one of the two readers of
+# that order; the DD path classifier is the other, so a name and a path settle
+# the same overlap the same way.
+FALLBACK_RANK_TABLE: tuple[str, ...] = tuple(load_domain_precedence())
 
 _RANK_INDEX = {domain: rank for rank, domain in enumerate(FALLBACK_RANK_TABLE)}
 

@@ -17,13 +17,23 @@ judged against the identical definitions.
 
 ## Physics Categories (first judgement)
 
+The categories are listed in precedence order: a category's place is that of its
+highest-ranked domain. When more than one category's scope fits the path, choose
+the one earliest in this order.
+
 {%- for category in physics_domain_categories %}
 - `{{ category.value }}`{% if category.scope %} — {{ category.scope }}{% endif %}
 {%- endfor %}
 
 ## Physics Domains (closed vocabulary — use exact values)
 
-{%- for domain in physics_domains %}
+The domains are listed in **precedence order**, earliest first — the same order
+the two-level classifier tree uses. When more than one domain's scope fits the
+path, choose the one earliest in the domain precedence below.
+
+{%- set precedence_order = domain_precedence if domain_precedence is defined and domain_precedence else (physics_domains | map(attribute='value') | list) %}
+{%- for value in precedence_order %}
+{%- for domain in physics_domains if domain.value == value %}
 - `{{ domain.value }}` — {{ domain.category }}{% if domain.description %} — {{ domain.description }}{% endif %}
 {%- if domain.scope %}
   Scope: {{ domain.scope }}
@@ -33,6 +43,7 @@ judged against the identical definitions.
 {%- endif %}
 {%- for exclusion in domain.excludes %}
   Excludes {{ exclusion.quantity }} (→ `{{ exclusion.neighbour }}`){% if exclusion.rule %}: {{ exclusion.rule }}{% endif %}
+{%- endfor %}
 {%- endfor %}
 {%- endfor %}
 
