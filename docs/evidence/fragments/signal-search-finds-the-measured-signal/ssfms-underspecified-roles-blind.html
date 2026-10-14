@@ -62,4 +62,32 @@
 <li><code>jt-60sa:general/lcdb_h060029_prad.s011_fit_ref_eqdb</code> — name &ldquo;Fit Reference Equilibrium DB (PRad)&rdquo;; description &ldquo;Reference equilibrium database used for fitting in the PRad radiated power analysis. Provides the magnetic equilibrium reconstruction used to map the radiated power measurements to flux coordinates.&rdquo;; stored <code>derived_or_computed</code>, hand <code>configuration_parameter</code>.</li>
 <li><code>jt-60sa:general/lcdb_h060029_ane.s001_iyexperr</code> — name &ldquo;Experimental Error Index (ANE)&rdquo;; description &ldquo;Error index for experimental data used in the ANE equilibrium reconstruction code. This debug/control parameter indicates the status or magnitude of experimental data fitting errors during the equilibrium reconstruction process.&rdquo;; stored <code>derived_or_computed</code>, hand <code>status_or_flag</code>.</li>
   </ul>
+  <h3 id="ssfms-underspecified-roles-blind-action">Action taken on the failing agreement</h3>
+  <p id="ssfms-underspecified-roles-blind-action-text">
+    Agreement 26 of 30 is below the 27 keep threshold, so the stored roles do not
+    stay. Every JT-60SA signal with <code>status='underspecified'</code> had its
+    <code>signal_role</code> set to <code>null</code>: 225 enumerated, 225 nulled,
+    0 remaining with a role (log
+    <code>null-underspecified-roles.log</code> under the run directory lists every
+    affected id). The stored roles compared above were the JT-60SA
+    underspecified-signal backfill; this nulling reverts that write.
+  </p>
+  <table id="ssfms-underspecified-roles-blind-census">
+    <caption id="ssfms-underspecified-roles-blind-census-caption">Census before and after the nulling.</caption>
+    <thead><tr><th>measure</th><th>before</th><th>after</th></tr></thead>
+    <tbody>
+      <tr><td>JT-60SA underspecified signals carrying a role</td><td>225</td><td>0</td></tr>
+      <tr><td>JT-60SA underspecified signals described and missing a role</td><td>0</td><td>225</td></tr>
+      <tr><td><code>census_signal_roles(facility='jt-60sa')</code> <code>missing</code></td><td>0</td><td>0</td></tr>
+      <tr><td><code>census_signal_roles(facility='jt-60sa')</code> <code>n</code></td><td>15111</td><td>15111</td></tr>
+    </tbody>
+  </table>
+  <p id="ssfms-underspecified-roles-blind-census-note">
+    The <code>missing</code> column reads 0 in both rows because this tree's
+    shared predicate is <code>status IN ['enriched','checked']</code> and so does
+    not count underspecified signals; the predicate extended to admit the
+    underspecified signals the way the backfill's own change does reads 225
+    missing after the nulling. The live underspecified population is 225, not the
+    210 the earlier count recorded, so the intended census figure is 225.
+  </p>
 </section>
