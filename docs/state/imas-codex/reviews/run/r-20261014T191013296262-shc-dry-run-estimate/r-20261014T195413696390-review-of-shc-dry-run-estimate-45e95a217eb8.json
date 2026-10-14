@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6152",
+    "imas_codex/cli/sn.py:6174",
+    "imas_codex/standard_names/harmonize.py:1276"
+  ],
+  "completed_at": "2026-10-14T20:04:33.797Z",
+  "dispatched_at": "2026-10-14T19:54:27Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": "6174",
+      "severity": "blocking",
+      "text": "blocking: the harmonize apply passes no runner_kwargs, so cost_fn resolves to the 0.0 stub default_cost (imas_codex/standard_names/campaign.py:862) in both the runner and _family_budget_drain, and an unmeasurable batch is charged $0.00 to the family, so the cap leak is still open on the path the CLI runs."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_estimate.py",
+      "line": "274",
+      "severity": "follow-on",
+      "text": "follow-on: assert applied == pytest.approx(0.30 + 5.40) compares the runner total against the literal spends the test injected into _RecordingDrain, so both sides move with the fixture and it holds whatever the estimate code does."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_estimate.py",
+      "line": "332",
+      "severity": "follow-on",
+      "text": "follow-on: assert result.total_cost == pytest.approx(3.0) compares against the cost_fn constant the test itself injected, so it moves with the fixture rather than an independent source."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "775",
+      "severity": "follow-on",
+      "text": "follow-on: _DOC_COST_QUERY applies LIMIT $row_cap before grouping by run_id, so a run carrying many LLMCost rows can be truncated mid-run and its run_cost and name list both understated."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit 45e95a2 against base c0d68e7; six files, the fixed constant retired for measure_doc_call_cost (harmonize.py:804) and the family drain (harmonize.py:1148) charging the fallback.",
+    "done_when": "the done_when names three stubbed tests and four gate files; the reviewed manifest records tests/standard_names/test_harmonize_estimate.py and the full head gate with base and after arms.",
+    "goal": "the goal is to estimate the dry run from measured spend and close the family-cap leak the earlier review found; harmonize.py:804 measure_doc_call_cost and harmonize.py:1148 _family_budget_drain are the landed mechanisms.",
+    "manifest": "read; it records status complete, head commit 45e95a2, 181 passed at head against 178 at base, and its first line of negative-control.log shows all three new tests failing together.",
+    "write_paths": "the brief scopes harmonize.py, sn.py, tests/standard_names/test_harmonize_estimate.py and the fragment; every path in the diff is inside them plus the declared figures directory."
+  },
+  "justifications": {
+    "durability": "negative-control.log:7 shows FFF (3 failed, exit 1) when the constant is restored and the fallback charge dropped, so each test guards its mechanism.",
+    "evidence": "the three tests in tests/standard_names/test_harmonize_estimate.py assert the done_when's three claims and their pass is recorded in gate-full-head.log.",
+    "fit": "the reader follows the module's bounded-query idiom at imas_codex/standard_names/harmonize.py:804 and no name carries a plan label.",
+    "goal_fidelity": "the estimate half is complete at imas_codex/cli/sn.py:6152, but the cap half is inert in production because imas_codex/cli/sn.py:6174 passes no cost_fn.",
+    "reuse": "no owner provides a cross-run windowed per-name mean; the per-run readers at imas_codex/standard_names/graph_ops.py:15843 sum a single run and are not extended.",
+    "scope_discipline": "every path in the diff is inside the declared write paths, including docs/figures/sn-harmonize-command/shc-dry-run-estimate/."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to estimate the dry run from measured spend and close the family-cap leak the earlier review found; harmonize.py:804 measure_doc_call_cost and harmonize.py:1148 _family_budget_drain are the landed mechanisms.\nVERDICT done_when: the done_when names three stubbed tests and four gate files; the reviewed manifest records tests/standard_names/test_harmonize_estimate.py and the full head gate with base and after arms.\nVERDICT write_paths: the brief scopes harmonize.py, sn.py, tests/standard_names/test_harmonize_estimate.py and the fragment; every path in the diff is inside them plus the declared figures directory.\nVERDICT manifest: read; it records status complete, head commit 45e95a2, 181 passed at head against 178 at base, and its first line of negative-control.log shows all three new tests failing together.\nVERDICT diff: read commit 45e95a2 against base c0d68e7; six files, the fixed constant retired for measure_doc_call_cost (harmonize.py:804) and the family drain (harmonize.py:1148) charging the fallback.\nCALL_SITES: imas_codex/cli/sn.py:6152, imas_codex/cli/sn.py:6174, imas_codex/standard_names/harmonize.py:1276\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: the estimate half is complete at imas_codex/cli/sn.py:6152, but the cap half is inert in production because imas_codex/cli/sn.py:6174 passes no cost_fn.\nSCORE evidence: 19\nJUSTIFICATION evidence: the three tests in tests/standard_names/test_harmonize_estimate.py assert the done_when's three claims and their pass is recorded in gate-full-head.log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff is inside the declared write paths, including docs/figures/sn-harmonize-command/shc-dry-run-estimate/.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control.log:7 shows FFF (3 failed, exit 1) when the constant is restored and the fallback charge dropped, so each test guards its mechanism.\nSCORE fit: 18\nJUSTIFICATION fit: the reader follows the module's bounded-query idiom at imas_codex/standard_names/harmonize.py:804 and no name carries a plan label.\nSCORE reuse: 16\nJUSTIFICATION reuse: no owner provides a cross-run windowed per-name mean; the per-run readers at imas_codex/standard_names/graph_ops.py:15843 sum a single run and are not extended.\nFINDING imas_codex/cli/sn.py:6174 blocking: the harmonize apply passes no runner_kwargs, so cost_fn resolves to the 0.0 stub default_cost (imas_codex/standard_names/campaign.py:862) in both the runner and _family_budget_drain, and an unmeasurable batch is charged $0.00 to the family, so the cap leak is still open on the path the CLI runs.\nFINDING tests/standard_names/test_harmonize_estimate.py:274 follow-on: assert applied == pytest.approx(0.30 + 5.40) compares the runner total against the literal spends the test injected into _RecordingDrain, so both sides move with the fixture and it holds whatever the estimate code does.\nFINDING tests/standard_names/test_harmonize_estimate.py:332 follow-on: assert result.total_cost == pytest.approx(3.0) compares against the cost_fn constant the test itself injected, so it moves with the fixture rather than an independent source.\nFINDING imas_codex/standard_names/harmonize.py:775 follow-on: _DOC_COST_QUERY applies LIMIT $row_cap before grouping by run_id, so a run carrying many LLMCost rows can be truncated mid-run and its run_cost and name list both understated.\n",
+  "review_run_id": "r-20261014T195413696390-review-of-shc-dry-run-estimate-45e95a217eb8",
+  "reviewed_base_sha": "c0d68e7705cdbc25aedc2f69e1768bb240632058",
+  "reviewed_head_sha": "45e95a217eb8f9cc6e929f4b7577742002e3ffe6",
+  "reviewed_run_id": "r-20261014T191013296262-shc-dry-run-estimate",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "subject": "r-20261014T191013296262-shc-dry-run-estimate",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T20:06:37.320894+00:00",
+  "total": 104
+}

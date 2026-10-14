@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="70">
+<meta name="plan-version" content="71">
 <meta name="plan-modified" content="2026-10-14">
 </head>
 <body>
@@ -426,6 +426,9 @@ crew/reviews/imas-codex/r-20261013T145943345276-shc-pin-anchor.at-4ae756c8581cf6
 </div>
 <div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-10-14T19:15:00Z">
     <div class="r-comment-body"><p>§8 closed: one cap covers the anchor and members together (<code>b5a58934f</code>, review 110/120). The review found a remaining leak, where a batch whose drain returns no cost escapes the family total. It goes to §12, which owns the same estimate path. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s8-family-cost-cap">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261014T195413696390-review-of-shc-dry-run-estimate-45e95a217eb8" data-who="reckon-build" data-when="2026-10-14T20:04:33.797Z">
+    <div class="r-comment-body"><p>Review of r-20261014T191013296262-shc-dry-run-estimate (base c0d68e7705cdbc25aedc2f69e1768bb240632058, head 45e95a217eb8f9cc6e929f4b7577742002e3ffe6) stored at both granted store paths: six dimensions scored (goal_fidelity 14, evidence 19, scope_discipline 19, durability 18, fit 18, reuse 16; total 104, all six checklist items carried), added_failure_count 0 with no added ids; one blocking finding that the harmonize apply call passes no cost_fn so the family-cap fix is inert on the production path, and three follow-ons (two self-referential assertions in the added test, one row-cap truncation before per-run aggregation).</p></div>
 </div>
 </section>
 </main>
