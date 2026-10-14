@@ -1,0 +1,785 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "7bbf44b5663c71078d6f94f84901867ba98430b8",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4970001,
+      "input_tokens_cumulative": 4970001,
+      "output_tokens": 26251,
+      "output_tokens_cumulative": 26251,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 7,
+    "files": 1,
+    "removed": 4
+  },
+  "clone_matches": [],
+  "commit_list_shortfall": {
+    "declared": 4,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261014T101429113954-ssfms-cleanup-goldens' has a passing gate presenting 1 commit(s) of the 4 its manifest declares; missing: 56641fdb4413aaae38a87ca7c8ef9bd98d027a1c, 9e20992126bdecb78b0fa5fd6303014c459a8a05, b1b8e8e59c7bb85515969ac9cf48162c4c9b3b96. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present the full list, or the boundary check may not cover the node's work",
+    "missing": [
+      "56641fdb4413aaae38a87ca7c8ef9bd98d027a1c",
+      "9e20992126bdecb78b0fa5fd6303014c459a8a05",
+      "b1b8e8e59c7bb85515969ac9cf48162c4c9b3b96"
+    ],
+    "presented": 1
+  },
+  "commit_resolution": null,
+  "commits": [
+    "e683d8341511426d501b518beedcb8ee11cd73ce"
+  ],
+  "completed_at": "2026-10-14T11:40:43.684Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-14T10:14:47Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "uv run pytest -m",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "/",
+    "scratch/grade3-negative-control.log.",
+    "scratch/role-filter-mutant.log"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider -m 'graph or not graph' tests/llm/test_signal_search_goldens.py tests/llm/test_signal_role_filter_live.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101429113954-ssfms-cleanup-goldens/scratch/after-suite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8666666666666667,
+    "plan": "signal-search-finds-the-measured-signal",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-14T11:14:30.419711+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-14T10:14:30Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 17,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 12,
+    "headroom": 1,
+    "mean_context": 124444,
+    "observed_at": "2026-10-14T10:14:15Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 17,
+      "aggregate_tokens_per_second": 365.32,
+      "detail": "",
+      "mean_tokens_per_second": 36.532,
+      "observed_at": "2026-10-14T10:14:15Z",
+      "runs": 10.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-14T11:40:43.684Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101429113954-ssfms-cleanup-goldens/manifest.md",
+  "member": "disposable-r-20261014T101429113954-ssfms-cleanup-goldens",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/llm/test_signal_role_filter_live.py::test_every_question_returns_a_grade3_measurement_in_its_filtered_top",
+      "tests/llm/test_signal_role_filter_live.py::test_filtered_call_returns_only_measured_signals",
+      "tests/llm/test_signal_role_filter_live.py::test_filtered_top_holds_no_grade2_command_or_reference"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/llm/test_signal_role_filter_live.py::test_every_question_returns_a_grade3_measurement_in_its_filtered_top",
+      "tests/llm/test_signal_role_filter_live.py::test_filtered_call_returns_only_measured_signals",
+      "tests/llm/test_signal_role_filter_live.py::test_filtered_top_holds_no_grade2_command_or_reference"
+    ],
+    "declaration": "with role='measured' replaced by no role in the filtered call, the role-filter test fails on its every-result-is-measured assertion",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101429113954-ssfms-cleanup-goldens/scratch/grade3-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101429113954-ssfms-cleanup-goldens/scratch/grade3-negative-control.log",
+    "test_paths": [
+      "tests/llm/test_signal_role_filter_live.py",
+      "tests/llm/test_signal_search_goldens.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "ssfms-cleanup-goldens",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1670,
+          "cached_input_tokens": 247667,
+          "input_tokens": 249339,
+          "output_tokens": 843,
+          "reasoning_output_tokens": 299,
+          "total_tokens": 250182,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+      "session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf"
+    },
+    "done_when": "UnlabelledCandidates names the depth it checked, so require_labelled reports the top 10 and require_labelled_pool reports the pool of 60, each asserted by a no-graph test; test_fixture_label_population_is_pinned also pins a sha256 digest of the sorted (question id, signal id, grade) triples of tests/llm/fixtures/signal_search_questions.json, its failure message says a changed label is read under the plan's section 3 rule with the digest updated in the same commit, and swapping the grades of two labels in opposite directions in a scratch copy of the fixture makes it fail while the grade totals still match (logged); tests/llm/test_signal_role_filter_live.py asserts a grade-3 candidate in each question's filtered top 10 instead of a sum over questions and passes with -m graph against the live graph, and a question with no grade-3 in its filtered top 10 is named in the manifest as a blocker rather than exempted; docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-relabel.html says re-read, not re-graded, wherever it describes the grouped-member pass, the reverted re-grade named only as reverted; docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html and docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress.json agree on the negative-control count of JT-60SA signals enriched before 2026-10-11T21:16:46Z, each figure stated with the instant and the log it was read from (the sample run recorded 1441 before its first reset in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T113938701940-ssfms-reprocess-sample/manifest.md; reprocess-progress.json carries 1416 with no source); uv run pytest -m 'graph or not graph' tests/llm/test_signal_search_goldens.py tests/llm/test_signal_role_filter_live.py passes, and the RRF arm's mean nDCG@10 equals the 0.8473 the relabel node recorded; docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html records each change with its check",
+    "estimated_hours": null,
+    "goal": "make the golden-set guards fail on the defects they name, with the reprocess records matching their own logs",
+    "id": "ssfms-cleanup-goldens",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-14T10:14:30Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 17,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 12,
+      "headroom": 1,
+      "mean_context": 124444,
+      "observed_at": "2026-10-14T10:14:15Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 17,
+        "aggregate_tokens_per_second": 365.32,
+        "detail": "",
+        "mean_tokens_per_second": 36.532,
+        "observed_at": "2026-10-14T10:14:15Z",
+        "runs": 10.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101429113954-ssfms-cleanup-goldens/manifest.md",
+    "negative_control": "with role='measured' replaced by no role in the filtered call, the role-filter test fails on its every-result-is-measured assertion",
+    "plan": "signal-search-finds-the-measured-signal",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§13",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/llm/test_signal_search_goldens.py",
+      "tests/llm/test_signal_role_filter_live.py",
+      "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-relabel.html",
+      "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html",
+      "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress.json",
+      "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html",
+      "docs/figures/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3595778.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "ssfms-cleanup-goldens",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-14T10:14:39.511068+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "Review waived for a 6% delta: the content review of section 13 at plan v134 passed wiring, done-when, single-goal, anchors and naming; v135 changes only the text answering its two acted findings (reasoning-2, evidence_paths-1), and the third is declined. Live graph reads only, rerank off, no Jev. Never change a fixture label: the digest pins the labels as committed. Run tests from the worktree with UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider. This session is on the fleet compute allocation (SLURM_JOB_ID set), so live-graph tests (-m graph) run here in place, never on a login node. Capture each gate to a log under the run directory with the revision and command as its first lines and an EXIT= line last.",
+    "confidence": 0.85,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 346.575,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1350.827,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 258.085712,
+        "budget_reason": null,
+        "burn_multiple": 1.498407124677359,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 71307,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.823290489444444,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.022066464622889498,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": false,
+        "utilisation_pct": 68.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 258.085712,
+        "budget_reason": null,
+        "burn_multiple": 1.498407124677359,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 71307,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.823290489444444,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.022066464622889498,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": false,
+        "utilisation_pct": 68.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 258.085712,
+        "budget_reason": null,
+        "burn_multiple": 1.498407124677359,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 71307,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.823290489444444,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.022066464622889498,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": false,
+        "utilisation_pct": 68.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 12,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 71307,
+          "headroom_pct": 69.0,
+          "peak_utilisation_p50_pct": 62.2,
+          "peak_utilisation_p90_pct": 76.9,
+          "peak_utilisation_runs": 597,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 15,
+          "not-run": 14,
+          "passed": 95,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 4
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 91.617712,
+        "budget_reason": null,
+        "burn_multiple": 3.9029922678704447,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 71307,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.780420119074074,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.1916478303473875,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 68.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 91.617712,
+        "budget_reason": null,
+        "burn_multiple": 3.9029922678704447,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 71307,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.780420119074074,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.1916478303473875,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 68.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 91.617712,
+        "budget_reason": null,
+        "burn_multiple": 3.9029922678704447,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 71307,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.780420119074074,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 6,
+          "passed": 38,
+          "unknown": 0
+        },
+        "pace_allowance": 0.1916478303473875,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 68.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001:claude": 0,
+      "claude:claude-opus-5-5:claude": 0,
+      "claude:claude-sonnet-5-5:claude": 0.04,
+      "codex:gpt-6-astra:codex": 0,
+      "codex:gpt-6-luna:codex": 0,
+      "codex:gpt-6-sol:codex": 0.06,
+      "hold": 0.03,
+      "local:deepseek-v4.1-flash:clive": 0.87
+    },
+    "questions": {
+      "route": {
+        "criteria": {
+          "claude:claude-haiku-4-5-20251001:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-haiku-4-5-20251001"
+          },
+          "claude:claude-opus-5-5:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-opus-5-5"
+          },
+          "claude:claude-sonnet-5-5:claude": {
+            "backend": "claude",
+            "effort": "medium",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-sonnet-5-5"
+          },
+          "codex:gpt-6-astra:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-astra"
+          },
+          "codex:gpt-6-luna:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-luna"
+          },
+          "codex:gpt-6-sol:codex": {
+            "backend": "codex",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-sol"
+          },
+          "hold": "Do not dispatch now; wait for pressure to ease. When the local lane is not admitting (full, paused or unavailable), well-defined, routine or deferrable work should usually hold for it rather than spend a pressed metered lane. On a sliding scale, hard, high-risk or urgent work may still take the metered lane; weigh expected wait against urgency without a numeric threshold. When exactly one lane can serve the node, a hold waits for that lane alone, as hold_waits_for states.",
+          "local:deepseek-v4.1-flash:clive": {
+            "backend": "clive",
+            "effort": "high",
+            "lane": "local",
+            "local": true,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "deepseek-v4.1-flash"
+          }
+        },
+        "glossary": {
+          "budget_age_s": "Seconds since the budget reading was observed; null when unknown.",
+          "budget_source": "Where a budget reading came from: a document reading is taken from the published paid-lanes document, an account-surface reading describes now, and a ledger reading carries the age of the run behind it.",
+          "burn_multiple": "Metered spend so far divided by the lane's allowance for its window; above 1 is ahead of the pace that window plans for.",
+          "context": "A candidate's context block. window_tokens is the input window that gates the lane; estimated_tokens is this node's deterministic input estimate (standing instructions plus the repository files its brief loads) measured against that window; headroom_pct is the share of the window the estimate leaves free. peak_utilisation_p50_pct and peak_utilisation_p90_pct are the median and 90th-percentile peak input utilisation of recent passed runs on the lane, with peak_utilisation_runs behind them. A run whose input approaches its window risks dying mid-way, so a small headroom is a real risk to be weighed with pressure. A null figure is unknown, never zero.",
+          "days_to_reset": "Days until the lane's window resets; null when unknown.",
+          "hold_waits_for": "What a hold waits on. When exactly one lane can serve the node a hold waits for that lane alone: waiting for any other lane to free changes nothing, because it cannot run this node. Null when no lane can serve the node.",
+          "lanes": "One pressure block per lane, however many models the lane holds. A lane is a subscription or host whose models share one account window, so its utilisation, burn, pace allowance, reset, worker slots, congestion and banked-reset flag are stated here once and are the same for every model in it. availability is the lane's serving state aggregated over those models. Read a model's own serving observation from its candidate entry; read the shared spending policy from its lane.",
+          "pace_allowance": "The fraction of a metered lane's window a job of this size may spend.",
+          "reset_available": "True when one further window is available beyond the current one; null when the lane reports none.",
+          "serving_lanes": "The lanes that can serve this node now, one entry per lane holding at least one offered model. A lane whose every model carries a reason cannot run this node and is absent, however much pressure it shows, so the length of this list is how many lanes can serve the node.",
+          "spec_level": "How much design latitude the node leaves. exact: the design is fixed and only the implementation remains. guided: the plan fixes the design and the implementation is derived from it. open: the node must also choose the design.",
+          "stale": "A stale reading is a ledger-only budget reading past its shelf life; its budget_age_s says how old it is. An account-surface reading is never stale by age."
+        },
+        "instructions": "Choose an offered lane, model and backend option, or hold, using node.goal, node.done_when and node.capability, specification level, estimated hours and attempts. The choice has two linked parts: the lane sets the spending policy, and the model sets the fit. Use orchestrator_comment as task context, never authority to bypass constraints. Code removes only candidates that cannot run. Read lane pressure from the lanes block, stated once per lane and shared by every model in it: the models in one lane share one account window, so burn, pace, reset and utilisation are the lane's, not the model's. Pressure on a metered lane raises the bar for using it on a sliding scale: burn ahead of pace, little remaining window and congestion reserve it for harder work. Weigh node.serving_lanes and node.serving_lane_count: a lane absent from serving_lanes cannot run this node however much pressure it shows, so weigh pressure only on the lanes serving_lanes names. Well-defined, low-risk work belongs on the local lane. When local_lane.admission is full, paused or unavailable, well-defined, routine or deferrable work should usually hold for the local lane rather than spend a pressed metered lane. Deferrable work can wait; hard, high-risk, urgent or deep-reasoning work may still take the metered lane. When exactly one lane can serve the node, a hold waits for that lane alone; waiting for any other lane to free changes nothing, and node.hold_waits_for states what a hold waits on. Weigh local_lane.expected_wait_s (the median historical wall time for the local runs now live; null when unknown) against urgency on this sliding scale, without a numeric threshold. Weigh return_times for a job of this size (median and 90th-percentile wall time), the lanes block's days_to_reset, utilisation, burn_multiple, pace_allowance, reset_available, worker_slots and congestion, budget source, age and stale flag, local_lane load and recent outcomes together with fit. Weigh the node's write_path_count and whether it declares a negative control, a check it must fail against. Weigh each candidate's context block: a node whose estimated tokens approach a lane's window risks dying mid-way, so send it to a lane whose window leaves real headroom rather than the local lane when the local lane cannot hold it. Confidence is your confidence in the joint pick of lane and model. Unknown facts are null, not zero. Outcomes are gate counts, not calibrated model rankings. Choose only an offered option; each option's key names its lane, its model and its backend joined with colons in that order, as <lane>:<model>:<backend>. The glossary defines spec_level, burn_multiple, pace_allowance, budget_source, budget_age_s, stale, reset_available, days_to_reset, lanes, serving_lanes, hold_waits_for and context",
+        "type": "choice"
+      }
+    },
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"general\",\"requirements\":{\"reasoning\":\"standard\",\"verification\":\"strict\",\"risk\":\"low\"}},\"goal\":\"make the golden-set guards fail on the defects they name, with the reprocess records matching their own logs\",\"done_when\":\"UnlabelledCandidates names the depth it checked, so require_labelled reports the top 10 and require_labelled_pool reports the pool of 60, each asserted by a no-graph test; test_fixture_label_population_is_pinned also pins a sha256 digest of the sorted (question id, signal id, grade) triples of tests/llm/fixtures/signal_search_questions.json, its failure message says a changed label is read under the plan's section 3 rule with the digest updated in the same commit, and swapping the grades of two labels in opposite directions in a scratch copy of the fixture makes it fail while the grade totals still match (logged); tests/llm/test_signal_role_filter_live.py asserts a grade-3 candidate in each question's filtered top 10 instead of a sum over questions and passes with -m graph against the live graph, and a question with no grade-3 in its filtered top 10 is named in the manifest as a blocker rather than exempted; docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-relabel.html says re-read, not re-graded, wherever it describes the grouped-member pass, the reverted re-grade named only as reverted; docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html and docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress.json agree on the negative-control count of JT-60SA signals enriched before 2026-10-11T21:16:46Z, each figure stated with the instant and the log it was read from (the sample run recorded 1441 before its first reset in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T113938701940-ssfms-reprocess-sample/manifest.md; reprocess-progress.json carries 1416 with no source); uv run pytest -m 'graph or not graph' tests/llm/test_signal_search_goldens.py tests/llm/test_signal_role_filter_live.py passes, and the RRF arm's mean nDCG@10 equals the 0.8473 the relabel node recorded; docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html records each change with its check\",\"estimated_context\":71307,\"estimated_hours\":4.0,\"estimated_hours_source\":\"section\",\"attempts\":0,\"write_path_count\":6,\"negative_control_declared\":true,\"serving_lanes\":[\"claude\",\"local\",\"codex\"],\"serving_lane_count\":3,\"hold_waits_for\":\"any one of 3 lanes that can serve this node to have room\"},\"orchestrator_comment\":\"Review waived for a 6% delta: the content review of section 13 at plan v134 passed wiring, done-when, single-goal, anchors and naming; v135 changes only the text answering its two acted findings (reasoning-2, evidence_paths-1), and the third is declined. Live graph reads only, rerank off, no Jev. Never change a fixture label: the digest pins the labels as committed. Run tests from the worktree with UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider. This session is on the fleet compute allocation (SLURM_JOB_ID set), so live-graph tests (-m graph) run here in place, never on a login node. Capture each gate to a log under the run directory with the revision and command as its first lines and an EXIT= line last.\",\"candidates\":{\"claude\":{\"backend\":\"claude\",\"lane\":\"claude\",\"model\":\"claude-sonnet-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":68.0,\"burn_multiple\":1.498407124677359,\"pace_allowance\":0.022066464622889498,\"days_to_reset\":3.823290489444444,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":71307,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":15.6,\"peak_utilisation_p90_pct\":18.0,\"peak_utilisation_runs\":4},\"budget_source\":null,\"budget_age_s\":258.085712,\"stale\":false,\"reset_available\":null},\"clive\":{\"backend\":\"clive\",\"lane\":\"local\",\"model\":\"deepseek-v4.1-flash\",\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":null,\"resets_at\":null,\"worker_slots\":4,\"congestion\":{\"running\":12,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"outcomes\":{\"passed\":95,\"failed\":15,\"not-run\":14,\"unknown\":0},\"context\":{\"window_tokens\":230144,\"estimated_tokens\":71307,\"headroom_pct\":69.0,\"peak_utilisation_p50_pct\":62.2,\"peak_utilisation_p90_pct\":76.9,\"peak_utilisation_runs\":597},\"budget_source\":null,\"budget_age_s\":null,\"stale\":null,\"reset_available\":null},\"codex\":{\"backend\":\"codex\",\"lane\":\"codex\",\"model\":\"gpt-6-sol\",\"availability\":\"unknown\",\"utilisation_pct\":68.0,\"burn_multiple\":3.9029922678704447,\"pace_allowance\":0.1916478303473875,\"days_to_reset\":5.780420119074074,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":38,\"failed\":2,\"not-run\":6,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":71307,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":91.617712,\"stale\":false,\"reset_available\":null}},\"return_times\":{\"claude\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":258.801558,\"stale\":false},\"clive\":{\"p50_s\":1796,\"p90_s\":6537,\"runs\":121,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":48190.866558,\"stale\":true},\"codex\":{\"p50_s\":1298.5,\"p90_s\":3178,\"runs\":44,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":92.333558,\"stale\":false}},\"lanes\":{\"claude\":{\"availability\":\"unknown\",\"utilisation_pct\":68.0,\"burn_multiple\":1.498407124677359,\"pace_allowance\":0.022066464622889498,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"days_to_reset\":3.8232822041898147,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false},\"local\":{\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":null,\"days_to_reset\":null,\"worker_slots\":4,\"congestion\":{\"running\":12,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"reset_available\":null},\"codex\":{\"availability\":\"unknown\",\"utilisation_pct\":68.0,\"burn_multiple\":3.9029922678704447,\"pace_allowance\":0.1916478303473875,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"days_to_reset\":5.780411833819445,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false}},\"local_lane\":{\"admission\":\"admitting\",\"expected_wait_s\":823,\"running\":12,\"waiting\":0,\"headroom\":1,\"worker_slots\":13,\"tokens_per_second\":36.532,\"read_at\":\"2026-10-14T10:14:28.429052+00:00\"}}",
+    "rendered_token_estimate": 1712,
+    "stage_ms": {
+      "budget-snapshot": 227.542,
+      "context-estimate": 4.702,
+      "records": 265.086,
+      "verdict-inputs": 68.033
+    },
+    "template_digest": "bf398dab17ed4a1f716fe26e88b498badb311b83b4b219bc1dfbeaad8ffd187d",
+    "usage": {
+      "cost": 0.00019257,
+      "input_tokens": 4585,
+      "output_tokens": 174
+    }
+  },
+  "plan": "signal-search-finds-the-measured-signal",
+  "plan_impl_at_dispatch": 0.8666666666666667,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "e683d8341511426d501b518beedcb8ee11cd73ce",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "7bbf44b5663c71078d6f94f84901867ba98430b8",
+    "reviewed_head_sha": "e683d8341511426d501b518beedcb8ee11cd73ce",
+    "scores": {
+      "durability": 17,
+      "evidence": 16,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261014T101429113954-ssfms-cleanup-goldens",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§13",
+  "session": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+  "session_harness": "claude",
+  "session_id": "ef14daee-7937-445f-beee-d7c6d6c43e6f",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 20039887,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 833.42,
+    "generated_tokens": 88929,
+    "generation_seconds": 651.801,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 57.3,
+    "machine_seconds": 181.619,
+    "peak_input_tokens": 131926,
+    "tokens_per_second": 136.44,
+    "wall_tokens_per_second": 106.7
+  },
+  "time_budget": "60m",
+  "tool_steps": 116.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 5156,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-14T11:40:46Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-14T11:26:45Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261014T101429113954-ssfms-cleanup-goldens",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 13151,
+    "worker_pid": 2758247
+  },
+  "worker_seconds": 5109,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
