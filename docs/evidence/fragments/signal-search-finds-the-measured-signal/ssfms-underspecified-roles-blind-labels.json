@@ -1,0 +1,225 @@
+{
+  "node": "ssfms-underspecified-roles-blind",
+  "purpose": "Blind hand-read of a seeded random sample of JT-60SA underspecified signals, each assigned one role from its name, unit and description alone, committed before any stored signal_role was read.",
+  "seed": 20261015,
+  "selection": {
+    "facility_id": "jt-60sa",
+    "status_filter": "underspecified",
+    "description_filter": "non-empty",
+    "population_size": 225,
+    "sample_size": 30,
+    "draw": "random.Random(20261015).sample(sorted(ids), 30)"
+  },
+  "signals": [
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ane.s001_shotex",
+      "name": "Shot Experiment Data (ANE)",
+      "unit": "",
+      "description": "Debug comment field associated with the ANE (density profile analysis) dataset, holding shot-level experimental metadata. The ANE module fits electron density profiles from interferometry or reflectometry measurements.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ane.s001_rec_abel_setting_params_float_n",
+      "name": "ANE Abel Setting Float Count",
+      "unit": "",
+      "description": "Number of floating-point Abel reconstruction setting parameters (REC_ABEL_SETTING_PARAMS_FLOAT_N) for the ANE density analysis module.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s011_ncst1",
+      "name": "Constraint Count NCST1 (ATE)",
+      "unit": "",
+      "description": "Constraint count parameter from the ATE equilibrium analysis module. NCST1 represents the number of constraints applied during the equilibrium fitting process.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s011_t1_r",
+      "name": "T1_R (Radial Coordinate)",
+      "unit": "",
+      "description": "Radial coordinate array (T1_R) from the ATE electron temperature analysis. Provides the major radius positions corresponding to the measured electron temperature profile.",
+      "hand_role": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_prad.s002_rec_map_setting_mxrotp",
+      "name": "PRAD Reconstruction Map MXROTP Setting",
+      "unit": "",
+      "description": "Configuration setting for the radiated power (PRAD) reconstruction map, controlling the MXROTP parameter used in the bolometric inversion. This is a debug/configuration value associated with the PRAD analysis rather than a physical measurement.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/uddb_2461uc001",
+      "name": "UDDB/2461UC001",
+      "unit": "",
+      "description": "Time-series signal from the JT-60SA UDDB database, channel 2461UC001. It is a discharge-synchronised acquisition channel whose physical quantity is not specified in the available metadata. The channel number is adjacent to 2461UB001, suggesting a related diagnostic or subsystem.",
+      "hand_role": "measured"
+    },
+    {
+      "id": "jt-60sa:general/uddb_2461ud001",
+      "name": "UDDB/2461UD001",
+      "unit": "",
+      "description": "Time-series signal from the JT-60SA UDDB database, channel 2461UD001. It belongs to the same channel family as 2461UB001 and 2461UC001, indicating a common diagnostic or plant subsystem. The specific measured quantity is not documented in the provided context.",
+      "hand_role": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_zeff.s002_used_fitdata_index",
+      "name": "ZEFF Used Fit Data Index",
+      "unit": "",
+      "description": "Index indicating which fit data were used in the ZEFF effective charge analysis module. ZEFF computes the effective ion charge from spectroscopic and density measurements. This signal tracks the selection of fit data for the analysis.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_b260008_zeff.s002_cst1",
+      "name": "ZEFF Constant CST1",
+      "unit": "",
+      "description": "Constant parameter CST1 used in the ZEFF effective charge analysis module. ZEFF computes the effective ion charge from spectroscopic and density measurements. This signal is a fitting constant in that procedure.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s002_topics_yfitdata",
+      "name": "TOPICS Y-Fit Data (PRAD)",
+      "unit": "",
+      "description": "Fitted data from the TOPICS analysis code applied to radiated power measurements in the PRAD module. Contains the fitted radiated power profile used for transport analysis.",
+      "hand_role": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ane.s001_nfitdata",
+      "name": "Fitted Density Data (ANE)",
+      "unit": "",
+      "description": "Fitted electron density profile data from the ANE analysis module. ANE performs electron density profile fitting, and this signal contains the resulting fitted density values as a function of position.",
+      "hand_role": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_avt.s001_dname",
+      "name": "AVT Data Name",
+      "unit": "",
+      "description": "Data name identifier string (DNAME) for the AVT analysis module in the JT-60SA EDAS database.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/uddb_2461ue001",
+      "name": "UDDB/2461UE001",
+      "unit": "",
+      "description": "Time-series signal from the JT-60SA UDDB database, channel 2461UE001. It is part of the 2461U channel group acquired synchronously with the discharge. The physical meaning of the channel is not specified in the available metadata.",
+      "hand_role": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s011_eslicever",
+      "name": "E-Slice Version (ATE)",
+      "unit": "",
+      "description": "Version identifier for the E-Slice equilibrium data structure produced by the ATE module. A bookkeeping field tracking the version of the equilibrium data format.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s002_topics_errflg",
+      "name": "TOPICS Error Flag (ATE)",
+      "unit": "",
+      "description": "Error flag from the TOPICS equilibrium analysis code within the ATE module. Indicates whether an error occurred during the equilibrium reconstruction or fitting process.",
+      "hand_role": "status_or_flag"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s002_out_rmaj",
+      "name": "Major Radius Output (PRAD)",
+      "unit": "",
+      "description": "Output major radius coordinate from the PRAD radiated power analysis module. Provides the radial coordinate grid for the radiated power profile derived from bolometric measurements.",
+      "hand_role": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s011_ncst1",
+      "name": "NCST1 (PRAD)",
+      "unit": "",
+      "description": "Configuration parameter from the PRAD radiated power analysis module, likely specifying the number of channels or a channel index for the radiated power measurement. Used in the reconstruction of the radiated power profile.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s011_rec_map_setting_ndmap",
+      "name": "Reconstruction Map Setting NDMAP",
+      "unit": "",
+      "description": "Reconstruction grid setting parameter (number of map points) used by the radiated power (PRAD) analysis mapping. Controls the spatial resolution of the radiated power reconstruction.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_zeff.s005_topics_rhotype",
+      "name": "TOPICS Rho Type (ZEFF)",
+      "unit": "",
+      "description": "Specifies the radial coordinate type (rho) used by the TOPICS code in the ZEFF analysis. Indicates whether the profile is expressed in normalized radius, toroidal flux, or another radial coordinate.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s011_fit_ref_eqdb",
+      "name": "Fit Reference Equilibrium DB (PRad)",
+      "unit": "",
+      "description": "Reference equilibrium database used for fitting in the PRad radiated power analysis. Provides the magnetic equilibrium reconstruction used to map the radiated power measurements to flux coordinates.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/uddb_2461ub001",
+      "name": "UDDB/2461UB001",
+      "unit": "",
+      "description": "Time-series signal from the JT-60SA UDDB (raw/processed acquisition) database, channel 2461UB001. The channel naming follows the JT-60SA data acquisition numbering scheme and likely corresponds to a diagnostic or plant measurement recorded synchronously with the discharge. Without a channel description, the exact physical quantity cannot be determined from the available context.",
+      "hand_role": "measured"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_zeff.s005_topics_yfitdata",
+      "name": "ZEFF TOPICS YFITDATA",
+      "unit": "",
+      "description": "Y-axis values of the fitted data from the TOPICS module within the ZEFF effective charge profile analysis. Provides the fitted ordinate values for the effective charge profile.",
+      "hand_role": "derived_or_computed"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s002_shotex",
+      "name": "Shot Experimental Data (ATE)",
+      "unit": "",
+      "description": "Reference shot number for the experimental data used in the ATE electron temperature profile fitting analysis. Metadata linking the analysis to its source discharge.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ane.s002_cst1",
+      "name": "Equilibrium Constraint Parameter CST1",
+      "unit": "",
+      "description": "Constraint parameter from the 'ane' equilibrium analysis module. CST1 likely represents a constraint value used in the equilibrium fitting process, such as a boundary condition or regularization constraint.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ate.s011_uid",
+      "name": "UID (ATe)",
+      "unit": "",
+      "description": "Unique identifier for the ATE equilibrium analysis data set. Used to reference the specific equilibrium reconstruction result within the database.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s011_rec_map_setting_ndf1",
+      "name": "Reconstruction Map Setting NDF1 (PRAD)",
+      "unit": "",
+      "description": "Configuration parameter defining the NDF1 dimension of the reconstruction grid used by the PRAD radiated power analysis module. This is a numerical setting controlling the spatial discretization of the radiated power reconstruction.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_c260058_ate.s001_date",
+      "name": "ATE Analysis Date",
+      "unit": "",
+      "description": "Date associated with an ATE (Abel inversion / tomography analysis) result record in the JT-60SA analysis database. This is metadata describing when the analysis was performed.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_zeff.s005_rec_abel_setting_params_float_n",
+      "name": "Abel Reconstruction Float Parameter (ZEFF)",
+      "unit": "",
+      "description": "Float parameter for the Abel inversion reconstruction used in the ZEFF (effective charge) analysis module. Configures the numerical settings of the Abel inversion applied to line-integrated measurements to obtain local emissivity or impurity data.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_prad.s002_exseq",
+      "name": "EXSEQ (PRAD)",
+      "unit": "",
+      "description": "Sequence/execution identifier for the PRAD (radiated power) analysis module. This is administrative metadata tracking the analysis run rather than a physical plasma quantity.",
+      "hand_role": "configuration_parameter"
+    },
+    {
+      "id": "jt-60sa:general/lcdb_h060029_ane.s001_iyexperr",
+      "name": "Experimental Error Index (ANE)",
+      "unit": "",
+      "description": "Error index for experimental data used in the ANE equilibrium reconstruction code. This debug/control parameter indicates the status or magnitude of experimental data fitting errors during the equilibrium reconstruction process.",
+      "hand_role": "status_or_flag"
+    }
+  ]
+}

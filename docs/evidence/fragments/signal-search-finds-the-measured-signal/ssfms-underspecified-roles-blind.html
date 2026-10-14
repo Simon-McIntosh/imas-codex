@@ -1,0 +1,93 @@
+<section id="ssfms-underspecified-roles-blind">
+  <h2 id="ssfms-underspecified-roles-blind-heading">Blind hand-read agreement: JT-60SA underspecified signal roles</h2>
+  <p id="ssfms-underspecified-roles-blind-scope">
+    This measure is the done-when for the node. A seeded random sample of
+    30 JT-60SA <code>FacilitySignal</code> nodes with <code>status='underspecified'</code>
+    and a non-empty description was drawn from a live population of
+    225 as
+    <code>random.Random(20261015).sample(sorted(ids), 30)</code>. Each
+    signal was read by id, name, unit and description alone and given exactly one
+    of the six role definitions from <code>ROLE_CRITERIA</code> in
+    <code>imas_codex/discovery/signals/role.py</code>, with no model call of any
+    kind. The hand labels were committed
+    (<code>signal-search-finds-the-measured-signal/ssfms-underspecified-roles-blind-labels.json</code>) before any
+    stored <code>signal_role</code> was read; only then was the stored role read
+    for each sampled signal and the agreement computed. The stored roles present
+    at comparison were the JT-60SA underspecified-signal backfill.
+  </p>
+  <p id="ssfms-underspecified-roles-blind-result">
+    Agreement is <strong>26 of 30</strong> against a keep threshold of 27 of 30
+    (90&percnt;): verdict <strong>fail</strong>.
+  </p>
+  <table id="ssfms-underspecified-roles-blind-table">
+    <caption id="ssfms-underspecified-roles-blind-caption">Hand role versus stored <code>signal_role</code> for the 30 sampled signals, in draw order.</caption>
+    <thead><tr><th>#</th><th>signal id</th><th>hand role</th><th>stored role</th><th>agree</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>jt-60sa:general/lcdb_h060029_ane.s001_shotex</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>2</td><td><code>jt-60sa:general/lcdb_h060029_ane.s001_rec_abel_setting_params_float_n</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr class="disagree"><td>3</td><td><code>jt-60sa:general/lcdb_h060029_ate.s011_ncst1</code></td><td>configuration_parameter</td><td>derived_or_computed</td><td>no</td></tr>
+<tr class="disagree"><td>4</td><td><code>jt-60sa:general/lcdb_h060029_ate.s011_t1_r</code></td><td>derived_or_computed</td><td>measured</td><td>no</td></tr>
+<tr><td>5</td><td><code>jt-60sa:general/lcdb_b260008_prad.s002_rec_map_setting_mxrotp</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>6</td><td><code>jt-60sa:general/uddb_2461uc001</code></td><td>measured</td><td>measured</td><td>yes</td></tr>
+<tr><td>7</td><td><code>jt-60sa:general/uddb_2461ud001</code></td><td>measured</td><td>measured</td><td>yes</td></tr>
+<tr><td>8</td><td><code>jt-60sa:general/lcdb_b260008_zeff.s002_used_fitdata_index</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>9</td><td><code>jt-60sa:general/lcdb_b260008_zeff.s002_cst1</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>10</td><td><code>jt-60sa:general/lcdb_h060029_prad.s002_topics_yfitdata</code></td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+<tr><td>11</td><td><code>jt-60sa:general/lcdb_h060029_ane.s001_nfitdata</code></td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+<tr><td>12</td><td><code>jt-60sa:general/lcdb_h060029_avt.s001_dname</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>13</td><td><code>jt-60sa:general/uddb_2461ue001</code></td><td>measured</td><td>measured</td><td>yes</td></tr>
+<tr><td>14</td><td><code>jt-60sa:general/lcdb_h060029_ate.s011_eslicever</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>15</td><td><code>jt-60sa:general/lcdb_h060029_ate.s002_topics_errflg</code></td><td>status_or_flag</td><td>status_or_flag</td><td>yes</td></tr>
+<tr><td>16</td><td><code>jt-60sa:general/lcdb_h060029_prad.s002_out_rmaj</code></td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+<tr><td>17</td><td><code>jt-60sa:general/lcdb_h060029_prad.s011_ncst1</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>18</td><td><code>jt-60sa:general/lcdb_h060029_prad.s011_rec_map_setting_ndmap</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>19</td><td><code>jt-60sa:general/lcdb_h060029_zeff.s005_topics_rhotype</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr class="disagree"><td>20</td><td><code>jt-60sa:general/lcdb_h060029_prad.s011_fit_ref_eqdb</code></td><td>configuration_parameter</td><td>derived_or_computed</td><td>no</td></tr>
+<tr><td>21</td><td><code>jt-60sa:general/uddb_2461ub001</code></td><td>measured</td><td>measured</td><td>yes</td></tr>
+<tr><td>22</td><td><code>jt-60sa:general/lcdb_h060029_zeff.s005_topics_yfitdata</code></td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+<tr><td>23</td><td><code>jt-60sa:general/lcdb_h060029_ate.s002_shotex</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>24</td><td><code>jt-60sa:general/lcdb_h060029_ane.s002_cst1</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>25</td><td><code>jt-60sa:general/lcdb_h060029_ate.s011_uid</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>26</td><td><code>jt-60sa:general/lcdb_h060029_prad.s011_rec_map_setting_ndf1</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>27</td><td><code>jt-60sa:general/lcdb_c260058_ate.s001_date</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>28</td><td><code>jt-60sa:general/lcdb_h060029_zeff.s005_rec_abel_setting_params_float_n</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr><td>29</td><td><code>jt-60sa:general/lcdb_h060029_prad.s002_exseq</code></td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+<tr class="disagree"><td>30</td><td><code>jt-60sa:general/lcdb_h060029_ane.s001_iyexperr</code></td><td>status_or_flag</td><td>derived_or_computed</td><td>no</td></tr>
+    </tbody>
+  </table>
+  <h3 id="ssfms-underspecified-roles-blind-disagreements">Disagreements (4)</h3>
+  <ul id="ssfms-underspecified-roles-blind-disagreement-list">
+    <li><code>jt-60sa:general/lcdb_h060029_ate.s011_ncst1</code> — name &ldquo;Constraint Count NCST1 (ATE)&rdquo;; description &ldquo;Constraint count parameter from the ATE equilibrium analysis module. NCST1 represents the number of constraints applied during the equilibrium fitting process.&rdquo;; stored <code>derived_or_computed</code>, hand <code>configuration_parameter</code>.</li>
+<li><code>jt-60sa:general/lcdb_h060029_ate.s011_t1_r</code> — name &ldquo;T1_R (Radial Coordinate)&rdquo;; description &ldquo;Radial coordinate array (T1_R) from the ATE electron temperature analysis. Provides the major radius positions corresponding to the measured electron temperature profile.&rdquo;; stored <code>measured</code>, hand <code>derived_or_computed</code>.</li>
+<li><code>jt-60sa:general/lcdb_h060029_prad.s011_fit_ref_eqdb</code> — name &ldquo;Fit Reference Equilibrium DB (PRad)&rdquo;; description &ldquo;Reference equilibrium database used for fitting in the PRad radiated power analysis. Provides the magnetic equilibrium reconstruction used to map the radiated power measurements to flux coordinates.&rdquo;; stored <code>derived_or_computed</code>, hand <code>configuration_parameter</code>.</li>
+<li><code>jt-60sa:general/lcdb_h060029_ane.s001_iyexperr</code> — name &ldquo;Experimental Error Index (ANE)&rdquo;; description &ldquo;Error index for experimental data used in the ANE equilibrium reconstruction code. This debug/control parameter indicates the status or magnitude of experimental data fitting errors during the equilibrium reconstruction process.&rdquo;; stored <code>derived_or_computed</code>, hand <code>status_or_flag</code>.</li>
+  </ul>
+  <h3 id="ssfms-underspecified-roles-blind-action">Action taken on the failing agreement</h3>
+  <p id="ssfms-underspecified-roles-blind-action-text">
+    Agreement 26 of 30 is below the 27 keep threshold, so the stored roles do not
+    stay. Every JT-60SA signal with <code>status='underspecified'</code> had its
+    <code>signal_role</code> set to <code>null</code>: 225 enumerated, 225 nulled,
+    0 remaining with a role (log
+    <code>null-underspecified-roles.log</code> under the run directory lists every
+    affected id). The stored roles compared above were the JT-60SA
+    underspecified-signal backfill; this nulling reverts that write.
+  </p>
+  <table id="ssfms-underspecified-roles-blind-census">
+    <caption id="ssfms-underspecified-roles-blind-census-caption">Census before and after the nulling.</caption>
+    <thead><tr><th>measure</th><th>before</th><th>after</th></tr></thead>
+    <tbody>
+      <tr><td>JT-60SA underspecified signals carrying a role</td><td>225</td><td>0</td></tr>
+      <tr><td>JT-60SA underspecified signals described and missing a role</td><td>0</td><td>225</td></tr>
+      <tr><td><code>census_signal_roles(facility='jt-60sa')</code> <code>missing</code></td><td>0</td><td>0</td></tr>
+      <tr><td><code>census_signal_roles(facility='jt-60sa')</code> <code>n</code></td><td>15111</td><td>15111</td></tr>
+    </tbody>
+  </table>
+  <p id="ssfms-underspecified-roles-blind-census-note">
+    The <code>missing</code> column reads 0 in both rows because this tree's
+    shared predicate is <code>status IN ['enriched','checked']</code> and so does
+    not count underspecified signals; the predicate extended to admit the
+    underspecified signals the way the backfill's own change does reads 225
+    missing after the nulling. The live underspecified population is 225, not the
+    210 the earlier count recorded, so the intended census figure is 225.
+  </p>
+</section>
