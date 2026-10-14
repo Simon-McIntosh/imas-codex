@@ -79,9 +79,12 @@ class _RecordedCostGraph:
         self,
         nodes: list[dict[str, Any]],
         cost_rows: list[dict[str, Any]] | None = None,
+        run_spend: dict[str, float] | None = None,
     ):
         self.nodes = [dict(n) for n in nodes]
         self.cost_rows = list(cost_rows or [])
+        #: Spend recorded per run id, for the runner's fallback cost hook.
+        self.run_spend = dict(run_spend or {})
         self.queries: list[str] = []
 
     def __enter__(self) -> _RecordedCostGraph:
@@ -95,6 +98,9 @@ class _RecordedCostGraph:
 
     def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
         self.queries.append(cypher)
+        if "AS total" in cypher and "run_id" in cypher:
+            run_id = params.get("run_id")
+            return [{"total": float(self.run_spend.get(run_id, 0.0))}]
         if "LLMCost" in cypher:
             return [dict(r) for r in self.cost_rows]
         if "sn.name_stage AS name_stage" in cypher:
@@ -330,3 +336,52 @@ def test_fallback_batch_cost_counts_against_family_cap(monkeypatch: Any) -> None
     # The fallback charge reached the family total too: the unmeasurable anchor
     # batch's cost_fn figure is what the runner and the family both count.
     assert result.total_cost == pytest.approx(3.0)
+
+
+# ── The CLI wires a measuring fallback, not the 0.00 stub ────────────────────
+
+
+def test_cli_apply_wires_a_measuring_cost_fn(monkeypatch: Any) -> None:
+    """The CLI's harmonize apply hands the runner a cost_fn that measures spend.
+
+    The fallback is only as good as the hook the CLI passes: the runner's
+    default is the ``default_cost`` stub, which returns 0.00, so an
+    unmeasurable batch would be charged nothing to the family cap. The CLI
+    must inject the recorded-spend hook the campaign path already uses.
+    """
+    from imas_codex.standard_names import graph_ops
+    from imas_codex.standard_names.campaign import default_cost
+
+    graph = _RecordedCostGraph(_family_nodes(), [], run_spend={f"scope-{_ANCHOR}": 2.5})
+    _install_graph(monkeypatch, graph)
+    # ``aggregate_spend_for_run`` resolves GraphClient from its own module.
+    monkeypatch.setattr(graph_ops, "GraphClient", lambda *a, **k: graph)
+
+    from imas_codex.standard_names import harmonize
+
+    captured: dict[str, Any] = {}
+
+    def spy(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        captured.update(kwargs)
+        return {
+            "plans": [],
+            "applied": [],
+            "recommended_guards": {},
+            "force_reason": None,
+            "force_run_id": None,
+        }
+
+    monkeypatch.setattr(harmonize, "apply_families", spy)
+
+    from imas_codex.cli.sn import sn
+
+    result = CliRunner().invoke(sn, ["harmonize", "--family", _ANCHOR, "--apply"])
+    assert result.exit_code == 0, result.output
+
+    cost_fn = (captured.get("runner_kwargs") or {}).get("cost_fn")
+    assert cost_fn is not None, (
+        "the CLI passed no cost_fn; the family falls back to the 0.00 stub"
+    )
+    assert cost_fn is not default_cost
+    # It measures: the run's recorded spend comes back, not the stub's 0.00.
+    assert cost_fn(f"scope-{_ANCHOR}") == pytest.approx(2.5)

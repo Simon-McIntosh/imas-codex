@@ -6168,6 +6168,8 @@ def sn_harmonize(
                         )
                 return
 
+            from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
+
             _harmonize_drain = _docs_drain_factory(quiet=False)
 
             try:
@@ -6182,6 +6184,11 @@ def sn_harmonize(
                         per_batch_cost_cap=cost_limit,
                         campaign_cost_ceiling=cost_limit,
                     ),
+                    # A batch whose drain cannot measure its own spend is charged
+                    # this spend against the family cap, the same figure the
+                    # runner falls back to. The stub default returns 0.00, so
+                    # without it the batch is charged nothing.
+                    runner_kwargs={"cost_fn": aggregate_spend_for_run},
                 )
             except RecommendedNameError as exc:
                 raise click.ClickException(str(exc)) from exc

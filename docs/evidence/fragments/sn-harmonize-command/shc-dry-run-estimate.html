@@ -60,6 +60,14 @@
           and returns it, so the family's remaining budget reflects it and the family
           cannot exceed its ceiling by one unmeasurable batch.</td>
       </tr>
+      <tr>
+        <td><code>imas_codex/cli/sn.py</code> — the harmonize apply</td>
+        <td>Injects <code>runner_kwargs={"cost_fn": aggregate_spend_for_run}</code>, the
+          same recorded-spend hook the campaign path already passes. Without it
+          <code>cost_fn</code> resolves to the <code>default_cost</code> stub, which
+          returns 0.00, so the family wrapper would charge an unmeasurable batch
+          nothing and the cap leak would stay open on the path the CLI runs.</td>
+      </tr>
     </tbody>
   </table>
 
@@ -76,6 +84,17 @@
     (<code>negative-control.log</code>: 3 failed, exit 1), the measured-estimate
     test reading the constant's figure and the cap-leak test handing the member
     batch the whole $5.00 cap instead of the remaining $2.00.
+  </p>
+  <p id="shc-dry-run-estimate-cli-wiring">
+    A follow-up finding observed that the runner's fallback hook is only as good
+    as what the CLI passes: the harmonize apply gave no <code>runner_kwargs</code>,
+    so <code>cost_fn</code> resolved to the <code>default_cost</code> stub
+    (0.00) and the family wrapper charged an unmeasurable batch nothing.
+    <code>test_cli_apply_wires_a_measuring_cost_fn</code> drives the CLI apply
+    against a stub graph whose recorded spend for the batch's run is $2.50 and
+    asserts the wired hook returns that figure rather than the stub's 0.00.
+    Removing the <code>runner_kwargs</code> wiring fails exactly that test
+    (<code>repair-negative-control.log</code>: "the CLI passed no cost_fn").
   </p>
 
   <h3 id="shc-dry-run-estimate-gate">Gate</h3>
