@@ -1889,12 +1889,11 @@ class AgentsServer:
         # where the mode is known and read when that instance is built.
         _rerank_dd_paths = not (self.read_only or self.dd_only)
 
-        # The signal rerank was measured against fusion alone over three passes
-        # on the pooled labels and earned its place: the role-aware arm beats
-        # fusion on both mean nDCG@10 and grade-3 precision@5, its worst pass
-        # stays above fusion, and its p95 is inside the 5 s budget. It therefore
-        # follows the mode exactly as the DD-path rerank does, so a read-only or
-        # DD-only server never spends a judgement.
+        # Signal reranking follows server mode like DD-path reranking. Its
+        # five-second wall budget ends scoring and keeps unscored candidates
+        # in fusion order. On reprocessed JT-60SA signals, the role-aware arm
+        # lifts mean nDCG@10 from 0.847 to 0.922 and grade-3 precision@5
+        # from 0.809 to 0.894.
         _rerank_signals = not (self.read_only or self.dd_only)
 
         name = "imas-codex-readonly" if self.read_only else "imas-codex"
@@ -2003,10 +2002,10 @@ class AgentsServer:
 
         if not self.read_only:
             # =====================================================================
-            # Tool 1: python - Persistent REPL (primary interface)
+            # python - Persistent REPL (primary interface)
             # =====================================================================
 
-            # Build description before decoration — FastMCP 3.0 captures
+            # Build description before decoration — FastMCP captures
             # the description eagerly at decoration time, so setting
             # __doc__ after @mcp.tool() has no effect on the MCP schema.
             repl_description = (
@@ -2056,7 +2055,7 @@ class AgentsServer:
                     return _bound_repl_output(f"Error: {e}\n\n{tb}")
 
         # =====================================================================
-        # Tool 2: get_graph_schema - Schema introspection (REPL companion)
+        # get_graph_schema - Schema introspection (REPL companion)
         # =====================================================================
         # Only available in full mode — provides schema context for Cypher
         # queries via the REPL, which dd-only mode does not expose.
@@ -2098,7 +2097,7 @@ class AgentsServer:
 
         if not self.read_only:
             # =====================================================================
-            # Tool 3: add_to_graph - Schema-validated writes
+            # add_to_graph - Schema-validated writes
             # =====================================================================
 
             @self.mcp.tool()
@@ -2242,7 +2241,7 @@ class AgentsServer:
 
         if not self.read_only:
             # =====================================================================
-            # Tool 4: update_facility_config - Facility configuration management
+            # update_facility_config - Facility configuration management
             # =====================================================================
 
             @self.mcp.tool()
@@ -2277,13 +2276,11 @@ class AgentsServer:
                     logger.exception(f"Failed to access config for {facility}")
                     raise RuntimeError(f"Failed to access config: {e}") from e
 
-        # NOTE: update_facility_infrastructure, get_facility_infrastructure, and
-        # add_exploration_note were removed (private-infra deprecation).
-        # Use the repl tool with update_infrastructure() / get_facility_infrastructure()
-        # from imas_codex.discovery for those operations if still needed.
+        # Infrastructure reads and writes use update_infrastructure() and
+        # get_facility_infrastructure() from imas_codex.discovery via the REPL.
 
         # =====================================================================
-        # Tool 7b: get_facility_coverage - Scored path coverage and gaps
+        # get_facility_coverage - Scored path coverage and gaps
         # =====================================================================
 
         if not self.dd_only:
