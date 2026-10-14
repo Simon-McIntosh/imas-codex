@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-harmonize-command,sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;imas-standard-names:concept-and-notation-registry#s2&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;}">
   <title>One Definition, One Notation: The Standard Names House Style | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-10-14">
 <meta name="plan-commits" content="4c83ff4241a80b4269329de87e0b1eb299dd591b,489a1a81f1e5ac0b7c90a02bfdb074a2cf0f410a,363a1ea5677475b3a076c0cc712ef1f45bc61601,03d2b6f5bba05d101d5ba4cd170ab0bd5553c704">
 </head>
@@ -97,7 +97,7 @@
     </p>
 
     <h2 id="s3">§3 — Authoring the entries: the coordinator polish a pipeline cannot do</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       The coordinator drafts every entry needed by the WEST roster first, then the wider
       corpus, and lands them in ISN under <code>concept-and-notation-registry</code> §3. Each
@@ -467,6 +467,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s3-read-delegated" data-who="reckon-build" data-when="2026-10-14T19:50:00Z">
     <div class="r-comment-body"><p><strong>The lead delegated the read of <code>concepts.yml</code> to the coordinator on 2026-10-14</strong>, and the coordinator has read all 46 entries. They are correct and consistent with the catalog's convention, and no COCOS is named. Two are corrected through ISN's registry plan:</p><ul><li>The outboard and inboard midplanes were fixed at dR/dZ = 0 on the separatrix. That is undefined for a limited plasma and disagrees with the poloidal angle's zero, so they become the height the data's <code>midplane_identifier</code> selects, the magnetic-axis height by default (node <code>cnr-midplane-and-inductance</code>).</li><li><code>internal_inductance</code> names its l_i(3) form.</li></ul><p>Separately, the lead ruled that the <code>plasma_boundary</code> locus definition be strengthened to name the last closed flux surface (node <code>cnr-plasma-boundary-definition</code>). §3 closes when both land.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-14T20:27:00Z">
+    <div class="r-comment-body"><p>§3 closed. The WEST worklist is closed. The coordinator read all 46 concept entries under the lead's delegation, and its three corrections landed in ISN: plasma boundary (<code>f9965fd</code>), midplanes and internal inductance (<code>0e43cde</code>). Reviews 101 and 102/120. <a href="/imas-codex/evidence/archive/sn-house-style-landed.html#s3-entries-closed">evidence</a></p></div>
 </div>
 </section>
 </main>
