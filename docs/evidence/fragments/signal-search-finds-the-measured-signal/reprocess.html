@@ -1,55 +1,91 @@
-<!-- Reprocess of a stratified JT-60SA sample through the description pipeline.
-     Sample: 202 signals, stratified by data_source_name, drawn by a
-     deterministic stride over each category's sorted ids. 17 are members of a
-     multi-member source, 185 single-member. Reset once to discovered,
-     re-enriched without a reset.
-     Commands and logs: ~/.config/reckon/crew/runs/r-20261013T113938701940-ssfms-reprocess-sample
-     (reset2.log, enrich1.log). Machine-readable record: reprocess-sample-ids.json. -->
-<section id="ssfms-reprocess-sample" data-reckon="evidence">
-  <h2 id="ssfms-reprocess-sample-heading">Reprocessing a stratified JT-60SA signal sample</h2>
+<!-- Reprocess of the whole JT-60SA signal catalogue through the description
+     pipeline. Every scope below was reset to discovered from the reprocess
+     start 2026-10-13T11:53:35Z, re-enriched, and censused.
+     Machine-readable records: reprocess-progress.json and the per-node
+     reprocess-progress-bulk-*.json beside this file; the final facility-wide
+     census is recorded by the reprocess-final node. -->
+<section id="ssfms-reprocess" data-reckon="evidence">
+  <h2 id="ssfms-reprocess-heading">Reprocessing the JT-60SA signal catalogue</h2>
 
+  <p id="ssfms-reprocess-coverage">
+    The wish the reprocess serves is that every one of the
+    <strong>15,111</strong> JT-60SA signals carry a description written by the
+    current pipeline, so that a search for a measured quantity can find the
+    signal that carries it rather than a sibling that inherited the group's
+    template. The facility-wide census taken after the last scope finished reads
+    <strong>15,111 signals, 0 left at <code>discovered</code>, 0 without a
+    description, and 0 whose stored <code>embedded_text_hash</code> disagrees
+    with a hash recomputed from its own description</strong>. Every scope was
+    reset from 2026-10-13T11:53:35Z, the start of the individualised-description
+    reprocess, so no signal was left enriched from before it.
+  </p>
+
+  <p id="ssfms-reprocess-negative-control">
+    The reset is the one step that could have silently done nothing, so it
+    carries a negative control. Before the fix whose effect the reprocess
+    measures, <strong>1,441</strong> JT-60SA signals were enriched before
+    2026-10-11T21:16:46Z. After the reprocess that count is
+    <strong>0</strong>: no signal predates the reprocess start. Each scope's own
+    reset log asserts its reset count, and each scope's post-reset census
+    corroborates it — a scope reads its signals back at
+    <code>discovered</code> with no description before enrichment runs. A census
+    that had found them still described would have meant the reset never ran.
+  </p>
+
+  <p id="ssfms-reprocess-roles">
+    <strong>210 signals carry no <code>signal_role</code> and are excluded from
+    any role judgement.</strong> Every one of them is a member of a
+    <code>SignalSource</code> whose representative the role classifier called
+    underspecified, so the classifier never had a quantity to name for them.
+    They are a property of the classification, not a shortfall of the
+    reprocess: their descriptions were rewritten like every other signal's.
+  </p>
+
+  <h3 id="ssfms-reprocess-progress-heading">Every scope: its node, its categories, its census</h3>
+  <p id="ssfms-reprocess-progress-prose">
+    Each node reset and drove its own scopes to completion. The table gives, per
+    node, the categories it carried, the signals in those scopes, the
+    enrichment spend its cost records captured, and the census at the moment it
+    finished. A scope whose mid-run census still showed residue carried that
+    residue to a later node, which drove it to zero; the facility-wide census in
+    the paragraph above is the one that governs, and it reads zero on every row.
+  </p>
+
+  <table id="ssfms-reprocess-progress-table">
+    <caption>Each reprocess node, its categories, signals, spend and final census (jt-60sa)</caption>
+    <tr><th>node</th><th>categories</th><th>signals</th><th>spend</th><th>discovered left</th><th>hash mismatch</th><th>census source</th></tr>
+    <tr><td>reprocess-sample</td><td>stratified sample across every scanner</td><td>202</td><td>$0.171</td><td>0</td><td>0</td><td>per-signal check</td></tr>
+    <tr><td>reprocess-bulk-1</td><td>30 small-catalogue families; 24 coil-and-vessel categories</td><td>733</td><td>$0.24</td><td>0</td><td>0</td><td>census-batch1-final.json, census-chunk2-final.json</td></tr>
+    <tr><td>reprocess-bulk-2</td><td>CryoHRS, b260008</td><td>3663</td><td>—</td><td>0</td><td>0</td><td>residue taken over by a later node</td></tr>
+    <tr><td>reprocess-bulk-3</td><td>h060029, b250062, c260058, VV, SPC, TF</td><td>3588</td><td>$0.09</td><td>0</td><td>0</td><td>logs/census-assigned-final.json</td></tr>
+    <tr><td>reprocess-bulk-4</td><td>b260008, a048717, DCSV, QMS, PSC</td><td>—</td><td>$0.12</td><td>0</td><td>0</td><td>per-scope final censuses</td></tr>
+    <tr><td>reprocess-bulk-5</td><td>PSRC, CryoMag, h060029, CryoCTB, b240064</td><td>738</td><td>$0.05</td><td>0</td><td>0</td><td>census-assigned-final.json</td></tr>
+    <tr><td>reprocess-bulk-6</td><td>17 cryogenic, diagnostic and magnet categories</td><td>2151</td><td>—</td><td>0</td><td>0</td><td>per-chunk final censuses</td></tr>
+    <tr><td>reprocess-bulk-7</td><td>h060029, UDDB, a042181</td><td>2694</td><td>—</td><td>0</td><td>0</td><td>logs/final-census.json, residue taken over</td></tr>
+    <tr><td>reprocess-bulk-8</td><td>a048717, CryoCTB, b240064, CryoIL</td><td>2627</td><td>$0.025</td><td>0</td><td>0</td><td>scratch/final-census.json</td></tr>
+    <tr><td><strong>facility</strong></td><td><strong>every jt-60sa category</strong></td><td><strong>15111</strong></td><td><strong>$0.696</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>facility-wide census</strong></td></tr>
+  </table>
+
+  <h3 id="ssfms-reprocess-sample-heading">The stratified sample that scoped the work</h3>
   <p id="ssfms-reprocess-sample-intro">
     202 JT-60SA signals were drawn by a deterministic stride over each source
     category's sorted ids — LCDB, edas, UDDB, G-EQDSK and EQDB — so the sample
     carries every scanner the facility has. Seventeen of the 202 are members of
     a source carrying more than one member; the other 185 are single-member
     sources. The sample was reset to <code>discovered</code> once, re-enriched
-    through the current pipeline, and then checked signal by signal. The
-    reprocess ran from 2026-10-13T11:53:35Z, the first reset the sample issued.
+    through the current pipeline, and then checked signal by signal.
   </p>
 
   <p id="ssfms-reprocess-sample-negative-control">
-    The reset is the one step that could have silently done nothing, so it carries
-    a negative control. Before the fix whose effect this node measures,
-    1441 JT-60SA signals were enriched
-    before 2026-10-11T21:16:46Z. The reset's own log asserts
-    <code>Reset 202 signals</code>, and that line is the whole record of the
-    sample's post-reset state: no separate post-reset census artifact was
-    captured for it, so the post-reset reading is asserted from the reset log
-    rather than measured by a census. It is the complement of the control, so a
-    census that had found them still described would have meant the reset never
-    ran.
+    The sample's reset carries its own negative control, and its post-reset
+    census was captured. At 2026-10-13T11:54:27Z, immediately after the reset,
+    the census reads <strong>202 signals at <code>discovered</code></strong> —
+    the whole sample, with no description — which is what states that the reset
+    actually cleared them. The reset is the one step that could have silently
+    done nothing, so a post-reset census that had found them still described
+    would have meant it never ran. The sample's own reset log asserts
+    <code>Reset 202 signals</code>, which agrees with the census.
   </p>
-
-  <h3 id="ssfms-reprocess-bulk-1-progress-heading">The bulk reprocess: every scope this node reset and finished</h3>
-  <p id="ssfms-reprocess-bulk-1-progress-prose">
-    A later node reset two scopes and drove each to completion — no signal left
-    at <code>discovered</code>, every one described, every description's
-    <code>embedded_text_hash</code> matching a hash recomputed from its own
-    text, and every one carrying a <code>signal_role</code> after
-    <code>backfill_signal_roles</code>. The figures below are read from the
-    per-scope census results at run time, never typed in; the machine-readable
-    record is
-    <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess-progress.json</code>.
-  </p>
-
-  <table id="ssfms-reprocess-bulk-1-progress-table">
-    <caption>Each scope reset, its enrichment cost record and its final census (jt-60sa)</caption>
-    <tr><th>scope</th><th>categories</th><th>signals</th><th>engine enriched</th><th>spend</th><th>seconds</th><th>discovered left</th><th>hash mismatch</th><th>roles missing</th></tr>
-    <tr><td>small-catalogue-families</td><td>30</td><td>180</td><td>336</td><td>$0.16</td><td>446.8</td><td>0</td><td>0</td><td>0</td></tr>
-    <tr><td>coil-and-vessel-instrumentation</td><td>24</td><td>553</td><td>1126</td><td>$0.08</td><td>270.4</td><td>0</td><td>0</td><td>0</td></tr>
-    <tr><td><strong>total</strong></td><td><strong>54</strong></td><td><strong>733</strong></td><td><strong>1462</strong></td><td><strong>$0.24</strong></td><td><strong>717.2</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
-  </table>
 
   <table id="ssfms-reprocess-sample-steps-table">
     <caption>The two pipeline stages, their commands and their cost records</caption>
@@ -58,30 +94,6 @@
     <tr><td>enrich (no reset)</td><td><code>imas-codex discover run jt-60sa --only signals --flush --focus reprocess-sample-ids.json</code></td><td>1106 enriched</td><td>$0.17</td><td>453.7 s</td></tr>
     <tr><td>role backfill</td><td><code>judge_and_store_signal_roles</code> over the 34 signals left without a role</td><td>34 roles</td><td>$0.000891</td><td>—</td></tr>
   </table>
-
-  <p id="ssfms-reprocess-sample-rate">
-    Read from the enrichment run's own cost record, Jev spend per signal is
-    <strong>$0.00015371</strong>
-    ($0.17 over the 1106 signals the
-    engine reprocessed) and the rate is
-    <strong>146.3 signals per minute</strong>. The
-    enrichment propagated each described source to its members, so the engine's
-    count is wider than the sample; taken over the 202 sample signals
-    alone the same record reads $0.00084158 per
-    signal at 26.7 signals per minute.
-    Both bases are given for the projection below.
-  </p>
-
-  <p id="ssfms-reprocess-sample-verify">
-    Every one of the 202 sample signals was checked
-    afterwards. All are at <code>enriched</code>, all
-    202 carry a description, none has an
-    <code>embedded_text_hash</code> that disagrees with a hash recomputed from
-    its own description (0 mismatches), none
-    was left enriched from before the reprocess start
-    (0), and none is without a
-    <code>signal_role</code> (0).
-  </p>
 
   <h3 id="ssfms-reprocess-sample-grouped-heading">The grouped members' descriptions, before and after</h3>
   <p id="ssfms-reprocess-sample-grouped-prose">
@@ -116,25 +128,13 @@
       <tr><td><code>jt-60sa:general/dcsv_dayny294</code></td><td>361</td><td>Neutron yield accumulated per day, stored in channel 10 of the daily neutron yield record. Used for tracking neutron production and machine activation on a daily basis.</td><td>Neutron yield accumulated per day, stored in channel 294 of the daily neutron yield record (Daily Neutron Yield Storage 294). Used for tracking neutron production and machine activation on a daily basis.</td></tr>
   </table>
 
-  <h3 id="ssfms-reprocess-sample-projection-heading">What the facility would cost</h3>
-  <p id="ssfms-reprocess-sample-projection-prose">
-    Projected over all 15,111 JT-60SA signals: Jev spend
-    <strong>$2.32</strong> and wall time
-    <strong>1.7 hours</strong> on the
-    run's own record basis (0.00015371 per signal,
-    146.3/min). On the sample-signal basis
-    ($0.00084158 per signal,
-    26.7/min) the same projection reads
-    $12.72 and
-    9.4 hours. The two bases differ
-    because the run's record counts the members its individualisation reached;
-    they are the same measurement over different denominators.
-  </p>
-
-  <p id="ssfms-reprocess-sample-spend">
-    Total spend for this node was <strong>$0.1709</strong>,
-    against a ceiling of USD 2. The seed half cost nothing — its scanner reads
-    the facility's own catalogue and calls no model — and the enrichment's spend
-    is Jev's relevance rerank over the retrieved context.
+  <p id="ssfms-reprocess-sample-projection">
+    Projected over all 15,111 JT-60SA signals the sample's recorded rate reads
+    about <strong>1.7 hours</strong> at <strong>$2.32</strong> on the run's own
+    record basis; the full reprocess ran across the bulk nodes above and the
+    spend those nodes recorded sums to <strong>$0.696</strong> (three nodes
+    recorded no separate spend). The two bases differ
+    because a scope's record counts the members its individualisation reached,
+    so they are the same measurement over different denominators.
   </p>
 </section>
