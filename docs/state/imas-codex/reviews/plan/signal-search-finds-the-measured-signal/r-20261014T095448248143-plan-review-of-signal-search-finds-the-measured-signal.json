@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-14T10:10:16.917Z",
+  "dispatched_at": "2026-10-14T09:55:04Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:369",
+      "id": "reasoning-1",
+      "reason": "a reader or node applying \u00a77's ship rule literally gets the opposite of the recorded decision and the landed rerank state, so the clause must be amended to the wall-budget reading or the decision cited from both done-whens.",
+      "text": "the new decision `signal-rerank-latency` (line 615, `data-sections=\"s7,s12\"`) rules that the 5 s latency clause is met by the rerank's own wall budget and keeps the switch on at a measured p95 of 5.022 s, but \u00a77's done-when still says the switch \"ships on only if \u2026 p95 is within 5 s. Otherwise it ships off\", and \u00a712's done-when still says the harness is re-recorded \"with the switch re-checked against \u00a77's ship rule\" \u2014 so the plan's own acceptance text now scores \"off\" the state the decision and the landed code (`_rerank_signals` following server mode) both hold",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:501",
+      "id": "reasoning-2",
+      "reason": "the sentence is false for node four, and it frames the whole section as zero-risk cleanup, so the section's risk and verification reading understates a change to live search output.",
+      "text": "\u00a713 opens \"None changes a search result\" and then lists, as one of its categories, \"a gap in what `role=` can find\", which is exactly node four (lines 561\u2013571): it changes enrichment so the 210 underspecified JT-60SA signals gain a role and are returned by every `role=` search",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/signal-search-finds-the-measured-signal.html:561",
+      "id": "evidence_paths-1",
+      "reason": "without a named fragment the 90% gate's evidence and the spend receipt land wherever the worker chooses, so the gate that authorises storing 210 roles cannot be reopened and checked by a later reader.",
+      "text": "\u00a713's underspecified-role node \"hand-reads a seeded random 30 \u2026 and records the agreement\", \"stores the roles only at 90% agreement or better\", then runs the backfill under a USD 0.05 Jev ceiling, but neither the agreement record nor the backfill/census receipt is given a durable path \u2014 the two files it declares (`parallel.py`, `test_signal_role_store.py`) are code, not evidence, unlike \u00a77's `rerank.html` and \u00a712's `reprocess.html`",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e8a1661e55b436139e638be2f5a4b925442948ccb033b36d6ca5b24764fdf573",
+  "plan_slug": "signal-search-finds-the-measured-signal",
+  "plan_version": 134,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261014T095448248143-plan-review-of-signal-search-finds-the-measured-signal",
+  "reviewed_blob_sha": "64747ab099809c19fc5da081a7886bf24a516d00",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every path and symbol \u00a713 names resolves in the tree at base `a2e447878`: `format_signals_report` and its single-member branch (`search_formatters.py:231`), the three test names, `UnlabelledCandidates`/`require_labelled_pool`, the two `_RecordingClient` classes, `tests/graph/__init__.py`'s docstring, `ssfms-reprocess-relabel.html` (says \"re-graded\"), `reprocess.html` (1,441) against `reprocess-progress.json` (`negative_control_enriched_before_fix: 1416`), and `measure_signal_role.py`'s `FIXTURE` constant; the extensionless hrefs resolve under the `.html` convention.",
+    "done_when": "pass \u2014 \u00a713's done-when names a negative control (\"a check that fails without it, shown by reverting the change\") plus two measurable invariants (the \u00a74 fusion arm's mean nDCG@10 unchanged; the JT-60SA role census reading zero), each of which can fail.",
+    "evidence_paths": "a finding \u2014 \u00a713's underspecified-role node produces a hand-read agreement record and a live backfill receipt but names no durable fragment path, unlike \u00a77 (`rerank.html`) and \u00a712 (`reprocess.html`).",
+    "naming": "pass \u2014 \u00a713 introduces no plan labels, stage names or ticket numbers; the symbols it targets are mechanism-named, and the `SSFMS_JEV_ARMS` / plan-section-comment items are already absent from `tests/llm/test_signal_search_goldens.py`.",
+    "reasoning": "two findings \u2014 the `signal-rerank-latency` decision supersedes \u00a77's latency clause while \u00a77's and \u00a712's done-whens still state the literal clause; and \u00a713's opening claim \"None changes a search result\" is contradicted by its own node four.",
+    "single_goal": "pass \u2014 each of \u00a713's four nodes is scoped by write set to one file family and one intent (\"report rows\", \"golden guards and records\", \"test doubles and the role measurement\", \"underspecified signals get a role\"), which is the split the section itself states.",
+    "wiring": "pass \u2014 \u00a713's four nodes declare disjoint write sets (`search_formatters.py` + two test files; two test files + three evidence files; six test/double files; `parallel.py` + one test file), so \"they run in parallel\" holds, and the other relationships I opened resolve (`decisions` entry `signal-rerank-latency` carrying `data-sections=\"s7,s12\"`; gate `g-ssfms-1` on `s11`)."
+  },
+  "section_digests": {
+    "_document": "291a7b50cae3f1381fb553a1526bcd8f6ed77c2215b8c743846415aa3a47987c",
+    "s1": "e58a341feafcdbbe4c2e547cf50a1fb5e759d1c331f09b8777ce5142efc9daed",
+    "s10": "6d89774dcbcd560d4e557a4f8b5311441f1f341a0c304652be2d62177458ad31",
+    "s11": "aee16468b3601b1eadb06d08a97bcfd43cf9b8e4a33abe436683514d8f8c1489",
+    "s12": "bc20ddc56a7e1535923331eed6b72064f2d2470ee0e76ec0f3792770a0ee4840",
+    "s13": "2fdf8463d73a3929ff0fe46b17b30a7618010e2eca69c8257873ef13501f7dbb",
+    "s2": "f55b74ba093a840986cbccb42c598af18961c0fa16e4c51222c7b7391877efa2",
+    "s3": "5a77efb737bcf64e7fd5b30aaa71ed3ff5a27b6c8e7b4d33023f03292a98fb15",
+    "s4": "31e1b80d34ee0473acbbff8894edb94dee236159b67ee202ce8891143f015e9a",
+    "s5": "cf965008026275c857a91393e40f4bf274211018609b3e64d2e01a013594d8ec",
+    "s6": "c52bea774c71a04c540e7d48dc9b0f33b9e660bc8f31ebb54d1321fd40992555",
+    "s7": "39767f9634d04e6e5c76f3c5e95c921e3a6afe69d9984f4209b5aa22cb591834",
+    "s8": "7a4f48cf049c22a9e18bb9d564ddc020c0316999ece5bdf87656d0d4c65ebaec",
+    "s9": "37a1002a450850d41b5c609a5a3ea2a4591ba2f6fb3e3bc91d6cfee5d3cd82ee"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T10:11:40.410064+00:00"
+}
