@@ -1,0 +1,84 @@
+<!-- Landing record for the golden split-stability work.
+     Tests: tests/standard_names/test_judgment_goldens.py (rebuild preservation, no-committed-file).
+     Live check: live_split_check.py under the run directory, reporting per-golden changed splits. -->
+<section id="sje-golden-split-stability" data-reckon="evidence">
+  <h2 id="sje-golden-split-stability-heading">A golden keeps its split when it grows</h2>
+
+  <p id="sje-golden-split-stability-intro">
+    <code>assign_group_splits</code> re-derived the whole calibration/validation
+    assignment from rank on every rebuild, so a copy group new to a golden moved
+    every group ranked after it to the other split. Golden D's 47 ruled synonym
+    pairs moved 10 of its 15 existing rows. The fix reads each golden's committed
+    <code>copy_group &rarr; split</code> assignment and hands it in: every group
+    already in the file keeps its split, and only the groups new to the file are
+    ranked and alternated among themselves. An imbalance already in the file is
+    kept, not corrected.
+  </p>
+
+  <p id="sje-golden-split-stability-wiring">
+    <code>_finish</code> gained a <code>golden_path</code> argument and reads the
+    committed file's assignment through <code>_committed_group_splits</code>.
+    Each builder names the golden it writes: <code>build_name_acceptable</code>
+    (A), <code>build_description_object</code> (C) and
+    <code>build_near_duplicate</code> (D); the one other caller,
+    <code>build_documentation_sheet</code> (B), names the documentation sheet.
+    The test that asserted every copy group sits in one split held by
+    construction and was replaced by a rebuild-preservation test that can fail.
+  </p>
+
+  <h3 id="sje-golden-split-stability-tests">Tests</h3>
+  <table id="sje-golden-split-stability-tests-table">
+    <caption>Gate at head <code>a950d7465</code> against base <code>43bde5857</code>.</caption>
+    <thead>
+      <tr><th>Measure</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Gate: <code>tests/standard_names/test_judgment_goldens.py</code> + <code>tests/discovery/test_evaluation.py</code></td>
+        <td>42 passed at head, EXIT=0; base 40 passed, EXIT=0; 0 added failures</td>
+      </tr>
+      <tr>
+        <td>Rebuild preservation &mdash; a rebuild adding five groups to a four-group golden leaves every existing group's split unchanged</td>
+        <td>present; new groups split within one of even</td>
+      </tr>
+      <tr>
+        <td>No committed file &mdash; a golden with no committed file splits exactly as today</td>
+        <td>present; equals <code>assign_group_splits</code> with no prior</td>
+      </tr>
+      <tr>
+        <td>Negative control &mdash; prior-split read removed in <code>_finish</code></td>
+        <td><code>test_rebuild_keeps_every_existing_groups_split</code> FAILED, EXIT=1 (23 deselected)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="sje-golden-split-stability-live">Live check</h3>
+  <p id="sje-golden-split-stability-live-intro">
+    Goldens A, B, C and D were rebuilt from the live graph into a scratch
+    directory (never over the committed files) with <code>UV_NO_SYNC=1</code>. For
+    each, every <code>copy_group</code> present in both the rebuilt and committed
+    files was compared, and the number whose split changed is reported. The
+    preservation rule requires zero.
+  </p>
+  <table id="sje-golden-split-stability-live-table">
+    <caption>Live rebuild: changed splits per golden. Must be 0.</caption>
+    <thead>
+      <tr><th>Golden</th><th>Shared groups</th><th>Changed splits</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>A &mdash; golden-name-acceptable.json</td><td>525</td><td>0</td></tr>
+      <tr><td>B &mdash; golden-documentation-acceptable-sheet.json</td><td>190</td><td>0</td></tr>
+      <tr><td>C &mdash; golden-description-object.json</td><td>202</td><td>0</td></tr>
+      <tr><td>D &mdash; golden-near-duplicate.json</td><td>52</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="sje-golden-split-stability-live-control">
+    <strong>Instrument positive control.</strong> With the prior-split read
+    removed, the same live check reports 17 changed splits for golden A, so the
+    counter sees a violation rather than reporting a blind zero. B, C and D
+    report 0 even under the mutation because their committed splits are exactly
+    reproducible from rank on the current row set; A is the golden whose
+    committed file had already drifted, which is what this change prevents for
+    every golden. No golden file was committed.
+  </p>
+</section>
