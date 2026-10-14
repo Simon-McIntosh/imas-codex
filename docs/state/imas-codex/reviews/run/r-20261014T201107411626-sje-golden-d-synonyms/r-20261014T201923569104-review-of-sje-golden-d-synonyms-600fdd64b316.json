@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/standard_names/judgment_goldens.py:879"
+  ],
+  "completed_at": "2026-10-14T20:35:46.396Z",
+  "dispatched_at": "2026-10-14T20:19:37Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/judgment_goldens.py",
+      "line": "519",
+      "severity": "follow-on",
+      "text": "follow-on: the inline union-find in _synonym_ruling_rows re-implements the connected-component grouping already owned by imas_codex/standard_names/review/audits.py:505 (UnionFind) without extending or wrapping it; the same algorithm is also inlined at judgment_goldens.py:247, so the mechanism now has three copies in the package."
+    },
+    {
+      "file": "tests/standard_names/test_judgment_goldens.py",
+      "line": "242",
+      "severity": "follow-on",
+      "text": "follow-on: `assert all(len(found) == 1 for found in splits.values())` guards nothing \u2014 row[\"split\"] is assigned from assign_group_splits keyed on copy_group at judgment_goldens.py:231-233, so every row of one copy group necessarily shares its split by construction; the assertion reads as checking that no group spans both splits but can never redden, so it counts as coverage it does not provide."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read 600fdd64b against base 8b30f6526 commit by commit; four files changed, all inside the declared write paths, the builder appending one row per ruled pair and rebuilding the fixture.",
+    "done_when": "the done_when names tests/standard_names/test_judgment_goldens.py and tests/discovery/test_evaluation.py; the reviewed manifest records 40 passed at head against 35 at base, EXIT=0, and 0 added failures.",
+    "goal": "the node goal is to fold the 47 ruled synonym pairs into golden D; judgment_goldens.py:630 appends them via _synonym_ruling_rows and the committed golden-near-duplicate.json holds 62 rows, 47 of them coordinator_synonym_ruling at 7 label-1.",
+    "manifest": "read; it records the gate command and result, three negative-control logs, 62 rows over 30 calibration / 32 validation, and 52 copy groups.",
+    "write_paths": "the declared scope is judgment_goldens.py, test_judgment_goldens.py, golden-near-duplicate.json and the fragment html; the diff touches exactly those four files."
+  },
+  "justifications": {
+    "durability": "the tests fail under three distinct mutations, but the added assertion at tests/standard_names/test_judgment_goldens.py:242 is a tautology that can never redden (see FINDING).",
+    "evidence": "the reviewed manifest's head-final.log records 40 passed against base.log's 35 with EXIT=0, and the three negative-control logs (e.g. negative-drop-rows.log) each name failing test ids, so the added assertions are shown to redden.",
+    "fit": "the addition follows the module's _row/_finish idiom and introduces no plan or version label; the redundant `| {\"name\": left}` at judgment_goldens.py:544 re-adds a key _row drops, uncommented.",
+    "goal_fidelity": "judgment_goldens.py:506 _synonym_ruling_rows builds one _row per ruled pair with the ruled label, sorted ::-joined unit and coordinator_synonym_ruling source, matching the brief; the only deviation is the whole-file re-split, which the fragment sje-golden-d-synonyms.html records as 10 older rows changing split.",
+    "reuse": "no prior owner exists for folding ruled pairs into golden D (search over imas_codex/standard_names for connected-component/union-find and for the golden builders found none), but the inline union-find at judgment_goldens.py:519 duplicates the owner review/audits.py:505.",
+    "scope_discipline": "git diff --stat 8b30f6526 600fdd64b lists only judgment_goldens.py, test_judgment_goldens.py, golden-near-duplicate.json and sje-golden-d-synonyms.html, all inside the manifest's declared scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to fold the 47 ruled synonym pairs into golden D; judgment_goldens.py:630 appends them via _synonym_ruling_rows and the committed golden-near-duplicate.json holds 62 rows, 47 of them coordinator_synonym_ruling at 7 label-1.\nVERDICT done_when: the done_when names tests/standard_names/test_judgment_goldens.py and tests/discovery/test_evaluation.py; the reviewed manifest records 40 passed at head against 35 at base, EXIT=0, and 0 added failures.\nVERDICT write_paths: the declared scope is judgment_goldens.py, test_judgment_goldens.py, golden-near-duplicate.json and the fragment html; the diff touches exactly those four files.\nVERDICT manifest: read; it records the gate command and result, three negative-control logs, 62 rows over 30 calibration / 32 validation, and 52 copy groups.\nVERDICT diff: read 600fdd64b against base 8b30f6526 commit by commit; four files changed, all inside the declared write paths, the builder appending one row per ruled pair and rebuilding the fixture.\nCALL_SITES: imas_codex/standard_names/judgment_goldens.py:879\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: judgment_goldens.py:506 _synonym_ruling_rows builds one _row per ruled pair with the ruled label, sorted ::-joined unit and coordinator_synonym_ruling source, matching the brief; the only deviation is the whole-file re-split, which the fragment sje-golden-d-synonyms.html records as 10 older rows changing split.\nSCORE evidence: 18\nJUSTIFICATION evidence: the reviewed manifest's head-final.log records 40 passed against base.log's 35 with EXIT=0, and the three negative-control logs (e.g. negative-drop-rows.log) each name failing test ids, so the added assertions are shown to redden.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 8b30f6526 600fdd64b lists only judgment_goldens.py, test_judgment_goldens.py, golden-near-duplicate.json and sje-golden-d-synonyms.html, all inside the manifest's declared scope.\nSCORE durability: 16\nJUSTIFICATION durability: the tests fail under three distinct mutations, but the added assertion at tests/standard_names/test_judgment_goldens.py:242 is a tautology that can never redden (see FINDING).\nSCORE fit: 18\nJUSTIFICATION fit: the addition follows the module's _row/_finish idiom and introduces no plan or version label; the redundant `| {\"name\": left}` at judgment_goldens.py:544 re-adds a key _row drops, uncommented.\nSCORE reuse: 14\nJUSTIFICATION reuse: no prior owner exists for folding ruled pairs into golden D (search over imas_codex/standard_names for connected-component/union-find and for the golden builders found none), but the inline union-find at judgment_goldens.py:519 duplicates the owner review/audits.py:505.\nFINDING imas_codex/standard_names/judgment_goldens.py:519 follow-on: the inline union-find in _synonym_ruling_rows re-implements the connected-component grouping already owned by imas_codex/standard_names/review/audits.py:505 (UnionFind) without extending or wrapping it; the same algorithm is also inlined at judgment_goldens.py:247, so the mechanism now has three copies in the package.\nFINDING tests/standard_names/test_judgment_goldens.py:242 follow-on: `assert all(len(found) == 1 for found in splits.values())` guards nothing \u2014 row[\"split\"] is assigned from assign_group_splits keyed on copy_group at judgment_goldens.py:231-233, so every row of one copy group necessarily shares its split by construction; the assertion reads as checking that no group spans both splits but can never redden, so it counts as coverage it does not provide.\n",
+  "review_run_id": "r-20261014T201923569104-review-of-sje-golden-d-synonyms-600fdd64b316",
+  "reviewed_base_sha": "8b30f65265325207503bb5928bd1858657251d9b",
+  "reviewed_head_sha": "600fdd64b31603236c6f2d2a7ae73163dcb64c1c",
+  "reviewed_run_id": "r-20261014T201107411626-sje-golden-d-synonyms",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "subject": "r-20261014T201107411626-sje-golden-d-synonyms",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T20:37:22.370116+00:00",
+  "total": 103
+}
