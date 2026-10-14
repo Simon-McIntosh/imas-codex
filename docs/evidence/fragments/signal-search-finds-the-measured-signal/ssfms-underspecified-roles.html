@@ -1,0 +1,113 @@
+<section id="ssfms-underspecified-roles" data-reckon="fragment">
+  <h2 id="ssfms-underspecified-roles-title">An underspecified signal is judged for its role, not left role-less</h2>
+
+  <p id="ssfms-underspecified-roles-intro">
+    A signal enrichment marks <code>underspecified</code> carries the same stored
+    description a searcher reads, but the role predicate admitted only
+    <code>enriched</code> and <code>checked</code>, and the enrich worker judged a
+    role only on its enriched branch. So an underspecified signal was reachable by
+    text and invisible to a <code>role=</code> filter, and the sweep that backfills
+    missing roles never saw it. This node admits <code>underspecified</code> in the
+    shared predicate and has the enrich worker judge any signal it marks
+    underspecified as it already did for one it marks enriched.
+  </p>
+
+  <p id="ssfms-underspecified-roles-predicate">
+    The sweep and its census still share one predicate, extended by one status.
+    A signal is a candidate when <code>status</code> is <code>enriched</code>,
+    <code>checked</code> or <code>underspecified</code>, its description is
+    non-empty, and <code>signal_role</code> is null. The store test now drives its
+    graph double from the Cypher the production sweep and census issue rather than
+    from a predicate of the test's own, so the two are required to agree by
+    construction: the double selects exactly the rows the statement it receives
+    names, and the test fails when a caller drops the underspecified status.
+  </p>
+
+  <p id="ssfms-underspecified-roles-live">
+    Against the live graph, <strong>210 JT-60SA signals
+    awaited a role</strong> — described, underspecified, and role-less. Every one was
+    judged before any write (<strong>210/210
+    accepted, 0 failed</strong>), at Jev response-usage spend of
+    <strong>USD 0.005393</strong>. The judged roles were then stored, and the census
+    read <strong>210 before and 0 after</strong> across
+    a population of 15111 JT-60SA signals — zero exactly when the store left
+    nothing.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Stored role</th><th>Signals</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>configuration_parameter</td><td>141</td></tr>
+      <tr><td>derived_or_computed</td><td>36</td></tr>
+      <tr><td>measured</td><td>17</td></tr>
+      <tr><td>status_or_flag</td><td>13</td></tr>
+      <tr><td>reference_or_setpoint</td><td>3</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-underspecified-roles-agreement">
+    The roles were judged without storing first, and a seeded random
+    <strong>30</strong> of the 210 were read by this worker
+    from the signal's own name, unit and description under the six role definitions,
+    before the model's judgement was examined. Agreement is
+    <strong>29/30</strong>. One disagreement is listed.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Signal ID</th><th>Model</th><th>Worker</th><th>Agree</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>jt-60sa:general/lcdb_b260008_zeff.s002_ifunc</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_c260058_ate.s001_nfitdata</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_c260058_ate.s001_rec_map_setting_ndnel</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_c260058_ate.s001_rec_map_type</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_c260058_ate.s001_shtno</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ane.s001_rec_map_setting_ivdm_s</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ane.s002_pid_tab_kind</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_eslicever</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_expadd_err_flg</td><td>status_or_flag</td><td>status_or_flag</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_ncst1</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_rec_map_setting_ndbmx</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_rec_map_setting_ndf1</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_rec_map_setting_ndmap</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_extime</td><td>reference_or_setpoint</td><td>configuration_parameter</td><td>no</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_nexpadd</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_rec_map_setting_ndbmx</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_rec_map_setting_ndint</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_rec_map_setting_njdb</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_shoteq</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s002_ifitcnt</td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s002_out_rmaj</td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s002_rec_abel_setting_params_elmch</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s002_xfitdata</td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s011_rec_map_setting_ndbmx</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s011_shtno</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s011_topics_errflg</td><td>status_or_flag</td><td>status_or_flag</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_zeff.s002_crmin</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_zeff.s002_fit_ref_eqdb</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_zeff.s005_topics_rhotype</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_zeff.s005_topics_yfitdata</td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-underspecified-roles-disagreement">
+    <strong>Disagreement — jt-60sa:general/lcdb_h060029_ate.s011_extime</strong>, described as “Time base / external time signal (EXTIME) for the ATE analysis dataset (ate.s011) in the JT-60SA EDAS analysis database. Provides the temporal reference for the associated ATE signals.”. The
+    model read <code>reference_or_setpoint</code> (a target or setpoint a controller
+    is compared against); this worker read <code>configuration_parameter</code>. The
+    text's word <em>reference</em> is a temporal one — the time base of the ATE
+    dataset — not a control target, so a searcher filtering <code>role=setpoint</code>
+    finds a time axis rather than a requested quantity. The stored value is the
+    model's, and the effect is bounded: one configuration-parameter signal in a
+    sparsely populated role, and the time base is findable by text regardless.
+  </p>
+
+  <p id="ssfms-underspecified-roles-caveat">
+    This measures that underspecified signals are judged on this workstation’s
+    JT-60SA population, that the judged roles are stored, and that the census agrees
+    with the store afterwards. It does not measure role accuracy population-wide,
+    which the hand-labelled sample pages separately.
+  </p>
+</section>
