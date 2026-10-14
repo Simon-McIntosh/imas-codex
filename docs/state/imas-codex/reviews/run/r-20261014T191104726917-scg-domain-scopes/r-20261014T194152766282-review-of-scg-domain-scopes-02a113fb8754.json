@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "backend": "local",
+  "base_log_revision": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/graph/dd_domain_classifier.py:813",
+    "imas_codex/llm/prompt_loader.py:928"
+  ],
+  "completed_at": "2026-10-14T19:58:50.557Z",
+  "dispatched_at": "2026-10-14T19:42:08Z",
+  "findings": [
+    {
+      "file": "imas_codex/definitions/physics/domains.yaml",
+      "line": "537",
+      "severity": "follow-on",
+      "text": "follow-on: four (domain, quantity, neighbour) triples are each added twice with divergent rule text (plasma_wall_interactions:519/537, particle_measurement_diagnostics:688/700, plasma_measurement_diagnostics:919/925, neutronics:1008/1014) because two distinct silent pairs can land on the same losing domain and neighbour, so the pair-driven edit never deduped; the manifest's 'one per silent ordered pair and its losing side' overstates the distinct entries."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-scopes.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment is a research/evidence record with no figure, though the node's FENCE SCOPE reserved docs/figures/sn-catalog-grouping/scg-domain-scopes; a confusion or relabel figure would carry the 64-pair adjudication and 56-label change better than the tables alone."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read c0d68e7705cdbc25aedc2f69e1768bb240632058..02a113fb8754bf9a57a279726afbdf1d85fc57f8: 42 excludes entries across 16 domains in domains.yaml, a precedence sort of the category list plus two private imports in prompt_loader.py:592-621, one added test, and the fragment, script and results json.",
+    "done_when": "the done_when names the fragment, the guidance and precedence tests, an EXIT=0 re-score, and a category-order test that fails with the ordering removed; all four are met (gate 17 passed EXIT=0, rescore EXIT=0, negative control EXIT=1).",
+    "goal": "the node goal is that the domain scopes sort the confused pairs and the 201 measured DD paths are relabelled by rule; imas_codex/definitions/physics/domains.yaml carries the 42 pair exclusions and docs/evidence/fragments/sn-catalog-grouping/scg-domain-scopes.html:5 gives all 64 pairs a verdict and :74 lists the 56 changed labels.",
+    "manifest": "read; status complete, gate tests/graph/test_physics_domain_guidance.py + test_domain_precedence.py + test_domain_classifier_prompt.py 17 passed EXIT=0, negative control reds test_category_block_is_rendered_in_precedence_order, but it names no baseline_suite/after_suite keys (it uses test_logs baseline/gate).",
+    "write_paths": "the source manifest's FENCE SCOPE grants seven paths; git diff --name-only c0d68e77..02a113fb lists exactly six, all inside the grant, with docs/figures/sn-catalog-grouping/scg-domain-scopes reserved but unused."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_domain_classifier_prompt.py:81 supplies the categories in reverse precedence order and reddens when the sort is removed (negative-control.log EXIT=1), but no test guards the domains.yaml excludes data.",
+    "evidence": "each of the done_when's four conditions is measured and recorded - gate.log 17 passed EXIT=0, rescore.log EXIT=0, negative-control.log EXIT=1 reddening the added test - though the manifest names no baseline_suite/after_suite keys.",
+    "fit": "imas_codex/llm/prompt_loader.py:592 imports and reuses dd_domain_classifier's precedence helpers, matching the repo's existing cross-module private-import idiom, though binding to private names is the only blemish.",
+    "goal_fidelity": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-scopes.html:5 gives every one of the 64 pairs a verdict and :74 lists the 56 changed labels, so the goal's two halves land, though four of the pair edits are redundant (imas_codex/definitions/physics/domains.yaml:537).",
+    "reuse": "imas_codex/llm/prompt_loader.py:618 reuses _category_precedence_rank(_precedence_rank()) from imas_codex/graph/dd_domain_classifier.py:146 rather than re-deriving the category order, so the change extends the owner of that capability.",
+    "scope_discipline": "git diff --stat c0d68e77..02a113fb lists exactly the six declared write paths with no plan, dependency or generated-file change."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that the domain scopes sort the confused pairs and the 201 measured DD paths are relabelled by rule; imas_codex/definitions/physics/domains.yaml carries the 42 pair exclusions and docs/evidence/fragments/sn-catalog-grouping/scg-domain-scopes.html:5 gives all 64 pairs a verdict and :74 lists the 56 changed labels.\nVERDICT done_when: the done_when names the fragment, the guidance and precedence tests, an EXIT=0 re-score, and a category-order test that fails with the ordering removed; all four are met (gate 17 passed EXIT=0, rescore EXIT=0, negative control EXIT=1).\nVERDICT write_paths: the source manifest's FENCE SCOPE grants seven paths; git diff --name-only c0d68e77..02a113fb lists exactly six, all inside the grant, with docs/figures/sn-catalog-grouping/scg-domain-scopes reserved but unused.\nVERDICT manifest: read; status complete, gate tests/graph/test_physics_domain_guidance.py + test_domain_precedence.py + test_domain_classifier_prompt.py 17 passed EXIT=0, negative control reds test_category_block_is_rendered_in_precedence_order, but it names no baseline_suite/after_suite keys (it uses test_logs baseline/gate).\nVERDICT diff: read c0d68e7705cdbc25aedc2f69e1768bb240632058..02a113fb8754bf9a57a279726afbdf1d85fc57f8: 42 excludes entries across 16 domains in domains.yaml, a precedence sort of the category list plus two private imports in prompt_loader.py:592-621, one added test, and the fragment, script and results json.\nCALL_SITES: imas_codex/graph/dd_domain_classifier.py:813, imas_codex/llm/prompt_loader.py:928\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-catalog-grouping/scg-domain-scopes.html:5 gives every one of the 64 pairs a verdict and :74 lists the 56 changed labels, so the goal's two halves land, though four of the pair edits are redundant (imas_codex/definitions/physics/domains.yaml:537).\nSCORE evidence: 18\nJUSTIFICATION evidence: each of the done_when's four conditions is measured and recorded - gate.log 17 passed EXIT=0, rescore.log EXIT=0, negative-control.log EXIT=1 reddening the added test - though the manifest names no baseline_suite/after_suite keys.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat c0d68e77..02a113fb lists exactly the six declared write paths with no plan, dependency or generated-file change.\nSCORE durability: 16\nJUSTIFICATION durability: tests/graph/test_domain_classifier_prompt.py:81 supplies the categories in reverse precedence order and reddens when the sort is removed (negative-control.log EXIT=1), but no test guards the domains.yaml excludes data.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/llm/prompt_loader.py:592 imports and reuses dd_domain_classifier's precedence helpers, matching the repo's existing cross-module private-import idiom, though binding to private names is the only blemish.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/llm/prompt_loader.py:618 reuses _category_precedence_rank(_precedence_rank()) from imas_codex/graph/dd_domain_classifier.py:146 rather than re-deriving the category order, so the change extends the owner of that capability.\nFINDING imas_codex/definitions/physics/domains.yaml:537 follow-on: four (domain, quantity, neighbour) triples are each added twice with divergent rule text (plasma_wall_interactions:519/537, particle_measurement_diagnostics:688/700, plasma_measurement_diagnostics:919/925, neutronics:1008/1014) because two distinct silent pairs can land on the same losing domain and neighbour, so the pair-driven edit never deduped; the manifest's 'one per silent ordered pair and its losing side' overstates the distinct entries.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-domain-scopes.html:1 follow-on: the fragment is a research/evidence record with no figure, though the node's FENCE SCOPE reserved docs/figures/sn-catalog-grouping/scg-domain-scopes; a confusion or relabel figure would carry the 64-pair adjudication and 56-label change better than the tables alone.",
+  "review_run_id": "r-20261014T194152766282-review-of-scg-domain-scopes-02a113fb8754",
+  "reviewed_base_sha": "c0d68e7705cdbc25aedc2f69e1768bb240632058",
+  "reviewed_head_sha": "02a113fb8754bf9a57a279726afbdf1d85fc57f8",
+  "reviewed_run_id": "r-20261014T191104726917-scg-domain-scopes",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T19:56:17.599286+00:00",
+  "total": 105,
+  "verdict": "SOUND WITH FINDINGS"
+}
