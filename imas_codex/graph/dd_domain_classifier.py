@@ -130,12 +130,21 @@ DOMAIN_QUESTION = "physics_domain"
 #: probability lies within this of the first.
 CATEGORY_BEAM_MARGIN = 0.15
 
-#: A path whose two-level probability falls below this is re-judged by the chat
-#: classifier, which reads the same guidance but as one free-text decision.
-DEFAULT_TREE_THRESHOLD = 0.8
-
 #: Maximum domain Choices in flight at once, matching the decisions owner's bound.
 DEFAULT_DECISION_CONCURRENCY = 8
+
+
+def _tree_threshold() -> float:
+    """The configured confidence bar below which a path is re-judged by chat.
+
+    Read from the ``[sn-domain-tree].threshold`` setting rather than held as a
+    constant, so the bar the classifier routes on is the one the benchmark
+    calibrated and the seat section carries.
+    """
+    from imas_codex.settings import get_sn_domain_tree_threshold
+
+    return get_sn_domain_tree_threshold()
+
 
 # =============================================================================
 # Pydantic Response Models
@@ -630,7 +639,7 @@ async def classify_tier1_llm(
     model: str,
     service: str = SERVICE_TAG,
     tree_model: str | None = None,
-    threshold: float = DEFAULT_TREE_THRESHOLD,
+    threshold: float | None = None,
     on_cost: Callable[[float], None] | None = None,
     on_items: Callable[[int], None] | None = None,
 ) -> list[dict[str, Any]]:
@@ -663,6 +672,9 @@ async def classify_tier1_llm(
         from imas_codex.settings import get_model as _get_model
 
         tree_model = _get_model("sn-domain-tree")
+
+    if threshold is None:
+        threshold = _tree_threshold()
 
     valid_domains = {d.value for d in PhysicsDomain}
 
@@ -1173,7 +1185,7 @@ async def _classify_batch_tree(
     chat_model: str,
     service: str,
     valid_domains: set[str],
-    threshold: float = DEFAULT_TREE_THRESHOLD,
+    threshold: float | None = None,
     concurrency: int = DEFAULT_DECISION_CONCURRENCY,
     cost: Any | None = None,
 ) -> tuple[list[dict[str, Any]], float]:
@@ -1191,6 +1203,9 @@ async def _classify_batch_tree(
         ``domain_source``, ``domain_model`` and ``cost``, plus the tree's
         ``probability`` and ``physics_category`` when the tree decided the path.
     """
+    if threshold is None:
+        threshold = _tree_threshold()
+
     decisions, total_cost = await decide_domain_tree(
         batch,
         model=model,
