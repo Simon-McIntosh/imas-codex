@@ -85,11 +85,17 @@ def test_report_keeps_fused_rank_after_a_rerank() -> None:
 
 
 def test_row_shows_the_stored_role_when_present() -> None:
-    signal = _signal("EF2 Booster BPS Voltage", "MMSYS", role="measured")
+    measured = _signal("EF2 Booster BPS Voltage", "MMSYS", role="measured")
+    reference = _signal("CS4 Voltage", "DCSV", role="reference_or_setpoint")
 
-    report = format_signals_report([signal], [], {})
+    report = format_signals_report([measured, reference], [], {})
 
-    assert "Role: measured" in report
+    measured_row = next(
+        row for row in report.split("### ") if "EF2 Booster BPS Voltage" in row
+    )
+    reference_row = next(row for row in report.split("### ") if "CS4 Voltage" in row)
+    assert "Role: measured" in measured_row
+    assert "Role: reference_or_setpoint" in reference_row
 
 
 def test_row_omits_the_role_when_the_signal_carries_none() -> None:

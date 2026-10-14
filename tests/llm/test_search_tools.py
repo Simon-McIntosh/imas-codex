@@ -551,21 +551,20 @@ class TestSignalRoleFilter:
         assert "jt-60sa:ps/refip" not in ids
 
     def test_role_search_narrows_the_vector_and_fulltext_streams(self):
-        gc = _RoleAwareSignalClient()
+        for role in ("measured", "reference_or_setpoint"):
+            gc = _RoleAwareSignalClient()
 
-        _rank_signals(
-            gc, [0.1] * 1024, "plasma current", "jt-60sa", 10, role="measured"
-        )
+            _rank_signals(gc, [0.1] * 1024, "plasma current", "jt-60sa", 10, role=role)
 
-        vector_queries = [
-            q for q in gc.calls if "facility_signal_desc_embedding" in q[0]
-        ]
-        text_queries = [q for q in gc.calls if "facility_signal_text" in q[0]]
-        assert vector_queries, "no vector stream query"
-        assert text_queries, "no text stream query"
-        for query, params in vector_queries + text_queries:
-            assert "signal_role = $role" in query
-            assert params["role"] == "measured"
+            vector_queries = [
+                q for q in gc.calls if "facility_signal_desc_embedding" in q[0]
+            ]
+            text_queries = [q for q in gc.calls if "facility_signal_text" in q[0]]
+            assert vector_queries, "no vector stream query"
+            assert text_queries, "no text stream query"
+            for query, params in vector_queries + text_queries:
+                assert "signal_role = $role" in query
+                assert params["role"] == role
 
     def test_unfiltered_search_keeps_every_role(self):
         gc = _RoleAwareSignalClient()
@@ -837,11 +836,15 @@ class TestSignalRerankState:
         }
 
     def test_state_carries_the_stored_role_when_present(self):
-        candidate = {"name": "ip", "signal_role": "measured"}
+        measured = _signal_rerank_state(
+            "plasma current", {"name": "ip", "signal_role": "measured"}
+        )
+        reference = _signal_rerank_state(
+            "plasma current", {"name": "refip", "signal_role": "reference_or_setpoint"}
+        )
 
-        state = _signal_rerank_state("plasma current", candidate)
-
-        assert state["candidate"]["role"] == "measured"
+        assert measured["candidate"]["role"] == "measured"
+        assert reference["candidate"]["role"] == "reference_or_setpoint"
 
     def test_state_omits_the_role_when_the_signal_carries_none(self):
         state = _signal_rerank_state("q", {"name": "ip", "signal_role": None})
