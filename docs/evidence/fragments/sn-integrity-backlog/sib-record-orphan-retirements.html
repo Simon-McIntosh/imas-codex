@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-record-orphan-retirements">
+<title>Landing record — sib-record-orphan-retirements</title>
+</head>
+<body>
+<main>
+<h1 id="sib-record-orphan-retirements-title">Recording the orphan retirement on the 183 source-less superseded names</h1>
+
+<p id="sib-record-orphan-retirements-summary">
+One signed authority stamps a retirement change on each of the <strong>183</strong>
+superseded standard names that no <code>StandardNameSource</code> produces and whose
+change log holds no supersession, retirement or refinement event. Every name stays
+<code>superseded</code>; its paid reviews are untouched. The authority carries a
+<strong>184th</strong> row as a control — an accepted name outside the class — which the
+preview must refuse. The write goes through <code>apply_signed_manifest</code> only:
+preview, apply under the preview digest, readback, replay. No product code was edited.
+</p>
+
+<h2 id="sib-record-orphan-retirements-read">The re-read split, re-run before any write</h2>
+<p id="sib-record-orphan-retirements-read-body">
+The census instrument was re-run against the live graph
+(<code>bolt://98d4-gpu-0002:7687</code>) from this worktree. Log
+<code>01-census-read.log</code>, <code>EXIT=0</code>. The read reproduces §30 exactly,
+so the counts have not moved and the node proceeds.
+</p>
+<table id="sib-record-orphan-retirements-read-table">
+<thead><tr><th>measure</th><th>count</th></tr></thead>
+<tbody>
+<tr><td>population — names at <code>name_stage = 'superseded'</code></td><td>2,166</td></tr>
+<tr><td>excluded — outgoing <code>HAS_SUCCESSOR</code> only (branch A exclusive)</td><td>6</td></tr>
+<tr><td>excluded — incoming <code>REFINED_FROM</code> only (branch B exclusive)</td><td>1,628</td></tr>
+<tr><td>excluded — both relations</td><td>15</td></tr>
+<tr><td>excluded total</td><td>1,649</td></tr>
+<tr><td>census — neither relation</td><td>517</td></tr>
+<tr><td>census + excluded = population</td><td>2,166</td></tr>
+<tr><td>no recorded supersession event (the class this node acts on)</td><td>208</td></tr>
+<tr><td>— of those, no producing source (recorded here)</td><td>183</td></tr>
+<tr><td>— of those, with a producing source (left for the restore class)</td><td>25</td></tr>
+</tbody>
+</table>
+<p id="sib-record-orphan-retirements-read-witness">
+The excluded split sums with the census exactly as §30 recorded it. The witnesses
+<code>etendue_of_spectrometer_channel</code> (branch A, outgoing <code>HAS_SUCCESSOR</code>)
+and <code>x_direction_unit_vector_of_sensor</code> (branch B, incoming
+<code>REFINED_FROM</code>) are both excluded and absent from the 183. The figure
+<code>docs/figures/sn-integrity-backlog/sib-record-orphan-retirements/census-split.svg</code>
+draws this split and cites <code>01-census-read.log</code>.
+</p>
+
+<h2 id="sib-record-orphan-retirements-kind">The mutation kind, and the change it writes</h2>
+<p id="sib-record-orphan-retirements-kind-body">
+The kind is <code>supersede</code>. It is the only kind in
+<code>_SIGNED_MANIFEST_MUTATION_KINDS</code> whose write the orphan lifecycle's own
+retirement (<code>supersede_exhausted_orphan</code> in
+<code>imas_codex/standard_names/graph_ops.py</code>) also uses, so the recorded
+retirement carries the same shape as a lifecycle orphan retirement. The mutation is
+written <em>without</em> a signed successor — no <code>arguments.successor_id</code> — so
+no <code>HAS_SUCCESSOR</code> edge is minted, which is what keeps the 183 in the census:
+they still point to nothing. Its Cypher is the signed-manifest supersede branch,
+which sets <code>superseded_from_stage = coalesce(superseded_from_stage, name_stage)</code>,
+leaves <code>name_stage = 'superseded'</code> and <code>status = 'superseded'</code>, clears
+the claim fields, and writes no review. The guard set a supersede mutation must carry is
+<code>structural-legitimacy</code> and <code>out-of-allowlist-immutability</code>; both are
+attached to each row, the second over the target alone.
+</p>
+<p id="sib-record-orphan-retirements-change">
+The receipt change is one <code>StandardNameChange</code> per admitted row, written by
+<code>_write_receipts</code> with: <code>operation = 'supersede_exhausted_orphan'</code>
+(taken from the authority's <code>receipt_policy.operation</code>);
+<code>from_name = to_name = &lt;name id&gt;</code> (a retirement has no replacement, so
+<code>_receipt_names</code> returns the name itself for both);
+<code>origin = 'signed_manifest'</code>; <code>internal = true</code>; <code>run_id</code>;
+<code>manifest_sha256</code>; <code>authority_file_sha256</code>;
+<code>authority_payload_sha256</code>; <code>row_id</code>; <code>mutation_kinds</code>.
+It is linked to the name by <code>HAS_INTERNAL_CHANGE</code>. The <code>reason</code> on
+every change states that the supersession census found no supersession event on a
+source-less superseded identity, and that the retirement it lacks is recorded and the
+name left terminal at <code>superseded</code>.
+</p>
+
+<h2 id="sib-record-orphan-retirements-auth">The authority</h2>
+<p id="sib-record-orphan-retirements-auth-body">
+<code>sib-record-orphan-retirements-authority.json</code> — schema
+<code>imas-codex.repair-authority.v1</code>, <code>authority_mode = external_reviewed</code>,
+<code>orphan_policy = refuse</code>, 184 rows (183 + 1 control). Signature
+<code>json-sort-keys-v1</code> over the payload, built by the instrument in
+<code>sib-record-orphan-retirements-run.py</code>. Build log
+<code>02-authority-build.log</code>, <code>EXIT=0</code>: file sha256
+<code>cc0c4b075167a653b5fa69d967a22219b418e09cffa2b99094748317a0ca53cb</code>, payload
+sha256 <code>33c4178064fa18cadb193416a277eaa60d564d11b49aa6f6e86241980435e508</code>.
+</p>
+<table id="sib-record-orphan-retirements-auth-table">
+<thead><tr><th>field</th><th>value</th></tr></thead>
+<tbody>
+<tr><td>authority_file_sha256</td><td><code>cc0c4b075167a653b5fa69d967a22219b418e09cffa2b99094748317a0ca53cb</code></td></tr>
+<tr><td>authority_payload_sha256</td><td><code>33c4178064fa18cadb193416a277eaa60d564d11b49aa6f6e86241980435e508</code></td></tr>
+<tr><td>rows</td><td>184</td></tr>
+<tr><td>control row</td><td><code>absorbed_power_of_beam_tracing_beam</code> (accepted, carries a live structural child)</td></tr>
+</tbody>
+</table>
+<p id="sib-record-orphan-retirements-auth-names">
+The authority's <code>repair_rows</code> enumerates the 184 row ids in order: the
+<strong>183</strong> source-less superseded names this node records the retirement on,
+then the control. Readback confirms each of the 183 now carries its retirement change and
+a receipt; the authority file is the citable list of them.
+</p>
+
+<h2 id="sib-record-orphan-retirements-preview">Preview</h2>
+<p id="sib-record-orphan-retirements-preview-body">
+Log <code>03-preview.log</code>, <code>EXIT=0</code>. Outcome
+<code>would_apply</code>, <code>would_change = 183</code>, counts
+<code>authority_rows = 184</code>, <code>admitted = 183</code>,
+<code>refused = 1</code>. The one refusal is the control,
+<code>absorbed_power_of_beam_tracing_beam</code>, reason
+<code>target has a live structural child</code>. The preview's authorization digest is
+<code>manifest_sha256 = 6a396fd803f185314ed0076fdd6d8cb640a40b3404e1856b1639e79aa38368b4</code>.
+</p>
+
+<h2 id="sib-record-orphan-retirements-apply">Apply, under the preview digest</h2>
+<p id="sib-record-orphan-retirements-apply-body">
+Log <code>04-apply.log</code>, <code>EXIT=0</code>. Outcome <code>applied</code>,
+<code>changed = 183</code>, <code>mutations = 183</code>,
+<code>receipt_rows = 183</code>, <code>persistent_writes = 366</code> (183 mutations +
+183 receipts). The apply ran under the preview's digest
+<code>6a396fd803f185314ed0076fdd6d8cb640a40b3404e1856b1639e79aa38368b4</code>, so the
+authorization matched the closure the apply re-derived at execution time. Every
+admitted row wrote exactly one <code>StandardNameChange</code>; the control wrote none.
+</p>
+
+<h2 id="sib-record-orphan-retirements-readback">Readback</h2>
+<p id="sib-record-orphan-retirements-readback-body">
+Log <code>05-readback.log</code>, <code>EXIT=0</code>. Scoped to this authority's file
+sha <code>cc0c4b075167a653b5fa69d967a22219b418e09cffa2b99094748317a0ca53cb</code> — so the
+read does not touch the 281 names the lifecycle policy's own
+<code>supersede_exhausted_orphan</code> writes carry — the receipt cohort holds <strong>183</strong>
+changes, one per expected name (<code>receipts_per_name_min</code> and
+<code>receipts_per_name_max</code> both 1, <code>names_without_receipt</code> empty), all
+with <code>operation = supersede_exhausted_orphan</code> and
+<code>manifest_sha256 = 6a396fd803f185314ed0076fdd6d8cb640a40b3404e1856b1639e79aa38368b4</code>.
+All <strong>183</strong> names are still <code>name_stage = 'superseded'</code>. The control
+<code>absorbed_power_of_beam_tracing_beam</code> is still <code>accepted</code> with zero
+receipts: the apply left it untouched.
+</p>
+
+<h2 id="sib-record-orphan-retirements-replay">Replay</h2>
+<p id="sib-record-orphan-retirements-replay-body">
+Log <code>06-replay.log</code>, <code>EXIT=0</code>. Re-applying under the same digest
+short-circuits at <code>_replay</code>: outcome <code>already_applied</code>,
+<code>changed = 0</code>, <code>persistent_writes = 0</code>, <code>receipt_rows = 183</code>.
+The stored cohort was re-verified against the authority and matched, so the replay
+admits nothing new and writes nothing.
+</p>
+
+<h2 id="sib-record-orphan-retirements-instrument">Instrument</h2>
+<p id="sib-record-orphan-retirements-instrument-body">
+<code>sib-record-orphan-retirements-run.py</code> is committed beside this fragment, as the reproducible record of the census re-read, the instrument's authority build, and the six logged steps.
+</p>
+</main>
+</body>
+</html>
