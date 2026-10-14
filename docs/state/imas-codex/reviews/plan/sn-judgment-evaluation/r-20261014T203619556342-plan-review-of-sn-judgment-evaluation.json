@@ -32,7 +32,24 @@
   "plan_slug": "sn-judgment-evaluation",
   "plan_version": 36,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-14T20:50:01.326063+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-14T20:50:01.326063+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-judgment-evaluation/r-20261014T203619556342-plan-review-of-sn-judgment-evaluation.json",
   "review_run_id": "r-20261014T203619556342-plan-review-of-sn-judgment-evaluation",
   "reviewed_blob_sha": "7386c33309d9b4c563481de720621a725ee126b6",
   "rubric": "content",
