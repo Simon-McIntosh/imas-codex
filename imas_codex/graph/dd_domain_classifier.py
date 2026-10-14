@@ -133,6 +133,42 @@ CATEGORY_BEAM_MARGIN = 0.15
 #: Maximum domain Choices in flight at once, matching the decisions owner's bound.
 DEFAULT_DECISION_CONCURRENCY = 8
 
+#: The tie-break both tree levels state: several options can have a scope that
+#: fits a path, and the one earliest in the declared precedence wins. The same
+#: order is what the standard-name selector reads, so a name and a path settle
+#: the same overlap the same way.
+PRECEDENCE_TIEBREAK_RULE = (
+    "When more than one option's scope fits the path, choose the one earliest "
+    "in the domain precedence; the options below are listed in that order."
+)
+
+
+def _precedence_rank() -> dict[str, int]:
+    """The domain precedence order, keyed by domain, earliest = 0."""
+    from imas_codex.definitions.physics import load_domain_precedence
+
+    return {domain: rank for rank, domain in enumerate(load_domain_precedence())}
+
+
+def _category_precedence_rank(rank: Mapping[str, int]) -> dict[str, int]:
+    """Each ISN category's place: the rank of its earliest domain.
+
+    A category's place is its highest-ranked domain, so a category holding the
+    top-precedence domain sorts before one whose best domain ranks lower.
+    """
+    from imas_codex.definitions.physics import load_isn_physics_domains
+
+    category_rank: dict[str, int] = {}
+    for value, meta in load_isn_physics_domains().items():
+        category = meta.get("category")
+        domain_rank = rank.get(value)
+        if not category or domain_rank is None:
+            continue
+        current = category_rank.get(category)
+        if current is None or domain_rank < current:
+            category_rank[category] = domain_rank
+    return category_rank
+
 
 def _tree_threshold() -> float:
     """The configured confidence bar below which a path is re-judged by chat.
@@ -767,11 +803,17 @@ async def _classify_batch(
     Returns:
         Tuple of (results list, cost).
     """
+    from imas_codex.definitions.physics import load_domain_precedence
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
 
-    # Render prompt with batch context
-    system_prompt = render_prompt("imas/domain_classifier", {"paths": batch})
+    # Render prompt with batch context. The precedence order is passed so the
+    # prompt lists the domains in the same order the tree's questions use, and
+    # the classifier applies the same tie-break a two-level decision does.
+    system_prompt = render_prompt(
+        "imas/domain_classifier",
+        {"paths": batch, "domain_precedence": load_domain_precedence()},
+    )
     user_prompt = _format_batch_user_prompt(batch)
 
     llm_result = await acall_llm_structured(
@@ -859,12 +901,13 @@ def _format_batch_user_prompt(batch: list[dict[str, Any]]) -> str:
 
 
 def _category_options() -> dict[str, str]:
-    """ISN category → its classification scope, read at call time.
+    """ISN category → its classification scope, in precedence order.
 
     The category set is read from the ISN vocabulary rather than a frozen list
     so a category added upstream reaches the first-level question without a code
     change, and its scope comes from the guidance file keyed by the same value.
-    """
+    Options are ordered by each category's highest-ranked domain, so the
+    earliest option is the one the tie-break rule picks."""
     from imas_codex.definitions.physics import (
         load_domain_guidance,
         load_isn_physics_domains,
@@ -876,7 +919,13 @@ def _category_options() -> dict[str, str]:
         category = meta.get("category")
         if category and category not in options:
             options[category] = (scopes.get(category) or {}).get("scope", "")
-    return options
+    rank = _category_precedence_rank(_precedence_rank())
+    return dict(
+        sorted(
+            options.items(),
+            key=lambda item: (rank.get(item[0], len(rank)), item[0]),
+        )
+    )
 
 
 def _domain_option_text(meta: dict[str, Any], guide: dict[str, Any]) -> str:
@@ -898,7 +947,10 @@ def _domain_option_text(meta: dict[str, Any], guide: dict[str, Any]) -> str:
 
 
 def _domain_options(category: str) -> dict[str, str]:
-    """The domains ISN places in *category*, each with its guidance, at call time."""
+    """The domains ISN places in *category*, in precedence order, at call time.
+
+    Ordered by the declared precedence, so the earliest option is the one the
+    tie-break rule picks when more than one scope fits the path."""
     from imas_codex.definitions.physics import (
         load_domain_guidance,
         load_isn_physics_domains,
@@ -910,7 +962,13 @@ def _domain_options(category: str) -> dict[str, str]:
         if meta.get("category") != category:
             continue
         options[value] = _domain_option_text(meta, guidance.get(value) or {})
-    return options
+    rank = _precedence_rank()
+    return dict(
+        sorted(
+            options.items(),
+            key=lambda item: (rank.get(item[0], len(rank)), item[0]),
+        )
+    )
 
 
 def build_category_question() -> dict[str, Any]:
@@ -925,7 +983,7 @@ def build_category_question() -> dict[str, Any]:
             "instructions": (
                 "Choose the one category of physics or machine function this IMAS "
                 "Data Dictionary path belongs to, judging what the quantity is "
-                "rather than which IDS carries it."
+                "rather than which IDS carries it. " + PRECEDENCE_TIEBREAK_RULE
             ),
             "criteria": _category_options(),
         }
@@ -940,7 +998,8 @@ def build_domain_question(category: str) -> dict[str, Any]:
             "instructions": (
                 f"Choose the one physics domain within the '{category}' category "
                 "this IMAS Data Dictionary path belongs to, judging what the "
-                "quantity measures rather than the IDS it lives under."
+                "quantity measures rather than the IDS it lives under. "
+                + PRECEDENCE_TIEBREAK_RULE
             ),
             "criteria": _domain_options(category),
         }
