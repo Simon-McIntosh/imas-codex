@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/judgment_goldens.py:428 build_name_acceptable",
+    "imas_codex/standard_names/judgment_goldens.py:527 build_description_object",
+    "imas_codex/standard_names/judgment_goldens.py:658 build_near_duplicate",
+    "imas_codex/standard_names/judgment_goldens.py:835 build_documentation_sheet"
+  ],
+  "completed_at": "2026-10-14T21:46:37.115Z",
+  "dispatched_at": "2026-10-14T21:34:24Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_judgment_goldens.py",
+      "line": "146",
+      "severity": "follow-on",
+      "text": "test_golden_without_a_committed_file_splits_as_new builds its expected value by calling assign_group_splits -- the same function _finish itself calls -- so both sides of the comparison at :147 move together and the assertion stays green for any behaviour of assign_group_splits; it guards only the copy_group-to-split wiring of _finish, not the no-committed-file split rule the brief assigns it."
+    },
+    {
+      "file": "imas_codex/standard_names/judgment_goldens.py",
+      "line": "102",
+      "severity": "follow-on",
+      "text": "_committed_group_splits re-reads a committed golden with a raw json.loads(path.read_text()) at imas_codex/standard_names/judgment_goldens.py:102-107 instead of the repository owner load_labelled_fixture (imas_codex/discovery/base/evaluation.py:70), which reads and validates the same labelled-fixture files; the absent-file tolerance and the copy_group-to-split projection are new, but the raw read bypasses the owner's row validation, so a malformed committed split propagates into the rebuild instead of being refused by name and row index."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "four production call sites of _finish were verified, all inside imas_codex/standard_names/judgment_goldens.py (the four builders at :428, :527, :658, :835) reached from main(); no module outside judgment_goldens.py imports it (grep over imas_codex/ and tests/ finds no importer).",
+    "diff": "read commits a950d7465 (code and tests) and 492e0bac4 (fragment) against base 43bde585; the change threads golden_path through _finish, adds _committed_group_splits, names each builder's golden file (including the fourth caller build_documentation_sheet), and replaces the by-construction single-split assertion.",
+    "done_when": "the done_when requires the preservation test to fail with the prior-split read removed and the live rebuild to change no existing row's split in A/B/C/D; logs/negative_control.log shows test_rebuild_keeps_every_existing_groups_split FAILED at EXIT=1 under that mutation and logs/live_check.log records changed_splits 0 for all four with a mutation positive control reporting 17 changed on A.",
+    "goal": "the node's goal is that a golden keeps each copy group's committed split when it grows; imas_codex/standard_names/judgment_goldens.py:256-258 _finish passes _committed_group_splits(golden_path) into assign_group_splits, which keeps every prior group's split and alternates only the groups new to the file.",
+    "manifest": "read; status complete, head 492e0bac4, records the gate at head 42 passed EXIT=0 against base 40 passed EXIT=0 (0 added failures), the red negative control, the live check and its positive control, and one landing line.",
+    "write_paths": "the declared scope is imas_codex/standard_names/judgment_goldens.py, tests/standard_names/test_judgment_goldens.py and docs/evidence/fragments/sn-judgment-evaluation/sje-golden-split-stability.html; git diff --stat 43bde585..492e0bac4 names exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_judgment_goldens.py:133 reddens under the recorded mutation (logs/negative_control.log, EXIT=1) and its left side (before) comes from a separate build, so it fails on the regression it guards.",
+    "evidence": "logs/live_check.log records changed_splits 0 for A, B, C and D and its mutation positive control reports 17 changed on A, while logs/head_gate.log '42 passed' against logs/base_gate.log '40 passed' record 0 added failures.",
+    "fit": "the new NAME_GOLDEN/OBJECT_GOLDEN/NEAR_DUPLICATE_GOLDEN constants at imas_codex/standard_names/judgment_goldens.py:22-24 name what they are and the added docstrings describe the mechanism; no plan, ticket or gate label appears.",
+    "goal_fidelity": "imas_codex/standard_names/judgment_goldens.py:256-258 passes the committed copy_group-to-split map into assign_group_splits and :95-97 preserves every prior group's split while alternating only the fresh ones, exactly as the node goal states.",
+    "reuse": "imas_codex/standard_names/judgment_goldens.py:102 reads the committed golden with a raw json.loads(path.read_text()) rather than the owner load_labelled_fixture (imas_codex/discovery/base/evaluation.py:70) that reads and validates the same labelled fixture files; the projection itself has no prior owner.",
+    "scope_discipline": "git diff --stat 43bde585..492e0bac4 changes only judgment_goldens.py, test_judgment_goldens.py and the fragment html, every path inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a golden keeps each copy group's committed split when it grows; imas_codex/standard_names/judgment_goldens.py:256-258 _finish passes _committed_group_splits(golden_path) into assign_group_splits, which keeps every prior group's split and alternates only the groups new to the file.\nVERDICT done_when: the done_when requires the preservation test to fail with the prior-split read removed and the live rebuild to change no existing row's split in A/B/C/D; logs/negative_control.log shows test_rebuild_keeps_every_existing_groups_split FAILED at EXIT=1 under that mutation and logs/live_check.log records changed_splits 0 for all four with a mutation positive control reporting 17 changed on A.\nVERDICT write_paths: the declared scope is imas_codex/standard_names/judgment_goldens.py, tests/standard_names/test_judgment_goldens.py and docs/evidence/fragments/sn-judgment-evaluation/sje-golden-split-stability.html; git diff --stat 43bde585..492e0bac4 names exactly those three files and nothing else.\nVERDICT manifest: read; status complete, head 492e0bac4, records the gate at head 42 passed EXIT=0 against base 40 passed EXIT=0 (0 added failures), the red negative control, the live check and its positive control, and one landing line.\nVERDICT diff: read commits a950d7465 (code and tests) and 492e0bac4 (fragment) against base 43bde585; the change threads golden_path through _finish, adds _committed_group_splits, names each builder's golden file (including the fourth caller build_documentation_sheet), and replaces the by-construction single-split assertion.\nCALL_SITES: imas_codex/standard_names/judgment_goldens.py:428 build_name_acceptable, imas_codex/standard_names/judgment_goldens.py:527 build_description_object, imas_codex/standard_names/judgment_goldens.py:658 build_near_duplicate, imas_codex/standard_names/judgment_goldens.py:835 build_documentation_sheet\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/judgment_goldens.py:256-258 passes the committed copy_group-to-split map into assign_group_splits and :95-97 preserves every prior group's split while alternating only the fresh ones, exactly as the node goal states.\nSCORE evidence: 20\nJUSTIFICATION evidence: logs/live_check.log records changed_splits 0 for A, B, C and D and its mutation positive control reports 17 changed on A, while logs/head_gate.log '42 passed' against logs/base_gate.log '40 passed' record 0 added failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 43bde585..492e0bac4 changes only judgment_goldens.py, test_judgment_goldens.py and the fragment html, every path inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_judgment_goldens.py:133 reddens under the recorded mutation (logs/negative_control.log, EXIT=1) and its left side (before) comes from a separate build, so it fails on the regression it guards.\nSCORE fit: 19\nJUSTIFICATION fit: the new NAME_GOLDEN/OBJECT_GOLDEN/NEAR_DUPLICATE_GOLDEN constants at imas_codex/standard_names/judgment_goldens.py:22-24 name what they are and the added docstrings describe the mechanism; no plan, ticket or gate label appears.\nSCORE reuse: 14\nJUSTIFICATION reuse: imas_codex/standard_names/judgment_goldens.py:102 reads the committed golden with a raw json.loads(path.read_text()) rather than the owner load_labelled_fixture (imas_codex/discovery/base/evaluation.py:70) that reads and validates the same labelled fixture files; the projection itself has no prior owner.\nFINDING tests/standard_names/test_judgment_goldens.py:146 follow-on: test_golden_without_a_committed_file_splits_as_new builds its expected value by calling assign_group_splits -- the same function _finish itself calls -- so both sides of the comparison at :147 move together and the assertion stays green for any behaviour of assign_group_splits; it guards only the copy_group-to-split wiring of _finish, not the no-committed-file split rule the brief assigns it.\nFINDING imas_codex/standard_names/judgment_goldens.py:102 follow-on: _committed_group_splits re-reads a committed golden with a raw json.loads(path.read_text()) at imas_codex/standard_names/judgment_goldens.py:102-107 instead of the repository owner load_labelled_fixture (imas_codex/discovery/base/evaluation.py:70), which reads and validates the same labelled-fixture files; the absent-file tolerance and the copy_group-to-split projection are new, but the raw read bypasses the owner's row validation, so a malformed committed split propagates into the rebuild instead of being refused by name and row index.\n",
+  "review_run_id": "r-20261014T213411270438-review-of-sje-golden-split-stability-492e0bac4d9a",
+  "reviewed_base_sha": "43bde5857dc571e9ccf5cffc888d682258a3633f",
+  "reviewed_head_sha": "492e0bac4d9ab17d31b2679f8323a5a3fcf4be5c",
+  "reviewed_run_id": "r-20261014T205032922028-sje-golden-split-stability",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "subject": "r-20261014T205032922028-sje-golden-split-stability",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T21:49:06.055754+00:00",
+  "total": 111
+}
