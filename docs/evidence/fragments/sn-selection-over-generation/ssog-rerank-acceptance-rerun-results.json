@@ -572,23 +572,233 @@
         "name": "vertical_coordinate_of_diagnostic_component_centre",
         "reviewer_score": 0.65,
         "accepted": false
+      },
+      {
+        "source_id": "pulse_schedule/density_control/n_e_line_of_sight/second_point/phi",
+        "name": "toroidal_coordinate_of_line_of_sight",
+        "reviewer_score": 0.55,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/gas_injection_accumulated/xenon/value",
+        "name": "accumulated_xenon_count_due_to_gas_injection",
+        "reviewer_score": 0.9,
+        "accepted": true
+      },
+      {
+        "source_id": "lh_antennas/antenna/row/n_pol",
+        "name": "poloidal_launched_wave_index_of_lower_hybrid_antenna_row",
+        "reviewer_score": 0.875,
+        "accepted": true
+      },
+      {
+        "source_id": "pellets/time_slice/pellet/propellant_gas/element/z_n",
+        "name": "atomic_number",
+        "reviewer_score": 0.6375,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/local/pedestal/velocity_phi/carbon/value",
+        "name": "toroidal_carbon_velocity_at_pedestal",
+        "reviewer_score": 0.8375,
+        "accepted": false
+      },
+      {
+        "source_id": "plasma_initiation/global_quantities/ion/element/atoms_n",
+        "name": "ion_atomic_count",
+        "reviewer_score": 0.675,
+        "accepted": false
+      },
+      {
+        "source_id": "magnetics/flux_loop/gm9",
+        "name": "surface_integrated_inverse_of_radius_of_flux_loop",
+        "reviewer_score": 0.725,
+        "accepted": false
+      },
+      {
+        "source_id": "wall/description_2d/vessel/unit/annular/outline_outer/r",
+        "name": null,
+        "reviewer_score": 0.0,
+        "accepted": false
+      },
+      {
+        "source_id": "wall/description_ggd/ggd/e_field/r",
+        "name": "radial_electric_field",
+        "reviewer_score": 0.9125,
+        "accepted": true
       }
     ],
     "cost_usd": 0.0,
     "sources_done": [
       "bolometer/camera/channel/aperture/centre/z",
+      "breeding_blanket/time_slice/tritium_breeding_ratio",
+      "cryostat/description_2d/thermal_shield/unit/element/outline/r",
+      "distribution_sources/vacuum_toroidal_field/b0",
       "distributions/distribution/ggd/orbit_frequency_tor/values",
+      "distributions/distribution/global_quantities/collisions/electrons/power_fast",
+      "ece/channel/beam_tracing/beam/wave_vector/k_phi",
+      "gyrokinetics_local/species_all/shearing_rate_norm",
       "langmuir_probes/embedded/fluence",
       "langmuir_probes/reciprocating/plunge/position_average/r",
+      "lh_antennas/antenna/row/n_pol",
+      "magnetics/flux_loop/gm9",
+      "neutron_diagnostic/detector/geometry/radius",
+      "ntms/time_slice/mode/detailed_evolution/deltaw/value",
+      "ntms/time_slice/mode/detailed_evolution/phase",
+      "pellets/time_slice/pellet/propellant_gas/element/z_n",
+      "plasma_initiation/b_field_lines/townsend_or_closed_grid_positions/z",
+      "plasma_initiation/global_quantities/ion/element/atoms_n",
+      "pulse_schedule/density_control/n_e_line_of_sight/second_point/phi",
+      "pulse_schedule/time",
       "reflectometer_profile/channel/line_of_sight_emission/second_point/r",
-      "summary/heating_current_drive/nbi/tangency_radius/value"
-    ]
+      "summary/gas_injection_accumulated/xenon/value",
+      "summary/heating_current_drive/nbi/tangency_radius/value",
+      "summary/local/pedestal/momentum_phi/value",
+      "summary/local/pedestal/velocity_phi/carbon/value",
+      "summary/pedestal_fits/linear/b_field_pol_pedestal_top_hfs/value",
+      "wall/description_2d/vessel/unit/annular/outline_outer/r",
+      "wall/description_ggd/ggd/e_field/r",
+      "workflow/time"
+    ],
+    "units_completed": 23
   },
   "arm_b": {
-    "records": [],
-    "cost_usd": 0.0
+    "records": [
+      {
+        "source_id": "langmuir_probes/reciprocating/plunge/position_average/r",
+        "name": "radial_coordinate_of_langmuir_probe_position",
+        "reviewer_score": 0.6,
+        "accepted": false
+      },
+      {
+        "source_id": "distributions/distribution/ggd/orbit_frequency_tor/values",
+        "name": "toroidal_fast_particle_angular_frequency",
+        "reviewer_score": 0.5,
+        "accepted": false
+      },
+      {
+        "source_id": "langmuir_probes/embedded/fluence",
+        "name": "normal_incident_ion_fluence_at_langmuir_probe_position",
+        "reviewer_score": 0.8125,
+        "accepted": false
+      },
+      {
+        "source_id": "bolometer/camera/channel/aperture/centre/z",
+        "name": "vertical_coordinate_of_diagnostic_component_centre",
+        "reviewer_score": 0.6375,
+        "accepted": false
+      },
+      {
+        "source_id": "lh_antennas/antenna/row/n_pol",
+        "name": "poloidal_launched_wave_index",
+        "reviewer_score": 0.625,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/gas_injection_accumulated/xenon/value",
+        "name": "accumulated_xenon_source_due_to_gas_injection",
+        "reviewer_score": 0.5625,
+        "accepted": false
+      },
+      {
+        "source_id": "pulse_schedule/density_control/n_e_line_of_sight/second_point/phi",
+        "name": "toroidal_coordinate",
+        "reviewer_score": 0.0,
+        "accepted": false
+      },
+      {
+        "source_id": "pellets/time_slice/pellet/propellant_gas/element/z_n",
+        "name": "atomic_number",
+        "reviewer_score": 0.7375,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/local/pedestal/velocity_phi/carbon/value",
+        "name": "toroidal_carbon_velocity_at_pedestal",
+        "reviewer_score": 0.775,
+        "accepted": false
+      },
+      {
+        "source_id": "plasma_initiation/global_quantities/ion/element/atoms_n",
+        "name": "ion_atomic_count",
+        "reviewer_score": 0.45,
+        "accepted": false
+      },
+      {
+        "source_id": "wall/description_ggd/ggd/e_field/r",
+        "name": "radial_electric_field_at_wall",
+        "reviewer_score": 0.8625,
+        "accepted": true
+      },
+      {
+        "source_id": "wall/description_2d/vessel/unit/annular/outline_outer/r",
+        "name": null,
+        "reviewer_score": 0.0,
+        "accepted": false
+      },
+      {
+        "source_id": "magnetics/flux_loop/gm9",
+        "name": "coefficient_of_flux_loop",
+        "reviewer_score": 0.2875,
+        "accepted": false
+      }
+    ],
+    "cost_usd": 0.001105,
+    "sources_done": [
+      "bolometer/camera/channel/aperture/centre/z",
+      "breeding_blanket/time_slice/tritium_breeding_ratio",
+      "cryostat/description_2d/thermal_shield/unit/element/outline/r",
+      "distribution_sources/vacuum_toroidal_field/b0",
+      "distributions/distribution/ggd/orbit_frequency_tor/values",
+      "distributions/distribution/global_quantities/collisions/electrons/power_fast",
+      "ece/channel/beam_tracing/beam/wave_vector/k_phi",
+      "gyrokinetics_local/species_all/shearing_rate_norm",
+      "langmuir_probes/embedded/fluence",
+      "langmuir_probes/reciprocating/plunge/position_average/r",
+      "lh_antennas/antenna/row/n_pol",
+      "magnetics/flux_loop/gm9",
+      "neutron_diagnostic/detector/geometry/radius",
+      "ntms/time_slice/mode/detailed_evolution/deltaw/value",
+      "ntms/time_slice/mode/detailed_evolution/phase",
+      "pellets/time_slice/pellet/propellant_gas/element/z_n",
+      "plasma_initiation/b_field_lines/townsend_or_closed_grid_positions/z",
+      "plasma_initiation/global_quantities/ion/element/atoms_n",
+      "pulse_schedule/density_control/n_e_line_of_sight/second_point/phi",
+      "pulse_schedule/time",
+      "reflectometer_profile/channel/line_of_sight_emission/second_point/r",
+      "summary/gas_injection_accumulated/xenon/value",
+      "summary/heating_current_drive/nbi/tangency_radius/value",
+      "summary/local/pedestal/momentum_phi/value",
+      "summary/local/pedestal/velocity_phi/carbon/value",
+      "summary/pedestal_fits/linear/b_field_pol_pedestal_top_hfs/value",
+      "wall/description_2d/vessel/unit/annular/outline_outer/r",
+      "wall/description_ggd/ggd/e_field/r",
+      "workflow/time"
+    ],
+    "units_completed": 29
   },
-  "status": "blocked",
+  "status": "ok",
   "resume_note": "wall-clock fence: 4/29 sources recorded in arm A and 0/29 in arm B; rerun the same command to continue from the recorded sources, which the driver skips",
-  "spend_usd": 0.002701
+  "spend_usd": 0.003806,
+  "summary": {
+    "n_items_common": 12,
+    "acceptance_rate_arm_a": 0.25,
+    "acceptance_rate_arm_b": 0.08333333333333333,
+    "paired_difference_b_minus_a": -0.16666666666666669,
+    "accepted_arm_a": 3,
+    "accepted_arm_b": 1,
+    "bootstrap_interval": {
+      "point": -0.33333333333333337,
+      "lower": -0.5,
+      "upper": 0.0,
+      "level": 0.95,
+      "n_resamples": 1000,
+      "seed": 123
+    },
+    "bootstrap_error": ""
+  },
+  "sources_remaining": {
+    "arm_b": 0,
+    "arm_a": 0
+  }
 }
