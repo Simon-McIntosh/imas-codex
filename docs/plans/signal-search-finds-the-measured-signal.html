@@ -18,11 +18,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s12&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="133">
+<meta name="plan-version" content="134">
 <meta name="plan-modified" content="2026-10-14">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47,68c603525,97eac4222,b97d4bdf4,3b1e4a193,1e2dc0252,c0a17c176,72eb206e8,fe031856a,ce47976e0,a54ca1a0e,05d22929b,f746278c4,f13f1e582,dd7e64c92,be370b25b,c5f4bc3bd,bee82d5bd,f244d24d1,d6df6b678,a4f123848,2971756f3,5162f5fec">
 </head>
@@ -493,6 +493,94 @@
 <p>The run is <code>imas-codex discover jt-60sa --only signals --reset-to discovered</code>. The reset clears each signal's description and vector, and enrichment writes them again: the describe seat runs on the local model, and each enrichment batch spends a Jev context rerank on the discovery-relevance seat. The reset clears every signal it names at once, and it clears them again on every invocation that carries it, so a chunk is reset once and its enrichment then continues without the flag. A cleared signal is out of search until it is enriched again, so the run goes chunk by chunk, by scanner or category, and the rest of the facility stays searchable.</p>
 <p>The section is three nodes. The first reprocesses a stratified sample of about 200 signals across categories, including grouped catalogue members, and records Jev spend per signal, signals per minute, and each grouped member's description before and after. It runs after §9 lands, because §9's live checks read the graph. The second reprocesses the rest in chunks, under a cost limit of 1.5 times the sample's projection for the whole facility, in foreground passes of under ten minutes each. Enrichment judges the role of each signal it describes, but a pattern follower that receives its description by propagation is not judged there, so the bulk node then runs the role backfill sweep until the role census is zero. The reprocess start is the instant the sample node's first reset runs, recorded in the fragment, so the sample's own signals stay eligible. The third node moves the fixture's eligibility cutover to that instant. It labels any candidate the wider population brings into an arm's RRF top 60, under §3's rule, and re-checks the labels of grouped members whose descriptions changed in meaning. Then it re-runs the harness and §7's three passes.</p>
 <p>The third node owns this section's done-when. <strong>Done when</strong> every JT-60SA FacilitySignal has <code>enriched_at</code> at or after the reprocess start and none is left at <code>discovered</code>; the embedding census reports no mismatch; the role census reports no described signal without a role; the fixture's cutover is the reprocess start and no candidate in any question's RRF top 60 is unlabelled; and the harness table and §7's three passes are re-recorded, with the switch re-checked against §7's ship rule. The negative control is the count of JT-60SA signals enriched before 21:16:46Z on 2026-10-11, the member-individualisation fix: the sample node records it before its first reset, where it is not zero, and the third node records it at zero, so a run that reset nothing cannot pass. The spend, the wall time and the before-and-after tables are in <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html</code>.</p>
+
+    <h2 id="s13">§13 — Close what the reviews left open</h2>
+<section data-reckon="section" data-id="s13" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>
+      The independent reviews of §7 to §12 left follow-ons open as their sections closed. None changes a search
+      result. Each is a guard that cannot fail, a message that misstates its check, a record that disagrees with its own
+      data, or a gap in what <code>role=</code> can find. Four nodes take them, split by the files they write, so they
+      run in parallel.
+    </p>
+<p>
+<strong>Report rows</strong> write <code>imas_codex/llm/search_formatters.py</code>,
+      <code>tests/llm/test_search_tools.py</code> and <code>tests/llm/test_signal_report_rows.py</code>.
+    </p>
+<ul>
+<li>The single-member branch of <code>format_signals_report</code> lays out the imports, connection and access-call
+      lines that the shared-template loop lays out again, so the two can drift. One helper renders those lines for both,
+      and the report text for every case the existing tests build is unchanged.</li>
+<li>Three assertions compare a value with the literal the test passed in, so they hold whatever the code does: the
+      rerank state's role in <code>test_state_carries_the_stored_role_when_present</code>, the bound role parameter in
+      <code>test_role_search_narrows_the_vector_and_fulltext_streams</code>, and the report's role line in
+      <code>test_row_shows_the_stored_role_when_present</code>. Each gets an expected value the input alone cannot
+      supply, for instance two candidates with different roles, each checked on its own row.</li>
+</ul>
+<p>
+<strong>Golden guards and records</strong> write <code>tests/llm/test_signal_search_goldens.py</code>,
+      <code>tests/llm/test_signal_role_filter_live.py</code>, and three of §12's evidence files.
+    </p>
+<ul>
+<li><code>UnlabelledCandidates</code> always says <em>top 10</em>, including when
+      <code>require_labelled_pool</code> raised it over the pool of 60. The message names the depth that was checked.</li>
+<li><code>test_fixture_label_population_is_pinned</code> compares grade totals, so swapping two labels in opposite
+      directions passes. It also pins a digest of every (question, signal, grade) triple, and its failure message says
+      a changed label is read under §3's rule and the digest updated in the same commit.</li>
+<li>The live role-filter test sums grade-3 hits over all 22 questions, so 21 of them could return none and it
+      would still pass. It asserts a grade-3 hit in each question's filtered top 10. A question with none on the live
+      graph is reported, not exempted. Its negative control is the one declared for it and not run: drop
+      <code>role=measured</code> from the filtered call.</li>
+<li><code>ssfms-reprocess-relabel.html</code> still says <em>re-graded</em> in its harness heading, table caption
+      and arm-order paragraph, though the re-grade was reverted and replaced by a re-read. It says <em>re-read</em>.
+      <code>reprocess.html</code> states the negative control as 1,441 while <code>reprocess-progress.json</code>
+      records 1416. Both carry the figure the sample node's pre-reset census log holds, and cite that log.</li>
+</ul>
+<p>
+<strong>Test doubles and the role measurement</strong> write
+      <code>tests/discovery/test_signal_embedding_sweep.py</code>, <code>tests/graph/test_dd_path_domain_upsert.py</code>,
+      <code>tests/graph/__init__.py</code>, <code>tests/discovery/test_signal_role.py</code>,
+      <code>tests/llm/measure_signal_role.py</code> and a new <code>tests/recording_graph_client.py</code>.
+    </p>
+<ul>
+<li>Two classes named <code>_RecordingClient</code>, in the embedding-sweep and DD-path upsert tests, both capture
+      the statements a graph client receives. One statement-capturing double lives in the shared module and both files
+      use it; the DD-path test keeps its fixture logic on top of it.</li>
+<li>The live embedding census test asserts <code>result["n"] &gt;= 0</code>, which no count can fail. It asserts
+      the population equals an independent count of <code>FacilitySignal</code> nodes read in the same test, and that
+      the count is above zero.</li>
+<li><code>tests/graph/__init__.py</code> says every test there needs a live Neo4j and is excluded by default, but
+      the package now holds no-graph guards that run by default. The docstring states the marker rule as it is.</li>
+<li>In <code>tests/discovery/test_signal_role.py</code>, three assertions compare a result with the fake judge's
+      own return or the module's own constant: the criteria check, the accepted-row check and the role list. Each is
+      rewritten so a wrong role routing or a missing criterion fails it.</li>
+<li><code>tests/llm/measure_signal_role.py</code> reads a fixture fixed in a constant, which left
+      <code>tests/llm/fixtures/signal_role_labels.json</code>, the prototype's 300 hand labels, read by no code. The
+      fixture becomes an argument defaulting to the random-sample labels, so either set can be re-measured.</li>
+</ul>
+<p>
+<strong>Underspecified signals get a role</strong>, writing <code>imas_codex/discovery/signals/parallel.py</code>
+      and <code>tests/discovery/test_signal_role_store.py</code>. The role predicate admits only enriched and checked
+      signals, so the 210 JT-60SA signals marked underspecified carry a description and no role, and every
+      <code>role=</code> search drops them. Enrichment judges and stores a role for an underspecified signal as it does
+      for an enriched one, and the predicate the sweep and census share admits the underspecified status. The store
+      test's graph double answers every candidate read through the test's own predicate, so the test named for the
+      shared predicate cannot fail if sweep and census drift apart; it reads the production predicate instead. Before
+      storing, the node judges the 210 without writing, hand-reads a seeded random 30 of them under §8's six role
+      definitions, and records the agreement. It stores the roles only at 90% agreement or better, a lower bar than
+      §8's 95.7% and 97% because these signals carry less context. The backfill then runs on JT-60SA under a Jev
+      ceiling of USD 0.05.
+    </p>
+<p>
+      Three follow-ons are left out. The role-enrichment record's live sweep covered one role, which the full backfill
+      has since superseded. The re-measurement's figures directory is empty, and its tables carry the result. Its
+      run-local closing note contradicted the landed state, and its promotion record already corrects it.
+    </p>
+<p>
+<strong>Done when</strong> each item above carries its change and a check that fails without it, shown by
+      reverting the change. The tests the four nodes touch pass at the merged head, with the live-graph tests run on a
+      compute node. §4's fusion arm scores the same mean nDCG@10 as at the revision dispatched from, and the JT-60SA
+      role census, now counting underspecified signals, reads zero.
+    </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
