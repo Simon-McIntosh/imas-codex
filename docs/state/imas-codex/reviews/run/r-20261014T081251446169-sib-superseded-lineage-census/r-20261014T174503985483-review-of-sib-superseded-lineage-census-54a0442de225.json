@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-14T17:58:16.036Z",
+  "dispatched_at": "2026-10-14T17:45:19Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html",
+      "line": "110",
+      "severity": "follow-on",
+      "text": "follow-on: the class table header promises three named examples per class, but the spelling_or_rename_supersede row at line 146 lists only two (minimum_of_safety_factor, toroidal_neutral_state_momentum_diffusivity) because the class holds exactly two members, and the table does not state that the class is smaller than three, so a reader cannot distinguish a forced shortfall from an omitted example."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "follow-on: the census derivation depends on instrument.py under the run directory (runs/r-20261014T081251446169-sib-superseded-lineage-census), which lies outside the repository and is not committed, so a later reader cannot re-derive the classification from the repository alone; the fragment cites the instrument and its census.log but neither artefact is durable."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the single commit 54a0442de against its parent 3cc0ebfeb; it adds exactly one new file, the 200-line fragment, and touches no other path.",
+    "done_when": "the done-when asks the fragment to count by class with three named examples each and a remedy, to report population/excluded/census that sum, the excluded split by branch, and one witness per exclusion branch; the fragment reports 2,166 = 1,649 + 517 at line 59, the branch union split (21/1,643/15) at line 74, and both witnesses at line 92, and its gate is instrument.py's census.log (EXIT=0) whose JSON carries the same numbers (population 2166, excluded 1649, census 517, sum_check 2166, branch 21/1643/15, both witnesses in_census 0).",
+    "goal": "the node's goal is a read-only census classifying every successor-less superseded StandardName by the mechanism that superseded it, with a remedy per class; docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html:110 does that, splitting all 517 into six mechanism classes each carrying a remedy.",
+    "manifest": "read the manifest; status complete, and it records the instrument run (census.log EXIT=0, population 2166 / excluded 1649 / census 517) and tests/graph/test_cypher_property_check.py 4 passed EXIT=0 (cypher_check.log), both of which I re-read on disk and found to match.",
+    "write_paths": "the declared write path is docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html; git show --name-only 54a0442de names only that file and the worktree at 54a0442de is clean, so nothing outside the scope was written."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion of any kind, being HTML only, so no test fails if the census regresses, and the re-run cypher-property check at cypher_check.log guards no committed code; the blind-query control the manifest names is manual.",
+    "evidence": "the census figures the done-when names are emitted by instrument.py and re-stated at sib-superseded-lineage-census.html:59-95, with census.log on disk carrying the same JSON numbers under EXIT=0.",
+    "fit": "the fragment follows the sibling idiom of docs/evidence/fragments/sn-integrity-backlog/row-census.html in its meta tags, heading ids and tables, and its node-id carries no plan-stage label.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html:110 classifies all 517 successor-less superseded names into six mechanism classes and states a remedy for each, which is what the plan section asks.",
+    "reuse": "the diff adds no Python definition to the repository so there is nothing to fork a capability; a search over imas_codex/standard_names for a successor-lineage reader found graph_ops.py:12963 resolving terminal successors, a different capability the census does not touch.",
+    "scope_discipline": "git show --name-only 54a0442de names only docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html, inside the declared write path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a read-only census classifying every successor-less superseded StandardName by the mechanism that superseded it, with a remedy per class; docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html:110 does that, splitting all 517 into six mechanism classes each carrying a remedy.\nVERDICT done_when: the done-when asks the fragment to count by class with three named examples each and a remedy, to report population/excluded/census that sum, the excluded split by branch, and one witness per exclusion branch; the fragment reports 2,166 = 1,649 + 517 at line 59, the branch union split (21/1,643/15) at line 74, and both witnesses at line 92, and its gate is instrument.py's census.log (EXIT=0) whose JSON carries the same numbers (population 2166, excluded 1649, census 517, sum_check 2166, branch 21/1643/15, both witnesses in_census 0).\nVERDICT write_paths: the declared write path is docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html; git show --name-only 54a0442de names only that file and the worktree at 54a0442de is clean, so nothing outside the scope was written.\nVERDICT manifest: read the manifest; status complete, and it records the instrument run (census.log EXIT=0, population 2166 / excluded 1649 / census 517) and tests/graph/test_cypher_property_check.py 4 passed EXIT=0 (cypher_check.log), both of which I re-read on disk and found to match.\nVERDICT diff: read the single commit 54a0442de against its parent 3cc0ebfeb; it adds exactly one new file, the 200-line fragment, and touches no other path.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html:110 classifies all 517 successor-less superseded names into six mechanism classes and states a remedy for each, which is what the plan section asks.\nSCORE evidence: 17\nJUSTIFICATION evidence: the census figures the done-when names are emitted by instrument.py and re-stated at sib-superseded-lineage-census.html:59-95, with census.log on disk carrying the same JSON numbers under EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --name-only 54a0442de names only docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html, inside the declared write path.\nSCORE durability: 9\nJUSTIFICATION durability: the diff adds no assertion of any kind, being HTML only, so no test fails if the census regresses, and the re-run cypher-property check at cypher_check.log guards no committed code; the blind-query control the manifest names is manual.\nSCORE fit: 19\nJUSTIFICATION fit: the fragment follows the sibling idiom of docs/evidence/fragments/sn-integrity-backlog/row-census.html in its meta tags, heading ids and tables, and its node-id carries no plan-stage label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no Python definition to the repository so there is nothing to fork a capability; a search over imas_codex/standard_names for a successor-lineage reader found graph_ops.py:12963 resolving terminal successors, a different capability the census does not touch.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html:110 follow-on: the class table header promises three named examples per class, but the spelling_or_rename_supersede row at line 146 lists only two (minimum_of_safety_factor, toroidal_neutral_state_momentum_diffusivity) because the class holds exactly two members, and the table does not state that the class is smaller than three, so a reader cannot distinguish a forced shortfall from an omitted example.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-superseded-lineage-census.html:26 follow-on: the census derivation depends on instrument.py under the run directory (runs/r-20261014T081251446169-sib-superseded-lineage-census), which lies outside the repository and is not committed, so a later reader cannot re-derive the classification from the repository alone; the fragment cites the instrument and its census.log but neither artefact is durable.",
+  "review_run_id": "r-20261014T174503985483-review-of-sib-superseded-lineage-census-54a0442de225",
+  "reviewed_base_sha": "3cc0ebfebcda998a56f7dbb6f0702d23b0290c1d",
+  "reviewed_head_sha": "54a0442de2256ff5db7423affda832baa330d49a",
+  "reviewed_run_id": "r-20261014T081251446169-sib-superseded-lineage-census",
+  "scores": {
+    "durability": 9,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T17:55:23.396203+00:00",
+  "total": 104,
+  "verdict": "SOUND WITH FINDINGS"
+}
