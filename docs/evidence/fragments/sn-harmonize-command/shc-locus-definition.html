@@ -1,0 +1,35 @@
+<section>
+  <h2 id="shc-locus-definition">The locus is defined once, from the registry</h2>
+  <p id="shc-locus-definition-scope">
+    Extends the registry-form insertion and the documentation conformance gate
+    of §6/§11 to a locus's defining sentence. Write paths:
+    <code>imas_codex/standard_names/workers.py</code>,
+    <code>imas_codex/standard_names/docs_gates.py</code>,
+    <code>tests/standard_names/test_docs_locus_definition.py</code>.
+  </p>
+  <p id="shc-locus-definition-changed">
+    Insertion: <code>_documentation_with_registry_form</code> appends
+    <code>locus_definition_sentence</code> for the name's locus, read from the
+    locus registry's <code>definition</code> joined with the conventions
+    entry's equation and symbols through <code>select_conventions</code>. Every
+    locus the registry defines is covered by construction, not only the plasma
+    boundary. Check: <code>_locus_definition_findings</code> reports a sentence
+    that defines the locus phrase in other words as
+    <code>locus_definition</code>, added to the review's barring set so it is
+    refined rather than accepted. The locus's forbidden variant still arrives
+    through <code>forbidden_locus_gloss</code>.
+  </p>
+  <p id="shc-locus-definition-measure">
+    Measure: 31 passed / 0 failed at head against 25 passed / 0 failed at base
+    for the conformance gate, the opening-insertion tests and the new locus
+    tests — 0 added failures. Red arms: removing the insertion fails the
+    identical-sentence test; removing the check fails the refinement test.
+  </p>
+  <p id="shc-locus-definition-caveat">
+    The plasma-boundary locus registry definition reads "The surface used to
+    delimit the plasma domain for the quantity being described" — it names the
+    domain, not the last closed flux surface the equation fixes. It is
+    rendered verbatim; strengthening it is an ISN change for the lead, not a
+    rewrite here.
+  </p>
+</section>

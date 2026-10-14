@@ -517,6 +517,7 @@ class HouseStyleFindingClass(StrEnum):
     FORBIDDEN_EQUATION_VARIANT = "forbidden_equation_variant"
     FORBIDDEN_SYMBOL_SPELLING = "forbidden_symbol_spelling"
     FORBIDDEN_LOCUS_GLOSS = "forbidden_locus_gloss"
+    LOCUS_DEFINITION = "locus_definition"
     TEMPLATE_OPENING = "template_opening"
     NON_CANONICAL_EQUATION = "non_canonical_equation"
 
@@ -595,6 +596,92 @@ def _forbidden_variant_findings(
                     detail=(
                         f"'{match.group(0).strip()}' is a forbidden variant of "
                         f"'{concept.phrase}'"
+                    ),
+                )
+            )
+            break
+    return findings
+
+
+def _locus_registry_tokens() -> frozenset[str]:
+    """The tokens the locus registry defines, so every locus is covered."""
+
+    from imas_standard_names.grammar.vocab_loaders import load_locus_registry
+
+    return frozenset(load_locus_registry().loci)
+
+
+def locus_definition_sentence(concept: Any) -> str:
+    """Render a locus's defining sentence from its registry entry.
+
+    The sentence is the locus registry's ``definition``, followed by the
+    conventions entry's canonical equation and the symbols that equation uses.
+    The registry, not the name, supplies every part, so the sentence reads the
+    same for each name evaluated at the locus whatever its subject.
+    """
+
+    definition = concept.definition.strip()
+    if not definition.endswith("."):
+        definition = f"{definition}."
+    equation = concept.equation.strip()
+    if not equation:
+        return definition
+    clause = f"Where ${equation}$"
+    if concept.symbols:
+        symbols = "; ".join(
+            f"${symbol.symbol}$ is {symbol.meaning}" for symbol in concept.symbols
+        )
+        clause = f"{clause}, {symbols}."
+    else:
+        clause = f"{clause}."
+    return f"{definition} {clause}"
+
+
+def _collapsed(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _locus_definition_findings(
+    concepts: tuple[Any, ...],
+    text: str,
+) -> list[HouseStyleFinding]:
+    """Flag a locus sentence that departs from the locus registry's definition.
+
+    A locus is defined once, in the locus registry. A name evaluated at it may
+    state that definition, but a sentence of its own that defines the locus in
+    other words is a second definition and is refined until it carries the
+    registry's. The locus's forbidden variants arrive through the concept's
+    variants and are not reported again here.
+    """
+
+    locus_tokens = _locus_registry_tokens()
+    sentences = re.split(r"(?<=[.;])\s+", text)
+    findings: list[HouseStyleFinding] = []
+    for concept in concepts:
+        if concept.token not in locus_tokens:
+            continue
+        definition = _collapsed(concept.definition)
+        if not definition:
+            continue
+        phrase = r"[\s-]+".join(
+            re.escape(word) for word in concept.phrase.split() if word
+        )
+        if not phrase:
+            continue
+        defining = re.compile(rf"\b{phrase}\b", re.IGNORECASE)
+        asserts = re.compile(r"\b(is|are)\b", re.IGNORECASE)
+        for sentence in sentences:
+            if not defining.search(sentence) or not asserts.search(sentence):
+                continue
+            if definition in _collapsed(sentence):
+                continue
+            findings.append(
+                HouseStyleFinding(
+                    finding_class=HouseStyleFindingClass.LOCUS_DEFINITION,
+                    registry_entry=f"concept:{concept.token}",
+                    detail=(
+                        f"a sentence defining '{concept.phrase}' does not carry "
+                        f"the locus registry definition '{concept.definition}'"
                     ),
                 )
             )
@@ -853,12 +940,14 @@ def house_style_findings(
     equation form and its forbidden variants, the canonical symbol per quantity,
     and the opening each pattern template requires. The forbidden locus gloss
     arrives through the same concept variants, so a gloss equating two loci is
-    reported without a separate lookup.
+    reported without a separate lookup. A locus is defined once in its registry,
+    so a sentence defining it in other words is reported as well.
     """
 
     prose = f"{description}\n\n{documentation}"
     return [
         *_forbidden_variant_findings(conventions.concepts, prose),
+        *_locus_definition_findings(conventions.concepts, prose),
         *_forbidden_symbol_findings(conventions.notation, prose),
         *_template_opening_findings(conventions.templates, documentation),
         *_non_canonical_equation_findings(conventions.concepts, prose),
