@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: head-default.log (9 passed) and head-graph.log (2 passed) carry zero FAILED/ERROR ids; the base arms base-default.log and base-graph.log ended EXIT=4 with no tests collected, so the baseline failure set is empty and the delta is zero by absence of head failures rather than by a completed base comparison.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-14T11:27:58.381Z",
+  "dispatched_at": "2026-10-14T11:06:16Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "tests",
+      "severity": "blocking",
+      "text": "blocking: the manifest records base \"9 passed, 2 deselected\" for a base arm that never ran \u2014 logs/base-default.log and logs/base-graph.log both end EXIT=4 with \"ERROR: file or directory not found\" and \"no tests ran\" \u2014 so the done_when's \"zero added failures against base\" is unsupported and the record contradicts its own cited log."
+    },
+    {
+      "file": "logs/nc-03-hardcoded-cost.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the cost-mutation log is truncated; it holds only the command line with no pytest session and no EXIT= line, so the recorded evidence for the cost assertion's falsifiability does not exist."
+    },
+    {
+      "file": "logs/nc-04-hardcoded-population.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the population-mutation log omits the required bare EXIT= last line and ends on the pytest summary, so its own exit status is not recorded."
+    },
+    {
+      "file": "manifest.md",
+      "line": "orientation_base_sha",
+      "severity": "follow-on",
+      "text": "follow-on: the recorded orientation_base_sha 7bbf44b5663c71078d6f94f40901867ba98430b8 names no commit, so the revision the node claims to have started from cannot be resolved."
+    },
+    {
+      "file": "tests/discovery/test_signal_embedding_sweep.py",
+      "line": "290",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's first follow-on says the frozen literal \"cannot detect a census that reads nothing\", but logs/nc-04-hardcoded-population.log records this assertion failing (0 == 15111) under exactly that mutation, so the stated rationale is wrong though the literal is brittle."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read both commits against base 7bbf44b56; ad2c87a7b rewrites six test files and c8cb6fd44 adds the evidence fragment and its figure, all inside the declared scope.",
+    "done_when": "the done_when names the shared double, three role mutations and the live census assertion with `pytest -m 'graph or not graph'` green at head and zero added failures against base; the head arms are green (logs/head-default.log \"9 passed\", logs/head-graph.log \"2 passed\") but both base arms ended EXIT=4 with no tests run.",
+    "goal": "the node's goal is to replace the signal tests' unfalsifiable checks with checks a regression fails, sharing one statement-capturing graph double; the diff adds tests/recording_graph_client.py:18 and both signal suites import it.",
+    "manifest": "read; status complete with commits ad2c87a7b and c8cb6fd44, but it records base \"9 passed, 2 deselected\" where its own logs/base-default.log ends EXIT=4 with \"no tests ran\", and its orientation_base_sha 7bbf44b5663c71078d6f94f40901867ba98430b8 resolves to no commit.",
+    "write_paths": "read the manifest's eight declared paths; every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_signal_role.py:50 fails under the criteria mutation (logs/nc-01), :83-84 under the role mutation (logs/nc-02) and :85 under the cost mutation, and tests/discovery/test_signal_embedding_sweep.py:272 fails under the population mutation (logs/nc-04), each against an independent literal.",
+    "evidence": "logs/head-default.log ends \"9 passed, 2 deselected\" and logs/head-graph.log \"2 passed\", but logs/base-default.log and logs/base-graph.log each end EXIT=4 with \"no tests ran\", so the base half of the done_when's gate is unmeasured and the manifest's recorded base result is contradicted by its cited log.",
+    "fit": "tests/recording_graph_client.py:18 follows the surrounding test-double idiom and carries no plan, version or ticket identifier, and every fragment id starts with the node name.",
+    "goal_fidelity": "tests/recording_graph_client.py:31 is the one statement-capturing query double both suites import, and tests/discovery/test_signal_role.py:83-85 compare production output against literals the test supplies rather than against the code's own return.",
+    "reuse": "tests/recording_graph_client.py:18 is the first shared owner of the capability; a tests/ search for classes recording (cypher, params) found the private same-capability doubles tests/graph/test_dd_graph_ops.py:4 and tests/standard_names/test_embedding_preflight_stamping.py:10, both outside the node's scope and neither extended.",
+    "scope_discipline": "the diff 7bbf44b56..c8cb6fd44 lists exactly the eight declared paths (six test files, the evidence fragment and the figure) and no product source."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to replace the signal tests' unfalsifiable checks with checks a regression fails, sharing one statement-capturing graph double; the diff adds tests/recording_graph_client.py:18 and both signal suites import it.\nVERDICT done_when: the done_when names the shared double, three role mutations and the live census assertion with `pytest -m 'graph or not graph'` green at head and zero added failures against base; the head arms are green (logs/head-default.log \"9 passed\", logs/head-graph.log \"2 passed\") but both base arms ended EXIT=4 with no tests run.\nVERDICT write_paths: read the manifest's eight declared paths; every path in the diff is inside them.\nVERDICT manifest: read; status complete with commits ad2c87a7b and c8cb6fd44, but it records base \"9 passed, 2 deselected\" where its own logs/base-default.log ends EXIT=4 with \"no tests ran\", and its orientation_base_sha 7bbf44b5663c71078d6f94f40901867ba98430b8 resolves to no commit.\nVERDICT diff: read both commits against base 7bbf44b56; ad2c87a7b rewrites six test files and c8cb6fd44 adds the evidence fragment and its figure, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/recording_graph_client.py:31 is the one statement-capturing query double both suites import, and tests/discovery/test_signal_role.py:83-85 compare production output against literals the test supplies rather than against the code's own return.\nSCORE evidence: 11\nJUSTIFICATION evidence: logs/head-default.log ends \"9 passed, 2 deselected\" and logs/head-graph.log \"2 passed\", but logs/base-default.log and logs/base-graph.log each end EXIT=4 with \"no tests ran\", so the base half of the done_when's gate is unmeasured and the manifest's recorded base result is contradicted by its cited log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff 7bbf44b56..c8cb6fd44 lists exactly the eight declared paths (six test files, the evidence fragment and the figure) and no product source.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_signal_role.py:50 fails under the criteria mutation (logs/nc-01), :83-84 under the role mutation (logs/nc-02) and :85 under the cost mutation, and tests/discovery/test_signal_embedding_sweep.py:272 fails under the population mutation (logs/nc-04), each against an independent literal.\nSCORE fit: 19\nJUSTIFICATION fit: tests/recording_graph_client.py:18 follows the surrounding test-double idiom and carries no plan, version or ticket identifier, and every fragment id starts with the node name.\nSCORE reuse: 17\nJUSTIFICATION reuse: tests/recording_graph_client.py:18 is the first shared owner of the capability; a tests/ search for classes recording (cypher, params) found the private same-capability doubles tests/graph/test_dd_graph_ops.py:4 and tests/standard_names/test_embedding_preflight_stamping.py:10, both outside the node's scope and neither extended.\nFINDING manifest.md:tests blocking: the manifest records base \"9 passed, 2 deselected\" for a base arm that never ran \u2014 logs/base-default.log and logs/base-graph.log both end EXIT=4 with \"ERROR: file or directory not found\" and \"no tests ran\" \u2014 so the done_when's \"zero added failures against base\" is unsupported and the record contradicts its own cited log.\nFINDING logs/nc-03-hardcoded-cost.log:1 follow-on: the cost-mutation log is truncated; it holds only the command line with no pytest session and no EXIT= line, so the recorded evidence for the cost assertion's falsifiability does not exist.\nFINDING logs/nc-04-hardcoded-population.log:1 follow-on: the population-mutation log omits the required bare EXIT= last line and ends on the pytest summary, so its own exit status is not recorded.\nFINDING manifest.md:orientation_base_sha follow-on: the recorded orientation_base_sha 7bbf44b5663c71078d6f94f40901867ba98430b8 names no commit, so the revision the node claims to have started from cannot be resolved.\nFINDING tests/discovery/test_signal_embedding_sweep.py:290 follow-on: the manifest's first follow-on says the frozen literal \"cannot detect a census that reads nothing\", but logs/nc-04-hardcoded-population.log records this assertion failing (0 == 15111) under exactly that mutation, so the stated rationale is wrong though the literal is brittle.",
+  "review_run_id": "r-20261014T110602021656-review-of-ssfms-cleanup-test-doubles-c8cb6fd4454c",
+  "reviewed_base_sha": "7bbf44b5663c71078d6f94f84901867ba98430b8",
+  "reviewed_head_sha": "c8cb6fd4454c99596759179848b81d2f0f2753a6",
+  "reviewed_run_id": "r-20261014T101629002079-ssfms-cleanup-test-doubles",
+  "reviewer": "review-of-ssfms-cleanup-test-doubles-c8cb6fd4454c",
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 11,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T11:24:23.392033+00:00",
+  "total": 104
+}
