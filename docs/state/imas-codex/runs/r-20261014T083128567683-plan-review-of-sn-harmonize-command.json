@@ -1,0 +1,360 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 6,
+  "attempt_kind": "redispatch",
+  "backend": "clive",
+  "base_sha": "3cc0ebfebcda998a56f7dbb6f0702d23b0290c1d",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T083128567683-plan-review-of-sn-harmonize-command/brief.md",
+    "sha256": "2deb4c887aa86ff2ec1148f992cdfcd74f1f8ecd4e2d115ec8a7e69764447462"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3034843,
+      "input_tokens_cumulative": 3034843,
+      "output_tokens": 25689,
+      "output_tokens_cumulative": 25689,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-14T08:45:34.716Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-14T08:31:46Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "",
+    "reason": "brief-names-no-plan",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-14T08:51:28.583932+00:00",
+    "horizon_seconds": 1200,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-14T08:31:28Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 8,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 8,
+    "mean_context": 130000,
+    "observed_at": "2026-10-14T08:31:20Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 8,
+      "aggregate_tokens_per_second": 417.244,
+      "detail": "",
+      "mean_tokens_per_second": 83.449,
+      "observed_at": "2026-10-14T08:31:20Z",
+      "runs": 5.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-14T08:45:34.716Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 6,
+    "kind": "redispatch",
+    "previous_run_id": "r-20261013T134720020149-plan-review-of-sn-harmonize-command",
+    "root_run_id": "r-20261012T051704622392-plan-review-of-sn-harmonize-command"
+  },
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T075513540411-plan-review-of-sn-harmonize-command/manifest.md",
+  "member": "disposable-r-20261014T083128567683-plan-review-of-sn-harmonize-command",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "a plan review writes its report to the review store, not the repository",
+  "node": "plan-review-of-sn-harmonize-command",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-harmonize-command/r-20261014T075512074464-plan-review-of-sn-harmonize-command/brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T083128567683-plan-review-of-sn-harmonize-command/brief.md",
+    "brief_sha256": "2deb4c887aa86ff2ec1148f992cdfcd74f1f8ecd4e2d115ec8a7e69764447462",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-harmonize-command/r-20261014T075512074464-plan-review-of-sn-harmonize-command/report.md contains RUBRIC lines for every checklist item and FINDING lines carrying WOULD_CHANGE_THE_PLAN and REASON for each finding; the manifest names the delivered report",
+    "estimated_hours": null,
+    "goal": "review the content of plan sn-harmonize-command",
+    "id": "plan-review-of-sn-harmonize-command",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-14T08:31:28Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 8,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 8,
+      "mean_context": 130000,
+      "observed_at": "2026-10-14T08:31:20Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 8,
+        "aggregate_tokens_per_second": 417.244,
+        "detail": "",
+        "mean_tokens_per_second": 83.449,
+        "observed_at": "2026-10-14T08:31:20Z",
+        "runs": 5.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T075513540411-plan-review-of-sn-harmonize-command/manifest.md",
+    "negative_control": "",
+    "plan": "",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "20m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-harmonize-command/r-20261014T075512074464-plan-review-of-sn-harmonize-command"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2196381.0,
+  "outcome": "content review of sn-harmonize-command sections 8-11: four findings, all acted on (section 12 split out)",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "plan-review-of-sn-harmonize-command",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-14T08:31:37.920684+00:00",
+    "score": 0.475,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:state-render",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.446,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 318.374,
+      "context-estimate": 16.778,
+      "records": 344.619,
+      "verdict-inputs": 139.453
+    }
+  },
+  "plan": null,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "3cc0ebfebcda998a56f7dbb6f0702d23b0290c1d",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261014T083128567683-plan-review-of-sn-harmonize-command",
+    "scores": {},
+    "status": "ready",
+    "total": null
+  },
+  "review_tier": "none",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261014T083128567683-plan-review-of-sn-harmonize-command",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "1e28e99d-97e5-494a-8ea3-05ca05d27d5e",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 3034843,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 817.063,
+    "generated_tokens": 25689,
+    "generation_seconds": 742.234,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 61.3,
+    "machine_seconds": 74.829,
+    "peak_input_tokens": 141026,
+    "tokens_per_second": 34.61,
+    "wall_tokens_per_second": 31.44
+  },
+  "time_budget": "20m",
+  "tool_steps": 26.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 828,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 6,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-14T08:45:41Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-14T08:31:53Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261014T083128567683-plan-review-of-sn-harmonize-command",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6665,
+    "worker_pid": 1352540
+  },
+  "worker_seconds": 784,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
