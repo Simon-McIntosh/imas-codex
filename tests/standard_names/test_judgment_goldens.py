@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter, defaultdict
 from copy import deepcopy
@@ -16,6 +17,7 @@ from imas_codex.standard_names.judgment_goldens import (
     _west_verdicts,
     assign_group_splits,
     build_documentation_sheet,
+    build_near_duplicate,
     write_sheet,
 )
 
@@ -167,13 +169,92 @@ def test_recorded_name_verdicts() -> None:
     )
 
 
-def test_distinct_side_only() -> None:
+class _EmptyGraph:
+    """Answers every read with no rows, so only recorded verdicts build rows."""
+
+    def query(self, cypher: str, **params):
+        return []
+
+
+RULED_SOURCE = "coordinator_synonym_ruling"
+CHARGE_NUMBER_NAMES = {
+    "average_charge_number",
+    "ion_charge",
+    "ion_charge_state_average_charge_number",
+}
+
+
+def _ruled(rows: list[dict]) -> list[dict]:
+    return [row for row in rows if row["label_source"] == RULED_SOURCE]
+
+
+def _rulings() -> list[dict]:
+    path = OUTPUT / "golden-synonym-rulings.json"
+    return json.loads(path.read_text())["rows"]
+
+
+def test_path_pair_rows_stay_on_the_distinct_side() -> None:
     rows = load_labelled_fixture(OUTPUT / "golden-near-duplicate.json")
-    assert all(row["label"] == 0 for row in rows)
+    others = [row for row in rows if row["label_source"] != RULED_SOURCE]
+    assert others
+    assert all(row["label"] == 0 for row in others)
     assert {row["label_source"] for row in rows} == {
         "west_shared_identity",
         "isn_duplicate_path_review",
+        RULED_SOURCE,
     }
+
+
+@pytest.mark.parametrize("origin", ("built", "committed"))
+def test_near_duplicate_carries_every_ruled_pair(origin: str) -> None:
+    if origin == "built":
+        rows = build_near_duplicate(_EmptyGraph())
+    else:
+        rows = load_labelled_fixture(OUTPUT / "golden-near-duplicate.json")
+    ruled = _ruled(rows)
+    assert len(ruled) == 47
+    assert sum(row["label"] == 1 for row in ruled) == 7
+    by_unit = {row["unit"]: row for row in ruled}
+    for ruling in _rulings():
+        left, right = sorted((ruling["left"], ruling["right"]))
+        row = by_unit[f"{left}::{right}"]
+        assert row["label"] == ruling["label"]
+        assert row["canonical_unit"] == row["unit"]
+        assert row["source_evidence"] == (
+            f"golden-synonym-rulings.json:pair={ruling['pair']}"
+        )
+
+
+@pytest.mark.parametrize("origin", ("built", "committed"))
+def test_ruled_names_sit_in_exactly_one_copy_group(origin: str) -> None:
+    if origin == "built":
+        rows = build_near_duplicate(_EmptyGraph())
+    else:
+        rows = load_labelled_fixture(OUTPUT / "golden-near-duplicate.json")
+    groups: dict[str, set[str]] = defaultdict(set)
+    splits: dict[str, set[str]] = defaultdict(set)
+    for row in _ruled(rows):
+        for name in row["unit"].split("::"):
+            groups[name].add(row["copy_group"])
+        splits[row["copy_group"]].add(row["split"])
+    assert groups
+    assert all(len(found) == 1 for found in groups.values())
+    assert all(len(found) == 1 for found in splits.values())
+    assert len(set.union(*groups.values())) < len(_ruled(rows))
+    charge = {next(iter(groups[name])) for name in CHARGE_NUMBER_NAMES}
+    assert charge == {"average_charge_number"}
+
+
+def test_built_ruled_rows_match_the_committed_fixture() -> None:
+    built = {row["unit"]: row for row in _ruled(build_near_duplicate(_EmptyGraph()))}
+    stored = {
+        row["unit"]: row
+        for row in _ruled(load_labelled_fixture(OUTPUT / "golden-near-duplicate.json"))
+    }
+    assert built.keys() == stored.keys()
+    for unit, row in built.items():
+        for key in ("label", "copy_group", "label_source", "source_evidence"):
+            assert row[key] == stored[unit][key], (unit, key)
 
 
 # --- documentation-acceptability sheet -------------------------------------

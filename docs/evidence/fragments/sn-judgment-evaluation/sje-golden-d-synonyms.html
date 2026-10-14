@@ -1,0 +1,33 @@
+<section id="sje-golden-d-synonyms">
+<h3 id="sje-golden-d-synonyms-title">Golden D carries the 47 ruled synonym pairs</h3>
+<p id="sje-golden-d-synonyms-summary"><code>golden-near-duplicate.json</code> now holds 62 rows: the 15 path-pair rows it held before plus
+one row per ruled name pair from <code>golden-synonym-rulings.json</code> (47 pairs, 7 synonyms at label 1,
+40 distinct at label 0). The file was rebuilt alone with <code>build_near_duplicate</code> on a live graph;
+the other goldens and the documentation sheet were not rewritten.</p>
+<table id="sje-golden-d-synonyms-counts">
+<thead><tr><th>label_source</th><th>label</th><th>calibration</th><th>validation</th><th>rows</th></tr></thead>
+<tbody>
+<tr><td>coordinator_synonym_ruling</td><td>1</td><td>3</td><td>4</td><td>7</td></tr>
+<tr><td>coordinator_synonym_ruling</td><td>0</td><td>19</td><td>21</td><td>40</td></tr>
+<tr><td>west_shared_identity</td><td>0</td><td>8</td><td>6</td><td>14</td></tr>
+<tr><td>isn_duplicate_path_review</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+<tr><td><b>total</b></td><td>1: 7 &middot; 0: 55</td><td>30</td><td>32</td><td>62</td></tr>
+</tbody>
+</table>
+<p id="sje-golden-d-synonyms-groups">Copy groups: 52 in the file, 41 over the ruled pairs and 11 over the older path-pair rows,
+with no group shared between the two sets. Each ruled name sits in exactly one group (86 names), and no group
+spans both splits. Groups are the connected components of the ruled name graph, named by the alphabetically first
+member. Four groups hold more than one pair: <code>average_charge_number</code> (3 pairs: the three charge-number
+names), <code>neutral_species_particle_diffusivity</code> (3), <code>neutral_internal_state_pressure</code> (2) and
+<code>tungsten_density_at_separatrix</code> (2).</p>
+<p id="sje-golden-d-synonyms-resplit">Adding the groups re-ran the existing group split over the whole file, so 10 of
+the 15 older rows changed split (labels, groups and evidence are unchanged). The older rows are now 8 calibration
+and 7 validation against 10 and 5 before.</p>
+<p id="sje-golden-d-synonyms-tests">Tests: <code>test_near_duplicate_carries_every_ruled_pair</code>,
+<code>test_ruled_names_sit_in_exactly_one_copy_group</code> (both on the built rows and on the committed file),
+<code>test_built_ruled_rows_match_the_committed_fixture</code> and
+<code>test_path_pair_rows_stay_on_the_distinct_side</code> (replaces the all-label-0 assertion, which no longer
+describes the file). With the ruled rows dropped from the builder 3 fail; with the component join removed 2 fail.
+The two named test files give 40 passed against 35 at base.</p>
+<p id="sje-golden-d-synonyms-notes">Rulings flagged for the coordinator: none.</p>
+</section>
