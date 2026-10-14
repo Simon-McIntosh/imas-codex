@@ -612,7 +612,7 @@ def report_family_rows(
                 "invariant": list(family["invariant"]),
                 "members": sorted(m.get("id") for m in members if m.get("id")),
                 "n": len(members),
-                "anchor": select_anchor(None, None, None, members),
+                "anchor": resolve_family_anchor(members),
                 "drift": drift(members),
                 "lint": dict(sorted(lint.items())),
                 "domain_lint": dict(sorted(domain_lint.items())),
@@ -861,6 +861,41 @@ def pinned_family_anchor(members: list[dict[str, Any]]) -> str | None:
     return next(iter(recorded)) if len(recorded) == 1 else None
 
 
+def resolve_family_anchor(
+    members: list[dict[str, Any]],
+    *,
+    member_ids: list[str] | None = None,
+    signature: str | None = None,
+) -> str | None:
+    """The anchor an apply would use for this family.
+
+    The single definition of what anchor a family shows: ``select_anchor``'s
+    live ranking, replaced by the family's recorded pin unless the family is
+    already stamped harmonized. The stamp releases the pin, so a converged
+    family reranks and an interrupted one keeps the anchor its run recorded.
+    Every reader that displays a family's anchor — the report, the dry run,
+    the family view — resolves it here, so none of them can name a member the
+    apply would not use. ``member_ids`` and ``signature`` are accepted so a
+    caller that already derived them from the same members is not made to
+    recompute.
+    """
+    anchor = select_anchor(None, None, None, members)
+    if member_ids is None:
+        member_ids = sorted(m.get("id") for m in members if m.get("id"))
+    if signature is None:
+        signature = group_signature(members)
+    stored = {
+        m.get("harmonized_group_signature")
+        for m in members
+        if m.get("harmonized_group_signature") is not None
+    }
+    if not (member_ids and stored == {signature}):
+        pinned = pinned_family_anchor(members)
+        if pinned is not None and pinned in member_ids:
+            anchor = pinned
+    return anchor
+
+
 def _record_family_anchor(gc: Any, member_ids: list[str], anchor_id: str) -> None:
     """Stamp the chosen anchor on the family's members as an apply starts."""
     gc.query(
@@ -914,15 +949,13 @@ def plan_family_applies(
             for m in members
             if m.get("harmonized_group_signature") is not None
         }
-        anchor = select_anchor(None, None, None, members)
         # A family not yet stamped harmonized reuses the anchor its run
         # recorded, even after that member's reset left it mid-pipeline and
         # another accepted member outscores it. A stamped family selects
         # normally; only the stamp releases the pin.
-        if not (member_ids and stored == {signature}):
-            pinned = pinned_family_anchor(members)
-            if pinned is not None and pinned in member_ids:
-                anchor = pinned
+        anchor = resolve_family_anchor(
+            members, member_ids=member_ids, signature=signature
+        )
         if member_ids and stored == {signature}:
             decision, batches = "harmonized", []
         elif anchor is None:

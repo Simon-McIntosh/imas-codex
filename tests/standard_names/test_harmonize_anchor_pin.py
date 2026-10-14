@@ -173,6 +173,38 @@ def test_forced_apply_reuses_the_recorded_anchor(monkeypatch: Any) -> None:
     assert outcome["applied"][0]["anchor"] == _ANCHOR
 
 
+def test_the_report_names_the_anchor_the_apply_would_use(
+    monkeypatch: Any,
+) -> None:
+    """The report shows the pinned anchor the planning would apply.
+
+    A family held mid-run carries a recorded anchor whose member is
+    mid-pipeline (null score) while a sibling is accepted and outscores it.
+    The report is read through the same pin the planning reads, so the anchor
+    it prints is the one an apply would start on rather than the live ranking.
+    """
+    from imas_codex.standard_names import graph_ops
+
+    harmonize = _harmonize()
+    nodes = [
+        _node(_ANCHOR, "drafted", None, anchor=_ANCHOR),
+        _node(_OUTSCORER, "accepted", 0.9, anchor=_ANCHOR),
+    ]
+    _family_read(monkeypatch, nodes)
+    monkeypatch.setattr(
+        graph_ops,
+        "get_existing_standard_names",
+        lambda gc=None: {n["id"] for n in nodes},
+    )
+
+    plan = harmonize.plan_family_applies(_Graph(nodes), min_size=1)
+    report = harmonize.report_family_rows()
+
+    assert plan[0]["anchor"] == _ANCHOR, "the dry run keeps the pinned anchor"
+    assert report[0]["anchor"] == _ANCHOR, "the report names the pinned anchor"
+    assert report[0]["anchor"] == plan[0]["anchor"]
+
+
 def test_report_without_a_client_counts_an_out_of_scope_link_live(
     monkeypatch: Any,
 ) -> None:

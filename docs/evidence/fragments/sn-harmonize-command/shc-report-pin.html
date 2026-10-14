@@ -1,0 +1,95 @@
+<section id="shc-report-pin">
+  <h2 id="shc-report-pin-heading">The report names the anchor the apply will use</h2>
+  <p id="shc-report-pin-summary">
+    A family held mid-run carries a recorded anchor
+    (<code>harmonized_anchor</code>) that the dry run and the apply honour,
+    but <code>sn harmonize --report</code> re-selected each family's anchor
+    through <code>select_anchor</code> alone. When the pinned member sits
+    mid-pipeline with a null documentation score, a live ranking picks a
+    different, higher-scoring member, so the report named an anchor the apply
+    would not use. The anchor a family displays is now resolved in one place —
+    <code>resolve_family_anchor(members, *, member_ids=None, signature=None)</code>
+    in <code>imas_codex/standard_names/harmonize.py</code> — which reads the
+    recorded pin through <code>pinned_family_anchor</code> and falls back to
+    <code>select_anchor</code> only when no pin is recorded, or the family is
+    already stamped harmonized (the stamp releases the pin). The report and
+    the dry run call it, so what the operator sees is what the apply does.
+  </p>
+
+  <h3 id="shc-report-pin-sites">Every <code>select_anchor</code> call site and its decision</h3>
+  <table id="shc-report-pin-site-table">
+    <thead>
+      <tr><th>Site</th><th>Surface</th><th>Decision</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>report_family_rows</code> (<code>harmonize.py</code>, the row build)</td>
+        <td><code>sn harmonize --report</code> — prints each family's
+          <code>anchor</code>.</td>
+        <td><strong>Changed.</strong> The anchor is now
+          <code>resolve_family_anchor(members)</code>. This is the operator
+          surface whose anchor disagreed with the apply; it reads the pin the
+          same way the planning does.</td>
+      </tr>
+      <tr>
+        <td><code>plan_family_applies</code> (<code>harmonize.py</code>)</td>
+        <td>The dry run — prints each family's planned
+          <code>anchor</code>.</td>
+        <td><strong>Refactored, no behaviour change.</strong> It already read
+          the pin inline; the inline <code>select_anchor</code>-then-pin logic
+          is replaced by the shared <code>resolve_family_anchor</code>, so the
+          rule has one definition rather than a copy per reader. The
+          <code>signature</code>/ <code>member_ids</code> it already derived
+          are handed in so the stamp-release test is not recomputed.</td>
+      </tr>
+      <tr>
+        <td><code>assemble_family</code> (<code>harmonize.py</code> §273 parent route, §294 pattern route)</td>
+        <td><code>sn harmonize --family &lt;seed&gt;</code> — prints
+          <code>Anchor: …</code>.</td>
+        <td><strong>Unchanged.</strong> It is operator-facing, but it
+          assembles a different family than the apply's: it prefers the
+          parent-grouped family, while the pin is recorded over pattern
+          families. Its two member reads moreover do not project
+          <code>harmonized_*</code> (the pattern read is in
+          <code>families.py</code>), so the pin is not on its members and
+          cannot be read within this node's write scope. Follow-on below.</td>
+      </tr>
+      <tr>
+        <td><code>build_worklist</code> (<code>harmonize.py</code> §384 parent route, §438 parentless route)</td>
+        <td>The drift worklist (ranked families to re-align).</td>
+        <td><strong>Unchanged.</strong> Its <code>anchor</code> is never
+          displayed: the only CLI consumer takes <code>len(drifted)</code>,
+          and the apply re-derives its own anchor through
+          <code>plan_family_applies</code>. It promises nothing about the
+          apply, so nothing is introduced.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-report-pin-measure">Measure</h3>
+  <p id="shc-report-pin-test">
+    <code>tests/standard_names/test_harmonize_anchor_pin.py::test_the_report_names_the_anchor_the_apply_would_use</code>
+    stubs a family of two members — the pinned member mid-pipeline (null docs
+    score) and an accepted, higher-scoring sibling — and asserts the plan and
+    the report name the same member, the pinned one. With the report's pin
+    read removed (the anchor resolved through <code>select_anchor</code>
+    directly), the test fails
+    (<code>assert 'base_at_axis' == 'base_at_axis'</code> vs the outscorer
+    named instead); the red run is recorded with the run's manifest. The
+    harmonize test files (<code>grep -rl harmonize tests/standard_names/</code>,
+    14 files) ran green at the base revision (134 passed) and at the head
+    (135 passed — the one added test), so the change adds 0 failures.
+  </p>
+
+  <h3 id="shc-report-pin-followon">Follow-on</h3>
+  <p id="shc-report-pin-followon-text">
+    <code>sn harmonize --family &lt;seed&gt;</code> can still show an anchor
+    the apply would not use for a pinned family whose route is the parent
+    branch, because <code>assemble_family</code> reads a family the apply does
+    not. Projecting <code>harmonized_anchor</code> onto its member reads — the
+    pattern read <code>_PATTERN_FAMILY_MEMBERS_QUERY</code> in
+    <code>families.py</code> is the blocker — and routing its anchor through
+    <code>resolve_family_anchor</code> would close it; the change reaches
+    <code>families.py</code>, outside this node's write scope.
+  </p>
+</section>
