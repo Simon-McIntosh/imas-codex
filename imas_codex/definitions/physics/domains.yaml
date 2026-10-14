@@ -534,11 +534,6 @@ domains:
           An infrared camera's target-image coordinate is
           radiation_measurement_diagnostics; the wall surface's own response is
           plasma_wall_interactions.
-      - quantity: an edge-transport model's flux-limiter coordinate
-        neighbour: transport
-        rule: >-
-          An edge-transport model's flux-limiter coordinate is transport; a
-          surface property is plasma_wall_interactions.
       - quantity: the plasma's behaviour in the scrape-off layer
         neighbour: edge_plasma_physics
         rule: >-
@@ -688,21 +683,16 @@ domains:
       - quantity: a neutron detector's aperture geometry
         neighbour: neutronics
         rule: >-
-          A neutron detector's aperture geometry is neutronics;
-          particle_measurement_diagnostics owns a scattering or particle-counting
-          instrument.
+          A neutron detector's aperture geometry is neutronics: the detector
+          also counts particles, but the neutron-detection family determines its
+          domain. Particle_measurement_diagnostics owns scattering or
+          particle-counting instruments without a more specific family.
       - quantity: a barometry gauge's gas pressure
         neighbour: mechanical_measurement_diagnostics
         rule: >-
           A barometry gauge's gas pressure is mechanical_measurement_diagnostics;
           particle_measurement_diagnostics owns a scattering or particle-counting
           instrument.
-      - quantity: a neutron detector's aperture geometry
-        neighbour: neutronics
-        rule: >-
-          A neutron detector's aperture geometry is neutronics and, being a
-          particle counter, also particle_measurement_diagnostics; neutronics owns
-          the neutron-detection family, so the label follows the family.
       - quantity: a spectrum that measures emission rather than scattering
         neighbour: spectroscopy
         rule: >-
@@ -919,14 +909,10 @@ domains:
       - quantity: an electron cyclotron emission channel position
         neighbour: radiation_measurement_diagnostics
         rule: >-
-          An ECE channel position is radiation_measurement_diagnostics; an ECE
-          diagnostic records emitted cyclotron radiation rather than transmitting
-          a probe wave.
-      - quantity: an electron cyclotron emission channel position
-        neighbour: radiation_measurement_diagnostics
-        rule: >-
-          An ECE channel position is radiation_measurement_diagnostics; the flux
-          surface it is expressed against is equilibrium.
+          An ECE channel position is radiation_measurement_diagnostics because
+          ECE records emitted cyclotron radiation rather than transmitting a
+          probe wave. The flux surface used to express that position is
+          equilibrium.
       - quantity: a neutron detector's aperture width
         neighbour: neutronics
         rule: >-
@@ -1008,14 +994,10 @@ domains:
       - quantity: an MSE channel's detector geometry
         neighbour: spectroscopy
         rule: >-
-          An MSE channel's detector geometry is spectroscopy; the motional Stark
-          effect on the emitted light is a spectroscopic measurement, not
-          neutronics or a magnetic sensor.
-      - quantity: an MSE channel's detector geometry
-        neighbour: spectroscopy
-        rule: >-
-          An MSE channel's detector geometry is spectroscopy (mse/*); neutronics
-          owns a neutron detection or activation quantity.
+          An MSE channel's detector geometry is spectroscopy (mse/*): the
+          motional Stark effect on emitted light is a spectroscopic measurement,
+          not neutronics or a magnetic sensor. Neutronics owns neutron detection
+          and activation quantities.
       - quantity: an electromagnetic-radiation measurement
         neighbour: radiation_measurement_diagnostics
         rule: >-
