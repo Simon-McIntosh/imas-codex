@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-14T19:14:36.993Z",
+  "dispatched_at": "2026-10-14T19:05:27Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-rerun.html",
+      "line": "40",
+      "severity": "follow-on",
+      "text": "follow-on: the acceptance table row reports 13 candidates and 3 accepted beside an acceptance rate of 0.2500, but 3/13 = 0.2308; the rate is accepted over the 12 sources present in both arms, and that denominator of 12 appears nowhere in the table, while line 4 defines acceptance as 'counted per composed name' (which would be 13). A reader cannot reproduce the rate from the table's own columns, and the 'acceptance rate' header is mislabeled as candidate-counted."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-rerun-run.py",
+      "line": "270",
+      "severity": "follow-on",
+      "text": "follow-on: a candidate whose composed name matches no reviewer score is recorded as reviewer_score 0.0 and accepted False through the 'if scored else 0.0' fallback, so an ungraded candidate is counted as a rejection rather than excluded. Two such records sit in each arm (name null) and remain in the 12-source paired set; excluding them would give arm A 3/10 and arm B 1/10, a paired difference of -0.2 instead of -0.1667. The conclusion is unchanged, but the reported rate is sensitive to a choice the fragment does not state."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-rerun-run.py",
+      "line": "139",
+      "severity": "follow-on",
+      "text": "follow-on: render_harness_messages re-derives the harness compose prompt's context keys inline, mirroring imas_codex/standard_names/benchmark.py:1637-1662. The build is trusted to keep the control faithful, but if benchmark.py's context assembly drifts the positive control keeps hashing a prompt the harness no longer sends and stays green, so the guard stops guarding without reporting anything."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the landed change is a docs/evidence measurement driver, fragment and results JSON; a grep for the driver name over imas_codex/ and tests/ found no importer, so no runtime module reaches it. I examined the production interfaces the driver consumes instead: imas_codex/standard_names/benchmark.py:_run_model (compose prompt path), imas_codex/standard_names/benchmark.py:_rendered_messages_hash, imas_codex/standard_names/workers.py:_rerank_comparators_for_compose, imas_codex/standard_names/context.py:comparator_rerank_enabled and imas_codex/discovery/base/evaluation.py:bootstrap_interval.",
+    "diff": "read all six commits b1f1dc5ea..a227b7b81 against base 3cc0ebfeb commit by commit; the whole diff is three added files (ssog-rerank-acceptance-rerun-run.py 599 lines, ssog-rerank-acceptance-rerun-results.json 804 lines, ssog-rerank-acceptance-rerun.html 61 lines, 1464 insertions and no deletions), every path inside the declared write paths. The driver is the merged ssog-rerank-held-out-acceptance-run.py with per-unit persistence, a per-batch positive control and an arm-per-pass schedule added.",
+    "done_when": "the brief's done-when asks for the positive control as differing prompt hashes, each arm's acceptance rate over the same sources, the paired difference with bootstrap_interval from imas_codex/discovery/base/evaluation.py and whether it excludes 0, the per-pass logs each with the command first and EXIT= last, and the spend; ssog-rerank-acceptance-rerun-results.json carries the control (29 batches, 24 differ), the per-arm rates, the paired difference and interval, and the spend, and each pass log opens with its command line and closes with a bare EXIT= line.",
+    "goal": "the node's goal is to run the held-out comparator-rerank acceptance measure on the repaired harness; docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-rerun.html:3-47 reports the positive control (24 of 29 batches hash differently between the arms), first-pass acceptance per arm (A 0.2500, B 0.0833 on the 12 sources common to both), the paired difference -0.1667 with a bootstrap interval that includes 0, the per-pass logs and the spend USD 0.003806 of USD 3.00, which is the section's held-out-batch acceptance measurement.",
+    "manifest": "read; it records status complete, the six commit shas b1f1dc5ea..a227b7b81, the three changed paths, the probe wall time 213.6s with EXIT=0, arm A 29/29 and arm B 29/29 sources recorded, spend USD 0.003806 of USD 3.00, and the paired landing line; baseline_suite and after_suite are null, so the record carries no armed suite result to derive added failures from.",
+    "write_paths": "read the brief's three declared write paths and the brief's matching 'Write scope' list; every path in the diff is inside them and no file outside them was touched (git log 3cc0ebfeb..a227b7b81 --name-only lists only the three)."
+  },
+  "justifications": {
+    "durability": "no test exists that fails on this change's regression; the driver self-guards by returning exit 3 and status blocked when no batch hash differs (run.py:517-524), and the control is empirically discriminative because 5 of 29 batches hash equal, but nothing guards the acceptance arithmetic or the harness-prompt mirror.",
+    "evidence": "the gate the node ran is the measure itself and its result is recorded, not claimed: ssog-rerank-acceptance-rerun-results.json carries the control, per-arm rates, the paired difference and bootstrap_interval, and pass-list values reconcile with the committed JSON, though the acceptance-rate denominator is mislabeled (html:40).",
+    "fit": "the module follows the merged driver's idiom and its added names are mechanism-named with no plan, gate or ticket label; measure-specific placeholders like the label-sheet basename at run.py:55 are unchanged from the merged driver, and the fragment cites the driver basename, not a plan label.",
+    "goal_fidelity": "ssog-rerank-acceptance-rerun.html:47 reports the paired difference -0.1667 with the interval -0.5000 to 0.0000 including 0, which is exactly the held-out first-pass acceptance measure \u00a74's done-when asks for, run both ways under the one reviewer seat.",
+    "reuse": "the driver imports the repository's owners rather than forking them (bootstrap_interval, _collect_nearby_name_comparators, _rerank_comparators_for_compose, comparator_rerank_enabled, DEFAULT_MIN_SCORE), but it is a near-copy of the merged ssog-rerank-held-out-acceptance-run.py, as the brief instructed, and its render_harness_messages at run.py:139 duplicates the harness's inline prompt assembly rather than extending an owner.",
+    "scope_discipline": "every path in the diff is one of the three declared write paths (docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-rerun-{run.py,results.json,html}), and the driver addition is the persistence plus the arm-per-pass schedule the repeated-pass requirement forces, not unrelated change."
+  },
+  "node": "review-of-ssog-rerank-acceptance-rerun-a227b7b810cd",
+  "project": "imas-codex",
+  "review_run_id": "r-20261014T190512271762-review-of-ssog-rerank-acceptance-rerun-a227b7b810cd",
+  "reviewed_base_sha": "3cc0ebfebcda998a56f7dbb6f0702d23b0290c1d",
+  "reviewed_head_sha": "a227b7b810cd99b147689bed6f6a17a19dca3abf",
+  "reviewed_run_id": "r-20261014T081219634715-ssog-rerank-acceptance-rerun",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T19:11:21.448068127Z",
+  "total": 97
+}
