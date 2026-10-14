@@ -1,0 +1,399 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/brief.md",
+    "sha256": "ffa5d0700f418b5d50f9797b34668319a67cf836ca2526061bad9aebaaafa5f6"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8841648,
+      "input_tokens_cumulative": 8841648,
+      "output_tokens": 40967,
+      "output_tokens_cumulative": 40967,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 256,
+    "files": 3,
+    "removed": 1
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "f3a57c5e84ae032f266b66b3edd70421f76e933e"
+  ],
+  "completed_at": "2026-10-14T18:26:17.625Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-14T18:05:59Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/test_detachment_attribution_wiring.py tests/standard_names/test_family_harmonization_auto.py tests/standard_names/test_flux_surface_reduction_audit.py tests/standard_names/test_harmonize.py tests/standard_names/test_harmonize_anchor_pin.py tests/standard_names/test_harmonize_apply.py tests/standard_names/test_harmonize_command.py tests/standard_names/test_harmonize_guard.py tests/standard_names/test_orphan_sweep.py tests/standard_names/test_report_graph_links.py tests/standard_names/test_review_neighbours.py tests/standard_names/test_scoped_global_maintenance.py tests/standard_names/test_campaign.py tests/standard_names/test_budget_graph_backed.py tests/standard_names/test_budget_hard_exhausted.py tests/standard_names/test_budget_lease.py tests/standard_names/test_budget_lease_release.py tests/standard_names/test_budget_phase_tracking.py tests/standard_names/test_budget_reservation_invariant.py tests/standard_names/test_harmonize_cost_cap.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/gate-head.log"
+  },
+  "impl_move": {
+    "at_complete": 0.4166666666666667,
+    "at_dispatch": 0.4166666666666667,
+    "plan": "sn-harmonize-command",
+    "reason": "the section close beat is recorded at landing",
+    "verdict": "waived"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-14T19:05:41.793350+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-14T18:05:41Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 27,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 7,
+    "headroom": 4,
+    "mean_context": 75556,
+    "observed_at": "2026-10-14T18:05:16Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 27,
+      "aggregate_tokens_per_second": 457.048,
+      "detail": "",
+      "mean_tokens_per_second": 60.138,
+      "observed_at": "2026-10-14T18:05:16Z",
+      "runs": 7.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-14T18:26:17.625Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/manifest.md",
+  "member": "disposable-r-20261014T180536961497-shc-family-cost-cap",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/standard_names/test_harmonize_cost_cap.py::test_family_cap_is_shared_between_anchor_and_members"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/standard_names/test_harmonize_cost_cap.py::test_family_cap_is_shared_between_anchor_and_members"
+    ],
+    "declaration": "restore the per-batch cap and the family cap test fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/negative-control-per-batch.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/negative-control-per-batch.log",
+    "test_paths": [
+      "tests/standard_names/test_harmonize_cost_cap.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "shc-family-cost-cap",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/shc-family-cost-cap.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/brief.md",
+    "brief_sha256": "ffa5d0700f418b5d50f9797b34668319a67cf836ca2526061bad9aebaaafa5f6",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2197,
+          "cached_input_tokens": 686466,
+          "input_tokens": 688665,
+          "output_tokens": 1126,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 689791,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "a stubbed test shows an anchor spending 60 percent of the cap leaving members exactly the remaining 40 percent and stopping at the cap, failing when the cap returns to per-batch; the harmonize and budget tests add 0 failures against base",
+    "estimated_hours": null,
+    "goal": "Make one cost cap cover a whole family apply, anchor and members together",
+    "id": "shc-family-cost-cap",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-14T18:05:41Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 27,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 7,
+      "headroom": 4,
+      "mean_context": 75556,
+      "observed_at": "2026-10-14T18:05:16Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 27,
+        "aggregate_tokens_per_second": 457.048,
+        "detail": "",
+        "mean_tokens_per_second": 60.138,
+        "observed_at": "2026-10-14T18:05:16Z",
+        "runs": 7.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T180536961497-shc-family-cost-cap/manifest.md",
+    "negative_control": "restore the per-batch cap and the family cap test fails",
+    "plan": "sn-harmonize-command",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§8",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/cli/sn.py",
+      "imas_codex/standard_names/harmonize.py",
+      "imas_codex/standard_names/budget.py",
+      "tests/standard_names/test_harmonize_cost_cap.py",
+      "docs/evidence/fragments/sn-harmonize-command/shc-family-cost-cap.html",
+      "docs/figures/sn-harmonize-command/shc-family-cost-cap"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3612255.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "shc-family-cost-cap",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-14T18:05:51.017139+00:00",
+    "score": 0.6625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:state-render",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5247.452,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 428.403,
+      "context-estimate": 64.088,
+      "records": 313.314,
+      "verdict-inputs": 355.264
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.4166666666666667,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f3a57c5e84ae032f266b66b3edd70421f76e933e",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85",
+    "reviewed_head_sha": "f3a57c5e84ae032f266b66b3edd70421f76e933e",
+    "scores": {
+      "durability": 17,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261014T180536961497-shc-family-cost-cap",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§8",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "536712a2-1a79-461b-84de-bae9793caa6e",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 8841648,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1204.689,
+    "generated_tokens": 40967,
+    "generation_seconds": 691.542,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.0,
+    "machine_seconds": 513.147,
+    "peak_input_tokens": 177245,
+    "tokens_per_second": 59.24,
+    "wall_tokens_per_second": 34.01
+  },
+  "time_budget": "60m",
+  "tool_steps": 63.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1218,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-14T18:26:20Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-14T18:06:06Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261014T180536961497-shc-family-cost-cap",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7213,
+    "worker_pid": 4015705
+  },
+  "worker_seconds": 1190,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
