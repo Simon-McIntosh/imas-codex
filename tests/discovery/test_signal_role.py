@@ -1,11 +1,10 @@
 """The signal-role choice is accepted only from the closed vocabulary.
 
 Three checks pin the role vocabulary and the routing of a role judgement: the
-criteria the question offers, the role each accepted row carries, and the
-response cost summed over the batch. Each is compared against literals this
-test supplies rather than against the fake judge's own return or the module's
-own constant, so a path that hardcodes a criteria set, a role, or a cost fails
-it instead of agreeing with the value it produced.
+criteria the question offers and their descriptions, the role and cost each
+accepted row carries, and the response cost summed over the batch. Each names
+the row, role or cost it reads, so a path that hardcodes a criteria set, a role,
+or a cost fails it rather than agreeing with the value it produced.
 """
 
 from __future__ import annotations
@@ -86,6 +85,10 @@ async def test_judge_accepts_choice_and_reports_response_cost(monkeypatch) -> No
     # here rather than agreeing with whatever the fake judge returned.
     assert accepted_by_id["observed"]["signal_role"] == "measured", accepted
     assert accepted_by_id["target"]["signal_role"] == "reference_or_setpoint", accepted
+    # The per-row cost is pinned too, so a regression that puts the batch total
+    # on one row and zero on the other fails here rather than only in the sum.
+    assert accepted_by_id["observed"]["cost_usd"] == 0.002, accepted
+    assert accepted_by_id["target"]["cost_usd"] == 0.002, accepted
     assert cost == 0.004, cost
     assert failed == []
 

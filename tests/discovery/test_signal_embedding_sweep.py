@@ -282,10 +282,19 @@ def test_facility_scoped_census_runs_against_the_live_graph():
     The facility-scoped state query is the one that could not run before the
     clause separator was restored, so this is the live check that the scope
     reaches the graph: ``census_signal_embeddings(facility='jt-60sa')`` reads
-    the JT-60SA population. Run with ``-m graph``; the default markers exclude
-    it.
+    the JT-60SA population. The population must equal an independent count of
+    JT-60SA ``FacilitySignal`` nodes read in this test, and be above zero: a
+    census that ignored the scope and read every facility, or that read nothing,
+    would otherwise agree with a frozen literal. Run with ``-m graph``; the
+    default markers exclude it.
     """
     result = parallel.census_signal_embeddings(facility="jt-60sa")
+    with GraphClient() as client:
+        independent = client.query(
+            "MATCH (s:FacilitySignal {facility_id: $facility}) RETURN count(s) AS n",
+            facility="jt-60sa",
+        )[0]["n"]
 
-    assert result["n"] == 15111, result
+    assert result["n"] == independent, (result["n"], independent)
+    assert result["n"] > 0, result
     assert result["mismatch"] == result["missing_hash"] + result["differing"], result
