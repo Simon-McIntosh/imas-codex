@@ -554,13 +554,41 @@
         "name": "radial_coordinate_of_langmuir_probe",
         "reviewer_score": 0.7375,
         "accepted": false
+      },
+      {
+        "source_id": "summary/heating_current_drive/nbi/tangency_radius/value",
+        "name": null,
+        "reviewer_score": 0.0,
+        "accepted": false
+      },
+      {
+        "source_id": "langmuir_probes/embedded/fluence",
+        "name": "ion_fluence_at_divertor_target",
+        "reviewer_score": 0.0,
+        "accepted": false
+      },
+      {
+        "source_id": "bolometer/camera/channel/aperture/centre/z",
+        "name": "vertical_coordinate_of_diagnostic_component_centre",
+        "reviewer_score": 0.65,
+        "accepted": false
       }
     ],
-    "cost_usd": 0.0
+    "cost_usd": 0.0,
+    "sources_done": [
+      "bolometer/camera/channel/aperture/centre/z",
+      "distributions/distribution/ggd/orbit_frequency_tor/values",
+      "langmuir_probes/embedded/fluence",
+      "langmuir_probes/reciprocating/plunge/position_average/r",
+      "reflectometer_profile/channel/line_of_sight_emission/second_point/r",
+      "summary/heating_current_drive/nbi/tangency_radius/value"
+    ]
   },
   "arm_b": {
     "records": [],
     "cost_usd": 0.0
   },
-  "status": "in-progress"
+  "status": "blocked",
+  "resume_note": "wall-clock fence: 4/29 sources recorded in arm A and 0/29 in arm B; rerun the same command to continue from the recorded sources, which the driver skips",
+  "spend_usd": 0.002701
 }
