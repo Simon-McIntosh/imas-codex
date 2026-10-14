@@ -23,6 +23,14 @@
     names, and the test fails when a caller drops the underspecified status.
   </p>
 
+  <p id="ssfms-underspecified-roles-tests">
+    <code>test_enrichment_judges_an_underspecified_signal</code> covers the enrich
+    path directly: with the judgement block removed from the worker, the signal it
+    marks underspecified is judged by no one and the test fails —
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T104258578484-ssfms-underspecified-roles/logs/red-arm-enrich-worker.log</code>,
+    the worker's own red arm: 1 failed, exit 1.
+  </p>
+
   <p id="ssfms-underspecified-roles-live">
     Against the live graph, <strong>210 JT-60SA signals
     awaited a role</strong> — described, underspecified, and role-less. Every one was
@@ -48,11 +56,15 @@
   </table>
 
   <p id="ssfms-underspecified-roles-agreement">
-    The roles were judged without storing first, and a seeded random
-    <strong>30</strong> of the 210 were read by this worker
-    from the signal's own name, unit and description under the six role definitions,
-    before the model's judgement was examined. Agreement is
-    <strong>29/30</strong>. One disagreement is listed.
+    A seeded random <strong>30</strong> of the 210 were read by this worker from the
+    signal's own name, unit and description under the six role definitions, and
+    29/30 matched the model's judgement. <strong>That read is not an independent
+    check and does not serve as the agreement gate.</strong> The worker saw each
+    sampled signal's role printed beside it before writing its own label, so the
+    figure measures agreement with an answer that was already in view, not a blind
+    reading. The table below is kept as a record of what was done, not as the gate.
+    The gate is re-measured blind by a separate node, whose record is
+    <code>ssfms-underspecified-roles-blind.html</code>.
   </p>
 
   <table>
@@ -107,7 +119,9 @@
   <p id="ssfms-underspecified-roles-caveat">
     This measures that underspecified signals are judged on this workstation’s
     JT-60SA population, that the judged roles are stored, and that the census agrees
-    with the store afterwards. It does not measure role accuracy population-wide,
-    which the hand-labelled sample pages separately.
+    with the store afterwards. It does not measure role accuracy population-wide:
+    the 29/30 above was read with the model's answer in view, and the blind
+    re-measurement is the separate node’s record,
+    <code>ssfms-underspecified-roles/ssfms-underspecified-roles-blind.html</code>.
   </p>
 </section>
