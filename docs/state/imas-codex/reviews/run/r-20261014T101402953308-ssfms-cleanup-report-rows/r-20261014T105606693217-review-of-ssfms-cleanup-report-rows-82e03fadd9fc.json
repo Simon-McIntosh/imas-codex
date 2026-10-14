@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/llm/search_tools.py:428",
+    "imas_codex/llm/search_tools.py:461"
+  ],
+  "completed_at": "2026-10-14T11:10:41.768Z",
+  "dispatched_at": "2026-10-14T10:56:21Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_search_tools.py",
+      "line": "567",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion compares the code's output param against the same loop variable handed to _rank_signals, so its independence rests entirely on the enclosing two-role loop at tests/llm/test_search_tools.py:554; a future edit that narrowed that loop to a single role would leave the assertion true under the constant-role regression it was added to catch."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read against base 7bbf44b5663c71078d6f94f84901867ba98430b8; the single commit 82e03fadd adds the helper and rewrites three assertions, 117 insertions and 32 deletions across search_formatters.py, the two tests and the fragment, and carries no figure.",
+    "done_when": "the done-when requires a byte-identical rendered report shown by a recorded diff, three tests each failing under a constant-role mutation with one log per mutation, and a green gate at head with zero added failures; reports_base.txt and reports_head.txt are both 6375 bytes with report_diff.txt 0 bytes over the harness's 16 cases (positive control re-checked: 16 CASE markers, 15 'Data access' lines), mutation_1.log/mutation_2.log/mutation_3.log each read 1 failed EXIT=1, and the two-file gate reads 130 passed / 8 skipped EXIT=0 at base and head.",
+    "goal": "the goal is to render a signal report's data-access lines through one helper and harden three role assertions so they cannot pass by echoing their input; imas_codex/llm/search_formatters.py:135 adds _render_data_access_lines and both layout sites call it (single-member row at search_formatters.py:263, shared-template loop at search_formatters.py:299), while the three assertions at tests/llm/test_search_tools.py:553, tests/llm/test_search_tools.py:838 and tests/llm/test_signal_report_rows.py:87 each carry an expected value the input alone cannot supply.",
+    "manifest": "read; status complete, commit 82e03fadd9fcaffbe3416f3e04e2b816cd82846d, changed_paths the four declared paths, tests 'uv run --no-sync pytest tests/llm/test_search_tools.py tests/llm/test_signal_report_rows.py' with 130 passed/8 skipped EXIT=0, negative_control_log logs/mutation_1.log, and baseline_suite/after_suite both 0 failures.",
+    "write_paths": "the manifest declares imas_codex/llm/search_formatters.py, tests/llm/test_search_tools.py, tests/llm/test_signal_report_rows.py and the fragment docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup; the diff's changed paths are exactly those four, so every path is inside the fence."
+  },
+  "justifications": {
+    "durability": "each rewritten assertion reddens under the declared constant-role mutation (tests/llm/test_search_tools.py:838, tests/llm/test_search_tools.py:567, tests/llm/test_signal_report_rows.py:98), because each arm's expected value is a literal or a distinct loop arm, while the helper extraction is guarded only by the coarse existing report-presence tests plus the recorded diff.",
+    "evidence": "the done-when's byte-identical claim is the recorded diff of reports_base.txt and reports_head.txt (0 bytes over 16 cases) and the mutation claim is mutation_1..3.log each 1 failed EXIT=1, both re-checked on disk.",
+    "fit": "the helper at search_formatters.py:135 follows the module's annotated style with a one-paragraph docstring and a keyword-only indent, and introduces no version, plan or ticket identifier.",
+    "goal_fidelity": "search_formatters.py:135 defines _render_data_access_lines and both call sites (search_formatters.py:263 and :299) use it, and the three rewritten tests each assert two distinct expected values.",
+    "reuse": "git grep for connection_template and imports_template finds only graph_ops producers of the template data, no other renderer of a data-access block, so the helper extends the sole renderer rather than forking a capability.",
+    "scope_discipline": "every path in the diff against 7bbf44b5 (search_formatters.py, the two test files, the fragment) is one of the manifest's declared write paths, with no other file touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to render a signal report's data-access lines through one helper and harden three role assertions so they cannot pass by echoing their input; imas_codex/llm/search_formatters.py:135 adds _render_data_access_lines and both layout sites call it (single-member row at search_formatters.py:263, shared-template loop at search_formatters.py:299), while the three assertions at tests/llm/test_search_tools.py:553, tests/llm/test_search_tools.py:838 and tests/llm/test_signal_report_rows.py:87 each carry an expected value the input alone cannot supply.\nVERDICT done_when: the done-when requires a byte-identical rendered report shown by a recorded diff, three tests each failing under a constant-role mutation with one log per mutation, and a green gate at head with zero added failures; reports_base.txt and reports_head.txt are both 6375 bytes with report_diff.txt 0 bytes over the harness's 16 cases (positive control re-checked: 16 CASE markers, 15 'Data access' lines), mutation_1.log/mutation_2.log/mutation_3.log each read 1 failed EXIT=1, and the two-file gate reads 130 passed / 8 skipped EXIT=0 at base and head.\nVERDICT write_paths: the manifest declares imas_codex/llm/search_formatters.py, tests/llm/test_search_tools.py, tests/llm/test_signal_report_rows.py and the fragment docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup; the diff's changed paths are exactly those four, so every path is inside the fence.\nVERDICT manifest: read; status complete, commit 82e03fadd9fcaffbe3416f3e04e2b816cd82846d, changed_paths the four declared paths, tests 'uv run --no-sync pytest tests/llm/test_search_tools.py tests/llm/test_signal_report_rows.py' with 130 passed/8 skipped EXIT=0, negative_control_log logs/mutation_1.log, and baseline_suite/after_suite both 0 failures.\nVERDICT diff: read against base 7bbf44b5663c71078d6f94f84901867ba98430b8; the single commit 82e03fadd adds the helper and rewrites three assertions, 117 insertions and 32 deletions across search_formatters.py, the two tests and the fragment, and carries no figure.\nCALL_SITES: imas_codex/llm/search_tools.py:428, imas_codex/llm/search_tools.py:461\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: search_formatters.py:135 defines _render_data_access_lines and both call sites (search_formatters.py:263 and :299) use it, and the three rewritten tests each assert two distinct expected values.\nSCORE evidence: 20\nJUSTIFICATION evidence: the done-when's byte-identical claim is the recorded diff of reports_base.txt and reports_head.txt (0 bytes over 16 cases) and the mutation claim is mutation_1..3.log each 1 failed EXIT=1, both re-checked on disk.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff against 7bbf44b5 (search_formatters.py, the two test files, the fragment) is one of the manifest's declared write paths, with no other file touched.\nSCORE durability: 18\nJUSTIFICATION durability: each rewritten assertion reddens under the declared constant-role mutation (tests/llm/test_search_tools.py:838, tests/llm/test_search_tools.py:567, tests/llm/test_signal_report_rows.py:98), because each arm's expected value is a literal or a distinct loop arm, while the helper extraction is guarded only by the coarse existing report-presence tests plus the recorded diff.\nSCORE fit: 20\nJUSTIFICATION fit: the helper at search_formatters.py:135 follows the module's annotated style with a one-paragraph docstring and a keyword-only indent, and introduces no version, plan or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: git grep for connection_template and imports_template finds only graph_ops producers of the template data, no other renderer of a data-access block, so the helper extends the sole renderer rather than forking a capability.\nFINDING tests/llm/test_search_tools.py:567 follow-on: the assertion compares the code's output param against the same loop variable handed to _rank_signals, so its independence rests entirely on the enclosing two-role loop at tests/llm/test_search_tools.py:554; a future edit that narrowed that loop to a single role would leave the assertion true under the constant-role regression it was added to catch.",
+  "review_run_id": "r-20261014T105606693217-review-of-ssfms-cleanup-report-rows-82e03fadd9fc",
+  "reviewed_base_sha": "7bbf44b5663c71078d6f94f84901867ba98430b8",
+  "reviewed_head_sha": "82e03fadd9fcaffbe3416f3e04e2b816cd82846d",
+  "reviewed_run_id": "r-20261014T101402953308-ssfms-cleanup-report-rows",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T11:07:04.659693+00:00",
+  "total": 118,
+  "verdict": "SOUND WITH FINDINGS"
+}
