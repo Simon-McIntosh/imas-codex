@@ -1,0 +1,141 @@
+<section id="ssfms-cleanup-test-doubles" data-plan="signal-search-finds-the-measured-signal" data-node="ssfms-cleanup-test-doubles">
+  <h3>ssfms-cleanup-test-doubles — one statement-capturing double, and checks a regression fails</h3>
+
+  <p id="ssfms-cleanup-test-doubles-landing">
+    The signal suites each carried a private recording graph client, so a change
+    to how a statement was captured had to be repeated in every copy, and three
+    checks in the role suite compared production output against the value
+    production had just produced — a fake judge that returned whatever the
+    assertion then read, and a criteria set compared against the module's own
+    constant. Those checks pass whatever the code does. This node lands one
+    shared double and rewrites each check against a value the test supplies, so
+    the check fails when the behaviour it names is replaced by a hardcoded
+    answer.
+  </p>
+
+  <h4 id="ssfms-cleanup-test-doubles-changes">Changes, each with its check</h4>
+
+  <p id="ssfms-cleanup-test-doubles-shared-double">
+    <strong>One statement-capturing double.</strong>
+    <code>tests/recording_graph_client.py</code> holds
+    <code>RecordingGraphClient</code>, which records every
+    <code>(cypher, params)</code> pair it is handed and answers with no rows. It
+    replaces the private <code>_RecordingClient</code> in
+    <code>tests/discovery/test_signal_embedding_sweep.py</code> and the private
+    recording logic in <code>tests/graph/test_dd_path_domain_upsert.py</code>.
+    The DD-path test keeps its domain-assignment model by subclassing the shared
+    double (<code>_DomainCompletingClient</code>) and overriding
+    <code>query</code>, so the capture lives in one place and the fixture's
+    behaviour stays with the test that asserts on it. Check:
+    <code>grep -rn 'class _RecordingClient' tests/discovery tests/graph</code>
+    returns nothing, both suites run the shared class, and the DD-path test's
+    domain assertions still discriminate the two upsert forms.
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-criteria-check">
+    <strong>The offered criteria set is compared against a literal.</strong>
+    <code>tests/discovery/test_signal_role.py</code> now writes the six-role
+    vocabulary once, as <code>SIX_ROLES</code>, and asserts
+    <code>set(criteria) == SIX_ROLES</code> over what
+    <code>signal_role_questions()</code> returns. Previously the check compared
+    the set against <code>ROLE_CRITERIA</code>, the same constant the production
+    function returns, so a criteria set that lost a role still agreed with
+    itself. Check: with <code>signal_role_questions</code> returning a
+    hardcoded two-role set, the criteria assertion fails
+    (<code>nc-01-hardcoded-criteria.log</code>).
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-accepted-row-check">
+    <strong>Each accepted row's role is checked on its own.</strong> The fake
+    judge answers a different role per input (<code>measured</code> for the
+    sensor, <code>reference_or_setpoint</code> for the target), and the test
+    asserts each row's <code>signal_role</code> against the literal it expects
+    for that row. The earlier check read the role out of the accepted rows and
+    compared it to the value the same fake had just returned, so it could not
+    fail. Check: with the judge's decision discarded for a hardcoded
+    <code>measured</code> on every row, the accepted-row assertion fails with
+    <code>assert 'measured' == 'reference_or_setpoint'</code>
+    (<code>nc-02-hardcoded-role.log</code>). This is the node's declared
+    negative control.
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-cost-check">
+    <strong>The batched response cost is compared against a literal.</strong>
+    The fake judge prices each decision at USD 0.002 over a two-row batch, and
+    the test asserts the returned cost equals 0.004 — a value the test supplies
+    rather than one read back out of the module's return. Check: with the
+    returned cost replaced by a hardcoded 0.0, the cost assertion fails with
+    <code>assert 0.0 == 0.004</code> (<code>nc-03-hardcoded-cost.log</code>).
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-census-check">
+    <strong>The live census population is checked against an independent
+    count.</strong> <code>test_census_statement_runs_against_the_live_graph</code>
+    reads the census population from <code>census_signal_embeddings()</code> and
+    compares it to a <code>FacilitySignal</code> count issued in the same test
+    through a second <code>GraphClient</code>, and requires it above zero. The
+    earlier check asserted a frozen literal (still present on the
+    facility-scoped test as <code>result["n"] == 15111</code>, recorded as a
+    follow-on below) and so could pass on a census that read nothing, since both
+    sides of a subtraction that agrees at zero agree. Check: with the census's
+    population hardcoded to 0, the live check fails with
+    <code>assert 0 == 61983</code> (<code>nc-04-hardcoded-population.log</code>).
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-fixture-argument">
+    <strong>The role measurement takes its fixture as an argument.</strong>
+    <code>tests/llm/measure_signal_role.py</code> binds its fixture through
+    <code>--fixture</code>, defaulting to
+    <code>tests/llm/fixtures/signal_role_random_labels.json</code>, and the one
+    loader validates both role fixtures. Check: each fixture loads and reports
+    its row count with no spend —
+    <code>--load-only</code> on the default prints 200 rows and on
+    <code>tests/llm/fixtures/signal_role_labels.json</code> prints 300 rows,
+    both at USD 0.000000, against the USD 0.02 ceiling for this check. A loader
+    that still accepted only the stratified set would refuse one of the two.
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-package-docstring">
+    <strong>The graph test package states what needs a live server.</strong>
+    <code>tests/graph/__init__.py</code>'s docstring now says that only the
+    tests marked <code>graph</code> need a live Neo4j, that the default run
+    excludes that marker, and that the package also holds guards which need no
+    graph and run by default — which is the case the DD-path guard establishes,
+    as it runs under the default markers. Check: the docstring's claim matches
+    observed behaviour, since <code>tests/graph/test_dd_path_domain_upsert.py</code>
+    is collected and passes under <code>-m 'not slow and not graph'</code>.
+  </p>
+
+  <figure id="ssfms-cleanup-test-doubles-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles/falsifiability-matrix.svg" alt="Each rewritten check against the source state it is meant to fail under: the four matched mutation pairs fail, every unmatched pair passes.">
+    <figcaption>Rows are the production values the rewritten checks read; columns
+    are the source state. A filled marker is a check that failed, so the guard
+    fired; an open marker is a check that passed; an x is a pair never run
+    together, because the role mutations were exercised through the default
+    marker set, which excludes the graph-marked census check. Each column's
+    matched mutation sits on the diagonal, and each fails the check written for
+    it. The unmutated run passes all of them.</figcaption>
+  </figure>
+
+  <h4 id="ssfms-cleanup-test-doubles-gate">Gate</h4>
+
+  <p id="ssfms-cleanup-test-doubles-gate-result">
+    Base revision <code>7bbf44b56</code> ran the three touched test files under
+    the default markers at <strong>9 passed, 2 deselected</strong>. At the
+    commit head the same command gives <strong>9 passed, 2 deselected</strong> —
+    identical counts, so no failure was added. The graph-marked sweep tests ran
+    separately under <code>-m graph</code> against the live graph:
+    <strong>2 passed</strong>, which is the run the census assertion above is
+    observed in.
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-mutation-method">
+    Each mutation was applied to a copy of the tree under node-local
+    <code>/tmp</code>, run there with the mutated module confirmed as the one
+    imported, and reverted between runs from a saved pristine source, one log
+    per mutation. The check that a mutation actually took effect is in the
+    driver: the anchor must appear exactly once and the target must differ from
+    the pristine source afterwards. An unmutated run in the same tree passes,
+    which is the positive control for every mutation result.
+  </p>
+</section>
