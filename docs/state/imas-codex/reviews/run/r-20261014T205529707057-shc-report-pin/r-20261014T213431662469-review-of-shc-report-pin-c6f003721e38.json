@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/harmonize.py:615 report_family_rows row build -> resolve_family_anchor",
+    "imas_codex/standard_names/harmonize.py:955 plan_family_applies -> resolve_family_anchor",
+    "imas_codex/cli/sn.py:6268 sn harmonize --report calls report_family_rows",
+    "imas_codex/cli/sn.py:6282 report table prints row['anchor']"
+  ],
+  "completed_at": "2026-10-14T21:46:51.896Z",
+  "dispatched_at": "2026-10-14T21:34:44Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_harmonize_anchor_pin.py",
+      "line": "205",
+      "severity": "follow-on",
+      "text": "the third added assertion, assert report[0]['anchor'] == plan[0]['anchor'] (tests/standard_names/test_harmonize_anchor_pin.py:205), compares two values both produced through the new resolve_family_anchor, so both sides move together and it holds whenever report_family_rows and plan_family_applies call the same helper, whatever that helper returns; it cannot fail on the regression assertions :203-:204 catch, so it adds no durability. Durability rests on :203-:204, which compare each output to the fixed member constant _ANCHOR and are independent of the code under test."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-report-pin.html",
+      "line": "55",
+      "severity": "follow-on",
+      "text": "the unchanged decision for assemble_family rests on 'the pin is not on its members and cannot be read within this node's write scope (the pattern read is in families.py)'; the parent-route member read is the inline Cypher at imas_codex/standard_names/harmonize.py:230, inside the node's write scope, so 'cannot be read within this node's write scope' is imprecise for that route. The unchanged decision still holds, but on the stronger ground the fragment leaves implicit: the pin is recorded over pattern-family member ids, which the apply plans over, and a parent-grouped family is a different member set the apply never operates on."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "four production call sites verified: harmonize.py:615 and :955 (the two readers routing through resolve_family_anchor) and imas_codex/cli/sn.py:6268, :6282 (sn harmonize --report calls report_family_rows and prints row['anchor']); the other four select_anchor sites the brief named (assemble_family :273/:294, build_worklist :384/:438) were read and their non-display / different-family decisions confirmed against sn.py:4158 and sn.py:4163. The brief's '~838' has no select_anchor call in this revision.",
+    "diff": "read commits c2c541788 (adds resolve_family_anchor, routes report_family_rows and plan_family_applies through it, adds the test, adds the fragment) and c6f003721 (docstring scope only) against base c8ab3575; the plan refactor is behaviour-preserving because plan_family_applies passes member_ids and signature exactly as resolve_family_anchor derives them, and the only behaviour change is the report now reading the pin.",
+    "done_when": "the done_when names a stubbed pin-vs-outscorer test that must fail with the report's pin read removed, plus 0 added failures over the harmonize test files and a fragment listing each select_anchor call site; all three are measured (test at tests/standard_names/test_harmonize_anchor_pin.py:176 with the recorded red run, 135 vs 134 at head/base, and the four-row site table).",
+    "goal": "the node goal is that sn harmonize --report names the same anchor the dry run and apply use; harmonize.py:615 now resolves the report row's anchor through the shared resolve_family_anchor, which reads the recorded pin via pinned_family_anchor (:847) and falls back to select_anchor, so the report and plan (:955) agree.",
+    "manifest": "read at runs/r-20261014T205247760713-shc-report-pin/manifest.md; status complete, commits c2c541788+c6f003721, records head gate 135 passed EXIT=0 against base 134 passed EXIT=0 (0 added failures), the red negative control, and one landing line.",
+    "write_paths": "the declared scope is harmonize.py, tests/standard_names/test_harmonize_anchor_pin.py and docs/evidence/fragments/sn-harmonize-command/shc-report-pin.html; git show --stat of c2c541788 and c6f003721 against base c8ab3575 names exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize_anchor_pin.py:203-204 compare the plan and report anchors to the fixed constant _ANCHOR and fail on the regression (negative-control.log shows the report reading the outscorer 'base_at_boundary' instead), so durability rests on those two; the third assertion at :205 is self-referential and adds none, as recorded in the finding.",
+    "evidence": "the gate the worker ran is the harmonize test files, head-gate.log '135 passed' against base-gate.log '134 passed' (0 added failures), and the required red is recorded in negative-control.log as assert 'base_at_boundary' == 'base_at_axis' EXIT=1 under the report's pin read removed.",
+    "fit": "the new function resolve_family_anchor at imas_codex/standard_names/harmonize.py:864 is named by what it does and its docstring states the mechanism, matching the surrounding helpers pinned_family_anchor (:847) and _record_family_anchor (:897); no plan, ticket or gate label appears in the diff.",
+    "goal_fidelity": "imas_codex/standard_names/harmonize.py:615 resolves the report row's anchor through resolve_family_anchor, the same helper plan_family_applies uses at :955, so sn harmonize --report (imas_codex/cli/sn.py:6282) names the pinned anchor the apply would start on.",
+    "reuse": "resolve_family_anchor composes the existing owners select_anchor (imas_codex/standard_names/families.py:479) and pinned_family_anchor (harmonize.py:847) rather than reimplementing them, and replaces the two inline copies (the report and plan readers) with one definition, so the capability has a single owner.",
+    "reuse_note": "context.py:924 calls select_anchor with the parent-route form and claims 'the same rule the harmonize command applies'; it does not read the pin, but it is outside this node's write scope and was not made reachable by the landed change, so it is out of scope for this verdict.",
+    "scope_discipline": "git diff --stat c8ab3575..c6f003721 changes only imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_anchor_pin.py and docs/evidence/fragments/sn-harmonize-command/shc-report-pin.html, every path inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that sn harmonize --report names the anchor the apply would use; imas_codex/standard_names/harmonize.py:615 now resolves the report row's anchor through resolve_family_anchor.\nVERDICT done_when: the done_when names a stubbed pin-vs-outscorer test, 0 added failures over the harmonize test files, and a fragment listing each select_anchor call site; all three are measured.\nVERDICT write_paths: read the manifest's declared paths; git diff --stat c8ab3575..c6f003721 names exactly harmonize.py, test_harmonize_anchor_pin.py and the fragment, all inside them.\nVERDICT manifest: read at runs/r-20261014T205247760713-shc-report-pin/manifest.md; status complete, records head 135 passed against base 134 passed and the red control.\nVERDICT diff: read commits c2c541788 and c6f003721 against base c8ab3575; the plan refactor is behaviour-preserving and the report is the only behaviour change.\nCALL_SITES: imas_codex/standard_names/harmonize.py:615, imas_codex/standard_names/harmonize.py:955, imas_codex/cli/sn.py:6268, imas_codex/cli/sn.py:6282\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/harmonize.py:615 resolves the report anchor through the same resolve_family_anchor the plan uses at :955, so sn harmonize --report (imas_codex/cli/sn.py:6282) names the pinned anchor.\nSCORE evidence: 20\nJUSTIFICATION evidence: head-gate.log '135 passed' against base-gate.log '134 passed' (0 added failures) records the gate, and negative-control.log records the required red assert 'base_at_boundary' == 'base_at_axis' EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat c8ab3575..c6f003721 changes only harmonize.py, test_harmonize_anchor_pin.py and the fragment, every path inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_harmonize_anchor_pin.py:203-204 compare the plan and report anchors to the fixed constant _ANCHOR and fail on the regression; the third assertion at :205 is self-referential and adds none.\nSCORE fit: 19\nJUSTIFICATION fit: resolve_family_anchor at imas_codex/standard_names/harmonize.py:864 is named by mechanism and matches the surrounding helpers pinned_family_anchor (:847) and _record_family_anchor (:897); no plan or ticket label appears.\nSCORE reuse: 20\nJUSTIFICATION reuse: resolve_family_anchor composes the owners select_anchor (imas_codex/standard_names/families.py:479) and pinned_family_anchor (harmonize.py:847) and collapses the two inline copies into one definition.\nFINDING tests/standard_names/test_harmonize_anchor_pin.py:205 follow-on: assert report[0]['anchor'] == plan[0]['anchor'] compares two values both produced through resolve_family_anchor, so it holds whenever both readers call the same helper whatever it returns and adds no durability.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-report-pin.html:55 follow-on: the unchanged decision for assemble_family cites 'cannot be read within this node's write scope (the pattern read is in families.py)', but the parent-route member read is the inline Cypher at imas_codex/standard_names/harmonize.py:230, inside scope; the decision still holds because the apply plans over pattern families the pin is recorded against (imas_codex/standard_names/harmonize.py:955), which the fragment leaves implicit.",
+  "review_run_id": "r-20261014T213431662469-review-of-shc-report-pin-c6f003721e38",
+  "reviewed_base_sha": "c8ab3575c264e481b99d733c92ad69c83534bf20",
+  "reviewed_head_sha": "c6f003721e38f41f8a6a6ba92e28f8b2a8109550",
+  "reviewed_run_id": "r-20261014T205529707057-shc-report-pin",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "subject": "r-20261014T205529707057-shc-report-pin",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T21:49:42.144634+00:00",
+  "total": 115
+}

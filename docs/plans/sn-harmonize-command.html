@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="73">
+<meta name="plan-version" content="74">
 <meta name="plan-modified" content="2026-10-14">
 </head>
 <body>
@@ -434,7 +434,10 @@ crew/reviews/imas-codex/r-20261013T145943345276-shc-pin-anchor.at-4ae756c8581cf6
     <div class="r-comment-body"><p>Review of r-20261014T191013296262-shc-dry-run-estimate at head 1668e89c stored at both granted paths: six dimensions scored (goal_fidelity 19, evidence 19, scope_discipline 19, durability 19, fit 18, reuse 17; total 111), all six checklist items carried, added_failure_count 0 with no added ids, no blocking findings, three follow-on findings (two self-referential assertions in the added test, one row-cap LIMIT applied before per-run grouping).</p></div>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-run-r-20261014T191013296262-shc-dry-run-estimate" data-who="reckon-build" data-when="2026-10-14T20:33:32.421Z">
-    <div class="r-comment-body"><p>The dry run now estimates from measured spend: for the 17-member boundary-density family it read 7 recent documentation runs covering 23 calls at $0.41 per call and printed $7.04, against the $6.26 the second forced apply recorded (anchor $1.026 + members $5.233), inside the 30% band and with the basis printed; with nothing recorded it states the estimate is unavailable rather than guessing, and the retired constant is gone. A member batch whose drain returns None is now charged the runner&#x27;s cost_fn fallback to the family&#x27;s spent total, so an unmeasurable batch can no longer let the family overrun its cap. The CLI&#x27;s harmonize apply injects runner_kwargs={&quot;cost_fn&quot;: aggregate_spend_for_run}, the recorded-spend hook the campaign path already passes, so that fallback measures the run&#x27;s LLMCost spend instead of resolving to the default_cost stub that returns 0.00 — without it the family cap would still leak on the path the CLI runs.</p></div>
+    <div class="r-comment-body"><p>The dry run now estimates from measured spend: for the 17-member boundary-density family it read 7 recent documentation runs covering 23 calls at $0.41 per call and printed $7.04, against the $6.26 the second forced apply recorded (anchor $1.026 + members $5.233), inside the 30% band and with the basis printed; with nothing recorded it states the estimate is unavailable rather than guessing, and the retired constant is gone. A member batch whose drain returns None is now charged the runner's cost_fn fallback to the family's spent total, so an unmeasurable batch can no longer let the family overrun its cap. The CLI's harmonize apply injects runner_kwargs={"cost_fn": aggregate_spend_for_run}, the recorded-spend hook the campaign path already passes, so that fallback measures the run's LLMCost spend instead of resolving to the default_cost stub that returns 0.00 — without it the family cap would still leak on the path the CLI runs.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261014T213431662469-review-of-shc-report-pin-c6f003721e38" data-who="reckon-build" data-when="2026-10-14T21:46:51.896Z">
+    <div class="r-comment-body"><p>review-of-shc-report-pin-c6f003721e38 — independent review of r-20261014T205529707057-shc-report-pin stored at reviews/imas-codex/r-20261014T205529707057-shc-report-pin.json (and .at-c6f003721e38f41f8a6a6ba92e28f8b2a8109550.json): 6 dimensions scored goal_fidelity 18, evidence 20, scope_discipline 20, durability 18, fit 19, reuse 20; 2 follow-on findings; no blocking finding.</p></div>
 </div>
 </section>
 </main>
