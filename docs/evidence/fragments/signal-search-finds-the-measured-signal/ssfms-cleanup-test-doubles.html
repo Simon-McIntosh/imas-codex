@@ -120,13 +120,27 @@
   <h4 id="ssfms-cleanup-test-doubles-gate">Gate</h4>
 
   <p id="ssfms-cleanup-test-doubles-gate-result">
-    Base revision <code>7bbf44b56</code> ran the three touched test files under
-    the default markers at <strong>9 passed, 2 deselected</strong>. At the
-    commit head the same command gives <strong>9 passed, 2 deselected</strong> —
-    identical counts, so no failure was added. The graph-marked sweep tests ran
-    separately under <code>-m graph</code> against the live graph:
-    <strong>2 passed</strong>, which is the run the census assertion above is
-    observed in.
+    Base revision <code>7bbf44b5663c71078d6f94f84901867ba98430b8</code> ran the
+    three touched test files under the default markers at
+    <strong>9 passed, 2 deselected</strong> (exit 0). At the commit head the same
+    command gives <strong>9 passed, 2 deselected</strong> (exit 0) — identical
+    counts, so no failure was added. The graph-marked sweep tests ran separately
+    under <code>-m graph</code> against the live graph:
+    <strong>2 passed</strong> at the base and <strong>2 passed</strong> at the
+    head, which is the run the census assertion above is observed in.
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-gate-provenance">
+    The base arm is a genuine run of the base revision, not an inference: the
+    base tree is materialised with
+    <code>git archive 7bbf44b5663c71078d6f94f84901867ba98430b8</code> into a
+    fresh directory under node-local <code>/tmp</code>, and the tree's
+    gitignored generated modules are copied in from the working checkout before
+    the run, because <code>tests/conftest.py</code> otherwise triggers
+    regeneration into the shared editable install. Each log carries the command
+    it ran as its first line and the command's own status as its final
+    <code>EXIT=&lt;n&gt;</code> line, so a reader can tell a completed run from a
+    truncated one.
   </p>
 
   <p id="ssfms-cleanup-test-doubles-mutation-method">
