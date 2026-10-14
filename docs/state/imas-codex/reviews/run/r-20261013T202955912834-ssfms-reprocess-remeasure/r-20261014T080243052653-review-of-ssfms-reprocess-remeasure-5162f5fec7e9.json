@@ -12,6 +12,13 @@
     "imas_codex/llm/search_tools.py:248"
   ],
   "completed_at": "2026-10-14T08:37:54.329Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "the behaviour is guarded: tests/llm/test_search_tools.py::TestSignalRerankFollowsServerMode::test_a_full_server_reranks_signals asserts a full server reranks signals, and the run's switch_off_negative.log shows it failing (assert False is True, EXIT=1) with only _rerank_signals set to False, so a later flip reddens it; the net diff adds no test because the guard predates the run, and the re-measurement itself is evidence, not code",
+      "recorded_at": "2026-10-14T08:39:53.720997+00:00"
+    }
+  },
   "dispatched_at": "2026-10-14T08:02:57Z",
   "findings": [
     {
