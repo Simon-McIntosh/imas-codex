@@ -1,0 +1,315 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "recover-recorded-successor-lineage",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-superseded-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "link_signed_successor",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "atomic_count_of_ion_state=>atomic_count",
+    "minimum_of_safety_factor=>minimum_safety_factor",
+    "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift=>parallel_neutral_state_velocity_due_to_diamagnetic_drift",
+    "toroidal_neutral_state_momentum_diffusivity=>toroidal_neutral_internal_state_momentum_diffusion_coefficient",
+    "flux_surface_averaged_deuterium_tritium_density=>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "atomic_count_of_ion_state=>atomic_count:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "atomic_count_of_ion_state"
+          ]
+        },
+        {
+          "id": "atomic_count_of_ion_state=>atomic_count:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "atomic_count_of_ion_state",
+            "atomic_count"
+          ]
+        }
+      ],
+      "id": "atomic_count_of_ion_state=>atomic_count",
+      "identity": {
+        "id": "atomic_count_of_ion_state=>atomic_count",
+        "kind": "standard_name",
+        "target_id": "atomic_count_of_ion_state"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "atomic_count"
+          },
+          "id": "atomic_count_of_ion_state:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "atomic_count_of_ion_state"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "atomic_count_of_ion_state",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "atomic_count",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "minimum_of_safety_factor=>minimum_safety_factor:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "minimum_of_safety_factor"
+          ]
+        },
+        {
+          "id": "minimum_of_safety_factor=>minimum_safety_factor:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "minimum_of_safety_factor",
+            "minimum_safety_factor"
+          ]
+        }
+      ],
+      "id": "minimum_of_safety_factor=>minimum_safety_factor",
+      "identity": {
+        "id": "minimum_of_safety_factor=>minimum_safety_factor",
+        "kind": "standard_name",
+        "target_id": "minimum_of_safety_factor"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "minimum_safety_factor"
+          },
+          "id": "minimum_of_safety_factor:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "minimum_of_safety_factor"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "minimum_of_safety_factor",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "minimum_safety_factor",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift=>parallel_neutral_state_velocity_due_to_diamagnetic_drift:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift"
+          ]
+        },
+        {
+          "id": "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift=>parallel_neutral_state_velocity_due_to_diamagnetic_drift:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift",
+            "parallel_neutral_state_velocity_due_to_diamagnetic_drift"
+          ]
+        }
+      ],
+      "id": "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift=>parallel_neutral_state_velocity_due_to_diamagnetic_drift",
+      "identity": {
+        "id": "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift=>parallel_neutral_state_velocity_due_to_diamagnetic_drift",
+        "kind": "standard_name",
+        "target_id": "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "parallel_neutral_state_velocity_due_to_diamagnetic_drift"
+          },
+          "id": "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "parallel_neutral_state_velocity_due_to_diamagnetic_drift",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "toroidal_neutral_state_momentum_diffusivity=>toroidal_neutral_internal_state_momentum_diffusion_coefficient:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "toroidal_neutral_state_momentum_diffusivity"
+          ]
+        },
+        {
+          "id": "toroidal_neutral_state_momentum_diffusivity=>toroidal_neutral_internal_state_momentum_diffusion_coefficient:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "toroidal_neutral_state_momentum_diffusivity",
+            "toroidal_neutral_internal_state_momentum_diffusion_coefficient"
+          ]
+        }
+      ],
+      "id": "toroidal_neutral_state_momentum_diffusivity=>toroidal_neutral_internal_state_momentum_diffusion_coefficient",
+      "identity": {
+        "id": "toroidal_neutral_state_momentum_diffusivity=>toroidal_neutral_internal_state_momentum_diffusion_coefficient",
+        "kind": "standard_name",
+        "target_id": "toroidal_neutral_state_momentum_diffusivity"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "toroidal_neutral_internal_state_momentum_diffusion_coefficient"
+          },
+          "id": "toroidal_neutral_state_momentum_diffusivity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "toroidal_neutral_state_momentum_diffusivity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "toroidal_neutral_state_momentum_diffusivity",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "toroidal_neutral_internal_state_momentum_diffusion_coefficient",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "flux_surface_averaged_deuterium_tritium_density=>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "flux_surface_averaged_deuterium_tritium_density"
+          ]
+        },
+        {
+          "id": "flux_surface_averaged_deuterium_tritium_density=>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "flux_surface_averaged_deuterium_tritium_density",
+            "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+          ]
+        }
+      ],
+      "id": "flux_surface_averaged_deuterium_tritium_density=>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+      "identity": {
+        "id": "flux_surface_averaged_deuterium_tritium_density=>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+        "kind": "standard_name",
+        "target_id": "flux_surface_averaged_deuterium_tritium_density"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+          },
+          "id": "flux_surface_averaged_deuterium_tritium_density:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "flux_surface_averaged_deuterium_tritium_density"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_averaged_deuterium_tritium_density",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "ea7b7dec43a34ce10effa0d93d0dca2bf91d25d4fb52ef879d34d30385a0f684"
+  }
+}
