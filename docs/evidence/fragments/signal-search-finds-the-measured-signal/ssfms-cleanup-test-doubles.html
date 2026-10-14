@@ -50,13 +50,22 @@
     judge answers a different role per input (<code>measured</code> for the
     sensor, <code>reference_or_setpoint</code> for the target), and the test
     asserts each row's <code>signal_role</code> against the literal it expects
-    for that row. The earlier check read the role out of the accepted rows and
+    for that row. The judge also asserts that the state it is handed carries
+    each row's name, which is the input the name-keyed branch reads; that guard
+    is part of what makes the check falsifiable, because a state delivered
+    without the name fails it rather than quietly taking the other branch. The
+    earlier check read the role out of the accepted rows and
     compared it to the value the same fake had just returned, so it could not
     fail. Check: with the judge's decision discarded for a hardcoded
     <code>measured</code> on every row, the accepted-row assertion fails with
     <code>assert 'measured' == 'reference_or_setpoint'</code>
     (<code>nc-02-hardcoded-role.log</code>). This is the node's declared
-    negative control.
+    negative control. The name guard's own falsifiability is logged beside it:
+    with <code>signal_role_state</code> mutated to hand the judge an empty
+    name, the guard fires and the batch is refused
+    (<code>nc-05-judge-name-guard.log</code>), while the same mutation leaves
+    the guard silent once the guard itself is removed
+    (<code>nc-repair2-control.log</code>).
   </p>
 
   <p id="ssfms-cleanup-test-doubles-cost-check">
@@ -76,8 +85,11 @@
     through a second <code>GraphClient</code>, and requires it above zero. The
     earlier check asserted a frozen literal (still present on the
     facility-scoped test as <code>result["n"] == 15111</code>, recorded as a
-    follow-on below) and so could pass on a census that read nothing, since both
-    sides of a subtraction that agrees at zero agree. Check: with the census's
+    follow-on below). That literal does catch a census that reads nothing —
+    <code>nc-04</code> records it failing at <code>assert 0 == 15111</code> —
+    so the defect is brittleness rather than blindness: it reddens on any
+    legitimate change in the population, which sends a reader after a
+    non-defect, and the independent count removes that. Check: with the census's
     population hardcoded to 0, the live check fails with
     <code>assert 0 == 61983</code> (<code>nc-04-hardcoded-population.log</code>).
   </p>
@@ -122,12 +134,14 @@
   <p id="ssfms-cleanup-test-doubles-gate-result">
     Base revision <code>7bbf44b5663c71078d6f94f84901867ba98430b8</code> ran the
     three touched test files under the default markers at
-    <strong>9 passed, 2 deselected</strong> (exit 0). At the commit head the same
-    command gives <strong>9 passed, 2 deselected</strong> (exit 0) — identical
-    counts, so no failure was added. The graph-marked sweep tests ran separately
-    under <code>-m graph</code> against the live graph:
+    <strong>9 passed, 2 deselected</strong> (exit 0). At head
+    <code>33134fe2874dffb8bee11b791b59bd3f4193b129</code> the same command gives
+    <strong>9 passed, 2 deselected</strong> (exit 0) — identical counts, so no
+    failure was added. The graph-marked sweep tests ran separately under
+    <code>-m graph</code> against the live graph:
     <strong>2 passed</strong> at the base and <strong>2 passed</strong> at the
-    head, which is the run the census assertion above is observed in.
+    head, which is the run the census assertion above is observed in
+    (<code>head-default.log</code>, <code>head-graph.log</code>).
   </p>
 
   <p id="ssfms-cleanup-test-doubles-gate-provenance">
