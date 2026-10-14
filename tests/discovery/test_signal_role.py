@@ -1,6 +1,6 @@
 """The signal-role choice is accepted only from the closed vocabulary.
 
-Three checks pin the role vocabulary and the routing of a roll judgement: the
+Three checks pin the role vocabulary and the routing of a role judgement: the
 criteria the question offers, the role each accepted row carries, and the
 response cost summed over the batch. Each is compared against literals this
 test supplies rather than against the fake judge's own return or the module's
@@ -57,6 +57,10 @@ def test_state_uses_only_the_recorded_text() -> None:
 @pytest.mark.asyncio
 async def test_judge_accepts_choice_and_reports_response_cost(monkeypatch) -> None:
     async def fake_decision(model, state, questions, *, service):
+        # The judge is handed each row's name, which is what decides the
+        # name-keyed choice below; a path that sent the judge a state without
+        # it would otherwise agree with whatever choice the branch produced.
+        assert state["signal"]["name"] in {"Current sensor", "Current target"}
         assert state["signal"]["unit"] == "A"
         assert questions["signal_role"]["type"] == "choice"
         assert service == "facility-discovery"
