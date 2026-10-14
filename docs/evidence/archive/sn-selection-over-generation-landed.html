@@ -60,6 +60,11 @@
     <p>The held-out draw is fixed: seed 20261014, 40 drawn, 29 admitted. The driver runs a positive control and both arms through the benchmark harness, and both are merged (<code>265ad54bd</code>). No arm ran. A compose call through the harness never completes on the local seat. A single-source probe was still in flight at 526 s and was killed at 540 s, while the router's generation gate had 9 of 12 in flight and 0 waiting. The harness compose call passes no timeout and no token bound, while the harness docs call bounds its call deliberately. A repair node compares the harness request with the production compose request and makes the harness send what production sends. Spend so far: USD 0.0001 of the USD 3.00 ceiling.</p>
   </section>
 
+  <section id="s4-rerank-acceptance-measured">
+    <h2>§4 — the comparator rerank&#x27;s held-out acceptance, measured</h2>
+    <p>The held-out measure ran in full on the repaired harness (merge <code>ea23fef2f</code>, review 97/120).</p><ul><li><strong>Setup:</strong> 29 sources per arm, a fixed draw with seed 20261014, composed and reviewed on the local seat.</li><li><strong>Positive control:</strong> passed. 24 of 29 batch prompts differ between the arms; the other 5 reranked to the order retrieval already gave.</li><li><strong>Result:</strong> first-pass acceptance was 0.25 (3 of 13 candidates) with the rerank off and 0.083 (1 of 13) with it on. The paired difference, over the 12 sources present in both arms, is −0.17, with a 95% bootstrap interval of [−0.50, 0.00].</li></ul><p>There is no measurable gain, and the point estimate leans against the rerank. The sample is small: 29 sources yielded 13 candidates per arm. Per the review, a candidate the reviewer did not score was counted as a rejection, which affects both arms alike. Spend: USD 0.0038 of the USD 3.00 ceiling.</p>
+  </section>
+
 </main>
 </body>
 </html>

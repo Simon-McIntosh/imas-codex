@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="54">
 <meta name="plan-modified" content="2026-10-14">
 </head>
 <body>
@@ -302,7 +302,10 @@
     <div class="r-comment-body"><p>ran the held-out comparator rerank acceptance measure on the repaired harness — the positive control passes (24 of 29 batch prompt hashes differ between arms); first-pass acceptance arm A 0.2500 vs arm B 0.0833 on 12 sources present in both arms, paired difference -0.1667, bootstrap interval -0.3333 (-0.5000 to +0.0000 at 95%, 1000 resamples), which includes zero so the arms do not separate at this sample; spend USD 0.003806 of USD 3.00; see docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-rerun.html</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261014T190512271762-review-of-ssog-rerank-acceptance-rerun-a227b7b810cd" data-who="reckon-build" data-when="2026-10-14T19:14:36.993Z">
-    <div class="r-comment-body"><p>Independent review of r-20261014T081219634715-ssog-rerank-acceptance-rerun at base 3cc0ebfebcda998a56f7dbb6f0702d23b0290c1d → head a227b7b810cd99b147689bed6f6a17a19dca3abf: goal_fidelity 19, evidence 16, scope_discipline 18, durability 12, fit 17, reuse 15 (total 97); 0 added failures derived from the reviewed run&#x27;s null baseline_suite/after_suite (no armed suite); three follow-on findings (acceptance-rate denominator mislabeled in the fragment table; ungraded candidates counted as rejections; the harness-prompt mirror unpinned) and no blocking finding.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261014T081219634715-ssog-rerank-acceptance-rerun at base 3cc0ebfebcda998a56f7dbb6f0702d23b0290c1d → head a227b7b810cd99b147689bed6f6a17a19dca3abf: goal_fidelity 19, evidence 16, scope_discipline 18, durability 12, fit 17, reuse 15 (total 97); 0 added failures derived from the reviewed run's null baseline_suite/after_suite (no armed suite); three follow-on findings (acceptance-rate denominator mislabeled in the fragment table; ungraded candidates counted as rejections; the harness-prompt mirror unpinned) and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-rerank-no-gain" data-who="reckon-build" data-when="2026-10-14T19:20:00Z">
+    <div class="r-comment-body"><p>The rerank's acceptance is measured, and it shows no gain: 1 of 13 accepted with it on against 3 of 13 with it off, with an interval of [−0.50, 0.00] (<code>ea23fef2f</code>). The nDCG lift, 0.749 to 0.925, did not carry through to first-pass acceptance at this sample size. §4 stays open on a decision for the lead: keep the rerank off by default, or measure a larger draw. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s4-rerank-acceptance-measured">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e" data-who="reckon-build" data-when="2026-10-13T05:56:49.621Z">
     <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
