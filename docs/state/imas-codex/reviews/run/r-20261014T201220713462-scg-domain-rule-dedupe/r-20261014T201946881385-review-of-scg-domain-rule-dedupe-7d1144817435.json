@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/dd_domain_classifier.py:938",
+    "imas_codex/llm/prompt_loader.py:614",
+    "imas_codex/llm/prompts/imas/domain_classifier.md:44"
+  ],
+  "completed_at": "2026-10-14T20:36:21.372Z",
+  "dispatched_at": "2026-10-14T20:20:02Z",
+  "findings": [
+    {
+      "file": "tests/graph/test_physics_domain_guidance.py",
+      "line": "83",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion iterates load_domain_guidance(), which returns {} when domains.yaml is absent or unreadable (imas_codex/definitions/physics/__init__.py), so the loop body never runs and the guard passes vacuously instead of failing; the sibling test at tests/graph/test_physics_domain_guidance.py:43 guards exactly this case with an explicit non-empty check."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call sites reaching the excludes list the change edits",
+    "diff": "read commit by commit against base 8b30f6526; 14fed09a2 merges four repeated triples in imas_codex/definitions/physics/domains.yaml and adds the invariant test at tests/graph/test_physics_domain_guidance.py:77, and 7d1144817435 adds docs/evidence/fragments/sn-catalog-grouping/scg-domain-rule-dedupe.html.",
+    "done_when": "the done_when asks for a passing head arm, a red arm on the f1da060d3 copy, 0 added failures across three gate files, and a before/after fragment; the manifest records negative-f1da060d3.log (EXIT=1 at blob 52326a87d) and head-gate-final-corrected.log (18 passed, EXIT=0) against base-gate.log (17 passed, EXIT=0), and the fragment carries four before/after pairs.",
+    "goal": "the node goal is to merge the four (domain, quantity, neighbour) exclusion triples written twice in domains.yaml and add a test that refuses a future duplicate; imas_codex/definitions/physics/domains.yaml now carries one merged entry per triple, confirmed by an independent YAML scan (base blob has exactly the four named duplicates, head blob has none, 134 exclusions over 32 domains unchanged).",
+    "manifest": "read; it records status complete, head 7d1144817435 over base 8b30f6526, 18 passed at head against 17 at base with 0 added failures, and names negative-f1da060d3.log as its negative control.",
+    "write_paths": "the manifest declares imas_codex/definitions/physics/domains.yaml, tests/graph/test_physics_domain_guidance.py and the fragment; git show --stat over both commits lists only those paths plus the trailing newline added to domains.yaml."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_physics_domain_guidance.py:83 reddens if any duplicate triple returns, shown by negative-f1da060d3.log failing at the asserted blob 52326a87d; it does not guard the merged rule text, which the brief also required.",
+    "evidence": "the worker's gate arms are recorded on disk and reconciled against its manifest, base 17 passed at 8b30f6526 (base-gate.log, EXIT=0) and head 18 passed at 7d1144817435 (head-gate-final-corrected.log, EXIT=0), each with its own command and EXIT= line.",
+    "fit": "the test at tests/graph/test_physics_domain_guidance.py:77 follows the sibling load-and-assert idiom and no added name, comment or filename carries a plan or section label.",
+    "goal_fidelity": "imas_codex/definitions/physics/domains.yaml holds one merged entry per repeated triple and tests/graph/test_physics_domain_guidance.py:77 states the same invariant, so the landed change is what the goal describes.",
+    "reuse": "searching tests/graph and imas_codex/definitions/physics found no existing uniqueness check on excludes entries; the sibling assertions at tests/graph/test_physics_domain_guidance.py:60 test neighbour validity and rule presence rather than duplicates.",
+    "scope_discipline": "git show --stat over 14fed09a2 and 7d1144817435 lists only imas_codex/definitions/physics/domains.yaml, tests/graph/test_physics_domain_guidance.py and the fragment file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to merge the four (domain, quantity, neighbour) exclusion triples written twice in domains.yaml and add a test that refuses a future duplicate; imas_codex/definitions/physics/domains.yaml now carries one merged entry per triple, which an independent YAML scan confirms (base blob holds exactly the four duplicates the brief names, head blob holds none, 134 exclusions over 32 domains unchanged).\nVERDICT done_when: the done_when asks for a passing head arm, a red arm on the f1da060d3 copy, 0 added failures across three gate files, and a before/after fragment; the manifest records negative-f1da060d3.log (EXIT=1 at blob 52326a87d) and head-gate-final-corrected.log (18 passed, EXIT=0) against base-gate.log (17 passed, EXIT=0), and the fragment carries four before/after pairs.\nVERDICT write_paths: the manifest declares imas_codex/definitions/physics/domains.yaml, tests/graph/test_physics_domain_guidance.py and the fragment; git show --stat over both commits lists only those paths plus the trailing newline added to domains.yaml.\nVERDICT manifest: read; it records status complete, head 7d1144817435 over base 8b30f6526, 18 passed at head against 17 at base with 0 added failures, and names negative-f1da060d3.log as its negative control.\nVERDICT diff: read commit by commit against base 8b30f6526; 14fed09a2 merges four repeated triples in imas_codex/definitions/physics/domains.yaml and adds the invariant test at tests/graph/test_physics_domain_guidance.py:77, and 7d1144817435 adds docs/evidence/fragments/sn-catalog-grouping/scg-domain-rule-dedupe.html.\nCALL_SITES: imas_codex/graph/dd_domain_classifier.py:938, imas_codex/llm/prompt_loader.py:614, imas_codex/llm/prompts/imas/domain_classifier.md:44\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/definitions/physics/domains.yaml holds one merged entry per repeated triple and tests/graph/test_physics_domain_guidance.py:77 states the same invariant, so the landed change is what the goal describes.\nJUSTIFICATION evidence: the worker's gate arms are recorded on disk and reconciled against its manifest, base 17 passed at 8b30f6526 (base-gate.log, EXIT=0) and head 18 passed at 7d1144817435 (head-gate-final-corrected.log, EXIT=0), each with its own command and EXIT= line, with the red arm in negative-f1da060d3.log.\nJUSTIFICATION_PLACEHOLDER\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat over 14fed09a2 and 7d1144817435 lists only imas_codex/definitions/physics/domains.yaml, tests/graph/test_physics_domain_guidance.py and the fragment file.\nSCORE durability: 19\nJUSTIFICATION durability: tests/graph/test_physics_domain_guidance.py:83 reddens if any duplicate triple returns, shown by negative-f1da060d3.log failing at the asserted blob 52326a87d; it does not guard the merged rule text, which the brief also required.\nSCORE fit: 19\nJUSTIFICATION fit: the test at tests/graph/test_physics_domain_guidance.py:77 follows the sibling load-and-assert idiom and no added name, comment or filename carries a plan or section label.\nSCORE reuse: 20\nJUSTIFICATION reuse: searching tests/graph and imas_codex/definitions/physics found no existing uniqueness check on excludes entries; the sibling assertions at tests/graph/test_physics_domain_guidance.py:60 test neighbour validity and rule presence rather than duplicates.\nFINDING tests/graph/test_physics_domain_guidance.py:83 follow-on: the assertion iterates load_domain_guidance(), which returns {} for an absent or unreadable domains.yaml (imas_codex/definitions/physics/__init__.py), so the loop never runs and the guard cannot fail; the sibling test at tests/graph/test_physics_domain_guidance.py:43 carries an explicit non-empty check for exactly this reason.\n",
+  "review_run_id": "r-20261014T201946881385-review-of-scg-domain-rule-dedupe-7d1144817435",
+  "reviewed_base_sha": "8b30f65265325207503bb5928bd1858657251d9b",
+  "reviewed_head_sha": "7d1144817435bfe79f2f3dd530cca9b9e53bff90",
+  "reviewed_run_id": "r-20261014T201220713462-scg-domain-rule-dedupe",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "subject": "r-20261014T201220713462-scg-domain-rule-dedupe",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T20:38:10.182630+00:00",
+  "total": 117
+}
