@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6152",
+    "imas_codex/cli/sn.py:6191",
+    "imas_codex/standard_names/harmonize.py:1279"
+  ],
+  "completed_at": "2026-10-14T20:49:08.980Z",
+  "dispatched_at": "2026-10-14T20:36:11Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_harmonize_estimate.py",
+      "line": "280",
+      "severity": "follow-on",
+      "text": "follow-on: assert applied == pytest.approx(0.30 + 5.40) compares the runner's total against the literal spends the test injected into _RecordingDrain, so both sides move with the fixture and it holds whatever the family is charged."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_estimate.py",
+      "line": "338",
+      "severity": "follow-on",
+      "text": "follow-on: assert result.total_cost == pytest.approx(3.0) compares the runner total against the cost_fn constant the test itself injected, so it moves with the fixture rather than an independent source."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "778",
+      "severity": "follow-on",
+      "text": "follow-on: _DOC_COST_QUERY applies LIMIT $row_cap before grouping by run_id, so a run whose LLMCost rows straddle the row-cap boundary is summed from a partial row set, understating that run's spend and their name list."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s): the CLI dry-run and apply branches and the family-drain wrapper they reach",
+    "diff": "read three commits against base c0d68e77; the constant is retired for measure_doc_call_cost, the family drain charges the fallback, and imas_codex/cli/sn.py:6191 injects aggregate_spend_for_run, the last commit touching only the fragment.",
+    "done_when": "the done_when names three stubbed tests; tests/standard_names/test_harmonize_estimate.py asserts each (recorded-cost estimate within 30%, no-measurement stated, None batch charged to the family cap) and their pass is recorded in gate-full-head.log.",
+    "goal": "the goal is a dry-run estimate from measured spend and a closed family-cap leak; imas_codex/standard_names/harmonize.py:804 measure_doc_call_cost and harmonize.py:1180 drain are the landed mechanisms, reachable through imas_codex/cli/sn.py:6152 and :6191.",
+    "manifest": "read; it records status complete, head commit 1668e89c, 182 passed at head against 178 at base with zero added failures, and names the declared and repair negative controls.",
+    "write_paths": "read the fence in prompt.txt:189-193; every path in the diff (harmonize.py, sn.py, the test, the fragment, the figures dir) is inside it."
+  },
+  "justifications": {
+    "durability": "negative-control.log shows 3 failed (exit 1) with the constant restored and the fallback charge dropped, and repair-negative-control.log shows the wiring-removal failure, so each mechanism has a test that reddens when reverted.",
+    "evidence": "gate-full-base.log (178 passed) and gate-full-head.log (182 passed) record the delta at the named revisions, and gate-cypher.log records the 4-passed property check for the new LLMCost query.",
+    "fit": "measure_doc_call_cost at imas_codex/standard_names/harmonize.py:804 follows the module's bounded-query idiom and introduces no plan, stage or ticket name.",
+    "goal_fidelity": "imas_codex/cli/sn.py:6191 now injects the measured-spend cost hook, so harmonize.py:1180 charges an unmeasurable batch the measured spend instead of the 0.00 stub.",
+    "reuse": "the fallback extends the existing per-run reader at imas_codex/standard_names/graph_ops.py:15843, and a search over standard_names for a cross-run windowed per-name mean found only the SNRun-based cost_per_name at coverage.py:220, a different source and granularity.",
+    "scope_discipline": "git diff --stat c0d68e77..1668e89c shows only the five fenced files plus the declared docs/figures/sn-harmonize-command/shc-dry-run-estimate directory."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a dry-run estimate from measured spend and a closed family-cap leak; imas_codex/standard_names/harmonize.py:804 measure_doc_call_cost and harmonize.py:1180 drain are the landed mechanisms, reachable through imas_codex/cli/sn.py:6152 and :6191.\nVERDICT done_when: the done_when names three stubbed tests; tests/standard_names/test_harmonize_estimate.py asserts each (recorded-cost estimate within 30%, no-measurement stated, None batch charged to the family cap) and their pass is recorded in gate-full-head.log.\nVERDICT write_paths: read the fence in prompt.txt:189-193; every path in the diff (harmonize.py, sn.py, the test, the fragment, the figures dir) is inside it.\nVERDICT manifest: read; it records status complete, head commit 1668e89c, 182 passed at head against 178 at base with zero added failures, and names the declared and repair negative controls.\nVERDICT diff: read three commits against base c0d68e77; the constant is retired for measure_doc_call_cost, the family drain charges the fallback, and imas_codex/cli/sn.py:6191 injects aggregate_spend_for_run, the last commit touching only the fragment.\nCALL_SITES: imas_codex/cli/sn.py:6152, imas_codex/cli/sn.py:6191, imas_codex/standard_names/harmonize.py:1279\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/cli/sn.py:6191 now injects the measured-spend cost hook, so harmonize.py:1180 charges an unmeasurable batch the measured spend instead of the 0.00 stub.\nSCORE evidence: 19\nJUSTIFICATION evidence: gate-full-base.log (178 passed) and gate-full-head.log (182 passed) record the delta at the named revisions, and gate-cypher.log records the 4-passed property check for the new LLMCost query.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat c0d68e77..1668e89c shows only the five fenced files plus the declared docs/figures/sn-harmonize-command/shc-dry-run-estimate directory.\nSCORE durability: 19\nJUSTIFICATION durability: negative-control.log shows 3 failed (exit 1) with the constant restored and the fallback charge dropped, and repair-negative-control.log shows the wiring-removal failure, so each mechanism has a test that reddens when reverted.\nSCORE fit: 18\nJUSTIFICATION fit: measure_doc_call_cost at imas_codex/standard_names/harmonize.py:804 follows the module's bounded-query idiom and introduces no plan, stage or ticket name.\nSCORE reuse: 17\nJUSTIFICATION reuse: the fallback extends the existing per-run reader at imas_codex/standard_names/graph_ops.py:15843, and a search over standard_names for a cross-run windowed per-name mean found only the SNRun-based cost_per_name at coverage.py:220, a different source and granularity.\nFINDING tests/standard_names/test_harmonize_estimate.py:280 follow-on: assert applied == pytest.approx(0.30 + 5.40) compares the runner's total against the literal spends the test injected into _RecordingDrain, so both sides move with the fixture and it holds whatever the family is charged.\nFINDING tests/standard_names/test_harmonize_estimate.py:338 follow-on: assert result.total_cost == pytest.approx(3.0) compares the runner total against the cost_fn constant the test itself injected, so it moves with the fixture rather than an independent source.\nFINDING imas_codex/standard_names/harmonize.py:778 follow-on: _DOC_COST_QUERY applies LIMIT $row_cap before grouping by run_id, so a run whose LLMCost rows straddle the row-cap boundary is summed from a partial row set, understating that run's spend and their name list.\n",
+  "review_run_id": "r-20261014T203557839921-review-of-shc-dry-run-estimate-1668e89c5bf4",
+  "reviewed_base_sha": "c0d68e7705cdbc25aedc2f69e1768bb240632058",
+  "reviewed_head_sha": "1668e89c5bf4b138bf775ef6c0d764863775fcb7",
+  "reviewed_run_id": "r-20261014T191013296262-shc-dry-run-estimate",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "subject": "r-20261014T191013296262-shc-dry-run-estimate",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T20:50:21.970868+00:00",
+  "total": 111
+}
