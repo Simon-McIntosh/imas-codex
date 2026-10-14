@@ -1,0 +1,1578 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "f746278c4fe1e4458f4f55a6e2ca69c6f028699a",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 47190144,
+      "cached_input_tokens_cumulative": 47190144,
+      "input_tokens": 47632445,
+      "input_tokens_cumulative": 47632445,
+      "output_tokens": 80930,
+      "output_tokens_cumulative": 80930,
+      "reasoning_output_tokens": 36696,
+      "reasoning_output_tokens_cumulative": 36696
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 12,
+    "files": 1,
+    "removed": 6
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "test_engine_import_does_not_load_cli",
+        "path": "tests/discovery/test_engine_import_order.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2023
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 638,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2023
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 1995,
+        "name": "_register_tools",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 2012
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "test_engine_import_does_not_load_cli",
+        "path": "tests/discovery/test_engine_import_order.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 638,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "list_promotion_candidates",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3401
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_format_uptime",
+        "path": "tests/llm/test_health_endpoint.py"
+      },
+      "run_function": {
+        "line": 3829,
+        "name": "_format_uptime",
+        "path": "imas_codex/llm/server.py"
+      },
+      "window_line": 3829
+    }
+  ],
+  "commit_list_shortfall": {
+    "declared": 7,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261013T202955912834-ssfms-reprocess-remeasure' has a passing gate presenting 1 commit(s) of the 7 its manifest declares; missing: 2971756f34929022505c997f76910f3adf59f52c, a4f1238481a24328622ff4e437e65fa308e79c97, bee82d5bd15306176c32da21f57c67cbf9f64388, c5f4bc3bd9557d3f790850e5c7b71943c6107f82, d6df6b67896c513310e85b296c6115bf59b6367a, f244d24d1a33c962101f32da2524cec8c9193604. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present the full list, or the boundary check may not cover the node's work",
+    "missing": [
+      "2971756f34929022505c997f76910f3adf59f52c",
+      "a4f1238481a24328622ff4e437e65fa308e79c97",
+      "bee82d5bd15306176c32da21f57c67cbf9f64388",
+      "c5f4bc3bd9557d3f790850e5c7b71943c6107f82",
+      "d6df6b67896c513310e85b296c6115bf59b6367a",
+      "f244d24d1a33c962101f32da2524cec8c9193604"
+    ],
+    "presented": 1
+  },
+  "commit_resolution": null,
+  "commits": [
+    "5162f5fec7e9ded711b346ca2a9248c20a5cc22c"
+  ],
+  "completed_at": "2026-10-14T08:01:45Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-13T20:30:20Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "packed-refs.lock"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/llm/test_search_tools.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T202955912834-ssfms-reprocess-remeasure/gate_signal_search_tools.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.6923076923076923,
+    "plan": "signal-search-finds-the-measured-signal",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 4.976620217161869,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-15T03:08:12Z, which is after this node's 3600s horizon ending 2026-10-13T21:29:58.276485+00:00",
+    "horizon_ends_at": "2026-10-13T21:29:58.276485+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-13T20:29:57Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-15T03:08:12Z",
+    "resets_at": "2026-10-20T04:58:15Z",
+    "seconds_until_reset": 548897,
+    "state": "quiet",
+    "utilisation_pct": 46.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-13T20:29:57Z",
+    "read_at": "2026-10-13T20:29:58Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 46.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-14T08:01:45Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T202955912834-ssfms-reprocess-remeasure/manifest.md",
+  "member": "disposable-r-20261013T202955912834-ssfms-reprocess-remeasure",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/llm/test_search_tools.py::TestSignalRerankFollowsServerMode::test_a_full_server_reranks_signals"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/llm/test_search_tools.py::TestSignalRerankFollowsServerMode::test_a_full_server_reranks_signals"
+    ],
+    "declaration": "with one label removed from a scratch copy of the fixture, for a candidate that sits in a question's RRF top 60, the measurement refuses that question as holding an unlabelled candidate instead of scoring it",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T202955912834-ssfms-reprocess-remeasure/switch_off_negative.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T202955912834-ssfms-reprocess-remeasure/switch_off_negative.log",
+    "test_paths": [
+      "tests/llm/test_search_tools.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "ssfms-reprocess-remeasure",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1045,
+          "cached_input_tokens": 287036,
+          "input_tokens": 288083,
+          "output_tokens": 495,
+          "reasoning_output_tokens": 86,
+          "total_tokens": 288578,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+      "session_id": "0ba4e093-6897-47fa-b875-003d44d07ddf"
+    },
+    "done_when": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure.html records, from python -m tests.llm.measure_search_rankings 3 --section signal over the 2,914-label fixture whose eligibility cutover is 2026-10-13T11:53:35Z, fusion alone and both rerank arms (generic and role-aware question) over three passes: mean nDCG@10 and grade-3 precision@5 per pass and over the passes, the role-aware arm's worst pass, per-question wins and losses against fusion, and p95 wall time at pool 60, each beside the figure section 7 recorded (role-aware 0.9128 and fusion 0.7949 mean nDCG@10, 0.8818 and 0.7182 grade-3 precision@5, worst pass 0.9100, p95 4.72 s); it states whether the role-aware arm still meets section 7's ship rule (beats fusion on mean nDCG@10 and on grade-3 precision@5, worst pass not below fusion on mean nDCG@10, p95 within 5 s), and _rerank_signals in imas_codex/llm/server.py is left unchanged if the rule holds and set to False if it does not, the fragment naming the branch with the figures it rests on; no arm refuses a question for an unlabelled candidate; the fragment records the JT-60SA census read at measurement time through census_signal_embeddings and census_signal_roles and one Cypher count each: signals at discovered, signals enriched before 2026-10-13T11:53:35Z, signals enriched before 2026-10-11T21:16:46Z, embedding mismatches, and signals the role census reports missing, every one of them 0; total Jev spend is read from response usage, recorded in the fragment, and under USD 1",
+    "estimated_hours": null,
+    "goal": "re-record section 7's three-pass rerank measurement over the reprocessed JT-60SA population against section 7's ship rule",
+    "id": "ssfms-reprocess-remeasure",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-13T20:29:57Z",
+      "read_at": "2026-10-13T20:29:58Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 46.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T202955912834-ssfms-reprocess-remeasure/manifest.md",
+    "negative_control": "with one label removed from a scratch copy of the fixture, for a candidate that sits in a question's RRF top 60, the measurement refuses that question as holding an unlabelled candidate instead of scoring it",
+    "plan": "signal-search-finds-the-measured-signal",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§12",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/llm/server.py",
+      "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure.html",
+      "docs/figures/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure",
+      "tests/llm/test_search_tools.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 4.975869684884693,
+      "derived": 0.10169076604580042,
+      "drain_hours": 168.0,
+      "effective_limit": 0.10169076604580042,
+      "elapsed_fraction": 0.09244615095072765,
+      "elapsed_hours": 15.530953359722247,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-13T20:30:07+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.54,
+      "remaining_windows": null,
+      "resets_at": "2026-10-20T04:58:16Z",
+      "state": "observed",
+      "utilisation": 0.46,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.440128,
+      "decided_by": "window",
+      "margin": 0.297372,
+      "name": "ssfms-reprocess-remeasure",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.46
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.432095,
+        "observed_at": "2026-10-13T20:30:07+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-20T04:58:16Z",
+        "state": "observed",
+        "utilisation": 0.46,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "ssfms-reprocess-remeasure",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-13T20:30:07.432095+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "codex",
+    "comment": "Review waived: section 12 was re-reviewed and its findings answered; this is its third node's second half, the paid re-measurement that follows the relabel node. Live graph reads only; do not reset or enrich anything. Jev budget under USD 1.",
+    "confidence": 0.44,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "codex",
+    "jev_latency_ms": 744.128,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2826.811,
+    "model": "gpt-6-sol",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1346.997711,
+        "budget_reason": null,
+        "burn_multiple": 1.2634008962477057,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 99129,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.395914216307871,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.031175796016345503,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 47.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1346.997711,
+        "budget_reason": null,
+        "burn_multiple": 1.2634008962477057,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 99129,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.395914216307871,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.031175796016345503,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 47.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 1346.997711,
+        "budget_reason": null,
+        "burn_multiple": 1.2634008962477057,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 99129,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.395914216307871,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.031175796016345503,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 47.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "congested",
+          "running": 11,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 99129,
+          "headroom_pct": 56.9,
+          "peak_utilisation_p50_pct": 62.1,
+          "peak_utilisation_p90_pct": 76.9,
+          "peak_utilisation_runs": 593,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 15,
+          "not-run": 14,
+          "passed": 92,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 0
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 27.153711,
+        "budget_reason": null,
+        "burn_multiple": 4.868980072356708,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 99129,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.3530438459375,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.10166400203819437,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 45.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 27.153711,
+        "budget_reason": null,
+        "burn_multiple": 4.868980072356708,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 99129,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.3530438459375,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.10166400203819437,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 45.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 27.153711,
+        "budget_reason": null,
+        "burn_multiple": 4.868980072356708,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 99129,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.3530438459375,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 6,
+          "passed": 37,
+          "unknown": 0
+        },
+        "pace_allowance": 0.10166400203819437,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 45.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001:claude": 0,
+      "claude:claude-opus-5-5:claude": 0.01,
+      "claude:claude-sonnet-5-5:claude": 0.1,
+      "codex:gpt-6-astra:codex": 0.01,
+      "codex:gpt-6-luna:codex": 0.01,
+      "codex:gpt-6-sol:codex": 0.51,
+      "hold": 0.32,
+      "local:deepseek-v4.1-flash:clive": 0.04
+    },
+    "questions": {
+      "route": {
+        "criteria": {
+          "claude:claude-haiku-4-5-20251001:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-haiku-4-5-20251001"
+          },
+          "claude:claude-opus-5-5:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-opus-5-5"
+          },
+          "claude:claude-sonnet-5-5:claude": {
+            "backend": "claude",
+            "effort": "medium",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-sonnet-5-5"
+          },
+          "codex:gpt-6-astra:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-astra"
+          },
+          "codex:gpt-6-luna:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-luna"
+          },
+          "codex:gpt-6-sol:codex": {
+            "backend": "codex",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-sol"
+          },
+          "hold": "Do not dispatch now; wait for pressure to ease. When the local lane is not admitting (full, paused or unavailable), well-defined, routine or deferrable work should usually hold for it rather than spend a pressed metered lane. On a sliding scale, hard, high-risk or urgent work may still take the metered lane; weigh expected wait against urgency without a numeric threshold. When exactly one lane can serve the node, a hold waits for that lane alone, as hold_waits_for states.",
+          "local:deepseek-v4.1-flash:clive": {
+            "backend": "clive",
+            "effort": "high",
+            "lane": "local",
+            "local": true,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "deepseek-v4.1-flash"
+          }
+        },
+        "glossary": {
+          "budget_age_s": "Seconds since the budget reading was observed; null when unknown.",
+          "budget_source": "Where a budget reading came from: a document reading is taken from the published paid-lanes document, an account-surface reading describes now, and a ledger reading carries the age of the run behind it.",
+          "burn_multiple": "Metered spend so far divided by the lane's allowance for its window; above 1 is ahead of the pace that window plans for.",
+          "context": "A candidate's context block. window_tokens is the input window that gates the lane; estimated_tokens is this node's deterministic input estimate (standing instructions plus the repository files its brief loads) measured against that window; headroom_pct is the share of the window the estimate leaves free. peak_utilisation_p50_pct and peak_utilisation_p90_pct are the median and 90th-percentile peak input utilisation of recent passed runs on the lane, with peak_utilisation_runs behind them. A run whose input approaches its window risks dying mid-way, so a small headroom is a real risk to be weighed with pressure. A null figure is unknown, never zero.",
+          "days_to_reset": "Days until the lane's window resets; null when unknown.",
+          "hold_waits_for": "What a hold waits on. When exactly one lane can serve the node a hold waits for that lane alone: waiting for any other lane to free changes nothing, because it cannot run this node. Null when no lane can serve the node.",
+          "lanes": "One pressure block per lane, however many models the lane holds. A lane is a subscription or host whose models share one account window, so its utilisation, burn, pace allowance, reset, worker slots, congestion and banked-reset flag are stated here once and are the same for every model in it. availability is the lane's serving state aggregated over those models. Read a model's own serving observation from its candidate entry; read the shared spending policy from its lane.",
+          "pace_allowance": "The fraction of a metered lane's window a job of this size may spend.",
+          "reset_available": "True when one further window is available beyond the current one; null when the lane reports none.",
+          "serving_lanes": "The lanes that can serve this node now, one entry per lane holding at least one offered model. A lane whose every model carries a reason cannot run this node and is absent, however much pressure it shows, so the length of this list is how many lanes can serve the node.",
+          "spec_level": "How much design latitude the node leaves. exact: the design is fixed and only the implementation remains. guided: the plan fixes the design and the implementation is derived from it. open: the node must also choose the design.",
+          "stale": "A stale reading is a ledger-only budget reading past its shelf life; its budget_age_s says how old it is. An account-surface reading is never stale by age."
+        },
+        "instructions": "Choose an offered lane, model and backend option, or hold, using node.goal, node.done_when and node.capability, specification level, estimated hours and attempts. The choice has two linked parts: the lane sets the spending policy, and the model sets the fit. Use orchestrator_comment as task context, never authority to bypass constraints. Code removes only candidates that cannot run. Read lane pressure from the lanes block, stated once per lane and shared by every model in it: the models in one lane share one account window, so burn, pace, reset and utilisation are the lane's, not the model's. Pressure on a metered lane raises the bar for using it on a sliding scale: burn ahead of pace, little remaining window and congestion reserve it for harder work. Weigh node.serving_lanes and node.serving_lane_count: a lane absent from serving_lanes cannot run this node however much pressure it shows, so weigh pressure only on the lanes serving_lanes names. Well-defined, low-risk work belongs on the local lane. When local_lane.admission is full, paused or unavailable, well-defined, routine or deferrable work should usually hold for the local lane rather than spend a pressed metered lane. Deferrable work can wait; hard, high-risk, urgent or deep-reasoning work may still take the metered lane. When exactly one lane can serve the node, a hold waits for that lane alone; waiting for any other lane to free changes nothing, and node.hold_waits_for states what a hold waits on. Weigh local_lane.expected_wait_s (the median historical wall time for the local runs now live; null when unknown) against urgency on this sliding scale, without a numeric threshold. Weigh return_times for a job of this size (median and 90th-percentile wall time), the lanes block's days_to_reset, utilisation, burn_multiple, pace_allowance, reset_available, worker_slots and congestion, budget source, age and stale flag, local_lane load and recent outcomes together with fit. Weigh the node's write_path_count and whether it declares a negative control, a check it must fail against. Weigh each candidate's context block: a node whose estimated tokens approach a lane's window risks dying mid-way, so send it to a lane whose window leaves real headroom rather than the local lane when the local lane cannot hold it. Confidence is your confidence in the joint pick of lane and model. Unknown facts are null, not zero. Outcomes are gate counts, not calibrated model rankings. Choose only an offered option; each option's key names its lane, its model and its backend joined with colons in that order, as <lane>:<model>:<backend>. The glossary defines spec_level, burn_multiple, pace_allowance, budget_source, budget_age_s, stale, reset_available, days_to_reset, lanes, serving_lanes, hold_waits_for and context",
+        "type": "choice"
+      }
+    },
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"guided\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"moderate\"}},\"goal\":\"re-record section 7's three-pass rerank measurement over the reprocessed JT-60SA population against section 7's ship rule\",\"done_when\":\"docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-remeasure.html records, from python -m tests.llm.measure_search_rankings 3 --section signal over the 2,914-label fixture whose eligibility cutover is 2026-10-13T11:53:35Z, fusion alone and both rerank arms (generic and role-aware question) over three passes: mean nDCG@10 and grade-3 precision@5 per pass and over the passes, the role-aware arm's worst pass, per-question wins and losses against fusion, and p95 wall time at pool 60, each beside the figure section 7 recorded (role-aware 0.9128 and fusion 0.7949 mean nDCG@10, 0.8818 and 0.7182 grade-3 precision@5, worst pass 0.9100, p95 4.72 s); it states whether the role-aware arm still meets section 7's ship rule (beats fusion on mean nDCG@10 and on grade-3 precision@5, worst pass not below fusion on mean nDCG@10, p95 within 5 s), and _rerank_signals in imas_codex/llm/server.py is left unchanged if the rule holds and set to False if it does not, the fragment naming the branch with the figures it rests on; no arm refuses a question for an unlabelled candidate; the fragment records the JT-60SA census read at measurement time through census_signal_embeddings and census_signal_roles and one Cypher count each: signals at discovered, signals enriched before 2026-10-13T11:53:35Z, signals enriched before 2026-10-11T21:16:46Z, embedding mismatches, and signals the role census reports missing, every one of them 0; total Jev spend is read from response usage, recorded in the fragment, and under USD 1\",\"estimated_context\":99129,\"estimated_hours\":4.0,\"estimated_hours_source\":\"section\",\"attempts\":0,\"write_path_count\":3,\"negative_control_declared\":true,\"serving_lanes\":[\"claude\",\"local\",\"codex\"],\"serving_lane_count\":3,\"hold_waits_for\":\"any one of 3 lanes that can serve this node to have room\"},\"orchestrator_comment\":\"Review waived: section 12 was re-reviewed and its findings answered; this is its third node's second half, the paid re-measurement that follows the relabel node. Live graph reads only; do not reset or enrich anything. Jev budget under USD 1.\",\"candidates\":{\"claude\":{\"backend\":\"claude\",\"lane\":\"claude\",\"model\":\"claude-sonnet-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":47.0,\"burn_multiple\":1.2634008962477057,\"pace_allowance\":0.031175796016345503,\"days_to_reset\":4.395914216307871,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":99129,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":15.6,\"peak_utilisation_p90_pct\":18.0,\"peak_utilisation_runs\":4},\"budget_source\":null,\"budget_age_s\":1346.997711,\"stale\":true,\"reset_available\":null},\"clive\":{\"backend\":\"clive\",\"lane\":\"local\",\"model\":\"deepseek-v4.1-flash\",\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":null,\"resets_at\":null,\"worker_slots\":0,\"congestion\":{\"running\":11,\"waiting\":0,\"admission_verdict\":\"congested\",\"stale\":false,\"slots_state\":\"measured\"},\"outcomes\":{\"passed\":92,\"failed\":15,\"not-run\":14,\"unknown\":0},\"context\":{\"window_tokens\":230144,\"estimated_tokens\":99129,\"headroom_pct\":56.9,\"peak_utilisation_p50_pct\":62.1,\"peak_utilisation_p90_pct\":76.9,\"peak_utilisation_runs\":593},\"budget_source\":null,\"budget_age_s\":null,\"stale\":null,\"reset_available\":null},\"codex\":{\"backend\":\"codex\",\"lane\":\"codex\",\"model\":\"gpt-6-sol\",\"availability\":\"unknown\",\"utilisation_pct\":45.0,\"burn_multiple\":4.868980072356708,\"pace_allowance\":0.10166400203819437,\"days_to_reset\":6.3530438459375,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":37,\"failed\":2,\"not-run\":6,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":99129,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":27.153711,\"stale\":false,\"reset_available\":null}},\"return_times\":{\"claude\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":1349.0055,\"stale\":false},\"clive\":{\"p50_s\":1791.0,\"p90_s\":6537,\"runs\":118,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":2568.5125,\"stale\":true},\"codex\":{\"p50_s\":1272,\"p90_s\":3083,\"runs\":43,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":29.1615,\"stale\":false}},\"lanes\":{\"claude\":{\"availability\":\"unknown\",\"utilisation_pct\":47.0,\"burn_multiple\":1.2634008962477057,\"pace_allowance\":0.031175796016345503,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"days_to_reset\":4.395890978009259,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false},\"local\":{\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":null,\"days_to_reset\":null,\"worker_slots\":0,\"congestion\":{\"running\":11,\"waiting\":0,\"admission_verdict\":\"congested\",\"stale\":false,\"slots_state\":\"measured\"},\"reset_available\":null},\"codex\":{\"availability\":\"unknown\",\"utilisation_pct\":45.0,\"burn_multiple\":4.868980072356708,\"pace_allowance\":0.10166400203819437,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"days_to_reset\":6.353020607638888,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false}},\"local_lane\":{\"admission\":\"full\",\"expected_wait_s\":1883.5,\"running\":11,\"waiting\":0,\"headroom\":-2,\"worker_slots\":0,\"tokens_per_second\":32.914,\"read_at\":\"2026-10-13T20:29:55.031012+00:00\"}}",
+    "rendered_token_estimate": 1459,
+    "stage_ms": {
+      "budget-snapshot": 287.187,
+      "context-estimate": 5.845,
+      "jev": 2828.843,
+      "records": 205.038,
+      "verdict-inputs": 64.25
+    },
+    "template_digest": "bf398dab17ed4a1f716fe26e88b498badb311b83b4b219bc1dfbeaad8ffd187d",
+    "usage": {
+      "cost": 0.000182826,
+      "input_tokens": 4353,
+      "output_tokens": 171
+    }
+  },
+  "plan": "signal-search-finds-the-measured-signal",
+  "plan_impl_at_dispatch": 0.6923076923076923,
+  "plan_link": null,
+  "predecessor_run": "r-20261013T173800636976-ssfms-reprocess-relabel",
+  "promoted_by": null,
+  "promoted_revision": "5162f5fec7e9ded711b346ca2a9248c20a5cc22c",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f746278c4fe1e4458f4f55a6e2ca69c6f028699a",
+    "reviewed_head_sha": "5162f5fec7e9ded711b346ca2a9248c20a5cc22c",
+    "scores": {
+      "durability": 6,
+      "evidence": 16,
+      "fit": 14,
+      "goal_fidelity": 10,
+      "reuse": 20,
+      "scope_discipline": 15
+    },
+    "status": "parsed",
+    "total": 81
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261013T202955912834-ssfms-reprocess-remeasure",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§12",
+  "session": "0ba4e093-6897-47fa-b875-003d44d07ddf",
+  "session_harness": "codex",
+  "session_id": "01a136f5-9c9a-70d1-962a-cbfa7ed4ff4d",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 47190144,
+    "cumulative_input_tokens": 94822589,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 117626
+  },
+  "time_budget": "60m",
+  "tool_steps": 159.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 41485,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-14T08:01:48Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-14T07:47:53Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261013T202955912834-ssfms-reprocess-remeasure",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 905,
+    "worker_pid": 1147732
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}
