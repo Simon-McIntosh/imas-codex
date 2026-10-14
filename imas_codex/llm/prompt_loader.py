@@ -589,6 +589,10 @@ def _provide_physics_domains() -> dict[str, Any]:
         load_domain_guidance,
         load_isn_physics_domains,
     )
+    from imas_codex.graph.dd_domain_classifier import (
+        _category_precedence_rank,
+        _precedence_rank,
+    )
 
     isn_vocabulary = load_isn_physics_domains()
     guidance = load_domain_guidance()
@@ -611,9 +615,13 @@ def _provide_physics_domains() -> dict[str, Any]:
             }
         )
 
+    category_rank = _category_precedence_rank(_precedence_rank())
     categories = [
         {"value": name, "scope": entry.get("scope", "")}
-        for name, entry in category_guidance.items()
+        for name, entry in sorted(
+            category_guidance.items(),
+            key=lambda item: (category_rank.get(item[0], len(category_rank)), item[0]),
+        )
     ]
 
     return {

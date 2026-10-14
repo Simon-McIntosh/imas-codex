@@ -76,3 +76,63 @@ def test_prompt_renders_each_domains_scope_includes_and_excludes() -> None:
             if exclusion["quantity"] not in prompt:
                 missing.append(f"{name}:excludes:{exclusion['quantity']}")
     assert missing == [], f"guidance absent from the prompt: {missing}"
+
+
+def test_category_block_is_rendered_in_precedence_order(monkeypatch) -> None:
+    """The categories reach the prompt in precedence order, not file order.
+
+    The template tells the classifier the categories are in precedence order, so
+    a category block rendered in file-insertion order would state a rule the
+    list itself contradicts. The guidance is supplied here with its categories
+    in reverse precedence order: an explicit sort is the only way the rendered
+    order can follow precedence, so removing that sort fails this test.
+    """
+    from imas_codex.definitions import physics as physics_defs
+    from imas_codex.graph.dd_domain_classifier import (
+        _category_precedence_rank,
+        _precedence_rank,
+    )
+    from imas_codex.llm import prompt_loader
+
+    rank = _category_precedence_rank(_precedence_rank())
+    guidance = load_domain_guidance()
+    categories = guidance["categories"]
+    assert categories and rank, "check cannot see its subject"
+
+    scrambled = dict(
+        sorted(
+            categories.items(),
+            key=lambda item: (-rank.get(item[0], len(rank)), item[0]),
+        )
+    )
+    expected = sorted(scrambled, key=lambda name: (rank[name], name))
+    assert expected != list(scrambled), "scramble is a no-op — the test is vacuous"
+
+    def guidance_in_file_order():
+        return {**guidance, "categories": scrambled}
+
+    monkeypatch.setattr(physics_defs, "load_domain_guidance", guidance_in_file_order)
+    monkeypatch.setattr(
+        prompt_loader,
+        "_SCHEMA_PROVIDERS",
+        {
+            **prompt_loader._SCHEMA_PROVIDERS,
+            "physics_domains": prompt_loader._provide_physics_domains,
+        },
+    )
+
+    prompt_loader._provide_physics_domains.cache_clear()
+    try:
+        rendered = [
+            entry["value"]
+            for entry in prompt_loader._provide_physics_domains()[
+                "physics_domain_categories"
+            ]
+        ]
+        assert rendered == expected
+    finally:
+        prompt_loader._provide_physics_domains.cache_clear()
+
+    prompt = render_prompt("imas/domain_classifier", {"paths": []})
+    positions = [prompt.index(name) for name in expected]
+    assert positions == sorted(positions), "categories not ordered by precedence"
