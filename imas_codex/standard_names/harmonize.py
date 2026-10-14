@@ -873,11 +873,10 @@ def resolve_family_anchor(
     live ranking, replaced by the family's recorded pin unless the family is
     already stamped harmonized. The stamp releases the pin, so a converged
     family reranks and an interrupted one keeps the anchor its run recorded.
-    Every reader that displays a family's anchor — the report, the dry run,
-    the family view — resolves it here, so none of them can name a member the
-    apply would not use. ``member_ids`` and ``signature`` are accepted so a
-    caller that already derived them from the same members is not made to
-    recompute.
+    The report and the dry run both resolve a family's anchor here, so the
+    anchor an operator reads is the one an apply would start on.
+    ``member_ids`` and ``signature`` are accepted so a caller that already
+    derived them from the same members is not made to recompute.
     """
     anchor = select_anchor(None, None, None, members)
     if member_ids is None:
