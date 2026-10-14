@@ -1909,8 +1909,11 @@ def census_signal_embeddings(
 # over the ``s`` alias, it selects both the rows the sweep judges and the rows
 # the census counts. A signal the judge could not answer for, or whose answer
 # fell outside the six roles, keeps no role and is selected again on the next
-# sweep. The status bound keeps the sweep off signals that are not yet enriched
-# and off skipped ones the pipeline filtered out.
+# sweep. An underspecified description carries too little context for the role
+# judge, which disagreed with a blind hand-read on 4 of 30 signals the worker
+# had marked underspecified, so an underspecified signal is not judged for a
+# role and its status is not admitted here; the status bound keeps the sweep on
+# the enriched and checked signals with no role yet.
 _SIGNAL_ROLE_MISSING_WHERE = (
     "s.status IN ['enriched', 'checked'] "
     "AND s.description IS NOT NULL AND trim(s.description) <> '' "
@@ -2217,6 +2220,7 @@ def mark_signals_underspecified(
                     s.analysis_code = coalesce(nullIf(sig.analysis_code, ''), s.analysis_code),
                     s.keywords = coalesce(sig.keywords, s.keywords),
                     s.sign_convention = coalesce(nullIf(sig.sign_convention, ''), s.sign_convention),
+                    s.signal_role = null,
                     s.enrichment_source = 'direct_underspecified',
                     s.llm_cost = $per_signal_cost,
                     s.enriched_at = datetime(),

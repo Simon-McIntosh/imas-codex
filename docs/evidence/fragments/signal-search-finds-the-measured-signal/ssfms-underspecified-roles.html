@@ -1,0 +1,189 @@
+<section id="ssfms-underspecified-roles" data-reckon="fragment">
+  <h2 id="ssfms-underspecified-roles-title">An underspecified signal carries no stored role</h2>
+
+  <p id="ssfms-underspecified-roles-outcome-note">
+    <strong>Outcome: the change this record was written to describe was withdrawn.</strong>
+    This node first admitted <code>underspecified</code> to the shared role
+    predicate and had the enrich worker judge a role for every signal it marked
+    underspecified. The blind re-measurement of that judgement scored
+    <strong>26 of 30</strong>, below the 27 needed to keep the roles, so the
+    change is withdrawn and replaced by its opposite: an underspecified signal
+    carries no role, and the marking clears any role it held. The account below
+    is kept as the history of what was built and measured; the evidence for the
+    reversal is in the closing section.
+  </p>
+
+  <p id="ssfms-underspecified-roles-intro">
+    <em>As first built.</em> A signal enrichment marks <code>underspecified</code>
+    carries the same stored description a searcher reads, but the role predicate
+    admitted only <code>enriched</code> and <code>checked</code>, and the enrich
+    worker judged a role only on its enriched branch. So an underspecified signal
+    was reachable by text and invisible to a <code>role=</code> filter, and the
+    sweep that backfills missing roles never saw it. The withdrawn change
+    admitted <code>underspecified</code> in the shared predicate and had the
+    enrich worker judge any signal it marked underspecified as it already did for
+    one it marked enriched.
+  </p>
+
+  <p id="ssfms-underspecified-roles-predicate">
+    The shared predicate now admits only the two statuses that carry a judgement,
+    <code>enriched</code> and <code>checked</code>, with a non-empty description
+    and a null <code>signal_role</code>. The sweep and its census still share
+    that one predicate, and the store test drives its graph double from the
+    Cypher the production sweep and census issue rather than from a predicate of
+    the test's own, so the two are required to agree by construction: the double
+    selects exactly the rows the statement it receives names.
+  </p>
+
+  <p id="ssfms-underspecified-roles-tests">
+    Three tests hold the invariant, one per way it could be lost, and each has a
+    recorded red arm. <code>test_underspecified_signal_is_not_a_role_candidate</code>
+    fails when <code>underspecified</code> is re-admitted to the predicate;
+    <code>test_enrichment_does_not_judge_an_underspecified_signal</code> fails
+    when the enrich worker judges a signal it marks underspecified; and
+    <code>test_mark_signals_underspecified_clears_a_stored_role</code> fails when
+    the marking statement drops its role clear. The three arms are logged beside
+    the run at
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T104258578484-ssfms-underspecified-roles/logs/red-arm-predicate.log</code>,
+    <code>red-arm-judge.log</code> and <code>red-arm-clear.log</code>, each
+    1 failed with exit 1.
+  </p>
+
+  <p id="ssfms-underspecified-roles-live">
+    <em>The withdrawn run.</em> Against the live graph, <strong>210 JT-60SA signals
+    awaited a role</strong> — described, underspecified, and role-less. Every one was
+    judged before any write (<strong>210/210
+    accepted, 0 failed</strong>), at Jev response-usage spend of
+    <strong>USD 0.005393</strong>. The judged roles were then stored, and the census
+    read <strong>210 before and 0 after</strong> across
+    a population of 15111 JT-60SA signals — zero exactly when the store left
+    nothing. The roles this stored were cleared by the blind node's nulling,
+    recorded in the closing section.
+  </p>
+
+  <table>
+    <caption>The roles this run stored, before they were cleared.</caption>
+    <thead>
+      <tr><th>Stored role</th><th>Signals</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>configuration_parameter</td><td>141</td></tr>
+      <tr><td>derived_or_computed</td><td>36</td></tr>
+      <tr><td>measured</td><td>17</td></tr>
+      <tr><td>status_or_flag</td><td>13</td></tr>
+      <tr><td>reference_or_setpoint</td><td>3</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-underspecified-roles-agreement">
+    A seeded random <strong>30</strong> of the 210 were read by this worker from the
+    signal's own name, unit and description under the six role definitions, and
+    29/30 matched the model's judgement. <strong>That read is not an independent
+    check and does not serve as the agreement gate.</strong> The worker saw each
+    sampled signal's role printed beside it before writing its own label, so the
+    figure measures agreement with an answer that was already in view, not a blind
+    reading. The table below is kept as a record of what was done, not as the gate.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Signal ID</th><th>Model</th><th>Worker</th><th>Agree</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>jt-60sa:general/lcdb_b260008_zeff.s002_ifunc</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_c260058_ate.s001_nfitdata</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_c260058_ate.s001_rec_map_setting_ndnel</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_c260058_ate.s001_rec_map_type</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_c260058_ate.s001_shtno</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ane.s001_rec_map_setting_ivdm_s</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ane.s002_pid_tab_kind</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_eslicever</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_expadd_err_flg</td><td>status_or_flag</td><td>status_or_flag</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_ncst1</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_rec_map_setting_ndbmx</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_rec_map_setting_ndf1</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s002_rec_map_setting_ndmap</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_extime</td><td>reference_or_setpoint</td><td>configuration_parameter</td><td>no</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_nexpadd</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_rec_map_setting_ndbmx</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_rec_map_setting_ndint</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_rec_map_setting_njdb</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_ate.s011_shoteq</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s002_ifitcnt</td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s002_out_rmaj</td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s002_rec_abel_setting_params_elmch</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s002_xfitdata</td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s011_rec_map_setting_ndbmx</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s011_shtno</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_prad.s011_topics_errflg</td><td>status_or_flag</td><td>status_or_flag</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_zeff.s002_crmin</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_zeff.s002_fit_ref_eqdb</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_zeff.s005_topics_rhotype</td><td>configuration_parameter</td><td>configuration_parameter</td><td>yes</td></tr>
+      <tr><td>jt-60sa:general/lcdb_h060029_zeff.s005_topics_yfitdata</td><td>derived_or_computed</td><td>derived_or_computed</td><td>yes</td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssfms-underspecified-roles-disagreement">
+    <strong>Disagreement — jt-60sa:general/lcdb_h060029_ate.s011_extime</strong>, described as “Time base / external time signal (EXTIME) for the ATE analysis dataset (ate.s011) in the JT-60SA EDAS analysis database. Provides the temporal reference for the associated ATE signals.”. The
+    model read <code>reference_or_setpoint</code> (a target or setpoint a
+    controller is compared against); this worker read <code>configuration_parameter</code>. The
+    text's word <em>reference</em> is a temporal one — the time base of the ATE
+    dataset — not a control target, so a searcher filtering <code>role=setpoint</code>
+    finds a time axis rather than a requested quantity.
+  </p>
+
+  <h3 id="ssfms-underspecified-roles-blind-gate">
+    The blind gate failed, and the roles were cleared
+  </h3>
+
+  <p id="ssfms-underspecified-roles-blind-result">
+    The gate is the blind re-measurement, whose record is
+    <a href="/imas-codex/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-underspecified-roles-blind.html">ssfms-underspecified-roles-blind.html</a>.
+    A separate node drew a fresh seeded sample of <strong>30</strong> of the
+    <strong>225</strong> JT-60SA underspecified signals, labelled each from its
+    name, unit and description alone with no model call and no stored role in
+    view, and compared only afterwards: agreement was <strong>26 of 30</strong>
+    against a keep threshold of 27 (90&percnt;), so the verdict was
+    <strong>fail</strong>. Four signals disagreed, each a case where the
+    description names a quantity the six definitions place in a different slot
+    from the one the model chose — a constraint count read as
+    <code>derived_or_computed</code> where the hand reads
+    <code>configuration_parameter</code>, a radial coordinate array read as
+    <code>measured</code> where the hand reads <code>derived_or_computed</code>.
+  </p>
+
+  <p id="ssfms-underspecified-roles-blind-cleared">
+    On that failing verdict the blind node cleared every role the backfill had
+    stored: all <strong>225</strong> JT-60SA signals with
+    <code>status='underspecified'</code> had <code>signal_role</code> set to
+    <code>null</code>, 225 enumerated and 225 nulled with 0 remaining, as its
+    record's census table shows. The live underspecified population is 225, not
+    the 210 the withdrawn run counted, because the population grew between the
+    two measurements.
+  </p>
+
+  <p id="ssfms-underspecified-roles-withdrawal">
+    <strong>Withdrawn.</strong> The changes this record's earlier sections
+    describe — the shared predicate admitting <code>underspecified</code> and the
+    enrich worker judging a role for every signal it marks underspecified — are
+    withdrawn, because a role judged from a description the worker itself found
+    too thin to enrich agrees with a blind hand-read on 26 of 30 such signals,
+    below the rate at which the roles are worth storing.
+    The predicate admits only <code>enriched</code> and <code>checked</code>
+    again, the enrich worker judges nothing for a signal it marks underspecified,
+    and the marking clears any role the signal carried so no stale role survives
+    the status change. A signal marked underspecified is invisible to a
+    <code>role=</code> filter by design; it remains reachable by text, which is
+    the only evidence a reader has for it.
+  </p>
+
+  <p id="ssfms-underspecified-roles-caveat">
+    This measures that underspecified signals carry no stored role on this
+    workstation's JT-60SA population, that the marking clears a role a signal
+    already held, and that the shared predicate no longer admits them. It does
+    not measure how a searcher's <code>role=</code> filter behaves against a
+    cleanly re-enriched population: the cleared signals were judged from
+    descriptions that remain too thin to judge, so their absence from a role
+    filter is the intended state rather than a regression.
+  </p>
+</section>
