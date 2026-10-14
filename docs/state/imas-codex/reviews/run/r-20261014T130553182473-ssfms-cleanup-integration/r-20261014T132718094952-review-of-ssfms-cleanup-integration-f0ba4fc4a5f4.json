@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-14T13:33:28.537Z",
+  "dispatched_at": "2026-10-14T13:27:33Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/ssfms-cleanup-integration/report.md",
+      "line": "46",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log's `module:` header line is an annotation computed from the emitting shell's cwd rather than derived from the run itself, so it can name a tree the run never imported \u2014 the first base pass named the head worktree's imas_codex/__init__.py and both base logs had to be re-run (base-default-markers.superseded-badheader.log, base-graph-markers.superseded-badheader.log). The final headers are correct and the node discloses the supersession and its identical totals at report.md:45-49, but the header is not self-proving; the in-pytest probe base-import-provenance.log is what actually establishes the base arm measured base code."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T130553182473-ssfms-cleanup-integration/manifest.md",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: retry_failures opens \"none\" while the run's own classification record (classification.json) carries retry_counted_failures 2 for the two re-run base gate commands, so the field's text and the counted value disagree \u2014 the same record-disagrees-with-its-own-data shape s13 exists to close. No test failed in either run and the cause is stated in the same field, so nothing is hidden, but a promotion guard reading retry_counted_failures sees a number the field's own wording does not."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 0 production call site(s)",
+    "diff": "the node is a read-only test role and made no commits, so the diff of its commits against its base f0ba4fc4a is empty; its only artefacts are report.md, counts.log and seven log files under the declared reports scope, each re-read on disk.",
+    "done_when": "the done-when names two gate commands at f0ba4fc4a each captured to one log whose first lines are revision and command and whose last line is an EXIT= line, the RRF arm's mean nDCG@10 from test_four_arm_table_matches_the_control_below_every_arm equal to 0.8473 to four places, the JT-60SA census 0 missing and a Cypher count of underspecified-with-role 0, and a report tabulating all of it; each is recorded and re-read on disk \u2014 head-default-markers.log (revision f0ba4fc4a, 1707 passed, EXIT=0), head-graph-markers.log:12 (\"rrf\": 0.8472853917655051), counts.log (missing 0, cypher 0, positive controls 225 and 14886), report.md.",
+    "goal": "the goal is to show the tests s13's nodes touched pass together at the merged head; report.md's \"Gate commands and totals\" table records both done-when commands green at f0ba4fc4a (default markers 1707 passed, live-graph -m graph 9 passed, each EXIT=0), and I re-read head-default-markers.log and head-graph-markers.log to confirm those totals and exit codes.",
+    "manifest": "read; status complete, and I re-read each cited log on disk \u2014 the four gate totals and EXIT= lines, counts.log with its positive controls, head-graph-collect.log (9/27 collected) and base-import-provenance.log all match what the manifest states.",
+    "write_paths": "the declared scope is the single directory reports/imas-codex/ssfms-cleanup-integration; every one of the ten changed_paths in the manifest lies inside it, and git status --porcelain at f0ba4fc4a in the node's worktree is empty, so no repository file was written."
+  },
+  "justifications": {
+    "durability": "the node landed a report and ran no red arm, so no test fails if this verification regresses; the suites it ran are the guards of s13's code rather than a durable guard of its own deliverable, and re-running them is manual.",
+    "evidence": "counts.log carries the zero beside positive controls on the same connection and facility (225 underspecified rows, 14886 role-carrying signals) so the absence is read by an instrument that can see rows, and head-graph-markers.log:12 carries the RRF figure the done-when names, printed by test_four_arm_table_matches_the_control_below_every_arm.",
+    "fit": "the node added no source and its artefact names (report.md, head-default-markers.log, counts.log, head-graph-collect.log) carry no plan, version, stage or ticket label, matching the reports-scope idiom.",
+    "goal_fidelity": "report.md's \"Gate commands and totals\" table shows both done-when commands green at f0ba4fc4a and the manifest's landing line states the same, which is exactly what the goal asks for.",
+    "reuse": "the node re-ran the existing pytest suites and the production census_signal_roles rather than re-implementing a census, and added no definition that could duplicate an owner.",
+    "scope_discipline": "every changed_path in the manifest is under reports/imas-codex/ssfms-cleanup-integration and git status --porcelain in the node's worktree at f0ba4fc4a is empty, so nothing outside the declared scope was written."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to show the tests section 13's nodes touched pass together at the merged head; report.md's \"Gate commands and totals\" table records both done-when commands green at f0ba4fc4a (default markers 1707 passed, live-graph -m graph 9 passed, each EXIT=0), and I re-read head-default-markers.log and head-graph-markers.log to confirm the totals and exit codes.\nVERDICT done_when: the done-when names two gate commands at f0ba4fc4a each captured to one log whose first lines are revision and command and whose last line is an EXIT= line, the RRF arm's mean nDCG@10 from test_four_arm_table_matches_the_control_below_every_arm equal to 0.8473 to four places, the JT-60SA census 0 missing and a Cypher count of underspecified-with-role 0, and a report tabulating all of it; each is recorded and re-read on disk - head-default-markers.log (revision f0ba4fc4a, 1707 passed, EXIT=0), head-graph-markers.log:12 (\"rrf\": 0.8472853917655051), counts.log (missing 0, cypher 0, positive controls 225 and 14886), report.md.\nVERDICT write_paths: the declared scope is the single directory reports/imas-codex/ssfms-cleanup-integration; every one of the ten changed_paths in the manifest lies inside it, and git status --porcelain at f0ba4fc4a in the node's worktree is empty, so no repository file was written.\nVERDICT manifest: read; status complete, and I re-read each cited log on disk - the four gate totals and EXIT= lines, counts.log with its positive controls, head-graph-collect.log (9/27 collected) and base-import-provenance.log all match what the manifest states.\nVERDICT diff: the node is a read-only test role and made no commits, so the diff of its commits against its base f0ba4fc4a is empty; its only artefacts are report.md, counts.log and seven log files under the declared reports scope, each re-read on disk.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: report.md's \"Gate commands and totals\" table shows both done-when commands green at f0ba4fc4a and the manifest's landing line states the same, which is exactly what the goal asks for.\nSCORE evidence: 19\nJUSTIFICATION evidence: counts.log carries the zero beside positive controls on the same connection and facility (225 underspecified rows, 14886 role-carrying signals) so the absence is read by an instrument that can see rows, and head-graph-markers.log:12 carries the RRF figure the done-when names, printed by test_four_arm_table_matches_the_control_below_every_arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed_path in the manifest is under reports/imas-codex/ssfms-cleanup-integration and git status --porcelain in the node's worktree at f0ba4fc4a is empty, so nothing outside the declared scope was written.\nSCORE durability: 14\nJUSTIFICATION durability: the node landed a report and ran no red arm, so no test fails if this verification regresses; the suites it ran are the guards of section 13's code rather than a durable guard of its own deliverable, and re-running them is manual.\nSCORE fit: 19\nJUSTIFICATION fit: the node added no source and its artefact names (report.md, head-default-markers.log, counts.log, head-graph-collect.log) carry no plan, version, stage or ticket label, matching the reports-scope idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the node re-ran the existing pytest suites and the production census_signal_roles rather than re-implementing a census, and added no definition that could duplicate an owner.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/ssfms-cleanup-integration/report.md:46 follow-on: the gate log's `module:` header line is an annotation computed from the emitting shell's cwd rather than derived from the run itself, so it can name a tree the run never imported - the first base pass named the head worktree's imas_codex/__init__.py and both base logs had to be re-run; the final headers are correct and the supersession is disclosed with identical totals, but the header is not self-proving.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T130553182473-ssfms-cleanup-integration/manifest.md:10 follow-on: retry_failures opens \"none\" while the run's own classification record carries retry_counted_failures 2 for the two re-run base gate commands, so the field's text and the counted value disagree; no test failed in either run and the cause is stated in the same field, so nothing is hidden, but a promotion guard reading the count sees a number the wording does not.\n",
+  "review_run_id": "r-20261014T132718094952-review-of-ssfms-cleanup-integration-f0ba4fc4a5f4",
+  "reviewed_base_sha": "f0ba4fc4a5f4ee889a245c9d36f7c2d392c62f93",
+  "reviewed_head_sha": "f0ba4fc4a5f4ee889a245c9d36f7c2d392c62f93",
+  "reviewed_run_id": "r-20261014T130553182473-ssfms-cleanup-integration",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T13:36:00Z",
+  "total": 112,
+  "verdict": "SOUND WITH FINDINGS"
+}
