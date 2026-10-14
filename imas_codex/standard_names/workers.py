@@ -9683,8 +9683,10 @@ def _documentation_with_registry_form(
         _DISPLAY_MATH_RE,
         HouseStyleFindingClass,
         _is_canonical_equation,
+        _locus_registry_tokens,
         _opening_line,
         house_style_findings,
+        locus_definition_sentence,
     )
 
     written = normalize_prose_spelling(documentation)
@@ -9733,6 +9735,15 @@ def _documentation_with_registry_form(
             for match in _DISPLAY_MATH_RE.finditer(written)
         ):
             written = f"{written.rstrip()}\n\n$${concept.equation}$$"
+
+    locus_tokens = _locus_registry_tokens()
+    for concept in applied.concepts:
+        if concept.token not in locus_tokens:
+            continue
+        sentence = locus_definition_sentence(concept)
+        if sentence and sentence not in written:
+            written = f"{written.rstrip()}\n\n{sentence}"
+        break
     return written
 
 
@@ -10695,6 +10706,7 @@ def _documentation_conformance_note(item: dict[str, Any]) -> str | None:
         HouseStyleFindingClass.TEMPLATE_OPENING,
         HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT,
         HouseStyleFindingClass.FORBIDDEN_LOCUS_GLOSS,
+        HouseStyleFindingClass.LOCUS_DEFINITION,
         HouseStyleFindingClass.NON_CANONICAL_EQUATION,
     }
     try:
