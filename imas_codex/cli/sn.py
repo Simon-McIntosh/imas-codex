@@ -6087,8 +6087,8 @@ def sn_harmonize(
     if apply_mode:
         from imas_codex.standard_names.campaign import CampaignBudget
         from imas_codex.standard_names.harmonize import (
-            ESTIMATED_DOC_CALL_COST_USD,
             apply_families,
+            measure_doc_call_cost,
             plan_family_applies,
             preview_recommended_refusals,
         )
@@ -6139,13 +6139,33 @@ def sn_harmonize(
                         f"famil(ies): {names}. 0 planned call(s), estimated "
                         f"cost $0.00. Wrote nothing."
                     )
-                else:
+                elif total_calls == 0:
                     console.print(
                         f"[green]Dry run[/green]: {len(plans)} family(ies), "
-                        f"{total_calls} planned call(s), estimated cost "
-                        f"${total_calls * ESTIMATED_DOC_CALL_COST_USD:.2f}. "
+                        f"0 planned call(s), estimated cost $0.00. "
                         f"Wrote nothing."
                     )
+                else:
+                    # Estimate from what recent documentation-seat calls
+                    # actually cost the pools, not from a fixed guess, and
+                    # print the basis so the figure can be judged.
+                    estimate = measure_doc_call_cost(gc)
+                    if estimate is None:
+                        console.print(
+                            f"[yellow]Dry run[/yellow]: {len(plans)} family(ies), "
+                            f"{total_calls} planned call(s), estimated cost "
+                            f"unavailable — no measured per-call cost recorded "
+                            f"in the recent ledger. Wrote nothing."
+                        )
+                    else:
+                        console.print(
+                            f"[green]Dry run[/green]: {len(plans)} family(ies), "
+                            f"{total_calls} planned call(s), estimated cost "
+                            f"${total_calls * estimate.mean_usd:.2f} from "
+                            f"{estimate.runs} recent run(s) and "
+                            f"{estimate.calls} call(s) at "
+                            f"${estimate.mean_usd:.2f} per call. Wrote nothing."
+                        )
                 return
 
             _harmonize_drain = _docs_drain_factory(quiet=False)

@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import hashlib
 import re
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from imas_codex.graph.models import NameStage
@@ -753,10 +755,87 @@ def stamp_harmonized(
 # CampaignRunner per family with an explicit two-batch plan: the anchor alone,
 # then the remaining members. See ``plan_family_applies`` / ``apply_families``.
 
-#: Rough per-name estimate for the dry-run cost figure. The pool drain reports
-#: its own measured spend; this only gives ``--dry-run`` a number before any
-#: call is placed.
-ESTIMATED_DOC_CALL_COST_USD = 0.05
+# ── Cost of a documented name, measured from the ledger ─────────────────────
+# The dry run has to state a cost before any call is placed. It measures that
+# cost from what recent runs actually spent rather than from a fixed guess: the
+# per-name spend of the documentation seat — the regenerations a harmonize
+# apply places and the reviews that follow them — read from the ``LLMCost``
+# rows the pools record.
+
+#: The documentation-seat phases a regeneration cycle bills. A planned call
+#: regenerates one member's documentation and pays the review that follows it,
+#: so the cycle's spend is the summed cost of these phases for that name.
+DOC_CALL_PHASES: tuple[str, ...] = ("generate_docs", "refine_docs", "review_docs")
+
+#: How far back the dry run measures, and a row cap so the read stays bounded
+#: however large the ledger grows.
+_DOC_COST_WINDOW_DAYS = 14
+_DOC_COST_ROW_CAP = 4000
+
+_DOC_COST_QUERY = """
+MATCH (c:LLMCost)
+WHERE c.phase IN $phases AND c.llm_at >= datetime($since)
+WITH c ORDER BY c.llm_at DESC LIMIT $row_cap
+WITH c.run_id AS run_id, sum(c.llm_cost) AS run_cost,
+     collect(c.standard_name_ids) AS name_lists
+RETURN run_id AS run_id, run_cost AS run_cost, name_lists AS name_lists
+"""
+
+
+@dataclass(frozen=True)
+class DocCallCostEstimate:
+    """The measured cost of one documentation call, and its basis.
+
+    ``runs`` is how many recorded runs the measurement spans; ``calls`` is how
+    many distinct names those runs documented (one planned call regenerates one
+    name); ``total_usd`` is the documentation-seat spend those calls accounted
+    for. ``mean_usd`` is the cost per call the dry run estimates from.
+    """
+
+    runs: int
+    calls: int
+    total_usd: float
+
+    @property
+    def mean_usd(self) -> float:
+        return self.total_usd / self.calls if self.calls else 0.0
+
+
+def measure_doc_call_cost(
+    gc: Any,
+    *,
+    window_days: int = _DOC_COST_WINDOW_DAYS,
+    row_cap: int = _DOC_COST_ROW_CAP,
+) -> DocCallCostEstimate | None:
+    """Measure the cost of one documentation call from the recent ledger.
+
+    Reads the ``LLMCost`` rows for the documentation-seat phases
+    (:data:`DOC_CALL_PHASES`) recorded within *window_days*, capped at
+    *row_cap* rows, and returns their spend per documented name. ``None`` when
+    the ledger holds no such measurement, so the caller states the absence
+    rather than falling back to a guess.
+    """
+    since = (datetime.now(UTC) - timedelta(days=window_days)).isoformat()
+    rows = gc.query(
+        _DOC_COST_QUERY,
+        phases=list(DOC_CALL_PHASES),
+        since=since,
+        row_cap=row_cap,
+    )
+    runs = 0
+    calls: set[str] = set()
+    total_usd = 0.0
+    for row in rows or []:
+        if row.get("run_id") is None:
+            continue
+        runs += 1
+        total_usd += float(row.get("run_cost") or 0.0)
+        for name_list in row.get("name_lists") or []:
+            calls.update(name_list or [])
+    if runs == 0 or not calls:
+        return None
+    return DocCallCostEstimate(runs=runs, calls=len(calls), total_usd=total_usd)
+
 
 #: The member property a started apply stamps with the anchor it chose. It
 #: rides the family's own run state — the same member nodes carry ``run_id``
@@ -1066,7 +1145,12 @@ def _record_forced_recommended(
         )
 
 
-def _family_budget_drain(base_drain: Any, ceiling: float) -> Any:
+def _family_budget_drain(
+    base_drain: Any,
+    ceiling: float,
+    *,
+    cost_fn: Any | None = None,
+) -> Any:
     """Wrap *base_drain* so one family's batches share a single cost cap.
 
     The runner drains each batch with the budget's ``per_batch_cost_cap``,
@@ -1078,18 +1162,28 @@ def _family_budget_drain(base_drain: Any, ceiling: float) -> Any:
     batches. The drain's measured spend already includes the review that
     follows each regeneration, so the cap covers that too.
 
+    A batch whose drain cannot measure its own spend (returns ``None``) is
+    charged ``cost_fn(run_id)`` — the same figure the runner falls back to for
+    that batch — so a batch that cannot report its cost still counts against
+    the family's remaining budget, and the family cannot exceed ``ceiling`` by
+    one.
+
     ``ceiling`` is the budget's ``campaign_cost_ceiling`` — the same field the
     runner halts on between batches — so there is one family ceiling, not a
     second counter beside it.
     """
+    from imas_codex.standard_names.campaign import default_cost
+
+    fallback = cost_fn or default_cost
     spent = 0.0
 
     def drain(run_id: str, batch_cost_cap: float) -> float | None:
         nonlocal spent
         remaining = max(ceiling - spent, 0.0)
         cost = base_drain(run_id, min(batch_cost_cap, remaining))
-        if cost is not None:
-            spent += float(cost)
+        if cost is None:
+            cost = fallback(run_id)
+        spent += float(cost)
         return cost
 
     return drain
@@ -1129,6 +1223,7 @@ def apply_families(
         CampaignRunner,
         CampaignSpec,
         ConvergenceThresholds,
+        default_cost,
     )
 
     resolved_gc, own_gc = _resolve_gc(gc)
@@ -1178,7 +1273,11 @@ def apply_families(
             # The anchor batch and the member batch draw on one family cap:
             # each batch is drained against what the family has left, not the
             # whole cap again.
-            family_drain = _family_budget_drain(drain_fn, budget.campaign_cost_ceiling)
+            family_drain = _family_budget_drain(
+                drain_fn,
+                budget.campaign_cost_ceiling,
+                cost_fn=kwargs.get("cost_fn") or default_cost,
+            )
             runner = (
                 runner_factory(spec)
                 if runner_factory is not None
@@ -1231,7 +1330,8 @@ __all__ = [
     "build_worklist",
     "concept_member_ids",
     "report_family_rows",
-    "ESTIMATED_DOC_CALL_COST_USD",
+    "measure_doc_call_cost",
+    "DocCallCostEstimate",
     "plan_family_applies",
     "apply_families",
     "docs_score_regressions",

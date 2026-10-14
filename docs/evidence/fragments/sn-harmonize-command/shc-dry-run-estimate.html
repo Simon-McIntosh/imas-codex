@@ -1,0 +1,90 @@
+<section id="shc-dry-run-estimate">
+  <h2 id="shc-dry-run-estimate-title">The dry run estimates from measured spend, and the family cap is airtight against an unmeasured batch</h2>
+  <p id="shc-dry-run-estimate-intro">
+    <code>sn harmonize --apply --dry-run</code> used to multiply the planned calls
+    by a fixed constant (<code>ESTIMATED_DOC_CALL_COST_USD = 0.05</code>): 17
+    planned calls printed <strong>$0.85</strong>, while the apply then spent
+    <strong>$6.26</strong> — a guess three-quarters of the real cost low. The dry
+    run now reads the recorded documentation-seat spend from the ledger and
+    estimates each planned call from it, and it prints the basis so the figure can
+    be judged. For the 17-member boundary-density family it printed
+    <strong>$7.04</strong> — measured from 7 recent runs covering 23 calls at
+    <strong>$0.41</strong> per call — against the <strong>$6.26</strong> the second
+    forced apply recorded (anchor $1.026 + members $5.233), 12% above the applied
+    spend and inside the 30% band. A separate leak is closed too: a member batch
+    whose drain cannot measure its own spend was charged the runner's fallback
+    cost to the runner but not to the family, so the family could overrun its cap;
+    that fallback is now charged to the family as well.
+  </p>
+
+  <figure id="shc-dry-run-estimate-figure">
+    <img src="/imas-codex/figures/sn-harmonize-command/shc-dry-run-estimate/estimate-calibration.svg"
+         alt="Horizontal bars: the dry-run estimate $7.04 beside the recorded apply $6.26, with the ±30% acceptance band drawn around the applied figure."/>
+    <figcaption>
+      The dry-run estimate for the boundary-density family, read live from the
+      ledger, beside the spend the second forced apply recorded. The dotted lines
+      are the ±30% acceptance band around the applied figure; the estimate lands
+      inside it. Figure:
+      <code>docs/figures/sn-harmonize-command/shc-dry-run-estimate/make_estimate_calibration_figure.py</code>.
+    </figcaption>
+  </figure>
+
+  <h3 id="shc-dry-run-estimate-where">Where the estimate is measured</h3>
+  <table id="shc-dry-run-estimate-site">
+    <caption>The measured estimate, after the change</caption>
+    <thead><tr><th>Site</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>imas_codex/standard_names/harmonize.py</code> — <code>measure_doc_call_cost(gc)</code></td>
+        <td>The bounded reader. It reads the documentation-seat phases
+          (<code>generate_docs</code>, <code>refine_docs</code>, <code>review_docs</code>)
+          from <code>LLMCost</code> nodes in a fixed recent window, most-recent-first
+          under a row cap, and returns the distinct-name count, the run count and the
+          total spend. The mean cost per call is the aggregate spend over the distinct
+          names those runs documented, so the self-inflating solo-run figure is not
+          used and the review that follows each regeneration is included. It returns
+          <code>None</code> when nothing was recorded — the dry run then says the
+          estimate is unavailable rather than guessing.</td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/cli/sn.py</code> — the dry-run branch</td>
+        <td>Multiplies the planned calls by the measured mean and prints the basis:
+          the runs read, the calls, and the mean cost per call. The retired constant
+          is gone — there is no second path.</td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/standard_names/harmonize.py</code> — <code>_family_budget_drain(...)</code></td>
+        <td>The family cap wrapper. A batch whose drain returns <code>None</code> — the
+          same condition under which the runner falls back to <code>cost_fn(run_id)</code>
+          — now charges <code>cost_fn(run_id)</code> to the family's <code>spent</code>
+          and returns it, so the family's remaining budget reflects it and the family
+          cannot exceed its ceiling by one unmeasurable batch.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-dry-run-estimate-measure">Measure</h3>
+  <p id="shc-dry-run-estimate-measure-text">
+    <code>tests/standard_names/test_harmonize_estimate.py</code> drives the CLI dry
+    run against recorded <code>LLMCost</code> rows and asserts the printed estimate
+    lands within 30% of the cost a stubbed apply then reports, asserts the dry run
+    states no measurement exists when none was recorded, and asserts a
+    <code>None</code> batch charged through <code>cost_fn</code> still counts
+    against the family cap. All three pass at head. The declared negative control
+    applies both mutations at once — restore the constant in the dry run and drop
+    the fallback charge in <code>_family_budget_drain</code> — and all three fail
+    (<code>negative-control.log</code>: 3 failed, exit 1), the measured-estimate
+    test reading the constant's figure and the cap-leak test handing the member
+    batch the whole $5.00 cap instead of the remaining $2.00.
+  </p>
+
+  <h3 id="shc-dry-run-estimate-gate">Gate</h3>
+  <p id="shc-dry-run-estimate-gate-text">
+    The harmonize tests (<code>grep -rl harmonize tests/standard_names/</code>), the
+    campaign tests and <code>test_house_style_checks.py</code>: 178 passed, 1
+    deselected at base; 181 passed (+3 new), 1 deselected at head — 0 added failures
+    (<code>gate-full-base.log</code>, <code>gate-full-head.log</code>). The new
+    <code>LLMCost</code> Cypher is exercised by
+    <code>tests/graph/test_cypher_property_check.py</code> (4 passed).
+  </p>
+</section>
