@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="134">
+<meta name="plan-version" content="135">
 <meta name="plan-modified" content="2026-10-14">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47,68c603525,97eac4222,b97d4bdf4,3b1e4a193,1e2dc0252,c0a17c176,72eb206e8,fe031856a,ce47976e0,a54ca1a0e,05d22929b,f746278c4,f13f1e582,dd7e64c92,be370b25b,c5f4bc3bd,bee82d5bd,f244d24d1,d6df6b678,a4f123848,2971756f3,5162f5fec">
 </head>
@@ -497,9 +497,10 @@
     <h2 id="s13">§13 — Close what the reviews left open</h2>
 <section data-reckon="section" data-id="s13" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
 <p>
-      The independent reviews of §7 to §12 left follow-ons open as their sections closed. None changes a search
-      result. Each is a guard that cannot fail, a message that misstates its check, a record that disagrees with its own
-      data, or a gap in what <code>role=</code> can find. Four nodes take them, split by the files they write, so they
+      The independent reviews of §7 to §12 left follow-ons open as their sections closed. Each is a guard that
+      cannot fail, a message that misstates its check, a record that disagrees with its own data, or a gap in what
+      <code>role=</code> can find. Only the last changes a search result: a <code>role=</code> search starts returning
+      the underspecified signals it now drops, and that node carries its own agreement gate. Four nodes take them, split by the files they write, so they
       run in parallel.
     </p>
 <p>
@@ -568,7 +569,9 @@
       storing, the node judges the 210 without writing, hand-reads a seeded random 30 of them under §8's six role
       definitions, and records the agreement. It stores the roles only at 90% agreement or better, a lower bar than
       §8's 95.7% and 97% because these signals carry less context. The backfill then runs on JT-60SA under a Jev
-      ceiling of USD 0.05.
+      ceiling of USD 0.05. The sample table, the agreement, the census before and after, and the spend go in
+      <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-underspecified-roles.html</code>, so the
+      gate that authorises the write can be checked later.
     </p>
 <p>
       Three follow-ons are left out. The role-enrichment record's live sweep covered one role, which the full backfill
