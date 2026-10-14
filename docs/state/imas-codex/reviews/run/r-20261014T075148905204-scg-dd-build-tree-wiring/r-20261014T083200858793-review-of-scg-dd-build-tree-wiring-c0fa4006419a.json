@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's manifest declares a baseline_suite and an after_suite pair over the same six gate files. logs/base-gate.log (revision 31465e77d) records 190 passed, EXIT=0, no failing ids; logs/head-gate.log (revision c0fa40064) records 195 passed, EXIT=0, no failing ids. The +5 is the new tests/graph/test_dd_build_classify_tree.py. Neither arm holds a failing test id, so added_failure_count is 0 and added_failure_ids is empty.",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/graph/dd_workers.py:706",
+    "imas_codex/graph/dd_domain_classifier.py:174",
+    "imas_codex/graph/dd_domain_classifier.py:635",
+    "imas_codex/graph/dd_domain_classifier.py:1181",
+    "imas_codex/standard_names/benchmark_roles.py:1533"
+  ],
+  "completed_at": "2026-10-14T08:46:26.121Z",
+  "dispatched_at": "2026-10-14T08:32:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-build-tree-wiring.html",
+      "line": "25",
+      "severity": "follow-on",
+      "text": "follow-on: the call-path table cites classify_domains at dd_domain_classifier.py:173 (actual :174), classify_tier1_llm at :634 (actual :635), _classify_batch_tree at :1180 (actual :1181) and _route_below_threshold at :1147 (actual :1148), each one line low, so a reader opening the cited line finds a blank or comment line rather than the named site."
+    },
+    {
+      "file": "logs/base-gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the base arm ran in a scratch tree (/tmp/reckon-crew-scratch/r-20261014T075148905204-scg-dd-build-tree-wiring/basegate.Tc9Q4o) but its header names only revision/tree/command, not the module under test's imported path or the resolved working directory, so the arm's provenance rests on the manifest's measurement_module/measurement_cwd rather than on the log itself."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "five production sites reach the change: imas_codex/graph/dd_workers.py:706 classify_worker -> imas_codex/graph/dd_domain_classifier.py:174 classify_domains -> :635 classify_tier1_llm -> :1181 _classify_batch_tree, and imas_codex/standard_names/benchmark_roles.py:1533 (the classifier role bench) calls _classify_batch_tree with no threshold so it now resolves 0.9 from the seat setting instead of the old constant.",
+    "diff": "read from base 31465e77d to head c0fa40064 commit by commit (one commit, feat(sn-domain-tree)); it changes 5 files, +404/-6, adding _tree_threshold, get_sn_domain_tree_threshold, the pyproject threshold key and the wiring test.",
+    "done_when": "the done_when's measures are recorded \u2014 logs/head-gate.log reads 195 passed EXIT=0 at c0fa40064, logs/red-tree-bypass.log reads 3 failed EXIT=1, logs/red-threshold-hardcoded.log reads 2 failed EXIT=1, git grep confirms DEFAULT_TREE_THRESHOLD is absent at head, and the fragment carries the call path; the only shortfall is the base-arm scratch log header.",
+    "goal": "the node's goal is to make the two-level tree's confidence threshold a setting and to prove the DD build's classify phase routes through it; imas_codex/graph/dd_domain_classifier.py:137 (_tree_threshold) resolves [sn-domain-tree].threshold and DEFAULT_TREE_THRESHOLD is gone at head.",
+    "manifest": "read; status complete, tests, test_logs, baseline_suite/after_suite, negative_control_log (logs/red-tree-bypass.log), measurement_module/measurement_cwd and the landing line are all filled and reconcile with the logs.",
+    "write_paths": "the five declared paths are exactly the five paths commit c0fa40064 touches, so the diff stays inside scope."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_dd_build_classify_tree.py:243 (test_the_threshold_setting_decides_the_routing) reddens when the threshold is held as a mechanism constant (logs/red-threshold-hardcoded.log, 2 failed) and the call-path tests redden when the tree is bypassed (logs/red-tree-bypass.log, 3 failed).",
+    "evidence": "logs/head-gate.log records 195 passed EXIT=0 and both red logs record EXIT=1 with failing ids, but the scratch-tree base arm logs/base-gate.log:1 names only revision/tree/command and omits the module.__file__ and resolved-cwd lines.",
+    "fit": "imas_codex/settings.py:1480 sits beside get_sn_dedup_threshold and follows the env->section->default shape, and no name carries a plan, sprint or gate label.",
+    "goal_fidelity": "imas_codex/settings.py:1480 reads [sn-domain-tree].threshold (0.9) and imas_codex/graph/dd_domain_classifier.py:677,1207 route on it, so the calibrated bar reaches the running classifier.",
+    "reuse": "the diff adds one accessor extending the existing threshold family (imas_codex/settings.py:1050 get_discovery_threshold) and _tree_threshold wraps it in the module's existing lazy-import idiom; no capability is forked.",
+    "scope_discipline": "every path in the diff is inside the manifest's declared write paths (imas_codex/graph/dd_domain_classifier.py, imas_codex/settings.py, pyproject.toml, tests/graph/test_dd_build_classify_tree.py, docs/evidence/fragments/sn-catalog-grouping/scg-dd-build-tree-wiring.html) and carries nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to make the two-level tree's confidence threshold a setting and to prove the DD build's classify phase routes through it; imas_codex/graph/dd_domain_classifier.py:137 (_tree_threshold) resolves [sn-domain-tree].threshold, and DEFAULT_TREE_THRESHOLD is gone at c0fa40064 (git grep over imas_codex tests returns nothing).\nVERDICT done_when: the bar is met and recorded \u2014 logs/head-gate.log reads 195 passed EXIT=0 at c0fa40064; logs/red-tree-bypass.log reads 3 failed EXIT=1, logs/red-threshold-hardcoded.log reads 2 failed EXIT=1, and docs/evidence/fragments/sn-catalog-grouping/scg-dd-build-tree-wiring.html carries the call path; the only shortfall is the base-arm scratch log header (see the finding).\nVERDICT write_paths: the five declared paths (imas_codex/graph/dd_domain_classifier.py, imas_codex/settings.py, pyproject.toml, tests/graph/test_dd_build_classify_tree.py, docs/evidence/fragments/sn-catalog-grouping/scg-dd-build-tree-wiring.html) are exactly the five paths commit c0fa40064 touches.\nVERDICT manifest: read; status complete, tests, test_logs, baseline_suite/after_suite, negative_control_log (logs/red-tree-bypass.log), measurement_module/measurement_cwd and the landing line are filled and reconcile with the logs.\nVERDICT diff: read from base 31465e77d to head c0fa40064 commit by commit (one commit, feat(sn-domain-tree)); it changes 5 files, +404/-6, adding _tree_threshold, get_sn_domain_tree_threshold, the pyproject threshold key and the wiring test.\nCALL_SITES: imas_codex/graph/dd_workers.py:706, imas_codex/graph/dd_domain_classifier.py:174, imas_codex/graph/dd_domain_classifier.py:635, imas_codex/graph/dd_domain_classifier.py:1181, imas_codex/standard_names/benchmark_roles.py:1533\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/settings.py:1480 reads [sn-domain-tree].threshold (0.9) and imas_codex/graph/dd_domain_classifier.py:677,1207 route on it, so the calibrated bar reaches the running classifier.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/head-gate.log records 195 passed EXIT=0 and both red logs record EXIT=1 with failing ids, but the scratch-tree base arm logs/base-gate.log:1 names only revision/tree/command and omits the module.__file__ and resolved-cwd lines.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (imas_codex/graph/dd_domain_classifier.py, imas_codex/settings.py, pyproject.toml, tests/graph/test_dd_build_classify_tree.py, docs/evidence/fragments/sn-catalog-grouping/scg-dd-build-tree-wiring.html) is inside the manifest's declared write paths and carries nothing else.\nSCORE durability: 19\nJUSTIFICATION durability: tests/graph/test_dd_build_classify_tree.py:243 (test_the_threshold_setting_decides_the_routing) reddens when the threshold is held as a constant (logs/red-threshold-hardcoded.log, 2 failed) and the call-path tests redden when the tree is bypassed (logs/red-tree-bypass.log, 3 failed).\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/settings.py:1480 sits beside get_sn_dedup_threshold and follows the env->section->default shape, and no name carries a plan, sprint or gate label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds one accessor extending the existing threshold family (imas_codex/settings.py:1050 get_discovery_threshold) and _tree_threshold wraps it in the module's existing lazy-import idiom; no capability is forked.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-build-tree-wiring.html:25 follow-on: the call-path table cites classify_domains at dd_domain_classifier.py:173 (actual :174), classify_tier1_llm at :634 (actual :635), _classify_batch_tree at :1180 (actual :1181) and _route_below_threshold at :1147 (actual :1148), each one line low, so a reader opening the cited line finds a blank or comment line rather than the named site.\nFINDING logs/base-gate.log:1 follow-on: the base arm ran in a scratch tree (/tmp/reckon-crew-scratch/r-20261014T075148905204-scg-dd-build-tree-wiring/basegate.Tc9Q4o) but its header names only revision/tree/command, not the module under test's imported path or the resolved working directory, so the arm's provenance rests on the manifest's measurement_module/measurement_cwd rather than on the log itself.\n",
+  "review_run_id": "r-20261014T083200858793-review-of-scg-dd-build-tree-wiring-c0fa4006419a",
+  "reviewed_base_sha": "31465e77de604903ae4a7431a64873126a8ca4ce",
+  "reviewed_head_sha": "c0fa4006419adc3c551a2a40af37943278040194",
+  "reviewed_run_id": "r-20261014T075148905204-scg-dd-build-tree-wiring",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T08:47:24.940362+00:00",
+  "total": 114
+}
