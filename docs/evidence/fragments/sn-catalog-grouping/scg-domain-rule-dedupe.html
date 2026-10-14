@@ -1,0 +1,42 @@
+<section id="scg-domain-rule-dedupe">
+  <h2>Repeated exclusion rules, before and after</h2>
+  <table>
+    <thead>
+      <tr><th>Domain, quantity, neighbour</th><th>Before: two rules</th><th>After: one rule</th></tr>
+    </thead>
+    <tbody>
+      <tr id="scg-domain-rule-dedupe-wall">
+        <td><code>plasma_wall_interactions</code><br>an edge-transport model's flux-limiter coordinate<br><code>transport</code></td>
+        <td>
+          <p>An edge-transport model's flux-limiter coordinate is transport; the model's own quantity in machine coordinates is not gyrokinetics, and a wall surface property is plasma_wall_interactions.</p>
+          <p>An edge-transport model's flux-limiter coordinate is transport; a surface property is plasma_wall_interactions.</p>
+        </td>
+        <td>An edge-transport model's flux-limiter coordinate is transport; the model's own quantity in machine coordinates is not gyrokinetics, and a wall surface property is plasma_wall_interactions.</td>
+      </tr>
+      <tr id="scg-domain-rule-dedupe-particle">
+        <td><code>particle_measurement_diagnostics</code><br>a neutron detector's aperture geometry<br><code>neutronics</code></td>
+        <td>
+          <p>A neutron detector's aperture geometry is neutronics; particle_measurement_diagnostics owns a scattering or particle-counting instrument.</p>
+          <p>A neutron detector's aperture geometry is neutronics and, being a particle counter, also particle_measurement_diagnostics; neutronics owns the neutron-detection family, so the label follows the family.</p>
+        </td>
+        <td>A neutron detector's aperture geometry is neutronics: the detector also counts particles, but the neutron-detection family determines its domain. Particle_measurement_diagnostics owns scattering or particle-counting instruments without a more specific family.</td>
+      </tr>
+      <tr id="scg-domain-rule-dedupe-plasma">
+        <td><code>plasma_measurement_diagnostics</code><br>an electron cyclotron emission channel position<br><code>radiation_measurement_diagnostics</code></td>
+        <td>
+          <p>An ECE channel position is radiation_measurement_diagnostics; an ECE diagnostic records emitted cyclotron radiation rather than transmitting a probe wave.</p>
+          <p>An ECE channel position is radiation_measurement_diagnostics; the flux surface it is expressed against is equilibrium.</p>
+        </td>
+        <td>An ECE channel position is radiation_measurement_diagnostics because ECE records emitted cyclotron radiation rather than transmitting a probe wave. The flux surface used to express that position is equilibrium.</td>
+      </tr>
+      <tr id="scg-domain-rule-dedupe-neutronics">
+        <td><code>neutronics</code><br>an MSE channel's detector geometry<br><code>spectroscopy</code></td>
+        <td>
+          <p>An MSE channel's detector geometry is spectroscopy; the motional Stark effect on the emitted light is a spectroscopic measurement, not neutronics or a magnetic sensor.</p>
+          <p>An MSE channel's detector geometry is spectroscopy (mse/*); neutronics owns a neutron detection or activation quantity.</p>
+        </td>
+        <td>An MSE channel's detector geometry is spectroscopy (mse/*): the motional Stark effect on emitted light is a spectroscopic measurement, not neutronics or a magnetic sensor. Neutronics owns neutron detection and activation quantities.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
