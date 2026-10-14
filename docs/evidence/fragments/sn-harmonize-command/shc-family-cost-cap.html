@@ -1,0 +1,60 @@
+<section id="shc-family-cost-cap">
+  <h2 id="shc-family-cost-cap-title">One cost cap covers a whole family apply</h2>
+  <p id="shc-family-cost-cap-intro">
+    The second forced apply over the boundary-density family drained the anchor
+    batch and the member batch each against the whole <code>-c/--cost-limit</code>,
+    so the family spent <strong>$6.259</strong> against a <strong>$5.00</strong>
+    cap (anchor $1.026 + members $5.233) and stopped unstamped. The cap is now one
+    ceiling shared by the anchor and its members, so the members are drained
+    against whatever the anchor leaves.
+  </p>
+
+  <h3 id="shc-family-cost-cap-where">Where the cap is applied</h3>
+  <table id="shc-family-cost-cap-site">
+    <caption>The family cap, after the change</caption>
+    <thead><tr><th>Site</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>imas_codex/standard_names/harmonize.py:1069</code></td>
+        <td><code>_family_budget_drain(base_drain, ceiling)</code> — wraps the drain so each batch receives the family's remaining budget, <code>ceiling</code> minus what earlier batches spent (<code>harmonize.py:1090</code>: <code>base_drain(run_id, min(batch_cost_cap, remaining))</code>).</td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/standard_names/harmonize.py:1181</code></td>
+        <td><code>family_drain = _family_budget_drain(drain_fn, budget.campaign_cost_ceiling)</code> — the per-family wrapper, handed to the runner at <code>harmonize.py:1190</code> (<code>drain_fn=family_drain</code>).</td>
+      </tr>
+      <tr>
+        <td><code>imas_codex/cli/sn.py:6161&ndash;6164</code></td>
+        <td>The live apply's <code>CampaignBudget(per_batch_cost_cap=cost_limit, campaign_cost_ceiling=cost_limit)</code>. Unchanged: the existing <code>campaign_cost_ceiling</code> is the family cap, so there is one ceiling rather than a second counter beside it. The runner still halts between batches on the same field (<code>campaign.py:996</code>).</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-family-cost-cap-fallback">
+    The fallback <code>CampaignBudget()</code> (<code>harmonize.py:1135</code>,
+    used when no budget is passed) holds the same rule by construction:
+    <code>apply_families</code> is the single site that wraps the drain, so both
+    the live CLI apply and the fallback route through the one family cap. The
+    drain's measured spend already includes the review that follows each
+    regeneration, so the cap covers the review too.
+  </p>
+
+  <h3 id="shc-family-cost-cap-measure">Measure</h3>
+  <p id="shc-family-cost-cap-measure-text">
+    <code>tests/standard_names/test_harmonize_cost_cap.py</code> drives the real
+    <code>apply_families</code> and <code>CampaignRunner</code> against a stub
+    drain that records the cost limit it was handed per batch. With a $5.00 cap
+    and an anchor that spends 60% ($3.00), the member batch is handed exactly
+    the remaining 40% ($2.00), and the family stops at $5.00. Both tests pass at
+    head; the family-cap test fails when the cap returns to per-batch
+    (<code>negative-control-per-batch.log</code>: member batch handed $5.00
+    instead of $2.00, <code>1 failed, 1 passed</code>, exit 1).
+  </p>
+
+  <h3 id="shc-family-cost-cap-gate">Gate</h3>
+  <p id="shc-family-cost-cap-gate-text">
+    The harmonize tests (<code>grep -rl harmonize tests/standard_names/</code>)
+    plus <code>test_campaign.py</code> and the <code>test_budget_*.py</code>
+    files: 285 passed, 1 skipped, 12 deselected at base; 287 passed (+2 new), 1
+    skipped, 12 deselected at head — 0 added failures
+    (<code>gate-base.log</code>, <code>gate-head.log</code>).
+  </p>
+</section>
