@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-restore-produced-names">
+<title>Produced names: cohort re-read blocked the restore</title>
+</head>
+<body>
+<main>
+<h1 id="sib-restore-produced-names-title">The recorded stage split no longer holds</h1>
+<p id="sib-restore-produced-names-result">No authority was signed and no graph
+mutation was applied. The re-read found 25 superseded names with an incoming
+<code>PRODUCED_NAME</code>, no outgoing <code>HAS_SUCCESSOR</code>, no incoming
+<code>REFINED_FROM</code>, and no change operation beyond
+<code>realign_grammar_segments</code>. Only <strong>one</strong> has
+<code>superseded_from_stage</code>, against the recorded nine. The instrument
+stopped on that difference. The read and explicit refusal are in
+<code>cohort-guard.log</code> (<code>EXIT=1</code>); the completed read is in
+<code>confirm-split.log</code> (<code>EXIT=0</code>), both under run
+<code>r-20261014T211159251701-sib-restore-produced-names</code>.</p>
+<p id="sib-restore-produced-names-positive-control">The graph still has
+2,166 superseded names. A separate bounded count found 1,341 of them with a
+non-null <code>superseded_from_stage</code>, so the property read can see known
+values. The successor-less subset is 513 after adjacent graph work. Every one
+of the 25 has at least one producing source edge; their source ids and source
+states are listed in <code>confirm-split.log</code>. The property and edge names
+were checked against <code>imas_codex/schemas/standard_name.yaml</code>.</p>
+<p id="sib-restore-produced-names-examples"><code>energy_flux_at_first_wall</code>
+is the sole member with a prior stage, <code>refining</code>, and has source
+<code>derived:energy_flux_at_first_wall</code>. <code>alpha_angle</code> and
+<code>density_at_separatrix</code> have producing DD sources but no prior stage.
+The complete 25-name row set is in <code>confirm-split.log</code>.</p>
+<p id="sib-restore-produced-names-review-rule">The name review claim in
+<code>imas_codex/standard_names/graph_ops.py</code> requires
+<code>name_stage='drafted'</code>, <code>validation_status='valid'</code>, a real
+description, and a non-derived origin, aside from a separately scoped drain.
+Four members of the 25 are currently quarantined:
+<code>radial_ion_state_effective_momentum_convection_velocity</code>,
+<code>vertical_coordinate_of_diagnostic_component_centre</code>,
+<code>vertical_line_of_sight</code>, and
+<code>x1_coordinate_of_diagnostic_aperture</code>. Moving them to
+<code>drafted</code> alone would not make the review pool claim them. The pool
+predicate is quoted by the read in <code>graph_ops.py</code> at
+<code>REVIEW_NAME_ELIGIBILITY_WHERE</code>; the four live validation states are
+in <code>confirm-split.log</code>.</p>
+<p id="sib-restore-produced-names-next">A new ruling must identify the eight
+missing prior-stage records or revise the stage assignment for those names,
+and state how the four quarantined names become eligible for regeneration.
+The recorded 25/9 split is a stop condition, so preview, apply, readback and
+replay were not attempted.</p>
+</main>
+</body>
+</html>
