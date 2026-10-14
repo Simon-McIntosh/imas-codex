@@ -1066,6 +1066,35 @@ def _record_forced_recommended(
         )
 
 
+def _family_budget_drain(base_drain: Any, ceiling: float) -> Any:
+    """Wrap *base_drain* so one family's batches share a single cost cap.
+
+    The runner drains each batch with the budget's ``per_batch_cost_cap``,
+    which on its own would hand the anchor batch and the member batch the
+    whole cap independently. This wrapper instead gives every batch the
+    family's *remaining* budget — ``ceiling`` minus what the earlier batches
+    already spent — so the anchor spends what it needs and the members receive
+    exactly what it leaves, and the family stops at ``ceiling`` across all
+    batches. The drain's measured spend already includes the review that
+    follows each regeneration, so the cap covers that too.
+
+    ``ceiling`` is the budget's ``campaign_cost_ceiling`` — the same field the
+    runner halts on between batches — so there is one family ceiling, not a
+    second counter beside it.
+    """
+    spent = 0.0
+
+    def drain(run_id: str, batch_cost_cap: float) -> float | None:
+        nonlocal spent
+        remaining = max(ceiling - spent, 0.0)
+        cost = base_drain(run_id, min(batch_cost_cap, remaining))
+        if cost is not None:
+            spent += float(cost)
+        return cost
+
+    return drain
+
+
 def apply_families(
     gc: Any | None = None,
     *,
@@ -1146,6 +1175,10 @@ def apply_families(
             # recorded anchor is what a replan mid-run reuses, so it must
             # precede the run rather than follow it. Released on the stamp.
             _record_family_anchor(resolved_gc, fam_plan["members"], fam_plan["anchor"])
+            # The anchor batch and the member batch draw on one family cap:
+            # each batch is drained against what the family has left, not the
+            # whole cap again.
+            family_drain = _family_budget_drain(drain_fn, budget.campaign_cost_ceiling)
             runner = (
                 runner_factory(spec)
                 if runner_factory is not None
@@ -1154,7 +1187,7 @@ def apply_families(
             result = runner.run(
                 gc=resolved_gc,
                 target_ids=fam_plan["members"],
-                drain_fn=drain_fn,
+                drain_fn=family_drain,
                 batch_plan=fam_plan["batches"],
                 **kwargs,
             )
