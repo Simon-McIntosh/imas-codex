@@ -19,6 +19,9 @@ EXPERT = Path(
     "/home/ITER/mcintos/Code/imas-standard-names/docs/archive/independent-review-fixes-dup-paths-classification.html"
 )
 OUTPUT = ROOT / "docs/evidence/fragments/sn-judgment-evaluation"
+NAME_GOLDEN = OUTPUT / "golden-name-acceptable.json"
+OBJECT_GOLDEN = OUTPUT / "golden-description-object.json"
+NEAR_DUPLICATE_GOLDEN = OUTPUT / "golden-near-duplicate.json"
 SEED = 17041
 WEST_AUDITS = (
     "west-name-audit.md",
@@ -77,12 +80,33 @@ def _rank(value: str) -> str:
     return hashlib.sha256(f"{SEED}:{value}".encode()).hexdigest()
 
 
-def assign_group_splits(rows: list[dict[str, Any]], group_key: str) -> dict[str, str]:
-    """Alternate ranked groups between calibration and validation."""
-    groups = sorted({row[group_key] for row in rows}, key=_rank)
+def assign_group_splits(
+    rows: list[dict[str, Any]],
+    group_key: str,
+    prior: dict[str, str] | None = None,
+) -> dict[str, str]:
+    """Alternate ranked groups between calibration and validation.
+
+    A group already carrying a split in ``prior`` keeps it, so growing
+    a golden never moves a row the judge may already be fitted on.  Only
+    the groups new to the file are ranked and alternated among themselves.
+    An imbalance already in ``prior`` is kept, not corrected.
+    """
+    known = dict(prior or {})
+    fresh = sorted({row[group_key] for row in rows} - set(known), key=_rank)
+    for index, group in enumerate(fresh):
+        known[group] = "calibration" if index % 2 == 0 else "validation"
+    return {group: known[group] for group in {row[group_key] for row in rows}}
+
+
+def _committed_group_splits(path: Path | None) -> dict[str, str]:
+    """The ``copy_group -> split`` assignment a committed golden already holds."""
+    if path is None or not path.exists():
+        return {}
     return {
-        group: "calibration" if index % 2 == 0 else "validation"
-        for index, group in enumerate(groups)
+        row["copy_group"]: row["split"]
+        for row in json.loads(path.read_text())
+        if "copy_group" in row and "split" in row
     }
 
 
@@ -199,6 +223,7 @@ def _finish(
     graph: GraphClient,
     *,
     name_key: str = "name",
+    golden_path: Path | None = None,
 ) -> list[dict[str, Any]]:
     seen: set[tuple[str, int]] = set()
     unique = []
@@ -228,7 +253,9 @@ def _finish(
     covered = _review_coverage(
         graph, [row.get(name_key, row["unit"]) for row in unique]
     )
-    split = assign_group_splits(unique, "copy_group")
+    split = assign_group_splits(
+        unique, "copy_group", _committed_group_splits(golden_path)
+    )
     for row in unique:
         row["split"] = split[row["copy_group"]]
         row["incumbent_review"] = row.get(name_key, row["unit"]) in covered
@@ -398,7 +425,7 @@ def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
             | {"name": name}
         )
     _group_name_copies(rows)
-    return _finish(rows, graph)
+    return _finish(rows, graph, golden_path=NAME_GOLDEN)
 
 
 def build_description_object(graph: GraphClient) -> list[dict[str, Any]]:
@@ -497,7 +524,7 @@ def build_description_object(graph: GraphClient) -> list[dict[str, Any]]:
         )
         row["name"] = name
         rows.append(row)
-    return _finish(rows, graph)
+    return _finish(rows, graph, golden_path=OBJECT_GOLDEN)
 
 
 SYNONYM_RULINGS = OUTPUT / "golden-synonym-rulings.json"
@@ -628,7 +655,7 @@ def build_near_duplicate(graph: GraphClient) -> list[dict[str, Any]]:
             | {"name": names[0]}
         )
     rows.extend(_synonym_ruling_rows())
-    return _finish(rows, graph)
+    return _finish(rows, graph, golden_path=NEAR_DUPLICATE_GOLDEN)
 
 
 DOCUMENTATION_SHEET = OUTPUT / "golden-documentation-acceptable-sheet.json"
@@ -805,7 +832,7 @@ def build_documentation_sheet(
         ]
         row["conventions"] = _applied_conventions(item["name"], registry)
         rows.append(row)
-    finished = _finish(rows, graph)
+    finished = _finish(rows, graph, golden_path=DOCUMENTATION_SHEET)
     for row in finished:
         row.pop("incumbent_review", None)
         row["physics_domain"] = row.pop("domain")
@@ -874,12 +901,12 @@ def write_fixture(path: Path, rows: list[dict[str, Any]]) -> dict[str, Any]:
 def main() -> None:
     with GraphClient() as graph:
         builders = (
-            ("golden-name-acceptable.json", build_name_acceptable),
-            ("golden-description-object.json", build_description_object),
-            ("golden-near-duplicate.json", build_near_duplicate),
+            (NAME_GOLDEN, build_name_acceptable),
+            (OBJECT_GOLDEN, build_description_object),
+            (NEAR_DUPLICATE_GOLDEN, build_near_duplicate),
         )
-        for filename, builder in builders:
-            print(json.dumps(write_fixture(OUTPUT / filename, builder(graph))))
+        for path, builder in builders:
+            print(json.dumps(write_fixture(path, builder(graph))))
         print(
             json.dumps(
                 write_sheet(DOCUMENTATION_SHEET, build_documentation_sheet(graph), 400)
