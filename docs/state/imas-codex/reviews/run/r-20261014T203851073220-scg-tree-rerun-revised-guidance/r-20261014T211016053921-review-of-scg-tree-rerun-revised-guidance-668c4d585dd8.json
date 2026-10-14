@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-14T21:27:48.080Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the re-implemented accuracy lives in a one-shot evidence script; every figure reproduces at EXIT=0 and matches the coordinator's independent recount from the saved answers, so no measured figure depends on the duplicate; owners for later measures are classification_metrics and exact_match_accuracy",
+      "recorded_at": "2026-10-14T21:25:58.717806+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-14T21:10:30Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py",
+      "line": "146",
+      "severity": "follow-on",
+      "text": "score() at docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:146 re-implements exact-match accuracy already owned by imas_codex/standard_names/benchmark_roles.py:259 (exact_match_accuracy) and imas_codex/discovery/base/evaluation.py:208 (classification_metrics) without extending either; the fragment imports production modules elsewhere, so the duplication is avoidable."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py",
+      "line": "463",
+      "severity": "follow-on",
+      "text": "rescore() at docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:463 compares compute() output against figures that compute() itself wrote (run.py:447 and :492), so it demonstrates determinism of the scoring code rather than its correctness and would not redden on a figure that was wrong at commit time."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py",
+      "line": "415",
+      "severity": "follow-on",
+      "text": "new_domain at docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:415 records the raw tree decision, while the production composer applies a deterministic path-domain override to confident paths (imas_codex/graph/dd_domain_classifier.py:1227); the only override-matching path in this set is unsettled, so no figure moves, but a settled override path would be scored against a domain production does not emit."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 0 production call sites: the landed artifact is a standalone evidence fragment under docs/evidence/fragments/, imported by no runtime module (grep over imas_codex/ and tests/ finds no importer).",
+    "diff": "read the single commit 668c4d585 against base acea96ec (git show --stat: four files added, 5320 insertions) and run.py line by line; nothing outside the declared scope and no production module touched.",
+    "done_when": "the done_when names the fragment, the results JSON, one SVG and a rescoring pass at EXIT=0; all four exist and tree-rescore.log records 'RESCORE OK  old=0.791 new=0.791 settled=1.0 unsettled=122/201' then EXIT=0.",
+    "goal": "the goal is to re-measure the Jev domain tree on the 201 rule-labelled DD paths under the revised guidance; docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:425 run() classifies all 201 and scg-tree-rerun-revised-guidance-results.json records new 0.791 beside old 0.791, settled 1.0 (79/79), unsettled 122/201, spend USD 0.031998.",
+    "manifest": "read; status complete, head 668c4d585, records the paid run and the rescore both EXIT=0, spend 0.031998 under the USD 0.50 ceiling, and declares no negative control.",
+    "write_paths": "read the fence in prompt.txt:213-217 and the manifest's orientation_write_paths; the four changed paths are exactly the three fragment files plus docs/figures/sn-catalog-grouping/scg-tree-rerun-revised-guidance/."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:463 rescore() reddens on a change to compute(), but the committed figures were themselves written by compute() (run.py:447 and :492), so it proves determinism rather than correctness and no negative control was recorded.",
+    "evidence": "tree-rescore.log records RESCORE OK at EXIT=0 reproducing old=0.791 new=0.791 settled=1.0 unsettled=122/201, and the saved-answers arm is re-scored against the same revised labels as a control.",
+    "fit": "docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:377 applies the shared data-ink style and no added name, comment or ticket label appears in the fragment.",
+    "goal_fidelity": "docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:425-458 classifies the 201 paths through _classify_batch_tree and the before/after split table lands in scg-tree-rerun-revised-guidance.html:9-17.",
+    "reuse": "docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:146 score() re-implements exact-match accuracy the repository already owns at imas_codex/discovery/base/evaluation.py:208 (classification_metrics) and imas_codex/standard_names/benchmark_roles.py:259 (exact_match_accuracy) without extending either owner.",
+    "scope_discipline": "git show --stat 668c4d585 lists only the three fragment files and the figures SVG, every one inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to re-measure the Jev domain tree on the 201 rule-labelled DD paths under the revised guidance; docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:425 run() classifies all 201 and scg-tree-rerun-revised-guidance-results.json records new 0.791 beside old 0.791, settled 1.0 (79/79), unsettled 122/201, spend USD 0.031998.\nVERDICT done_when: the done_when names the fragment, the results JSON, one SVG and a rescoring pass at EXIT=0; all four exist and tree-rescore.log records 'RESCORE OK  old=0.791 new=0.791 settled=1.0 unsettled=122/201' then EXIT=0.\nVERDICT write_paths: read the fence in prompt.txt:213-217 and the manifest's orientation_write_paths; the four changed paths are exactly the three fragment files plus docs/figures/sn-catalog-grouping/scg-tree-rerun-revised-guidance/.\nVERDICT manifest: read; status complete, head 668c4d585, records the paid run and the rescore both EXIT=0, spend 0.031998 under the USD 0.50 ceiling, and declares no negative control.\nVERDICT diff: read the single commit 668c4d585 against base acea96ec (git show --stat: four files added, 5320 insertions) and run.py line by line; nothing outside the declared scope and no production module touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:425-458 classifies the 201 paths through _classify_batch_tree and the before/after split table lands in scg-tree-rerun-revised-guidance.html:9-17.\nSCORE evidence: 16\nJUSTIFICATION evidence: tree-rescore.log records RESCORE OK at EXIT=0 reproducing old=0.791 new=0.791 settled=1.0 unsettled=122/201, and the saved-answers arm is re-scored against the same revised labels as a control.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat 668c4d585 lists only the three fragment files and the figures SVG, every one inside the declared write paths.\nSCORE durability: 11\nJUSTIFICATION durability: docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:463 rescore() reddens on a change to compute(), but the committed figures were themselves written by compute() (run.py:447 and :492), so it proves determinism rather than correctness and no negative control was recorded.\nSCORE fit: 17\nJUSTIFICATION fit: docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:377 applies the shared data-ink style and no added name, comment or ticket label appears in the fragment.\nSCORE reuse: 5\nJUSTIFICATION reuse: docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:146 score() re-implements exact-match accuracy the repository already owns at imas_codex/discovery/base/evaluation.py:208 (classification_metrics) and imas_codex/standard_names/benchmark_roles.py:259 (exact_match_accuracy) without extending either owner.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:146 follow-on: score() at docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:146 re-implements exact-match accuracy already owned by imas_codex/standard_names/benchmark_roles.py:259 (exact_match_accuracy) and imas_codex/discovery/base/evaluation.py:208 (classification_metrics) without extending either; the fragment imports production modules elsewhere, so the duplication is avoidable.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:463 follow-on: rescore() at docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:463 compares compute() output against figures that compute() itself wrote (run.py:447 and :492), so it demonstrates determinism of the scoring code rather than its correctness and would not redden on a figure that was wrong at commit time.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:415 follow-on: new_domain at docs/evidence/fragments/sn-catalog-grouping/scg-tree-rerun-revised-guidance-run.py:415 records the raw tree decision, while the production composer applies a deterministic path-domain override to confident paths (imas_codex/graph/dd_domain_classifier.py:1227); the only override-matching path in this set is unsettled, so no figure moves, but a settled override path would be scored against a domain production does not emit.\n",
+  "review_run_id": "r-20261014T211016053921-review-of-scg-tree-rerun-revised-guidance-668c4d585dd8",
+  "reviewed_base_sha": "acea96ec8d8864b025468dcc249d58304386374c",
+  "reviewed_head_sha": "668c4d585dd8c7ebc19158938b1e0a56122e55e6",
+  "reviewed_run_id": "r-20261014T203851073220-scg-tree-rerun-revised-guidance",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "subject": "r-20261014T203851073220-scg-tree-rerun-revised-guidance",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T21:28:36.987383+00:00",
+  "total": 86
+}
