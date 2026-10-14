@@ -47,9 +47,22 @@
       "finding": "wiring-1",
       "reason": "",
       "when": "2026-10-14T17:48:58.052018+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "",
+      "when": "2026-10-14T17:49:02.015255+00:00"
     }
   ],
   "responses": {
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-14T17:49:02.015255+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
