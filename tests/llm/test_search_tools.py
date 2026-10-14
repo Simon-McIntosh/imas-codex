@@ -757,11 +757,14 @@ class TestSignalRerankSwitch:
         assert seen["pool"] == RERANK_POOL
 
 
-class TestSignalRerankDisabledByLatency:
-    """Keep signal reranking off while its pool-60 p95 exceeds the search budget.
+class TestSignalRerankFollowsServerMode:
+    """The signal rerank switch is a mode decision, like the DD-path one.
 
-    The DD-path rerank still follows server mode. ``_rerank_signals`` is a module
-    global set at server construction, so each case restores it after the check.
+    The role-aware signal rerank beat fusion alone on the pooled labels over the
+    three measurement passes, so a full or facility server turns it on and a
+    read-only or DD-only server leaves it off, computed beside the DD-path switch
+    the search tools read. ``_rerank_signals`` is a module global set at server
+    construction, so each case restores it after the check.
     """
 
     @pytest.fixture()
@@ -772,11 +775,11 @@ class TestSignalRerankDisabledByLatency:
         yield module
         module._rerank_signals = prior
 
-    def test_a_full_server_keeps_signal_rerank_off(self, server_module):
+    def test_a_full_server_reranks_signals(self, server_module):
         server_module.AgentsServer(read_only=False, dd_only=False)
 
-        assert server_module._rerank_signals is False
-        # The DD-path rerank still follows the full server mode.
+        assert server_module._rerank_signals is True
+        # Beside the DD-path switch, whose mode decision it mirrors.
         assert server_module._rerank_dd_paths is True
 
     def test_a_read_only_server_does_not_rerank_signals(self, server_module):
