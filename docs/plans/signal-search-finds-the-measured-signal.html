@@ -22,7 +22,7 @@
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="149">
+<meta name="plan-version" content="150">
 <meta name="plan-modified" content="2026-10-14">
 <meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47,68c603525,97eac4222,b97d4bdf4,3b1e4a193,1e2dc0252,c0a17c176,72eb206e8,fe031856a,ce47976e0,a54ca1a0e,05d22929b,f746278c4,f13f1e582,dd7e64c92,be370b25b,c5f4bc3bd,bee82d5bd,f244d24d1,d6df6b678,a4f123848,2971756f3,5162f5fec">
 </head>
@@ -1019,6 +1019,9 @@
 </div>
 <div class="r-comment" data-section="s13" data-id="c-run-r-20261014T125608628668-review-of-ssfms-cleanup-test-doubles-b27b4b02cf8c" data-who="reckon-build" data-when="2026-10-14T13:02:57.475Z">
     <div class="r-comment-body"><p>independent review of run r-20261014T101629002079-ssfms-cleanup-test-doubles over base 612105f19fba38855af48392502afc7d5b020113 and head b27b4b02cf8ce77b90242e5ccd16dd59f76238be scores all six dimensions (goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 19, reuse 20; total 115) with one follow-on finding and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-run-r-20261014T101629002079-ssfms-cleanup-test-doubles" data-who="reckon-build" data-when="2026-10-14T12:55:56.406Z">
+    <div class="r-comment-body"><p>signal-search-finds-the-measured-signal §13 — one statement-capturing graph-client double now lives in tests/recording_graph_client.py and both signal suites use it; the role suite&#x27;s criteria check, its per-row role and cost checks, its batch-cost check, the judge&#x27;s name guard and both live census population checks each fail under a mutation that replaces the value they read with a hardcoded or misrouted one, one log per mutation, the census checks falsified against independent counts read from the live graph, and a base arm that is a real run of the base revision at the same counts as the head (9 passed / 2 deselected default, 2 passed -m graph).</p></div>
 </div>
 </section>
 </main>
