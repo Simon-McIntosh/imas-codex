@@ -3,14 +3,14 @@
 
   <p id="ssfms-cleanup-test-doubles-landing">
     The signal suites each carried a private recording graph client, so a change
-    to how a statement was captured had to be repeated in every copy, and three
-    checks in the role suite compared production output against the value
-    production had just produced — a fake judge that returned whatever the
-    assertion then read, and a criteria set compared against the module's own
-    constant. Those checks pass whatever the code does. This node lands one
-    shared double and rewrites each check against a value the test supplies, so
-    the check fails when the behaviour it names is replaced by a hardcoded
-    answer.
+    to how a statement was captured had to be repeated in every copy. This node
+    lands one shared double in <code>tests/recording_graph_client.py</code> and
+    sharpens the role suite's checks, so each names the row, role or cost it
+    reads rather than comparing one composite literal: the criteria check now
+    also requires a non-empty description per role, and the accepted-row check
+    localises each role and cost to its row. A mutation log accompanies each
+    check, recording it failing when the value it reads is replaced by a
+    hardcoded answer.
   </p>
 
   <h4 id="ssfms-cleanup-test-doubles-changes">Changes, each with its check</h4>
@@ -34,32 +34,37 @@
 
   <p id="ssfms-cleanup-test-doubles-criteria-check">
     <strong>The offered criteria set is compared against a literal.</strong>
-    <code>tests/discovery/test_signal_role.py</code> now writes the six-role
+    <code>tests/discovery/test_signal_role.py</code> writes the six-role
     vocabulary once, as <code>SIX_ROLES</code>, and asserts
     <code>set(criteria) == SIX_ROLES</code> over what
-    <code>signal_role_questions()</code> returns. Previously the check compared
-    the set against <code>ROLE_CRITERIA</code>, the same constant the production
-    function returns, so a criteria set that lost a role still agreed with
-    itself. Check: with <code>signal_role_questions</code> returning a
-    hardcoded two-role set, the criteria assertion fails
+    <code>signal_role_questions()</code> returns. The base check already
+    compared the criteria set against a six-name literal, so it too failed on a
+    lost role; what this adds is the description requirement — every role's
+    description must be a non-empty string — which the base check did not read.
+    Check: with <code>signal_role_questions</code> returning a hardcoded
+    two-role set, the criteria assertion fails
     (<code>nc-01-hardcoded-criteria.log</code>).
   </p>
 
   <p id="ssfms-cleanup-test-doubles-accepted-row-check">
-    <strong>Each accepted row's role is checked on its own.</strong> The fake
-    judge answers a different role per input (<code>measured</code> for the
-    sensor, <code>reference_or_setpoint</code> for the target), and the test
-    asserts each row's <code>signal_role</code> against the literal it expects
-    for that row. The judge also asserts that the state it is handed carries
-    each row's name, which is the input the name-keyed branch reads; that guard
-    is part of what makes the check falsifiable, because a state delivered
-    without the name fails it rather than quietly taking the other branch. The
-    earlier check read the role out of the accepted rows and
-    compared it to the value the same fake had just returned, so it could not
-    fail. Check: with the judge's decision discarded for a hardcoded
-    <code>measured</code> on every row, the accepted-row assertion fails with
-    <code>assert 'measured' == 'reference_or_setpoint'</code>
-    (<code>nc-02-hardcoded-role.log</code>). This is the node's declared
+    <strong>Each accepted row's role and cost are checked on their own.</strong>
+    The fake judge answers a different role per input (<code>measured</code> for
+    the sensor, <code>reference_or_setpoint</code> for the target) and prices
+    each decision at USD 0.002, and the test asserts each row's
+    <code>signal_role</code> and <code>cost_usd</code> by id against the literal
+    it expects for that row. The judge also asserts that the state it is handed
+    carries each row's name, which is the input the name-keyed branch reads; a
+    state delivered without the name fails there rather than quietly taking the
+    other branch. The base check compared the whole accepted list against one
+    literal, so it too would fail on a wrong role or a wrong per-row cost;
+    naming each row is what says which row moved, and the per-row cost keeps a
+    regression from hiding in the batch total. Check: with the judge's decision
+    discarded for a hardcoded <code>measured</code> on every row, the accepted-row
+    assertion fails with <code>assert 'measured' == 'reference_or_setpoint'</code>
+    (<code>nc-02-hardcoded-role.log</code>); with <code>judge_rows</code> putting
+    the batch cost on one row and zero on the other, the per-row cost assertion
+    fails while the batch total still reads 0.004
+    (<code>nc-06-row-cost.log</code>). <code>nc-02</code> is the node's declared
     negative control. The name guard's own falsifiability is logged beside it:
     with <code>signal_role_state</code> mutated to hand the judge an empty
     name, the guard fires and the batch is refused
@@ -79,18 +84,21 @@
 
   <p id="ssfms-cleanup-test-doubles-census-check">
     <strong>The live census population is checked against an independent
-    count.</strong> <code>test_census_statement_runs_against_the_live_graph</code>
-    reads the census population from <code>census_signal_embeddings()</code> and
-    compares it to a <code>FacilitySignal</code> count issued in the same test
-    through a second <code>GraphClient</code>, and requires it above zero. The
-    earlier check asserted a frozen literal (still present on the
-    facility-scoped test as <code>result["n"] == 15111</code>, recorded as a
-    follow-on below). That literal does catch a census that reads nothing —
-    <code>nc-04</code> records it failing at <code>assert 0 == 15111</code> —
-    so the defect is brittleness rather than blindness: it reddens on any
-    legitimate change in the population, which sends a reader after a
-    non-defect, and the independent count removes that. Check: with the census's
-    population hardcoded to 0, the live check fails with
+    count.</strong> Both live census tests read the population from
+    <code>census_signal_embeddings()</code> and compare it to a
+    <code>FacilitySignal</code> count issued in the same test through a second
+    <code>GraphClient</code>, and require it above zero. The unscoped test
+    compares against a count of every <code>FacilitySignal</code>; the
+    facility-scoped test, whose base version asserted the frozen literal
+    <code>result["n"] == 15111</code>, now counts the JT-60SA
+    <code>FacilitySignal</code> nodes the same way. A frozen literal does catch
+    a census that reads nothing — <code>nc-04</code> records it failing at
+    <code>assert 0 == 15111</code> — so its defect was brittleness rather than
+    blindness: it reddens on any legitimate change in the population and sends
+    a reader after a non-defect. The independent count also catches a scope that
+    stops reaching the graph, since the census would then return every
+    facility's signals while the independent count stays at JT-60SA's. Check:
+    with the census's population hardcoded to 0, the live check fails with
     <code>assert 0 == 61983</code> (<code>nc-04-hardcoded-population.log</code>).
   </p>
 
@@ -119,7 +127,7 @@
   </p>
 
   <figure id="ssfms-cleanup-test-doubles-figure">
-    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles/falsifiability-matrix.svg" alt="Each rewritten check against the source state it is meant to fail under: the four matched mutation pairs fail, every unmatched pair passes.">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles/falsifiability-matrix.svg" alt="Each rewritten check against the source state it is meant to fail under: every matched mutation pair fails, every unmatched pair passes.">
     <figcaption>Rows are the production values the rewritten checks read; columns
     are the source state. A filled marker is a check that failed, so the guard
     fired; an open marker is a check that passed; an x is a pair never run
@@ -135,12 +143,12 @@
     Base revision <code>7bbf44b5663c71078d6f94f84901867ba98430b8</code> ran the
     three touched test files under the default markers at
     <strong>9 passed, 2 deselected</strong> (exit 0). At head
-    <code>33134fe2874dffb8bee11b791b59bd3f4193b129</code> the same command gives
+    <code>9a1ddd5b62afa88dbd809641ba3c8ed1d6444cbf</code> the same command gives
     <strong>9 passed, 2 deselected</strong> (exit 0) — identical counts, so no
     failure was added. The graph-marked sweep tests ran separately under
     <code>-m graph</code> against the live graph:
     <strong>2 passed</strong> at the base and <strong>2 passed</strong> at the
-    head, which is the run the census assertion above is observed in
+    head, which is the run the census assertions above are observed in
     (<code>head-default.log</code>, <code>head-graph.log</code>).
   </p>
 
@@ -151,19 +159,22 @@
     fresh directory under node-local <code>/tmp</code>, and the tree's
     gitignored generated modules are copied in from the working checkout before
     the run, because <code>tests/conftest.py</code> otherwise triggers
-    regeneration into the shared editable install. Each log carries the command
-    it ran as its first line and the command's own status as its final
-    <code>EXIT=&lt;n&gt;</code> line, so a reader can tell a completed run from a
-    truncated one.
+    regeneration into the shared editable install. Each log names the revision
+    it ran at in its header and carries the command as its first line and the
+    command's own status as its final <code>EXIT=&lt;n&gt;</code> line, so a
+    reader can tell a completed run from a truncated one and can tell which
+    revision produced it.
   </p>
 
   <p id="ssfms-cleanup-test-doubles-mutation-method">
     Each mutation was applied to a copy of the tree under node-local
     <code>/tmp</code>, run there with the mutated module confirmed as the one
     imported, and reverted between runs from a saved pristine source, one log
-    per mutation. The check that a mutation actually took effect is in the
-    driver: the anchor must appear exactly once and the target must differ from
-    the pristine source afterwards. An unmutated run in the same tree passes,
-    which is the positive control for every mutation result.
+    per mutation. Each log names the revision it ran at in its header, so a
+    result that predates a change cannot be read as evidence about it. The
+    check that a mutation actually took effect is in the driver: the anchor must
+    appear exactly once and the target must differ from the pristine source
+    afterwards. An unmutated run in the same tree passes, which is the positive
+    control for every mutation result.
   </p>
 </section>
