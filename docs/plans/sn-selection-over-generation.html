@@ -24,7 +24,7 @@
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-modified" content="2026-10-14">
 </head>
 <body>
@@ -306,6 +306,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-rerank-no-gain" data-who="reckon-build" data-when="2026-10-14T19:20:00Z">
     <div class="r-comment-body"><p>The rerank's acceptance is measured, and it shows no gain: 1 of 13 accepted with it on against 3 of 13 with it off, with an interval of [−0.50, 0.00] (<code>ea23fef2f</code>). The nDCG lift, 0.749 to 0.925, did not carry through to first-pass acceptance at this sample size. §4 stays open on a decision for the lead: keep the rerank off by default, or measure a larger draw. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s4-rerank-acceptance-measured">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-lead-rerank-ruling" data-who="Simon McIntosh" data-when="2026-10-14T19:50:00Z">
+    <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-14:</strong> keep the comparator rerank off by default, and measure a larger draw before deciding. Node <code>ssog-rerank-acceptance-large</code> runs about 120 held-out sources per arm on a new seed, counting candidates the reviewer did not score separately rather than as rejections.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e" data-who="reckon-build" data-when="2026-10-13T05:56:49.621Z">
     <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
