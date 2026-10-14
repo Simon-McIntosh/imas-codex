@@ -1,0 +1,3403 @@
+{
+ "changed_labels": 56,
+ "figures": {
+  "bands_new": [
+   {
+    "accuracy": 0.9554,
+    "band": "above 0.8",
+    "correct": 107,
+    "paths": 112
+   },
+   {
+    "accuracy": 0.7321,
+    "band": "0.5 to 0.8",
+    "correct": 41,
+    "paths": 56
+   },
+   {
+    "accuracy": 0.3333,
+    "band": "below 0.5",
+    "correct": 11,
+    "paths": 33
+   }
+  ],
+  "bands_old": [
+   {
+    "accuracy": 0.9412,
+    "band": "above 0.8",
+    "correct": 112,
+    "paths": 119
+   },
+   {
+    "accuracy": 0.7,
+    "band": "0.5 to 0.8",
+    "correct": 35,
+    "paths": 50
+   },
+   {
+    "accuracy": 0.375,
+    "band": "below 0.5",
+    "correct": 12,
+    "paths": 32
+   }
+  ],
+  "confusion_new": [
+   {
+    "count": 3,
+    "label": "equilibrium",
+    "paths": [
+     "equilibrium/time_slice/constraints/ip/measured",
+     "equilibrium/time_slice/constraints/n_e/measured",
+     "equilibrium/time_slice/constraints/n_e/reconstructed"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 3,
+    "label": "equilibrium",
+    "paths": [
+     "equilibrium/time_slice/constraints/n_e_line/reconstructed",
+     "summary/local/itb/q/value",
+     "summary/pedestal_fits/linear/n_e/pedestal_position/value"
+    ],
+    "predicted": "data_management"
+   },
+   {
+    "count": 2,
+    "label": "auxiliary_heating",
+    "paths": [
+     "lh_antennas/antenna/row/n_phi",
+     "summary/heating_current_drive/ic/k_perpendicular/value"
+    ],
+    "predicted": "waves"
+   },
+   {
+    "count": 2,
+    "label": "equilibrium",
+    "paths": [
+     "core_profiles/vacuum_toroidal_field/r0",
+     "core_sources/vacuum_toroidal_field/r0"
+    ],
+    "predicted": "magnetic_field_systems"
+   },
+   {
+    "count": 2,
+    "label": "magnetic_field_systems",
+    "paths": [
+     "ferritic/object/axisymmetric/outline/r",
+     "ferritic/object/centroid/y"
+    ],
+    "predicted": "equilibrium"
+   },
+   {
+    "count": 2,
+    "label": "neutronics",
+    "paths": [
+     "wall/description_2d/limiter/unit/midplane_power_density_nuclear",
+     "wall/description_2d/limiter/unit/power_nuclear"
+    ],
+    "predicted": "plasma_wall_interactions"
+   },
+   {
+    "count": 2,
+    "label": "neutronics",
+    "paths": [
+     "breeding_blanket/module/layer/time_slice/power_nuclear",
+     "breeding_blanket/module/time_slice/escape_flux_max"
+    ],
+    "predicted": "structural_components"
+   },
+   {
+    "count": 2,
+    "label": "spectroscopy",
+    "paths": [
+     "charge_exchange/channel/ion/n_i_over_n_e",
+     "charge_exchange/channel/ion/velocity_pol"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 2,
+    "label": "transport",
+    "paths": [
+     "edge_transport/model/ggd/ion/momentum/flux_limiter/phi",
+     "plasma_transport/model/ggd/neutral/state/momentum/v/parallel"
+    ],
+    "predicted": "gyrokinetics"
+   },
+   {
+    "count": 1,
+    "label": "core_plasma_physics",
+    "paths": [
+     "summary/composition/carbon/value"
+    ],
+    "predicted": "data_management"
+   },
+   {
+    "count": 1,
+    "label": "core_plasma_physics",
+    "paths": [
+     "summary/global_quantities/power_loss/value"
+    ],
+    "predicted": "edge_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "current_drive",
+    "paths": [
+     "summary/fusion/current/value"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "divertor_physics",
+    "paths": [
+     "divertors/divertor/target/extension_r"
+    ],
+    "predicted": "plasma_wall_interactions"
+   },
+   {
+    "count": 1,
+    "label": "edge_plasma_physics",
+    "paths": [
+     "edge_profiles/ggd/vorticity_over_r/z"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "electromagnetic_wave_diagnostics",
+    "paths": [
+     "interferometer/electrons_n"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "equilibrium",
+    "paths": [
+     "focs/outline/z"
+    ],
+    "predicted": "computational_workflow"
+   },
+   {
+    "count": 1,
+    "label": "equilibrium",
+    "paths": [
+     "equilibrium/time_slice/constraints/n_e_line/measured"
+    ],
+    "predicted": "electromagnetic_wave_diagnostics"
+   },
+   {
+    "count": 1,
+    "label": "equilibrium",
+    "paths": [
+     "ece/channel/beam_tracing/beam/position/rho_tor_norm"
+    ],
+    "predicted": "radiation_measurement_diagnostics"
+   },
+   {
+    "count": 1,
+    "label": "equilibrium",
+    "paths": [
+     "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm"
+    ],
+    "predicted": "waves"
+   },
+   {
+    "count": 1,
+    "label": "fast_particles",
+    "paths": [
+     "distributions/distribution/ggd/orbit_frequency_pol/values"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "fast_particles",
+    "paths": [
+     "distribution_sources/source/profiles_1d/particles"
+    ],
+    "predicted": "transport"
+   },
+   {
+    "count": 1,
+    "label": "fueling",
+    "paths": [
+     "spi/injector/pellet/core/atoms_n"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "magnetic_field_systems",
+    "paths": [
+     "pf_passive/loop/element/geometry/arcs_of_circle/r"
+    ],
+    "predicted": "computational_workflow"
+   },
+   {
+    "count": 1,
+    "label": "magnetohydrodynamics",
+    "paths": [
+     "disruption/profiles_1d/grid/psi"
+    ],
+    "predicted": "equilibrium"
+   },
+   {
+    "count": 1,
+    "label": "magnetohydrodynamics",
+    "paths": [
+     "mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary"
+    ],
+    "predicted": "gyrokinetics"
+   },
+   {
+    "count": 1,
+    "label": "magnetohydrodynamics",
+    "paths": [
+     "disruption/halo_currents/active_wall_point/r"
+    ],
+    "predicted": "plasma_wall_interactions"
+   },
+   {
+    "count": 1,
+    "label": "mechanical_measurement_diagnostics",
+    "paths": [
+     "barometry/gauge/position/phi"
+    ],
+    "predicted": "computational_workflow"
+   },
+   {
+    "count": 1,
+    "label": "neutronics",
+    "paths": [
+     "summary/fusion/neutron_rates/total/value"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "plasma_initiation",
+    "paths": [
+     "plasma_initiation/global_quantities/b_field_stray"
+    ],
+    "predicted": "magnetic_field_systems"
+   },
+   {
+    "count": 1,
+    "label": "radiation_measurement_diagnostics",
+    "paths": [
+     "bolometer/power_radiated_total"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "radiation_measurement_diagnostics",
+    "paths": [
+     "ece/channel/position/phi"
+    ],
+    "predicted": "equilibrium"
+   }
+  ],
+  "confusion_old": [
+   {
+    "count": 6,
+    "label": "equilibrium",
+    "paths": [
+     "equilibrium/time_slice/constraints/ip/measured",
+     "equilibrium/time_slice/constraints/n_e/measured",
+     "equilibrium/time_slice/constraints/n_e/reconstructed",
+     "equilibrium/time_slice/profiles_1d/j_phi",
+     "summary/pedestal_fits/linear/n_e/pedestal_position/value",
+     "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 2,
+    "label": "auxiliary_heating",
+    "paths": [
+     "lh_antennas/antenna/row/n_phi",
+     "summary/heating_current_drive/ic/k_perpendicular/value"
+    ],
+    "predicted": "waves"
+   },
+   {
+    "count": 2,
+    "label": "edge_plasma_physics",
+    "paths": [
+     "edge_profiles/ggd/e_field/parallel",
+     "edge_profiles/ggd/vorticity_over_r/z"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 2,
+    "label": "equilibrium",
+    "paths": [
+     "ece/channel/beam_tracing/beam/position/rho_tor_norm",
+     "equilibrium/time_slice/constraints/n_e_line/measured"
+    ],
+    "predicted": "electromagnetic_wave_diagnostics"
+   },
+   {
+    "count": 2,
+    "label": "magnetic_field_systems",
+    "paths": [
+     "ferritic/object/axisymmetric/outline/r",
+     "ferritic/object/centroid/y"
+    ],
+    "predicted": "equilibrium"
+   },
+   {
+    "count": 2,
+    "label": "neutronics",
+    "paths": [
+     "wall/description_2d/limiter/unit/midplane_power_density_nuclear",
+     "wall/description_2d/limiter/unit/power_nuclear"
+    ],
+    "predicted": "plasma_wall_interactions"
+   },
+   {
+    "count": 2,
+    "label": "neutronics",
+    "paths": [
+     "breeding_blanket/module/layer/time_slice/power_nuclear",
+     "breeding_blanket/module/time_slice/escape_flux_max"
+    ],
+    "predicted": "structural_components"
+   },
+   {
+    "count": 2,
+    "label": "transport",
+    "paths": [
+     "edge_transport/model/ggd/ion/momentum/flux_limiter/phi",
+     "plasma_transport/model/ggd/neutral/state/momentum/v/parallel"
+    ],
+    "predicted": "gyrokinetics"
+   },
+   {
+    "count": 1,
+    "label": "auxiliary_heating",
+    "paths": [
+     "ic_antennas/antenna/module/pressure/position/z"
+    ],
+    "predicted": "electromagnetic_wave_diagnostics"
+   },
+   {
+    "count": 1,
+    "label": "core_plasma_physics",
+    "paths": [
+     "summary/global_quantities/power_loss/value"
+    ],
+    "predicted": "edge_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "core_plasma_physics",
+    "paths": [
+     "summary/global_quantities/power_radiated/value"
+    ],
+    "predicted": "transport"
+   },
+   {
+    "count": 1,
+    "label": "current_drive",
+    "paths": [
+     "summary/fusion/current/value"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "divertor_physics",
+    "paths": [
+     "divertors/divertor/target/extension_r"
+    ],
+    "predicted": "plasma_wall_interactions"
+   },
+   {
+    "count": 1,
+    "label": "electromagnetic_wave_diagnostics",
+    "paths": [
+     "interferometer/electrons_n"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "equilibrium",
+    "paths": [
+     "equilibrium/time_slice/constraints/n_e_line/reconstructed"
+    ],
+    "predicted": "data_management"
+   },
+   {
+    "count": 1,
+    "label": "equilibrium",
+    "paths": [
+     "core_profiles/vacuum_toroidal_field/r0"
+    ],
+    "predicted": "magnetic_field_systems"
+   },
+   {
+    "count": 1,
+    "label": "equilibrium",
+    "paths": [
+     "equilibrium/time_slice/global_quantities/current_centre/velocity_z"
+    ],
+    "predicted": "magnetohydrodynamics"
+   },
+   {
+    "count": 1,
+    "label": "equilibrium",
+    "paths": [
+     "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm"
+    ],
+    "predicted": "waves"
+   },
+   {
+    "count": 1,
+    "label": "fast_particles",
+    "paths": [
+     "distributions/distribution/ggd/orbit_frequency_pol/values"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "fast_particles",
+    "paths": [
+     "distribution_sources/source/profiles_1d/particles"
+    ],
+    "predicted": "transport"
+   },
+   {
+    "count": 1,
+    "label": "fueling",
+    "paths": [
+     "spi/injector/pellet/core/atoms_n"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "magnetic_field_systems",
+    "paths": [
+     "pf_passive/loop/element/geometry/arcs_of_circle/r"
+    ],
+    "predicted": "computational_workflow"
+   },
+   {
+    "count": 1,
+    "label": "magnetohydrodynamics",
+    "paths": [
+     "disruption/profiles_1d/grid/psi"
+    ],
+    "predicted": "equilibrium"
+   },
+   {
+    "count": 1,
+    "label": "magnetohydrodynamics",
+    "paths": [
+     "mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary"
+    ],
+    "predicted": "gyrokinetics"
+   },
+   {
+    "count": 1,
+    "label": "magnetohydrodynamics",
+    "paths": [
+     "disruption/halo_currents/active_wall_point/r"
+    ],
+    "predicted": "plasma_wall_interactions"
+   },
+   {
+    "count": 1,
+    "label": "mechanical_measurement_diagnostics",
+    "paths": [
+     "barometry/gauge/position/phi"
+    ],
+    "predicted": "computational_workflow"
+   },
+   {
+    "count": 1,
+    "label": "neutronics",
+    "paths": [
+     "summary/fusion/neutron_rates/total/value"
+    ],
+    "predicted": "core_plasma_physics"
+   },
+   {
+    "count": 1,
+    "label": "plasma_initiation",
+    "paths": [
+     "plasma_initiation/global_quantities/b_field_stray"
+    ],
+    "predicted": "magnetic_field_systems"
+   },
+   {
+    "count": 1,
+    "label": "radiation_measurement_diagnostics",
+    "paths": [
+     "ece/channel/position/phi"
+    ],
+    "predicted": "equilibrium"
+   },
+   {
+    "count": 1,
+    "label": "radiation_measurement_diagnostics",
+    "paths": [
+     "bolometer/power_radiated_total"
+    ],
+    "predicted": "transport"
+   }
+  ],
+  "overall": {
+   "new_settled_only": {
+    "accuracy": 1.0,
+    "correct": 79,
+    "total": 79
+   },
+   "new_tree": {
+    "accuracy": 0.791,
+    "correct": 159,
+    "total": 201
+   },
+   "old_tree": {
+    "accuracy": 0.791,
+    "correct": 159,
+    "total": 201
+   },
+   "unsettled": 122,
+   "unsettled_share": 0.607
+  },
+  "per_split": {
+   "calibration": {
+    "new_settled_only": {
+     "accuracy": 1.0,
+     "correct": 31,
+     "total": 31
+    },
+    "new_tree": {
+     "accuracy": 0.8125,
+     "correct": 65,
+     "total": 80
+    },
+    "old_tree": {
+     "accuracy": 0.825,
+     "correct": 66,
+     "total": 80
+    },
+    "paths": 80,
+    "unsettled": 49
+   },
+   "reference": {
+    "new_settled_only": {
+     "accuracy": 1.0,
+     "correct": 14,
+     "total": 14
+    },
+    "new_tree": {
+     "accuracy": 0.8,
+     "correct": 32,
+     "total": 40
+    },
+    "old_tree": {
+     "accuracy": 0.825,
+     "correct": 33,
+     "total": 40
+    },
+    "paths": 40,
+    "unsettled": 26
+   },
+   "validation": {
+    "new_settled_only": {
+     "accuracy": 1.0,
+     "correct": 34,
+     "total": 34
+    },
+    "new_tree": {
+     "accuracy": 0.7654,
+     "correct": 62,
+     "total": 81
+    },
+    "old_tree": {
+     "accuracy": 0.7407,
+     "correct": 60,
+     "total": 81
+    },
+    "paths": 81,
+    "unsettled": 47
+   }
+  },
+  "stability": {
+   "answers_changed": 15,
+   "answers_reproduced": 186,
+   "gained_correct": 6,
+   "gained_paths": [
+    "edge_profiles/ggd/e_field/parallel",
+    "equilibrium/time_slice/global_quantities/current_centre/velocity_z",
+    "equilibrium/time_slice/profiles_1d/j_phi",
+    "ic_antennas/antenna/module/pressure/position/z",
+    "summary/global_quantities/power_radiated/value",
+    "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value"
+   ],
+   "lost_correct": 6,
+   "lost_paths": [
+    "charge_exchange/channel/ion/n_i_over_n_e",
+    "charge_exchange/channel/ion/velocity_pol",
+    "core_sources/vacuum_toroidal_field/r0",
+    "focs/outline/z",
+    "summary/composition/carbon/value",
+    "summary/local/itb/q/value"
+   ]
+  },
+  "unsettled_paths": [
+   "amns_data/a",
+   "amns_data/process/reactants/element/atoms_n",
+   "barometry/gauge/position/phi",
+   "barometry/gauge/pressure",
+   "bolometer/camera/channel/line_of_sight/first_point/r",
+   "bolometer/power_radiated_total",
+   "breeding_blanket/module/layer/time_slice/power_nuclear",
+   "breeding_blanket/module/time_slice/escape_flux_max",
+   "camera_ir/channel/target_surface_center/y",
+   "camera_ir/optical_element/geometry/outline/x1",
+   "camera_x_rays/detector_temperature",
+   "charge_exchange/channel/ion/n_i_over_n_e",
+   "charge_exchange/channel/ion/velocity_pol",
+   "charge_exchange/channel/ion/z_ion",
+   "core_profiles/profiles_1d/e_field/parallel",
+   "core_profiles/profiles_1d/grid/rho_pol_norm",
+   "core_profiles/profiles_1d/grid/rho_tor",
+   "core_profiles/profiles_1d/grid/rho_tor_norm",
+   "core_profiles/profiles_1d/grid/volume",
+   "core_profiles/profiles_1d/ion/element/a",
+   "core_profiles/profiles_1d/ion/element/z_n",
+   "core_profiles/profiles_1d/neutral/element/z_n",
+   "core_profiles/vacuum_toroidal_field/r0",
+   "core_sources/source/profiles_1d/grid/psi",
+   "core_sources/source/profiles_1d/grid/psi_boundary",
+   "core_sources/source/profiles_1d/grid/rho_pol_norm",
+   "core_sources/source/profiles_1d/grid/rho_tor",
+   "core_sources/source/profiles_1d/grid/rho_tor_norm",
+   "core_sources/source/profiles_1d/grid/volume",
+   "core_sources/vacuum_toroidal_field/r0",
+   "disruption/halo_currents/active_wall_point/r",
+   "disruption/profiles_1d/grid/psi",
+   "distribution_sources/source/ggd/particles/values",
+   "distribution_sources/source/profiles_1d/particles",
+   "distributions/distribution/ggd/orbit_frequency_pol/values",
+   "distributions/distribution/profiles_2d/collisions/ion/torque_thermal_phi",
+   "divertors/divertor/target/extension_r",
+   "ec_launchers/beam/phase/curvature",
+   "ece/channel/beam_tracing/beam/position/rho_tor_norm",
+   "ece/channel/delta_position_suprathermal/theta",
+   "ece/channel/position/phi",
+   "edge_profiles/ggd/e_field/parallel",
+   "edge_profiles/ggd/ion/velocity_over_b_field/phi",
+   "edge_profiles/ggd/j_ion_neutral_friction/r",
+   "edge_profiles/ggd/j_ion_neutral_friction/radial",
+   "edge_profiles/ggd/vorticity_over_r/z",
+   "edge_profiles/profiles_1d/q",
+   "edge_profiles/profiles_1d/rotation_frequency_tor_sonic",
+   "edge_transport/model/ggd/ion/momentum/flux_limiter/phi",
+   "equilibrium/time_slice/boundary/gap/angle",
+   "equilibrium/time_slice/boundary/minor_radius",
+   "equilibrium/time_slice/constraints/ip/measured",
+   "equilibrium/time_slice/constraints/n_e/measured",
+   "equilibrium/time_slice/constraints/n_e/reconstructed",
+   "equilibrium/time_slice/constraints/n_e_line/measured",
+   "equilibrium/time_slice/constraints/n_e_line/reconstructed",
+   "equilibrium/time_slice/global_quantities/current_centre/velocity_z",
+   "equilibrium/time_slice/profiles_1d/gm7",
+   "equilibrium/time_slice/profiles_1d/j_phi",
+   "ferritic/object/axisymmetric/outline/r",
+   "ferritic/object/centroid/y",
+   "focs/outline/z",
+   "gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_1/pressure_perpendicular",
+   "gyrokinetics_local/non_linear/fields_intensity_1d/b_field_parallel_perturbed_norm",
+   "gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/b_field_parallel_perturbed_norm",
+   "gyrokinetics_local/species/density_log_gradient_norm",
+   "ic_antennas/antenna/module/pressure/position/z",
+   "ic_antennas/antenna/module/strap/geometry/annulus/z",
+   "ic_antennas/antenna/module/strap/geometry/thick_line/first_point/z",
+   "ic_antennas/reference_point/z",
+   "interferometer/electrons_n",
+   "langmuir_probes/embedded/ion_saturation_current",
+   "lh_antennas/antenna/row/n_phi",
+   "lh_antennas/reference_point/z",
+   "magnetics/rogowski_coil/current",
+   "mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary",
+   "ntms/time_slice/mode/rho_tor_norm",
+   "operational_instrumentation/sensor/attachement_points/y",
+   "pellets/time_slice/pellet/path_profiles/n_e",
+   "pellets/time_slice/pellet/path_profiles/psi",
+   "pf_passive/loop/element/geometry/arcs_of_circle/r",
+   "pf_passive/loop/element/geometry/oblique/alpha",
+   "pf_plasma/element/geometry/oblique/alpha",
+   "pf_plasma/element/geometry/oblique/length_alpha",
+   "pf_plasma/element/geometry/rectangle/height",
+   "plasma_initiation/global_quantities/b_field_stray",
+   "plasma_profiles/ggd/ion/velocity_over_b_field/r",
+   "plasma_transport/model/ggd/neutral/state/momentum/v/parallel",
+   "pulse_schedule/position_control/gap/angle",
+   "soft_x_rays/channel/filter_window/outline/x2",
+   "spectrometer_visible/channel/isotope_ratios/isotope/density_ratio",
+   "spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals",
+   "spectrometer_visible/channel/polarizer/centre/z",
+   "spectrometer_x_ray_crystal/channel/crystal/thickness",
+   "spi/injector/fragment/species/density",
+   "spi/injector/fragment/volume",
+   "spi/injector/pellet/core/atoms_n",
+   "summary/boundary/minor_radius/value",
+   "summary/composition/carbon/value",
+   "summary/fusion/current/value",
+   "summary/fusion/neutron_rates/total/value",
+   "summary/gas_injection_rates/beryllium/value",
+   "summary/gas_injection_rates/bottom/value",
+   "summary/global_quantities/power_loss/value",
+   "summary/global_quantities/power_radiated/value",
+   "summary/heating_current_drive/ic/k_perpendicular/value",
+   "summary/heating_current_drive/lh/n_parallel/value",
+   "summary/local/itb/q/value",
+   "summary/pedestal_fits/linear/b_field_tor_pedestal_top_lfs/value",
+   "summary/pedestal_fits/linear/n_e/pedestal_position/value",
+   "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value",
+   "summary/pedestal_fits/mtanh/b_field_tor_pedestal_top_lfs/value",
+   "thomson_scattering/laser/end_point/r",
+   "wall/description_2d/limiter/unit/midplane_power_density_nuclear",
+   "wall/description_2d/limiter/unit/power_nuclear",
+   "wall/description_ggd/ggd/energy_fluxes/current/incident",
+   "wall/description_ggd/ggd/energy_fluxes/current/incident/values",
+   "wall/global_quantities/electrons/pumping_speed",
+   "wall/global_quantities/power_to_cooling",
+   "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm",
+   "waves/coherent_wave/profiles_1d/ion/state/power_density_fast",
+   "waves/coherent_wave/profiles_2d/ion/state/power_density_fast"
+  ]
+ },
+ "model": "typesafe/jev-1.13",
+ "path_answers": {
+  "amns_data/a": {
+   "label": "computational_workflow",
+   "new_category": "data_computing",
+   "new_category_probability": 0.65,
+   "new_domain": "computational_workflow",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.65,
+   "old_probability": 0.63,
+   "old_tree": "computational_workflow",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "amns_data/process/products/element/atoms_n": {
+   "label": "computational_workflow",
+   "new_category": "data_computing",
+   "new_category_probability": 0.92,
+   "new_domain": "computational_workflow",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.9108,
+   "old_probability": 0.93,
+   "old_tree": "computational_workflow",
+   "settled": true,
+   "settled_domain": "computational_workflow",
+   "split": "reference"
+  },
+  "amns_data/process/reactants/element/atoms_n": {
+   "label": "computational_workflow",
+   "new_category": "data_computing",
+   "new_category_probability": 0.81,
+   "new_domain": "computational_workflow",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.81,
+   "old_probability": 0.84,
+   "old_tree": "computational_workflow",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "barometry/gauge/position/phi": {
+   "label": "mechanical_measurement_diagnostics",
+   "new_category": "data_computing",
+   "new_category_probability": 0.61,
+   "new_domain": "computational_workflow",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.5978,
+   "old_probability": 0.54,
+   "old_tree": "computational_workflow",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "barometry/gauge/pressure": {
+   "label": "mechanical_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.6,
+   "new_domain": "mechanical_measurement_diagnostics",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.594,
+   "old_probability": 0.6336,
+   "old_tree": "mechanical_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "bolometer/camera/channel/aperture/surface": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.93,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.93,
+   "old_probability": 0.96,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "reference"
+  },
+  "bolometer/camera/channel/aperture/x1_width": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.98,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.98,
+   "old_probability": 0.99,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "validation"
+  },
+  "bolometer/camera/channel/detector/surface": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.95,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.95,
+   "old_probability": 0.97,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "reference"
+  },
+  "bolometer/camera/channel/line_of_sight/first_point/r": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.89,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.89,
+   "old_probability": 0.9400000000000001,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "bolometer/camera/channel/line_of_sight/first_point/z": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.92,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.92,
+   "old_probability": 0.95,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "reference"
+  },
+  "bolometer/camera/channel/line_of_sight/second_point/r": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.91,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.91,
+   "old_probability": 0.94,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "reference"
+  },
+  "bolometer/camera/channel/line_of_sight/second_point/z": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.91,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.91,
+   "old_probability": 0.95,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "reference"
+  },
+  "bolometer/power_radiated_total": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.57,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.77,
+   "new_probability": 0.4389,
+   "old_probability": 0.42479999999999996,
+   "old_tree": "transport",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "breeding_blanket/module/layer/time_slice/power_nuclear": {
+   "label": "neutronics",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.58,
+   "new_domain": "structural_components",
+   "new_domain_probability": 0.78,
+   "new_probability": 0.4524,
+   "old_probability": 0.5355,
+   "old_tree": "structural_components",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "breeding_blanket/module/time_slice/escape_flux_max": {
+   "label": "neutronics",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.75,
+   "new_domain": "structural_components",
+   "new_domain_probability": 0.94,
+   "new_probability": 0.705,
+   "old_probability": 0.816,
+   "old_tree": "structural_components",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "bremsstrahlung_visible/channel/filter/wavelength_upper": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.95,
+   "new_probability": 0.95,
+   "old_probability": 0.95,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "calibration"
+  },
+  "camera_ir/channel/target_surface_center/y": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.92,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.97,
+   "new_probability": 0.8924,
+   "old_probability": 0.891,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "camera_ir/optical_element/geometry/outline/x1": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.63,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.6237,
+   "old_probability": 0.7056,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "camera_x_rays/detector_temperature": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.96,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.69,
+   "new_probability": 0.6624,
+   "old_probability": 0.637,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "camera_x_rays/filter_window/centre/phi": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.96,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.9504,
+   "old_probability": 0.95,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "validation"
+  },
+  "camera_x_rays/filter_window/radius": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.99,
+   "old_probability": 1.0,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "validation"
+  },
+  "camera_x_rays/filter_window/wavelength_upper": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.91,
+   "new_probability": 0.91,
+   "old_probability": 0.94,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "calibration"
+  },
+  "charge_exchange/channel/cone_diameter": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.99,
+   "old_probability": 0.96,
+   "old_tree": "spectroscopy",
+   "settled": true,
+   "settled_domain": "spectroscopy",
+   "split": "validation"
+  },
+  "charge_exchange/channel/ion/n_i_over_n_e": {
+   "label": "spectroscopy",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.61,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.61,
+   "old_probability": 0.4947,
+   "old_tree": "spectroscopy",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "charge_exchange/channel/ion/velocity_pol": {
+   "label": "spectroscopy",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.59,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.96,
+   "new_probability": 0.5664,
+   "old_probability": 0.59,
+   "old_tree": "spectroscopy",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "charge_exchange/channel/ion/z_ion": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.8,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.8,
+   "old_probability": 0.83,
+   "old_tree": "spectroscopy",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "coils_non_axisymmetric/coil/conductor/elements/centres/r": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 1.0,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "validation"
+  },
+  "coils_non_axisymmetric/coil/conductor/elements/intermediate_points/r": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.99,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.99,
+   "old_probability": 0.99,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "validation"
+  },
+  "core_profiles/global_quantities/ip": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.99,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.96,
+   "new_probability": 0.9504,
+   "old_probability": 0.98,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "reference"
+  },
+  "core_profiles/global_quantities/z_eff_resistive": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.99,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.96,
+   "new_probability": 0.9504,
+   "old_probability": 0.9503999999999999,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "calibration"
+  },
+  "core_profiles/profiles_1d/e_field/parallel": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.95,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.8,
+   "new_probability": 0.76,
+   "old_probability": 0.7426,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "core_profiles/profiles_1d/electrons/temperature": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 1.0,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/grid/psi_boundary": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.9,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.9,
+   "old_probability": 0.95,
+   "old_tree": "equilibrium",
+   "settled": true,
+   "settled_domain": "equilibrium",
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/grid/rho_pol_norm": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.8,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.8,
+   "old_probability": 0.88,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/grid/rho_tor": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.78,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.7722,
+   "old_probability": 0.9207000000000001,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/grid/rho_tor_norm": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.9,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.96,
+   "new_probability": 0.864,
+   "old_probability": 0.9215,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/grid/volume": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.71,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.71,
+   "old_probability": 0.78,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/ion/element/a": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.7,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.7,
+   "old_probability": 0.68,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/ion/element/z_n": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.67,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.67,
+   "old_probability": 0.83,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/ion/state/z_max": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 1.0,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/ion/state/z_min": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.99,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.99,
+   "old_probability": 1.0,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "calibration"
+  },
+  "core_profiles/profiles_1d/ion/z_ion": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 1.0,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/neutral/element/z_n": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.69,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.6831,
+   "old_probability": 0.7448,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/q": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 1.0,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.98,
+   "old_probability": 0.98,
+   "old_tree": "equilibrium",
+   "settled": true,
+   "settled_domain": "equilibrium",
+   "split": "reference"
+  },
+  "core_profiles/profiles_1d/rotation_frequency_tor_sonic": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 1.0,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.99,
+   "old_probability": 1.0,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "calibration"
+  },
+  "core_profiles/profiles_1d/zeff": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 1.0,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "calibration"
+  },
+  "core_profiles/profiles_2d/ion/state/z_max": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.94,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.94,
+   "old_probability": 0.94,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "reference"
+  },
+  "core_profiles/profiles_2d/ion/state/z_min": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.99,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.99,
+   "old_probability": 1.0,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "calibration"
+  },
+  "core_profiles/vacuum_toroidal_field/r0": {
+   "label": "equilibrium",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.65,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 0.64,
+   "new_probability": 0.416,
+   "old_probability": 0.42240000000000005,
+   "old_tree": "magnetic_field_systems",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_sources/source/profiles_1d/grid/psi": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.87,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.8526,
+   "old_probability": 0.8918,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_sources/source/profiles_1d/grid/psi_boundary": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.64,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.6336,
+   "old_probability": 0.6732,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_sources/source/profiles_1d/grid/rho_pol_norm": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.64,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.6272,
+   "old_probability": 0.735,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_sources/source/profiles_1d/grid/rho_tor": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.66,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.6468,
+   "old_probability": 0.7469,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_sources/source/profiles_1d/grid/rho_tor_norm": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.63,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.9,
+   "new_probability": 0.567,
+   "old_probability": 0.7031000000000001,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_sources/source/profiles_1d/grid/volume": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.51,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.4998,
+   "old_probability": 0.5488000000000001,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "core_sources/vacuum_toroidal_field/r0": {
+   "label": "equilibrium",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.52,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 0.79,
+   "new_probability": 0.4108,
+   "old_probability": 0.4059,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "disruption/halo_currents/active_wall_point/r": {
+   "label": "magnetohydrodynamics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.81,
+   "new_domain": "plasma_wall_interactions",
+   "new_domain_probability": 0.66,
+   "new_probability": 0.5346,
+   "old_probability": 0.5599999999999999,
+   "old_tree": "plasma_wall_interactions",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "disruption/profiles_1d/grid/psi": {
+   "label": "magnetohydrodynamics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.86,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.8428,
+   "old_probability": 0.9023999999999999,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "distribution_sources/source/ggd/particles/values": {
+   "label": "fast_particles",
+   "new_category": "energetic_particles",
+   "new_category_probability": 0.44,
+   "new_domain": "fast_particles",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.4356,
+   "old_probability": 0.54,
+   "old_tree": "fast_particles",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "distribution_sources/source/profiles_1d/particles": {
+   "label": "fast_particles",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.61,
+   "new_domain": "transport",
+   "new_domain_probability": 0.69,
+   "new_probability": 0.4209,
+   "old_probability": 0.7524,
+   "old_tree": "transport",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "distributions/distribution/ggd/orbit_frequency_pol/values": {
+   "label": "fast_particles",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.46,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.42,
+   "new_probability": 0.1932,
+   "old_probability": 0.2208,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "distributions/distribution/global_quantities/power_first_orbit": {
+   "label": "fast_particles",
+   "new_category": "energetic_particles",
+   "new_category_probability": 0.97,
+   "new_domain": "fast_particles",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.97,
+   "old_probability": 0.99,
+   "old_tree": "fast_particles",
+   "settled": true,
+   "settled_domain": "fast_particles",
+   "split": "validation"
+  },
+  "distributions/distribution/profiles_2d/collisions/ion/torque_thermal_phi": {
+   "label": "fast_particles",
+   "new_category": "energetic_particles",
+   "new_category_probability": 0.48,
+   "new_domain": "fast_particles",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.48,
+   "old_probability": 0.67,
+   "old_tree": "fast_particles",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "divertors/divertor/power_currents": {
+   "label": "divertor_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 1.0,
+   "new_domain": "divertor_physics",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.98,
+   "old_probability": 0.98,
+   "old_tree": "divertor_physics",
+   "settled": true,
+   "settled_domain": "divertor_physics",
+   "split": "calibration"
+  },
+  "divertors/divertor/target/extension_r": {
+   "label": "divertor_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.96,
+   "new_domain": "plasma_wall_interactions",
+   "new_domain_probability": 0.66,
+   "new_probability": 0.6336,
+   "old_probability": 0.5722999999999999,
+   "old_tree": "plasma_wall_interactions",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "ec_launchers/beam/phase/curvature": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 1.0,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 0.81,
+   "new_probability": 0.81,
+   "old_probability": 0.79,
+   "old_tree": "auxiliary_heating",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "ece/channel/beam_tracing/beam/position/rho_tor_norm": {
+   "label": "equilibrium",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.57,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.32,
+   "new_probability": 0.1824,
+   "old_probability": 0.33390000000000003,
+   "old_tree": "electromagnetic_wave_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "ece/channel/beam_tracing/beam/wave_vector/n_parallel": {
+   "label": "waves",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.95,
+   "new_domain": "waves",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.9405,
+   "old_probability": 0.9602999999999999,
+   "old_tree": "waves",
+   "settled": true,
+   "settled_domain": "waves",
+   "split": "calibration"
+  },
+  "ece/channel/delta_position_suprathermal/theta": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.93,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.87,
+   "new_probability": 0.8091,
+   "old_probability": 0.54,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "ece/channel/position/phi": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.45,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.94,
+   "new_probability": 0.423,
+   "old_probability": 0.47519999999999996,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "edge_profiles/ggd/e_field/parallel": {
+   "label": "edge_plasma_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.39,
+   "new_domain": "edge_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.39,
+   "old_probability": 0.1482,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "edge_profiles/ggd/electrons/temperature/values": {
+   "label": "edge_plasma_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 1.0,
+   "new_domain": "edge_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "edge_plasma_physics",
+   "settled": true,
+   "settled_domain": "edge_plasma_physics",
+   "split": "reference"
+  },
+  "edge_profiles/ggd/ion/velocity_over_b_field/phi": {
+   "label": "edge_plasma_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.71,
+   "new_domain": "edge_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.71,
+   "old_probability": 0.55,
+   "old_tree": "edge_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "edge_profiles/ggd/j_ion_neutral_friction/r": {
+   "label": "edge_plasma_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.76,
+   "new_domain": "edge_plasma_physics",
+   "new_domain_probability": 0.93,
+   "new_probability": 0.7068,
+   "old_probability": 0.48600000000000004,
+   "old_tree": "edge_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "edge_profiles/ggd/j_ion_neutral_friction/radial": {
+   "label": "edge_plasma_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.75,
+   "new_domain": "edge_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.75,
+   "old_probability": 0.6731999999999999,
+   "old_tree": "edge_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "edge_profiles/ggd/vorticity_over_r/z": {
+   "label": "edge_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.58,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.4,
+   "new_probability": 0.232,
+   "old_probability": 0.2928,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "edge_profiles/profiles_1d/q": {
+   "label": "edge_plasma_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.79,
+   "new_domain": "edge_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.79,
+   "old_probability": 0.5700000000000001,
+   "old_tree": "edge_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "edge_profiles/profiles_1d/rotation_frequency_tor_sonic": {
+   "label": "edge_plasma_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.78,
+   "new_domain": "edge_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.78,
+   "old_probability": 0.58,
+   "old_tree": "edge_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "edge_transport/model/ggd/ion/momentum/flux_limiter/phi": {
+   "label": "transport",
+   "new_category": "advanced_physics",
+   "new_category_probability": 0.48,
+   "new_domain": "gyrokinetics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.48,
+   "old_probability": 0.46,
+   "old_tree": "gyrokinetics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "equilibrium/time_slice/boundary/gap/angle": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.67,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.67,
+   "old_probability": 0.7524,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "equilibrium/time_slice/boundary/minor_radius": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.87,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.8613,
+   "old_probability": 0.9503999999999999,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "equilibrium/time_slice/constraints/ip/measured": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.83,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.71,
+   "new_probability": 0.5893,
+   "old_probability": 0.4964,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "equilibrium/time_slice/constraints/n_e/measured": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.73,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.95,
+   "new_probability": 0.6935,
+   "old_probability": 0.611,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "equilibrium/time_slice/constraints/n_e/reconstructed": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.41,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.92,
+   "new_probability": 0.3772,
+   "old_probability": 0.3471,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "reference"
+  },
+  "equilibrium/time_slice/constraints/n_e_line/measured": {
+   "label": "equilibrium",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.57,
+   "new_domain": "electromagnetic_wave_diagnostics",
+   "new_domain_probability": 0.55,
+   "new_probability": 0.3135,
+   "old_probability": 0.7084,
+   "old_tree": "electromagnetic_wave_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "equilibrium/time_slice/constraints/n_e_line/reconstructed": {
+   "label": "equilibrium",
+   "new_category": "data_computing",
+   "new_category_probability": 0.58,
+   "new_domain": "data_management",
+   "new_domain_probability": 0.7,
+   "new_probability": 0.406,
+   "old_probability": 0.34219999999999995,
+   "old_tree": "data_management",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "equilibrium/time_slice/global_quantities/current_centre/velocity_z": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.99,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.61,
+   "new_probability": 0.6039,
+   "old_probability": 0.46,
+   "old_tree": "magnetohydrodynamics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "equilibrium/time_slice/global_quantities/q_min/psi_norm": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.99,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.9801,
+   "old_probability": 0.99,
+   "old_tree": "equilibrium",
+   "settled": true,
+   "settled_domain": "equilibrium",
+   "split": "calibration"
+  },
+  "equilibrium/time_slice/profiles_1d/dvolume_dpsi": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.98,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.98,
+   "old_probability": 0.9801,
+   "old_tree": "equilibrium",
+   "settled": true,
+   "settled_domain": "equilibrium",
+   "split": "validation"
+  },
+  "equilibrium/time_slice/profiles_1d/gm7": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.89,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.8811,
+   "old_probability": 0.9306,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "equilibrium/time_slice/profiles_1d/j_phi": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 1.0,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.53,
+   "new_probability": 0.53,
+   "old_probability": 0.57,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "ferritic/object/axisymmetric/outline/r": {
+   "label": "magnetic_field_systems",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.32,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.97,
+   "new_probability": 0.3104,
+   "old_probability": 0.3663,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "ferritic/object/centroid/y": {
+   "label": "magnetic_field_systems",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.39,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.77,
+   "new_probability": 0.3003,
+   "old_probability": 0.24189999999999998,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "focs/outline/z": {
+   "label": "equilibrium",
+   "new_category": "data_computing",
+   "new_category_probability": 0.47,
+   "new_domain": "computational_workflow",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.47,
+   "old_probability": 0.6237,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_1/pressure_perpendicular": {
+   "label": "gyrokinetics",
+   "new_category": "advanced_physics",
+   "new_category_probability": 0.78,
+   "new_domain": "gyrokinetics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.78,
+   "old_probability": 0.9,
+   "old_tree": "gyrokinetics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "gyrokinetics_local/non_linear/fields_intensity_1d/b_field_parallel_perturbed_norm": {
+   "label": "gyrokinetics",
+   "new_category": "advanced_physics",
+   "new_category_probability": 0.8,
+   "new_domain": "gyrokinetics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.8,
+   "old_probability": 0.87,
+   "old_tree": "gyrokinetics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/b_field_parallel_perturbed_norm": {
+   "label": "gyrokinetics",
+   "new_category": "advanced_physics",
+   "new_category_probability": 0.79,
+   "new_domain": "gyrokinetics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.79,
+   "old_probability": 0.91,
+   "old_tree": "gyrokinetics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "gyrokinetics_local/species/density_log_gradient_norm": {
+   "label": "gyrokinetics",
+   "new_category": "advanced_physics",
+   "new_category_probability": 0.77,
+   "new_domain": "gyrokinetics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.77,
+   "old_probability": 0.87,
+   "old_tree": "gyrokinetics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "hard_x_rays/channel/detector/outline/x2": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.9,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.9,
+   "old_probability": 0.93,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "calibration"
+  },
+  "hard_x_rays/channel/energy_band/detection_efficiency": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "validation"
+  },
+  "hard_x_rays/channel/filter_window/centre/phi": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.94,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.9306,
+   "old_probability": 0.93,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "validation"
+  },
+  "hard_x_rays/channel/filter_window/radius": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.98,
+   "old_probability": 0.99,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "validation"
+  },
+  "ic_antennas/antenna/module/coupling_resistance": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 1.0,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "auxiliary_heating",
+   "settled": true,
+   "settled_domain": "auxiliary_heating",
+   "split": "validation"
+  },
+  "ic_antennas/antenna/module/pressure/position/z": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.25,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.2475,
+   "old_probability": 0.27030000000000004,
+   "old_tree": "electromagnetic_wave_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "ic_antennas/antenna/module/strap/geometry/annulus/z": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.85,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.85,
+   "old_probability": 0.8,
+   "old_tree": "auxiliary_heating",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "ic_antennas/antenna/module/strap/geometry/thick_line/first_point/z": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.75,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.75,
+   "old_probability": 0.7,
+   "old_tree": "auxiliary_heating",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "ic_antennas/reference_point/z": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.77,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.77,
+   "old_probability": 0.4,
+   "old_tree": "auxiliary_heating",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "interferometer/channel/wavelength/phase_to_n_e_line": {
+   "label": "electromagnetic_wave_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.99,
+   "new_domain": "electromagnetic_wave_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.99,
+   "old_probability": 0.99,
+   "old_tree": "electromagnetic_wave_diagnostics",
+   "settled": true,
+   "settled_domain": "electromagnetic_wave_diagnostics",
+   "split": "validation"
+  },
+  "interferometer/electrons_n": {
+   "label": "electromagnetic_wave_diagnostics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.67,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.67,
+   "old_probability": 0.64,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "langmuir_probes/embedded/ion_saturation_current": {
+   "label": "particle_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.69,
+   "new_domain": "particle_measurement_diagnostics",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.6762,
+   "old_probability": 0.71,
+   "old_tree": "particle_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "langmuir_probes/reciprocating/plunge/collector/ion_saturation_current": {
+   "label": "particle_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.99,
+   "new_domain": "particle_measurement_diagnostics",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.9702,
+   "old_probability": 0.99,
+   "old_tree": "particle_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "particle_measurement_diagnostics",
+   "split": "validation"
+  },
+  "lh_antennas/antenna/row/n_phi": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 1.0,
+   "new_domain": "waves",
+   "new_domain_probability": 0.72,
+   "new_probability": 0.72,
+   "old_probability": 0.81,
+   "old_tree": "waves",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "lh_antennas/reference_point/z": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.64,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.64,
+   "old_probability": 0.4,
+   "old_tree": "auxiliary_heating",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "magnetics/b_field_phi_probe/turns": {
+   "label": "magnetic_field_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.99,
+   "new_domain": "magnetic_field_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.99,
+   "old_probability": 1.0,
+   "old_tree": "magnetic_field_diagnostics",
+   "settled": true,
+   "settled_domain": "magnetic_field_diagnostics",
+   "split": "validation"
+  },
+  "magnetics/rogowski_coil/current": {
+   "label": "magnetic_field_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.87,
+   "new_domain": "magnetic_field_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.87,
+   "old_probability": 0.92,
+   "old_tree": "magnetic_field_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "magnetics/shunt/voltage": {
+   "label": "magnetic_field_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.97,
+   "new_domain": "magnetic_field_diagnostics",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.9603,
+   "old_probability": 0.9702,
+   "old_tree": "magnetic_field_diagnostics",
+   "settled": true,
+   "settled_domain": "magnetic_field_diagnostics",
+   "split": "calibration"
+  },
+  "mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary": {
+   "label": "magnetohydrodynamics",
+   "new_category": "advanced_physics",
+   "new_category_probability": 0.58,
+   "new_domain": "gyrokinetics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.58,
+   "old_probability": 0.68,
+   "old_tree": "gyrokinetics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "mse/channel/detector/radius": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.97,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.97,
+   "old_probability": 0.9801,
+   "old_tree": "spectroscopy",
+   "settled": true,
+   "settled_domain": "spectroscopy",
+   "split": "calibration"
+  },
+  "nbi/unit/beamlets_group/tilting/delta_position/r": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.96,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.9504,
+   "old_probability": 0.9119999999999999,
+   "old_tree": "auxiliary_heating",
+   "settled": true,
+   "settled_domain": "auxiliary_heating",
+   "split": "validation"
+  },
+  "nbi/unit/beamlets_group/tilting/delta_position/z": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.91,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.91,
+   "old_probability": 0.89,
+   "old_tree": "auxiliary_heating",
+   "settled": true,
+   "settled_domain": "auxiliary_heating",
+   "split": "calibration"
+  },
+  "nbi/unit/source/radius": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.97,
+   "new_domain": "auxiliary_heating",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.97,
+   "old_probability": 0.95,
+   "old_tree": "auxiliary_heating",
+   "settled": true,
+   "settled_domain": "auxiliary_heating",
+   "split": "validation"
+  },
+  "neutron_diagnostic/detector/aperture/radius": {
+   "label": "neutronics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.98,
+   "new_domain": "neutronics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.98,
+   "old_probability": 0.99,
+   "old_tree": "neutronics",
+   "settled": true,
+   "settled_domain": "neutronics",
+   "split": "calibration"
+  },
+  "neutron_diagnostic/detector/geometry/surface": {
+   "label": "neutronics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.94,
+   "new_domain": "neutronics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.94,
+   "old_probability": 0.9207000000000001,
+   "old_tree": "neutronics",
+   "settled": true,
+   "settled_domain": "neutronics",
+   "split": "calibration"
+  },
+  "neutron_diagnostic/detector/geometry/x1_width": {
+   "label": "neutronics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.96,
+   "new_domain": "neutronics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.96,
+   "old_probability": 0.9702,
+   "old_tree": "neutronics",
+   "settled": true,
+   "settled_domain": "neutronics",
+   "split": "validation"
+  },
+  "ntms/time_slice/mode/rho_tor_norm": {
+   "label": "magnetohydrodynamics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.89,
+   "new_domain": "magnetohydrodynamics",
+   "new_domain_probability": 0.81,
+   "new_probability": 0.7209,
+   "old_probability": 0.8827,
+   "old_tree": "magnetohydrodynamics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "operational_instrumentation/sensor/attachement_points/y": {
+   "label": "mechanical_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.88,
+   "new_domain": "mechanical_measurement_diagnostics",
+   "new_domain_probability": 0.97,
+   "new_probability": 0.8536,
+   "old_probability": 0.882,
+   "old_tree": "mechanical_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "pellets/time_slice/pellet/path_profiles/n_e": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.46,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.46,
+   "old_probability": 0.48,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "pellets/time_slice/pellet/path_profiles/psi": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.62,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.62,
+   "old_probability": 0.5741999999999999,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "pf_active/coil/element/geometry/arcs_of_circle/curvature_radii": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.98,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.98,
+   "old_probability": 0.98,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "validation"
+  },
+  "pf_active/coil/element/geometry/outline/r": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.91,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.91,
+   "old_probability": 0.95,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "validation"
+  },
+  "pf_active/coil/geometry/arcs_of_circle/curvature_radii": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.96,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.96,
+   "old_probability": 0.98,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "validation"
+  },
+  "pf_active/coil/resistance": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 1.0,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 0.99,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "validation"
+  },
+  "pf_active/coil/temperature": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 1.0,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "calibration"
+  },
+  "pf_passive/loop/element/geometry/arcs_of_circle/r": {
+   "label": "magnetic_field_systems",
+   "new_category": "data_computing",
+   "new_category_probability": 0.52,
+   "new_domain": "computational_workflow",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.5148,
+   "old_probability": 0.49,
+   "old_tree": "computational_workflow",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "pf_passive/loop/element/geometry/oblique/alpha": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.91,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 0.96,
+   "new_probability": 0.8736,
+   "old_probability": 0.8835,
+   "old_tree": "magnetic_field_systems",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "pf_plasma/element/geometry/oblique/alpha": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.77,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.89,
+   "new_probability": 0.6853,
+   "old_probability": 0.7475999999999999,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "pf_plasma/element/geometry/oblique/length_alpha": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.75,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.9,
+   "new_probability": 0.675,
+   "old_probability": 0.6496999999999999,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "pf_plasma/element/geometry/rectangle/height": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.48,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.75,
+   "new_probability": 0.36,
+   "old_probability": 0.3358,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "plasma_initiation/global_quantities/b_field_stray": {
+   "label": "plasma_initiation",
+   "new_category": "machine_systems",
+   "new_category_probability": 0.52,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 0.97,
+   "new_probability": 0.5044,
+   "old_probability": 0.5194,
+   "old_tree": "magnetic_field_systems",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "plasma_profiles/ggd/ion/velocity_over_b_field/r": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.93,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.9,
+   "new_probability": 0.837,
+   "old_probability": 0.7565,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "plasma_profiles/profiles_1d/ion/state/z_average": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.98,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.98,
+   "old_probability": 0.99,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "validation"
+  },
+  "plasma_transport/model/ggd/neutral/state/momentum/v/parallel": {
+   "label": "transport",
+   "new_category": "advanced_physics",
+   "new_category_probability": 0.41,
+   "new_domain": "gyrokinetics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.41,
+   "old_probability": 0.38,
+   "old_tree": "gyrokinetics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "polarimeter/channel/ellipticity_initial": {
+   "label": "electromagnetic_wave_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "electromagnetic_wave_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "electromagnetic_wave_diagnostics",
+   "settled": true,
+   "settled_domain": "electromagnetic_wave_diagnostics",
+   "split": "calibration"
+  },
+  "polarimeter/channel/polarization_initial": {
+   "label": "electromagnetic_wave_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.99,
+   "new_domain": "electromagnetic_wave_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.99,
+   "old_probability": 1.0,
+   "old_tree": "electromagnetic_wave_diagnostics",
+   "settled": true,
+   "settled_domain": "electromagnetic_wave_diagnostics",
+   "split": "calibration"
+  },
+  "pulse_schedule/position_control/gap/angle": {
+   "label": "plasma_control",
+   "new_category": "control_operations",
+   "new_category_probability": 0.94,
+   "new_domain": "plasma_control",
+   "new_domain_probability": 0.94,
+   "new_probability": 0.8836,
+   "old_probability": 0.9114,
+   "old_tree": "plasma_control",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "reflectometer_fluctuation/channel/amplitude": {
+   "label": "electromagnetic_wave_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "electromagnetic_wave_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "electromagnetic_wave_diagnostics",
+   "settled": true,
+   "settled_domain": "electromagnetic_wave_diagnostics",
+   "split": "validation"
+  },
+  "reflectometer_profile/channel/amplitude": {
+   "label": "electromagnetic_wave_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "electromagnetic_wave_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "electromagnetic_wave_diagnostics",
+   "settled": true,
+   "settled_domain": "electromagnetic_wave_diagnostics",
+   "split": "validation"
+  },
+  "refractometer/channel/bandwidth/frequency_main": {
+   "label": "electromagnetic_wave_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "electromagnetic_wave_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "electromagnetic_wave_diagnostics",
+   "settled": true,
+   "settled_domain": "electromagnetic_wave_diagnostics",
+   "split": "validation"
+  },
+  "runaway_electrons/global_quantities/volume_average/energy_density_kinetic": {
+   "label": "runaway_electrons",
+   "new_category": "energetic_particles",
+   "new_category_probability": 1.0,
+   "new_domain": "runaway_electrons",
+   "new_domain_probability": 0.97,
+   "new_probability": 0.97,
+   "old_probability": 0.96,
+   "old_tree": "runaway_electrons",
+   "settled": true,
+   "settled_domain": "runaway_electrons",
+   "split": "validation"
+  },
+  "soft_x_rays/channel/detector/centre/phi": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.94,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.94,
+   "old_probability": 0.96,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "validation"
+  },
+  "soft_x_rays/channel/detector/outline/x1": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.9,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.9,
+   "old_probability": 0.93,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "calibration"
+  },
+  "soft_x_rays/channel/detector/outline/x2": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.96,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.96,
+   "old_probability": 0.97,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "validation"
+  },
+  "soft_x_rays/channel/etendue": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "calibration"
+  },
+  "soft_x_rays/channel/filter_window/outline/x2": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.88,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.8712,
+   "old_probability": 0.8924,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "soft_x_rays/channel/filter_window/x2_width": {
+   "label": "radiation_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.97,
+   "new_domain": "radiation_measurement_diagnostics",
+   "new_domain_probability": 0.97,
+   "new_probability": 0.9409,
+   "old_probability": 0.9603999999999999,
+   "old_tree": "radiation_measurement_diagnostics",
+   "settled": true,
+   "settled_domain": "radiation_measurement_diagnostics",
+   "split": "validation"
+  },
+  "spectrometer_uv/channel/detector/outline/x1": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.92,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.9016,
+   "old_probability": 0.9408,
+   "old_tree": "spectroscopy",
+   "settled": true,
+   "settled_domain": "spectroscopy",
+   "split": "calibration"
+  },
+  "spectrometer_uv/channel/detector/radius": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.98,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.9702,
+   "old_probability": 0.9702,
+   "old_tree": "spectroscopy",
+   "settled": true,
+   "settled_domain": "spectroscopy",
+   "split": "calibration"
+  },
+  "spectrometer_uv/channel/grating/image_field/centre/phi": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.97,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.97,
+   "new_probability": 0.9409,
+   "old_probability": 0.9702,
+   "old_tree": "spectroscopy",
+   "settled": true,
+   "settled_domain": "spectroscopy",
+   "split": "calibration"
+  },
+  "spectrometer_visible/channel/grating_spectrometer/processed_line/intensity": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 1.0,
+   "new_probability": 1.0,
+   "old_probability": 1.0,
+   "old_tree": "spectroscopy",
+   "settled": true,
+   "settled_domain": "spectroscopy",
+   "split": "validation"
+  },
+  "spectrometer_visible/channel/isotope_ratios/isotope/density_ratio": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.84,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.8232,
+   "old_probability": 0.89,
+   "old_tree": "spectroscopy",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "spectrometer_visible/channel/light_collection_efficiencies/values": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.99,
+   "old_probability": 1.0,
+   "old_tree": "spectroscopy",
+   "settled": true,
+   "settled_domain": "spectroscopy",
+   "split": "validation"
+  },
+  "spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.81,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.8019,
+   "old_probability": 0.8019000000000001,
+   "old_tree": "spectroscopy",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "spectrometer_visible/channel/polarizer/centre/z": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.99,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.79,
+   "new_probability": 0.7821,
+   "old_probability": 0.8526,
+   "old_tree": "spectroscopy",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "spectrometer_x_ray_crystal/channel/crystal/radius": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.95,
+   "new_probability": 0.95,
+   "old_probability": 0.95,
+   "old_tree": "spectroscopy",
+   "settled": true,
+   "settled_domain": "spectroscopy",
+   "split": "calibration"
+  },
+  "spectrometer_x_ray_crystal/channel/crystal/thickness": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 1.0,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.89,
+   "new_probability": 0.89,
+   "old_probability": 0.92,
+   "old_tree": "spectroscopy",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "spectrometer_x_ray_crystal/channel/reflector/x2_curvature": {
+   "label": "spectroscopy",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.99,
+   "new_domain": "spectroscopy",
+   "new_domain_probability": 0.92,
+   "new_probability": 0.9108,
+   "old_probability": 0.97,
+   "old_tree": "spectroscopy",
+   "settled": true,
+   "settled_domain": "spectroscopy",
+   "split": "calibration"
+  },
+  "spi/injector/fragment/species/density": {
+   "label": "fueling",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.5,
+   "new_domain": "fueling",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.5,
+   "old_probability": 0.41,
+   "old_tree": "fueling",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "spi/injector/fragment/volume": {
+   "label": "fueling",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.45,
+   "new_domain": "fueling",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.45,
+   "old_probability": 0.4,
+   "old_tree": "fueling",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "spi/injector/pellet/core/atoms_n": {
+   "label": "fueling",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.45,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.77,
+   "new_probability": 0.3465,
+   "old_probability": 0.403,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "summary/boundary/minor_radius/value": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.7,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.693,
+   "old_probability": 0.8613,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "summary/composition/carbon/value": {
+   "label": "core_plasma_physics",
+   "new_category": "data_computing",
+   "new_category_probability": 0.5,
+   "new_domain": "data_management",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.495,
+   "old_probability": 0.72,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "summary/fusion/current/value": {
+   "label": "current_drive",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.53,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.89,
+   "new_probability": 0.4717,
+   "old_probability": 0.5277999999999999,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "summary/fusion/neutron_rates/total/value": {
+   "label": "neutronics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.64,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.82,
+   "new_probability": 0.5248,
+   "old_probability": 0.585,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "summary/gas_injection_rates/beryllium/value": {
+   "label": "fueling",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.57,
+   "new_domain": "fueling",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.57,
+   "old_probability": 0.47000000000000003,
+   "old_tree": "fueling",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "summary/gas_injection_rates/bottom/value": {
+   "label": "fueling",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.68,
+   "new_domain": "fueling",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.68,
+   "old_probability": 0.52,
+   "old_tree": "fueling",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "summary/global_quantities/power_loss/value": {
+   "label": "core_plasma_physics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.92,
+   "new_domain": "edge_plasma_physics",
+   "new_domain_probability": 0.72,
+   "new_probability": 0.6624,
+   "old_probability": 0.6525,
+   "old_tree": "edge_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "summary/global_quantities/power_radiated/value": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.92,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 0.82,
+   "new_probability": 0.7544,
+   "old_probability": 0.5605,
+   "old_tree": "transport",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "summary/heating_current_drive/ic/k_perpendicular/value": {
+   "label": "auxiliary_heating",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 1.0,
+   "new_domain": "waves",
+   "new_domain_probability": 0.85,
+   "new_probability": 0.85,
+   "old_probability": 0.91,
+   "old_tree": "waves",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "summary/heating_current_drive/lh/current/value": {
+   "label": "current_drive",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.93,
+   "new_domain": "current_drive",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.93,
+   "old_probability": 0.95,
+   "old_tree": "current_drive",
+   "settled": true,
+   "settled_domain": "current_drive",
+   "split": "validation"
+  },
+  "summary/heating_current_drive/lh/n_parallel/value": {
+   "label": "waves",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 1.0,
+   "new_domain": "waves",
+   "new_domain_probability": 0.82,
+   "new_probability": 0.82,
+   "old_probability": 0.93,
+   "old_tree": "waves",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "summary/local/itb/q/value": {
+   "label": "equilibrium",
+   "new_category": "data_computing",
+   "new_category_probability": 0.42,
+   "new_domain": "data_management",
+   "new_domain_probability": 0.96,
+   "new_probability": 0.4032,
+   "old_probability": 0.3822,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "summary/pedestal_fits/linear/b_field_tor_pedestal_top_lfs/value": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.4,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.92,
+   "new_probability": 0.368,
+   "old_probability": 0.455,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "summary/pedestal_fits/linear/n_e/pedestal_position/value": {
+   "label": "equilibrium",
+   "new_category": "data_computing",
+   "new_category_probability": 0.33,
+   "new_domain": "data_management",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.33,
+   "old_probability": 0.3596,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.55,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.49,
+   "new_probability": 0.2695,
+   "old_probability": 0.3933,
+   "old_tree": "core_plasma_physics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "summary/pedestal_fits/mtanh/b_field_tor_pedestal_top_lfs/value": {
+   "label": "equilibrium",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.39,
+   "new_domain": "equilibrium",
+   "new_domain_probability": 0.95,
+   "new_probability": 0.3705,
+   "old_probability": 0.5073,
+   "old_tree": "equilibrium",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "summary/volume_average/t_i_average/value": {
+   "label": "core_plasma_physics",
+   "new_category": "core_plasma",
+   "new_category_probability": 0.97,
+   "new_domain": "core_plasma_physics",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.97,
+   "old_probability": 0.99,
+   "old_tree": "core_plasma_physics",
+   "settled": true,
+   "settled_domain": "core_plasma_physics",
+   "split": "calibration"
+  },
+  "tf/coil/conductor/cross_section/area": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 1.0,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.99,
+   "old_probability": 1.0,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "calibration"
+  },
+  "tf/coil/conductor/resistance": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 1.0,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.99,
+   "old_probability": 0.98,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "calibration"
+  },
+  "tf/coil/resistance": {
+   "label": "magnetic_field_systems",
+   "new_category": "machine_systems",
+   "new_category_probability": 1.0,
+   "new_domain": "magnetic_field_systems",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.99,
+   "old_probability": 0.99,
+   "old_tree": "magnetic_field_systems",
+   "settled": true,
+   "settled_domain": "magnetic_field_systems",
+   "split": "calibration"
+  },
+  "thomson_scattering/laser/end_point/r": {
+   "label": "particle_measurement_diagnostics",
+   "new_category": "diagnostics",
+   "new_category_probability": 0.94,
+   "new_domain": "particle_measurement_diagnostics",
+   "new_domain_probability": 0.91,
+   "new_probability": 0.8554,
+   "old_probability": 0.9215,
+   "old_tree": "particle_measurement_diagnostics",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "wall/description_2d/limiter/unit/midplane_power_density_nuclear": {
+   "label": "neutronics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.88,
+   "new_domain": "plasma_wall_interactions",
+   "new_domain_probability": 0.96,
+   "new_probability": 0.8448,
+   "old_probability": 0.882,
+   "old_tree": "plasma_wall_interactions",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "wall/description_2d/limiter/unit/power_nuclear": {
+   "label": "neutronics",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.86,
+   "new_domain": "plasma_wall_interactions",
+   "new_domain_probability": 0.95,
+   "new_probability": 0.817,
+   "old_probability": 0.833,
+   "old_tree": "plasma_wall_interactions",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "wall/description_ggd/ggd/energy_fluxes/current/incident": {
+   "label": "plasma_wall_interactions",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.83,
+   "new_domain": "plasma_wall_interactions",
+   "new_domain_probability": 0.98,
+   "new_probability": 0.8134,
+   "old_probability": 0.8036000000000001,
+   "old_tree": "plasma_wall_interactions",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "wall/description_ggd/ggd/energy_fluxes/current/incident/values": {
+   "label": "plasma_wall_interactions",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.77,
+   "new_domain": "plasma_wall_interactions",
+   "new_domain_probability": 0.97,
+   "new_probability": 0.7469,
+   "old_probability": 0.6532,
+   "old_tree": "plasma_wall_interactions",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "wall/global_quantities/electrons/pumping_speed": {
+   "label": "plasma_wall_interactions",
+   "new_category": "edge_divertor",
+   "new_category_probability": 1.0,
+   "new_domain": "plasma_wall_interactions",
+   "new_domain_probability": 0.88,
+   "new_probability": 0.88,
+   "old_probability": 0.9114,
+   "old_tree": "plasma_wall_interactions",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "wall/global_quantities/power_to_cooling": {
+   "label": "plasma_wall_interactions",
+   "new_category": "edge_divertor",
+   "new_category_probability": 0.64,
+   "new_domain": "plasma_wall_interactions",
+   "new_domain_probability": 0.99,
+   "new_probability": 0.6336,
+   "old_probability": 0.5643,
+   "old_tree": "plasma_wall_interactions",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "waves/coherent_wave/beam_tracing/beam/phase/curvature": {
+   "label": "waves",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.96,
+   "new_domain": "waves",
+   "new_domain_probability": 1.0,
+   "new_probability": 0.96,
+   "old_probability": 0.95,
+   "old_tree": "waves",
+   "settled": true,
+   "settled_domain": "waves",
+   "split": "calibration"
+  },
+  "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm": {
+   "label": "equilibrium",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.88,
+   "new_domain": "waves",
+   "new_domain_probability": 0.94,
+   "new_probability": 0.8272,
+   "old_probability": 0.9,
+   "old_tree": "waves",
+   "settled": false,
+   "settled_domain": null,
+   "split": "validation"
+  },
+  "waves/coherent_wave/profiles_1d/ion/state/power_density_fast": {
+   "label": "waves",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.89,
+   "new_domain": "waves",
+   "new_domain_probability": 0.93,
+   "new_probability": 0.8277,
+   "old_probability": 0.8827,
+   "old_tree": "waves",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  },
+  "waves/coherent_wave/profiles_1d/power_inside": {
+   "label": "waves",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 1.0,
+   "new_domain": "waves",
+   "new_domain_probability": 0.92,
+   "new_probability": 0.92,
+   "old_probability": 0.98,
+   "old_tree": "waves",
+   "settled": true,
+   "settled_domain": "waves",
+   "split": "validation"
+  },
+  "waves/coherent_wave/profiles_2d/ion/state/power_density_fast": {
+   "label": "waves",
+   "new_category": "heating_current_drive",
+   "new_category_probability": 0.94,
+   "new_domain": "waves",
+   "new_domain_probability": 0.93,
+   "new_probability": 0.8742,
+   "old_probability": 0.8924,
+   "old_tree": "waves",
+   "settled": false,
+   "settled_domain": null,
+   "split": "calibration"
+  }
+ },
+ "spend_ceiling_usd": 0.5,
+ "spend_usd": 0.031998,
+ "threshold": 0.9
+}

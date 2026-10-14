@@ -1,0 +1,356 @@
+<section id="scg-tree-rerun-revised-guidance">
+<h2>The Jev domain tree re-measured under the revised guidance</h2>
+<p>201 rule-labelled DD paths, 56 of them relabelled by the revised scope rules. Every path was re-classified through <code>_classify_batch_tree</code> with its production context, the seat threshold <code>0.9</code> and the chat fallback disabled, so a path below the threshold is unsettled rather than answered by chat. Spend USD 0.0320 under the USD 0.50 ceiling.</p>
+<h3>Path-level accuracy, before and after the revision</h3>
+<p>The tree's answer to every path is scored against the revised labels. The saved answers predate the revision, so their re-scored figures are the before column. The saved run deferred nothing; the re-run defers the unsettled paths, whose share is listed below the accuracy it reaches on the paths it settles.</p>
+<table><thead><tr><th>Split</th><th>Paths</th><th>Before (saved answers)</th><th>After (re-run)</th><th>After, settled only</th><th>Unsettled</th></tr></thead><tbody>
+<tr><td>calibration</td><td>80</td><td>0.825 (66/80)</td><td>0.8125 (65/80)</td><td>1.0 (31/31)</td><td>49</td></tr>
+<tr><td>validation</td><td>81</td><td>0.7407 (60/81)</td><td>0.7654 (62/81)</td><td>1.0 (34/34)</td><td>47</td></tr>
+<tr><td>reference</td><td>40</td><td>0.825 (33/40)</td><td>0.8 (32/40)</td><td>1.0 (14/14)</td><td>26</td></tr>
+<tr><td><strong>overall</strong></td><td>201</td><td>0.791 (159/201)</td><td>0.791 (159/201)</td><td>1.0 (79/79)</td><td>122 (0.607)</td></tr>
+</tbody></table>
+<p>The re-run reproduced 186 of the 201 saved answers; 15 moved. Of those, 6 came to the correct label and 6 left it, so the overall figure is unchanged at 0.791 by a net-zero exchange.</p>
+<h3>Accuracy by probability band</h3>
+<p>Every path is placed in the band of its tree probability; the answer scored is the tree's best domain for that path, so the band measures the confidence against the label regardless of the seat threshold.</p>
+<table><thead><tr><th>Band</th><th>Paths (after)</th><th>Before accuracy</th><th>After accuracy</th></tr></thead><tbody>
+<tr><td>above 0.8</td><td>112</td><td>0.9412 (112/119)</td><td>0.9554 (107/112)</td></tr>
+<tr><td>0.5 to 0.8</td><td>56</td><td>0.7 (35/50)</td><td>0.7321 (41/56)</td></tr>
+<tr><td>below 0.5</td><td>33</td><td>0.375 (12/32)</td><td>0.3333 (11/33)</td></tr>
+</tbody></table>
+<h3>Confused domain pairs that remain</h3>
+<p>Label to the tree's predicted domain, over the re-run's answers, with each confused path. The pairs the earlier measurement recorded are listed beneath for comparison.</p>
+<h4>after (re-run)</h4>
+<p><strong>equilibrium &rarr; core_plasma_physics</strong> (3 paths)</p><ul>
+<li><code>equilibrium/time_slice/constraints/ip/measured</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.5893); core_plasma</li>
+<li><code>equilibrium/time_slice/constraints/n_e/measured</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.6935); core_plasma</li>
+<li><code>equilibrium/time_slice/constraints/n_e/reconstructed</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.3772); core_plasma</li>
+</ul>
+<p><strong>equilibrium &rarr; data_management</strong> (3 paths)</p><ul>
+<li><code>equilibrium/time_slice/constraints/n_e_line/reconstructed</code> &mdash; label equilibrium; tree data_management (p=0.406); data_computing</li>
+<li><code>summary/local/itb/q/value</code> &mdash; label equilibrium; tree data_management (p=0.4032); data_computing</li>
+<li><code>summary/pedestal_fits/linear/n_e/pedestal_position/value</code> &mdash; label equilibrium; tree data_management (p=0.33); data_computing</li>
+</ul>
+<p><strong>auxiliary_heating &rarr; waves</strong> (2 paths)</p><ul>
+<li><code>lh_antennas/antenna/row/n_phi</code> &mdash; label auxiliary_heating; tree waves (p=0.72); heating_current_drive</li>
+<li><code>summary/heating_current_drive/ic/k_perpendicular/value</code> &mdash; label auxiliary_heating; tree waves (p=0.85); heating_current_drive</li>
+</ul>
+<p><strong>equilibrium &rarr; magnetic_field_systems</strong> (2 paths)</p><ul>
+<li><code>core_profiles/vacuum_toroidal_field/r0</code> &mdash; label equilibrium; tree magnetic_field_systems (p=0.416); machine_systems</li>
+<li><code>core_sources/vacuum_toroidal_field/r0</code> &mdash; label equilibrium; tree magnetic_field_systems (p=0.4108); machine_systems</li>
+</ul>
+<p><strong>magnetic_field_systems &rarr; equilibrium</strong> (2 paths)</p><ul>
+<li><code>ferritic/object/axisymmetric/outline/r</code> &mdash; label magnetic_field_systems; tree equilibrium (p=0.3104); core_plasma</li>
+<li><code>ferritic/object/centroid/y</code> &mdash; label magnetic_field_systems; tree equilibrium (p=0.3003); core_plasma</li>
+</ul>
+<p><strong>neutronics &rarr; plasma_wall_interactions</strong> (2 paths)</p><ul>
+<li><code>wall/description_2d/limiter/unit/midplane_power_density_nuclear</code> &mdash; label neutronics; tree plasma_wall_interactions (p=0.8448); edge_divertor</li>
+<li><code>wall/description_2d/limiter/unit/power_nuclear</code> &mdash; label neutronics; tree plasma_wall_interactions (p=0.817); edge_divertor</li>
+</ul>
+<p><strong>neutronics &rarr; structural_components</strong> (2 paths)</p><ul>
+<li><code>breeding_blanket/module/layer/time_slice/power_nuclear</code> &mdash; label neutronics; tree structural_components (p=0.4524); machine_systems</li>
+<li><code>breeding_blanket/module/time_slice/escape_flux_max</code> &mdash; label neutronics; tree structural_components (p=0.705); machine_systems</li>
+</ul>
+<p><strong>spectroscopy &rarr; core_plasma_physics</strong> (2 paths)</p><ul>
+<li><code>charge_exchange/channel/ion/n_i_over_n_e</code> &mdash; label spectroscopy; tree core_plasma_physics (p=0.61); core_plasma</li>
+<li><code>charge_exchange/channel/ion/velocity_pol</code> &mdash; label spectroscopy; tree core_plasma_physics (p=0.5664); core_plasma</li>
+</ul>
+<p><strong>transport &rarr; gyrokinetics</strong> (2 paths)</p><ul>
+<li><code>edge_transport/model/ggd/ion/momentum/flux_limiter/phi</code> &mdash; label transport; tree gyrokinetics (p=0.48); advanced_physics</li>
+<li><code>plasma_transport/model/ggd/neutral/state/momentum/v/parallel</code> &mdash; label transport; tree gyrokinetics (p=0.41); advanced_physics</li>
+</ul>
+<p><strong>core_plasma_physics &rarr; data_management</strong> (1 paths)</p><ul>
+<li><code>summary/composition/carbon/value</code> &mdash; label core_plasma_physics; tree data_management (p=0.495); data_computing</li>
+</ul>
+<p><strong>core_plasma_physics &rarr; edge_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>summary/global_quantities/power_loss/value</code> &mdash; label core_plasma_physics; tree edge_plasma_physics (p=0.6624); edge_divertor</li>
+</ul>
+<p><strong>current_drive &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>summary/fusion/current/value</code> &mdash; label current_drive; tree core_plasma_physics (p=0.4717); core_plasma</li>
+</ul>
+<p><strong>divertor_physics &rarr; plasma_wall_interactions</strong> (1 paths)</p><ul>
+<li><code>divertors/divertor/target/extension_r</code> &mdash; label divertor_physics; tree plasma_wall_interactions (p=0.6336); edge_divertor</li>
+</ul>
+<p><strong>edge_plasma_physics &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>edge_profiles/ggd/vorticity_over_r/z</code> &mdash; label edge_plasma_physics; tree core_plasma_physics (p=0.232); core_plasma</li>
+</ul>
+<p><strong>electromagnetic_wave_diagnostics &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>interferometer/electrons_n</code> &mdash; label electromagnetic_wave_diagnostics; tree core_plasma_physics (p=0.67); core_plasma</li>
+</ul>
+<p><strong>equilibrium &rarr; computational_workflow</strong> (1 paths)</p><ul>
+<li><code>focs/outline/z</code> &mdash; label equilibrium; tree computational_workflow (p=0.47); data_computing</li>
+</ul>
+<p><strong>equilibrium &rarr; electromagnetic_wave_diagnostics</strong> (1 paths)</p><ul>
+<li><code>equilibrium/time_slice/constraints/n_e_line/measured</code> &mdash; label equilibrium; tree electromagnetic_wave_diagnostics (p=0.3135); diagnostics</li>
+</ul>
+<p><strong>equilibrium &rarr; radiation_measurement_diagnostics</strong> (1 paths)</p><ul>
+<li><code>ece/channel/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; tree radiation_measurement_diagnostics (p=0.1824); diagnostics</li>
+</ul>
+<p><strong>equilibrium &rarr; waves</strong> (1 paths)</p><ul>
+<li><code>waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; tree waves (p=0.8272); heating_current_drive</li>
+</ul>
+<p><strong>fast_particles &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>distributions/distribution/ggd/orbit_frequency_pol/values</code> &mdash; label fast_particles; tree core_plasma_physics (p=0.1932); core_plasma</li>
+</ul>
+<p><strong>fast_particles &rarr; transport</strong> (1 paths)</p><ul>
+<li><code>distribution_sources/source/profiles_1d/particles</code> &mdash; label fast_particles; tree transport (p=0.4209); core_plasma</li>
+</ul>
+<p><strong>fueling &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>spi/injector/pellet/core/atoms_n</code> &mdash; label fueling; tree core_plasma_physics (p=0.3465); core_plasma</li>
+</ul>
+<p><strong>magnetic_field_systems &rarr; computational_workflow</strong> (1 paths)</p><ul>
+<li><code>pf_passive/loop/element/geometry/arcs_of_circle/r</code> &mdash; label magnetic_field_systems; tree computational_workflow (p=0.5148); data_computing</li>
+</ul>
+<p><strong>magnetohydrodynamics &rarr; equilibrium</strong> (1 paths)</p><ul>
+<li><code>disruption/profiles_1d/grid/psi</code> &mdash; label magnetohydrodynamics; tree equilibrium (p=0.8428); core_plasma</li>
+</ul>
+<p><strong>magnetohydrodynamics &rarr; gyrokinetics</strong> (1 paths)</p><ul>
+<li><code>mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary</code> &mdash; label magnetohydrodynamics; tree gyrokinetics (p=0.58); advanced_physics</li>
+</ul>
+<p><strong>magnetohydrodynamics &rarr; plasma_wall_interactions</strong> (1 paths)</p><ul>
+<li><code>disruption/halo_currents/active_wall_point/r</code> &mdash; label magnetohydrodynamics; tree plasma_wall_interactions (p=0.5346); edge_divertor</li>
+</ul>
+<p><strong>mechanical_measurement_diagnostics &rarr; computational_workflow</strong> (1 paths)</p><ul>
+<li><code>barometry/gauge/position/phi</code> &mdash; label mechanical_measurement_diagnostics; tree computational_workflow (p=0.5978); data_computing</li>
+</ul>
+<p><strong>neutronics &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>summary/fusion/neutron_rates/total/value</code> &mdash; label neutronics; tree core_plasma_physics (p=0.5248); core_plasma</li>
+</ul>
+<p><strong>plasma_initiation &rarr; magnetic_field_systems</strong> (1 paths)</p><ul>
+<li><code>plasma_initiation/global_quantities/b_field_stray</code> &mdash; label plasma_initiation; tree magnetic_field_systems (p=0.5044); machine_systems</li>
+</ul>
+<p><strong>radiation_measurement_diagnostics &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>bolometer/power_radiated_total</code> &mdash; label radiation_measurement_diagnostics; tree core_plasma_physics (p=0.4389); core_plasma</li>
+</ul>
+<p><strong>radiation_measurement_diagnostics &rarr; equilibrium</strong> (1 paths)</p><ul>
+<li><code>ece/channel/position/phi</code> &mdash; label radiation_measurement_diagnostics; tree equilibrium (p=0.423); core_plasma</li>
+</ul>
+<h4>before (saved answers)</h4>
+<p><strong>equilibrium &rarr; core_plasma_physics</strong> (6 paths)</p><ul>
+<li><code>equilibrium/time_slice/constraints/ip/measured</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.5893); core_plasma</li>
+<li><code>equilibrium/time_slice/constraints/n_e/measured</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.6935); core_plasma</li>
+<li><code>equilibrium/time_slice/constraints/n_e/reconstructed</code> &mdash; label equilibrium; tree core_plasma_physics (p=0.3772); core_plasma</li>
+<li><code>equilibrium/time_slice/profiles_1d/j_phi</code> &mdash; label equilibrium; tree equilibrium (p=0.53); core_plasma</li>
+<li><code>summary/pedestal_fits/linear/n_e/pedestal_position/value</code> &mdash; label equilibrium; tree data_management (p=0.33); data_computing</li>
+<li><code>summary/pedestal_fits/linear/pressure_electron/pedestal_position/value</code> &mdash; label equilibrium; tree equilibrium (p=0.2695); core_plasma</li>
+</ul>
+<p><strong>auxiliary_heating &rarr; waves</strong> (2 paths)</p><ul>
+<li><code>lh_antennas/antenna/row/n_phi</code> &mdash; label auxiliary_heating; tree waves (p=0.72); heating_current_drive</li>
+<li><code>summary/heating_current_drive/ic/k_perpendicular/value</code> &mdash; label auxiliary_heating; tree waves (p=0.85); heating_current_drive</li>
+</ul>
+<p><strong>edge_plasma_physics &rarr; core_plasma_physics</strong> (2 paths)</p><ul>
+<li><code>edge_profiles/ggd/e_field/parallel</code> &mdash; label edge_plasma_physics; tree edge_plasma_physics (p=0.39); edge_divertor</li>
+<li><code>edge_profiles/ggd/vorticity_over_r/z</code> &mdash; label edge_plasma_physics; tree core_plasma_physics (p=0.232); core_plasma</li>
+</ul>
+<p><strong>equilibrium &rarr; electromagnetic_wave_diagnostics</strong> (2 paths)</p><ul>
+<li><code>ece/channel/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; tree radiation_measurement_diagnostics (p=0.1824); diagnostics</li>
+<li><code>equilibrium/time_slice/constraints/n_e_line/measured</code> &mdash; label equilibrium; tree electromagnetic_wave_diagnostics (p=0.3135); diagnostics</li>
+</ul>
+<p><strong>magnetic_field_systems &rarr; equilibrium</strong> (2 paths)</p><ul>
+<li><code>ferritic/object/axisymmetric/outline/r</code> &mdash; label magnetic_field_systems; tree equilibrium (p=0.3104); core_plasma</li>
+<li><code>ferritic/object/centroid/y</code> &mdash; label magnetic_field_systems; tree equilibrium (p=0.3003); core_plasma</li>
+</ul>
+<p><strong>neutronics &rarr; plasma_wall_interactions</strong> (2 paths)</p><ul>
+<li><code>wall/description_2d/limiter/unit/midplane_power_density_nuclear</code> &mdash; label neutronics; tree plasma_wall_interactions (p=0.8448); edge_divertor</li>
+<li><code>wall/description_2d/limiter/unit/power_nuclear</code> &mdash; label neutronics; tree plasma_wall_interactions (p=0.817); edge_divertor</li>
+</ul>
+<p><strong>neutronics &rarr; structural_components</strong> (2 paths)</p><ul>
+<li><code>breeding_blanket/module/layer/time_slice/power_nuclear</code> &mdash; label neutronics; tree structural_components (p=0.4524); machine_systems</li>
+<li><code>breeding_blanket/module/time_slice/escape_flux_max</code> &mdash; label neutronics; tree structural_components (p=0.705); machine_systems</li>
+</ul>
+<p><strong>transport &rarr; gyrokinetics</strong> (2 paths)</p><ul>
+<li><code>edge_transport/model/ggd/ion/momentum/flux_limiter/phi</code> &mdash; label transport; tree gyrokinetics (p=0.48); advanced_physics</li>
+<li><code>plasma_transport/model/ggd/neutral/state/momentum/v/parallel</code> &mdash; label transport; tree gyrokinetics (p=0.41); advanced_physics</li>
+</ul>
+<p><strong>auxiliary_heating &rarr; electromagnetic_wave_diagnostics</strong> (1 paths)</p><ul>
+<li><code>ic_antennas/antenna/module/pressure/position/z</code> &mdash; label auxiliary_heating; tree auxiliary_heating (p=0.2475); heating_current_drive</li>
+</ul>
+<p><strong>core_plasma_physics &rarr; edge_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>summary/global_quantities/power_loss/value</code> &mdash; label core_plasma_physics; tree edge_plasma_physics (p=0.6624); edge_divertor</li>
+</ul>
+<p><strong>core_plasma_physics &rarr; transport</strong> (1 paths)</p><ul>
+<li><code>summary/global_quantities/power_radiated/value</code> &mdash; label core_plasma_physics; tree core_plasma_physics (p=0.7544); core_plasma</li>
+</ul>
+<p><strong>current_drive &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>summary/fusion/current/value</code> &mdash; label current_drive; tree core_plasma_physics (p=0.4717); core_plasma</li>
+</ul>
+<p><strong>divertor_physics &rarr; plasma_wall_interactions</strong> (1 paths)</p><ul>
+<li><code>divertors/divertor/target/extension_r</code> &mdash; label divertor_physics; tree plasma_wall_interactions (p=0.6336); edge_divertor</li>
+</ul>
+<p><strong>electromagnetic_wave_diagnostics &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>interferometer/electrons_n</code> &mdash; label electromagnetic_wave_diagnostics; tree core_plasma_physics (p=0.67); core_plasma</li>
+</ul>
+<p><strong>equilibrium &rarr; data_management</strong> (1 paths)</p><ul>
+<li><code>equilibrium/time_slice/constraints/n_e_line/reconstructed</code> &mdash; label equilibrium; tree data_management (p=0.406); data_computing</li>
+</ul>
+<p><strong>equilibrium &rarr; magnetic_field_systems</strong> (1 paths)</p><ul>
+<li><code>core_profiles/vacuum_toroidal_field/r0</code> &mdash; label equilibrium; tree magnetic_field_systems (p=0.416); machine_systems</li>
+</ul>
+<p><strong>equilibrium &rarr; magnetohydrodynamics</strong> (1 paths)</p><ul>
+<li><code>equilibrium/time_slice/global_quantities/current_centre/velocity_z</code> &mdash; label equilibrium; tree equilibrium (p=0.6039); core_plasma</li>
+</ul>
+<p><strong>equilibrium &rarr; waves</strong> (1 paths)</p><ul>
+<li><code>waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; tree waves (p=0.8272); heating_current_drive</li>
+</ul>
+<p><strong>fast_particles &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>distributions/distribution/ggd/orbit_frequency_pol/values</code> &mdash; label fast_particles; tree core_plasma_physics (p=0.1932); core_plasma</li>
+</ul>
+<p><strong>fast_particles &rarr; transport</strong> (1 paths)</p><ul>
+<li><code>distribution_sources/source/profiles_1d/particles</code> &mdash; label fast_particles; tree transport (p=0.4209); core_plasma</li>
+</ul>
+<p><strong>fueling &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>spi/injector/pellet/core/atoms_n</code> &mdash; label fueling; tree core_plasma_physics (p=0.3465); core_plasma</li>
+</ul>
+<p><strong>magnetic_field_systems &rarr; computational_workflow</strong> (1 paths)</p><ul>
+<li><code>pf_passive/loop/element/geometry/arcs_of_circle/r</code> &mdash; label magnetic_field_systems; tree computational_workflow (p=0.5148); data_computing</li>
+</ul>
+<p><strong>magnetohydrodynamics &rarr; equilibrium</strong> (1 paths)</p><ul>
+<li><code>disruption/profiles_1d/grid/psi</code> &mdash; label magnetohydrodynamics; tree equilibrium (p=0.8428); core_plasma</li>
+</ul>
+<p><strong>magnetohydrodynamics &rarr; gyrokinetics</strong> (1 paths)</p><ul>
+<li><code>mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary</code> &mdash; label magnetohydrodynamics; tree gyrokinetics (p=0.58); advanced_physics</li>
+</ul>
+<p><strong>magnetohydrodynamics &rarr; plasma_wall_interactions</strong> (1 paths)</p><ul>
+<li><code>disruption/halo_currents/active_wall_point/r</code> &mdash; label magnetohydrodynamics; tree plasma_wall_interactions (p=0.5346); edge_divertor</li>
+</ul>
+<p><strong>mechanical_measurement_diagnostics &rarr; computational_workflow</strong> (1 paths)</p><ul>
+<li><code>barometry/gauge/position/phi</code> &mdash; label mechanical_measurement_diagnostics; tree computational_workflow (p=0.5978); data_computing</li>
+</ul>
+<p><strong>neutronics &rarr; core_plasma_physics</strong> (1 paths)</p><ul>
+<li><code>summary/fusion/neutron_rates/total/value</code> &mdash; label neutronics; tree core_plasma_physics (p=0.5248); core_plasma</li>
+</ul>
+<p><strong>plasma_initiation &rarr; magnetic_field_systems</strong> (1 paths)</p><ul>
+<li><code>plasma_initiation/global_quantities/b_field_stray</code> &mdash; label plasma_initiation; tree magnetic_field_systems (p=0.5044); machine_systems</li>
+</ul>
+<p><strong>radiation_measurement_diagnostics &rarr; equilibrium</strong> (1 paths)</p><ul>
+<li><code>ece/channel/position/phi</code> &mdash; label radiation_measurement_diagnostics; tree equilibrium (p=0.423); core_plasma</li>
+</ul>
+<p><strong>radiation_measurement_diagnostics &rarr; transport</strong> (1 paths)</p><ul>
+<li><code>bolometer/power_radiated_total</code> &mdash; label radiation_measurement_diagnostics; tree core_plasma_physics (p=0.4389); core_plasma</li>
+</ul>
+<h3>Unsettled paths</h3>
+<p>122 of 201 paths scored below the 0.9 seat threshold and are recorded as unsettled with their best category and probability.</p>
+<ul>
+<li><code>amns_data/a</code> &mdash; label computational_workflow; best computational_workflow in data_computing (p=0.65)</li>
+<li><code>amns_data/process/reactants/element/atoms_n</code> &mdash; label computational_workflow; best computational_workflow in data_computing (p=0.81)</li>
+<li><code>barometry/gauge/position/phi</code> &mdash; label mechanical_measurement_diagnostics; best computational_workflow in data_computing (p=0.5978)</li>
+<li><code>barometry/gauge/pressure</code> &mdash; label mechanical_measurement_diagnostics; best mechanical_measurement_diagnostics in diagnostics (p=0.594)</li>
+<li><code>bolometer/camera/channel/line_of_sight/first_point/r</code> &mdash; label radiation_measurement_diagnostics; best radiation_measurement_diagnostics in diagnostics (p=0.89)</li>
+<li><code>bolometer/power_radiated_total</code> &mdash; label radiation_measurement_diagnostics; best core_plasma_physics in core_plasma (p=0.4389)</li>
+<li><code>breeding_blanket/module/layer/time_slice/power_nuclear</code> &mdash; label neutronics; best structural_components in machine_systems (p=0.4524)</li>
+<li><code>breeding_blanket/module/time_slice/escape_flux_max</code> &mdash; label neutronics; best structural_components in machine_systems (p=0.705)</li>
+<li><code>camera_ir/channel/target_surface_center/y</code> &mdash; label radiation_measurement_diagnostics; best radiation_measurement_diagnostics in diagnostics (p=0.8924)</li>
+<li><code>camera_ir/optical_element/geometry/outline/x1</code> &mdash; label radiation_measurement_diagnostics; best radiation_measurement_diagnostics in diagnostics (p=0.6237)</li>
+<li><code>camera_x_rays/detector_temperature</code> &mdash; label radiation_measurement_diagnostics; best radiation_measurement_diagnostics in diagnostics (p=0.6624)</li>
+<li><code>charge_exchange/channel/ion/n_i_over_n_e</code> &mdash; label spectroscopy; best core_plasma_physics in core_plasma (p=0.61)</li>
+<li><code>charge_exchange/channel/ion/velocity_pol</code> &mdash; label spectroscopy; best core_plasma_physics in core_plasma (p=0.5664)</li>
+<li><code>charge_exchange/channel/ion/z_ion</code> &mdash; label spectroscopy; best spectroscopy in diagnostics (p=0.8)</li>
+<li><code>core_profiles/profiles_1d/e_field/parallel</code> &mdash; label core_plasma_physics; best core_plasma_physics in core_plasma (p=0.76)</li>
+<li><code>core_profiles/profiles_1d/grid/rho_pol_norm</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.8)</li>
+<li><code>core_profiles/profiles_1d/grid/rho_tor</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.7722)</li>
+<li><code>core_profiles/profiles_1d/grid/rho_tor_norm</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.864)</li>
+<li><code>core_profiles/profiles_1d/grid/volume</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.71)</li>
+<li><code>core_profiles/profiles_1d/ion/element/a</code> &mdash; label core_plasma_physics; best core_plasma_physics in core_plasma (p=0.7)</li>
+<li><code>core_profiles/profiles_1d/ion/element/z_n</code> &mdash; label core_plasma_physics; best core_plasma_physics in core_plasma (p=0.67)</li>
+<li><code>core_profiles/profiles_1d/neutral/element/z_n</code> &mdash; label core_plasma_physics; best core_plasma_physics in core_plasma (p=0.6831)</li>
+<li><code>core_profiles/vacuum_toroidal_field/r0</code> &mdash; label equilibrium; best magnetic_field_systems in machine_systems (p=0.416)</li>
+<li><code>core_sources/source/profiles_1d/grid/psi</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.8526)</li>
+<li><code>core_sources/source/profiles_1d/grid/psi_boundary</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.6336)</li>
+<li><code>core_sources/source/profiles_1d/grid/rho_pol_norm</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.6272)</li>
+<li><code>core_sources/source/profiles_1d/grid/rho_tor</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.6468)</li>
+<li><code>core_sources/source/profiles_1d/grid/rho_tor_norm</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.567)</li>
+<li><code>core_sources/source/profiles_1d/grid/volume</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.4998)</li>
+<li><code>core_sources/vacuum_toroidal_field/r0</code> &mdash; label equilibrium; best magnetic_field_systems in machine_systems (p=0.4108)</li>
+<li><code>disruption/halo_currents/active_wall_point/r</code> &mdash; label magnetohydrodynamics; best plasma_wall_interactions in edge_divertor (p=0.5346)</li>
+<li><code>disruption/profiles_1d/grid/psi</code> &mdash; label magnetohydrodynamics; best equilibrium in core_plasma (p=0.8428)</li>
+<li><code>distribution_sources/source/ggd/particles/values</code> &mdash; label fast_particles; best fast_particles in energetic_particles (p=0.4356)</li>
+<li><code>distribution_sources/source/profiles_1d/particles</code> &mdash; label fast_particles; best transport in core_plasma (p=0.4209)</li>
+<li><code>distributions/distribution/ggd/orbit_frequency_pol/values</code> &mdash; label fast_particles; best core_plasma_physics in core_plasma (p=0.1932)</li>
+<li><code>distributions/distribution/profiles_2d/collisions/ion/torque_thermal_phi</code> &mdash; label fast_particles; best fast_particles in energetic_particles (p=0.48)</li>
+<li><code>divertors/divertor/target/extension_r</code> &mdash; label divertor_physics; best plasma_wall_interactions in edge_divertor (p=0.6336)</li>
+<li><code>ec_launchers/beam/phase/curvature</code> &mdash; label auxiliary_heating; best auxiliary_heating in heating_current_drive (p=0.81)</li>
+<li><code>ece/channel/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; best radiation_measurement_diagnostics in diagnostics (p=0.1824)</li>
+<li><code>ece/channel/delta_position_suprathermal/theta</code> &mdash; label radiation_measurement_diagnostics; best radiation_measurement_diagnostics in diagnostics (p=0.8091)</li>
+<li><code>ece/channel/position/phi</code> &mdash; label radiation_measurement_diagnostics; best equilibrium in core_plasma (p=0.423)</li>
+<li><code>edge_profiles/ggd/e_field/parallel</code> &mdash; label edge_plasma_physics; best edge_plasma_physics in edge_divertor (p=0.39)</li>
+<li><code>edge_profiles/ggd/ion/velocity_over_b_field/phi</code> &mdash; label edge_plasma_physics; best edge_plasma_physics in edge_divertor (p=0.71)</li>
+<li><code>edge_profiles/ggd/j_ion_neutral_friction/r</code> &mdash; label edge_plasma_physics; best edge_plasma_physics in edge_divertor (p=0.7068)</li>
+<li><code>edge_profiles/ggd/j_ion_neutral_friction/radial</code> &mdash; label edge_plasma_physics; best edge_plasma_physics in edge_divertor (p=0.75)</li>
+<li><code>edge_profiles/ggd/vorticity_over_r/z</code> &mdash; label edge_plasma_physics; best core_plasma_physics in core_plasma (p=0.232)</li>
+<li><code>edge_profiles/profiles_1d/q</code> &mdash; label edge_plasma_physics; best edge_plasma_physics in edge_divertor (p=0.79)</li>
+<li><code>edge_profiles/profiles_1d/rotation_frequency_tor_sonic</code> &mdash; label edge_plasma_physics; best edge_plasma_physics in edge_divertor (p=0.78)</li>
+<li><code>edge_transport/model/ggd/ion/momentum/flux_limiter/phi</code> &mdash; label transport; best gyrokinetics in advanced_physics (p=0.48)</li>
+<li><code>equilibrium/time_slice/boundary/gap/angle</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.67)</li>
+<li><code>equilibrium/time_slice/boundary/minor_radius</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.8613)</li>
+<li><code>equilibrium/time_slice/constraints/ip/measured</code> &mdash; label equilibrium; best core_plasma_physics in core_plasma (p=0.5893)</li>
+<li><code>equilibrium/time_slice/constraints/n_e/measured</code> &mdash; label equilibrium; best core_plasma_physics in core_plasma (p=0.6935)</li>
+<li><code>equilibrium/time_slice/constraints/n_e/reconstructed</code> &mdash; label equilibrium; best core_plasma_physics in core_plasma (p=0.3772)</li>
+<li><code>equilibrium/time_slice/constraints/n_e_line/measured</code> &mdash; label equilibrium; best electromagnetic_wave_diagnostics in diagnostics (p=0.3135)</li>
+<li><code>equilibrium/time_slice/constraints/n_e_line/reconstructed</code> &mdash; label equilibrium; best data_management in data_computing (p=0.406)</li>
+<li><code>equilibrium/time_slice/global_quantities/current_centre/velocity_z</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.6039)</li>
+<li><code>equilibrium/time_slice/profiles_1d/gm7</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.8811)</li>
+<li><code>equilibrium/time_slice/profiles_1d/j_phi</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.53)</li>
+<li><code>ferritic/object/axisymmetric/outline/r</code> &mdash; label magnetic_field_systems; best equilibrium in core_plasma (p=0.3104)</li>
+<li><code>ferritic/object/centroid/y</code> &mdash; label magnetic_field_systems; best equilibrium in core_plasma (p=0.3003)</li>
+<li><code>focs/outline/z</code> &mdash; label equilibrium; best computational_workflow in data_computing (p=0.47)</li>
+<li><code>gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_1/pressure_perpendicular</code> &mdash; label gyrokinetics; best gyrokinetics in advanced_physics (p=0.78)</li>
+<li><code>gyrokinetics_local/non_linear/fields_intensity_1d/b_field_parallel_perturbed_norm</code> &mdash; label gyrokinetics; best gyrokinetics in advanced_physics (p=0.8)</li>
+<li><code>gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/b_field_parallel_perturbed_norm</code> &mdash; label gyrokinetics; best gyrokinetics in advanced_physics (p=0.79)</li>
+<li><code>gyrokinetics_local/species/density_log_gradient_norm</code> &mdash; label gyrokinetics; best gyrokinetics in advanced_physics (p=0.77)</li>
+<li><code>ic_antennas/antenna/module/pressure/position/z</code> &mdash; label auxiliary_heating; best auxiliary_heating in heating_current_drive (p=0.2475)</li>
+<li><code>ic_antennas/antenna/module/strap/geometry/annulus/z</code> &mdash; label auxiliary_heating; best auxiliary_heating in heating_current_drive (p=0.85)</li>
+<li><code>ic_antennas/antenna/module/strap/geometry/thick_line/first_point/z</code> &mdash; label auxiliary_heating; best auxiliary_heating in heating_current_drive (p=0.75)</li>
+<li><code>ic_antennas/reference_point/z</code> &mdash; label auxiliary_heating; best auxiliary_heating in heating_current_drive (p=0.77)</li>
+<li><code>interferometer/electrons_n</code> &mdash; label electromagnetic_wave_diagnostics; best core_plasma_physics in core_plasma (p=0.67)</li>
+<li><code>langmuir_probes/embedded/ion_saturation_current</code> &mdash; label particle_measurement_diagnostics; best particle_measurement_diagnostics in diagnostics (p=0.6762)</li>
+<li><code>lh_antennas/antenna/row/n_phi</code> &mdash; label auxiliary_heating; best waves in heating_current_drive (p=0.72)</li>
+<li><code>lh_antennas/reference_point/z</code> &mdash; label auxiliary_heating; best auxiliary_heating in heating_current_drive (p=0.64)</li>
+<li><code>magnetics/rogowski_coil/current</code> &mdash; label magnetic_field_diagnostics; best magnetic_field_diagnostics in diagnostics (p=0.87)</li>
+<li><code>mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary</code> &mdash; label magnetohydrodynamics; best gyrokinetics in advanced_physics (p=0.58)</li>
+<li><code>ntms/time_slice/mode/rho_tor_norm</code> &mdash; label magnetohydrodynamics; best magnetohydrodynamics in core_plasma (p=0.7209)</li>
+<li><code>operational_instrumentation/sensor/attachement_points/y</code> &mdash; label mechanical_measurement_diagnostics; best mechanical_measurement_diagnostics in diagnostics (p=0.8536)</li>
+<li><code>pellets/time_slice/pellet/path_profiles/n_e</code> &mdash; label core_plasma_physics; best core_plasma_physics in core_plasma (p=0.46)</li>
+<li><code>pellets/time_slice/pellet/path_profiles/psi</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.62)</li>
+<li><code>pf_passive/loop/element/geometry/arcs_of_circle/r</code> &mdash; label magnetic_field_systems; best computational_workflow in data_computing (p=0.5148)</li>
+<li><code>pf_passive/loop/element/geometry/oblique/alpha</code> &mdash; label magnetic_field_systems; best magnetic_field_systems in machine_systems (p=0.8736)</li>
+<li><code>pf_plasma/element/geometry/oblique/alpha</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.6853)</li>
+<li><code>pf_plasma/element/geometry/oblique/length_alpha</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.675)</li>
+<li><code>pf_plasma/element/geometry/rectangle/height</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.36)</li>
+<li><code>plasma_initiation/global_quantities/b_field_stray</code> &mdash; label plasma_initiation; best magnetic_field_systems in machine_systems (p=0.5044)</li>
+<li><code>plasma_profiles/ggd/ion/velocity_over_b_field/r</code> &mdash; label core_plasma_physics; best core_plasma_physics in core_plasma (p=0.837)</li>
+<li><code>plasma_transport/model/ggd/neutral/state/momentum/v/parallel</code> &mdash; label transport; best gyrokinetics in advanced_physics (p=0.41)</li>
+<li><code>pulse_schedule/position_control/gap/angle</code> &mdash; label plasma_control; best plasma_control in control_operations (p=0.8836)</li>
+<li><code>soft_x_rays/channel/filter_window/outline/x2</code> &mdash; label radiation_measurement_diagnostics; best radiation_measurement_diagnostics in diagnostics (p=0.8712)</li>
+<li><code>spectrometer_visible/channel/isotope_ratios/isotope/density_ratio</code> &mdash; label spectroscopy; best spectroscopy in diagnostics (p=0.8232)</li>
+<li><code>spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals</code> &mdash; label spectroscopy; best spectroscopy in diagnostics (p=0.8019)</li>
+<li><code>spectrometer_visible/channel/polarizer/centre/z</code> &mdash; label spectroscopy; best spectroscopy in diagnostics (p=0.7821)</li>
+<li><code>spectrometer_x_ray_crystal/channel/crystal/thickness</code> &mdash; label spectroscopy; best spectroscopy in diagnostics (p=0.89)</li>
+<li><code>spi/injector/fragment/species/density</code> &mdash; label fueling; best fueling in edge_divertor (p=0.5)</li>
+<li><code>spi/injector/fragment/volume</code> &mdash; label fueling; best fueling in edge_divertor (p=0.45)</li>
+<li><code>spi/injector/pellet/core/atoms_n</code> &mdash; label fueling; best core_plasma_physics in core_plasma (p=0.3465)</li>
+<li><code>summary/boundary/minor_radius/value</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.693)</li>
+<li><code>summary/composition/carbon/value</code> &mdash; label core_plasma_physics; best data_management in data_computing (p=0.495)</li>
+<li><code>summary/fusion/current/value</code> &mdash; label current_drive; best core_plasma_physics in core_plasma (p=0.4717)</li>
+<li><code>summary/fusion/neutron_rates/total/value</code> &mdash; label neutronics; best core_plasma_physics in core_plasma (p=0.5248)</li>
+<li><code>summary/gas_injection_rates/beryllium/value</code> &mdash; label fueling; best fueling in edge_divertor (p=0.57)</li>
+<li><code>summary/gas_injection_rates/bottom/value</code> &mdash; label fueling; best fueling in edge_divertor (p=0.68)</li>
+<li><code>summary/global_quantities/power_loss/value</code> &mdash; label core_plasma_physics; best edge_plasma_physics in edge_divertor (p=0.6624)</li>
+<li><code>summary/global_quantities/power_radiated/value</code> &mdash; label core_plasma_physics; best core_plasma_physics in core_plasma (p=0.7544)</li>
+<li><code>summary/heating_current_drive/ic/k_perpendicular/value</code> &mdash; label auxiliary_heating; best waves in heating_current_drive (p=0.85)</li>
+<li><code>summary/heating_current_drive/lh/n_parallel/value</code> &mdash; label waves; best waves in heating_current_drive (p=0.82)</li>
+<li><code>summary/local/itb/q/value</code> &mdash; label equilibrium; best data_management in data_computing (p=0.4032)</li>
+<li><code>summary/pedestal_fits/linear/b_field_tor_pedestal_top_lfs/value</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.368)</li>
+<li><code>summary/pedestal_fits/linear/n_e/pedestal_position/value</code> &mdash; label equilibrium; best data_management in data_computing (p=0.33)</li>
+<li><code>summary/pedestal_fits/linear/pressure_electron/pedestal_position/value</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.2695)</li>
+<li><code>summary/pedestal_fits/mtanh/b_field_tor_pedestal_top_lfs/value</code> &mdash; label equilibrium; best equilibrium in core_plasma (p=0.3705)</li>
+<li><code>thomson_scattering/laser/end_point/r</code> &mdash; label particle_measurement_diagnostics; best particle_measurement_diagnostics in diagnostics (p=0.8554)</li>
+<li><code>wall/description_2d/limiter/unit/midplane_power_density_nuclear</code> &mdash; label neutronics; best plasma_wall_interactions in edge_divertor (p=0.8448)</li>
+<li><code>wall/description_2d/limiter/unit/power_nuclear</code> &mdash; label neutronics; best plasma_wall_interactions in edge_divertor (p=0.817)</li>
+<li><code>wall/description_ggd/ggd/energy_fluxes/current/incident</code> &mdash; label plasma_wall_interactions; best plasma_wall_interactions in edge_divertor (p=0.8134)</li>
+<li><code>wall/description_ggd/ggd/energy_fluxes/current/incident/values</code> &mdash; label plasma_wall_interactions; best plasma_wall_interactions in edge_divertor (p=0.7469)</li>
+<li><code>wall/global_quantities/electrons/pumping_speed</code> &mdash; label plasma_wall_interactions; best plasma_wall_interactions in edge_divertor (p=0.88)</li>
+<li><code>wall/global_quantities/power_to_cooling</code> &mdash; label plasma_wall_interactions; best plasma_wall_interactions in edge_divertor (p=0.6336)</li>
+<li><code>waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm</code> &mdash; label equilibrium; best waves in heating_current_drive (p=0.8272)</li>
+<li><code>waves/coherent_wave/profiles_1d/ion/state/power_density_fast</code> &mdash; label waves; best waves in heating_current_drive (p=0.8277)</li>
+<li><code>waves/coherent_wave/profiles_2d/ion/state/power_density_fast</code> &mdash; label waves; best waves in heating_current_drive (p=0.8742)</li>
+</ul>
+</section>
