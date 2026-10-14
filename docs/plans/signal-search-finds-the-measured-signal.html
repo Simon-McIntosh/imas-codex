@@ -18,13 +18,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="128">
+<meta name="plan-version" content="129">
 <meta name="plan-modified" content="2026-10-14">
-<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47,68c603525,97eac4222,b97d4bdf4,3b1e4a193,1e2dc0252,c0a17c176,72eb206e8">
+<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47,68c603525,97eac4222,b97d4bdf4,3b1e4a193,1e2dc0252,c0a17c176,72eb206e8,fe031856a,ce47976e0,a54ca1a0e,05d22929b,f746278c4,f13f1e582,dd7e64c92,be370b25b">
 </head>
 <body>
   <main class="plan-doc">
@@ -372,7 +372,7 @@
     </p>
 
     <h2 id="s8">§8 — Signal role as a stored judgment</h2>
-<section data-reckon="section" data-id="s8" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s8" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Judge each signal's role once, at enrichment, with a Jev Choice: <em>measured</em>, <em>commanded</em>,
       <em>reference or setpoint</em>, <em>status or flag</em>, <em>configuration parameter</em>, or <em>derived or
@@ -757,6 +757,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261013T185402647619-ssfms-role-filter-live" data-who="reckon-build" data-when="2026-10-13T19:47:06.507Z">
     <div class="r-comment-body"><p>live role=measured signal search over the 22 graded questions returns only stored-measured signals (0 of 22 questions leak a non-measured result), holds no graded-2 command or reference in any filtered top 5, and is non-empty with a graded-3 measurement on every question, while the unfiltered control keeps a graded-2 command or reference on 4 of 22 questions; tests/llm/test_signal_role_filter_live.py</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-10-14T07:58:00Z">
+    <div class="r-comment-body"><p>§8 landed (final merge <code>177131483</code>): every described JT-60SA signal outside the 210 underspecified ones carries a stored <code>signal_role</code>, judged at 95.7% prototype and 97% random-sample agreement for about USD 0.0000264 per signal; <code>role=</code> filters signal search before the rank cut. Live, a <code>role=measured</code> search keeps every grade-2 command or reference out of the top 5 on all 22 questions, while the unfiltered search keeps one on 4. Follow-on: underspecified signals carry no role. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s8">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261013T091702235762-review-of-ssfms-result-rows-97eac4222c89" data-who="reckon-build" data-when="2026-10-13T09:35:36.429Z">
     <div class="r-comment-body"><p>independent review of r-20261013T085005496411-ssfms-result-rows stored at both granted review paths — 6 dimensions scored (goal_fidelity 19, evidence 18, scope_discipline 19, durability 18, fit 15, reuse 16; total 105), reviewed_base_sha 7f54df09dd95bd456d45f56b9b7676b6ef5867f4 / reviewed_head_sha 97eac4222c89103942f49538791b294ab9134abf, added_failure_count 0 / ids [] derived from the reviewed run's baseline_suite and after_suite arms, 2 follow-on findings.</p></div>
