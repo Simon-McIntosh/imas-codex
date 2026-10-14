@@ -1,0 +1,3504 @@
+{
+ "confusion_chat": [
+  {
+   "count": 7,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "bolometer/camera/channel/aperture/surface",
+    "bolometer/camera/channel/aperture/x1_width",
+    "bolometer/camera/channel/detector/surface",
+    "bolometer/camera/channel/line_of_sight/first_point/r",
+    "bolometer/camera/channel/line_of_sight/first_point/z",
+    "bolometer/camera/channel/line_of_sight/second_point/r",
+    "bolometer/camera/channel/line_of_sight/second_point/z"
+   ],
+   "predicted": "radiation_measurement_diagnostics"
+  },
+  {
+   "count": 5,
+   "label": "radiation_measurement_diagnostics",
+   "paths": [
+    "bremsstrahlung_visible/channel/filter/wavelength_upper",
+    "spectrometer_uv/channel/detector/outline/x1",
+    "spectrometer_x_ray_crystal/channel/crystal/radius",
+    "spectrometer_x_ray_crystal/channel/crystal/thickness",
+    "spectrometer_x_ray_crystal/channel/reflector/x2_curvature"
+   ],
+   "predicted": "spectroscopy"
+  },
+  {
+   "count": 4,
+   "label": "core_plasma_physics",
+   "paths": [
+    "edge_profiles/ggd/e_field/parallel",
+    "edge_profiles/ggd/electrons/temperature/values",
+    "edge_profiles/ggd/ion/velocity_over_b_field/phi",
+    "edge_profiles/profiles_1d/rotation_frequency_tor_sonic"
+   ],
+   "predicted": "edge_plasma_physics"
+  },
+  {
+   "count": 3,
+   "label": "equilibrium",
+   "paths": [
+    "pf_plasma/element/geometry/oblique/alpha",
+    "pf_plasma/element/geometry/oblique/length_alpha",
+    "pf_plasma/element/geometry/rectangle/height"
+   ],
+   "predicted": "magnetic_field_systems"
+  },
+  {
+   "count": 3,
+   "label": "general",
+   "paths": [
+    "core_profiles/profiles_1d/ion/element/a",
+    "core_profiles/profiles_1d/ion/element/z_n",
+    "core_profiles/profiles_1d/neutral/element/z_n"
+   ],
+   "predicted": "core_plasma_physics"
+  },
+  {
+   "count": 3,
+   "label": "general",
+   "paths": [
+    "amns_data/a",
+    "amns_data/process/products/element/atoms_n",
+    "amns_data/process/reactants/element/atoms_n"
+   ],
+   "predicted": "data_management"
+  },
+  {
+   "count": 2,
+   "label": "auxiliary_heating",
+   "paths": [
+    "lh_antennas/antenna/row/n_phi",
+    "lh_antennas/reference_point/z"
+   ],
+   "predicted": "current_drive"
+  },
+  {
+   "count": 2,
+   "label": "core_plasma_physics",
+   "paths": [
+    "equilibrium/time_slice/constraints/n_e/measured",
+    "equilibrium/time_slice/constraints/n_e/reconstructed"
+   ],
+   "predicted": "equilibrium"
+  },
+  {
+   "count": 2,
+   "label": "core_plasma_physics",
+   "paths": [
+    "charge_exchange/channel/ion/n_i_over_n_e",
+    "charge_exchange/channel/ion/z_ion"
+   ],
+   "predicted": "spectroscopy"
+  },
+  {
+   "count": 2,
+   "label": "edge_plasma_physics",
+   "paths": [
+    "spectrometer_visible/channel/isotope_ratios/isotope/density_ratio",
+    "spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals"
+   ],
+   "predicted": "spectroscopy"
+  },
+  {
+   "count": 2,
+   "label": "electromagnetic_wave_diagnostics",
+   "paths": [
+    "equilibrium/time_slice/constraints/n_e_line/measured",
+    "equilibrium/time_slice/constraints/n_e_line/reconstructed"
+   ],
+   "predicted": "equilibrium"
+  },
+  {
+   "count": 2,
+   "label": "equilibrium",
+   "paths": [
+    "summary/pedestal_fits/linear/n_e/pedestal_position/value",
+    "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value"
+   ],
+   "predicted": "edge_plasma_physics"
+  },
+  {
+   "count": 2,
+   "label": "neutronics",
+   "paths": [
+    "neutron_diagnostic/detector/aperture/radius",
+    "neutron_diagnostic/detector/geometry/surface"
+   ],
+   "predicted": "particle_measurement_diagnostics"
+  },
+  {
+   "count": 2,
+   "label": "particle_measurement_diagnostics",
+   "paths": [
+    "langmuir_probes/embedded/ion_saturation_current",
+    "langmuir_probes/reciprocating/plunge/collector/ion_saturation_current"
+   ],
+   "predicted": "plasma_measurement_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "auxiliary_heating",
+   "paths": [
+    "summary/heating_current_drive/ic/k_perpendicular/value"
+   ],
+   "predicted": "waves"
+  },
+  {
+   "count": 1,
+   "label": "core_plasma_physics",
+   "paths": [
+    "interferometer/electrons_n"
+   ],
+   "predicted": "electromagnetic_wave_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "core_plasma_physics",
+   "paths": [
+    "bolometer/power_radiated_total"
+   ],
+   "predicted": "radiation_measurement_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "edge_plasma_physics",
+   "paths": [
+    "summary/global_quantities/power_loss/value"
+   ],
+   "predicted": "transport"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "core_profiles/global_quantities/ip"
+   ],
+   "predicted": "core_plasma_physics"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "ece/channel/beam_tracing/beam/position/rho_tor_norm"
+   ],
+   "predicted": "electromagnetic_wave_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "disruption/profiles_1d/grid/psi"
+   ],
+   "predicted": "magnetohydrodynamics"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "pulse_schedule/position_control/gap/angle"
+   ],
+   "predicted": "plasma_control"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm"
+   ],
+   "predicted": "waves"
+  },
+  {
+   "count": 1,
+   "label": "fast_particles",
+   "paths": [
+    "distributions/distribution/ggd/orbit_frequency_pol/values"
+   ],
+   "predicted": "transport"
+  },
+  {
+   "count": 1,
+   "label": "mechanical_measurement_diagnostics",
+   "paths": [
+    "operational_instrumentation/sensor/attachement_points/y"
+   ],
+   "predicted": "machine_operations"
+  },
+  {
+   "count": 1,
+   "label": "neutronics",
+   "paths": [
+    "mse/channel/detector/radius"
+   ],
+   "predicted": "magnetic_field_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "particle_measurement_diagnostics",
+   "paths": [
+    "thomson_scattering/laser/end_point/r"
+   ],
+   "predicted": "electromagnetic_wave_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "particle_measurement_diagnostics",
+   "paths": [
+    "barometry/gauge/pressure"
+   ],
+   "predicted": "mechanical_measurement_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_control",
+   "paths": [
+    "equilibrium/time_slice/global_quantities/current_centre/velocity_z"
+   ],
+   "predicted": "equilibrium"
+  },
+  {
+   "count": 1,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "ece/channel/position/phi"
+   ],
+   "predicted": "electromagnetic_wave_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "barometry/gauge/position/phi"
+   ],
+   "predicted": "mechanical_measurement_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "neutron_diagnostic/detector/geometry/x1_width"
+   ],
+   "predicted": "particle_measurement_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "charge_exchange/channel/cone_diameter"
+   ],
+   "predicted": "spectroscopy"
+  },
+  {
+   "count": 1,
+   "label": "plasma_wall_interactions",
+   "paths": [
+    "divertors/divertor/target/extension_r"
+   ],
+   "predicted": "divertor_physics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_wall_interactions",
+   "paths": [
+    "disruption/halo_currents/active_wall_point/r"
+   ],
+   "predicted": "magnetohydrodynamics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_wall_interactions",
+   "paths": [
+    "camera_ir/channel/target_surface_center/y"
+   ],
+   "predicted": "radiation_measurement_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_wall_interactions",
+   "paths": [
+    "edge_transport/model/ggd/ion/momentum/flux_limiter/phi"
+   ],
+   "predicted": "transport"
+  },
+  {
+   "count": 1,
+   "label": "structural_components",
+   "paths": [
+    "pf_passive/loop/element/geometry/oblique/alpha"
+   ],
+   "predicted": "magnetic_field_systems"
+  },
+  {
+   "count": 1,
+   "label": "waves",
+   "paths": [
+    "ece/channel/beam_tracing/beam/wave_vector/n_parallel"
+   ],
+   "predicted": "electromagnetic_wave_diagnostics"
+  }
+ ],
+ "confusion_tree": [
+  {
+   "count": 7,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "bolometer/camera/channel/aperture/surface",
+    "bolometer/camera/channel/aperture/x1_width",
+    "bolometer/camera/channel/detector/surface",
+    "bolometer/camera/channel/line_of_sight/first_point/r",
+    "bolometer/camera/channel/line_of_sight/first_point/z",
+    "bolometer/camera/channel/line_of_sight/second_point/r",
+    "bolometer/camera/channel/line_of_sight/second_point/z"
+   ],
+   "predicted": "radiation_measurement_diagnostics"
+  },
+  {
+   "count": 5,
+   "label": "auxiliary_heating",
+   "paths": [
+    "lh_antennas/antenna/row/n_phi",
+    "summary/heating_current_drive/ic/k_perpendicular/value",
+    "waves/coherent_wave/profiles_1d/ion/state/power_density_fast",
+    "waves/coherent_wave/profiles_1d/power_inside",
+    "waves/coherent_wave/profiles_2d/ion/state/power_density_fast"
+   ],
+   "predicted": "waves"
+  },
+  {
+   "count": 5,
+   "label": "equilibrium",
+   "paths": [
+    "core_profiles/global_quantities/ip",
+    "equilibrium/time_slice/constraints/ip/measured",
+    "equilibrium/time_slice/profiles_1d/j_phi",
+    "summary/pedestal_fits/linear/n_e/pedestal_position/value",
+    "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value"
+   ],
+   "predicted": "core_plasma_physics"
+  },
+  {
+   "count": 4,
+   "label": "radiation_measurement_diagnostics",
+   "paths": [
+    "spectrometer_uv/channel/detector/outline/x1",
+    "spectrometer_x_ray_crystal/channel/crystal/radius",
+    "spectrometer_x_ray_crystal/channel/crystal/thickness",
+    "spectrometer_x_ray_crystal/channel/reflector/x2_curvature"
+   ],
+   "predicted": "spectroscopy"
+  },
+  {
+   "count": 3,
+   "label": "core_plasma_physics",
+   "paths": [
+    "edge_profiles/ggd/electrons/temperature/values",
+    "edge_profiles/ggd/ion/velocity_over_b_field/phi",
+    "edge_profiles/profiles_1d/rotation_frequency_tor_sonic"
+   ],
+   "predicted": "edge_plasma_physics"
+  },
+  {
+   "count": 3,
+   "label": "general",
+   "paths": [
+    "amns_data/a",
+    "amns_data/process/products/element/atoms_n",
+    "amns_data/process/reactants/element/atoms_n"
+   ],
+   "predicted": "computational_workflow"
+  },
+  {
+   "count": 3,
+   "label": "general",
+   "paths": [
+    "core_profiles/profiles_1d/ion/element/a",
+    "core_profiles/profiles_1d/ion/element/z_n",
+    "core_profiles/profiles_1d/neutral/element/z_n"
+   ],
+   "predicted": "core_plasma_physics"
+  },
+  {
+   "count": 2,
+   "label": "core_plasma_physics",
+   "paths": [
+    "charge_exchange/channel/ion/n_i_over_n_e",
+    "charge_exchange/channel/ion/z_ion"
+   ],
+   "predicted": "spectroscopy"
+  },
+  {
+   "count": 2,
+   "label": "core_plasma_physics",
+   "paths": [
+    "bolometer/power_radiated_total",
+    "summary/global_quantities/power_radiated/value"
+   ],
+   "predicted": "transport"
+  },
+  {
+   "count": 2,
+   "label": "edge_plasma_physics",
+   "paths": [
+    "spectrometer_visible/channel/isotope_ratios/isotope/density_ratio",
+    "spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals"
+   ],
+   "predicted": "spectroscopy"
+  },
+  {
+   "count": 2,
+   "label": "neutronics",
+   "paths": [
+    "wall/description_2d/limiter/unit/midplane_power_density_nuclear",
+    "wall/description_2d/limiter/unit/power_nuclear"
+   ],
+   "predicted": "plasma_wall_interactions"
+  },
+  {
+   "count": 2,
+   "label": "neutronics",
+   "paths": [
+    "breeding_blanket/module/layer/time_slice/power_nuclear",
+    "breeding_blanket/module/time_slice/escape_flux_max"
+   ],
+   "predicted": "structural_components"
+  },
+  {
+   "count": 2,
+   "label": "structural_components",
+   "paths": [
+    "ferritic/object/axisymmetric/outline/r",
+    "ferritic/object/centroid/y"
+   ],
+   "predicted": "equilibrium"
+  },
+  {
+   "count": 1,
+   "label": "auxiliary_heating",
+   "paths": [
+    "ic_antennas/antenna/module/pressure/position/z"
+   ],
+   "predicted": "electromagnetic_wave_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "current_drive",
+   "paths": [
+    "summary/fusion/current/value"
+   ],
+   "predicted": "core_plasma_physics"
+  },
+  {
+   "count": 1,
+   "label": "edge_plasma_physics",
+   "paths": [
+    "edge_profiles/ggd/vorticity_over_r/z"
+   ],
+   "predicted": "core_plasma_physics"
+  },
+  {
+   "count": 1,
+   "label": "electromagnetic_wave_diagnostics",
+   "paths": [
+    "equilibrium/time_slice/constraints/n_e_line/reconstructed"
+   ],
+   "predicted": "data_management"
+  },
+  {
+   "count": 1,
+   "label": "electromagnetic_wave_diagnostics",
+   "paths": [
+    "ece/channel/delta_position_suprathermal/theta"
+   ],
+   "predicted": "radiation_measurement_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "edge_profiles/profiles_1d/q"
+   ],
+   "predicted": "edge_plasma_physics"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "ece/channel/beam_tracing/beam/position/rho_tor_norm"
+   ],
+   "predicted": "electromagnetic_wave_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "core_profiles/vacuum_toroidal_field/r0"
+   ],
+   "predicted": "magnetic_field_systems"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "pulse_schedule/position_control/gap/angle"
+   ],
+   "predicted": "plasma_control"
+  },
+  {
+   "count": 1,
+   "label": "equilibrium",
+   "paths": [
+    "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm"
+   ],
+   "predicted": "waves"
+  },
+  {
+   "count": 1,
+   "label": "fast_particles",
+   "paths": [
+    "distributions/distribution/ggd/orbit_frequency_pol/values"
+   ],
+   "predicted": "core_plasma_physics"
+  },
+  {
+   "count": 1,
+   "label": "fast_particles",
+   "paths": [
+    "distribution_sources/source/profiles_1d/particles"
+   ],
+   "predicted": "transport"
+  },
+  {
+   "count": 1,
+   "label": "fueling",
+   "paths": [
+    "spi/injector/pellet/core/atoms_n"
+   ],
+   "predicted": "core_plasma_physics"
+  },
+  {
+   "count": 1,
+   "label": "magnetic_field_diagnostics",
+   "paths": [
+    "focs/outline/z"
+   ],
+   "predicted": "equilibrium"
+  },
+  {
+   "count": 1,
+   "label": "magnetic_field_systems",
+   "paths": [
+    "pf_passive/loop/element/geometry/arcs_of_circle/r"
+   ],
+   "predicted": "computational_workflow"
+  },
+  {
+   "count": 1,
+   "label": "magnetohydrodynamics",
+   "paths": [
+    "mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary"
+   ],
+   "predicted": "gyrokinetics"
+  },
+  {
+   "count": 1,
+   "label": "neutronics",
+   "paths": [
+    "summary/fusion/neutron_rates/total/value"
+   ],
+   "predicted": "core_plasma_physics"
+  },
+  {
+   "count": 1,
+   "label": "neutronics",
+   "paths": [
+    "mse/channel/detector/radius"
+   ],
+   "predicted": "spectroscopy"
+  },
+  {
+   "count": 1,
+   "label": "particle_measurement_diagnostics",
+   "paths": [
+    "barometry/gauge/pressure"
+   ],
+   "predicted": "mechanical_measurement_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_control",
+   "paths": [
+    "equilibrium/time_slice/global_quantities/current_centre/velocity_z"
+   ],
+   "predicted": "magnetohydrodynamics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_initiation",
+   "paths": [
+    "plasma_initiation/global_quantities/b_field_stray"
+   ],
+   "predicted": "magnetic_field_systems"
+  },
+  {
+   "count": 1,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "barometry/gauge/position/phi"
+   ],
+   "predicted": "computational_workflow"
+  },
+  {
+   "count": 1,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "ece/channel/position/phi"
+   ],
+   "predicted": "equilibrium"
+  },
+  {
+   "count": 1,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "neutron_diagnostic/detector/geometry/x1_width"
+   ],
+   "predicted": "neutronics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_measurement_diagnostics",
+   "paths": [
+    "charge_exchange/channel/cone_diameter"
+   ],
+   "predicted": "spectroscopy"
+  },
+  {
+   "count": 1,
+   "label": "plasma_wall_interactions",
+   "paths": [
+    "edge_transport/model/ggd/ion/momentum/flux_limiter/phi"
+   ],
+   "predicted": "gyrokinetics"
+  },
+  {
+   "count": 1,
+   "label": "plasma_wall_interactions",
+   "paths": [
+    "camera_ir/channel/target_surface_center/y"
+   ],
+   "predicted": "radiation_measurement_diagnostics"
+  },
+  {
+   "count": 1,
+   "label": "structural_components",
+   "paths": [
+    "pf_passive/loop/element/geometry/oblique/alpha"
+   ],
+   "predicted": "magnetic_field_systems"
+  },
+  {
+   "count": 1,
+   "label": "transport",
+   "paths": [
+    "plasma_transport/model/ggd/neutral/state/momentum/v/parallel"
+   ],
+   "predicted": "gyrokinetics"
+  },
+  {
+   "count": 1,
+   "label": "waves",
+   "paths": [
+    "ec_launchers/beam/phase/curvature"
+   ],
+   "predicted": "auxiliary_heating"
+  }
+ ],
+ "excluded_names": [
+  {
+   "name": "plasma_mass_density_real_part",
+   "reason": "no source path"
+  },
+  {
+   "name": "current_density_due_to_non_inductive_current_drive",
+   "reason": "no source path"
+  },
+  {
+   "name": "magnetic_field_magnitude",
+   "reason": "no source path"
+  },
+  {
+   "name": "poloidal_perturbed_vacuum_magnetic_field",
+   "reason": "no source path"
+  },
+  {
+   "name": "time",
+   "reason": "no source path"
+  },
+  {
+   "name": "beryllium_density",
+   "reason": "no source path"
+  },
+  {
+   "name": "electrostatic_potential_amplitude",
+   "reason": "no source path"
+  },
+  {
+   "name": "electrostatic_potential_real_part",
+   "reason": "no source path"
+  },
+  {
+   "name": "source_rate_due_to_injection",
+   "reason": "no source path"
+  },
+  {
+   "name": "square_of_toroidal_flux_coordinate_gradient_magnitude",
+   "reason": "no source path"
+  },
+  {
+   "name": "torque_due_to_collisions",
+   "reason": "no source path"
+  },
+  {
+   "name": "time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+   "reason": "no source path"
+  },
+  {
+   "name": "mhd_mode_reference_phase",
+   "reason": "no source path"
+  },
+  {
+   "name": "plasma_temperature_imaginary_part",
+   "reason": "no source path"
+  },
+  {
+   "name": "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+   "reason": "no source path"
+  },
+  {
+   "name": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+   "reason": "no source path"
+  },
+  {
+   "name": "total_plasma_mass_density",
+   "paths": [
+    "edge_profiles/ggd/mass_density/values",
+    "equilibrium/time_slice/profiles_1d/mass_density"
+   ],
+   "reason": "source path outside benchmark"
+  },
+  {
+   "name": "flux_at_limiter",
+   "reason": "no source path"
+  },
+  {
+   "name": "momentum_flux_normalized_due_to_e_cross_b_drift",
+   "reason": "no source path"
+  },
+  {
+   "name": "incident_neutral_particle_flux_at_wall_due_to_recombination",
+   "reason": "no source path"
+  },
+  {
+   "name": "normalized_perturbed_parallel_magnetic_field_magnitude",
+   "reason": "no source path"
+  },
+  {
+   "name": "flux_surface_averaged_current_density_due_to_wave_driven_current_drive",
+   "reason": "no source path"
+  },
+  {
+   "name": "current_density_due_to_fast_ion",
+   "reason": "no source path"
+  }
+ ],
+ "guidance": {
+  "auxiliary_heating -> current_drive": {
+   "label_excludes": [
+    "The deposition of heat is auxiliary_heating; the driven current and its efficiency and control are current_drive."
+   ],
+   "label_scope": "The external systems that heat a plasma and their launch and coupling quantities, judged by whether the quantity belongs to a heating actuator or to the power it delivers. The heating method may be beams or waves; what decides the domain is that the quantity is about the injected power, not the transport it later causes.",
+   "predicted_excludes": [
+    "The energy that was launched is auxiliary_heating; the current it drove is current_drive. Both may come from one beam, and the quantity's subject decides."
+   ],
+   "predicted_scope": "The physics and profiles of current driven in the plasma by non-inductive means and the control of the current profile. Judge by whether the quantity states an amount of driven current, its efficiency, or the target current profile, rather than the power that drove it.",
+   "verdict": "separates"
+  },
+  "auxiliary_heating -> electromagnetic_wave_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "The external systems that heat a plasma and their launch and coupling quantities, judged by whether the quantity belongs to a heating actuator or to the power it delivers. The heating method may be beams or waves; what decides the domain is that the quantity is about the injected power, not the transport it later causes.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.",
+   "verdict": "silent"
+  },
+  "auxiliary_heating -> waves": {
+   "label_excludes": [
+    "The antenna and the power it delivers are auxiliary_heating; the wave it launches, its dispersion and its wave-particle interaction inside the plasma are waves."
+   ],
+   "label_scope": "The external systems that heat a plasma and their launch and coupling quantities, judged by whether the quantity belongs to a heating actuator or to the power it delivers. The heating method may be beams or waves; what decides the domain is that the quantity is about the injected power, not the transport it later causes.",
+   "predicted_excludes": [
+    "Hardware and launched power are auxiliary_heating; the wave in the plasma and its propagation are waves."
+   ],
+   "predicted_scope": "Electromagnetic waves in a plasma: their propagation, dispersion, mode conversion, damping and wave-particle interaction, and the model quantities a wave code computes. Judge by whether the quantity describes a wave field or its interaction rather than the hardware that launched it.",
+   "verdict": "separates"
+  },
+  "core_plasma_physics -> edge_plasma_physics": {
+   "label_excludes": [],
+   "label_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "predicted_excludes": [
+    "A core profile is core_plasma_physics; the same quantity resolved in the scrape-off layer or pedestal region is edge_plasma_physics."
+   ],
+   "predicted_scope": "The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.",
+   "verdict": "separates"
+  },
+  "core_plasma_physics -> electromagnetic_wave_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.",
+   "verdict": "silent"
+  },
+  "core_plasma_physics -> equilibrium": {
+   "label_excludes": [],
+   "label_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "predicted_excludes": [
+    "The amplitude of a temperature or density profile is a property of the plasma, so it is core_plasma_physics; equilibrium owns the surface on which that value sits, not the value."
+   ],
+   "predicted_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "verdict": "separates"
+  },
+  "core_plasma_physics -> radiation_measurement_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.",
+   "verdict": "silent"
+  },
+  "core_plasma_physics -> spectroscopy": {
+   "label_excludes": [],
+   "label_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "predicted_excludes": [],
+   "predicted_scope": "Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.",
+   "verdict": "silent"
+  },
+  "core_plasma_physics -> transport": {
+   "label_excludes": [
+    "How the plasma moves energy or particles is transport; the state it is in is core_plasma_physics. A profile's gradient is core; the flux that gradient drives is transport."
+   ],
+   "label_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "predicted_excludes": [
+    "The plasma's own profile value is core_plasma_physics; a flux or diffusivity derived from it is transport."
+   ],
+   "predicted_scope": "The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it \u2014 an equilibrium IDS with a diffusion model still holds transport quantities.",
+   "verdict": "separates"
+  },
+  "current_drive -> core_plasma_physics": {
+   "label_excludes": [
+    "The total current the plasma carries is a global state of the plasma, core_plasma_physics; the part of it driven externally and its efficiency are current_drive."
+   ],
+   "label_scope": "The physics and profiles of current driven in the plasma by non-inductive means and the control of the current profile. Judge by whether the quantity states an amount of driven current, its efficiency, or the target current profile, rather than the power that drove it.",
+   "predicted_excludes": [],
+   "predicted_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "verdict": "separates"
+  },
+  "edge_plasma_physics -> core_plasma_physics": {
+   "label_excludes": [
+    "A core profile is core_plasma_physics; the same quantity resolved in the scrape-off layer or pedestal region is edge_plasma_physics."
+   ],
+   "label_scope": "The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.",
+   "predicted_excludes": [],
+   "predicted_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "verdict": "separates"
+  },
+  "edge_plasma_physics -> spectroscopy": {
+   "label_excludes": [],
+   "label_scope": "The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.",
+   "predicted_excludes": [],
+   "predicted_scope": "Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.",
+   "verdict": "silent"
+  },
+  "edge_plasma_physics -> transport": {
+   "label_excludes": [],
+   "label_scope": "The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.",
+   "predicted_excludes": [],
+   "predicted_scope": "The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it \u2014 an equilibrium IDS with a diffusion model still holds transport quantities.",
+   "verdict": "silent"
+  },
+  "electromagnetic_wave_diagnostics -> data_management": {
+   "label_excludes": [],
+   "label_scope": "Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.",
+   "predicted_excludes": [],
+   "predicted_scope": "Summary data products, integrated analysis results and the archival and FAIR metadata of a dataset. Judge by whether the quantity is a data product assembled from a run, rather than a direct physics measurement or state.",
+   "verdict": "silent"
+  },
+  "electromagnetic_wave_diagnostics -> equilibrium": {
+   "label_excludes": [],
+   "label_scope": "Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.",
+   "predicted_excludes": [],
+   "predicted_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "verdict": "silent"
+  },
+  "electromagnetic_wave_diagnostics -> radiation_measurement_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.",
+   "verdict": "silent"
+  },
+  "equilibrium -> core_plasma_physics": {
+   "label_excludes": [
+    "The amplitude of a temperature or density profile is a property of the plasma, so it is core_plasma_physics; equilibrium owns the surface on which that value sits, not the value."
+   ],
+   "label_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "predicted_excludes": [],
+   "predicted_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "verdict": "separates"
+  },
+  "equilibrium -> edge_plasma_physics": {
+   "label_excludes": [],
+   "label_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "predicted_excludes": [],
+   "predicted_scope": "The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.",
+   "verdict": "silent"
+  },
+  "equilibrium -> electromagnetic_wave_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.",
+   "verdict": "silent"
+  },
+  "equilibrium -> magnetic_field_systems": {
+   "label_excludes": [],
+   "label_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "predicted_excludes": [
+    "The coils that make the field are magnetic_field_systems; the equilibrium field and its surfaces are equilibrium."
+   ],
+   "predicted_scope": "The machines that generate and confine the magnetic field: coil systems, superconducting magnets and the iron or ferritic field-shaping infrastructure. Judge by whether the quantity describes the hardware that produces the field rather than the field it produces or measures.",
+   "verdict": "separates"
+  },
+  "equilibrium -> magnetohydrodynamics": {
+   "label_excludes": [
+    "A mode that destabilises the configuration is magnetohydrodynamics; a property of the converged, static configuration is equilibrium."
+   ],
+   "label_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "predicted_excludes": [
+    "The shape of the field is equilibrium; a mode that grows on it and its stability is magnetohydrodynamics."
+   ],
+   "predicted_scope": "The stability and macroscopic dynamics of a plasma as a conducting fluid: instabilities, their growth and saturation, magnetic reconnection and the events a loss of stability produces. Judge by whether the quantity describes a coherent mode, its mode numbers and growth, or the evolution of a disruption.",
+   "verdict": "separates"
+  },
+  "equilibrium -> plasma_control": {
+   "label_excludes": [],
+   "label_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "predicted_excludes": [
+    "The commanded or reference configuration is plasma_control; the achieved equilibrium is equilibrium."
+   ],
+   "predicted_scope": "The control of the plasma in real time: position and shape control, feedback loops and the reference and actuator signals that hold a discharge on its trajectory. Judge by whether the quantity is a control reference, a feedback signal or an actuator command rather than a plasma state.",
+   "verdict": "separates"
+  },
+  "equilibrium -> waves": {
+   "label_excludes": [],
+   "label_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "predicted_excludes": [],
+   "predicted_scope": "Electromagnetic waves in a plasma: their propagation, dispersion, mode conversion, damping and wave-particle interaction, and the model quantities a wave code computes. Judge by whether the quantity describes a wave field or its interaction rather than the hardware that launched it.",
+   "verdict": "silent"
+  },
+  "fast_particles -> core_plasma_physics": {
+   "label_excludes": [
+    "The bulk thermal population is core_plasma_physics; the small suprathermal tail is fast_particles."
+   ],
+   "label_scope": "Populations of particles far from the thermal bulk \u2014 their distribution functions, slowing-down, thermalisation, and the instabilities they drive. Judge by whether the quantity describes a suprathermal population's distribution or its interaction with the plasma.",
+   "predicted_excludes": [],
+   "predicted_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "verdict": "separates"
+  },
+  "fast_particles -> transport": {
+   "label_excludes": [],
+   "label_scope": "Populations of particles far from the thermal bulk \u2014 their distribution functions, slowing-down, thermalisation, and the instabilities they drive. Judge by whether the quantity describes a suprathermal population's distribution or its interaction with the plasma.",
+   "predicted_excludes": [],
+   "predicted_scope": "The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it \u2014 an equilibrium IDS with a diffusion model still holds transport quantities.",
+   "verdict": "silent"
+  },
+  "fueling -> core_plasma_physics": {
+   "label_excludes": [
+    "The delivered particles are fueling; the density the plasma holds as a result is core_plasma_physics."
+   ],
+   "label_scope": "The injection of particles into a plasma and the systems that deliver them: gas puffing, pellets and shattered-pellet injection, and the resulting transport of injected neutrals and their ionisation source. Judge by whether the quantity concerns the delivery or the source of particles rather than the plasma's own density.",
+   "predicted_excludes": [],
+   "predicted_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "verdict": "separates"
+  },
+  "general -> computational_workflow": {
+   "label_excludes": [
+    "Tooling and reference data are computational_workflow; general is for physical quantities with no single subject."
+   ],
+   "label_scope": "Quantities that genuinely appear across many domains or carry no single physics subject, so no narrower domain fits. Hold this back: it is a last resort, and a path whose subject is knowable belongs in that subject's domain.",
+   "predicted_excludes": [],
+   "predicted_scope": "Computational and auxiliary infrastructure: atomic and molecular data, geometry definitions, generic temporary containers and the numerics that support a solver. Judge by whether the quantity is tooling or reference data rather than physics.",
+   "verdict": "separates"
+  },
+  "general -> core_plasma_physics": {
+   "label_excludes": [
+    "Choose the subject's own domain over general whenever the subject can be named; general is only for what remains after every narrower domain has been considered and rejected."
+   ],
+   "label_scope": "Quantities that genuinely appear across many domains or carry no single physics subject, so no narrower domain fits. Hold this back: it is a last resort, and a path whose subject is knowable belongs in that subject's domain.",
+   "predicted_excludes": [],
+   "predicted_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "verdict": "separates"
+  },
+  "general -> data_management": {
+   "label_excludes": [
+    "A product assembled from a run is data_management; general is for a physical quantity itself, not a container around many, so a summary product does not default to general."
+   ],
+   "label_scope": "Quantities that genuinely appear across many domains or carry no single physics subject, so no narrower domain fits. Hold this back: it is a last resort, and a path whose subject is knowable belongs in that subject's domain.",
+   "predicted_excludes": [],
+   "predicted_scope": "Summary data products, integrated analysis results and the archival and FAIR metadata of a dataset. Judge by whether the quantity is a data product assembled from a run, rather than a direct physics measurement or state.",
+   "verdict": "separates"
+  },
+  "magnetic_field_diagnostics -> equilibrium": {
+   "label_excludes": [
+    "The coils' signals are magnetic_field_diagnostics; the flux-surface geometry reconstructed from them is equilibrium."
+   ],
+   "label_scope": "Diagnostics of the magnetic field and flux: magnetic probes, flux loops, Rogowski coils and diamagnetic loops. Judge by whether the instrument measures the magnetic field, its flux or the current it reveals.",
+   "predicted_excludes": [],
+   "predicted_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "verdict": "separates"
+  },
+  "magnetic_field_systems -> computational_workflow": {
+   "label_excludes": [],
+   "label_scope": "The machines that generate and confine the magnetic field: coil systems, superconducting magnets and the iron or ferritic field-shaping infrastructure. Judge by whether the quantity describes the hardware that produces the field rather than the field it produces or measures.",
+   "predicted_excludes": [],
+   "predicted_scope": "Computational and auxiliary infrastructure: atomic and molecular data, geometry definitions, generic temporary containers and the numerics that support a solver. Judge by whether the quantity is tooling or reference data rather than physics.",
+   "verdict": "silent"
+  },
+  "magnetohydrodynamics -> gyrokinetics": {
+   "label_excludes": [],
+   "label_scope": "The stability and macroscopic dynamics of a plasma as a conducting fluid: instabilities, their growth and saturation, magnetic reconnection and the events a loss of stability produces. Judge by whether the quantity describes a coherent mode, its mode numbers and growth, or the evolution of a disruption.",
+   "predicted_excludes": [
+    "A fluid-scale coherent instability is magnetohydrodynamics; a gyrokinetic eigenmode is gyrokinetics."
+   ],
+   "predicted_scope": "The gyrokinetic model's own quantities: gyrocenter moments, the gyrokinetic distribution and its fluxes, expressed in the model's normalised coordinates. Judge by whether the quantity is defined within the gyrokinetic framework rather than in measured machine coordinates.",
+   "verdict": "separates"
+  },
+  "mechanical_measurement_diagnostics -> machine_operations": {
+   "label_excludes": [],
+   "label_scope": "Diagnostics of mechanical and structural quantities of machine components: strain, vibration, displacement and inertial or pressure measurement. Judge by whether the instrument measures the mechanical state of a component rather than the plasma or its fields.",
+   "predicted_excludes": [],
+   "predicted_scope": "The operation of the machine around a discharge: pulse scheduling, the shot cycle, workflow orchestration and operational metadata. Judge by whether the quantity concerns when and whether the machine runs rather than the physics it produces.",
+   "verdict": "silent"
+  },
+  "neutronics -> core_plasma_physics": {
+   "label_excludes": [
+    "The plasma's energy state is core_plasma_physics; the neutron emission and its measurement are neutronics."
+   ],
+   "label_scope": "Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.",
+   "predicted_excludes": [],
+   "predicted_scope": "What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.",
+   "verdict": "separates"
+  },
+  "neutronics -> magnetic_field_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics of the magnetic field and flux: magnetic probes, flux loops, Rogowski coils and diamagnetic loops. Judge by whether the instrument measures the magnetic field, its flux or the current it reveals.",
+   "verdict": "silent"
+  },
+  "neutronics -> particle_measurement_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.",
+   "verdict": "silent"
+  },
+  "neutronics -> plasma_wall_interactions": {
+   "label_excludes": [],
+   "label_scope": "Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.",
+   "predicted_excludes": [],
+   "predicted_scope": "The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.",
+   "verdict": "silent"
+  },
+  "neutronics -> spectroscopy": {
+   "label_excludes": [],
+   "label_scope": "Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.",
+   "predicted_excludes": [],
+   "predicted_scope": "Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.",
+   "verdict": "silent"
+  },
+  "neutronics -> structural_components": {
+   "label_excludes": [
+    "The component is structural_components; the neutronics of activation and dose in it is neutronics."
+   ],
+   "label_scope": "Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.",
+   "predicted_excludes": [],
+   "predicted_scope": "The static engineering structure of the device: vacuum vessel, cryostat, supports and the structural definition of components \u2014 materials, geometry and load paths. Judge by whether the quantity describes a structure that holds the machine rather than the plasma physics around it.",
+   "verdict": "separates"
+  },
+  "particle_measurement_diagnostics -> electromagnetic_wave_diagnostics": {
+   "label_excludes": [
+    "Counting particles is particle_measurement_diagnostics; probing with electromagnetic waves and detecting their propagation is electromagnetic_wave_diagnostics."
+   ],
+   "label_scope": "Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.",
+   "predicted_excludes": [
+    "A wave probe is electromagnetic_wave_diagnostics; a measurement that counts particles or their scattering is particle_measurement_diagnostics."
+   ],
+   "predicted_scope": "Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.",
+   "verdict": "separates"
+  },
+  "particle_measurement_diagnostics -> mechanical_measurement_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics of mechanical and structural quantities of machine components: strain, vibration, displacement and inertial or pressure measurement. Judge by whether the instrument measures the mechanical state of a component rather than the plasma or its fields.",
+   "verdict": "silent"
+  },
+  "particle_measurement_diagnostics -> plasma_measurement_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.",
+   "predicted_excludes": [],
+   "predicted_scope": "General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.",
+   "verdict": "silent"
+  },
+  "plasma_control -> equilibrium": {
+   "label_excludes": [
+    "The commanded or reference configuration is plasma_control; the achieved equilibrium is equilibrium."
+   ],
+   "label_scope": "The control of the plasma in real time: position and shape control, feedback loops and the reference and actuator signals that hold a discharge on its trajectory. Judge by whether the quantity is a control reference, a feedback signal or an actuator command rather than a plasma state.",
+   "predicted_excludes": [],
+   "predicted_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "verdict": "separates"
+  },
+  "plasma_control -> magnetohydrodynamics": {
+   "label_excludes": [
+    "The mode is magnetohydrodynamics; the control response to it is plasma_control."
+   ],
+   "label_scope": "The control of the plasma in real time: position and shape control, feedback loops and the reference and actuator signals that hold a discharge on its trajectory. Judge by whether the quantity is a control reference, a feedback signal or an actuator command rather than a plasma state.",
+   "predicted_excludes": [
+    "What the mode does is magnetohydrodynamics; what the controller commands in response is plasma_control."
+   ],
+   "predicted_scope": "The stability and macroscopic dynamics of a plasma as a conducting fluid: instabilities, their growth and saturation, magnetic reconnection and the events a loss of stability produces. Judge by whether the quantity describes a coherent mode, its mode numbers and growth, or the evolution of a disruption.",
+   "verdict": "separates"
+  },
+  "plasma_initiation -> magnetic_field_systems": {
+   "label_excludes": [
+    "The field-null configuration as a start-up physics quantity is plasma_initiation; the coils that produce it are magnetic_field_systems."
+   ],
+   "label_scope": "The start of a discharge: breakdown of the gas, the initial ionisation front, and the physics by which a burnthrough plasma is established. Judge by whether the quantity describes the very start of the plasma, before it is a confined, controlled discharge.",
+   "predicted_excludes": [],
+   "predicted_scope": "The machines that generate and confine the magnetic field: coil systems, superconducting magnets and the iron or ferritic field-shaping infrastructure. Judge by whether the quantity describes the hardware that produces the field rather than the field it produces or measures.",
+   "verdict": "separates"
+  },
+  "plasma_measurement_diagnostics -> computational_workflow": {
+   "label_excludes": [],
+   "label_scope": "General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.",
+   "predicted_excludes": [],
+   "predicted_scope": "Computational and auxiliary infrastructure: atomic and molecular data, geometry definitions, generic temporary containers and the numerics that support a solver. Judge by whether the quantity is tooling or reference data rather than physics.",
+   "verdict": "silent"
+  },
+  "plasma_measurement_diagnostics -> electromagnetic_wave_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.",
+   "verdict": "silent"
+  },
+  "plasma_measurement_diagnostics -> equilibrium": {
+   "label_excludes": [],
+   "label_scope": "General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.",
+   "predicted_excludes": [],
+   "predicted_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "verdict": "silent"
+  },
+  "plasma_measurement_diagnostics -> mechanical_measurement_diagnostics": {
+   "label_excludes": [
+    "A plasma-parameter instrument is plasma_measurement_diagnostics; a component's mechanical state is mechanical_measurement_diagnostics."
+   ],
+   "label_scope": "General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.",
+   "predicted_excludes": [
+    "A measurement of a machine component's mechanical state is mechanical_measurement_diagnostics; a measurement of a plasma parameter is plasma_measurement_diagnostics."
+   ],
+   "predicted_scope": "Diagnostics of mechanical and structural quantities of machine components: strain, vibration, displacement and inertial or pressure measurement. Judge by whether the instrument measures the mechanical state of a component rather than the plasma or its fields.",
+   "verdict": "separates"
+  },
+  "plasma_measurement_diagnostics -> neutronics": {
+   "label_excludes": [],
+   "label_scope": "General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.",
+   "predicted_excludes": [],
+   "predicted_scope": "Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.",
+   "verdict": "silent"
+  },
+  "plasma_measurement_diagnostics -> particle_measurement_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.",
+   "verdict": "silent"
+  },
+  "plasma_measurement_diagnostics -> radiation_measurement_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.",
+   "verdict": "silent"
+  },
+  "plasma_measurement_diagnostics -> spectroscopy": {
+   "label_excludes": [],
+   "label_scope": "General plasma-parameter measurement instruments that do not belong to one of the more specific diagnostic families. Judge by whether the instrument measures a plasma parameter directly and has no stronger home above.",
+   "predicted_excludes": [],
+   "predicted_scope": "Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.",
+   "verdict": "silent"
+  },
+  "plasma_wall_interactions -> divertor_physics": {
+   "label_excludes": [
+    "The plasma heat flux arriving at the target is divertor_physics; the target surface's erosion from it is plasma_wall_interactions."
+   ],
+   "label_scope": "The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.",
+   "predicted_excludes": [
+    "The plasma arriving at the target is divertor_physics; the surface it erodes is plasma_wall_interactions."
+   ],
+   "predicted_scope": "The divertor region's plasma and its exhaust of heat and particles: target loads, detachment, the radiation front and the ionisation and recombination in the divertor. Judge by whether the quantity concerns the divertor plasma rather than the edge globally or a wall surface.",
+   "verdict": "separates"
+  },
+  "plasma_wall_interactions -> gyrokinetics": {
+   "label_excludes": [],
+   "label_scope": "The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.",
+   "predicted_excludes": [],
+   "predicted_scope": "The gyrokinetic model's own quantities: gyrocenter moments, the gyrokinetic distribution and its fluxes, expressed in the model's normalised coordinates. Judge by whether the quantity is defined within the gyrokinetic framework rather than in measured machine coordinates.",
+   "verdict": "silent"
+  },
+  "plasma_wall_interactions -> magnetohydrodynamics": {
+   "label_excludes": [],
+   "label_scope": "The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.",
+   "predicted_excludes": [],
+   "predicted_scope": "The stability and macroscopic dynamics of a plasma as a conducting fluid: instabilities, their growth and saturation, magnetic reconnection and the events a loss of stability produces. Judge by whether the quantity describes a coherent mode, its mode numbers and growth, or the evolution of a disruption.",
+   "verdict": "silent"
+  },
+  "plasma_wall_interactions -> radiation_measurement_diagnostics": {
+   "label_excludes": [],
+   "label_scope": "The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.",
+   "predicted_excludes": [],
+   "predicted_scope": "Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.",
+   "verdict": "silent"
+  },
+  "plasma_wall_interactions -> transport": {
+   "label_excludes": [],
+   "label_scope": "The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.",
+   "predicted_excludes": [],
+   "predicted_scope": "The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it \u2014 an equilibrium IDS with a diffusion model still holds transport quantities.",
+   "verdict": "silent"
+  },
+  "radiation_measurement_diagnostics -> spectroscopy": {
+   "label_excludes": [
+    "Recording radiated power, photon flux or an image is radiation_measurement_diagnostics; resolving an emission spectrum is spectroscopy. The failing case this file exists to separate: a spectrometer's line-of-sight emission belongs to spectroscopy, not to radiation_measurement_diagnostics."
+   ],
+   "label_scope": "Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.",
+   "predicted_excludes": [
+    "A spectrum resolved in wavelength is spectroscopy; a bolometric power or a camera image is radiation_measurement_diagnostics. The failing case this file exists to separate: a spectrometer's emission is spectroscopy even though a spectrometer measures radiation."
+   ],
+   "predicted_scope": "Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.",
+   "verdict": "separates"
+  },
+  "structural_components -> equilibrium": {
+   "label_excludes": [],
+   "label_scope": "The static engineering structure of the device: vacuum vessel, cryostat, supports and the structural definition of components \u2014 materials, geometry and load paths. Judge by whether the quantity describes a structure that holds the machine rather than the plasma physics around it.",
+   "predicted_excludes": [],
+   "predicted_scope": "The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.",
+   "verdict": "silent"
+  },
+  "structural_components -> magnetic_field_systems": {
+   "label_excludes": [
+    "A magnetic coil system is magnetic_field_systems; the passive structure that supports it is structural_components."
+   ],
+   "label_scope": "The static engineering structure of the device: vacuum vessel, cryostat, supports and the structural definition of components \u2014 materials, geometry and load paths. Judge by whether the quantity describes a structure that holds the machine rather than the plasma physics around it.",
+   "predicted_excludes": [],
+   "predicted_scope": "The machines that generate and confine the magnetic field: coil systems, superconducting magnets and the iron or ferritic field-shaping infrastructure. Judge by whether the quantity describes the hardware that produces the field rather than the field it produces or measures.",
+   "verdict": "separates"
+  },
+  "transport -> gyrokinetics": {
+   "label_excludes": [],
+   "label_scope": "The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it \u2014 an equilibrium IDS with a diffusion model still holds transport quantities.",
+   "predicted_excludes": [
+    "The model's internal flux is gyrokinetics; the mean transport flux it predicts or that is measured in the plasma is transport."
+   ],
+   "predicted_scope": "The gyrokinetic model's own quantities: gyrocenter moments, the gyrokinetic distribution and its fluxes, expressed in the model's normalised coordinates. Judge by whether the quantity is defined within the gyrokinetic framework rather than in measured machine coordinates.",
+   "verdict": "separates"
+  },
+  "waves -> auxiliary_heating": {
+   "label_excludes": [
+    "Hardware and launched power are auxiliary_heating; the wave in the plasma and its propagation are waves."
+   ],
+   "label_scope": "Electromagnetic waves in a plasma: their propagation, dispersion, mode conversion, damping and wave-particle interaction, and the model quantities a wave code computes. Judge by whether the quantity describes a wave field or its interaction rather than the hardware that launched it.",
+   "predicted_excludes": [
+    "The antenna and the power it delivers are auxiliary_heating; the wave it launches, its dispersion and its wave-particle interaction inside the plasma are waves."
+   ],
+   "predicted_scope": "The external systems that heat a plasma and their launch and coupling quantities, judged by whether the quantity belongs to a heating actuator or to the power it delivers. The heating method may be beams or waves; what decides the domain is that the quantity is about the injected power, not the transport it later causes.",
+   "verdict": "separates"
+  },
+  "waves -> electromagnetic_wave_diagnostics": {
+   "label_excludes": [
+    "A wave field inside the plasma is waves; an instrument that probes the plasma with waves and records a signal, such as interferometry, reflectometry or polarimetry, is a diagnostic."
+   ],
+   "label_scope": "Electromagnetic waves in a plasma: their propagation, dispersion, mode conversion, damping and wave-particle interaction, and the model quantities a wave code computes. Judge by whether the quantity describes a wave field or its interaction rather than the hardware that launched it.",
+   "predicted_excludes": [
+    "A probe instrument and its measured signal are electromagnetic_wave_diagnostics; the plasma wave physics the probe studies is waves."
+   ],
+   "predicted_scope": "Diagnostics that probe the plasma with electromagnetic waves and detect the wave's propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.",
+   "verdict": "separates"
+  }
+ },
+ "name_count": 147,
+ "none_names_validation": [
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "beryllium_density",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "current_density_due_to_fast_ion",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "current_density_due_to_non_inductive_current_drive",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "flux_at_limiter",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "mhd_mode_reference_phase",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "normalized_perturbed_parallel_magnetic_field_magnitude",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "plasma_temperature_imaginary_part",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "source_rate_due_to_injection",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "time",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+   "sources": 0,
+   "tree": true
+  },
+  {
+   "cause": "no source path is bound to the name",
+   "chat": true,
+   "name": "torque_due_to_collisions",
+   "sources": 0,
+   "tree": true
+  }
+ ],
+ "path_answers": {
+  "amns_data/a": {
+   "chat": "data_management",
+   "description": "Data field in amns_data.",
+   "label": "general",
+   "split": "reference",
+   "tree": "computational_workflow",
+   "tree_category": "data_computing",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.63
+  },
+  "amns_data/process/products/element/atoms_n": {
+   "chat": "data_management",
+   "description": "Normalized atoms of element.",
+   "label": "general",
+   "split": "reference",
+   "tree": "computational_workflow",
+   "tree_category": "data_computing",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.93
+  },
+  "amns_data/process/reactants/element/atoms_n": {
+   "chat": "data_management",
+   "description": "Normalized atoms of element.",
+   "label": "general",
+   "split": "reference",
+   "tree": "computational_workflow",
+   "tree_category": "data_computing",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.84
+  },
+  "barometry/gauge/position/phi": {
+   "chat": "mechanical_measurement_diagnostics",
+   "description": "Toroidal angle (\u03c6) coordinate of position.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "reference",
+   "tree": "computational_workflow",
+   "tree_category": "data_computing",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.54
+  },
+  "barometry/gauge/pressure": {
+   "chat": "mechanical_measurement_diagnostics",
+   "description": "Neutral gas pressure measured by a barometry gauge within the vacuum vessel or surrounding vacuum system. Characterizes local gas inventory and vacuum conditions relevant to plasma fuelling, recycling, and neutral gas modelling.",
+   "label": "particle_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "mechanical_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.6336
+  },
+  "bolometer/camera/channel/aperture/surface": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Surface specification of aperture.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "reference",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.96
+  },
+  "bolometer/camera/channel/aperture/x1_width": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Full width of the bolometer channel aperture in the X1 direction, applicable when the aperture geometry type is rectangular (geometry_type=3). Defines the physical extent of the collimating aperture used in \u00e9tendue calculations.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.99
+  },
+  "bolometer/camera/channel/detector/surface": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Surface specification of detector.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "reference",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.97
+  },
+  "bolometer/camera/channel/line_of_sight/first_point/r": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Major radius (R) coordinate of first point.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "reference",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.9400000000000001
+  },
+  "bolometer/camera/channel/line_of_sight/first_point/z": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Vertical (Z) coordinate of first point.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "reference",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.95
+  },
+  "bolometer/camera/channel/line_of_sight/second_point/r": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Major radius (R) coordinate of second point.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "reference",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.94
+  },
+  "bolometer/camera/channel/line_of_sight/second_point/z": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Vertical (Z) coordinate of second point.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "reference",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.95
+  },
+  "bolometer/power_radiated_total": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Total radiated power (P_rad) reconstructed from bolometry measurements, integrating broadband electromagnetic emission across the entire plasma volume. A key global energy balance quantity for transport analysis and impurity monitoring.",
+   "label": "core_plasma_physics",
+   "split": "validation",
+   "tree": "transport",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.72,
+   "tree_probability": 0.42479999999999996
+  },
+  "breeding_blanket/module/layer/time_slice/power_nuclear": {
+   "chat": "neutronics",
+   "description": "Total nuclear power deposited in a specific breeding blanket layer by neutron heating. Represents the volumetric nuclear heat load from fusion neutron interactions with the blanket material.",
+   "label": "neutronics",
+   "split": "calibration",
+   "tree": "structural_components",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 0.85,
+   "tree_probability": 0.5355
+  },
+  "breeding_blanket/module/time_slice/escape_flux_max": {
+   "chat": "neutronics",
+   "description": "Maximum neutron flux escaping from the rear surface of a breeding blanket module. A key shielding performance metric indicating the blanket's effectiveness in attenuating the neutron flux toward the vessel structure.",
+   "label": "neutronics",
+   "split": "calibration",
+   "tree": "structural_components",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 0.96,
+   "tree_probability": 0.816
+  },
+  "bremsstrahlung_visible/channel/filter/wavelength_upper": {
+   "chat": "spectroscopy",
+   "description": "Upper bound of the wavelength passband for the optical filter in a visible bremsstrahlung channel. Defines the high-wavelength edge of the spectral window selected for effective charge (Zeff) measurements.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.95,
+   "tree_probability": 0.95
+  },
+  "camera_ir/channel/target_surface_center/y": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Y coordinate of target surface center.",
+   "label": "plasma_wall_interactions",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.891
+  },
+  "camera_ir/optical_element/geometry/outline/x1": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Positions of the optical element outline vertices along the x1 axis in the local (X1, X2) coordinate system. Defines part of the irregular cross-sectional boundary of an IR camera optical element.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.7056
+  },
+  "camera_x_rays/detector_temperature": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Physical temperature of the X-ray camera detector hardware. Relevant for calibration and monitoring of detector operating conditions during plasma measurements.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.65,
+   "tree_probability": 0.637
+  },
+  "camera_x_rays/filter_window/centre/phi": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Toroidal angle (\u03c6) coordinate of centre.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.95
+  },
+  "camera_x_rays/filter_window/radius": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Radius of a circular filter window aperture in the X-ray camera diagnostic, applicable only when the geometry type is set to circular. Defines the physical size of the window through which X-ray photons pass.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "camera_x_rays/filter_window/wavelength_upper": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Upper bound of the wavelength passband of the X-ray camera filter window, defining the high-wavelength (low-energy) cutoff of the spectral sensitivity range for the filter.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.94,
+   "tree_probability": 0.94
+  },
+  "charge_exchange/channel/cone_diameter": {
+   "chat": "spectroscopy",
+   "description": "Diameter of the base of the optical cone at the entrance pupil of a CXRS channel. A geometric parameter characterizing the light collection optics of the charge exchange recombination spectroscopy diagnostic.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "validation",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.96,
+   "tree_probability": 0.96
+  },
+  "charge_exchange/channel/ion/n_i_over_n_e": {
+   "chat": "spectroscopy",
+   "description": "Ion concentration of a given impurity or fuel species expressed as the ratio of ion density (ni) to electron density (ne) at the CXRS channel measurement point. Quantifies fractional abundance of the species relative to the electron population.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.97,
+   "tree_probability": 0.4947
+  },
+  "charge_exchange/channel/ion/velocity_pol": {
+   "chat": "spectroscopy",
+   "description": "Poloidal velocity (v_pol) of an ion species measured by charge exchange recombination spectroscopy (CXRS) at the channel measurement point. Represents the poloidal component of ion flow derived from Doppler-shifted emission.",
+   "label": "spectroscopy",
+   "split": "validation",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.59
+  },
+  "charge_exchange/channel/ion/z_ion": {
+   "chat": "spectroscopy",
+   "description": "Ion charge state (z_ion) of the measured ion species in charge exchange recombination spectroscopy (CXRS). Specifies the charge number (e.g., C+6, N+7) used to identify the spectral line and interpret the measurement.",
+   "label": "core_plasma_physics",
+   "split": "reference",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.83
+  },
+  "coils_non_axisymmetric/coil/conductor/elements/centres/r": {
+   "chat": "magnetic_field_systems",
+   "description": "Major radius (R) coordinate of centres.",
+   "label": "magnetic_field_systems",
+   "split": "validation",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "coils_non_axisymmetric/coil/conductor/elements/intermediate_points/r": {
+   "chat": "magnetic_field_systems",
+   "description": "Major radius (R) coordinate of intermediate points.",
+   "label": "magnetic_field_systems",
+   "split": "validation",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.99
+  },
+  "core_profiles/global_quantities/ip": {
+   "chat": "core_plasma_physics",
+   "description": "Total plasma current (Ip), the net toroidal current flowing through the plasma column, as stored in the core_profiles global quantities. A primary global parameter for confinement and stability.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.98
+  },
+  "core_profiles/global_quantities/z_eff_resistive": {
+   "chat": "core_plasma_physics",
+   "description": "Volume-averaged effective plasma charge (Zeff) estimated from ohmic resistive flux consumption during the ohmic heating phase. Provides a global impurity content measure derived resistively rather than spectroscopically.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.96,
+   "tree_probability": 0.9503999999999999
+  },
+  "core_profiles/profiles_1d/e_field/parallel": {
+   "chat": "core_plasma_physics",
+   "description": "Parallel component of e field.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.79,
+   "tree_probability": 0.7426
+  },
+  "core_profiles/profiles_1d/electrons/temperature": {
+   "chat": "core_plasma_physics",
+   "description": "Electron temperature (Te) radial profile in the core plasma, as a function of normalized flux coordinate. Fundamental to transport, stability, and heating analyses of the bulk electron population.",
+   "label": "core_plasma_physics",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "core_profiles/profiles_1d/grid/psi_boundary": {
+   "chat": "equilibrium",
+   "description": "Poloidal magnetic flux (\u03c8) at the plasma boundary (last closed flux surface, LCFS), used as the outer normalization reference for the radial \u03c8 grid in core plasma 1D profiles.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.95
+  },
+  "core_profiles/profiles_1d/grid/rho_pol_norm": {
+   "chat": "equilibrium",
+   "description": "Normalised poloidal flux coordinate (\u03c1_pol_norm), defined as sqrt((\u03c8\u2212\u03c8_axis)/(\u03c8_LCFS\u2212\u03c8_axis)). Standard radial grid coordinate for core plasma 1D profiles, equal to 0 at the magnetic axis and 1 at the LCFS.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.88
+  },
+  "core_profiles/profiles_1d/grid/rho_tor": {
+   "chat": "equilibrium",
+   "description": "Toroidal flux coordinate (\u03c1_tor), defined as sqrt(\u03a6_tor/(\u03c0 B0)), approximating the effective minor radius. Serves as the primary radial grid coordinate for 1D core plasma profiles.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9207000000000001
+  },
+  "core_profiles/profiles_1d/grid/rho_tor_norm": {
+   "chat": "equilibrium",
+   "description": "Normalized toroidal flux coordinate (\u03c1_tor,norm), defined as the square root of the toroidal flux normalized to its value at the last closed flux surface (LCFS). A standard radial coordinate for core plasma profiles.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.97,
+   "tree_probability": 0.9215
+  },
+  "core_profiles/profiles_1d/grid/volume": {
+   "chat": "equilibrium",
+   "description": "Volume (V) enclosed inside a magnetic flux surface as a function of the radial grid coordinate in the core profiles. Used as a geometric metric in transport calculations and flux-surface-averaged profile analysis.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.78
+  },
+  "core_profiles/profiles_1d/ion/element/a": {
+   "chat": "core_plasma_physics",
+   "description": "Data field in core_profiles.",
+   "label": "general",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.68
+  },
+  "core_profiles/profiles_1d/ion/element/z_n": {
+   "chat": "core_plasma_physics",
+   "description": "Normalized z of element.",
+   "label": "general",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.83
+  },
+  "core_profiles/profiles_1d/ion/state/z_max": {
+   "chat": "core_plasma_physics",
+   "description": "Maximum charge number (Z_max) of an ion charge state bundle in the core plasma profiles. Equal to z_min when the state represents a single charge state rather than a bundled range.",
+   "label": "core_plasma_physics",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "core_profiles/profiles_1d/ion/state/z_min": {
+   "chat": "core_plasma_physics",
+   "description": "Minimum charge state (Z_min) of a charge state bundle for an ion species in the core plasma profiles. Defines the lower bound of the bundled ionization states when multiple charge states are grouped together.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "core_profiles/profiles_1d/ion/z_ion": {
+   "chat": "core_plasma_physics",
+   "description": "Ion charge (Z_ion) of a given ion species, representing the charge of the dominant ionisation state as a scalar quantity. A radially resolved profile is stored separately as z_ion_1d.",
+   "label": "core_plasma_physics",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "core_profiles/profiles_1d/neutral/element/z_n": {
+   "chat": "core_plasma_physics",
+   "description": "Normalized z of element.",
+   "label": "general",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.7448
+  },
+  "core_profiles/profiles_1d/q": {
+   "chat": "equilibrium",
+   "description": "Safety factor (q) radial profile in the core plasma, representing the ratio of toroidal to poloidal magnetic field line turns per flux surface. A fundamental MHD stability parameter; rational q surfaces are resonant locations for tearing and kink modes.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.98
+  },
+  "core_profiles/profiles_1d/rotation_frequency_tor_sonic": {
+   "chat": "core_plasma_physics",
+   "description": "Toroidal angular rotation frequency (\u03a9_tor,sonic) due to the E\u00d7B drift, defined as the negative derivative of the flux-surface-averaged electrostatic potential with respect to poloidal flux. Corresponds to the sonic flow approximation of Hinton and Wong (1985).",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "core_profiles/profiles_1d/zeff": {
+   "chat": "core_plasma_physics",
+   "description": "Effective charge (Zeff) radial profile, the charge-weighted average ionic charge over all species. A key parameter for resistivity, radiation, and transport calculations that quantifies impurity content in the core plasma.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "core_profiles/profiles_2d/ion/state/z_max": {
+   "chat": "core_plasma_physics",
+   "description": "Maximum charge number Z (Z_max) of the ion charge state bundle for a given ion state in the 2D core profiles. If no bundling is applied, Z_max equals Z_min, identifying a single charge state.",
+   "label": "core_plasma_physics",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.94
+  },
+  "core_profiles/profiles_2d/ion/state/z_min": {
+   "chat": "core_plasma_physics",
+   "description": "Minimum charge number (Z_min) of the ion charge state bundle for a given ion species in the 2D core plasma profiles. Defines the lower bound of the charge state range grouped together in this bundle.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "core_profiles/vacuum_toroidal_field/r0": {
+   "chat": "equilibrium",
+   "description": "Reference major radius (R0) at which the vacuum toroidal magnetic field B0 is defined in the core_profiles IDS, typically a fixed geometric position at the vessel equatorial midplane. Used to normalise current densities and define the toroidal flux coordinate rho_tor.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 0.66,
+   "tree_probability": 0.42240000000000005
+  },
+  "core_sources/source/profiles_1d/grid/psi": {
+   "chat": "equilibrium",
+   "description": "Poloidal magnetic flux (\u03c8) as a radial coordinate on the 1D grid for core source term profiles. Labels flux surfaces for mapping source terms to the transport solver radial grid.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.8918
+  },
+  "core_sources/source/profiles_1d/grid/psi_boundary": {
+   "chat": "equilibrium",
+   "description": "Poloidal magnetic flux (\u03c8) at the plasma boundary (LCFS), used as a normalization reference defining the outer extent of the radial grid for core source profiles. Provides the boundary condition for the psi coordinate array.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.6732
+  },
+  "core_sources/source/profiles_1d/grid/rho_pol_norm": {
+   "chat": "equilibrium",
+   "description": "Normalised poloidal flux coordinate (\u03c1_pol_norm) on the radial grid for core source profiles, defined as sqrt((\u03c8\u2212\u03c8_axis)/(\u03c8_LCFS\u2212\u03c8_axis)). Used as a flux-surface label for source term radial profiles.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.735
+  },
+  "core_sources/source/profiles_1d/grid/rho_tor": {
+   "chat": "equilibrium",
+   "description": "Toroidal flux coordinate (\u03c1_tor) on the 1D radial grid for core source profiles. Defined as \u03c1_tor = sqrt(\u03a6_tor/(\u03c0\u00b7B0)), approximating the effective minor radius of a flux surface.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.97,
+   "tree_probability": 0.7469
+  },
+  "core_sources/source/profiles_1d/grid/rho_tor_norm": {
+   "chat": "equilibrium",
+   "description": "Normalised toroidal flux coordinate (rho_tor_norm) used as the radial grid for 1D core source profiles. Normalised to the toroidal flux coordinate at the last closed flux surface (LCFS), spanning 0 at the magnetic axis to 1 at the plasma edge.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.89,
+   "tree_probability": 0.7031000000000001
+  },
+  "core_sources/source/profiles_1d/grid/volume": {
+   "chat": "equilibrium",
+   "description": "Volume (V) enclosed inside each magnetic flux surface as a function of the radial coordinate, used as a geometric grid quantity for 1D core source profiles.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.5488000000000001
+  },
+  "core_sources/vacuum_toroidal_field/r0": {
+   "chat": "equilibrium",
+   "description": "Reference major radius (R0) at which the vacuum toroidal magnetic field B0 is specified in the core_sources IDS, typically a fixed device position. Defines the normalization point for the toroidal flux coordinate \u03c1_tor and current density expressions.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.4059
+  },
+  "disruption/halo_currents/active_wall_point/r": {
+   "chat": "magnetohydrodynamics",
+   "description": "Major radius (R) coordinate of active wall point.",
+   "label": "plasma_wall_interactions",
+   "split": "calibration",
+   "tree": "plasma_wall_interactions",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.7,
+   "tree_probability": 0.5599999999999999
+  },
+  "disruption/profiles_1d/grid/psi": {
+   "chat": "magnetohydrodynamics",
+   "description": "Poloidal magnetic flux (\u03c8) used as the radial grid coordinate for 1D disruption profiles. Each value labels the flux surface on which the disruption profile data (current density, power loss, runaway electrons) is evaluated.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.96,
+   "tree_probability": 0.9023999999999999
+  },
+  "distribution_sources/source/ggd/particles/values": {
+   "chat": "fast_particles",
+   "description": "Array of values for particles.",
+   "label": "fast_particles",
+   "split": "validation",
+   "tree": "fast_particles",
+   "tree_category": "energetic_particles",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.54
+  },
+  "distribution_sources/source/profiles_1d/particles": {
+   "chat": "fast_particles",
+   "description": "Particle source term for the density transport equation as a 1D radial profile, representing the net volumetric rate of particle production from the distribution source (e.g., NBI ionization, fusion reactions). Used as input for Fokker-Planck and kinetic transport calculations.",
+   "label": "fast_particles",
+   "split": "validation",
+   "tree": "transport",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.7524
+  },
+  "distributions/distribution/ggd/orbit_frequency_pol/values": {
+   "chat": "transport",
+   "description": "Array of values for orbit frequency pol.",
+   "label": "fast_particles",
+   "split": "validation",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.46,
+   "tree_probability": 0.2208
+  },
+  "distributions/distribution/global_quantities/power_first_orbit": {
+   "chat": "fast_particles",
+   "description": "Power loss due to first orbit losses, where newly born fast particles (e.g., from NBI or fusion reactions) escape before completing a full orbit. A global scalar power sink in the distribution function framework.",
+   "label": "fast_particles",
+   "split": "validation",
+   "tree": "fast_particles",
+   "tree_category": "energetic_particles",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.99
+  },
+  "distributions/distribution/profiles_2d/collisions/ion/torque_thermal_phi": {
+   "chat": "fast_particles",
+   "description": "Collisional toroidal torque density (phi-component) transferred to the thermal ion population in the 2D poloidal plane, arising from Coulomb collisions between the fast particle distribution and bulk thermal ions.",
+   "label": "fast_particles",
+   "split": "calibration",
+   "tree": "fast_particles",
+   "tree_category": "energetic_particles",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.67
+  },
+  "divertors/divertor/power_currents": {
+   "chat": "divertor_physics",
+   "description": "Power deposited on divertor targets due to electric currents, summed over all targets. Positive values indicate net power deposition from current-driven processes at the divertor.",
+   "label": "divertor_physics",
+   "split": "calibration",
+   "tree": "divertor_physics",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.98
+  },
+  "divertors/divertor/target/extension_r": {
+   "chat": "divertor_physics",
+   "description": "Radial extent (projection on the major radius axis R) of a divertor target. A geometric parameter characterising the target dimensions in the major radius direction.",
+   "label": "plasma_wall_interactions",
+   "split": "calibration",
+   "tree": "plasma_wall_interactions",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.59,
+   "tree_probability": 0.5722999999999999
+  },
+  "ec_launchers/beam/phase/curvature": {
+   "chat": "waves",
+   "description": "Inverse curvature radii (1/R) of the phase ellipse for an electron cyclotron (EC) launcher beam in Gaussian optics. Positive/negative values indicate divergent/convergent beam wavefronts; the two components describe the principal curvatures of the beam phase front.",
+   "label": "waves",
+   "split": "calibration",
+   "tree": "auxiliary_heating",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 0.79,
+   "tree_probability": 0.79
+  },
+  "ece/channel/beam_tracing/beam/position/rho_tor_norm": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Normalised toroidal flux coordinate (\u03c1_tor_norm) along the ECE beam or ray path, mapping each propagation position to a flux surface. Used to relate beam-tracing positions to plasma radial structure for Te profile reconstruction.",
+   "label": "equilibrium",
+   "split": "validation",
+   "tree": "electromagnetic_wave_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.53,
+   "tree_probability": 0.33390000000000003
+  },
+  "ece/channel/beam_tracing/beam/wave_vector/n_parallel": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Parallel refractive index (n_\u2225) of the ECE beam or ray along its propagation path, defined as the wave vector component parallel to the local magnetic field normalized by the free-space wave number.",
+   "label": "waves",
+   "split": "calibration",
+   "tree": "waves",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9602999999999999
+  },
+  "ece/channel/delta_position_suprathermal/theta": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Poloidal angle (\u03b8) component of the position shift of the ECE measurement location induced by suprathermal electrons. Part of the correction vector estimating how non-thermal electrons bias the apparent emission position relative to the thermal resonance layer.",
+   "label": "electromagnetic_wave_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.6,
+   "tree_probability": 0.54
+  },
+  "ece/channel/position/phi": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Toroidal angle (\u03c6) coordinate of position.",
+   "label": "plasma_measurement_diagnostics",
+   "split": "reference",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.47519999999999996
+  },
+  "edge_profiles/ggd/e_field/parallel": {
+   "chat": "edge_plasma_physics",
+   "description": "Parallel component of e field.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.38,
+   "tree_probability": 0.1482
+  },
+  "edge_profiles/ggd/electrons/temperature/values": {
+   "chat": "edge_plasma_physics",
+   "description": "Array of values for temperature.",
+   "label": "core_plasma_physics",
+   "split": "reference",
+   "tree": "edge_plasma_physics",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "edge_profiles/ggd/ion/velocity_over_b_field/phi": {
+   "chat": "edge_plasma_physics",
+   "description": "Toroidal angle (\u03c6) coordinate of velocity over b field.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "edge_plasma_physics",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.55
+  },
+  "edge_profiles/ggd/j_ion_neutral_friction/r": {
+   "chat": "edge_plasma_physics",
+   "description": "Major radius (R) coordinate of j ion neutral friction.",
+   "label": "edge_plasma_physics",
+   "split": "validation",
+   "tree": "edge_plasma_physics",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.9,
+   "tree_probability": 0.48600000000000004
+  },
+  "edge_profiles/ggd/j_ion_neutral_friction/radial": {
+   "chat": "edge_plasma_physics",
+   "description": "Radial component of j ion neutral friction.",
+   "label": "edge_plasma_physics",
+   "split": "validation",
+   "tree": "edge_plasma_physics",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.6731999999999999
+  },
+  "edge_profiles/ggd/vorticity_over_r/z": {
+   "chat": "edge_plasma_physics",
+   "description": "Vertical (Z) coordinate of vorticity over r.",
+   "label": "edge_plasma_physics",
+   "split": "validation",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.48,
+   "tree_probability": 0.2928
+  },
+  "edge_profiles/profiles_1d/q": {
+   "chat": "equilibrium",
+   "description": "Safety factor (q) radial profile in the edge and scrape-off layer (SOL) region, representing the ratio of toroidal to poloidal magnetic flux increments per field-line turn. A fundamental MHD stability parameter governing resonant surfaces and field-line connection lengths.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "edge_plasma_physics",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.5700000000000001
+  },
+  "edge_profiles/profiles_1d/rotation_frequency_tor_sonic": {
+   "chat": "edge_plasma_physics",
+   "description": "Toroidal angular rotation frequency (\u03a9_tor,sonic) due to the E\u00d7B drift, defined as minus the derivative of the flux-surface-averaged electrostatic potential with respect to poloidal flux. Also referred to as the sonic flow frequency in the edge/SOL region.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "edge_plasma_physics",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.58
+  },
+  "edge_transport/model/ggd/ion/momentum/flux_limiter/phi": {
+   "chat": "transport",
+   "description": "Toroidal angle (\u03c6) coordinate of flux limiter.",
+   "label": "plasma_wall_interactions",
+   "split": "validation",
+   "tree": "gyrokinetics",
+   "tree_category": "advanced_physics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.46
+  },
+  "equilibrium/time_slice/boundary/gap/angle": {
+   "chat": "equilibrium",
+   "description": "Angle of a plasma boundary gap vector measured clockwise from the radial cylindrical direction (grad R). Defines the orientation of the gap used to specify the plasma boundary shape in fixed-boundary equilibrium codes.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.7524
+  },
+  "equilibrium/time_slice/boundary/minor_radius": {
+   "chat": "equilibrium",
+   "description": "Minor radius (a) of the plasma boundary, defined as (R_max \u2212 R_min)/2 of the boundary contour. A primary geometric parameter characterizing the radial extent of the plasma cross-section.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9503999999999999
+  },
+  "equilibrium/time_slice/constraints/ip/measured": {
+   "chat": "equilibrium",
+   "description": "Measured value of ip.",
+   "label": "equilibrium",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.68,
+   "tree_probability": 0.4964
+  },
+  "equilibrium/time_slice/constraints/n_e/measured": {
+   "chat": "equilibrium",
+   "description": "Measured value of n e.",
+   "label": "core_plasma_physics",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.94,
+   "tree_probability": 0.611
+  },
+  "equilibrium/time_slice/constraints/n_e/reconstructed": {
+   "chat": "equilibrium",
+   "description": "Reconstructed value of n e.",
+   "label": "core_plasma_physics",
+   "split": "reference",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.89,
+   "tree_probability": 0.3471
+  },
+  "equilibrium/time_slice/constraints/n_e_line/measured": {
+   "chat": "equilibrium",
+   "description": "Measured value of n e line.",
+   "label": "electromagnetic_wave_diagnostics",
+   "split": "calibration",
+   "tree": "electromagnetic_wave_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.92,
+   "tree_probability": 0.7084
+  },
+  "equilibrium/time_slice/constraints/n_e_line/reconstructed": {
+   "chat": "equilibrium",
+   "description": "Reconstructed value of n e line.",
+   "label": "electromagnetic_wave_diagnostics",
+   "split": "calibration",
+   "tree": "data_management",
+   "tree_category": "data_computing",
+   "tree_domain_probability": 0.59,
+   "tree_probability": 0.34219999999999995
+  },
+  "equilibrium/time_slice/global_quantities/current_centre/velocity_z": {
+   "chat": "equilibrium",
+   "description": "Vertical velocity (dZ/dt) of the current centre, representing the rate of change of the vertical position of the centroid of the plasma current distribution. A global scalar equilibrium quantity.",
+   "label": "plasma_control",
+   "split": "validation",
+   "tree": "magnetohydrodynamics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.46,
+   "tree_probability": 0.46
+  },
+  "equilibrium/time_slice/global_quantities/q_min/psi_norm": {
+   "chat": "equilibrium",
+   "description": "Normalised poloidal flux coordinate (\u03c8_norm) at the location of the minimum safety factor (q_min) within the plasma. Used to identify the radial position of q_min on the flux surface grid.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.99
+  },
+  "equilibrium/time_slice/profiles_1d/dvolume_dpsi": {
+   "chat": "equilibrium",
+   "description": "Radial derivative of the volume enclosed by a flux surface with respect to poloidal flux (dV/d\u03c8). A geometric metric quantity used in flux-surface averaging, pressure balance calculations, and the formulation of 1D transport equations.",
+   "label": "equilibrium",
+   "split": "validation",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9801
+  },
+  "equilibrium/time_slice/profiles_1d/gm7": {
+   "chat": "equilibrium",
+   "description": "Flux-surface-averaged metric coefficient gm7 = \u27e8|\u2207\u03c1|\u27e9, where \u03c1 is the radial flux coordinate. A geometric quantity appearing in flux-surface-averaged transport equations and gyrokinetic geometry specifications.",
+   "label": "equilibrium",
+   "split": "validation",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9306
+  },
+  "equilibrium/time_slice/profiles_1d/j_phi": {
+   "chat": "equilibrium",
+   "description": "Flux-surface averaged toroidal current density (j_phi), defined as \u27e8j_tor/R\u27e9/\u27e81/R\u27e9. This quantity appears directly in the Grad-Shafranov equation and represents the effective current density driving the poloidal flux distribution.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.57,
+   "tree_probability": 0.57
+  },
+  "ferritic/object/axisymmetric/outline/r": {
+   "chat": "structural_components",
+   "description": "Major radius (R) coordinate of outline.",
+   "label": "structural_components",
+   "split": "validation",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.3663
+  },
+  "ferritic/object/centroid/y": {
+   "chat": "structural_components",
+   "description": "Y coordinate of centroid.",
+   "label": "structural_components",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.59,
+   "tree_probability": 0.24189999999999998
+  },
+  "focs/outline/z": {
+   "chat": "magnetic_field_diagnostics",
+   "description": "Vertical (Z) coordinate of outline.",
+   "label": "magnetic_field_diagnostics",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.6237
+  },
+  "gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_1/pressure_perpendicular": {
+   "chat": "gyrokinetics",
+   "description": "Normalised perpendicular pressure moment of the perturbed gyrocenter distribution function weighted by the first-order Bessel function J1, for a linear gyrokinetic eigenmode. Represents the perpendicular thermal pressure perturbation in Bessel-weighted gyrocenter space.",
+   "label": "gyrokinetics",
+   "split": "validation",
+   "tree": "gyrokinetics",
+   "tree_category": "advanced_physics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.9
+  },
+  "gyrokinetics_local/non_linear/fields_intensity_1d/b_field_parallel_perturbed_norm": {
+   "chat": "gyrokinetics",
+   "description": "Normalised perturbed parallel magnetic field (\u03b4B_\u2225) intensity as a 1D profile in ky, summed over kx, time-averaged, and flux-surface averaged in a nonlinear gyrokinetic simulation. Quantifies the electromagnetic compressional fluctuation contribution to turbulent transport.",
+   "label": "gyrokinetics",
+   "split": "calibration",
+   "tree": "gyrokinetics",
+   "tree_category": "advanced_physics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.87
+  },
+  "gyrokinetics_local/non_linear/fields_intensity_2d_surface_average/b_field_parallel_perturbed_norm": {
+   "chat": "gyrokinetics",
+   "description": "Normalised perturbed parallel magnetic field (\u03b4B\u2225) intensity, flux-surface and time-averaged, as a function of wavevectors (kx, ky) from a non-linear gyrokinetic simulation. Characterizes electromagnetic fluctuation amplitude in the parallel magnetic compression channel.",
+   "label": "gyrokinetics",
+   "split": "calibration",
+   "tree": "gyrokinetics",
+   "tree_category": "advanced_physics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.91
+  },
+  "gyrokinetics_local/species/density_log_gradient_norm": {
+   "chat": "gyrokinetics",
+   "description": "Normalised logarithmic density gradient (R/Ln) with respect to the normalised minor radius, a key drive term for density-gradient-driven micro-turbulence in gyrokinetic simulations. Used to characterize turbulent particle transport drives.",
+   "label": "gyrokinetics",
+   "split": "validation",
+   "tree": "gyrokinetics",
+   "tree_category": "advanced_physics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.87
+  },
+  "hard_x_rays/channel/detector/outline/x2": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "X2-axis coordinates of the vertices defining the irregular aperture outline of the hard X-ray detector in its local (X1, X2) coordinate system. Used together with x1 to compute the detector geometric etendue and sight-line integrals.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.93
+  },
+  "hard_x_rays/channel/energy_band/detection_efficiency": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Detection efficiency of a hard X-ray detector energy band, giving the probability of detecting a photon that impacts the detector as a function of photon energy. Used for absolute calibration of hard X-ray channel signals.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "hard_x_rays/channel/filter_window/centre/phi": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Toroidal angle (\u03c6) coordinate of centre.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.93
+  },
+  "hard_x_rays/channel/filter_window/radius": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Radius of a circular filter window aperture for a hard X-ray diagnostic channel. Used only when the filter window geometry type is set to circular (geometry_type/index = 2).",
+   "label": "radiation_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.99
+  },
+  "ic_antennas/antenna/module/coupling_resistance": {
+   "chat": "auxiliary_heating",
+   "description": "Coupling resistance of an ion cyclotron (IC) antenna module, characterizing the resistive part of the antenna loading impedance seen by the transmission line. A key RF coupling efficiency parameter relating launched power to antenna current.",
+   "label": "auxiliary_heating",
+   "split": "validation",
+   "tree": "auxiliary_heating",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "ic_antennas/antenna/module/pressure/position/z": {
+   "chat": "auxiliary_heating",
+   "description": "Vertical (Z) coordinate of position.",
+   "label": "auxiliary_heating",
+   "split": "validation",
+   "tree": "electromagnetic_wave_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.51,
+   "tree_probability": 0.27030000000000004
+  },
+  "ic_antennas/antenna/module/strap/geometry/annulus/z": {
+   "chat": "auxiliary_heating",
+   "description": "Vertical (Z) coordinate of annulus.",
+   "label": "auxiliary_heating",
+   "split": "calibration",
+   "tree": "auxiliary_heating",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.8
+  },
+  "ic_antennas/antenna/module/strap/geometry/thick_line/first_point/z": {
+   "chat": "auxiliary_heating",
+   "description": "Vertical (Z) coordinate of first point.",
+   "label": "auxiliary_heating",
+   "split": "calibration",
+   "tree": "auxiliary_heating",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.7
+  },
+  "ic_antennas/reference_point/z": {
+   "chat": "auxiliary_heating",
+   "description": "Vertical (Z) coordinate of reference point.",
+   "label": "auxiliary_heating",
+   "split": "validation",
+   "tree": "auxiliary_heating",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.4
+  },
+  "interferometer/channel/wavelength/phase_to_n_e_line": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Conversion factor from measured interferometric phase to line-integrated electron density (\u222bne\u00b7dl) for a given wavelength channel. Applied to translate raw phase shifts into physically meaningful line density values.",
+   "label": "electromagnetic_wave_diagnostics",
+   "split": "validation",
+   "tree": "electromagnetic_wave_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.99
+  },
+  "interferometer/electrons_n": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Data field in interferometer.",
+   "label": "core_plasma_physics",
+   "split": "validation",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.64
+  },
+  "langmuir_probes/embedded/ion_saturation_current": {
+   "chat": "plasma_measurement_diagnostics",
+   "description": "Ion saturation current (I_sat) measured by an embedded Langmuir probe. Proportional to the product of electron density and the Bohm velocity, used to infer local plasma density and heat flux at the plasma-facing target surface.",
+   "label": "particle_measurement_diagnostics",
+   "split": "validation",
+   "tree": "particle_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.71
+  },
+  "langmuir_probes/reciprocating/plunge/collector/ion_saturation_current": {
+   "chat": "plasma_measurement_diagnostics",
+   "description": "Ion saturation current (Isat) measured by a reciprocating Langmuir probe collector during a plunge. Isat is the limiting current at large negative bias, proportional to local plasma density and electron temperature at the probe tip.",
+   "label": "particle_measurement_diagnostics",
+   "split": "validation",
+   "tree": "particle_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.99
+  },
+  "lh_antennas/antenna/row/n_phi": {
+   "chat": "current_drive",
+   "description": "Toroidal refractive index (n_phi, equivalent to n\u2225) of the lower hybrid wave spectrum launched by a waveguide row. Determines the parallel wave number and hence the current drive deposition location in the plasma.",
+   "label": "auxiliary_heating",
+   "split": "validation",
+   "tree": "waves",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 0.81,
+   "tree_probability": 0.81
+  },
+  "lh_antennas/reference_point/z": {
+   "chat": "current_drive",
+   "description": "Vertical (Z) coordinate of reference point.",
+   "label": "auxiliary_heating",
+   "split": "calibration",
+   "tree": "auxiliary_heating",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.4
+  },
+  "magnetics/b_field_phi_probe/turns": {
+   "chat": "magnetic_field_diagnostics",
+   "description": "Number of turns (with sign) in a toroidal field (B_\u03c6) probe coil of the magnetics diagnostic. Determines the effective flux sensitivity of the coil together with the coil cross-sectional area.",
+   "label": "magnetic_field_diagnostics",
+   "split": "validation",
+   "tree": "magnetic_field_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "magnetics/rogowski_coil/current": {
+   "chat": "magnetic_field_diagnostics",
+   "description": "Measured current enclosed within a Rogowski coil contour, used to determine the net current (e.g., plasma current) threading the coil loop. The sign convention follows the right-hand rule relative to the coil's normal direction.",
+   "label": "magnetic_field_diagnostics",
+   "split": "validation",
+   "tree": "magnetic_field_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.92
+  },
+  "magnetics/shunt/voltage": {
+   "chat": "magnetic_field_diagnostics",
+   "description": "Voltage measured across shunt resistor terminals (V_first \u2212 V_second), used with the shunt resistance to infer the current flowing through divertor or vessel structure segments. Provides time-resolved current measurements in the magnetics diagnostic.",
+   "label": "magnetic_field_diagnostics",
+   "split": "calibration",
+   "tree": "magnetic_field_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9702
+  },
+  "mhd_linear/time_slice/toroidal_mode/plasma/alfven_frequency_spectrum/imaginary": {
+   "chat": "magnetohydrodynamics",
+   "description": "Imaginary part of the local shear Alfv\u00e9n frequency spectrum as a function of radius and root index in linear MHD stability analysis. Represents the damping or growth rate component of Alfv\u00e9n continuum eigenfrequencies.",
+   "label": "magnetohydrodynamics",
+   "split": "calibration",
+   "tree": "gyrokinetics",
+   "tree_category": "advanced_physics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.68
+  },
+  "mse/channel/detector/radius": {
+   "chat": "magnetic_field_diagnostics",
+   "description": "Radius of the circular detector aperture in the MSE diagnostic channel, applicable only when geometry_type = 2 (circular geometry). Defines the size of the sensitive area for line-of-sight calculations.",
+   "label": "neutronics",
+   "split": "calibration",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9801
+  },
+  "nbi/unit/beamlets_group/tilting/delta_position/r": {
+   "chat": "auxiliary_heating",
+   "description": "Major radius (R) coordinate of delta position.",
+   "label": "auxiliary_heating",
+   "split": "validation",
+   "tree": "auxiliary_heating",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 0.96,
+   "tree_probability": 0.9119999999999999
+  },
+  "nbi/unit/beamlets_group/tilting/delta_position/z": {
+   "chat": "auxiliary_heating",
+   "description": "Vertical (Z) coordinate of delta position.",
+   "label": "auxiliary_heating",
+   "split": "calibration",
+   "tree": "auxiliary_heating",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.89
+  },
+  "nbi/unit/source/radius": {
+   "chat": "auxiliary_heating",
+   "description": "Radius of the circular ion source surface for an NBI injector unit, used only when the source geometry type is circular (geometry_type = 2). Defines the spatial extent of the beam extraction aperture.",
+   "label": "auxiliary_heating",
+   "split": "validation",
+   "tree": "auxiliary_heating",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.95
+  },
+  "neutron_diagnostic/detector/aperture/radius": {
+   "chat": "particle_measurement_diagnostics",
+   "description": "Radius of a circular collimating aperture in a neutron diagnostic detector, applicable when geometry_type = 2. Defines the geometric acceptance of the neutron detector collimation for flux and emissivity measurements.",
+   "label": "neutronics",
+   "split": "calibration",
+   "tree": "neutronics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.99
+  },
+  "neutron_diagnostic/detector/geometry/surface": {
+   "chat": "particle_measurement_diagnostics",
+   "description": "Surface specification of geometry.",
+   "label": "neutronics",
+   "split": "calibration",
+   "tree": "neutronics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9207000000000001
+  },
+  "neutron_diagnostic/detector/geometry/x1_width": {
+   "chat": "particle_measurement_diagnostics",
+   "description": "Full width of the neutron detector aperture in the X1 direction. This geometric parameter applies only when the aperture geometry type is rectangular (geometry_type = 3).",
+   "label": "plasma_measurement_diagnostics",
+   "split": "validation",
+   "tree": "neutronics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9702
+  },
+  "ntms/time_slice/mode/rho_tor_norm": {
+   "chat": "magnetohydrodynamics",
+   "description": "Normalised toroidal flux coordinate (\u03c1_tor,norm) at which a neoclassical tearing mode (NTM) magnetic island is centred. Identifies the resonant flux surface location within the plasma for the given mode.",
+   "label": "magnetohydrodynamics",
+   "split": "validation",
+   "tree": "magnetohydrodynamics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.91,
+   "tree_probability": 0.8827
+  },
+  "operational_instrumentation/sensor/attachement_points/y": {
+   "chat": "machine_operations",
+   "description": "Y coordinate of attachement points.",
+   "label": "mechanical_measurement_diagnostics",
+   "split": "validation",
+   "tree": "mechanical_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.882
+  },
+  "pellets/time_slice/pellet/path_profiles/n_e": {
+   "chat": "core_plasma_physics",
+   "description": "Electron density (ne) profile along the pellet ablation path. Provides the local background plasma electron density encountered by the pellet as it traverses the plasma, used in ablation source calculations.",
+   "label": "core_plasma_physics",
+   "split": "validation",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.48
+  },
+  "pellets/time_slice/pellet/path_profiles/psi": {
+   "chat": "equilibrium",
+   "description": "Poloidal magnetic flux (\u03c8, psi) sampled along the pellet trajectory through the plasma. Provides the flux-surface label as a function of position along the pellet path for mapping ablation profiles to magnetic geometry.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.5741999999999999
+  },
+  "pf_active/coil/element/geometry/arcs_of_circle/curvature_radii": {
+   "chat": "magnetic_field_systems",
+   "description": "Curvature radius of each arc of circle used to describe the cross-sectional contour of a PF coil element via a piecewise arc representation. Each arc is defined by its start point (R, Z) and this radius, with the end given by the start of the next arc.",
+   "label": "magnetic_field_systems",
+   "split": "validation",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.98
+  },
+  "pf_active/coil/element/geometry/outline/r": {
+   "chat": "magnetic_field_systems",
+   "description": "Major radius (R) coordinate of outline.",
+   "label": "magnetic_field_systems",
+   "split": "validation",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.95
+  },
+  "pf_active/coil/geometry/arcs_of_circle/curvature_radii": {
+   "chat": "magnetic_field_systems",
+   "description": "Curvature radius of each arc of circle used to describe the cross-sectional contour of an active poloidal field (PF) coil. Each arc is defined by a start point and this radius, with the end point given by the start of the next arc.",
+   "label": "magnetic_field_systems",
+   "split": "validation",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.98
+  },
+  "pf_active/coil/resistance": {
+   "chat": "magnetic_field_systems",
+   "description": "Electrical resistance of a poloidal field (PF) coil winding. Used in circuit models to compute Ohmic dissipation, voltage requirements, and thermal loading of the coil.",
+   "label": "magnetic_field_systems",
+   "split": "validation",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.99
+  },
+  "pf_active/coil/temperature": {
+   "chat": "magnetic_field_systems",
+   "description": "Conductor temperature values serving as the coordinate axis for the current_limit_max look-up table of a PF coil. Defines the temperature-dependent operating limit on maximum allowable coil current.",
+   "label": "magnetic_field_systems",
+   "split": "calibration",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "pf_passive/loop/element/geometry/arcs_of_circle/r": {
+   "chat": "magnetic_field_systems",
+   "description": "Major radius (R) coordinate of arcs of circle.",
+   "label": "magnetic_field_systems",
+   "split": "validation",
+   "tree": "computational_workflow",
+   "tree_category": "data_computing",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.49
+  },
+  "pf_passive/loop/element/geometry/oblique/alpha": {
+   "chat": "magnetic_field_systems",
+   "description": "First inclination angle (alpha, \u03b1) of the oblique (trapezoidal/parallelogram) cross-sectional geometry of a passive conductor loop element, measured counter-clockwise from the outboard horizontal. Part of the poloidal-plane geometric parameterization.",
+   "label": "structural_components",
+   "split": "validation",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 0.95,
+   "tree_probability": 0.8835
+  },
+  "pf_plasma/element/geometry/oblique/alpha": {
+   "chat": "magnetic_field_systems",
+   "description": "Inclination angle alpha (\u03b1) of the first parallelogram side of the oblique cross-sectional element geometry, measured counter-clockwise from the outwardly directed horizontal radial vector (grad R). Defines the orientation of the parallelogram for a discrete plasma current-carrying filament.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.89,
+   "tree_probability": 0.7475999999999999
+  },
+  "pf_plasma/element/geometry/oblique/length_alpha": {
+   "chat": "magnetic_field_systems",
+   "description": "Length of the parallelogram side inclined at angle alpha with respect to the major radius axis, describing the oblique cross-sectional geometry of a discrete plasma current filament element.",
+   "label": "equilibrium",
+   "split": "validation",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.89,
+   "tree_probability": 0.6496999999999999
+  },
+  "pf_plasma/element/geometry/rectangle/height": {
+   "chat": "magnetic_field_systems",
+   "description": "Vertical full height of the rectangular cross-section describing a discrete plasma current-carrying filament element. Defines the vertical extent of the current element geometry in the pf_plasma filamentary representation.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.73,
+   "tree_probability": 0.3358
+  },
+  "plasma_initiation/global_quantities/b_field_stray": {
+   "chat": "plasma_initiation",
+   "description": "Stray magnetic field (Bstray) at the plasma position during plasma initiation. Residual fields from imperfect cancellation of external coil fields can inhibit electron avalanche breakdown.",
+   "label": "plasma_initiation",
+   "split": "calibration",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.5194
+  },
+  "plasma_profiles/ggd/ion/velocity_over_b_field/r": {
+   "chat": "core_plasma_physics",
+   "description": "Major radius (R) coordinate of velocity over b field.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.85,
+   "tree_probability": 0.7565
+  },
+  "plasma_profiles/profiles_1d/ion/state/z_average": {
+   "chat": "core_plasma_physics",
+   "description": "Concentration-weighted mean charge number (\u27e8Z\u27e9) of an ion charge-state bundle, volume-averaged over the plasma radius. Computed as \u03a3(Z\u00b7x_z) over all charge states within the bundle; scalar complement to the radial profile z_average_1d.",
+   "label": "core_plasma_physics",
+   "split": "validation",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.99
+  },
+  "plasma_transport/model/ggd/neutral/state/momentum/v/parallel": {
+   "chat": "transport",
+   "description": "Parallel component of v.",
+   "label": "transport",
+   "split": "validation",
+   "tree": "gyrokinetics",
+   "tree_category": "advanced_physics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.38
+  },
+  "polarimeter/channel/ellipticity_initial": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Initial ellipticity of the probing beam polarization state before entering the plasma, serving as the reference baseline for Cotton-Mouton effect measurements. Defined per polarimeter channel line-of-sight.",
+   "label": "electromagnetic_wave_diagnostics",
+   "split": "calibration",
+   "tree": "electromagnetic_wave_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "polarimeter/channel/polarization_initial": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Initial polarization vector of the probing wave before entering the plasma in a polarimeter channel. Defines the reference polarization state used to measure Faraday rotation and Cotton-Mouton ellipticity induced by the magnetized plasma.",
+   "label": "electromagnetic_wave_diagnostics",
+   "split": "calibration",
+   "tree": "electromagnetic_wave_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "pulse_schedule/position_control/gap/angle": {
+   "chat": "plasma_control",
+   "description": "Angle of the plasma boundary gap direction measured clockwise from the radial (grad R) direction in the poloidal cross-section. Defines the orientation of the gap vector used as a reference in plasma position control.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "plasma_control",
+   "tree_category": "control_operations",
+   "tree_domain_probability": 0.93,
+   "tree_probability": 0.9114
+  },
+  "reflectometer_fluctuation/channel/amplitude": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Measured amplitude of the detected probing wave as a function of swept frequency and time slice. Records the signal strength of the reflected wave returned to the fluctuation reflectometer antenna.",
+   "label": "electromagnetic_wave_diagnostics",
+   "split": "validation",
+   "tree": "electromagnetic_wave_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "reflectometer_profile/channel/amplitude": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Measured amplitude of the detected probing microwave signal for each frequency and time slice in a profile reflectometer channel. Sampled at the beginning of each frequency sweep, reflecting wave coupling and reflection conditions at the cutoff layer.",
+   "label": "electromagnetic_wave_diagnostics",
+   "split": "validation",
+   "tree": "electromagnetic_wave_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "refractometer/channel/bandwidth/frequency_main": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Main carrier frequency of the probing microwave signal in a refractometer channel, specified before upshifting and modulation. Defines the base frequency used for refractive phase shift measurements of electron density.",
+   "label": "electromagnetic_wave_diagnostics",
+   "split": "validation",
+   "tree": "electromagnetic_wave_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "runaway_electrons/global_quantities/volume_average/energy_density_kinetic": {
+   "chat": "runaway_electrons",
+   "description": "Volume-averaged kinetic energy density of the runaway electron (RE) population. Represents the mean kinetic energy per unit volume stored in suprathermal runaway electrons averaged over the plasma volume.",
+   "label": "runaway_electrons",
+   "split": "validation",
+   "tree": "runaway_electrons",
+   "tree_category": "energetic_particles",
+   "tree_domain_probability": 0.96,
+   "tree_probability": 0.96
+  },
+  "soft_x_rays/channel/detector/centre/phi": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Toroidal angle (\u03c6) coordinate of centre.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.96
+  },
+  "soft_x_rays/channel/detector/outline/x1": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Positions of the soft X-ray detector outline vertices along the X1 axis in the local (X1, X2) coordinate system. Defines part of the polygonal boundary of the detector or aperture used for etendue and line-of-sight calculations.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.93
+  },
+  "soft_x_rays/channel/detector/outline/x2": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Positions of the soft X-ray detector outline vertices along the x2 axis of the local (X1, X2) coordinate system. Defines the aperture geometry of the detector for line-of-sight and etendue calculations.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.97
+  },
+  "soft_x_rays/channel/etendue": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "\u00c9tendue (geometric extent, A\u03a9) of a soft X-ray diagnostic channel's optical system. Characterizes the product of detector area and solid angle, determining the channel's geometric sensitivity to plasma emission.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "soft_x_rays/channel/filter_window/outline/x2": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Positions of the soft X-ray filter window outline vertices along the X2 axis in the local (X1, X2) coordinate system. Together with X1 positions, defines the irregular boundary shape of the filter window for a soft X-ray channel.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.97,
+   "tree_probability": 0.8924
+  },
+  "soft_x_rays/channel/filter_window/x2_width": {
+   "chat": "radiation_measurement_diagnostics",
+   "description": "Full width of the soft X-ray filter window in the X2 direction of its local coordinate frame, applicable when the rectangular geometry type (index=3) is selected. A geometric parameter for the filter aperture description.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "validation",
+   "tree": "radiation_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.9603999999999999
+  },
+  "spectrometer_uv/channel/detector/outline/x1": {
+   "chat": "spectroscopy",
+   "description": "Positions of the UV spectrometer detector aperture outline vertices along the X1 axis of the local (X1, X2) coordinate system of the detector face. Defines one component of the 2D aperture boundary polygon.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.9408
+  },
+  "spectrometer_uv/channel/detector/radius": {
+   "chat": "spectroscopy",
+   "description": "Radius of the circular front face of the UV spectrometer detector (micro channel plate), applicable only when the detector geometry type is set to circular (geometry_type = 2). Defines the aperture size for optical throughput calculations.",
+   "label": "spectroscopy",
+   "split": "calibration",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.9702
+  },
+  "spectrometer_uv/channel/grating/image_field/centre/phi": {
+   "chat": "spectroscopy",
+   "description": "Toroidal angle (\u03c6) coordinate of centre.",
+   "label": "spectroscopy",
+   "split": "calibration",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.9702
+  },
+  "spectrometer_visible/channel/grating_spectrometer/processed_line/intensity": {
+   "chat": "spectroscopy",
+   "description": "Non-calibrated intensity of a processed spectral line from a visible grating spectrometer channel, integrated over the line profile. Unlike the sibling radiance, this is not background-subtracted or absolutely calibrated.",
+   "label": "spectroscopy",
+   "split": "validation",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "spectrometer_visible/channel/isotope_ratios/isotope/density_ratio": {
+   "chat": "spectroscopy",
+   "description": "Ratio of the neutral density of a given hydrogen isotope to the summed neutral densities of all other isotopes in the measurement channel. Used to quantify the hydrogen fuel isotope composition from visible spectroscopy.",
+   "label": "edge_plasma_physics",
+   "split": "validation",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.89
+  },
+  "spectrometer_visible/channel/light_collection_efficiencies/values": {
+   "chat": "spectroscopy",
+   "description": "Array of values for light collection efficiencies.",
+   "label": "spectroscopy",
+   "split": "validation",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals": {
+   "chat": "spectroscopy",
+   "description": "Line-of-sight projected velocity of hot neutral atoms measured by polarization spectroscopy on a visible spectrometer channel. Positive values correspond to motion from the first to the second point along the line of sight.",
+   "label": "edge_plasma_physics",
+   "split": "validation",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.8019000000000001
+  },
+  "spectrometer_visible/channel/polarizer/centre/z": {
+   "chat": "spectroscopy",
+   "description": "Vertical (Z) coordinate of centre.",
+   "label": "spectroscopy",
+   "split": "validation",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.87,
+   "tree_probability": 0.8526
+  },
+  "spectrometer_x_ray_crystal/channel/crystal/radius": {
+   "chat": "spectroscopy",
+   "description": "Radius of a circular X-ray crystal aperture, applicable only when the geometry type is circular (geometry_type = 2). Defines the physical size of the diffracting crystal used in the X-ray crystal spectrometer channel.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.95,
+   "tree_probability": 0.95
+  },
+  "spectrometer_x_ray_crystal/channel/crystal/thickness": {
+   "chat": "spectroscopy",
+   "description": "Physical thickness of the Bragg crystal used in an X-ray crystal spectrometer channel. A geometric parameter relevant to X-ray absorption, diffraction efficiency, and spectral resolution.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.92,
+   "tree_probability": 0.92
+  },
+  "spectrometer_x_ray_crystal/channel/reflector/x2_curvature": {
+   "chat": "spectroscopy",
+   "description": "Radius of curvature of the reflector surface in the X2 direction for an X-ray crystal spectrometer channel. Applicable only for specific curvature types (index 3 or 5) in the reflector geometry description.",
+   "label": "radiation_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "spectroscopy",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.97,
+   "tree_probability": 0.97
+  },
+  "spi/injector/fragment/species/density": {
+   "chat": "fueling",
+   "description": "Number density of a given atomic species within a shattered pellet (SPI) fragment. Characterizes the material composition of the individual SPI fragment.",
+   "label": "fueling",
+   "split": "calibration",
+   "tree": "fueling",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.41
+  },
+  "spi/injector/fragment/volume": {
+   "chat": "fueling",
+   "description": "Volume of an individual shattered pellet fragment as a function of time or fragment index. Used to characterise the fragment size distribution in shattered pellet injector (SPI) disruption mitigation studies.",
+   "label": "fueling",
+   "split": "calibration",
+   "tree": "fueling",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.4
+  },
+  "spi/injector/pellet/core/atoms_n": {
+   "chat": "fueling",
+   "description": "Normalized atoms of core.",
+   "label": "fueling",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.65,
+   "tree_probability": 0.403
+  },
+  "summary/boundary/minor_radius/value": {
+   "chat": "equilibrium",
+   "description": "Minor radius (a) of the plasma boundary, defined as half the difference between the maximum and minimum major radii of the last closed flux surface. A primary geometric parameter characterizing the plasma cross-section size.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.8613
+  },
+  "summary/composition/carbon/value": {
+   "chat": "core_plasma_physics",
+   "description": "Carbon (C).",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.72
+  },
+  "summary/fusion/current/value": {
+   "chat": "current_drive",
+   "description": "Parallel current driven by fusion reactions within the plasma. A minor contribution to the total non-inductive current, associated with fast alpha particles produced by D-T fusion reactions.",
+   "label": "current_drive",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.91,
+   "tree_probability": 0.5277999999999999
+  },
+  "summary/fusion/neutron_rates/total/value": {
+   "chat": "neutronics",
+   "description": "Total neutron emission rate (Sn) from all fusion reactions combined, including DT, DD, and TT reactions. Provides the aggregate neutron production rate used for fusion performance characterization.",
+   "label": "neutronics",
+   "split": "validation",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.75,
+   "tree_probability": 0.585
+  },
+  "summary/gas_injection_rates/beryllium/value": {
+   "chat": "fueling",
+   "description": "Beryllium.",
+   "label": "fueling",
+   "split": "calibration",
+   "tree": "fueling",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.47000000000000003
+  },
+  "summary/gas_injection_rates/bottom/value": {
+   "chat": "fueling",
+   "description": "Gas injection rate from all valves located near near the bottom of the vaccuum chamber.",
+   "label": "fueling",
+   "split": "validation",
+   "tree": "fueling",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.52
+  },
+  "summary/global_quantities/power_loss/value": {
+   "chat": "transport",
+   "description": "Total power crossing the separatrix (Psep), representing the net energy loss from the confined plasma through the last closed flux surface into the scrape-off layer.",
+   "label": "edge_plasma_physics",
+   "split": "validation",
+   "tree": "edge_plasma_physics",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.75,
+   "tree_probability": 0.6525
+  },
+  "summary/global_quantities/power_radiated/value": {
+   "chat": "core_plasma_physics",
+   "description": "Total radiated power (Prad) from the plasma, a key global energy balance quantity. Represents power lost from the plasma via electromagnetic radiation across all spectral ranges and emission processes.",
+   "label": "core_plasma_physics",
+   "split": "validation",
+   "tree": "transport",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.59,
+   "tree_probability": 0.5605
+  },
+  "summary/heating_current_drive/ic/k_perpendicular/value": {
+   "chat": "waves",
+   "description": "Main perpendicular wave number (k\u22a5) of ion cyclotron resonance heating (ICRH) waves launched by an IC antenna. Characterizes the transverse spatial scale of the wave in the plasma.",
+   "label": "auxiliary_heating",
+   "split": "validation",
+   "tree": "waves",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 0.91,
+   "tree_probability": 0.91
+  },
+  "summary/heating_current_drive/lh/current/value": {
+   "chat": "current_drive",
+   "description": "Parallel current driven by lower hybrid (LH) waves (LHCD), representing the non-inductive toroidal current generated by the LH heating and current drive system. A key figure of merit for current profile control scenarios.",
+   "label": "current_drive",
+   "split": "validation",
+   "tree": "current_drive",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.95
+  },
+  "summary/heating_current_drive/lh/n_parallel/value": {
+   "chat": "waves",
+   "description": "Main parallel refractive index of LH waves at launch.",
+   "label": "waves",
+   "split": "calibration",
+   "tree": "waves",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 0.93,
+   "tree_probability": 0.93
+  },
+  "summary/local/itb/q/value": {
+   "chat": "equilibrium",
+   "description": "Safety factor.",
+   "label": "equilibrium",
+   "split": "validation",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.3822
+  },
+  "summary/pedestal_fits/linear/b_field_tor_pedestal_top_lfs/value": {
+   "chat": "equilibrium",
+   "description": "Toroidal magnetic field (Bt) evaluated at the position of the pressure pedestal top as determined by a linear fit, on the low field side (LFS). Used in pedestal database characterization.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.91,
+   "tree_probability": 0.455
+  },
+  "summary/pedestal_fits/linear/n_e/pedestal_position/value": {
+   "chat": "edge_plasma_physics",
+   "description": "Pedestal position in normalised poloidal flux.",
+   "label": "equilibrium",
+   "split": "validation",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.62,
+   "tree_probability": 0.3596
+  },
+  "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value": {
+   "chat": "edge_plasma_physics",
+   "description": "Pedestal position in normalised poloidal flux.",
+   "label": "equilibrium",
+   "split": "validation",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.57,
+   "tree_probability": 0.3933
+  },
+  "summary/pedestal_fits/mtanh/b_field_tor_pedestal_top_lfs/value": {
+   "chat": "equilibrium",
+   "description": "Toroidal magnetic field (Bt) calculated at the pedestal top position on the low field side (LFS), as determined by the mtanh pedestal fit. Used for dimensionless parameter calculations in pedestal stability and confinement scaling analyses.",
+   "label": "equilibrium",
+   "split": "calibration",
+   "tree": "equilibrium",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 0.89,
+   "tree_probability": 0.5073
+  },
+  "summary/volume_average/t_i_average/value": {
+   "chat": "core_plasma_physics",
+   "description": "Volume-averaged ion temperature (Ti), averaged over all ion species, representing the mean thermal energy of the ion population across the plasma volume. A key global confinement metric.",
+   "label": "core_plasma_physics",
+   "split": "calibration",
+   "tree": "core_plasma_physics",
+   "tree_category": "core_plasma",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.99
+  },
+  "tf/coil/conductor/cross_section/area": {
+   "chat": "magnetic_field_systems",
+   "description": "Cross-sectional area of a TF coil conductor, derived from the conductor cross-section geometry. Used in electromagnetic and structural analyses of the toroidal field coil system.",
+   "label": "magnetic_field_systems",
+   "split": "calibration",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 1.0
+  },
+  "tf/coil/conductor/resistance": {
+   "chat": "magnetic_field_systems",
+   "description": "Ohmic resistance of a toroidal field (TF) coil conductor. Used to compute resistive power dissipation and voltage drop in the TF coil circuit.",
+   "label": "magnetic_field_systems",
+   "split": "calibration",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.98
+  },
+  "tf/coil/resistance": {
+   "chat": "magnetic_field_systems",
+   "description": "Electrical resistance of a toroidal field (TF) coil. Determines ohmic power dissipation during operation and is relevant for thermal management and energy balance of the TF coil system.",
+   "label": "magnetic_field_systems",
+   "split": "calibration",
+   "tree": "magnetic_field_systems",
+   "tree_category": "machine_systems",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.99
+  },
+  "thomson_scattering/laser/end_point/r": {
+   "chat": "electromagnetic_wave_diagnostics",
+   "description": "Major radius (R) coordinate of end point.",
+   "label": "particle_measurement_diagnostics",
+   "split": "calibration",
+   "tree": "particle_measurement_diagnostics",
+   "tree_category": "diagnostics",
+   "tree_domain_probability": 0.97,
+   "tree_probability": 0.9215
+  },
+  "wall/description_2d/limiter/unit/midplane_power_density_nuclear": {
+   "chat": "neutronics",
+   "description": "Nuclear power density deposited in a limiter wall unit at the midplane. Represents volumetric nuclear heating from neutron and gamma interactions at that toroidal location.",
+   "label": "neutronics",
+   "split": "calibration",
+   "tree": "plasma_wall_interactions",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.882
+  },
+  "wall/description_2d/limiter/unit/power_nuclear": {
+   "chat": "neutronics",
+   "description": "Nuclear power deposited in a specific limiter or plasma-facing component (PFC) unit of the 2D wall description. Captures the heating contribution from neutron and gamma radiation to the wall structure.",
+   "label": "neutronics",
+   "split": "validation",
+   "tree": "plasma_wall_interactions",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.833
+  },
+  "wall/description_ggd/ggd/energy_fluxes/current/incident": {
+   "chat": "plasma_wall_interactions",
+   "description": "Incident energy flux on wall components (GGD grid subsets) due to current-driven processes. Part of the energy flux decomposition where net wall flux equals incident minus emitted.",
+   "label": "plasma_wall_interactions",
+   "split": "validation",
+   "tree": "plasma_wall_interactions",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.8036000000000001
+  },
+  "wall/description_ggd/ggd/energy_fluxes/current/incident/values": {
+   "chat": "plasma_wall_interactions",
+   "description": "Array of values for incident.",
+   "label": "plasma_wall_interactions",
+   "split": "validation",
+   "tree": "plasma_wall_interactions",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.92,
+   "tree_probability": 0.6532
+  },
+  "wall/global_quantities/electrons/pumping_speed": {
+   "chat": "plasma_wall_interactions",
+   "description": "Pumping speed expressed as the pumped particle flux in equivalent electrons. Represents the rate at which electrons (or equivalent particles) are removed from the plasma region by wall pumping processes.",
+   "label": "plasma_wall_interactions",
+   "split": "calibration",
+   "tree": "plasma_wall_interactions",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.93,
+   "tree_probability": 0.9114
+  },
+  "wall/global_quantities/power_to_cooling": {
+   "chat": "plasma_wall_interactions",
+   "description": "Power transferred from the plasma-facing wall to the active cooling systems. Represents the total thermal power extracted by cooling, balancing incident plasma heat loads and accounting for energy removal from the tokamak wall.",
+   "label": "plasma_wall_interactions",
+   "split": "validation",
+   "tree": "plasma_wall_interactions",
+   "tree_category": "edge_divertor",
+   "tree_domain_probability": 0.99,
+   "tree_probability": 0.5643
+  },
+  "waves/coherent_wave/beam_tracing/beam/phase/curvature": {
+   "chat": "waves",
+   "description": "Inverse curvature radii (1/R) of the beam phase ellipse for a coherent wave in beam tracing calculations, characterizing wavefront curvature in the horizontal and vertical directions. Positive (negative) values indicate beam divergence (convergence).",
+   "label": "waves",
+   "split": "calibration",
+   "tree": "waves",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.95
+  },
+  "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm": {
+   "chat": "waves",
+   "description": "Normalised toroidal flux coordinate (\u03c1_tor,norm) at each position along the ray or beam path in a wave beam tracing calculation. Maps beam trajectory points to flux surface geometry.",
+   "label": "equilibrium",
+   "split": "validation",
+   "tree": "waves",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 1.0,
+   "tree_probability": 0.9
+  },
+  "waves/coherent_wave/profiles_1d/ion/state/power_density_fast": {
+   "chat": "auxiliary_heating",
+   "description": "Flux-surface-averaged absorbed wave power density deposited on the fast (non-thermal) ion population of a given charge state bundle, as a 1D radial profile. Characterises RF heating power density absorbed by fast ions via wave-particle interactions.",
+   "label": "auxiliary_heating",
+   "split": "calibration",
+   "tree": "waves",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 0.97,
+   "tree_probability": 0.8827
+  },
+  "waves/coherent_wave/profiles_1d/power_inside": {
+   "chat": "auxiliary_heating",
+   "description": "Total absorbed wave power (P_abs) inside a flux surface, cumulative volume integral over electrons, ions, and fast populations of the absorbed power density. Represents the radial profile of wave power deposition up to each flux surface.",
+   "label": "auxiliary_heating",
+   "split": "validation",
+   "tree": "waves",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 0.98,
+   "tree_probability": 0.98
+  },
+  "waves/coherent_wave/profiles_2d/ion/state/power_density_fast": {
+   "chat": "auxiliary_heating",
+   "description": "Absorbed RF wave power density deposited on fast (non-thermal) ions of a given charge state in a 2D poloidal cross-section. Represents the spatial distribution of RF wave energy deposited on fast ions per unit volume.",
+   "label": "auxiliary_heating",
+   "split": "calibration",
+   "tree": "waves",
+   "tree_category": "heating_current_drive",
+   "tree_domain_probability": 0.97,
+   "tree_probability": 0.8924
+  }
+ },
+ "path_label_count": 201,
+ "per_split": {
+  "calibration": {
+   "chat": {
+    "accuracy": 0.7125,
+    "correct": 57,
+    "total": 80
+   },
+   "paths": 80,
+   "tree": {
+    "accuracy": 0.7,
+    "correct": 56,
+    "total": 80
+   }
+  },
+  "reference": {
+   "chat": {
+    "accuracy": 0.5,
+    "correct": 20,
+    "total": 40
+   },
+   "paths": 40,
+   "tree": {
+    "accuracy": 0.5,
+    "correct": 20,
+    "total": 40
+   }
+  },
+  "validation": {
+   "chat": {
+    "accuracy": 0.716,
+    "correct": 58,
+    "total": 81
+   },
+   "paths": 81,
+   "tree": {
+    "accuracy": 0.6543,
+    "correct": 53,
+    "total": 81
+   }
+  }
+ },
+ "tree_probability_bands": [
+  {
+   "band": "above 0.8",
+   "paths": 119,
+   "tree_accuracy": 0.7143,
+   "tree_correct": 85
+  },
+  {
+   "band": "0.5 to 0.8",
+   "paths": 50,
+   "tree_accuracy": 0.62,
+   "tree_correct": 31
+  },
+  {
+   "band": "below 0.5",
+   "paths": 32,
+   "tree_accuracy": 0.4062,
+   "tree_correct": 13
+  }
+ ]
+}
