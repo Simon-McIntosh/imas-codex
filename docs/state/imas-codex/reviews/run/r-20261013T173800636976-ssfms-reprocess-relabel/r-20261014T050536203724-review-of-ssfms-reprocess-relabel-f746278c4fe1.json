@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest declares no baseline_suite and no after_suite (its manifest block carries neither key; the node's role is implement/repair), so there is no armed base/head pair to difference. Its only gate is the golden harness, recorded at logs/harness-final.log (revision: f746278c4: 15 passed, EXIT=0) and the negative control at logs/negative_control.log (EXIT=1, test_every_labelled_signal_is_eligible), which is the declared string control rather than an armed suite arm. No gate log holds a failing test id outside that control, so added_failure_count is 0 and added_failure_ids is empty.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-14T05:19:38.960Z",
+  "dispatched_at": "2026-10-14T05:05:50Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "537",
+      "severity": "blocking",
+      "text": "blocking: the edit lies outside the plan node's declared write paths, so check-manifest on this run answers ok=false ('changed paths outside the write scope') and the run cannot promote as delivered; the file holds the cutover pin and the new population guard."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "follow-on: the negative-control sentence states 1,441 while its own machine-readable source reprocess-progress.json:5 records 1416, and the commit message claims to correct the negative-control count but leaves this line unchanged."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-relabel.html",
+      "line": "76",
+      "severity": "follow-on",
+      "text": "follow-on: the harness heading, its table caption and the arm-order paragraph still say 're-graded'/'re-grade' after the re-grade was reverted and replaced by a re-read, so the fragment's vocabulary disagrees with the change it carries."
+    },
+    {
+      "file": "tests/llm/test_signal_search_goldens.py",
+      "line": "549",
+      "severity": "follow-on",
+      "text": "follow-on: the population pin compares only the fixture's aggregate grade totals, so a targeted swap of two labels in opposite directions keeps the totals equal and passes, catching a mass re-grade but not a small one."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from a54ca1a0e to f746278c4; two commits (05d22929b, the revert of the 1,220-label re-grade; f746278c4, the 11-label grouped-member re-read plus both fragments and a population pin) touch exactly the four listed paths.",
+    "done_when": "the harness ran under -m 'graph or not graph' (15 passed, EXIT=0 at revision f746278c4 in logs/harness-final.log) and both fragments carry the changed-label table and the refreshed arm table; the re-read was narrowed to grouped members (1,321 labels on 1,168 signals), leaving single-member-signal labels unread under a done_when that says every existing label.",
+    "goal": "the node's goal is to bring the golden fixture's labels and cutover in line with the reprocessed JT-60SA population; over the window this review reads (a54ca1a0e..f746278c4) the net effect on tests/llm/fixtures/signal_search_questions.json is 11 labels re-read from grade 3 to 1, since 05d22929b took back the 1,220-label arm-judged re-grade and f746278c4 re-read 11 grouped-member labels.",
+    "manifest": "read; it states 15 passed, names logs/harness-final.log (revision and command as its first two lines, EXIT=0 last), lists all five commits and all changed paths, and discloses the out-of-scope edit as a blocker rather than hiding it.",
+    "write_paths": "three of the four declared paths (tests/llm/fixtures/signal_search_questions.json and both fragments) are touched inside scope, but tests/llm/test_signal_search_goldens.py:537 lies outside the plan node's declared write paths, so check-manifest refuses the run ok=false."
+  },
+  "justifications": {
+    "durability": "test_fixture_label_population_is_pinned asserts an independent literal, and reverting any of the 11 changed labels moves totals to 781/653 and reddens tests/llm/test_signal_search_goldens.py:549, though the guard sees only aggregate grade totals and is not covered by the recorded negative control (logs/negative_control.log exercises the cutover pin alone).",
+    "evidence": "logs/harness-final.log records 'revision: f746278c4' with '15 passed ... EXIT=0' and its arm table matches ssfms-reprocess-relabel.html:87, though reprocess-progress.json:5 records negative_control_enriched_before_fix 1416 while reprocess.html:26 states 1,441.",
+    "fit": "the new test follows the file's conventions with no plan label, but ssfms-reprocess-relabel.html:76, 87 and 97 still say 're-graded'/'re-grade' for a population the window re-read rather than re-graded, and reprocess.html ends without a trailing newline.",
+    "goal_fidelity": "tests/llm/fixtures/signal_search_questions.json now grades the 11 cryomag m1tab grouped members 1 (down from 3) against the reprocessed text, and its total is 2,914 labels at 1,019/792/461/642, consistent with the reprocessed population.",
+    "reuse": "the diff adds one test function and no other definition, reusing the module-level fixture loader at tests/llm/test_signal_search_goldens.py:58, so no capability is forked.",
+    "scope_discipline": "the fixture and both fragments lie inside the declared write paths, but tests/llm/test_signal_search_goldens.py:537 lies outside them, so check-manifest refuses the run."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to bring the golden fixture's labels and cutover in line with the reprocessed JT-60SA population; over the window this review reads (a54ca1a0e..f746278c4) the net effect on tests/llm/fixtures/signal_search_questions.json is 11 labels re-read from grade 3 to 1, since 05d22929b took back the 1,220-label arm-judged re-grade and f746278c4 re-read 11 grouped-member labels.\nVERDICT done_when: the harness ran under -m 'graph or not graph' (15 passed, EXIT=0 at revision f746278c4 in logs/harness-final.log) and both fragments carry the changed-label table and the refreshed arm table; the re-read was narrowed to grouped members (1,321 labels on 1,168 signals), leaving single-member-signal labels unread under a done_when that says every existing label.\nVERDICT write_paths: three of the four declared paths (tests/llm/fixtures/signal_search_questions.json and both fragments) are touched inside scope, but tests/llm/test_signal_search_goldens.py:537 lies outside the plan node's declared write paths, so check-manifest refuses the run ok=false.\nVERDICT manifest: read; it states 15 passed, names logs/harness-final.log (revision and command as its first two lines, EXIT=0 last), lists all five commits and all changed paths, and discloses the out-of-scope edit as a blocker rather than hiding it.\nVERDICT diff: read commit by commit from a54ca1a0e to f746278c4; two commits (05d22929b, the revert of the 1,220-label re-grade; f746278c4, the 11-label grouped-member re-read plus both fragments and a population pin) touch exactly the four listed paths.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/llm/fixtures/signal_search_questions.json now grades the 11 cryomag m1tab grouped members 1 (down from 3) against the reprocessed text, and its total is 2,914 labels at 1,019/792/461/642, consistent with the reprocessed population.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/harness-final.log records 'revision: f746278c4' with '15 passed ... EXIT=0' and its arm table matches ssfms-reprocess-relabel.html:87, though reprocess-progress.json:5 records negative_control_enriched_before_fix 1416 while reprocess.html:26 states 1,441.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: the fixture and both fragments lie inside the declared write paths, but tests/llm/test_signal_search_goldens.py:537 lies outside them, so check-manifest refuses the run.\nSCORE durability: 18\nJUSTIFICATION durability: test_fixture_label_population_is_pinned asserts an independent literal, and reverting any of the 11 changed labels moves totals to 781/653 and reddens tests/llm/test_signal_search_goldens.py:549, though the guard sees only aggregate grade totals and is not covered by the recorded negative control (logs/negative_control.log exercises the cutover pin alone).\nSCORE fit: 16\nJUSTIFICATION fit: the new test follows the file's conventions with no plan label, but ssfms-reprocess-relabel.html:76, 87 and 97 still say 're-graded'/'re-grade' for a population the window re-read rather than re-graded, and reprocess.html ends without a trailing newline.\nSCORE reuse: 19\nJUSTIFICATION reuse: the diff adds one test function and no other definition, reusing the module-level fixture loader at tests/llm/test_signal_search_goldens.py:58, so no capability is forked.\nFINDING tests/llm/test_signal_search_goldens.py:537 blocking: the edit lies outside the plan node's declared write paths, so check-manifest on this run answers ok=false ('changed paths outside the write scope') and the run cannot promote as delivered; the file holds the cutover pin and the new population guard.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html:26 follow-on: the negative-control sentence states 1,441 while its own machine-readable source reprocess-progress.json:5 records 1416, and the commit message claims to correct the negative-control count but leaves this line unchanged.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-reprocess-relabel.html:76 follow-on: the harness heading, its table caption and the arm-order paragraph still say 're-graded'/'re-grade' after the re-grade was reverted and replaced by a re-read, so the fragment's vocabulary disagrees with the change it carries.\nFINDING tests/llm/test_signal_search_goldens.py:549 follow-on: the population pin compares only the fixture's aggregate grade totals, so a targeted swap of two labels in opposite directions keeps the totals equal and passes, catching a mass re-grade but not a small one.\n",
+  "review_run_id": "r-20261014T050536203724-review-of-ssfms-reprocess-relabel-f746278c4fe1",
+  "reviewed_base_sha": "a54ca1a0e65a6baf50bd868212409559877aff9c",
+  "reviewed_head_sha": "f746278c4fe1e4458f4f55a6e2ca69c6f028699a",
+  "reviewed_run_id": "r-20261013T173800636976-ssfms-reprocess-relabel",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T05:21:31.061230+00:00",
+  "total": 101
+}
