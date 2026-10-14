@@ -17,7 +17,7 @@
     <tr><th>change</th><th>file</th><th>check</th><th>shown to fire by</th></tr>
     <tr><td>the refusal names the depth it checked (top 10, or the pool of 60)</td><td><code>tests/llm/test_signal_search_goldens.py</code></td><td><code>test_the_refusal_names_the_depth_it_checked</code></td><td>reinstating the fixed top-10 message makes it fail on <code>f"pool of {RERANK_POOL}" in …</code></td></tr>
     <tr><td>the label population is pinned by a sha256 over every (question, signal, grade) triple, beside its grade totals</td><td><code>tests/llm/test_signal_search_goldens.py</code></td><td><code>test_fixture_label_population_is_pinned</code></td><td>swapping a grade 3 and a grade 0 in a scratch copy leaves the totals unchanged and fails on the digest</td></tr>
-    <tr><td>a graded-3 measurement is asserted in every question's filtered top 10, not summed across questions</td><td><code>tests/llm/test_signal_role_filter_live.py</code></td><td><code>test_every_question_returns_a_grade3_measurement_in_its_filtered_top</code></td><td>dropping <code>role="measured"</code> from the filtered call fails on <code>test_filtered_call_returns_only_measured_signals</code></td></tr>
+    <tr><td>a graded-3 measurement is asserted in every question's filtered top 10, not summed across questions</td><td><code>tests/llm/test_signal_role_filter_live.py</code></td><td><code>test_every_question_returns_a_grade3_measurement_in_its_filtered_top</code></td><td>reading the filtered call as <code>role="commanded"</code> fails that check itself, 3 failed with <code>EXIT=1</code> (<code>scratch/grade3-negative-control.log</code>)</td></tr>
     <tr><td>the reprocess records carry the same negative-control count, instant and source</td><td><code>reprocess.html</code>, <code>reprocess-progress.json</code></td><td>both read <strong>1,441</strong> at <code>2026-10-11T21:16:46Z</code> from the sample node's run record</td><td>the two files disagreed before (1,441 against 1,416 with no source)</td></tr>
     <tr><td>the grouped-member pass is described as a re-read, not a re-grade</td><td><code>ssfms-reprocess-relabel.html</code></td><td>the harness heading, table caption and arm-order paragraph say <em>re-read</em></td><td>the digest pin above is the re-read's own guard</td></tr>
   </table>
@@ -56,8 +56,10 @@
     return none and it would still pass. It now asserts a graded-3 measurement
     in every question's filtered top 10 and names any question that has none.
     Read against the live graph, all 22 questions return a graded-3 measurement
-    in their filtered top 10, so no question is exempted. The module's depth for
-    every check is now <code>TOP_N = 10</code>.
+    in their filtered top 10, so no question is exempted. The reach check reads
+    deeper than the three control checks, which read the served page: the
+    controls keep <code>TOP_N = 5</code>, the depth of the page the tool serves,
+    and the reach check carries its own <code>MEASUREMENT_REACH_DEPTH = 10</code>.
   </p>
 
   <p id="ssfms-cleanup-goldens-records">
@@ -84,7 +86,8 @@
     <strong>Evidence.</strong> The combined gate
     <code>pytest -m 'graph or not graph' tests/llm/test_signal_search_goldens.py
     tests/llm/test_signal_role_filter_live.py</code> passes, 20 tests, on this
-    node's own change. The RRF arm's mean nDCG@10 reads
+    node's own change, against 19 at base <code>7bbf44b56</code> so the one
+    added test is the delta. The RRF arm's mean nDCG@10 reads
     <strong>0.8473</strong>, the figure the relabel node recorded. This gate
     measures only this node's change; verifying the merged result belongs to a
     separately dispatched test node.
