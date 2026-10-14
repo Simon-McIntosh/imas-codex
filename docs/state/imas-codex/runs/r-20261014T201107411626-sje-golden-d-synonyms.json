@@ -1,0 +1,5406 @@
+{
+  "agent": {
+    "alias": "sonnet 5.5",
+    "backend": "claude",
+    "effort": "high",
+    "launch": "cli",
+    "model": "claude-sonnet-5-5",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "claude",
+  "base_sha": "8b30f65265325207503bb5928bd1858657251d9b",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T201107411626-sje-golden-d-synonyms/brief.md",
+    "sha256": "2127e34f3ced4ba57a622cd1c91ab2cb674f16e33ca6bbc6ede729ea4a25d848"
+  },
+  "budget": {
+    "billing": "subscription",
+    "budget_group": "claude-sub",
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "backend reports utilisation and reset time",
+    "harness_reported_cost_usd": 0.7534107999999999,
+    "harness_reported_cost_usd_cumulative": 0.7534107999999999,
+    "headroom": "known",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": "seven_day",
+    "refusal": false,
+    "resets_at": "2026-10-18T06:00:00Z",
+    "surpassed_threshold": 0.75,
+    "threshold_status": "allowed_warning",
+    "tokens": {
+      "cache_creation_input_tokens": 102879,
+      "cache_creation_input_tokens_cumulative": 102879,
+      "cache_read_input_tokens": 1803288,
+      "cache_read_input_tokens_cumulative": 1803288,
+      "fallback_credit": null,
+      "inference_geo": "global",
+      "input_tokens": 38,
+      "input_tokens_cumulative": 38,
+      "output_tokens": 16149,
+      "output_tokens_cumulative": 16149,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": 79.0
+  },
+  "changed_lines": {
+    "added": 224,
+    "files": 4,
+    "removed": 14
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 126,
+        "name": "test_transient_lock_only_write_is_exempt",
+        "path": "tests/graph/test_updated_at_coverage.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 648
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 548,
+        "name": "test_late_failure_rolls_back_materialized_parent",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 648
+    },
+    {
+      "existing_function": {
+        "line": 609,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 692,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 740,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 794,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 871,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "_seed_signed_live_rows",
+        "path": "tests/standard_names/test_stale_source_detach.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 648
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 648
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 463,
+        "name": "test_concurrent_authority_drift_invalidates_apply",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 648
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 640,
+        "name": "_live_documentation_names",
+        "path": "imas_codex/standard_names/judgment_goldens.py"
+      },
+      "window_line": 647
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 883,
+        "name": "test_uses_limiter_relationships_created",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 126
+    },
+    {
+      "existing_function": {
+        "line": 792,
+        "name": "test_uddb_table_rows_are_emitted",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "_fixture_row",
+        "path": "tests/discovery/test_evaluation.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 686,
+        "name": "test_classifies_single_path",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_gathers_sections_and_identifiers",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_returns_page_context",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_map_status_prints_route_counts",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "query",
+        "path": "tests/ids/test_member_identifier_patterns.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 879,
+        "name": "test_legacy_flat_format_backward_compat",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1093,
+        "name": "_terminal_recovery_client",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1703,
+        "name": "test_score_descriptions_parses_reviews",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_refine_corpus_parses_json_critique",
+        "path": "tests/standard_names/test_benchmark_roles.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 497,
+        "name": "test_adjudicator_not_called_when_nothing_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_rebuilds_sources_from_yaml_block_via_binder",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_no_sources_block_binds_nothing",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_matches_by_id_and_never_creates_a_node",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 208,
+        "name": "test_dry_run_performs_no_writes",
+        "path": "tests/standard_names/test_catalog_reconcile.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_staging",
+        "path": "tests/standard_names/test_catalog_traceability_fields.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_both_hybrid_and_related_render",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_unit_injection_reports_only_physical_scalar_edge_conflicts",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 587,
+        "name": "test_compose_evidence_follows_each_committed_disposition",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_registry_sync_returns_persisted_counts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 642,
+        "name": "test_registry_dry_run_reads_version_and_paths_only",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_registry_migration_cas_compares_complete_graph_snapshots",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "query",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 121,
+        "name": "test_pass_through_preserves_row",
+        "path": "tests/standard_names/test_dd_sources.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 223,
+        "name": "_add_peer_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "_add_related_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_fetch_docs_review_feedback_handles_malformed_scores_json",
+        "path": "tests/standard_names/test_docs_review_feedback_for_enrich.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 126
+    },
+    {
+      "existing_function": {
+        "line": 287,
+        "name": "test_claim_then_persist_race_does_not_loop",
+        "path": "tests/standard_names/test_docs_supersede_safety.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "test_worker_enriches_parent_with_children",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_manifest_source_projection_follows_superseded_identity",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_unknown_graph_link_blocks_final",
+        "path": "tests/standard_names/test_export_gates.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_unpublished_link_is_advisory_and_pruned_from_copy",
+        "path": "tests/standard_names/test_export_gates.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 389,
+        "name": "_staging",
+        "path": "tests/standard_names/test_export_sidecar_surface.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 451,
+        "name": "test_an_older_exporters_tree_is_refused_by_its_stamp",
+        "path": "tests/standard_names/test_export_sidecar_surface.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_invalid_json_tolerated",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_hint_fields_reach_the_caller",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "_claim",
+        "path": "tests/standard_names/test_focus_flag.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_operators_field_spelling_normalised_to_the_class",
+        "path": "tests/standard_names/test_gap_report_segment_constraint.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_unmappable_segment_inferred_from_the_token",
+        "path": "tests/standard_names/test_gap_report_segment_constraint.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_well_formed_gaps_pass_through_untouched",
+        "path": "tests/standard_names/test_gap_report_segment_constraint.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 633,
+        "name": "test_existing_cocos_type_not_overridden",
+        "path": "tests/standard_names/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 95,
+        "name": "test_embedding_field_not_in_write_batch",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 488,
+        "name": "test_new_single_batch_projection_is_source_probed_and_preserved",
+        "path": "tests/standard_names/test_parent_admission.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_review_name_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_pool_compose_retry.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_catalog_edit_persists_actor_from_pull_request_evidence",
+        "path": "tests/standard_names/test_promote_reviewer_actor.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 126
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/standard_names/test_prompt_context_wiring.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_bind_recovery_sources_merges_source_edge_and_dd_path",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_rebuild_routes_orphans_by_anchor_authority",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_rebuild_replays_all_bindings_before_consistency_reconciliation",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_renders_with_dd_paths_present",
+        "path": "tests/standard_names/test_refine_docs_prompt.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_review_entry",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_prior_reviews_iteration_uses_dict_index",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 126
+    },
+    {
+      "existing_function": {
+        "line": 993,
+        "name": "_fake_fetch",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_write_name_review_results_batch_uses_original_id",
+        "path": "tests/standard_names/test_revised_name_fix.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 231,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_self_refine.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "__init__",
+        "path": "tests/standard_names/test_sn_approve_undo_fallback.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "test_pooled_compose_delivers_source_and_name_steering_to_prompt",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "query",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 235,
+        "name": "query",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 527,
+        "name": "_query",
+        "path": "tests/standard_names/test_source_revival.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_accepts_dd_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 187,
+        "name": "test_accepts_signals_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 300,
+        "name": "test_reseed_version_mismatch_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 323,
+        "name": "test_new_source_without_version_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "_review_record",
+        "path": "tests/standard_names/test_suggestion_persist_gate.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 127
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_absent_token",
+        "path": "tests/standard_names/test_vocab_gap_gate.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_wrong_slot_placement",
+        "path": "tests/standard_names/test_vocab_gap_gate.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "test_ambiguous_known_token",
+        "path": "tests/standard_names/test_vocab_gap_gate.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 639,
+        "name": "test_observation_write_preserves_editorial_and_dedup_state",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 54,
+        "name": "test_actionable_gap_retires_source_no_string",
+        "path": "tests/standard_names/test_vocab_gap_source_persistence.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_nonactionable_gap_kept_retryable",
+        "path": "tests/standard_names/test_vocab_gap_source_persistence.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_gap_writer_failure_rolls_back_source_outcome",
+        "path": "tests/standard_names/test_vocab_gap_source_persistence.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_write_vocab_gaps_links_source_to_node",
+        "path": "tests/standard_names/test_vocab_gap_source_persistence.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 231,
+        "name": "test_dd_source_creates_imasnode_relationship",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_signal_source_creates_facilitysignal_relationship",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1143,
+        "name": "test_invalid_segment_skipped",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1163,
+        "name": "test_false_positive_skipped",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1189,
+        "name": "test_deletes_false_positive",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1218,
+        "name": "test_preserves_genuine_absent_gap",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1241,
+        "name": "test_reclassifies_wrong_slot",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1498,
+        "name": "test_sources_reset_when_gaps_resolved",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_render_with_unit_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_render_with_type_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 642,
+        "name": "test_cocos_factors_unknown_label_returns_unity",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 620,
+        "name": "_pending",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 124,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_reset_signal_prompt_uses_catalogue_text",
+        "path": "tests/discovery/test_catalogue_text_kept.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_calls_graph_with_underspecified_status",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_graph_error_returns_zero",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 592,
+        "name": "test_mbdb_signal_keeps_case_and_field",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 705,
+        "name": "test_lcdb_signal_keeps_owner_category_and_shot",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 792,
+        "name": "test_uddb_table_rows_are_emitted",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 883,
+        "name": "remote_run",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 985,
+        "name": "test_scan_unknown_data_class_leaves_slot_unset",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_claim_returns_source_node_field",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 380,
+        "name": "test_no_tree_context_for_non_tree_signals",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_edas_prompt_scopes_category_and_term_context_to_signals",
+        "path": "tests/discovery/test_signal_glossary.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 171,
+        "name": "test_enrichment_stores_a_role_for_a_described_signal",
+        "path": "tests/discovery/test_signal_role_store.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 327,
+        "name": "test_underspecified_signal_is_not_a_role_candidate",
+        "path": "tests/discovery/test_signal_role_store.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 390,
+        "name": "_claimed_signal",
+        "path": "tests/discovery/test_signal_role_store.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "sample_paths",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 581,
+        "name": "test_returns_list_of_dicts",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 598,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 686,
+        "name": "test_classifies_single_path",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 738,
+        "name": "test_invalid_domain_falls_back_to_general",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 844,
+        "name": "test_on_cost_callback_called",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_enrichment_calls_llm",
+        "path": "tests/graph/test_dd_enrichment.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_gathers_sections_and_identifiers",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_enriches_ids_with_llm",
+        "path": "tests/graph/test_dd_ids_enrichment.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_returns_page_context",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_cocos_class_rejects_undeclared_value",
+        "path": "tests/graph/test_signal_convention_schema.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered",
+        "path": "tests/ids/test_candidate_judgment.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "_query",
+        "path": "tests/ids/test_deprecated_dd_targets.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "_make_script",
+        "path": "tests/ids/test_e2e_codegen.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 489,
+        "name": "test_decimation_code_structure",
+        "path": "tests/ids/test_e2e_codegen.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_derive_error_mappings_error_signal_yields_binding",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 218,
+        "name": "test_classify_error_signals_identifies_uncertainty",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 239,
+        "name": "test_classify_error_signals_excludes_physics_error_fields",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_classify_error_signals_excludes_plain_signals",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_classify_error_signals_mixed",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 312,
+        "name": "test_classify_error_signals_lower_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 331,
+        "name": "test_classify_error_signals_upper_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 350,
+        "name": "test_classify_error_signals_sigma_keyword",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 369,
+        "name": "test_classify_error_signals_returns_required_keys",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "test_match_error_signals_to_imas_basic",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 472,
+        "name": "test_match_error_signals_to_imas_missing_data_mappings",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 491,
+        "name": "test_match_error_signals_to_imas_unmatched_parent",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 519,
+        "name": "test_match_error_signals_confidence_reduced",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 757,
+        "name": "test_run_error_derivation_only_matches_error_signals",
+        "path": "tests/ids/test_error_derivation.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_returns_mapping_with_bindings",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_parses_mapping_fields",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_cocos_warning_for_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_no_cocos_warning_for_non_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_field_details",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 405,
+        "name": "test_existing_mapping",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_query",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "query",
+        "path": "tests/ids/test_member_identifier_patterns.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_make_ctx",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 44,
+        "name": "test_basic_search",
+        "path": "tests/ingestion/test_search.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_sn_row",
+        "path": "tests/llm/test_search_standard_names_segment_filter.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 879,
+        "name": "test_legacy_flat_format_backward_compat",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 911,
+        "name": "test_data_nodes_section",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 962,
+        "name": "test_multiple_access_methods",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1037,
+        "name": "test_wiki_chunks_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1083,
+        "name": "test_page_grouping",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1354,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1495,
+        "name": "test_hybrid_text_boost",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1536,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_code_fence_uses_chunk_language",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1584,
+        "name": "test_code_fence_defaults_to_python",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1940,
+        "name": "test_wiki_page_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1977,
+        "name": "test_code_file_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 2000,
+        "name": "test_image_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 2050,
+        "name": "test_wiki_page_format",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 2071,
+        "name": "test_code_format_with_line_numbers",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 2090,
+        "name": "test_cross_references_aggregated",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 2126,
+        "name": "test_page_includes_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 2161,
+        "name": "test_code_includes_source_file_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1093,
+        "name": "_terminal_recovery_client",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "query",
+        "path": "tests/standard_names/test_attachment_write_guards.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 353,
+        "name": "test_compose_persist_guards_a_binding_onto_an_established_name",
+        "path": "tests/standard_names/test_attachment_write_guards.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 588,
+        "name": "test_run_benchmark_mocked",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_template_renders",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1499,
+        "name": "test_score_with_reviewer_docs_target",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 179,
+        "name": "test_docs_sample_shape",
+        "path": "tests/standard_names/test_benchmark_roles.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "test_counts_accepted_and_reintroduction_and_drift",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 445,
+        "name": "_two_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 497,
+        "name": "test_adjudicator_not_called_when_nothing_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 739,
+        "name": "test_halts_on_low_acceptance_and_sets_resume",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_catalog_import_divergence.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 431,
+        "name": "test_idempotent_re_emit",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_export_reader_withholds_valid_but_exhausted_names",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 617,
+        "name": "test_compose_commit_once",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_query",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_both_hybrid_and_related_render",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 587,
+        "name": "test_compose_evidence_follows_each_committed_disposition",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "_case",
+        "path": "tests/standard_names/test_dd_gap_identity_reclassification_graph.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_transition_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_release_reconcile_resolves_only_proven_unit_correction",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 291,
+        "name": "test_registered_exception_resolution_reports_stale_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unsupported_predicate_remains_manual_and_never_mutates",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 343,
+        "name": "test_missing_release_path_is_not_proof",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 60,
+        "name": "_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 530,
+        "name": "test_registry_inventory_backfills_structured_unit_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1055,
+        "name": "test_registry_plan_fails_closed_on_ambiguous_identity",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 1090,
+        "name": "test_registry_plan_rejects_target_collision_without_merging",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 1120,
+        "name": "test_registry_plan_refuses_related_fact_with_different_path_links",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 1148,
+        "name": "test_registry_plan_is_idempotent_and_ignores_unrelated_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 552,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_enrich_populates_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_enrich_populates_dd_source_docs_and_aliases",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 367,
+        "name": "test_generate_docs_user_template_renders_without_dd_context",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 223,
+        "name": "_add_peer_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "_add_related_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "_make_name",
+        "path": "tests/standard_names/test_docs_review_content_gate.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_plan",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "_eligible_node",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 131,
+        "name": "_persist_gc",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "test_worker_enriches_parent_with_children",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_manifest_source_projection_follows_superseded_identity",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "_staging_dir",
+        "path": "tests/standard_names/test_export_layout_stamp.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_graph_entry_carries_physics_domain_into_initial_validation",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_fixture_cohort_round_trips_through_resolved_entry_factory",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "_graph_rows",
+        "path": "tests/standard_names/test_export_sidecar_surface.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_candidate_stage_reserves_missing_target_under_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 1249,
+        "name": "test_reclaimed_same_candidate_can_reserve_after_owned_orphan_cleanup",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 878,
+        "name": "test_write_dd_skipped_source",
+        "path": "tests/standard_names/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "sample_candidates",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "test_gyrokinetics_constant_paths_qualify_as_eligible",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "test_mock_extraction_returns_gyrokinetics",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "_query",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_cocos_missing_integer_logs_warning",
+        "path": "tests/standard_names/test_metadata_invariants.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_generation_and_refinement_prompts_enforce_normative_boundary",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_formerly_valid_name_is_claimable_for_scoped_validation",
+        "path": "tests/standard_names/test_pinned_rename_refine.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 414,
+        "name": "test_requarantine_aborts_without_review_spend",
+        "path": "tests/standard_names/test_pinned_rename_refine.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_claims_returned_as_dicts",
+        "path": "tests/standard_names/test_polling_claims.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_scoped_terminal_residue_reports_transient_claims",
+        "path": "tests/standard_names/test_pool_idle_exhaustion.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "test_claim_review_docs_returns_scalar_physics_domain",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 311,
+        "name": "test_claim_compose_returns_scalar_physics_domain_from_imas",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 729,
+        "name": "test_rebuild_reports_exact_consistency_rows_and_refuses_completion",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_publish_transport_only.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_campaign_manifest_reports_a_reasonless_quarantine",
+        "path": "tests/standard_names/test_quarantine_reason.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_claim_eligibility",
+        "path": "tests/standard_names/test_refine_docs_chain.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_claim_enriches_chain_history",
+        "path": "tests/standard_names/test_refine_docs_chain.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_persist_empty_result",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_returns_mapping",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_prefers_accepted_over_drafted",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_frozen_artifact_with_source_accounting_loads_for_approval",
+        "path": "tests/standard_names/test_review_artifact_schema.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_write_reviews_coalesces_none_cost_to_zero",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_write_reviews_preserves_zero_cost",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 211,
+        "name": "test_escalation_review_carries_cost",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 316
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_audit_duplicate_candidates",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_review_cluster_reconstruction",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "test_review_neighborhood_enrichment",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 465,
+        "name": "test_review_cli_dry_run",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_docs_prompt_scores_docs_dimensions_only",
+        "path": "tests/standard_names/test_review_rubrics.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 9,
+        "name": "query",
+        "path": "tests/standard_names/test_roster_reason_transcription.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_empty_query_segment_filter_hits_backing",
+        "path": "tests/standard_names/test_search_facility_smoke.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "test_search_empty_query_with_filters_uses_catalog_query",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 545,
+        "name": "test_compose_two_step",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_dd_projection_reconcile_uses_full_attachment_guard",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_edge_writer_reports_every_standard_name_merge_endpoint",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_row",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 315
+    },
+    {
+      "existing_function": {
+        "line": 164,
+        "name": "test_fetch_single",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_list_all",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_list_with_physics_domain_filter",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 359,
+        "name": "test_list_filter_info_in_header",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_list_physics_domain_in_header",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_list_table_format",
+        "path": "tests/standard_names/test_sn_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "run",
+        "path": "tests/standard_names/test_source_claim_counter_fencing.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_accepts_dd_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 187,
+        "name": "test_accepts_signals_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "test_reseed_existing_pinned_source_without_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 300,
+        "name": "test_reseed_version_mismatch_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 323,
+        "name": "test_new_source_without_version_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_new_source_pinned_from_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_reseed_ignores_batch_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_review_prompt_includes_validation_context",
+        "path": "tests/standard_names/test_validate_persistence.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 639,
+        "name": "test_observation_write_preserves_editorial_and_dedup_state",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 699,
+        "name": "test_batch_observations_cannot_downgrade_mechanical_reuse",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 754,
+        "name": "test_editorial_guidance_routes_fold_reject_and_add_honestly",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 814,
+        "name": "test_active_editorial_decisions_project_into_triage",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 668,
+        "name": "test_text_only_match_uses_text_score",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 706,
+        "name": "test_dual_match_boosted",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 746,
+        "name": "test_enrichment_includes_lifecycle",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 882,
+        "name": "test_code_example_chunks_merged",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 920,
+        "name": "test_code_example_boost_on_overlap",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_existing_path_returns_true",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_existing_path_no_dd_version",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_shared_fetch_dd_error_fields_returns_structured_results",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_version_context_includes_diagnostics",
+        "path": "tests/tools/test_dd_version_and_error_fields.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 127,
+        "name": "test_dd3_path_found_with_dd_version_4",
+        "path": "tests/tools/test_dd_version_filtering.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 152,
+        "name": "test_dd_version_param_is_integer",
+        "path": "tests/tools/test_dd_version_filtering.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_no_dd_version_skips_filter",
+        "path": "tests/tools/test_dd_version_filtering.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_render_with_unit_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_rename_lineage_attached_when_present",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_rename_lineage_absent_when_none",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 297,
+        "name": "_stub_names",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "window_line": 314
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "600fdd64b31603236c6f2d2a7ae73163dcb64c1c"
+  ],
+  "completed_at": "2026-10-14T20:18:12.539Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-14T20:11:31Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run pytest -p no:cacheprovider tests/standard_names/test_judgment_goldens.py tests/discovery/test_evaluation.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T201107411626-sje-golden-d-synonyms/logs/head-final.log"
+  },
+  "impl_move": {
+    "at_complete": 1.0,
+    "at_dispatch": 0.8571428571428571,
+    "plan": "sn-judgment-evaluation",
+    "verdict": "moved"
+  },
+  "lane": "claude",
+  "lane_advisory": {
+    "backend": "claude",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'claude'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-14T20:56:10.526482+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-13T15:06:57.696Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-18T06:00:00Z",
+    "seconds_until_reset": 294529,
+    "state": "quiet",
+    "utilisation_pct": 35.0
+  },
+  "lane_declaration": {
+    "backend": "claude",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-13T15:06:57.696Z",
+    "read_at": "2026-10-14T20:11:10Z",
+    "resolved_backend": "claude",
+    "utilisation_pct": 35.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-14T20:18:12.539Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T201107411626-sje-golden-d-synonyms/manifest.md",
+  "member": "disposable-r-20261014T201107411626-sje-golden-d-synonyms",
+  "model_key": "sonnet",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/standard_names/test_judgment_goldens.py::test_built_ruled_rows_match_the_committed_fixture",
+      "tests/standard_names/test_judgment_goldens.py::test_near_duplicate_carries_every_ruled_pair[built]",
+      "tests/standard_names/test_judgment_goldens.py::test_ruled_names_sit_in_exactly_one_copy_group[built]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/standard_names/test_judgment_goldens.py::test_built_ruled_rows_match_the_committed_fixture",
+      "tests/standard_names/test_judgment_goldens.py::test_near_duplicate_carries_every_ruled_pair[built]",
+      "tests/standard_names/test_judgment_goldens.py::test_ruled_names_sit_in_exactly_one_copy_group[built]"
+    ],
+    "declaration": "drop the ruled-pair rows or the copy-group join and the new tests fail",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T201107411626-sje-golden-d-synonyms/logs/negative-drop-rows.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T201107411626-sje-golden-d-synonyms/logs/negative-drop-rows.log",
+    "test_paths": [
+      "tests/standard_names/test_judgment_goldens.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "sje-golden-d-synonyms",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/sje-golden-d-synonyms.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T201107411626-sje-golden-d-synonyms/brief.md",
+    "brief_sha256": "2127e34f3ced4ba57a622cd1c91ab2cb674f16e33ca6bbc6ede729ea4a25d848",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 230,
+          "cached_input_tokens": 321966,
+          "input_tokens": 322198,
+          "output_tokens": 858,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 323056,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "golden-near-duplicate.json holds the 15 existing rows plus 47 coordinator_synonym_ruling rows, 7 at label 1, with every name in exactly one copy group; the new tests pass at head and each fails with its mechanism removed, with an EXIT= log; the two named test files add 0 failures against base; the fragment reports counts by label, source and split",
+    "estimated_hours": null,
+    "goal": "Fold the 47 ruled synonym pairs into golden D",
+    "id": "sje-golden-d-synonyms",
+    "lane_declaration": {
+      "backend": "claude",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-13T15:06:57.696Z",
+      "read_at": "2026-10-14T20:11:10Z",
+      "resolved_backend": "claude",
+      "utilisation_pct": 35.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T201107411626-sje-golden-d-synonyms/manifest.md",
+    "negative_control": "drop the ruled-pair rows or the copy-group join and the new tests fail",
+    "plan": "sn-judgment-evaluation",
+    "requested_backend": "claude",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/standard_names/judgment_goldens.py",
+      "tests/standard_names/test_judgment_goldens.py",
+      "docs/evidence/fragments/sn-judgment-evaluation/golden-near-duplicate.json",
+      "docs/evidence/fragments/sn-judgment-evaluation/sje-golden-d-synonyms.html",
+      "docs/figures/sn-judgment-evaluation/sje-golden-d-synonyms"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 0.6822251199411113,
+      "derived": 0.051209371253351246,
+      "drain_hours": 156.0,
+      "effective_limit": 0.051209371253351246,
+      "elapsed_fraction": 0.5130271368931878,
+      "elapsed_hours": 86.18855899805556,
+      "group": "claude-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-13T15:02:28.525000+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.65,
+      "remaining_windows": 13.962288200388889,
+      "resets_at": "2026-10-18T06:00:00+00:00",
+      "state": "observed",
+      "utilisation": 0.35,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.068608,
+      "decided_by": "window",
+      "margin": 0.500142,
+      "name": "sje-golden-d-synonyms",
+      "score": 0.56875,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.16
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 104930.287393,
+        "observed_at": "2026-10-13T15:02:28.525000+00:00",
+        "period": "five_hour",
+        "resets_at": "2026-10-13T18:40:00+00:00",
+        "state": "observed",
+        "utilisation": 0.16,
+        "window_minutes": 300
+      },
+      "seven_day": {
+        "age_seconds": 104930.287393,
+        "observed_at": "2026-10-13T15:02:28.525000+00:00",
+        "period": "seven_day",
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "state": "observed",
+        "utilisation": 0.35,
+        "window_minutes": 10080
+      }
+    },
+    "group": "claude-sub",
+    "hold": null,
+    "lane": "claude",
+    "lift_id": null,
+    "member": "claude",
+    "node": "sje-golden-d-synonyms",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-14T20:11:18.812393+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "claude",
+    "comment": "",
+    "confidence": 0.31,
+    "decision_source": "jev",
+    "effort": "medium",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "claude",
+    "jev_latency_ms": 543.009,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2715.258,
+    "model": "claude-sonnet-5-5",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 104916.119923,
+        "budget_reason": null,
+        "burn_multiple": 0.6822569740976008,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 64759,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.4089740170949074,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.05120641959862914,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 35.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 104916.119923,
+        "budget_reason": null,
+        "burn_multiple": 0.6822569740976008,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 64759,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.4089740170949074,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.05120641959862914,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 35.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 104916.119923,
+        "budget_reason": null,
+        "burn_multiple": 0.6822569740976008,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 64759,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 15.6,
+          "peak_utilisation_p90_pct": 18.0,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.4089740170949074,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.05120641959862914,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 35.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "congested",
+          "running": 12,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 64759,
+          "headroom_pct": 71.9,
+          "peak_utilisation_p50_pct": 62.4,
+          "peak_utilisation_p90_pct": 76.9,
+          "peak_utilisation_runs": 608,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 5,
+          "not-run": 3,
+          "passed": 140,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 0
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 56.148923,
+        "budget_reason": null,
+        "burn_multiple": 3.684452567829717,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 64759,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.366103646724537,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.25675456057159396,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 86.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 56.148923,
+        "budget_reason": null,
+        "burn_multiple": 3.684452567829717,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 64759,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.366103646724537,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.25675456057159396,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 86.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 56.148923,
+        "budget_reason": null,
+        "burn_multiple": 3.684452567829717,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 64759,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.366103646724537,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 3,
+          "passed": 60,
+          "unknown": 0
+        },
+        "pace_allowance": 0.25675456057159396,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-20T04:58:16+00:00",
+        "stale": false,
+        "utilisation_pct": 86.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001:claude": 0.01,
+      "claude:claude-opus-5-5:claude": 0.01,
+      "claude:claude-sonnet-5-5:claude": 0.4,
+      "codex:gpt-6-astra:codex": 0.01,
+      "codex:gpt-6-luna:codex": 0,
+      "codex:gpt-6-sol:codex": 0.25,
+      "hold": 0.21,
+      "local:deepseek-v4.1-flash:clive": 0.11
+    },
+    "questions": {
+      "route": {
+        "criteria": {
+          "claude:claude-haiku-4-5-20251001:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-haiku-4-5-20251001"
+          },
+          "claude:claude-opus-5-5:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-opus-5-5"
+          },
+          "claude:claude-sonnet-5-5:claude": {
+            "backend": "claude",
+            "effort": "medium",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-sonnet-5-5"
+          },
+          "codex:gpt-6-astra:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-astra"
+          },
+          "codex:gpt-6-luna:codex": {
+            "backend": "codex",
+            "effort": "xhigh",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-luna"
+          },
+          "codex:gpt-6-sol:codex": {
+            "backend": "codex",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-sol"
+          },
+          "hold": "Do not dispatch now; wait for pressure to ease. When the local lane is not admitting (full, paused or unavailable), well-defined, routine or deferrable work should usually hold for it rather than spend a pressed metered lane. On a sliding scale, hard, high-risk or urgent work may still take the metered lane; weigh expected wait against urgency without a numeric threshold. When exactly one lane can serve the node, a hold waits for that lane alone, as hold_waits_for states.",
+          "local:deepseek-v4.1-flash:clive": {
+            "backend": "clive",
+            "effort": "high",
+            "lane": "local",
+            "local": true,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "deepseek-v4.1-flash"
+          }
+        },
+        "glossary": {
+          "budget_age_s": "Seconds since the budget reading was observed; null when unknown.",
+          "budget_source": "Where a budget reading came from: a document reading is taken from the published paid-lanes document, an account-surface reading describes now, and a ledger reading carries the age of the run behind it.",
+          "burn_multiple": "Metered spend so far divided by the lane's allowance for its window; above 1 is ahead of the pace that window plans for.",
+          "context": "A candidate's context block. window_tokens is the input window that gates the lane; estimated_tokens is this node's deterministic input estimate (standing instructions plus the repository files its brief loads) measured against that window; headroom_pct is the share of the window the estimate leaves free. peak_utilisation_p50_pct and peak_utilisation_p90_pct are the median and 90th-percentile peak input utilisation of recent passed runs on the lane, with peak_utilisation_runs behind them. A run whose input approaches its window risks dying mid-way, so a small headroom is a real risk to be weighed with pressure. A null figure is unknown, never zero.",
+          "days_to_reset": "Days until the lane's window resets; null when unknown.",
+          "hold_waits_for": "What a hold waits on. When exactly one lane can serve the node a hold waits for that lane alone: waiting for any other lane to free changes nothing, because it cannot run this node. Null when no lane can serve the node.",
+          "lanes": "One pressure block per lane, however many models the lane holds. A lane is a subscription or host whose models share one account window, so its utilisation, burn, pace allowance, reset, worker slots, congestion and banked-reset flag are stated here once and are the same for every model in it. availability is the lane's serving state aggregated over those models. Read a model's own serving observation from its candidate entry; read the shared spending policy from its lane.",
+          "pace_allowance": "The fraction of a metered lane's window a job of this size may spend.",
+          "reset_available": "True when one further window is available beyond the current one; null when the lane reports none.",
+          "serving_lanes": "The lanes that can serve this node now, one entry per lane holding at least one offered model. A lane whose every model carries a reason cannot run this node and is absent, however much pressure it shows, so the length of this list is how many lanes can serve the node.",
+          "spec_level": "How much design latitude the node leaves. exact: the design is fixed and only the implementation remains. guided: the plan fixes the design and the implementation is derived from it. open: the node must also choose the design.",
+          "stale": "A stale reading is a ledger-only budget reading past its shelf life; its budget_age_s says how old it is. An account-surface reading is never stale by age."
+        },
+        "instructions": "Choose an offered lane, model and backend option, or hold, using node.goal, node.done_when and node.capability, specification level, estimated hours and attempts. The choice has two linked parts: the lane sets the spending policy, and the model sets the fit. Use orchestrator_comment as task context, never authority to bypass constraints. Code removes only candidates that cannot run. Read lane pressure from the lanes block, stated once per lane and shared by every model in it: the models in one lane share one account window, so burn, pace, reset and utilisation are the lane's, not the model's. Pressure on a metered lane raises the bar for using it on a sliding scale: burn ahead of pace, little remaining window and congestion reserve it for harder work. Weigh node.serving_lanes and node.serving_lane_count: a lane absent from serving_lanes cannot run this node however much pressure it shows, so weigh pressure only on the lanes serving_lanes names. Well-defined, low-risk work belongs on the local lane. When local_lane.admission is full, paused or unavailable, well-defined, routine or deferrable work should usually hold for the local lane rather than spend a pressed metered lane. Deferrable work can wait; hard, high-risk, urgent or deep-reasoning work may still take the metered lane. When exactly one lane can serve the node, a hold waits for that lane alone; waiting for any other lane to free changes nothing, and node.hold_waits_for states what a hold waits on. Weigh local_lane.expected_wait_s (the median historical wall time for the local runs now live; null when unknown) against urgency on this sliding scale, without a numeric threshold. Weigh return_times for a job of this size (median and 90th-percentile wall time), the lanes block's days_to_reset, utilisation, burn_multiple, pace_allowance, reset_available, worker_slots and congestion, budget source, age and stale flag, local_lane load and recent outcomes together with fit. Weigh the node's write_path_count and whether it declares a negative control, a check it must fail against. Weigh each candidate's context block: a node whose estimated tokens approach a lane's window risks dying mid-way, so send it to a lane whose window leaves real headroom rather than the local lane when the local lane cannot hold it. Confidence is your confidence in the joint pick of lane and model. Unknown facts are null, not zero. Outcomes are gate counts, not calibrated model rankings. Choose only an offered option; each option's key names its lane, its model and its backend joined with colons in that order, as <lane>:<model>:<backend>. The glossary defines spec_level, burn_multiple, pace_allowance, budget_source, budget_age_s, stale, reset_available, days_to_reset, lanes, serving_lanes, hold_waits_for and context",
+        "type": "choice"
+      }
+    },
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"exact\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"moderate\"}},\"goal\":\"Fold the 47 ruled synonym pairs into golden D\",\"done_when\":\"golden-near-duplicate.json holds the 15 existing rows plus 47 coordinator_synonym_ruling rows, 7 at label 1, with every name in exactly one copy group; the new tests pass at head and each fails with its mechanism removed, with an EXIT= log; the two named test files add 0 failures against base; the fragment reports counts by label, source and split\",\"estimated_context\":64759,\"estimated_hours\":5.0,\"estimated_hours_source\":\"section\",\"attempts\":0,\"write_path_count\":4,\"negative_control_declared\":true,\"serving_lanes\":[\"claude\",\"local\",\"codex\"],\"serving_lane_count\":3,\"hold_waits_for\":\"any one of 3 lanes that can serve this node to have room\"},\"orchestrator_comment\":\"\",\"candidates\":{\"claude\":{\"backend\":\"claude\",\"lane\":\"claude\",\"model\":\"claude-sonnet-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":35.0,\"burn_multiple\":0.6822569740976008,\"pace_allowance\":0.05120641959862914,\"days_to_reset\":3.4089740170949074,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":4,\"failed\":1,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":64759,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":15.6,\"peak_utilisation_p90_pct\":18.0,\"peak_utilisation_runs\":4},\"budget_source\":null,\"budget_age_s\":104916.119923,\"stale\":true,\"reset_available\":null},\"clive\":{\"backend\":\"clive\",\"lane\":\"local\",\"model\":\"deepseek-v4.1-flash\",\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":null,\"resets_at\":null,\"worker_slots\":0,\"congestion\":{\"running\":12,\"waiting\":0,\"admission_verdict\":\"congested\",\"stale\":false,\"slots_state\":\"measured\"},\"outcomes\":{\"passed\":140,\"failed\":5,\"not-run\":3,\"unknown\":0},\"context\":{\"window_tokens\":230144,\"estimated_tokens\":64759,\"headroom_pct\":71.9,\"peak_utilisation_p50_pct\":62.4,\"peak_utilisation_p90_pct\":76.9,\"peak_utilisation_runs\":608},\"budget_source\":null,\"budget_age_s\":null,\"stale\":null,\"reset_available\":null},\"codex\":{\"backend\":\"codex\",\"lane\":\"codex\",\"model\":\"gpt-6-sol\",\"availability\":\"unknown\",\"utilisation_pct\":86.0,\"burn_multiple\":3.684452567829717,\"pace_allowance\":0.25675456057159396,\"days_to_reset\":5.366103646724537,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":60,\"failed\":3,\"not-run\":3,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":64759,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":56.148923,\"stale\":false,\"reset_available\":null}},\"return_times\":{\"claude\":{\"p50_s\":698,\"p90_s\":1868,\"runs\":5,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":104917.919006,\"stale\":true},\"clive\":{\"p50_s\":1762,\"p90_s\":5319,\"runs\":107,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":1792.682006,\"stale\":true},\"codex\":{\"p50_s\":1003.0,\"p90_s\":3922,\"runs\":50,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":57.948006,\"stale\":false}},\"lanes\":{\"claude\":{\"availability\":\"unknown\",\"utilisation_pct\":35.0,\"burn_multiple\":0.6822569740976008,\"pace_allowance\":0.05120641959862914,\"resets_at\":\"2026-10-18T06:00:00+00:00\",\"days_to_reset\":3.408953194375,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false},\"local\":{\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":null,\"days_to_reset\":null,\"worker_slots\":0,\"congestion\":{\"running\":12,\"waiting\":0,\"admission_verdict\":\"congested\",\"stale\":false,\"slots_state\":\"measured\"},\"reset_available\":null},\"codex\":{\"availability\":\"unknown\",\"utilisation_pct\":86.0,\"burn_multiple\":3.684452567829717,\"pace_allowance\":0.25675456057159396,\"resets_at\":\"2026-10-20T04:58:16+00:00\",\"days_to_reset\":5.366082824004629,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false}},\"local_lane\":{\"admission\":\"full\",\"expected_wait_s\":1791.0,\"running\":12,\"waiting\":0,\"headroom\":-1,\"worker_slots\":0,\"tokens_per_second\":36.769,\"read_at\":\"2026-10-14T20:11:06.456235+00:00\"}}",
+    "rendered_token_estimate": 1082,
+    "stage_ms": {
+      "budget-snapshot": 276.371,
+      "context-estimate": 21.851,
+      "records": 278.602,
+      "verdict-inputs": 104.068
+    },
+    "template_digest": "bf398dab17ed4a1f716fe26e88b498badb311b83b4b219bc1dfbeaad8ffd187d",
+    "usage": {
+      "cost": 0.000163884,
+      "input_tokens": 3902,
+      "output_tokens": 175
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.8571428571428571,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "600fdd64b31603236c6f2d2a7ae73163dcb64c1c",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8b30f65265325207503bb5928bd1858657251d9b",
+    "reviewed_head_sha": "600fdd64b31603236c6f2d2a7ae73163dcb64c1c",
+    "scores": {
+      "durability": 16,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "reuse": 14,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 103
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261014T201107411626-sje-golden-d-synonyms",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "45d87141-9e89-45a3-85b6-c492c4250a7c",
+  "session_model": "claude-sonnet-5-5",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 5,
+  "throughput": {
+    "cumulative_cached_input_tokens": 1803288,
+    "cumulative_input_tokens": 1906205,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+    "elapsed_seconds": 389.079,
+    "generated_tokens": 16149,
+    "generation_seconds": 126.071,
+    "input_budget_tokens": 1000000,
+    "input_utilisation_pct": 11.4,
+    "machine_seconds": 263.008,
+    "peak_input_tokens": 114197,
+    "tokens_per_second": 128.09,
+    "wall_tokens_per_second": 41.51
+  },
+  "time_budget": "45m",
+  "tool_steps": 19.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 401,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-14T20:18:14Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-14T20:11:38Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261014T201107411626-sje-golden-d-synonyms",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 118,
+    "worker_pid": 426787
+  },
+  "worker_seconds": 377,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
