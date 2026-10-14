@@ -41,6 +41,7 @@ import json
 import os
 import random
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -393,6 +394,9 @@ async def _amain(args: argparse.Namespace) -> int:
     batches = _extract_candidates(extract_cfg)
     n_items = sum(len(b.get("items", [])) for b in batches)
 
+    # The harness writes an incremental report per arm; keep it in scratch so
+    # the repository holds only the measure's own results JSON.
+    scratch = Path(tempfile.mkdtemp(prefix="ssog-rerank-arm-"))
     state = _load_results(out)
     state.update(
         {
@@ -448,7 +452,13 @@ async def _amain(args: argparse.Namespace) -> int:
     #    sources are all recorded is skipped, so a later pass never recomposes
     #    a recorded source.
     for arm_key, switch in (("arm_a", None), ("arm_b", "1")):
-        done = _recorded_sources(state[arm_key]["records"])
+        # A source is done once it has been composed in this arm, whether or not
+        # it yielded a scoring candidate: a batch the model answers with only
+        # vocabulary gaps leaves no record, and without the attempted set it
+        # would be recomposed on every pass and never advance.
+        done = _recorded_sources(state[arm_key]["records"]) | set(
+            state[arm_key].get("sources_done", [])
+        )
         for batch in batches:
             batch_sources = {
                 it.get("source_id", it.get("path", "")) for it in batch.get("items", [])
@@ -456,12 +466,13 @@ async def _amain(args: argparse.Namespace) -> int:
             if not batch_sources or batch_sources <= done:
                 continue
             records, cost = await run_arm_batch(
-                batch, source_paths, switch, out.with_suffix(f".{arm_key}.json")
+                batch, source_paths, switch, scratch / f"{arm_key}.json"
             )
             state[arm_key]["records"].extend(records)
             state[arm_key]["cost_usd"] = round(
                 state[arm_key]["cost_usd"] + cost, 6)
-            done |= _recorded_sources(records)
+            done |= _recorded_sources(records) | batch_sources
+            state[arm_key]["sources_done"] = sorted(done)
             _write_results(out, state)
             print(f"{arm_key} {batch.get('group_key')} records={len(records)}")
 
