@@ -582,6 +582,43 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "f9d99d23bb2708953f959f5dcd42c693c7174dd7",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5038,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261014T182726976776-review-of-shc-family-cost-cap-f3a57c5e84ae",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5038,
+        "path": "/tmp/reckon-crew-scratch/r-20261014T182726976776-review-of-shc-family-cost-cap-f3a57c5e84ae"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-shc-family-cost-cap-f3a57c5e84ae",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
