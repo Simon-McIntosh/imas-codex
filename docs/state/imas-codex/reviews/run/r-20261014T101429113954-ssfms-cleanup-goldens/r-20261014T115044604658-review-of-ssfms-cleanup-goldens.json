@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Derived from the reviewed run's own gate pair, now recorded in its manifest: baseline_suite (scratch/baseline-suite.log) re-runs the combined gate at base 7bbf44b5663c71078d6f94f84901867ba98430b8 and reports 19 passed, EXIT=0; after_suite (scratch/after-suite.log) runs the same command at final head e683d8341511426d501b518beedcb8ee11cd73ce and reports 20 passed, EXIT=0. Both ran to their summary line, so both are readable: added_failure_count is 0 and added_failure_ids is empty. The one-test delta (test_the_refusal_names_the_depth_it_checked) is the node's own addition, no regression.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-14T12:03:57.804Z",
+  "dispatched_at": "2026-10-14T11:50:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "the shown-to-fire cell for the reprocess-records row states only that the two files disagreed before the change (1,441 against 1,416) and names no reproduced failing arm. scratch/reprocess-agreement.log is a green agreement check that reads the post-change files (all checks True) and never runs against the pre-change pair, so the row's check is not shown to fail without the change as the plan's done_when requires."
+    },
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "the shown-to-fire cell for the re-read-wording row cites the digest pin as the re-read's own guard, but that pin is the (question, signal, grade) fixture digest in test_signal_search_goldens.py and does not guard the relabel fragment's prose at all, so this row carries no check rather than one shown to fire."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none - the landed change is two test modules and four docs/evidence fragments; no runtime production path imports or reaches any file the node touched. tests/llm/measure_search_rankings.py imports the goldens harness and catches harness.UnlabelledCandidates, but it is a measurement script rather than production runtime code and it only catches the exception (never constructs it), so the added keyword-only depth/scope parameters do not break it.",
+    "diff": "read commit by commit (b1b8e8e59, 56641fdb4, 9e2099212, e683d8341) against 7bbf44b5663c71078d6f94f84901867ba98430b8; two test modules and four evidence fragments, +225/-40 across six files, all inside the declared scope.",
+    "done_when": "the plan's measure is that each item carries a check that fails without it, shown by reverting the change; scratch/fixture-swap-negative-control.log reddens the digest pin, scratch/depth-negative-control.log reddens the depth check and scratch/grade3-negative-control.log reddens the combined gate (3 failed, EXIT=1) including the per-question reach check, but the two record items (reprocess count, re-read wording) are not shown to fire.",
+    "goal": "the node's goal is to tighten the golden-set guards and align the reprocess records; tests/llm/test_signal_search_goldens.py:565 and :752 tighten two guards, tests/llm/test_signal_role_filter_live.py:192 tightens a third, and the reprocess records are aligned at 1,441, so the goal is met.",
+    "manifest": "read; it reports status complete, the combined gate 20 passed EXIT=0, and now names a baseline_suite/after_suite pair (19 and 20 passed) with seven scratch logs, so its added-failure delta is derivable where the prior review found it absent.",
+    "write_paths": "read the manifest's declared paths; every path in git diff --stat 7bbf44b5663c71078d6f94f84901867ba98430b8..e683d8341511426d501b518beedcb8ee11cd73ce lies inside them and no path outside them changed."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_signal_search_goldens.py:585 reddens under the fixture label swap, :770 under the reverted depth change, and tests/llm/test_signal_role_filter_live.py:213 under the commanded-predicate mutant, all recorded as negative controls, though the reprocess-records and re-read-wording items carry no check registered with the suite.",
+    "evidence": "the gate pair is recorded in scratch/baseline-suite.log (19 passed, EXIT=0) and scratch/after-suite.log (20 passed, EXIT=0), and scratch/rrf-arm-table.log reads rrf 0.8472853917655051 against the 0.8473 fixed point, but docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html:21-22 overstates two rows' demonstrated firing, and the base-arm log header names no module.__file__ or cwd for a scratch-tree run.",
+    "fit": "the additions extend the existing UnlabelledCandidates shape at tests/llm/test_signal_search_goldens.py:157 and FIXTURE_LABEL_DIGEST at :96, and no added name carries a plan label, version suffix or author reference.",
+    "goal_fidelity": "tests/llm/test_signal_search_goldens.py:565 tightens the digest pin, :752 names the checked depth, tests/llm/test_signal_role_filter_live.py:192 makes the reach per-question, and the reprocess records agree at 1,441, which is the whole of the node's stated deliverable.",
+    "reuse": "a capability search over tests/ and imas_codex/ for a fixture-digest owner found only the signed-payload digests in tests/standard_names (a different capability), so _fixture_label_digest at tests/llm/test_signal_search_goldens.py:101 is this capability's first owner and it reuses the existing toy-question helpers.",
+    "scope_discipline": "every path in the four-commit diff against 7bbf44b5663c71078d6f94f84901867ba98430b8 is inside the declared write paths in the reviewed manifest (the two test modules and four of the seven named fragment/figure paths), and no path outside them changed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to tighten the golden-set guards and align the reprocess records; tests/llm/test_signal_search_goldens.py:565 and :752 tighten two guards, tests/llm/test_signal_role_filter_live.py:192 tightens a third, and the reprocess records are aligned at 1,441, so the goal is met.\nVERDICT done_when: the plan's measure is that each item carries a check that fails without it; scratch/fixture-swap-negative-control.log reddens the digest pin, scratch/depth-negative-control.log reddens the depth check and scratch/grade3-negative-control.log reddens the combined gate (3 failed, EXIT=1) including the per-question reach check, but the two record items are not shown to fire.\nVERDICT write_paths: read the manifest's declared paths; every path in git diff --stat 7bbf44b5663c71078d6f94f84901867ba98430b8..e683d8341511426d501b518beedcb8ee11cd73ce lies inside them and no path outside them changed.\nVERDICT manifest: read; it reports status complete with the combined gate 20 passed EXIT=0 and now names a baseline_suite/after_suite pair (19 and 20 passed) with seven scratch logs, so its added-failure delta is derivable.\nVERDICT diff: read commit by commit (b1b8e8e59, 56641fdb4, 9e2099212, e683d8341) against 7bbf44b5663c71078d6f94f84901867ba98430b8; two test modules and four evidence fragments, +225/-40 across six files, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/llm/test_signal_search_goldens.py:565 tightens the digest pin, :752 names the checked depth, tests/llm/test_signal_role_filter_live.py:192 makes the reach per-question, and the reprocess records agree at 1,441, which is the whole of the node's stated deliverable.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate pair is recorded in scratch/baseline-suite.log (19 passed, EXIT=0) and scratch/after-suite.log (20 passed, EXIT=0), and scratch/rrf-arm-table.log reads rrf 0.8472853917655051 against the 0.8473 fixed point, but docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html:21-22 overstates two rows' demonstrated firing.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the four-commit diff (two test modules and four docs/evidence fragments) lies inside the declared write paths in the reviewed manifest.\nSCORE durability: 17\nJUSTIFICATION durability: tests/llm/test_signal_search_goldens.py:585 reddens under the fixture label swap, :770 under the reverted depth change, and tests/llm/test_signal_role_filter_live.py:213 under the commanded-predicate mutant, all recorded as negative controls, though the two record items carry no check registered with the suite.\nSCORE fit: 19\nJUSTIFICATION fit: the additions extend the existing shape of tests/llm/test_signal_search_goldens.py:157 UnlabelledCandidates and :96 FIXTURE_LABEL_DIGEST, and no added name carries a plan label, version suffix or author reference.\nSCORE reuse: 19\nJUSTIFICATION reuse: a capability search over tests/ and imas_codex/ for a fixture-digest owner found only the signed-payload digests in tests/standard_names (a different capability), so _fixture_label_digest at tests/llm/test_signal_search_goldens.py:101 is this capability's first owner and it reuses the existing toy-question helpers.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html:21 follow-on: the shown-to-fire cell for the reprocess-records row states only that the two files disagreed before the change (1,441 against 1,416) and names no reproduced failing arm; scratch/reprocess-agreement.log is a green agreement check that reads the post-change files and never runs against the pre-change pair, so the row's check is not shown to fail without the change.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html:22 follow-on: the shown-to-fire cell for the re-read-wording row cites the digest pin as the re-read's own guard, which is the (question, signal, grade) fixture digest and does not guard the relabel fragment's prose at all, so that row carries no check at all rather than one shown to fire.\n",
+  "review_run_id": "r-20261014T115044604658-review-of-ssfms-cleanup-goldens",
+  "reviewed_base_sha": "7bbf44b5663c71078d6f94f84901867ba98430b8",
+  "reviewed_head_sha": "e683d8341511426d501b518beedcb8ee11cd73ce",
+  "reviewed_run_id": "r-20261014T101429113954-ssfms-cleanup-goldens",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T12:04:45.756603+00:00",
+  "total": 110
+}
