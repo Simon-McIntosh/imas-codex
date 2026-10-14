@@ -1,0 +1,183 @@
+<section id="shc-family-reapply">
+  <h2 id="shc-family-reapply-title">Boundary-averaged density family, applied once more after the three repairs</h2>
+  <p id="shc-family-reapply-intro">
+    An apply of the 17-member boundary-averaged density family through
+    <code>sn harmonize</code> on the live graph, after the three convergence
+    repairs landed (graph-wide report links; the opening and canonical equation
+    written and checked before acceptance; a run keeping the anchor it chose).
+    Before and after counts are measured from the live graph over the same
+    scope. Names, identities, source bindings and spend records are untouched.
+  </p>
+
+  <h3 id="shc-family-reapply-before">Before state</h3>
+  <p id="shc-family-reapply-before-text">
+    <code>sn harmonize --report --family
+    flux_surface_averaged_argon_density_at_plasma_boundary</code> resolves one
+    family, <code>density</code>, with 17 members and anchor
+    <code>flux_surface_averaged_xenon_density_at_plasma_boundary</code>.
+  </p>
+  <table id="shc-family-reapply-before-table">
+    <caption>Family <code>density</code> before the forced apply (17 members)</caption>
+    <thead><tr><th>Measure</th><th>Before</th></tr></thead>
+    <tbody>
+      <tr><td>Members</td><td>17</td></tr>
+      <tr><td>Anchor</td><td><code>flux_surface_averaged_xenon_density_at_plasma_boundary</code></td></tr>
+      <tr><td>Description drift</td><td>0.7647</td></tr>
+      <tr><td>Lint findings, total</td><td>39</td></tr>
+      <tr><td>&#160;&#160;<code>convention_violation</code></td><td>33</td></tr>
+      <tr><td>&#160;&#160;&#160;&#160;<code>non_canonical_equation</code></td><td>17</td></tr>
+      <tr><td>&#160;&#160;&#160;&#160;<code>template_opening</code></td><td>16</td></tr>
+      <tr><td>&#160;&#160;<code>link_missing_reverse</code></td><td>6</td></tr>
+      <tr><td>Distinct documentation openings</td><td>17</td></tr>
+      <tr><td>Distinct flux-surface-average equation forms</td><td>17</td></tr>
+      <tr><td><code>docs_stage=accepted</code></td><td>17 of 17</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-family-reapply-before-eq">
+    None of the 17 equation forms matches the registry's canonical form,
+    <code>\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|</code>
+    (the generic subject <code>f</code>). Every member writes the operation in
+    its own spelling, so all 17 raise <code>non_canonical_equation</code>.
+  </p>
+
+  <h3 id="shc-family-reapply-dryrun">Forced dry run</h3>
+  <p id="shc-family-reapply-dryrun-text">
+    <code>--apply --dry-run --force "&lt;reason&gt;"</code> returns
+    <code>decision=forced</code>,
+    <code>anchor=flux_surface_averaged_xenon_density_at_plasma_boundary</code>,
+    <code>members=17</code>, <code>calls=17</code> at an estimated $0.85,
+    naming <code>flux_surface_averaged_electron_density_at_plasma_boundary</code>
+    as forced (roster <code>v0.3.0rc1+west-task-2e</code>, catalog PR #3). The
+    dry-run anchor (xenon) matches the report's.
+  </p>
+
+  <h3 id="shc-family-reapply-apply">Forced apply</h3>
+  <p id="shc-family-reapply-apply-text">
+    <code>--apply --force "&lt;reason&gt;" --cost-limit 5</code> ran two scope
+    batches and stopped on budget exhaustion, exit 1, without reaching the
+    per-family summary or stamping the family.
+  </p>
+  <table id="shc-family-reapply-apply-table">
+    <caption>The forced apply's two batches</caption>
+    <thead><tr><th>Batch</th><th>Run</th><th>stop_reason</th><th>cost_spent</th><th>enriched / reviewed / regenerated</th></tr></thead>
+    <tbody>
+      <tr><td>anchor (xenon)</td><td><code>57acc7f2…</code></td><td><code>no_eligible_work</code></td><td>$1.026024</td><td>1 / 2 / 1</td></tr>
+      <tr><td>members (16), scope reset <code>2fa0f814-ce82-4256-a6e1-8a018edb0526</code></td><td><code>9ec4e357…</code></td><td><code>budget_exhausted</code></td><td>$5.233419</td><td>16 / 19 / 5</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-family-reapply-cost">
+    Spend was <strong>$6.259443</strong> in total, against the $5.00 the brief
+    set. The member batch reported <code>cost_spent=5.233419</code> against
+    <code>cost_limit=5.0</code>: the cap overshot by $0.23 and there was no
+    headroom for the anchor batch's $1.03. The apply did not complete, so the
+    family was not stamped.
+  </p>
+
+  <h3 id="shc-family-reapply-after">After state</h3>
+  <p id="shc-family-reapply-after-text">
+    Measured from the live graph on the same scope.
+  </p>
+  <table id="shc-family-reapply-after-table">
+    <caption>Family <code>density</code> before versus after the forced apply</caption>
+    <thead><tr><th>Measure</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td>Description drift</td><td>0.7647</td><td>0.8824</td></tr>
+      <tr><td>Lint findings, total</td><td>39</td><td>12</td></tr>
+      <tr><td>&#160;&#160;<code>convention_violation</code></td><td>33</td><td>0</td></tr>
+      <tr><td>&#160;&#160;&#160;&#160;<code>template_opening</code></td><td>16</td><td>0</td></tr>
+      <tr><td>&#160;&#160;&#160;&#160;<code>non_canonical_equation</code></td><td>17</td><td>0</td></tr>
+      <tr><td>&#160;&#160;<code>link_missing_reverse</code></td><td>6</td><td>12</td></tr>
+      <tr><tr><td>Distinct documentation openings</td><td>17</td><td>16</td></tr>
+      <tr><td>Distinct flux-surface-average equation forms</td><td>17</td><td>3</td></tr>
+      <tr><td><code>docs_stage=accepted</code></td><td>17 of 17</td><td>15 of 17</td></tr>
+      <tr><td>Second apply, planned calls</td><td>&#8212;</td><td>17</td></tr>
+    </tbody>
+  </table>
+
+  <h4 id="shc-family-reapply-anchor">The anchor moved again</h4>
+  <p id="shc-family-reapply-anchor-text">
+    The report and the dry run both chose
+    <code>flux_surface_averaged_xenon_density_at_plasma_boundary</code> before
+    the apply. After it, the live report selects
+    <code>flux_surface_averaged_tritium_density_at_plasma_boundary</code> while
+    the dry run still shows xenon: the regenerated member scores changed the
+    anchor selection. The pin holds for a run in flight; with the run halted
+    before stamping, the family keeps no anchor and the next selection moves.
+  </p>
+
+  <h4 id="shc-family-reapply-equations">The equation converges part-way</h4>
+  <p id="shc-family-reapply-equations-text">
+    Distinct forms fell from 17 to 3. Fifteen members now carry the registry's
+    canonical form exactly. Two do not:
+    <code>flux_surface_averaged_argon_density_at_plasma_boundary</code> writes
+    <code>\langle n_{\mathrm{Ar}}\rangle = \oint n_{\mathrm{Ar}}\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|</code>
+    (its own symbol <code>n_{\mathrm{Ar}}</code> in place of <code>f</code>),
+    and <code>flux_surface_averaged_hydrogen_density_at_plasma_boundary</code>
+    writes the canonical form with spaced delimiters (<code>\, / \,</code>).
+    Both are the canonical operation in a second spelling, and neither raises a
+    <code>non_canonical_equation</code> finding, which is why the lint reads
+    zero while the forms do not agree.
+  </p>
+
+  <h4 id="shc-family-reapply-members">Two members are not accepted</h4>
+  <p id="shc-family-reapply-members-text">
+    Fifteen members stand at <code>docs_stage=accepted</code>. Two remain
+    <code>drafted</code>, with no reviewer score, because the budget ran out:
+    <code>flux_surface_averaged_electron_density_at_plasma_boundary</code> and
+    <code>flux_surface_averaged_total_ion_density_at_plasma_boundary</code>.
+    Each carries documentation (1316 and 2192 characters), so the missing
+    acceptance is a pipeline stage, not absent text. Accepted docs-axis scores:
+    argon 0.9875, beryllium 1.0, carbon 1.0, deuterium 0.93125, helium_3
+    0.9375, helium_4 0.875, hydrogen 0.9375, ion 1.0, iron 1.0, lithium 0.85,
+    neon 1.0, nitrogen 0.98125, oxygen 0.9875, tritium 1.0, xenon 0.9375.
+  </p>
+
+  <h4 id="shc-family-reapply-second">The second apply still plans 17 calls</h4>
+  <p id="shc-family-reapply-second-text">
+    A second <code>--apply --force "&lt;reason&gt;"</code> over the same scope
+    returns <code>calls=17</code> at an estimated $0.85, not zero.
+  </p>
+
+  <h3 id="shc-family-reapply-verdict">Verdict on §3's one-pass convergence</h3>
+  <p id="shc-family-reapply-verdict-text">
+    The one-pass convergence does <strong>not</strong> hold. None of the five
+    conditions the done-when states is met:
+  </p>
+  <ul id="shc-family-reapply-verdict-list">
+    <li id="shc-family-reapply-verdict-lint">Zero lint errors &#8212; <strong>no</strong>: 12 findings remain, against 39 before (all <code>convention_violation</code> cleared, but <code>link_missing_reverse</code> rose from 6 to 12).</li>
+    <li id="shc-family-reapply-verdict-opening">One opening template &#8212; <strong>no</strong>: 16 distinct openings remain (from 17).</li>
+    <li id="shc-family-reapply-verdict-equation">No non-canonical flux-surface-average equation &#8212; <strong>partly</strong>: the finding count is zero, but two members still spell the canonical operation differently (argon, hydrogen).</li>
+    <li id="shc-family-reapply-verdict-accepted">Every member stays accepted &#8212; <strong>no</strong>: 15 of 17 accepted; electron and total_ion remain drafted.</li>
+    <li id="shc-family-reapply-verdict-second">A second apply plans zero calls &#8212; <strong>no</strong>: it plans 17.</li>
+  </ul>
+  <p id="shc-family-reapply-verdict-cost">
+    The pass also exceeded its ceiling: <strong>$6.26</strong> spent against a
+    $5.00 cap, and the apply exited 1 with <code>stop_reason
+    budget_exhausted</code> rather than completing. The run stopped after one
+    pass, as the brief required; no loop was attempted.
+  </p>
+
+  <h3 id="shc-family-reapply-tests">The §3 tests, passing</h3>
+  <p id="shc-family-reapply-tests-text">
+    The behaviours §3 rests on are covered by existing tests, run green at
+    revision <code>dbc4ebcb0</code> in the scope run
+    <code>r-20261013T192522910966-shc-family-reapply</code>
+    (<code>pytest -p no:cacheprovider</code>, 24 passed, 1 warning, exit 0; log
+    <code>gate-harmonize-tests.log</code>):
+  </p>
+  <ul id="shc-family-reapply-tests-list">
+    <li id="shc-family-reapply-test-anchor"><code>tests/standard_names/test_harmonize_apply.py::test_failed_anchor_leaves_members_untouched</code> &#8212; a failed anchor leaves the family untouched.</li>
+    <li id="shc-family-reapply-test-snapshot"><code>tests/standard_names/test_harmonize_apply.py::test_snapshot_precedes_every_reset_and_restores_the_family</code> &#8212; the snapshot precedes every reset and restores the family.</li>
+    <li id="shc-family-reapply-test-zerocalls"><code>tests/standard_names/test_harmonize_apply.py::test_second_apply_over_unchanged_scope_plans_zero_calls</code> &#8212; a second apply over an unchanged scope plans zero calls.</li>
+    <li id="shc-family-reapply-test-guard-roster"><code>tests/standard_names/test_harmonize_guard.py::test_roster_and_approved_members_refused_without_force</code> &#8212; the two-class refusal (frozen roster, approved) without <code>--force</code>.</li>
+    <li id="shc-family-reapply-test-guard-contested"><code>tests/standard_names/test_harmonize_guard.py::test_contested_member_refused_without_force</code> &#8212; a contested member is refused without <code>--force</code>.</li>
+    <li id="shc-family-reapply-test-guard-reason"><code>tests/standard_names/test_harmonize_guard.py::test_forced_apply_records_reason_on_the_run</code> &#8212; a forced apply records the reason on the run.</li>
+    <li id="shc-family-reapply-test-guard-cli"><code>tests/standard_names/test_harmonize_guard.py::test_cli_refuses_recommended_member_without_force</code> &#8212; the CLI refuses a recommended member without <code>--force</code>.</li>
+    <li id="shc-family-reapply-test-anchor-pin"><code>tests/standard_names/test_harmonize_anchor_pin.py::test_forced_apply_reuses_the_recorded_anchor</code> &#8212; a forced apply reuses the recorded anchor.</li>
+  </ul>
+  <p id="shc-family-reapply-tests-note">
+    No new test was written for this node: a live operational apply adds no
+    test. Its controls are the before counts above and the second apply's
+    planned calls.
+  </p>
+</section>
