@@ -1,0 +1,2556 @@
+{
+  "seed": 20261015,
+  "n_source_paths": 160,
+  "n_extracted_items": 137,
+  "n_batches": 120,
+  "source_paths": [
+    "waves/coherent_wave/profiles_2d/grid/volume",
+    "transport_solver_numerics/solver_1d/grid/rho_pol_norm",
+    "dataset_description/simulation/time_step",
+    "divertors/divertor/target/tile/surface_outline/r",
+    "edge_transport/model/ggd/ion/particles/v/values",
+    "ece/channel/calibration_offset",
+    "gyrokinetics/flux_surface/magnetic_shear_r_minor",
+    "summary/heating_current_drive/lh/position/value",
+    "plasma_initiation/time",
+    "magnetics/bpol_probe/non_linear_response/b_field_linear",
+    "tf/coil/neutron_fast_flux_inboard",
+    "disruption/global_quantities/phi_halo_boundary",
+    "langmuir_probes/reciprocating/plunge/collector/heat_flux_parallel",
+    "charge_exchange/channel/ion/velocity_pol",
+    "gas_injection/pipe/valve/species/fraction",
+    "pulse_schedule/density_control/zeff_line_of_sight/second_point/r",
+    "wall/description_ggd/ggd/recycling/neutral/element/z_n",
+    "soft_x_rays/channel/detector/outline/x2",
+    "breeding_blanket/module/layer/material_volume_fraction",
+    "plasma_transport/model/profiles_1d/neutral/state/momentum/flux/radial",
+    "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_parallel_b_field_parallel",
+    "waves/coherent_wave/global_quantities/n_phi",
+    "workflow/time_loop/workflow_cycle/component/time_interval_elapsed",
+    "dataset_description/simulation/time_begin",
+    "divertors/divertor/target/power_currents",
+    "edge_transport/model/ggd/neutral/momentum/d/poloidal",
+    "reflectometer_profile/channel/antenna_detection/centre/phi",
+    "plasma_profiles/profiles_1d/grid/rho_tor",
+    "summary/fusion/neutron_rates/dt/thermal/value",
+    "plasma_initiation/global_quantities/neutral/element/z_n",
+    "magnetics/latency",
+    "em_coupling/mutual_plasma_active",
+    "ntms/time_slice/mode/dwidth_dt",
+    "calorimetry/cooling_loop/temperature_out",
+    "neutron_diagnostic/detectors/energy_band/upper_bound",
+    "pellets/time_slice/pellet/path_profiles/rho_tor_norm",
+    "controllers/time",
+    "summary/composition/boron/value",
+    "spectrometer_x_ray_crystal/channel/crystal/wavelength_bragg",
+    "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+    "plasma_transport/model/ggd/neutral/state/momentum/d/toroidal",
+    "gyrokinetics/wavevector/eigenmode/phi_potential_perturbed_parity",
+    "waves/coherent_wave/profiles_1d/current_tor_inside_n_tor",
+    "transport_solver_numerics/time",
+    "summary/time_width",
+    "summary/local/divertor_target/n_i/iron/value",
+    "summary/local/separatrix/velocity_tor/tritium/value",
+    "refractometer/channel/line_of_sight/second_point/z",
+    "equilibrium/time_slice/constraints/n_e/position/psi",
+    "summary/pedestal_fits/mtanh/b_field_pedestal_top_lfs/value",
+    "plasma_initiation/global_quantities/neutral/element/atoms_n",
+    "magnetics/bpol_probe/toroidal_angle",
+    "pf_active/coil/element/geometry/annulus/radius_inner",
+    "mhd_linear/time_slice/toroidal_mode/vacuum/b_field_perturbed/coordinate1/imaginary",
+    "operational_instrumentation/sensor/direction/x",
+    "langmuir_probes/embedded/v_plasma",
+    "spi/injector/fragmentation_gas/temperature",
+    "pulse_schedule/density_control/ion/element/a",
+    "wall/global_quantities/power_recombination_plasma",
+    "spectrometer_visible/channel/geometry_matrix/voxels_n",
+    "wall/description_ggd/ggd/temperature/values",
+    "plasma_transport/model/ggd/ion/state/particles/flux_limiter/values",
+    "gyrokinetics_local/non_linear/fluxes_3d_rotating_frame/energy_b_field_parallel",
+    "waves/coherent_wave/profiles_1d/ion/state/vibrational_level",
+    "workflow/time_loop/workflow_cycle/component/time_interval_request",
+    "summary/local/divertor_target/n_i_total/value",
+    "edge_profiles/ggd/ion/state/velocity_exb/parallel",
+    "polarimeter/channel/line_of_sight/second_point/phi",
+    "equilibrium/time_slice/global_quantities/magnetic_axis/r",
+    "summary/disruption/halo_current/fraction_pol_max/value",
+    "plasma_initiation/profiles_2d/grid/volume_element",
+    "plasma_initiation/global_quantities/b_field_stray/data",
+    "iron_core/segment/geometry/oblique/z",
+    "sawteeth/profiles_1d/grid/area",
+    "operational_instrumentation/sensor/direction/y",
+    "neutron_diagnostic/detectors/aperture/x2_width",
+    "pellets/time_slice/pellet/path_profiles/t_e",
+    "pulse_schedule/density_control/valve/species/fraction",
+    "wall/global_quantities/neutral/incident_species/angles",
+    "camera_x_rays/camera/camera_dimensions",
+    "breeding_blanket/module/time_slice/power_incident_neutron",
+    "core_transport/model/profiles_1d/total_ion_energy/d",
+    "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_rotating_frame/velocity_parallel_gyroaveraged_real",
+    "waves/coherent_wave/profiles_1d/power_density",
+    "summary/simulation/time_step",
+    "summary/local/divertor_plate/t_i_average/value",
+    "edge_profiles/ggd/ion/state/z_max",
+    "camera_ir/optical_element/material_properties/refractive_index",
+    "equilibrium/time_slice/constraints/iron_core_segment/magnetisation_z/measured",
+    "summary/line_average/n_i/tungsten/value",
+    "plasma_initiation/global_quantities/ion/element/z_n",
+    "magnetics/b_field_pol_probe/non_linear_response/b_field_linear",
+    "ntms/vacuum_toroidal_field/b0",
+    "mhd/ggd/mass_density/values",
+    "langmuir_probes/reciprocating/plunge/time_within_plunge",
+    "charge_exchange/channel/ion/a",
+    "summary/gas_injection_rates/methane/value",
+    "pulse_schedule/density_control/valve/species/element/z_n",
+    "wall/global_quantities/current_tor",
+    "camera_visible/channel/aperture/centre/z",
+    "wall/description_2d/limiter/unit/midplane_thickness",
+    "plasma_profiles/profiles_1d/neutral/element/atoms_n",
+    "gyrokinetics/wavevector/eigenmode/fluxes_moments/fluxes_norm/energy_phi_potential",
+    "waves/coherent_wave/profiles_2d/ion/element/z_n",
+    "transport_solver_numerics/solver_1d/drho_tor_dt",
+    "summary/local/divertor_target/n_i/neon/value",
+    "summary/local/separatrix/velocity_tor/krypton/value",
+    "ece/line_of_sight/first_point/phi",
+    "equilibrium/time_slice/constraints/bpol_probe/time_measurement",
+    "summary/heating_current_drive/nbi/power/value",
+    "pulse_schedule/event/duration",
+    "plasma_profiles/ggd/b_field/toroidal",
+    "pf_active/coil/geometry/annulus/z",
+    "ntms/time_slice/mode/onset/width",
+    "barometry/gauge/position/z",
+    "mse/channel/detector/centre/r",
+    "summary/gas_injection_rates/deuterium/value",
+    "pulse_schedule/density_control/valve/species/element/atoms_n",
+    "camera_ir/channel/camera/up/y",
+    "soft_x_rays/channel/detector/centre/phi",
+    "breeding_blanket/module/cooling/time_slice/temperature_outlet",
+    "transport_solver_numerics/derivatives_1d/ion/d_drho_tor_norm/pressure_fast_parallel",
+    "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/particles_a_field_parallel",
+    "ic_antennas/antenna/module/voltage/position/r",
+    "distributions/distribution/ggd/orbit_frequency_pol/values",
+    "summary/local/divertor_target/n_i/tritium/value",
+    "edge_profiles/profiles_1d/ion/state/vibrational_level",
+    "ece/polarizer/polarization_angle",
+    "equilibrium/time_slice/boundary_separatrix/elongation_lower",
+    "summary/pedestal_fits/mtanh/t_e/d_dpsi_norm_max/value",
+    "pulse_schedule/event/time_stamp",
+    "plasma_profiles/ggd/b_field/radial",
+    "disruption/vacuum_toroidal_field/b0",
+    "mhd_linear/time_slice/toroidal_mode/growthrate",
+    "langmuir_probes/reciprocating/plunge/position_average/phi",
+    "thomson_scattering/laser/start_point/r",
+    "summary/gas_injection_accumulated/neon/value",
+    "pulse_schedule/density_control/ion/element/z_n",
+    "summary/local/limiter/n_i/tungsten/value",
+    "spectrometer_x_ray_crystal/channel/crystal/outline/x1",
+    "cryostat/description_2d/cryostat/unit/element/outline/r",
+    "plasma_sources/source/profiles_1d/ion/particles",
+    "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_b_field_parallel",
+    "distributions/distribution/profiles_2d/density_fast",
+    "summary/simulation/time_begin",
+    "divertors/divertor/target/power_radiated",
+    "edge_profiles/profiles_1d/t_i_average",
+    "interferometer/channel/line_of_sight/third_point/z",
+    "core_profiles/profiles_1d/q",
+    "summary/composition/hydrogen/value",
+    "plasma_initiation/b_field_lines/e_field_parallel",
+    "plasma_profiles/ggd/b_field/r",
+    "tf/field_map/b_field_tor",
+    "mhd_linear/time_slice/toroidal_mode/plasma/phi_potential_perturbed/imaginary",
+    "langmuir_probes/reciprocating/plunge/collector/ion_saturation_current",
+    "neutron_diagnostic/reconstructed_emissivity/rho_tor_norm",
+    "pellets/time_slice/pellet/path_geometry/second_point/phi",
+    "pulse_schedule/density_control/zeff_line_of_sight/second_point/phi",
+    "wall/description_ggd/ggd/j_total/r",
+    "bolometer/camera/channel/line_of_sight/third_point/z"
+  ],
+  "drawn": [
+    {
+      "path": "waves/coherent_wave/profiles_2d/grid/volume",
+      "description": "Volume enclosed inside a given magnetic flux surface, provided at each point of the 2D poloidal cross-section grid used for coherent wave propagation profiles. Serves as a flux-surface geometric coordinate on the wave profiles_2d grid.",
+      "domain": "auxiliary_heating"
+    },
+    {
+      "path": "transport_solver_numerics/solver_1d/grid/rho_pol_norm",
+      "description": "Normalised poloidal flux coordinate (\u03c1_pol_norm) for the 1D transport solver radial grid, defined as sqrt((\u03c8\u2212\u03c8_axis)/(\u03c8_LCFS\u2212\u03c8_axis)). Serves as the radial coordinate for the transport solver grid in transport_solver_numerics.",
+      "domain": "computational_workflow"
+    },
+    {
+      "path": "dataset_description/simulation/time_step",
+      "description": "Time interval between successive main simulation steps, assuming a constant step size. Provides temporal resolution metadata for a simulation dataset in the dataset_description IDS.",
+      "domain": "data_management"
+    },
+    {
+      "path": "divertors/divertor/target/tile/surface_outline/r",
+      "description": "Major radius (R) coordinate of surface outline.",
+      "domain": "divertor_physics"
+    },
+    {
+      "path": "edge_transport/model/ggd/ion/particles/v/values",
+      "description": "Array of values for v.",
+      "domain": "edge_plasma_physics"
+    },
+    {
+      "path": "ece/channel/calibration_offset",
+      "description": "Data field in ece.",
+      "domain": "electromagnetic_wave_diagnostics"
+    },
+    {
+      "path": "gyrokinetics/flux_surface/magnetic_shear_r_minor",
+      "description": "Magnetic shear (s) at the gyrokinetic flux surface, defined using the minor radius convention as s = (r/q)\u00b7(dq/dr). A key stability parameter characterizing the radial variation of the safety factor (q).",
+      "domain": "equilibrium"
+    },
+    {
+      "path": "summary/heating_current_drive/lh/position/value",
+      "description": "Position of the maximum of the LH power deposition, in rho_tor_norm.",
+      "domain": "general"
+    },
+    {
+      "path": "plasma_initiation/time",
+      "description": "Data field in plasma_initiation.",
+      "domain": "machine_operations"
+    },
+    {
+      "path": "magnetics/bpol_probe/non_linear_response/b_field_linear",
+      "description": "Array of magnetic field values assuming a linear sensor response, used as the input axis for the non-linear response calibration of a poloidal field (Hall) probe. Paired with b_field_non_linear to define the full calibration curve.",
+      "domain": "magnetic_field_diagnostics"
+    },
+    {
+      "path": "tf/coil/neutron_fast_flux_inboard",
+      "description": "Fast neutron flux incident on the inboard side of a toroidal field (TF) coil. Quantifies the neutron radiation load relevant for radiation damage, material activation, and insulation lifetime assessment.",
+      "domain": "magnetic_field_systems"
+    },
+    {
+      "path": "disruption/global_quantities/phi_halo_boundary",
+      "description": "Toroidal magnetic flux (\u03a6) at the boundary of the halo current region during a disruption. Defines the flux surface enclosing the halo zone for characterizing current and energy deposition during disruption events.",
+      "domain": "magnetohydrodynamics"
+    },
+    {
+      "path": "langmuir_probes/reciprocating/plunge/collector/heat_flux_parallel",
+      "description": "Parallel heat flux (q\u2225) measured at a reciprocating Langmuir probe collector position during a plunge into the scrape-off layer. Characterizes the power flow along magnetic field lines in the SOL.",
+      "domain": "mechanical_measurement_diagnostics"
+    },
+    {
+      "path": "charge_exchange/channel/ion/velocity_pol",
+      "description": "Poloidal velocity (v_pol) of an ion species measured by charge exchange recombination spectroscopy (CXRS) at the channel measurement point. Represents the poloidal component of ion flow derived from Doppler-shifted emission.",
+      "domain": "particle_measurement_diagnostics"
+    },
+    {
+      "path": "gas_injection/pipe/valve/species/fraction",
+      "description": "Relative molecular fraction of a given species in the gas mixture injected by a valve. Specifies the composition of multi-component gas mixtures for fuelling or impurity seeding.",
+      "domain": "plant_systems"
+    },
+    {
+      "path": "pulse_schedule/density_control/zeff_line_of_sight/second_point/r",
+      "description": "Major radius (R) coordinate of second point.",
+      "domain": "plasma_control"
+    },
+    {
+      "path": "wall/description_ggd/ggd/recycling/neutral/element/z_n",
+      "description": "Normalized z of element.",
+      "domain": "plasma_wall_interactions"
+    },
+    {
+      "path": "soft_x_rays/channel/detector/outline/x2",
+      "description": "Positions of the soft X-ray detector outline vertices along the x2 axis of the local (X1, X2) coordinate system. Defines the aperture geometry of the detector for line-of-sight and etendue calculations.",
+      "domain": "radiation_measurement_diagnostics"
+    },
+    {
+      "path": "breeding_blanket/module/layer/material_volume_fraction",
+      "description": "Volume fraction of each constituent material in a breeding blanket layer, describing the relative proportion of each material component within the composite layer. Used in neutronics and thermal-hydraulic calculations.",
+      "domain": "structural_components"
+    },
+    {
+      "path": "plasma_transport/model/profiles_1d/neutral/state/momentum/flux/radial",
+      "description": "Radial component of flux.",
+      "domain": "transport"
+    },
+    {
+      "path": "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_parallel_b_field_parallel",
+      "description": "Contribution of the perturbed parallel magnetic field (\u03b4B\u2225) to the parallel component of the normalised toroidal momentum flux (phi-direction) in the rotating frame, fully averaged over flux surface, time, kx, and ky in nonlinear gyrokinetic simulations.",
+      "domain": "turbulence"
+    },
+    {
+      "path": "waves/coherent_wave/global_quantities/n_phi",
+      "description": "Array of toroidal mode numbers (n_phi) associated with a coherent wave, where the toroidal wave vector component is k_tor = n_tor grad(phi). Positive n_phi indicates propagation in the positive toroidal direction.",
+      "domain": "auxiliary_heating"
+    },
+    {
+      "path": "workflow/time_loop/workflow_cycle/component/time_interval_elapsed",
+      "description": "Simulation time interval for which a workflow component has last completed its computation. Records the elapsed simulation time step actually achieved by the component in the most recent workflow cycle.",
+      "domain": "computational_workflow"
+    },
+    {
+      "path": "dataset_description/simulation/time_begin",
+      "description": "Start time of the simulation, marking when the time evolution begins. Defines the lower temporal boundary of the simulated dataset within the IMAS data provenance framework.",
+      "domain": "data_management"
+    },
+    {
+      "path": "divertors/divertor/target/power_currents",
+      "description": "Power deposited on this divertor target due to electric currents (positive means power is deposited on the target)",
+      "domain": "divertor_physics"
+    },
+    {
+      "path": "edge_transport/model/ggd/neutral/momentum/d/poloidal",
+      "description": "Poloidal component of d.",
+      "domain": "edge_plasma_physics"
+    },
+    {
+      "path": "reflectometer_profile/channel/antenna_detection/centre/phi",
+      "description": "Toroidal angle (\u03c6) coordinate of centre.",
+      "domain": "electromagnetic_wave_diagnostics"
+    },
+    {
+      "path": "plasma_profiles/profiles_1d/grid/rho_tor",
+      "description": "Toroidal flux coordinate (\u03c1_tor) on the 1D radial grid, defined as \u03c1_tor = sqrt(\u03a6_tor/(\u03c0\u00b7B0)), approximating the effective minor radius. Provides a physical radial coordinate with dimensions of length for plasma profile indexing.",
+      "domain": "equilibrium"
+    },
+    {
+      "path": "summary/fusion/neutron_rates/dt/thermal/value",
+      "description": "Neutron production rate from thermonuclear DT reactions in the thermal plasma bulk. Represents the fusion neutron rate (Hz) arising from thermal Maxwellian ion populations only.",
+      "domain": "general"
+    },
+    {
+      "path": "plasma_initiation/global_quantities/neutral/element/z_n",
+      "description": "Normalized z of element.",
+      "domain": "machine_operations"
+    },
+    {
+      "path": "magnetics/latency",
+      "description": "Upper bound on the real-time (RT) network latency for the magnetics diagnostic system, representing the maximum delay between physical signal reception and data availability on the RT network.",
+      "domain": "magnetic_field_diagnostics"
+    },
+    {
+      "path": "em_coupling/mutual_plasma_active",
+      "description": "Mutual inductance matrix coupling active PF coils to distributed plasma current filaments (M_plasma-active). Entries give the flux linkage in each plasma element per unit current in each active coil, used in plasma equilibrium and control calculations.",
+      "domain": "magnetic_field_systems"
+    },
+    {
+      "path": "ntms/time_slice/mode/dwidth_dt",
+      "description": "Time derivative of the full magnetic island width (dw/dt) for a neoclassical tearing mode (NTM). Quantifies the island growth or decay rate, a key quantity in the generalized Rutherford equation for NTM evolution.",
+      "domain": "magnetohydrodynamics"
+    },
+    {
+      "path": "calorimetry/cooling_loop/temperature_out",
+      "description": "Temperature of the coolant at the outlet of a cooling loop. Used together with the inlet temperature and mass flow rate to compute the deposited thermal power via calorimetric enthalpy balance.",
+      "domain": "mechanical_measurement_diagnostics"
+    },
+    {
+      "path": "neutron_diagnostic/detectors/energy_band/upper_bound",
+      "description": "Upper energy bound of a neutron detector energy band, defining the maximum neutron energy detected within that band. Together with the lower bound and detection efficiency, specifies the energy-resolved sensitivity of the detector.",
+      "domain": "particle_measurement_diagnostics"
+    },
+    {
+      "path": "pellets/time_slice/pellet/path_profiles/rho_tor_norm",
+      "description": "Normalised toroidal flux coordinate (\u03c1_tor_norm) sampled along the pellet ablation path as a 1D profile. Maps each pellet position to the corresponding flux surface label, indicating the radial location of the pellet as it ablates.",
+      "domain": "plant_systems"
+    },
+    {
+      "path": "controllers/time",
+      "description": "Data field in controllers.",
+      "domain": "plasma_control"
+    },
+    {
+      "path": "summary/composition/boron/value",
+      "description": "Boron (B).",
+      "domain": "plasma_wall_interactions"
+    },
+    {
+      "path": "spectrometer_x_ray_crystal/channel/crystal/wavelength_bragg",
+      "description": "Bragg wavelength (\u03bb_Bragg) of the diffracting crystal in an X-ray crystal spectrometer channel, satisfying the Bragg diffraction condition for the crystal's lattice spacing and orientation. Determines the central wavelength of the spectral passband.",
+      "domain": "radiation_measurement_diagnostics"
+    },
+    {
+      "path": "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+      "description": "Nuclear heating power density profile in a breeding blanket module, evaluated at the midplane. Represents the volumetric power deposition from neutron and gamma interactions in the blanket material.",
+      "domain": "structural_components"
+    },
+    {
+      "path": "plasma_transport/model/ggd/neutral/state/momentum/d/toroidal",
+      "description": "Toroidal component of d.",
+      "domain": "transport"
+    },
+    {
+      "path": "gyrokinetics/wavevector/eigenmode/phi_potential_perturbed_parity",
+      "description": "Parity of the perturbed electrostatic potential (\u03c6) eigenfunction with respect to the poloidal angle \u03b8=0. Indicates whether the eigenmode has even (ballooning) or odd (tearing) symmetry about the outboard midplane.",
+      "domain": "turbulence"
+    },
+    {
+      "path": "waves/coherent_wave/profiles_1d/current_tor_inside_n_tor",
+      "description": "Cumulative wave-driven toroidal current enclosed inside a flux surface, resolved per toroidal mode number (n_tor). Provides the mode-decomposed toroidal current drive profile contribution from a coherent wave.",
+      "domain": "auxiliary_heating"
+    },
+    {
+      "path": "transport_solver_numerics/time",
+      "description": "Data field in transport_solver_numerics.",
+      "domain": "computational_workflow"
+    },
+    {
+      "path": "summary/time_width",
+      "description": "Width of the time-averaging interval for time-dependent quantities in the summary IDS. By convention the interval spans from (time \u2212 time_width) to time; empty if no averaging is applied.",
+      "domain": "data_management"
+    },
+    {
+      "path": "summary/local/divertor_target/n_i/iron/value",
+      "description": "Iron (Fe).",
+      "domain": "divertor_physics"
+    },
+    {
+      "path": "summary/local/separatrix/velocity_tor/tritium/value",
+      "description": "Tritium.",
+      "domain": "edge_plasma_physics"
+    },
+    {
+      "path": "refractometer/channel/line_of_sight/second_point/z",
+      "description": "Vertical (Z) coordinate of second point.",
+      "domain": "electromagnetic_wave_diagnostics"
+    },
+    {
+      "path": "equilibrium/time_slice/constraints/n_e/position/psi",
+      "description": "Poloidal magnetic flux (\u03c8) at the position of an electron density (ne) measurement used as a constraint in equilibrium reconstruction. Specifies the flux-surface location of the ne measurement in terms of \u03c8.",
+      "domain": "equilibrium"
+    },
+    {
+      "path": "summary/pedestal_fits/mtanh/b_field_pedestal_top_lfs/value",
+      "description": "Magnetic field evaluated at the low-field-side pedestal top, typically represented as a vector or its magnitude.",
+      "domain": "general"
+    },
+    {
+      "path": "plasma_initiation/global_quantities/neutral/element/atoms_n",
+      "description": "Normalized atoms of element.",
+      "domain": "machine_operations"
+    },
+    {
+      "path": "magnetics/bpol_probe/toroidal_angle",
+      "description": "Toroidal angle of a poloidal field (Bpol) probe coil orientation, measuring the angular deviation of the sensing axis from the poloidal plane. A value of zero indicates the coil is fully oriented in the poloidal plane.",
+      "domain": "magnetic_field_diagnostics"
+    },
+    {
+      "path": "pf_active/coil/element/geometry/annulus/radius_inner",
+      "description": "Inner radius of the annular cross-section of an active PF coil element. Together with the outer radius and centre position, fully specifies the annular conductor geometry for electromagnetic modelling.",
+      "domain": "magnetic_field_systems"
+    },
+    {
+      "path": "mhd_linear/time_slice/toroidal_mode/vacuum/b_field_perturbed/coordinate1/imaginary",
+      "description": "Imaginary part of the first coordinate (radial) component of the perturbed magnetic field (\u03b4B) eigenfunction in the vacuum region, for a given toroidal mode number in linear MHD stability analysis.",
+      "domain": "magnetohydrodynamics"
+    },
+    {
+      "path": "operational_instrumentation/sensor/direction/x",
+      "description": "Component along X axis",
+      "domain": "mechanical_measurement_diagnostics"
+    },
+    {
+      "path": "langmuir_probes/embedded/v_plasma",
+      "description": "Plasma potential (Vp) measured at an embedded Langmuir probe position. Represents the local electrostatic potential of the plasma, derived from the probe I-V characteristic, used to characterize the plasma sheath and edge electric fields.",
+      "domain": "particle_measurement_diagnostics"
+    },
+    {
+      "path": "spi/injector/fragmentation_gas/temperature",
+      "description": "Temperature of the gas produced during shattered pellet injector (SPI) fragmentation. Characterizes the thermodynamic state of the fragmentation gas released upon pellet shattering for disruption mitigation.",
+      "domain": "plant_systems"
+    },
+    {
+      "path": "pulse_schedule/density_control/ion/element/a",
+      "description": "Data field in pulse_schedule.",
+      "domain": "plasma_control"
+    },
+    {
+      "path": "wall/global_quantities/power_recombination_plasma",
+      "description": "Power deposited on the wall due to recombination of plasma ions, as a time-resolved global quantity. Represents the energy released when ions recombine at the wall surface, contributing to the total plasma-wall energy transfer.",
+      "domain": "plasma_wall_interactions"
+    },
+    {
+      "path": "spectrometer_visible/channel/geometry_matrix/voxels_n",
+      "description": "Normalized voxels of geometry matrix.",
+      "domain": "radiation_measurement_diagnostics"
+    },
+    {
+      "path": "wall/description_ggd/ggd/temperature/values",
+      "description": "Array of values for temperature.",
+      "domain": "structural_components"
+    },
+    {
+      "path": "plasma_transport/model/ggd/ion/state/particles/flux_limiter/values",
+      "description": "Array of values for flux limiter.",
+      "domain": "transport"
+    },
+    {
+      "path": "gyrokinetics_local/non_linear/fluxes_3d_rotating_frame/energy_b_field_parallel",
+      "description": "Contribution of the perturbed parallel magnetic field (\u03b4B\u2225) to the normalised energy (heat) flux in the rotating frame, resolved as a 3D array over time and wavevectors in a nonlinear gyrokinetic simulation.",
+      "domain": "turbulence"
+    },
+    {
+      "path": "waves/coherent_wave/profiles_1d/ion/state/vibrational_level",
+      "description": "Vibrational quantum level of the ion species charge state (can be a bundled range). Used to identify the vibrational excitation state of molecular or partially molecular ion species in 1D radial wave-plasma interaction profiles.",
+      "domain": "auxiliary_heating"
+    },
+    {
+      "path": "workflow/time_loop/workflow_cycle/component/time_interval_request",
+      "description": "Requested simulation time interval for a specific workflow component within a workflow cycle. Specifies the duration over which the component is asked to compute its results during the current time-loop iteration.",
+      "domain": "computational_workflow"
+    },
+    {
+      "path": "summary/local/divertor_target/n_i_total/value",
+      "description": "Total ion density (ni,total) at a divertor target, summed over all ion species. Provides a local plasma density metric at the divertor strike point relevant to plasma-surface interaction and heat load assessment.",
+      "domain": "divertor_physics"
+    },
+    {
+      "path": "edge_profiles/ggd/ion/state/velocity_exb/parallel",
+      "description": "Parallel component of velocity exb.",
+      "domain": "edge_plasma_physics"
+    },
+    {
+      "path": "polarimeter/channel/line_of_sight/second_point/phi",
+      "description": "Toroidal angle (\u03c6) coordinate of second point.",
+      "domain": "electromagnetic_wave_diagnostics"
+    },
+    {
+      "path": "equilibrium/time_slice/global_quantities/magnetic_axis/r",
+      "description": "Major radius (R) coordinate of magnetic axis.",
+      "domain": "equilibrium"
+    },
+    {
+      "path": "summary/disruption/halo_current/fraction_pol_max/value",
+      "description": "Maximum poloidal halo current fraction, defined as the peak poloidal halo current normalized by the pre-disruption toroidal plasma current (Ip). A key metric for assessing mechanical loads on vessel structures during disruptions.",
+      "domain": "general"
+    },
+    {
+      "path": "plasma_initiation/profiles_2d/grid/volume_element",
+      "description": "Elementary plasma volume of the cell formed by adjacent grid nodes in the 2D poloidal plane grid during plasma initiation. Used for volume-weighted integration of quantities over the initiation-phase spatial domain.",
+      "domain": "machine_operations"
+    },
+    {
+      "path": "plasma_initiation/global_quantities/b_field_stray/data",
+      "description": "Data array for b field stray.",
+      "domain": "magnetic_field_diagnostics"
+    },
+    {
+      "path": "iron_core/segment/geometry/oblique/z",
+      "description": "Vertical (Z) coordinate of oblique.",
+      "domain": "magnetic_field_systems"
+    },
+    {
+      "path": "sawteeth/profiles_1d/grid/area",
+      "description": "Cross-sectional area of a magnetic flux surface on the sawtooth post-crash radial grid. Describes flux surface geometry for the 1D radial profiles stored in the sawteeth IDS.",
+      "domain": "magnetohydrodynamics"
+    },
+    {
+      "path": "operational_instrumentation/sensor/direction/y",
+      "description": "Component along Y axis",
+      "domain": "mechanical_measurement_diagnostics"
+    },
+    {
+      "path": "neutron_diagnostic/detectors/aperture/x2_width",
+      "description": "Full width of the neutron detector collimating aperture in the X2 direction, applicable when the aperture geometry type is rectangular. Defines one transverse dimension of the rectangular aperture cross-section.",
+      "domain": "particle_measurement_diagnostics"
+    },
+    {
+      "path": "pellets/time_slice/pellet/path_profiles/t_e",
+      "description": "Electron temperature (Te) sampled along the pellet trajectory path as a 1D profile. Represents the background plasma electron temperature encountered by the pellet during transit, used as input for ablation rate modelling.",
+      "domain": "plant_systems"
+    },
+    {
+      "path": "pulse_schedule/density_control/valve/species/fraction",
+      "description": "Relative molecular fraction of a gas species in the mixture injected by a density control valve. Specifies the composition of multi-component gas mixtures for plasma density and Zeff control.",
+      "domain": "plasma_control"
+    },
+    {
+      "path": "wall/global_quantities/neutral/incident_species/angles",
+      "description": "Array of incident angles at which the physical sputtering coefficient is tabulated for a neutral incident species on the wall. Forms the angular axis of the sputtering coefficient lookup table for plasma-wall interaction modelling.",
+      "domain": "plasma_wall_interactions"
+    },
+    {
+      "path": "camera_x_rays/camera/camera_dimensions",
+      "description": "Total physical dimensions of the X-ray camera detector array in the X1 and X2 directions. Defines the overall detector size for geometry and field-of-view characterization of the imaging system.",
+      "domain": "radiation_measurement_diagnostics"
+    },
+    {
+      "path": "breeding_blanket/module/time_slice/power_incident_neutron",
+      "description": "Total incident neutron power on a single breeding blanket module. Quantifies the nuclear power load delivered by fusion neutrons to the blanket, a key input for tritium breeding and thermal design.",
+      "domain": "structural_components"
+    },
+    {
+      "path": "core_transport/model/profiles_1d/total_ion_energy/d",
+      "description": "Data field in core_transport.",
+      "domain": "transport"
+    },
+    {
+      "path": "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_rotating_frame/velocity_parallel_gyroaveraged_real",
+      "description": "Real part of the normalised gyroaveraged parallel velocity moment of the perturbed distribution function, evaluated in the rotating frame for a given gyrokinetic eigenmode. Part of the complex spectral representation of the parallel flow fluctuation.",
+      "domain": "turbulence"
+    },
+    {
+      "path": "waves/coherent_wave/profiles_1d/power_density",
+      "description": "Flux-surface-averaged total absorbed wave power density (P_abs) from a coherent wave as a 1D radial profile, summed over electrons, ions, and fast populations. Represents local RF power deposition per unit volume.",
+      "domain": "auxiliary_heating"
+    },
+    {
+      "path": "summary/simulation/time_step",
+      "description": "Time step (\u0394t) between successive main output or storage steps in a simulation. Specifies the constant temporal resolution of simulation data stored in this summary IDS entry.",
+      "domain": "computational_workflow"
+    },
+    {
+      "path": "summary/local/divertor_plate/t_i_average/value",
+      "description": "Average ion temperature (Ti) at a divertor plate location, averaged over ion species. Characterizes the ion thermal energy at the plasma-wall interface in the divertor region.",
+      "domain": "divertor_physics"
+    },
+    {
+      "path": "edge_profiles/ggd/ion/state/z_max",
+      "description": "Maximum atomic charge number (Z_max) of an ion charge state bundle in the edge plasma GGD representation. Equals z_min when the bundle contains a single charge state rather than a range of states.",
+      "domain": "edge_plasma_physics"
+    },
+    {
+      "path": "camera_ir/optical_element/material_properties/refractive_index",
+      "description": "Refractive index (n) of an IR camera optical element material as a function of wavelength. Used with the extinction coefficient to characterize the complex optical response for transmission and reflection modelling of the optical element.",
+      "domain": "electromagnetic_wave_diagnostics"
+    },
+    {
+      "path": "equilibrium/time_slice/constraints/iron_core_segment/magnetisation_z/measured",
+      "description": "Measured value of magnetisation z.",
+      "domain": "equilibrium"
+    },
+    {
+      "path": "summary/line_average/n_i/tungsten/value",
+      "description": "Tungsten.",
+      "domain": "general"
+    },
+    {
+      "path": "plasma_initiation/global_quantities/ion/element/z_n",
+      "description": "Normalized z of element.",
+      "domain": "machine_operations"
+    },
+    {
+      "path": "magnetics/b_field_pol_probe/non_linear_response/b_field_linear",
+      "description": "Array of magnetic field values assuming a linear field-to-signal relation for a poloidal field probe, used as the input axis for characterising the probe's non-linear response. Serves as the reference linear calibration axis for Hall or flux-gate probe corrections.",
+      "domain": "magnetic_field_diagnostics"
+    },
+    {
+      "path": "ntms/vacuum_toroidal_field/b0",
+      "description": "Vacuum toroidal magnetic field (B0) at the reference major radius R0 in the NTMs IDS. Defines the nominal toroidal field strength used for normalization in neoclassical tearing mode (NTM) stability analysis and rho_tor coordinate definitions.",
+      "domain": "magnetic_field_systems"
+    },
+    {
+      "path": "mhd/ggd/mass_density/values",
+      "description": "Array of values for mass density.",
+      "domain": "magnetohydrodynamics"
+    },
+    {
+      "path": "langmuir_probes/reciprocating/plunge/time_within_plunge",
+      "description": "Time vector describing the temporal evolution of plasma quantities within a single reciprocating probe plunge. Serves as the independent temporal coordinate for all time-resolved measurements recorded during the plunge.",
+      "domain": "mechanical_measurement_diagnostics"
+    },
+    {
+      "path": "charge_exchange/channel/ion/a",
+      "description": "Data field in charge_exchange.",
+      "domain": "particle_measurement_diagnostics"
+    },
+    {
+      "path": "summary/gas_injection_rates/methane/value",
+      "description": "Methane (CH4).",
+      "domain": "plant_systems"
+    },
+    {
+      "path": "pulse_schedule/density_control/valve/species/element/z_n",
+      "description": "Normalized z of element.",
+      "domain": "plasma_control"
+    },
+    {
+      "path": "wall/global_quantities/current_tor",
+      "description": "Toroidal current (I_tor) flowing in the vacuum vessel wall, induced by changing poloidal flux during plasma operations. Relevant for electromagnetic force analysis and disruption studies.",
+      "domain": "plasma_wall_interactions"
+    },
+    {
+      "path": "camera_visible/channel/aperture/centre/z",
+      "description": "Vertical (Z) coordinate of centre.",
+      "domain": "radiation_measurement_diagnostics"
+    },
+    {
+      "path": "wall/description_2d/limiter/unit/midplane_thickness",
+      "description": "Physical thickness of a limiter or plasma-facing component (PFC) unit measured at the midplane. A geometric parameter used in engineering assessments and plasma-wall interaction analyses.",
+      "domain": "structural_components"
+    },
+    {
+      "path": "plasma_profiles/profiles_1d/neutral/element/atoms_n",
+      "description": "Normalized atoms of element.",
+      "domain": "transport"
+    },
+    {
+      "path": "gyrokinetics/wavevector/eigenmode/fluxes_moments/fluxes_norm/energy_phi_potential",
+      "description": "Contribution of the perturbed electrostatic potential (\u03c6) to the normalised energy flux in gyrokinetic simulations. Represents the electrostatic component of turbulent energy transport for a given eigenmode and wavevector.",
+      "domain": "turbulence"
+    },
+    {
+      "path": "waves/coherent_wave/profiles_2d/ion/element/z_n",
+      "description": "Normalized z of element.",
+      "domain": "auxiliary_heating"
+    },
+    {
+      "path": "transport_solver_numerics/solver_1d/drho_tor_dt",
+      "description": "Partial time derivative of the toroidal flux coordinate (\u2202\u03c1_tor/\u2202t), representing the rate of change of the radial coordinate grid due to evolving magnetic geometry. Used in coordinate-transformation terms of 1D transport equations.",
+      "domain": "computational_workflow"
+    },
+    {
+      "path": "summary/local/divertor_target/n_i/neon/value",
+      "description": "Neon (Ne).",
+      "domain": "divertor_physics"
+    },
+    {
+      "path": "summary/local/separatrix/velocity_tor/krypton/value",
+      "description": "Krypton (Kr).",
+      "domain": "edge_plasma_physics"
+    },
+    {
+      "path": "ece/line_of_sight/first_point/phi",
+      "description": "Toroidal angle (\u03c6) coordinate of first point.",
+      "domain": "electromagnetic_wave_diagnostics"
+    },
+    {
+      "path": "equilibrium/time_slice/constraints/bpol_probe/time_measurement",
+      "description": "Exact time of the poloidal field probe (B_pol) measurement used as a constraint in equilibrium reconstruction. If not coincident with the equilibrium time slice, linear interpolation from the source data is applied.",
+      "domain": "equilibrium"
+    },
+    {
+      "path": "summary/heating_current_drive/nbi/power/value",
+      "description": "NBI power coupled to the plasma by this unit (Pnbi), excluding shine-through and fast ion orbit losses. Represents the effective heating power delivered to the thermal plasma by neutral beam injection.",
+      "domain": "general"
+    },
+    {
+      "path": "pulse_schedule/event/duration",
+      "description": "Duration of a pulse schedule event, specifying the time interval length for a predefined trigger or recorded event within the pulse sequence.",
+      "domain": "machine_operations"
+    },
+    {
+      "path": "plasma_profiles/ggd/b_field/toroidal",
+      "description": "Toroidal component of b field.",
+      "domain": "magnetic_field_diagnostics"
+    },
+    {
+      "path": "pf_active/coil/geometry/annulus/z",
+      "description": "Vertical (Z) coordinate of annulus.",
+      "domain": "magnetic_field_systems"
+    },
+    {
+      "path": "ntms/time_slice/mode/onset/width",
+      "description": "Full width of a magnetic island associated with a tearing or neoclassical tearing mode.",
+      "domain": "magnetohydrodynamics"
+    },
+    {
+      "path": "barometry/gauge/position/z",
+      "description": "Vertical (Z) coordinate of position.",
+      "domain": "mechanical_measurement_diagnostics"
+    },
+    {
+      "path": "mse/channel/detector/centre/r",
+      "description": "Major radius (R) coordinate of centre.",
+      "domain": "particle_measurement_diagnostics"
+    },
+    {
+      "path": "summary/gas_injection_rates/deuterium/value",
+      "description": "Deuterium.",
+      "domain": "plant_systems"
+    },
+    {
+      "path": "pulse_schedule/density_control/valve/species/element/atoms_n",
+      "description": "Normalized atoms of element.",
+      "domain": "plasma_control"
+    },
+    {
+      "path": "camera_ir/channel/camera/up/y",
+      "description": "Y coordinate of up.",
+      "domain": "plasma_wall_interactions"
+    },
+    {
+      "path": "soft_x_rays/channel/detector/centre/phi",
+      "description": "Toroidal angle (\u03c6) coordinate of centre.",
+      "domain": "radiation_measurement_diagnostics"
+    },
+    {
+      "path": "breeding_blanket/module/cooling/time_slice/temperature_outlet",
+      "description": "Outlet coolant temperature at the exit of a breeding blanket module cooling system at a given time slice. Represents the thermal state of the coolant leaving the module and is used together with inlet temperature for heat balance assessment.",
+      "domain": "structural_components"
+    },
+    {
+      "path": "transport_solver_numerics/derivatives_1d/ion/d_drho_tor_norm/pressure_fast_parallel",
+      "description": "Radial derivative with respect to normalised toroidal flux coordinate (d/d\u03c1_tor_norm) of the fast (non-thermal) parallel ion pressure (P_fast,\u2225), averaged over charge states. Used by the transport solver for pressure anisotropy terms in the transport equations.",
+      "domain": "transport"
+    },
+    {
+      "path": "gyrokinetics_local/non_linear/fluxes_2d_k_x_sum/particles_a_field_parallel",
+      "description": "Contribution of the perturbed parallel electromagnetic vector potential (\u03b4A\u2225) to the normalised turbulent particle flux, summed over kx, as a function of ky, in a nonlinear gyrokinetic flux-tube simulation.",
+      "domain": "turbulence"
+    },
+    {
+      "path": "ic_antennas/antenna/module/voltage/position/r",
+      "description": "Major radius (R) coordinate of position.",
+      "domain": "auxiliary_heating"
+    },
+    {
+      "path": "distributions/distribution/ggd/orbit_frequency_pol/values",
+      "description": "Array of values for orbit frequency pol.",
+      "domain": "computational_workflow"
+    },
+    {
+      "path": "summary/local/divertor_target/n_i/tritium/value",
+      "description": "Tritium (T).",
+      "domain": "divertor_physics"
+    },
+    {
+      "path": "edge_profiles/profiles_1d/ion/state/vibrational_level",
+      "description": "Vibrational quantum level of an ion or neutral molecular species in a given internal state in edge/SOL profiles, which may represent a bundled range of vibrational levels. Relevant for molecular ion and neutral radical populations in the edge and SOL.",
+      "domain": "edge_plasma_physics"
+    },
+    {
+      "path": "ece/polarizer/polarization_angle",
+      "description": "Angle defining the polarization calibration of an electron cyclotron beam, representing the polarizer alignment in the plane transverse to the beam propagation.",
+      "domain": "electromagnetic_wave_diagnostics"
+    },
+    {
+      "path": "equilibrium/time_slice/boundary_separatrix/elongation_lower",
+      "description": "Lower half elongation (\u03ba_lower) of the plasma boundary at the separatrix, defined as the ratio of the lower half-height to the minor radius. Characterises the asymmetric vertical shaping of the plasma cross-section below the geometric axis.",
+      "domain": "equilibrium"
+    },
+    {
+      "path": "summary/pedestal_fits/mtanh/t_e/d_dpsi_norm_max/value",
+      "description": "Value",
+      "domain": "general"
+    },
+    {
+      "path": "pulse_schedule/event/time_stamp",
+      "description": "Time stamp of a pulse schedule event, recording the absolute or relative time at which the event occurs. Used to sequence predefined triggers and recorded events during the plasma discharge.",
+      "domain": "machine_operations"
+    },
+    {
+      "path": "plasma_profiles/ggd/b_field/radial",
+      "description": "Radial component of b field.",
+      "domain": "magnetic_field_diagnostics"
+    },
+    {
+      "path": "disruption/vacuum_toroidal_field/b0",
+      "description": "Vacuum toroidal magnetic field (B0) at the reference major radius R0, as used in the disruption IDS for normalization and rho_tor definition. The product R0\u00b7B0 is consistent with the tf IDS convention.",
+      "domain": "magnetic_field_systems"
+    },
+    {
+      "path": "mhd_linear/time_slice/toroidal_mode/growthrate",
+      "description": "Linear growth rate (\u03b3) of an MHD toroidal mode, characterizing the exponential growth timescale of the instability. A primary output of linear MHD stability analysis codes such as MARS, MISHKA, or KINX.",
+      "domain": "magnetohydrodynamics"
+    },
+    {
+      "path": "langmuir_probes/reciprocating/plunge/position_average/phi",
+      "description": "Toroidal angle (\u03c6) coordinate of position average.",
+      "domain": "mechanical_measurement_diagnostics"
+    },
+    {
+      "path": "thomson_scattering/laser/start_point/r",
+      "description": "Major radius (R) coordinate of start point.",
+      "domain": "particle_measurement_diagnostics"
+    },
+    {
+      "path": "summary/gas_injection_accumulated/neon/value",
+      "description": "Neon.",
+      "domain": "plant_systems"
+    },
+    {
+      "path": "pulse_schedule/density_control/ion/element/z_n",
+      "description": "Normalized z of element.",
+      "domain": "plasma_control"
+    },
+    {
+      "path": "summary/local/limiter/n_i/tungsten/value",
+      "description": "Tungsten.",
+      "domain": "plasma_wall_interactions"
+    },
+    {
+      "path": "spectrometer_x_ray_crystal/channel/crystal/outline/x1",
+      "description": "Positions along the X1 axis of the irregular outline of the crystal in the (X1, X2) coordinate system for an X-ray crystal spectrometer channel. Defines the boundary vertices of the crystal cross-section used in Bragg diffraction geometry.",
+      "domain": "radiation_measurement_diagnostics"
+    },
+    {
+      "path": "cryostat/description_2d/cryostat/unit/element/outline/r",
+      "description": "Major radius (R) coordinate of outline.",
+      "domain": "structural_components"
+    },
+    {
+      "path": "plasma_sources/source/profiles_1d/ion/particles",
+      "description": "Radial source term (S_n) for the ion density equation, representing the net volumetric particle source or sink for an ion species on a 1D flux-surface-averaged grid. Positive values indicate a net particle gain.",
+      "domain": "transport"
+    },
+    {
+      "path": "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_b_field_parallel",
+      "description": "Contribution of the perturbed parallel magnetic field (\u03b4B\u2225) to the perpendicular component of the normalised toroidal momentum flux (momentum_phi_perpendicular), computed in a non-linear gyrokinetic flux-tube simulation with summation over kx. Part of the 3D spectral turbulent momentum transport output.",
+      "domain": "turbulence"
+    },
+    {
+      "path": "distributions/distribution/profiles_2d/density_fast",
+      "description": "Number density of fast (non-thermal) particles (n_fast) in the 2D poloidal plane, representing the spatial distribution of the fast particle population from auxiliary heating or fusion products.",
+      "domain": "auxiliary_heating"
+    },
+    {
+      "path": "summary/simulation/time_begin",
+      "description": "Start time of the simulation relative to the beginning of the plasma pulse. Defines the lower bound of the time window covered by the simulation dataset.",
+      "domain": "computational_workflow"
+    },
+    {
+      "path": "divertors/divertor/target/power_radiated",
+      "description": "Net radiated power deposited on a divertor target, defined as incident radiative power minus the reflected fraction. Used in divertor power balance and radiation load assessments.",
+      "domain": "divertor_physics"
+    },
+    {
+      "path": "edge_profiles/profiles_1d/t_i_average",
+      "description": "Ion temperature (Ti) averaged over all charge states and ion species, as a 1D radial profile in the edge and scrape-off layer region. Represents the mean thermal energy of the ion population in the SOL and near-separatrix plasma.",
+      "domain": "edge_plasma_physics"
+    },
+    {
+      "path": "interferometer/channel/line_of_sight/third_point/z",
+      "description": "Vertical (Z) coordinate of third point.",
+      "domain": "electromagnetic_wave_diagnostics"
+    },
+    {
+      "path": "core_profiles/profiles_1d/q",
+      "description": "Safety factor (q) radial profile in the core plasma, representing the ratio of toroidal to poloidal magnetic field line turns per flux surface. A fundamental MHD stability parameter; rational q surfaces are resonant locations for tearing and kink modes.",
+      "domain": "equilibrium"
+    },
+    {
+      "path": "summary/composition/hydrogen/value",
+      "description": "Hydrogen (H).",
+      "domain": "general"
+    },
+    {
+      "path": "plasma_initiation/b_field_lines/e_field_parallel",
+      "description": "Parallel electric field (E\u2016) along magnetic field lines during plasma initiation. Used to characterise ionisation and electron avalanche conditions during the pre-breakdown phase of a tokamak discharge.",
+      "domain": "machine_operations"
+    },
+    {
+      "path": "plasma_profiles/ggd/b_field/r",
+      "description": "Major radius (R) coordinate of b field.",
+      "domain": "magnetic_field_diagnostics"
+    },
+    {
+      "path": "tf/field_map/b_field_tor",
+      "description": "Toroidal component of the vacuum magnetic field, given on various grid subsets",
+      "domain": "magnetic_field_systems"
+    },
+    {
+      "path": "mhd_linear/time_slice/toroidal_mode/plasma/phi_potential_perturbed/imaginary",
+      "description": "Imaginary part",
+      "domain": "magnetohydrodynamics"
+    },
+    {
+      "path": "langmuir_probes/reciprocating/plunge/collector/ion_saturation_current",
+      "description": "Ion saturation current (Isat) measured by a reciprocating Langmuir probe collector during a plunge. Isat is the limiting current at large negative bias, proportional to local plasma density and electron temperature at the probe tip.",
+      "domain": "mechanical_measurement_diagnostics"
+    },
+    {
+      "path": "neutron_diagnostic/reconstructed_emissivity/rho_tor_norm",
+      "description": "Normalised toroidal flux coordinate (\u03c1_tor_norm) used as the radial grid for reconstructed neutron emissivity profiles, ranging from 0 at the magnetic axis to 1 at the last closed flux surface (LCFS).",
+      "domain": "particle_measurement_diagnostics"
+    },
+    {
+      "path": "pellets/time_slice/pellet/path_geometry/second_point/phi",
+      "description": "Toroidal angle (\u03c6) coordinate of second point.",
+      "domain": "plant_systems"
+    },
+    {
+      "path": "pulse_schedule/density_control/zeff_line_of_sight/second_point/phi",
+      "description": "Toroidal angle (\u03c6) coordinate of second point.",
+      "domain": "plasma_control"
+    },
+    {
+      "path": "wall/description_ggd/ggd/j_total/r",
+      "description": "Major radius (R) coordinate of j total.",
+      "domain": "plasma_wall_interactions"
+    },
+    {
+      "path": "bolometer/camera/channel/line_of_sight/third_point/z",
+      "description": "Vertical (Z) coordinate of third point.",
+      "domain": "radiation_measurement_diagnostics"
+    }
+  ],
+  "excluded_by_group": {
+    "seed_20261014": [
+      "bolometer/camera/channel/aperture/centre/z",
+      "breeding_blanket/time_slice/tritium_breeding_ratio",
+      "cryostat/description_2d/thermal_shield/unit/element/outline/r",
+      "dataset_description/simulation/time_current",
+      "dataset_description/simulation/time_end",
+      "distribution_sources/vacuum_toroidal_field/b0",
+      "distributions/distribution/ggd/orbit_frequency_tor/values",
+      "distributions/distribution/global_quantities/collisions/electrons/power_fast",
+      "ece/channel/beam_tracing/beam/wave_vector/k_phi",
+      "em_coupling/field_probes_active",
+      "equilibrium/time_slice/boundary_separatrix/triangularity_upper",
+      "equilibrium/time_slice/constraints/j_tor/time_measurement",
+      "gyrokinetics_local/species_all/shearing_rate_norm",
+      "langmuir_probes/embedded/fluence",
+      "langmuir_probes/probe/mach_number_parallel",
+      "langmuir_probes/reciprocating/plunge/position_average/r",
+      "lh_antennas/antenna/row/n_pol",
+      "magnetics/flux_loop/gm9",
+      "neutron_diagnostic/detector/geometry/radius",
+      "neutron_diagnostic/detectors/aperture/outline/x2",
+      "neutron_diagnostic/detectors/test_generator/fall_time",
+      "ntms/time_slice/mode/detailed_evolution/deltaw/value",
+      "ntms/time_slice/mode/detailed_evolution/phase",
+      "pellets/time_slice/pellet/propellant_gas/element/z_n",
+      "plasma_initiation/b_field_lines/townsend_or_closed_grid_positions/z",
+      "plasma_initiation/global_quantities/ion/element/atoms_n",
+      "pulse_schedule/density_control/n_e_line_of_sight/second_point/phi",
+      "pulse_schedule/time",
+      "reflectometer_profile/channel/line_of_sight_emission/second_point/r",
+      "summary/gas_injection_accumulated/xenon/value",
+      "summary/heating_current_drive/nbi/tangency_radius/value",
+      "summary/local/divertor_plate/n_i/hydrogen/value",
+      "summary/local/pedestal/momentum_phi/value",
+      "summary/local/pedestal/velocity_phi/carbon/value",
+      "summary/pedestal_fits/linear/b_field_pol_pedestal_top_hfs/value",
+      "tf/b_field_tor_vacuum_r",
+      "wall/description_2d/vessel/unit/annular/outline_outer/r",
+      "wall/description_ggd/ggd/e_field/r",
+      "waves/coherent_wave/profiles_1d/e_field_n_tor/parallel/amplitude",
+      "workflow/time"
+    ],
+    "label_sheet": [
+      "camera_x_rays/camera/pixel_dimensions",
+      "core_transport/model/profiles_1d/momentum_tor/v",
+      "cryostat/description_2d/thermal_shield/unit/annular/thickness",
+      "dataset_description/simulation/time_restart",
+      "divertors/divertor/target/two_point_model/n_e_target",
+      "ec_launchers/latency",
+      "ece/channel/line_of_sight/first_point/r",
+      "edge_profiles/profiles_1d/electrons/pressure_thermal",
+      "equilibrium/time_slice/ggd/psi/values",
+      "ferritic/object/time_slice/magnetic_moment_tor",
+      "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum_rotating_frame/particles_a_field_parallel",
+      "magnetics/bpol_probe/position/r",
+      "nbi/unit/beam_current_fraction",
+      "neutron_diagnostic/detectors/mode/counting",
+      "neutron_diagnostic/detectors/temperature_sensor/fall_time",
+      "ntms/time_slice/mode/detailed_evolution/time_detailed",
+      "plasma_initiation/global_quantities/b_field_perpendicular",
+      "spi/injector/fragment/velocity_z",
+      "summary/local/itb/n_i/argon/value",
+      "summary/local/separatrix/n_e/value",
+      "summary/local/separatrix/n_i/beryllium/value",
+      "summary/local/separatrix/n_i/boron/value",
+      "summary/local/separatrix/n_i/carbon/value",
+      "summary/local/separatrix/n_i/deuterium/value",
+      "summary/local/separatrix/n_i/deuterium_tritium/value",
+      "summary/local/separatrix/n_i/helium_3/value",
+      "summary/local/separatrix/n_i/helium_4/value",
+      "summary/local/separatrix/n_i/hydrogen/value",
+      "wall/global_quantities/neutral/wall_inventory",
+      "workflow/time_loop/time_end"
+    ],
+    "boundary_density": [
+      "summary/local/separatrix/n_e/value",
+      "summary/local/separatrix/n_i/beryllium/value",
+      "summary/local/separatrix/n_i/boron/value",
+      "summary/local/separatrix/n_i/carbon/value",
+      "summary/local/separatrix/n_i/deuterium/value",
+      "summary/local/separatrix/n_i/deuterium_tritium/value",
+      "summary/local/separatrix/n_i/helium_3/value",
+      "summary/local/separatrix/n_i/helium_4/value",
+      "summary/local/separatrix/n_i/hydrogen/value"
+    ]
+  },
+  "n_excluded": 70,
+  "compose_seat": "local/deepseek-v4.1-flash",
+  "reviewer_seat": "local/deepseek-v4.1-flash",
+  "switch_env": "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS",
+  "positive_control": {
+    "batches": [
+      {
+        "group_key": "00dea59fb8b56b49/1",
+        "n_items": 2,
+        "n_comparators": 5,
+        "hash_off": "b7615427f9f14d87d8de20dad49ffaecc39ca7448178f045be4047fa4bef2ee1",
+        "hash_on": "9ba6247a2e7887c499e44ad69605c2741477ac32f0dd6dbd187768a95ddb7883",
+        "differs": true,
+        "rerank_cost_usd": 0.000236,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "020f52d46823b5ee/m^-3",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "9f1d73d997bac890ec676ff65ee9c5ad225bf20cef80830d344fe633cea5c8db",
+        "hash_on": "a2ab39ece4b90dfe85a84908c2220c3982e0cec108f024fffc42182b3edcbe8d",
+        "differs": true,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "058d7e221fcd3618/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "2a81f9757d216754d90c6ef33bb3c45253723a3d2d2e1b86227a754a8ee8b44d",
+        "hash_on": "02e587ed0e3cd185c01557d6a6cc08157bcb36407c7ac5ac22f3848ee6f96f1a",
+        "differs": true,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "06a63238d86a622b/rad",
+        "n_items": 2,
+        "n_comparators": 5,
+        "hash_off": "fe9422b87d7e2c4eb066e8e08b50d9039359f48f08a697fe08f2011162d8413e",
+        "hash_on": "5c802ae3f0dc305f5f797b07b6649105fb09dff9f2049333d2ed6d25fdf3fa7d",
+        "differs": true,
+        "rerank_cost_usd": 0.000195,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "0902d54607564c6a/u/ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "f198aab27d1609a927fbd9d9a509bed1121414e2d718a3724956fe2436ce239e",
+        "hash_on": "08f0ad20bede9a7fb0265516321a5f7cf505e55f79373cf3d6a3da6d9f25f017",
+        "differs": true,
+        "rerank_cost_usd": 9.4e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "0c4e5b5c9ab30c10/m.s^-1/ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "ecae1304a318a540a16f2d65d4f8d3a8efa7f948a066e685741b81ea93997b29",
+        "hash_on": "00ff323bcaa5ac98212b302cd50f70fa52abd13a9a01f2d79622c4cb5fc5fb92",
+        "differs": true,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "0e91316c16dd8f9d/eV",
+        "n_items": 1,
+        "n_comparators": 3,
+        "hash_off": "efee0cb3e340bb9c7abe8ac3473491db661febf9b7dacbf0620ae3f690ced20d",
+        "hash_on": "efee0cb3e340bb9c7abe8ac3473491db661febf9b7dacbf0620ae3f690ced20d",
+        "differs": false,
+        "rerank_cost_usd": 6.2e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "0ff77c26be32fc72/eV",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "195b6ccbe818ef28be71c379de50874338848691129c2439848a2e72e2bda001",
+        "hash_on": "4f0f4a50415765b9ed7fefa872246c9392611a75265d7636767bf04c31f69d53",
+        "differs": true,
+        "rerank_cost_usd": 8.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "10f79b7001a1dba8/m",
+        "n_items": 2,
+        "n_comparators": 9,
+        "hash_off": "e6b6f5fc16345af2de544d12a829b763743454b46b941d28a9059229db30394a",
+        "hash_on": "c677a0cea7fff5956b745e6dad39458615f6bed71fad8ccf27bed11edc080f83",
+        "differs": true,
+        "rerank_cost_usd": 0.000386,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "1260b5c57df3cc59/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "df58aa153bfc8b03fc6200d1f5bcf32113083bc51580c0535560a449effa0070",
+        "hash_on": "1e0b6a78b7e0a8f5d115e03516fd38602d9cf0c5d87e066ce045b365f3356e5c",
+        "differs": true,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "13d38550ca38d4e3/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "6b79f77926973a6a84a892be578011a511e886475261b1d45d39855deb8fd1ba",
+        "hash_on": "03b6dcc59eae66e807bb5faacf80499800f5b20b1ffe7e54b25172825b20485e",
+        "differs": true,
+        "rerank_cost_usd": 0.0001,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "15cb4276d8996777/K",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "dcfc9b6c3952a9a5c6c214f55eb73c128f5da261afd0038287a123ee96c355ca",
+        "hash_on": "ab165453433bacb41542729ac1736a63154d6da17aaed79adfe59ae0e0be037b",
+        "differs": true,
+        "rerank_cost_usd": 0.000104,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "16902027e336c935/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "58541afa96bac8ea93d8211ff196fa5a5fc60c7791bbeb54290d350673e11d45",
+        "hash_on": "2479a5d91cc7abdfa5bdf3283f0dd8379fef7bb1e3684c202920a348053e3cab",
+        "differs": true,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "1cf923451936ddad/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "506c87e0a20f3196b551cd2fadb4115f4040b2f30e966c0729f9ffef4c529a66",
+        "hash_on": "ab2093014e7615cb8a58d4eaec2473e39f80f19f7ad77e894486feb1a0f59202",
+        "differs": true,
+        "rerank_cost_usd": 9.8e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "1d546778674db52d/m^-3",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "66f05f17e3e36d2cafe416e1d8f592545e8d872dea710a2930c1e41324360d2c",
+        "hash_on": "beebfe91149e39752f36d002ace0a3751e0f0edc1e905b21b1ee793fece71ebb",
+        "differs": true,
+        "rerank_cost_usd": 0.000103,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "1e5599f6b7e88981/s",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "573f5eef3931196b7e1d9dd75d3fdc5de854fec55debf1b28304cec91ab6cb55",
+        "hash_on": "4fd51e4baec48697c6aad56cecab4c689e7bc979d5098ced3c429d5fc135c217",
+        "differs": true,
+        "rerank_cost_usd": 9.9e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "1ff8fd26f958f3fc/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "d457176d79d6d8f4749db13ec384c67f13ef12f9f1918d96c14af9f7efd96fc8",
+        "hash_on": "4fa88f6169bb8af3a2e86577a78ad08625147e3d30a3519a3cd4e3852969dfb8",
+        "differs": true,
+        "rerank_cost_usd": 0.000107,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "1ff8fd26f958f3fc/Wb",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "731806ca97d3a18bdaa3732a07318e63aea541b0dd7eb58b9d3c18c6d38d2b83",
+        "hash_on": "622fe582234b45040a93286bcba550ef003405ac69feb105f4901354697acd0f",
+        "differs": true,
+        "rerank_cost_usd": 0.000106,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "2050f472072288a0/rad.s^-1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "f83b97597c90ea777a45e5bba57bc79f2785aa086339e732e5664281d5fd7a16",
+        "hash_on": "816caf3025081472fedd6a298d95be1666aa19461a3ba448241cedbd8bb222a4",
+        "differs": true,
+        "rerank_cost_usd": 9.8e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "2566fa4790866f4a/rad",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "28be07e42f077b82905b63eddfb7db8290f188216f56f9c89efa9d69605a2d54",
+        "hash_on": "a99dae7470d1a831ed94490de96eed1a4c0bcf481191f163f76fb09ea915840c",
+        "differs": true,
+        "rerank_cost_usd": 9.9e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "36d65d6dd337598f/m^-3",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "11e5f09d4c9c5e488e0fe9e1c33ff947e29fedf6017c334a52cb38585136f75d",
+        "hash_on": "227d1ba003efdc575e219a370b1ef06d92699ae76f80687234311f1a345ba66f",
+        "differs": true,
+        "rerank_cost_usd": 9.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "3810e467643666a8/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "624e887155ba58dda7c0995a79338543d2b6138c8c6976234f17ff47a2c104ea",
+        "hash_on": "6a3fe69ec8b7f10e6b785a808e51b25bfcd6d8c4a96ee4ceb7b7d277e39f9be3",
+        "differs": true,
+        "rerank_cost_usd": 0.000102,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "3835a5727f955809/m",
+        "n_items": 1,
+        "n_comparators": 3,
+        "hash_off": "15ad4726e24d5de0ae6e4806c4b0895b08a256b88d22038977f7f9d2f2392c74",
+        "hash_on": "15ad4726e24d5de0ae6e4806c4b0895b08a256b88d22038977f7f9d2f2392c74",
+        "differs": false,
+        "rerank_cost_usd": 5.8e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "40fbbfffe91c80e5/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "483ef728a417d3c933d3500c48a2fbd2a21ae61cf3fcf964842db70c18ea621c",
+        "hash_on": "1426c3985e9ed75c5be25e5a1d8c881611e292b6047093755d67a51ff720abce",
+        "differs": true,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "42fcdd2104f2e8dc/W",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "45e547665e73a9188e09be9631347f899f8414d25dd97cf6ac6bcc2e4c4be44d",
+        "hash_on": "1ef05a521320618816dda102e77e74c09dfab3f7b47af9e9170bb9af5f03555b",
+        "differs": true,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "42fcdd2104f2e8dc/W.m^-3",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "19544cb3d00846f51259fe73b02090d7a8a1fca7f492b72c156bb5944bbba3d0",
+        "hash_on": "c77d10bc820461e37381fd730a8c30c6fb032a876fc92a1ef0f824d4ec7188c7",
+        "differs": true,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "45bc03acf9908b3a/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "44a2d5c3dabc8f14bf7c647687689fc325a233bae7ca95f30b5ac1838d394150",
+        "hash_on": "fc7e06140a38684abfd72917127c1d8a5f713e949a547e047769b950e3be061b",
+        "differs": true,
+        "rerank_cost_usd": 9.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "4dfee4108bf21831/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "c540bdd0094a2ab94cd1a6ee2b9819c4a3f3b3319dda95f8fccf361fc1efb4bd",
+        "hash_on": "08728e37151a0b87246a4d8605b2f8f8944b35fabed43b6f79799fae49313571",
+        "differs": true,
+        "rerank_cost_usd": 0.000107,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "510e52343e0ed6b6/1/ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "aae961c76f83f2215cd719f7db637d55b6f38e0ac215859eac3d1d1ee2fcbd1f",
+        "hash_on": "f8dc279200540111a56e3d702c18e50c7f83bfddf4cc9cd01e4f0c625e7d7b0c",
+        "differs": true,
+        "rerank_cost_usd": 0.0001,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "55963f51bdd001db/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "337f37363e58a62a25cc848a9e41ba5ce60c6bfd5b4d1cacb8354714225bed04",
+        "hash_on": "403ece8848028e3d15c3fc6a2d6ccfb98d2df909823739ab79ff87c28ec97c46",
+        "differs": true,
+        "rerank_cost_usd": 0.000109,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "5742e6deafe3cf11/K",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "3e673f12c15e030af86feb6d554dd5908817ce432a2b991080b5f24fd53f8ecb",
+        "hash_on": "414d6ea33d41054d8dcbb2b17c568778e263518d05960e1a9c1bd48525f1d27e",
+        "differs": true,
+        "rerank_cost_usd": 8.4e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "58d33074509b24f9/m^-3.s^-1/ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "824558858242eedf249b2d84ece17e2a03ab82168ab8b4262e776a1e8a96df7f",
+        "hash_on": "8a645cd9e64cc18fa57dc0dc26b19d6bdb9f8165076b34df7afec8048aa9bd53",
+        "differs": true,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "5cfff8d6a4166f91/1",
+        "n_items": 1,
+        "n_comparators": 2,
+        "hash_off": "ea76a4bf8a2ffc59a4583ed264188abb55ec10801bc032e64ace890a5e26425c",
+        "hash_on": "e9ea7cc5d4fb8711a0071b35855fc4a4cb395b274099cd46bf103cebe08222a8",
+        "differs": true,
+        "rerank_cost_usd": 4.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "5da01b748ce81aea/m^2.s^-1/neutral",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "cba16dbc14573b9b73a45ce336a2778b34d7607074fde4b515d2e4907259fa2d",
+        "hash_on": "5ab34eeaebdd8a2b9fe986830eb4017111a12187c5e522878976545c60b8780a",
+        "differs": true,
+        "rerank_cost_usd": 9.8e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "5f25b7b0d4007c05/u/ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "7cfd61315d3b311ac4a7a3e29583dfe2ead180b313f34d618caa7a754d653650",
+        "hash_on": "848c0104157d811b54f8ad87c334d931d4922f328aea22ebfe2273a5467e968d",
+        "differs": true,
+        "rerank_cost_usd": 9.5e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "63149ef3a43ee786/m.s^-1/ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "47c1c83aa2d1a9fdf520bbcddc7dd7ac619d482ae85c363a7b1f417a75e70b93",
+        "hash_on": "19222a5ba49f0beec5cb41bb520db0e0f5c1a3d289ffaf63112dc3dcdcd43b12",
+        "differs": true,
+        "rerank_cost_usd": 0.000107,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "690e52bd6522988c/rad",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "230564715a8297a08ee9cab7ed28ece46b2237e395fa9ed351f2f6c1e436ae3e",
+        "hash_on": "f9c8df2a1af28e8212582ed3f87d913d39871be28412707fa5f54b84a4366df4",
+        "differs": true,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "695950432d2057c8/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "8e275e343466b36a648d7e981894a937af2905364a94e6e96c9d419609c260a9",
+        "hash_on": "1acc71738866b0d7c3f4071a936a66272fcd592ac435ff19bfd831f0b7799a88",
+        "differs": true,
+        "rerank_cost_usd": 0.000102,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "6b3affedab8fcbc9/m.s^-1",
+        "n_items": 1,
+        "n_comparators": 2,
+        "hash_off": "1131a6eaaaec2a77a20cbecd90ceee30f75c9c2fdd54a08e1d474ce84ba051b0",
+        "hash_on": "1131a6eaaaec2a77a20cbecd90ceee30f75c9c2fdd54a08e1d474ce84ba051b0",
+        "differs": false,
+        "rerank_cost_usd": 4.3e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "6e277d2502529882/s",
+        "n_items": 4,
+        "n_comparators": 9,
+        "hash_off": "7b06b626764c88c0156fb90c39382bec0837d3d76163faf1ed27556e65f397e0",
+        "hash_on": "7465508ec832e30576cd6c83fc4402ff1671c93835fdc55e9a60b3cba623daf9",
+        "differs": true,
+        "rerank_cost_usd": 0.000717,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "6fb58200c378c3ce/rad",
+        "n_items": 2,
+        "n_comparators": 3,
+        "hash_off": "1a67c88c909ede0111619e7d9a28f7f0000f7b0d1b7d04559210d127ba55bad7",
+        "hash_on": "1a67c88c909ede0111619e7d9a28f7f0000f7b0d1b7d04559210d127ba55bad7",
+        "differs": false,
+        "rerank_cost_usd": 0.000115,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "7227a8f121247a95/1/ion",
+        "n_items": 1,
+        "n_comparators": 2,
+        "hash_off": "00ae8bd5e3834e0c6c3b31d2ce9a9084baefdbff1bdb57f7bbef2218aee1c14c",
+        "hash_on": "00ae8bd5e3834e0c6c3b31d2ce9a9084baefdbff1bdb57f7bbef2218aee1c14c",
+        "differs": false,
+        "rerank_cost_usd": 4.1e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "725f0874c17aafb4/m^-3",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "3009f3e0275dbe7c14bc1b76c14cfd1dadbb69f654e940400a04f00947c2b64c",
+        "hash_on": "c766da6e3312f03f7034dd3f22362029f8de10bbc19590ea9e9c4b23b9d32b46",
+        "differs": true,
+        "rerank_cost_usd": 9.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "76cf9d97603cac40/W",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "d931b762b81406c4030813b19678d0c72d9ddba4f2c50e3c9a8d576d9dfa0abf",
+        "hash_on": "a6110c0ffb50cdc7e1356e2f909ffd63d442c38925acee8db98c976958f5ac6d",
+        "differs": true,
+        "rerank_cost_usd": 0.000103,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "7c94e9e607b982e5/m.s^-1/ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "ae4f228d16a47c1ca049a77d24b5fc1398f7c809ca7b7c60ef34dab1fe3885fe",
+        "hash_on": "49c995836f05a74bbf540fe8785d9ba51f5a75797c4ec7271c533636b59a82e2",
+        "differs": true,
+        "rerank_cost_usd": 9.9e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "7d5c650f656b4f5d/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "b5b0d3badf1713ba9b16dafcd8a09d5b0beda48fe39bd1ad9d64ee23154e5b63",
+        "hash_on": "88bc92ef83c63d16bb0a6489b188e27294bc373327f676eb72b9c0aa0e87b4f1",
+        "differs": true,
+        "rerank_cost_usd": 9.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "836d24f5215a7987/1/ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "13a3c4cf245f16801d9d5663e01a811ad9813e56c6b9be907b7a4cb5cf3b2588",
+        "hash_on": "9f33cf48342fb02c9b115b7ecea3f5f111044d5a07ccdedfe8fee402ca1aad73",
+        "differs": true,
+        "rerank_cost_usd": 0.000106,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "86f4ba4e4f2053d9/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "4d0ce16100285e3c50b50e8b860a6daa245973ab81d38e183dae79779e5aeae3",
+        "hash_on": "02ac4fc5e9ddee1a7c8241b318bedfc49df1de8b608b00a1e330c7efcec99ace",
+        "differs": true,
+        "rerank_cost_usd": 0.000108,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "88e0dfc4d121004c/m^-3",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "b7badb6b9dbb5276fb13e46a45c8692fc6637d4469463a8c6f02b28ff82fad75",
+        "hash_on": "1dbe250acf94f7d7d45861f09d027e55cdf27dd76a914bacf0d59d57abcba69b",
+        "differs": true,
+        "rerank_cost_usd": 7.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "8a74b380aff9d5a3/kg.m^-3",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "bd17e1f02e69292c2b90aa3ed130b6593d8069c61a3e0f735e288589faa948b4",
+        "hash_on": "218a1a99511559da023c3b30a46c8e424c060ecbd6d13caa7ae91605a95c866a",
+        "differs": true,
+        "rerank_cost_usd": 9.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "8caef3e7d16a4266/m^2",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "3e36364fd731b060bdfccf3bc66cf5d27860c4fee99eb6810c4592092328c98b",
+        "hash_on": "3e36364fd731b060bdfccf3bc66cf5d27860c4fee99eb6810c4592092328c98b",
+        "differs": false,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "92ec0f90ca9514ac/A",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "7ed954286c021e86a8aef1949d8110538e6f411d1ef6ec9d347a1f423b341c1b",
+        "hash_on": "d4e8b230fef5601c63cafb6b2d4dc1ddc58c37f0e9f20259df5a5a8fb05ffee4",
+        "differs": true,
+        "rerank_cost_usd": 0.000108,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "99c67d73102fa43c/K",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "9b980100121b1410b36b9288a50b3dd68537c123850506975cc23f92d372ca72",
+        "hash_on": "df45f3d5964e8e64ca9e02b0eeaa4308c26c85bfd5d78c5520adcea09765d12b",
+        "differs": true,
+        "rerank_cost_usd": 9.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "9b418a9440a9352b/T",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "89466b25edca28769a19d93cda3601f639c2ee5752e928636ef328788bf5fcc8",
+        "hash_on": "4d889bc02b6837269b3849cabcef783b4c7aaeec3cd815d1bae3139e7699b842",
+        "differs": true,
+        "rerank_cost_usd": 0.000108,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "9bad0d02df714e1e/m",
+        "n_items": 2,
+        "n_comparators": 5,
+        "hash_off": "6cd5b09fc2214ede1493b2981c934a4b286cbb83af05d5dd2b167a27da75f5fa",
+        "hash_on": "d01424c4cd8515fe43c0d3e8371cfdaa8e1ebc07ff8ec77ca4799797f629d4db",
+        "differs": true,
+        "rerank_cost_usd": 0.000196,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "9f3a334337475f5d/m^2.s^-1/total_ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "c97a739f3d3fa0a0add23f6cf336b17c98c17f33b1d074fe3b88869706dd89ae",
+        "hash_on": "1b0547de357042dd6fcb30523c98b8af84f64727ba8452942900f4b5876cf8e3",
+        "differs": true,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "9fcd731d06f7e80f/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "6d7ede2cdb1b464572822bb698b1d0ec0bcc2ba259b48277263f29b1f6ae10e6",
+        "hash_on": "e7c60c8edfbf0a4e38db0ae2d4751314a9584c215ccd2277d01ff8e249c2426c",
+        "differs": true,
+        "rerank_cost_usd": 0.000106,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "a63660abe4d5732c/kg.m^-1.s^-2/neutral",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "bf8bbc131a456005c39446b641312f5df341ea10b98c1fc5d205ebfd6e99c3db",
+        "hash_on": "ff599879bdc644ae9b9f85ba813e94a4b0a160a728fa3b06488adcd576e72fb7",
+        "differs": true,
+        "rerank_cost_usd": 7.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "aa51cd9c72b19d42/s",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "147b0a8abf78275f58d674b241cde3c6d8eb3a2dd8d22b6219a6fa517203987d",
+        "hash_on": "9ba5315f573f084b29013245cfe0d31b92c992b16d75be4d349ec299793e9e35",
+        "differs": true,
+        "rerank_cost_usd": 0.0001,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "ae96a0a969082df0/1",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "8b227699b3145e55eb42ba29aee7e6b6fb671637de8e07e746b772b9e1ccb86e",
+        "hash_on": "8b227699b3145e55eb42ba29aee7e6b6fb671637de8e07e746b772b9e1ccb86e",
+        "differs": false,
+        "rerank_cost_usd": 9e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "b232a1da045f1222/dimensionless",
+        "n_items": 1,
+        "n_comparators": 1,
+        "hash_off": "7c868cc773286be8dce64dba74a89481aeccdc6e1b75a4f6a8f29d3e56340c48",
+        "hash_on": "7c868cc773286be8dce64dba74a89481aeccdc6e1b75a4f6a8f29d3e56340c48",
+        "differs": false,
+        "rerank_cost_usd": 1.9e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "b232a1da045f1222/dimensionless/neutral",
+        "n_items": 2,
+        "n_comparators": 1,
+        "hash_off": "ed3fe0b35e3c9d9f5f4507f7417023220ef4549556eec2902039347360d2d5f4",
+        "hash_on": "ed3fe0b35e3c9d9f5f4507f7417023220ef4549556eec2902039347360d2d5f4",
+        "differs": false,
+        "rerank_cost_usd": 3.8e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "b29d1a69acc15bab/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "d6548a93694285119cf3a1c96c576a85794fd86e84bd169fb08590bbde8fde08",
+        "hash_on": "562f0b6c5c1bb7b2c7d70cc25c017f6a045f4c4a5206602a26e2f78d4fdc040f",
+        "differs": true,
+        "rerank_cost_usd": 9.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "b29d1a69acc15bab/1/ion",
+        "n_items": 3,
+        "n_comparators": 5,
+        "hash_off": "53de37785b987ce9804f6562c84213dd89b982310e7f6abbd4467f05896c9362",
+        "hash_on": "eae60919e4e88133575d57605fc9a770cdd332217edcf14f17dc6cb442dbc80b",
+        "differs": true,
+        "rerank_cost_usd": 0.000288,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "b29d1a69acc15bab/1/neutral",
+        "n_items": 2,
+        "n_comparators": 5,
+        "hash_off": "34a42d6b849ebebd2a448a8723a045c0098d2bc3cbf4400ef75d1f687545ff3b",
+        "hash_on": "708671f3274d215d170f3dd0ba5185694ecbe3c3aa9ea0f8d8a29146c481c9b4",
+        "differs": true,
+        "rerank_cost_usd": 0.000193,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "b34f60da21d11cbf/m^3",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "a43c95ef4ab71d2f9d5c7c583aca60f527610f610865da60f4e9fe5eddb30eca",
+        "hash_on": "56db75b25e12a6a1eb2dfea118330542469f8b6525be224eed5161b5b547d9cb",
+        "differs": true,
+        "rerank_cost_usd": 8.3e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "b36489e2b9f627bf/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "f97818306fba546f1882cff8cb2358643f11254814d85a47b6f13e9ebd25d455",
+        "hash_on": "dd9e436b9f92f66a8d4d017af9a49534dbd5d0a75c0e19f4d1e86ae2da972905",
+        "differs": true,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "b96a96534e612d5d/m.s^-1",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "b3376913e88e883222a4228d8d08ceaaae6ad491d282fabfcad8d6c06259748f",
+        "hash_on": "8dc3a967020de929cecd6e2f409827c3e5cda835e2dece2cd4705bdf781c2fe4",
+        "differs": true,
+        "rerank_cost_usd": 8.5e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "ba4f8d351bb6476d/T",
+        "n_items": 2,
+        "n_comparators": 6,
+        "hash_off": "0aa6080cb180020592700e16379230f860a853f10b187bcfba9cb8b85dd24870",
+        "hash_on": "64880b07561a8d2b4b03750c6ac5d30fbedf03a5510411c686d3cbd24ded74ee",
+        "differs": true,
+        "rerank_cost_usd": 0.000256,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "bb876c5ec109b9a1/W.m^-2",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "dc0d741d4ecff8d658b85209185ae250fbb259cafefb2b3bdd3d81dd4d80a759",
+        "hash_on": "96109a2e0c26b59505d532ddc8b9b0788ef5b11268ba6c8bac41c6ade054a355",
+        "differs": true,
+        "rerank_cost_usd": 8.5e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "bfe6590e76d3d33d/V",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "d155aa0286fff4cdfb2cd403cbc39825b1691d6b9dbab3d055e36302dd05d6f4",
+        "hash_on": "fe55b54180cd352cb0b89f425f0d50bf5900345132dc32d5bc2fd3a6420895f2",
+        "differs": true,
+        "rerank_cost_usd": 0.000107,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "c0bcdab91a6d7bf3/W",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "ca130ced4a952b9453e4468733afa6a09f30295bbbfc8b5165c5092690c6af8e",
+        "hash_on": "99e973c8f059dbe09d9d732291d553d3cbbfa8ab80a3e4cc872e3536f48a2f04",
+        "differs": true,
+        "rerank_cost_usd": 0.000104,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "c66c62019b48fe18/m^-3",
+        "n_items": 2,
+        "n_comparators": 5,
+        "hash_off": "f022cb3936ddaf6c025825aa587c5a93252313247bdb68951d8e5f245049f382",
+        "hash_on": "4ece3fc9f60762f87fb7b9a7e01a89d27fdb5f7d4e8ea10157e6ac21550fe77a",
+        "differs": true,
+        "rerank_cost_usd": 0.000189,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "c8cd564b11d227fa/Hz",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "ec728c64256423f09955a8b6ff99b0927d6ed485d610a1b8224a9ccf036eaedb",
+        "hash_on": "d73c77e634bc4ba53b2cbde602d2c8d8af97e314a4e7e36cb783326bbd85dde0",
+        "differs": true,
+        "rerank_cost_usd": 0.000107,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "ce1791eb0bc6bbf8/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "a15c1b0210f9161e7f3a27710bffde334d6388297fc114f15a0813921cab73c2",
+        "hash_on": "f36d81e7f804cb84bad275c89cd187822dc21fd19d5e2f4bc773bc8f50926102",
+        "differs": true,
+        "rerank_cost_usd": 9.3e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "ce523155e81f19b3/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "79d57572e050c630c639ceb67e61439715f6fc10492916179cc2d6d6873a61d0",
+        "hash_on": "cb3693496032d01f64a6011561239858a7a2ace64cce430c48f44ccda426d08d",
+        "differs": true,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "d2eee852e6f32c23/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "aa5d9a004760616f1ff7202af80de3129b5a0a84826062fa4d5857abbc6d0088",
+        "hash_on": "6ac692133ec96ae5f904b2a0c28e05cbd8bc32ea39fb4d1c6e8c2ab90860008f",
+        "differs": true,
+        "rerank_cost_usd": 9.8e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "d34f67cdafbaebd0/s^-1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "c8dd2d3a800dfec578454883c123cf4369bca18291a9e074513098360c3492bf",
+        "hash_on": "00618435ec8af27a225737f70b125c3c76c564e2eebc629cb39d0e2e3ef730c9",
+        "differs": true,
+        "rerank_cost_usd": 9.9e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "d5727e6edac84b16/T",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "f46fcf3b0a4e7be6d273cc1540dea11aa691cccf02d4952ec658702da5c61f2d",
+        "hash_on": "d5817a51997b722941fcce2818c3c17093c96cac17e5978d0a15b138f11d6cf3",
+        "differs": true,
+        "rerank_cost_usd": 0.000109,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "da785100b12c5dcb/eV",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "daca7a6a74f5e40ab4a89e0d3e99d1ee569b833d8d613c4ea87acc0263940291",
+        "hash_on": "4bb308fa12c28b1a5ecdc7839e56001743c7623dcacc49f3671a982573622494",
+        "differs": true,
+        "rerank_cost_usd": 0.000104,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "de87a363d2d53c45/T",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "241eab2aa45294f354f079e92563d2e8376230e4a938ff17e07911b65da59e09",
+        "hash_on": "806541fa8c7c6852d990eecf85bd0a598bd1a5e7c2389ca92083d21a60ee627c",
+        "differs": true,
+        "rerank_cost_usd": 0.000114,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "e00290ca417df35b/V.m^-1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "5d7c45a9f0b60a3e1890f05e8d4071737209c58d6c6d98522424e59decfe0602",
+        "hash_on": "4c3c6be3ba09265f176612c6de95239bf69ea0329c00cd23b02c4750ec71ac33",
+        "differs": true,
+        "rerank_cost_usd": 0.000104,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "e2c300814e40af2a/m^3",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "63845ac16ce40b0f81173e5872839189eea32a60438d288c270724669c32e24d",
+        "hash_on": "e5f7a5b557371017da131226970b45634a5f3f32a6d8eb7fadd317ef9a4ce006",
+        "differs": true,
+        "rerank_cost_usd": 0.000108,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "e43953e8e019df99/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "a22cc1fd42151cfda571e7f6a1dc5d5b7cff3d1a1ad36a7045fe8e053e3129f2",
+        "hash_on": "c0db9397c82586f1832ad4d0cebdd9e1743707600916882f5eb0aff472925878",
+        "differs": true,
+        "rerank_cost_usd": 9.4e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "e5627192cdbec3c8/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "472019f5ba7941367eb82678350c23d7af4c153e66f6b75f2ce8f5c57542c5a8",
+        "hash_on": "908ce768a872f9aaee8373286eee419fa6954fc7e0e17a896a54240c685cd2bd",
+        "differs": true,
+        "rerank_cost_usd": 0.000107,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "ea13778589bafef7/rad",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "f64204226cfa22a1a085dbf744661c0ddfeedc245091d954d4943a57cc83c3ce",
+        "hash_on": "eec4a4efe8ff881773795564db92a2db02d25699309d9f03179289b0b51b86c8",
+        "differs": true,
+        "rerank_cost_usd": 7.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "ec6f26d70df272fc/s",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "08cdf0826a6963e8227285e407ede3016b0209adda668e27d84e5629a8936701",
+        "hash_on": "b4229c50ca9e190068a98f0bc58e25571b25c8ffa8f8c014c1e31cafc8d07129",
+        "differs": true,
+        "rerank_cost_usd": 0.0001,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "f2654e9bec2d2f4f/s^-1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "8bf103c5fefb16be975c051ad0c7cd5b012222168b3ac78db15accdd32835458",
+        "hash_on": "84347e05357f4d235a7d8442b353ab9fe1b6de6abc550d229c8d49bb58918749",
+        "differs": true,
+        "rerank_cost_usd": 9.6e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "f8449a20c3974be7/T",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "8542b5675247d514f33bc9e2a5e0df8bf1f6120f573d43cc8efa42e920f0ea5d",
+        "hash_on": "d5739921c41447f77fb0bc2601870b1a7dd4d37fd548ab67eb36e83877d42688",
+        "differs": true,
+        "rerank_cost_usd": 0.000107,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "family:operational_instrumentation/sensor/direction:physical_vector",
+        "n_items": 2,
+        "n_comparators": 7,
+        "hash_off": "1f893e1ab351ca6ac71c14db1c5a8d1c7d6ed99475913e641d8624a1406b6fb9",
+        "hash_on": "226795ec4f137d32fe092f0ac9f9bccbcfc5156e6960f193766e43d756b9a1d6",
+        "differs": true,
+        "rerank_cost_usd": 0.000272,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "family:plasma_profiles/ggd/b_field:physical_vector",
+        "n_items": 2,
+        "n_comparators": 9,
+        "hash_off": "c6d7b685e6bed2941145a278563275b1d14435a6a985f015f152f995552ecc61",
+        "hash_on": "79050e0ddba7275c2f43689ea417a38bbb7f53587e7faf9442e17ced2d2ed6d5",
+        "differs": true,
+        "rerank_cost_usd": 0.000351,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "family:pulse_schedule/density_control/zeff_line_of_sight/second_point:physical_vector",
+        "n_items": 2,
+        "n_comparators": 8,
+        "hash_off": "b5d0de35f240e8cf49059cfe59e734336e2e44aeb032f66eeb83959daef606b4",
+        "hash_on": "8b46162eb27c0d91c4941e3fbf6e5a55e9cff1f005e6c8e681231c2e7ecb1a7f",
+        "differs": true,
+        "rerank_cost_usd": 0.000312,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "fb9dde2fa9d1a803/W",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "d40271119636f73118639eb71c130bc416cc39282f980cbc52449ffd1ef9da0c",
+        "hash_on": "ac0abbdc13f481a635f90704179def613605b7040c18733f4ee56e1c80c2b2f0",
+        "differs": true,
+        "rerank_cost_usd": 0.000103,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "fd004ffeb25acbe5/W.m^-3",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "a6a7d718ba5de8c471bfd1286352bdea8cb8b22e4786764b74637926c7cc9fc9",
+        "hash_on": "642f8af50150688e3eeb68084741582cfc1524773b8ebbca27dec81efae49cac",
+        "differs": true,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "ff8d64d76e998b78/1/ion",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "e464a01702bb6f7fe6e4e79d2c04e653bcb66bf7dce9e72540daa560d8d6db02",
+        "hash_on": "e440f2d0de3fb68ef8dbe66560ff55db40e5e1d982ed61ba536f702f8cf45373",
+        "differs": true,
+        "rerank_cost_usd": 0.000107,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "physics_boundary_shape_r/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "a5c644262c3ce36b4d6d37b27629ce4dff105959d3b0ae71ad2e0e269d8efa05",
+        "hash_on": "9398af56126d3ef4de3567d2affd8b7a609b948c70122bb303fa01d045df34bd",
+        "differs": true,
+        "rerank_cost_usd": 9.9e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "physics_poloidal_flux/Wb",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "69e9eb65902914cdec048dcad9e9936bf1a7bc65e1441f274b44049691606c98",
+        "hash_on": "ed48cc7645c680fccf44f2e3a54535f849af5243c3ca42a08c5f7a8ed0cc540e",
+        "differs": true,
+        "rerank_cost_usd": 0.000106,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/breeding_blanket/breeding_blanket/module/layer/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "c68403b6f04214a8342d469ecfa9d1b0588da7afce449d732a9276f1df7e6219",
+        "hash_on": "aae2696832d9e48f68873852109bf97fbcb1315db36d0144bd84ee89a7d6b9cf",
+        "differs": true,
+        "rerank_cost_usd": 0.000104,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/camera_ir/camera_ir/optical_element/material_properties/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "cca6c3ee5df9d57d523bc848de614488329fe4034135f21d8a69a847105770f0",
+        "hash_on": "723856d84915ebb4daec196220ef185f9e725e730c5572cbbb020fd3f0cbe982",
+        "differs": true,
+        "rerank_cost_usd": 0.000104,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/camera_x_rays/camera_x_rays/camera/m",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "acb54d87f819edfc7450869c3361ad952208c9a2928c69237b4919139fea6ea6",
+        "hash_on": "b3af0a6cbefa3771ff97570a5422cf4507d46314b1b2a04c9819af3685861de4",
+        "differs": true,
+        "rerank_cost_usd": 0.000102,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/controllers/root/s",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "ac143fd37947fdcfad91fe4cc854c39faf566d8aa2381780845a9c6981c64e71",
+        "hash_on": "07657b9ba35ad6f6abc1ecee71f8d9368abdf561652c20523ae203ddfac18db8",
+        "differs": true,
+        "rerank_cost_usd": 9.4e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/divertors/divertors/divertor/target/tile/surface_outline/m",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "f5791473a2aa5cb1f6d1c3be730d39ee1c37a49a6f96089164915b0922b52370",
+        "hash_on": "bc46b6e73069c29ed0a88941e09a009f43702d919fd0d6360ebdecb4ccb1c467",
+        "differs": true,
+        "rerank_cost_usd": 7.8e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/ece/ece/channel/V",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "e041dfeec58ab722d8ff5cbb3fa8e4c8b2384d94aa5a51af1b80f098bdb02e14",
+        "hash_on": "502f64c8f7295e61e557c7f2b4441961f389394ab8ffadaefddc723867e958eb",
+        "differs": true,
+        "rerank_cost_usd": 9.5e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/langmuir_probes/langmuir_probes/reciprocating/plunge/s",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "f205ed3b14e9f306f0ff9c64788eda1498c77f410d286662bb6a86c2952e51ff",
+        "hash_on": "1c3b2936d8b4c077361f6a512f5ce11f589bb9d2aaa77c98dc852a0d16a5a062",
+        "differs": true,
+        "rerank_cost_usd": 0.000102,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/mhd_linear/mhd_linear/time_slice/toroidal_mode/Hz",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "26ebb010a67edd7ae7b53a5de79b49809d96276859f7422634fa98b529bb1b9c",
+        "hash_on": "fcb13968f26f4703407837f3d49295dc1a9f89cc15b04733a6ae45cd73cb55f0",
+        "differs": true,
+        "rerank_cost_usd": 0.000109,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/mhd_linear/mhd_linear/time_slice/toroidal_mode/plasma/phi_potential_perturbed/V",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "9f6d72de27ec74ecd3735d9e3780aab7decfc38da55dd52815a02b32b7b80e95",
+        "hash_on": "96b7f3ff0bb5fe663555f6ef06ce93de3f44bddbb851c754d0b5417415e9dea0",
+        "differs": true,
+        "rerank_cost_usd": 0.000115,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/neutron_diagnostic/neutron_diagnostic/reconstructed_emissivity/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "ab0e4409f26a0024996aaac7116071b29698b3f3041b1573c8d9a4ffd8eed662",
+        "hash_on": "90d52a39195bf4c39b6fed1948bff9b2ca216415fe61e8a57eef0bbcf6578d63",
+        "differs": true,
+        "rerank_cost_usd": 0.000108,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/pellets/pellets/time_slice/pellet/path_profiles/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "a248bd68953a2a546aaebb42522ad7cd800bd312c5e30372a95bdda552b492d1",
+        "hash_on": "889c7d0f5fe75bccc4d174d07ad9e3c4f81ee14ce9403c9d58bfe3bc748bae57",
+        "differs": true,
+        "rerank_cost_usd": 0.000107,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/plasma_initiation/plasma_initiation/global_quantities/b_field_stray/T",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "e92a39858b2a6d2be7a6b754f88aec2dfe135c2de124bec1f033d01efec30bb9",
+        "hash_on": "42f84c2b62a04a5546a5e747ed04c5a2510ddf033de3e607f94fdfa528e740ae",
+        "differs": true,
+        "rerank_cost_usd": 9.8e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/plasma_initiation/root/s",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "45aad6a5f82296be656a39a00c2f5533684ecd219b6fa55317917a87041a345d",
+        "hash_on": "122946dca99fe7f30978a54200c699809b9e0b3551517c7af7b4ec43d0fe7225",
+        "differs": true,
+        "rerank_cost_usd": 7.5e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/pulse_schedule/pulse_schedule/event/s",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "a4c2fb8c73024e811da5249e4e72b25b650d39e4853fb0be30a3be4a0ba9a5b1",
+        "hash_on": "08ce9f79f9a080eee4516fd8da75752c33645cee546676902f4b91ba7ce008e3",
+        "differs": true,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/spectrometer_visible/spectrometer_visible/channel/geometry_matrix/dimensionless",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "85bb3054733d8b56a1d34c4c958bcd8ffc17bcf092a95d8a1cb66d94e7189f55",
+        "hash_on": "85bb3054733d8b56a1d34c4c958bcd8ffc17bcf092a95d8a1cb66d94e7189f55",
+        "differs": false,
+        "rerank_cost_usd": 9.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/spi/spi/injector/fragmentation_gas/K",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "ebc6abadbd0ded86d4131d30c281ab3b7e2de95eadf197c3f9d959b68ebc6be1",
+        "hash_on": "923cf8df6f8c7b481c27e0708813e766a0097511712e8cc4281a7187fc20e629",
+        "differs": true,
+        "rerank_cost_usd": 0.000103,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/tf/tf/coil/m^-2.s^-1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "6cfcdfdb3f57a847cb317f5344f05f18f2c1474450059aefa1f3fc52a2562218",
+        "hash_on": "a05e74c5436373f848c01737f2b7178c892261a1ae12995d8cf567709356003b",
+        "differs": true,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/transport_solver_numerics/root/s",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "531f70c1aecc23dc89301107744b5415511874fab624e1434754890bfbe9ee62",
+        "hash_on": "1945cb877bdcc160241e6d2ea8d743f7417e6c99bdd3951c77315659fc8951e7",
+        "differs": true,
+        "rerank_cost_usd": 9.5e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/transport_solver_numerics/transport_solver_numerics/solver_1d/grid/1",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "555515331e8e4f3d82d229dc0fb0047ab82889629ca6142fbceef6fd21e27385",
+        "hash_on": "d1479d6b548530062d74c8feed9c597e7fe966a0780b8d443ccd6de0d9c33a83",
+        "differs": true,
+        "rerank_cost_usd": 0.000108,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/wall/wall/description_ggd/ggd/j_total/A.m^-2",
+        "n_items": 1,
+        "n_comparators": 4,
+        "hash_off": "811730a2d48b04c430ab21157d31230de5ead1d6d15f2d4f6654a2bb70905e5b",
+        "hash_on": "811730a2d48b04c430ab21157d31230de5ead1d6d15f2d4f6654a2bb70905e5b",
+        "differs": false,
+        "rerank_cost_usd": 7.7e-05,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/wall/wall/global_quantities/W",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "55a375ff3350af1cfe98063cb68a3e9bb218bc4b637b42bda6f36937857fcea5",
+        "hash_on": "6df97c56b6ae69b4799efb8902af862600855c5d7c07611173a4f7897e4ecfcc",
+        "differs": true,
+        "rerank_cost_usd": 0.000109,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/wall/wall/global_quantities/neutral/incident_species/rad/neutral",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "762ffe8f84984af8b09258e5eb743951566a01025f7f5d930d87e48199ca5028",
+        "hash_on": "762ffe8f84984af8b09258e5eb743951566a01025f7f5d930d87e48199ca5028",
+        "differs": false,
+        "rerank_cost_usd": 0.000105,
+        "rerank_seat": "typesafe/jev-1.13"
+      },
+      {
+        "group_key": "unclustered/waves/waves/coherent_wave/global_quantities/dimensionless",
+        "n_items": 1,
+        "n_comparators": 5,
+        "hash_off": "1a640bb733f810d7844ca42a5f38e60aa23271af1cf787baf87b1bd75ad6714e",
+        "hash_on": "553d6acb8c80c048b0e29b024d47333b19c9fb30600a577e8fe7860588f89949",
+        "differs": true,
+        "rerank_cost_usd": 0.000104,
+        "rerank_seat": "typesafe/jev-1.13"
+      }
+    ],
+    "switch_changes_harness_compose_prompt": true,
+    "rerank_cost_usd": 0.013962,
+    "n_batches": 120
+  },
+  "arm_a": {
+    "records": [
+      {
+        "source_id": "pulse_schedule/density_control/ion/element/a",
+        "name": "ion_atomic_mass",
+        "reviewer_score": 0.7125,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/composition/boron/value",
+        "name": "boron_fraction",
+        "reviewer_score": 0.7625,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "edge_profiles/ggd/ion/state/velocity_exb/parallel",
+        "name": "parallel_ion_state_velocity_due_to_e_cross_b_drift",
+        "reviewer_score": 0.9375,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "spectrometer_x_ray_crystal/channel/crystal/outline/x1",
+        "name": "first_local_tangential_coordinate_of_bragg_crystal",
+        "reviewer_score": 1.0,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "summary/composition/hydrogen/value",
+        "name": "hydrogen_fraction",
+        "reviewer_score": 0.475,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/pedestal_fits/mtanh/t_e/d_dpsi_norm_max/value",
+        "name": "maximum_of_derivative_of_electron_temperature_over_pedestal_region_with_respect_to_normalized_poloidal_flux_coordinate",
+        "reviewer_score": 0.6125,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "reflectometer_profile/channel/antenna... ",
+        "name": "toroidal_coordinate_of_reflectometer_antenna",
+        "reviewer_score": 0.95,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "reflectometer_profile/channel/line_of_sight_detection/first_point/phi",
+        "name": "toroidal_coordinate_of_line_of_sight",
+        "reviewer_score": 0.0,
+        "scored": false,
+        "accepted": false
+      },
+      {
+        "source_id": "soft_x_rays/channel/detector/centre/phi",
+        "name": "toroidal_coordinate_of_soft_xray_detector",
+        "reviewer_score": 0.9125,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "soft_x_rays/channel/filter_window/centre/phi",
+        "name": "toroidal_coordinate_of_filter_window",
+        "reviewer_score": 0.9125,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "distributions/distribution/profiles_2d/density_fast",
+        "name": "fast_particle_density",
+        "reviewer_score": 0.45,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/disruption/halo_current/fraction_pol_max/value",
+        "name": "maximum_of_ratio_of_poloidal_halo_current_to_plasma_current",
+        "reviewer_score": 0.75,
+        "scored": true,
+        "accepted": false
+      }
+    ],
+    "cost_usd": 0.0,
+    "sources_done": [
+      "calorimetry/cooling_loop/temperature_out",
+      "disruption/global_quantities/phi_halo_boundary",
+      "distributions/distribution/profiles_2d/density_fast",
+      "edge_profiles/ggd/ion/state/velocity_exb/parallel",
+      "edge_profiles/profiles_1d/t_i_average",
+      "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_parallel_b_field_parallel",
+      "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_b_field_parallel",
+      "ic_antennas/antenna/module/voltage/position/r",
+      "iron_core/segment/geometry/oblique/z",
+      "pulse_schedule/density_control/ion/element/a",
+      "pulse_schedule/event/time_stamp",
+      "reflectometer_profile/channel/antenna... ",
+      "reflectometer_profile/channel/antenna_detection/centre/phi",
+      "reflectometer_profile/channel/line_of_sight_detection/first_point/phi",
+      "soft_x_rays/channel/detector/centre/phi",
+      "soft_x_rays/channel/detector/outline/x2",
+      "soft_x_rays/channel/filter_window/centre/phi",
+      "spectrometer_x_ray_crystal/channel/crystal/outline/x1",
+      "summary/composition/boron/value",
+      "summary/composition/hydrogen/value",
+      "summary/disruption/halo_current/fraction_pol_max/value",
+      "summary/heating_current_drive/lh/position/value",
+      "summary/local/divertor_target/n_i_total/value",
+      "summary/pedestal_fits/mtanh/t_e/d_dpsi_norm_max/value"
+    ],
+    "units_completed": 18
+  },
+  "arm_b": {
+    "records": [
+      {
+        "source_id": "summary/composition/boron/value",
+        "name": "boron_fraction",
+        "reviewer_score": 0.4625,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "pulse_schedule/density_control/ion/element/a",
+        "name": "ion_atomic_mass",
+        "reviewer_score": 0.775,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "edge_profiles/ggd/ion/state/velocity_exb/parallel",
+        "name": "parallel_ion_state_velocity_due_to_e_cross_b_drift",
+        "reviewer_score": 0.7,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "spectrometer_x_ray_crystal/channel/crystal/outline/x1",
+        "name": "first_local_tangential_coordinate_of_bragg_crystal",
+        "reviewer_score": 0.9125,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "summary/composition/hydrogen/value",
+        "name": "hydrogen_fraction",
+        "reviewer_score": 0.5,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "reflectometer_profile/channel/antenna_detection/centre/phi",
+        "name": "toroidal_coordinate_of_diagnostic_component_centre",
+        "reviewer_score": 0.5,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/pedestal_fits/mtanh/t_e/d_dpsi_norm_max/value",
+        "name": "maximum_of_derivative_of_pedestal_electron_temperature_with_respect_to_normalized_poloidal_flux_coordinate",
+        "reviewer_score": 0.0,
+        "scored": false,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/pedestal_fits/mtanh/n_e/d_dpsi_norm_max/value",
+        "name": "maximum_of_derivative_of_pedestal_electron_density_with_respect_to_normalized_poloidal_flux_coordinate",
+        "reviewer_score": 0.0,
+        "scored": false,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm?placeholder",
+        "name": "maximum_of_derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate",
+        "reviewer_score": 0.0,
+        "scored": false,
+        "accepted": false
+      },
+      {
+        "source_id": "distributions/distribution/profiles_2d/density_fast",
+        "name": "fast_particle_density",
+        "reviewer_score": 0.45,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "summary/local/divertor_target/n_i/tritium/value",
+        "name": "tritium_density_at_divertor_target",
+        "reviewer_score": 0.9125,
+        "scored": true,
+        "accepted": true
+      },
+      {
+        "source_id": "pulse_schedule/density_control/valve/species/fraction",
+        "name": null,
+        "reviewer_score": 0.0,
+        "scored": false,
+        "accepted": false
+      },
+      {
+        "source_id": "langmuir_probes/reciprocating/plunge/position_average/phi",
+        "name": "toroidal_angle_of_langmuir_probe",
+        "reviewer_score": 0.8125,
+        "scored": true,
+        "accepted": false
+      },
+      {
+        "source_id": "barometry/gauge/position/z",
+        "name": "vertical_coordinate_of_gauge",
+        "reviewer_score": 0.875,
+        "scored": true,
+        "accepted": true
+      }
+    ],
+    "cost_usd": 0.001525,
+    "sources_done": [
+      "barometry/gauge/position/z",
+      "calorimetry/cooling_loop/temperature_out",
+      "disruption/global_quantities/phi_halo_boundary",
+      "distributions/distribution/ggd/orbit_frequency_pol/values",
+      "distributions/distribution/profiles_2d/density_fast",
+      "edge_profiles/ggd/ion/state/velocity_exb/parallel",
+      "edge_profiles/profiles_1d/t_i_average",
+      "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/momentum_phi_parallel_b_field_parallel",
+      "gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/momentum_phi_perpendicular_b_field_parallel",
+      "ic_antennas/antenna/module/voltage/position/r",
+      "iron_core/segment/geometry/oblique/z",
+      "langmuir_probes/reciprocating/plunge/position_average/phi",
+      "pulse_schedule/density_control/ion/element/a",
+      "pulse_schedule/density_control/valve/species/fraction",
+      "pulse_schedule/event/time_stamp",
+      "reflectometer_profile/channel/antenna_detection/centre/phi",
+      "soft_x_rays/channel/detector/centre/phi",
+      "soft_x_rays/channel/detector/outline/x2",
+      "spectrometer_x_ray_crystal/channel/crystal/outline/x1",
+      "summary/composition/boron/value",
+      "summary/composition/hydrogen/value",
+      "summary/heating_current_drive/lh/position/value",
+      "summary/local/divertor_target/n_i/tritium/value",
+      "summary/local/divertor_target/n_i_total/value",
+      "summary/pedestal_fits/mtanh/n_e/d_dpsi_norm_max/value",
+      "summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm?placeholder",
+      "summary/pedestal_fits/mtanh/t_e/d_dpsi_norm_max/value"
+    ],
+    "units_completed": 22
+  },
+  "status": "blocked",
+  "summary": {
+    "arm_a": {
+      "candidates": 12,
+      "scored_candidates": 11,
+      "unscored_candidates": 1,
+      "accepted_scored": 5,
+      "acceptance_rate_over_scored": 0.45454545454545453
+    },
+    "arm_b": {
+      "candidates": 14,
+      "scored_candidates": 10,
+      "unscored_candidates": 4,
+      "accepted_scored": 3,
+      "acceptance_rate_over_scored": 0.3
+    },
+    "paired_denominator_sources": 6,
+    "paired_acceptance_rate_arm_a": 0.3333333333333333,
+    "paired_acceptance_rate_arm_b": 0.16666666666666666,
+    "paired_difference_b_minus_a": -0.16666666666666666,
+    "paired_accepted_arm_a": 2,
+    "paired_accepted_arm_b": 1,
+    "bootstrap_interval": {
+      "point": -0.25,
+      "lower": -0.5,
+      "upper": 0.0,
+      "level": 0.95,
+      "n_resamples": 1000,
+      "seed": 123
+    },
+    "bootstrap_interval_excludes_zero": false,
+    "bootstrap_error": ""
+  },
+  "spend_usd": 0.015487,
+  "sources_remaining": {
+    "arm_a": 96,
+    "arm_b": 93
+  },
+  "reason": "time fence reached with units remaining; resume continues from recorded units"
+}

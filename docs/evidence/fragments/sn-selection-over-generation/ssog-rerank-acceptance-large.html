@@ -1,0 +1,35 @@
+<section id="ssog-rerank-acceptance-large-scope">
+  <h2>Comparator rerank acceptance on a large held-out draw</h2>
+  <p id="ssog-rerank-acceptance-large-state">Status: <strong>blocked on the time fence</strong>. The draw was fixed and the measure started; the arms did not reach the drawn cohort before the 60-minute node budget ended, so the numbers below are a partial pass and the node must be resumed to reach the 120-source cohort the brief set.</p>
+  <p id="ssog-rerank-acceptance-large-draw">Draw seed <code>20261015</code>, 160 sources drawn so the harness admits about 120: <strong>120 admitted as standard-name sources</strong> across 120 extraction batches (137 items). Excluded set: 70 sources — the 40 drawn under seed <code>20261014</code> (read from that run's own results record), the 30 sources of the comparator label sheet, and the sheet's 9 boundary-density sources (already inside the 30; recorded as their own group). Composed and reviewed on <code>local/deepseek-v4.1-flash</code>; only arm B reranks the nearby-name comparator block, judged by <code>typesafe/jev-1.13</code>.</p>
+</section>
+
+<section id="ssog-rerank-acceptance-large-positive-control">
+  <h2>Positive control</h2>
+  <p id="ssog-rerank-acceptance-large-control-result">Passed. All 120 batches rendered the harness compose prompt under both switch settings: the switch changed the rendered-message hash on at least one batch (<code>switch_changes_harness_compose_prompt: true</code>). Nine batches reranked the pool to the order retrieval already gave and hashed identically; the rest differ. Rerank cost of the control: <strong>USD 0.013962</strong>.</p>
+</section>
+
+<section id="ssog-rerank-acceptance-large-arms">
+  <h2>First-pass acceptance, partial pass</h2>
+  <p id="ssog-rerank-acceptance-large-counts">A candidate the reviewer returned no score for is recorded with <code>scored: false</code> and counted separately, not as a rejection; the rate is taken over scored candidates.</p>
+  <table>
+    <thead><tr><th>arm</th><th>sources composed</th><th>candidates</th><th>scored</th><th>unscored</th><th>accepted (scored)</th><th>acceptance over scored</th></tr></thead>
+    <tbody>
+      <tr><td>A (rerank off)</td><td>24</td><td>12</td><td>11</td><td>1</td><td>5</td><td>0.455</td></tr>
+      <tr><td>B (rerank on)</td><td>27</td><td>14</td><td>10</td><td>4</td><td>3</td><td>0.300</td></tr>
+    </tbody>
+  </table>
+  <p id="ssog-rerank-acceptance-large-paired">Paired over the <strong>6 sources present in both arms</strong>: acceptance 0.333 (arm A) vs 0.167 (arm B), paired difference <strong>−0.167</strong>. The <code>bootstrap_interval</code> from <code>imas_codex/discovery/base/evaluation.py</code> is point −0.25, lower −0.50, upper 0.00 (95%, 1000 resamples): it <strong>does not exclude 0</strong>. With 6 paired sources and 15 scored candidates in total this is far short of the drawn cohort and decides nothing.</p>
+</section>
+
+<section id="ssog-rerank-acceptance-large-spend">
+  <h2>Spend and per-pass logs</h2>
+  <p id="ssog-rerank-acceptance-large-spend-figure">Total spend <strong>USD 0.015487 of the USD 1.00 ceiling</strong> (control rerank 0.013962, arm B rerank 0.001525, arm A 0). Compose and review ran on the free local seat.</p>
+  <ul id="ssog-rerank-acceptance-large-pass-logs">
+    <li><code>pass1.log</code> — extraction + control; <code>EXIT=124</code></li>
+    <li><code>pass2.log</code> — arm B, 480 s; <code>EXIT=124</code></li>
+    <li><code>pass3.log</code> — arm A, returned cleanly; <code>EXIT=0</code></li>
+    <li><code>pass4.log</code> — arm A, cut by the fence; <code>EXIT=124</code></li>
+  </ul>
+  <p id="ssog-rerank-acceptance-large-remaining">Remaining when the fence arrived: 96 arm-A sources and 93 arm-B sources. Resume continues from the recorded units.</p>
+</section>
