@@ -32,14 +32,20 @@
   </table>
 
   <p id="ssfms-reprocess-remeasure-branch">
-    <strong>Ship rule: fails on latency; switch set to off.</strong> The role-aware arm
+    <strong>Ship rule: switch stays on under the wall-budget cap.</strong> The role-aware arm
     beats fusion on mean nDCG@10 (0.9220 &gt; 0.8473) and mean grade-3 precision@5
     (0.8939 &gt; 0.8091), and its worst pass stays above fusion's mean nDCG@10
-    (0.9194 &gt; 0.8473). Its p95 is <strong>5.022 s</strong>, exceeding the 5 s limit
-    by 0.022 s. The same metric was 4.722 s in §7. Consequently
-    <code>_rerank_signals</code> in <code>imas_codex/llm/server.py</code> is
-    <code>False</code> for every server mode (commit <code>c5f4bc3bd</code>); signal
-    search keeps the fused order. The generic arm's p95 is also 5.022 s.
+    (0.9194 &gt; 0.8473). The observed role-aware p95 is <strong>5.022 s</strong>,
+    compared with 4.722 s in §7: 13 of 66 calls took 5.013–5.027 s and the
+    other 53 took 4.110–4.984 s. The generic arm's p95 is also 5.022 s; its
+    54 calls below the cap took 3.997–4.985 s, while 12 took 5.012–5.032 s.
+    <code>rerank_candidates</code> stops scoring at its 5.0 s wall budget and
+    leaves unscored candidates in fusion order. The roughly 20 ms above the
+    deadline is post-deadline overhead, and the quality figures already include
+    those capped calls. The lead's 2026-10-14 decision reads the latency clause
+    as met by this cap. Consequently <code>_rerank_signals</code> follows server
+    mode (commit <code>a4f123848</code>): on for full or facility servers, off
+    for read-only or DD-only servers.
   </p>
 
   <table id="ssfms-reprocess-remeasure-questions">
