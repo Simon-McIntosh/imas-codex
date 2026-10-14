@@ -74,6 +74,16 @@ def test_every_excluded_neighbour_is_a_domain_value() -> None:
             )
 
 
+def test_each_excluded_quantity_and_neighbour_appears_once_per_domain() -> None:
+    """One rule must carry all guidance for a quantity and its neighbour."""
+    for name, entry in load_domain_guidance()["domains"].items():
+        seen: set[tuple[str, str]] = set()
+        for exclusion in entry.get("excludes", []):
+            pair = (exclusion["quantity"], exclusion["neighbour"])
+            assert pair not in seen, f"{name}: duplicate exclusion {pair!r}"
+            seen.add(pair)
+
+
 def test_provider_returns_the_guidance_per_domain_and_category() -> None:
     """The prompt provider serves the guidance, keyed by value and by category."""
     provided = _provide_physics_domains()
