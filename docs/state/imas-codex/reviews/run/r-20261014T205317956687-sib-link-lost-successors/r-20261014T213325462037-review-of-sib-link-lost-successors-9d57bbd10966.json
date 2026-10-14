@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:7566",
+    "imas_codex/cli/sn.py:8941"
+  ],
+  "completed_at": "2026-10-14T21:46:35.732Z",
+  "dispatched_at": "2026-10-14T21:33:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-link-lost-successors-run.py",
+      "line": "212",
+      "severity": "follow-on",
+      "text": "follow-on: write_authority, with authority_row at :174, hand-rolls the imas-codex.repair-authority.v1 build that imas_codex/standard_names/repair_authority.py:135 build_repair_authority already owns, duplicating the capability without extending it; the owner validates selection, receipt_policy and the RepairAuthorityArtifact and serializes with sort_keys, so the fork's missing validation is what let the rejected expected_name_stage field reach preview, recorded as failure_attribution preview-authority-extra-field."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-link-lost-successors-run.py",
+      "line": "320",
+      "severity": "follow-on",
+      "text": "follow-on: the target assertion compares the graph edge against TARGETS at run.py:10, the same map write_authority at :212 used to generate the applied authority, so both sides move together and the assertion cannot catch a wrong adjudication, only a graph write that diverges from the committed JSON."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s): the signed-manifest write path apply_signed_manifest through which the authority is applied, and the CLI apply route that reaches the same loader; the instrument itself is a manual docs script that no production module imports.",
+    "diff": "read commit 5cad9fa35 (authority JSON and run.py) and commit 9d57bbd10 (run.py readback tightening and the fragment HTML) against base c8ab3575; both are inside the declared scope and add no product code or test.",
+    "done_when": "the source done_when (prompt.txt:218) requires a preview admitting the 2 legacy spellings plus every adjudicated refine product with one control refused, the apply digest, a readback of exactly one receipt-stamped edge per adjudicated name, and a replay preview admitting 0; preview-final.log records 4 admitted and 1 refused, apply.log the digest, readback.log the four receipt edges and excluded 1649->1653, but replay-preview.log records 4 re-admitted, not 0.",
+    "goal": "the node goal is to add a signed successor edge for each superseded name that lost one (prompt.txt:30); the landed authority docs/evidence/fragments/sn-integrity-backlog/sib-link-lost-successors-authority.json carries four supersede rows and apply_signed_manifest (imas_codex/standard_names/signed_manifest.py:7566) stamped them, so four of the fourteen names now carry a HAS_SUCCESSOR edge while the remaining ten are listed unadjudicated.",
+    "manifest": "read; it records status complete, commits 5cad9fa35 and 9d57bbd10, runs no product test because the node is docs-only, names the readback and replay logs, and reports the replay re-admission under blockers, repaired to complete by the coordinator (status-repair.json).",
+    "write_paths": "the fence at prompt.txt:193-197 names the fragment, the authority JSON, the run.py and a docs/figures/sn-integrity-backlog/sib-link-lost-successors directory; git diff --name-status c8ab3575 9d57bbd1 adds exactly the three files inside it and no figure."
+  },
+  "justifications": {
+    "durability": "run.py:311 is a genuine independent assertion against before_excluded and the live graph, but the node adds no test and no suite invocation, so nothing reddens in a suite on regression.",
+    "evidence": "run.py:311 asserts excluded == before_excluded + len(TARGETS) and readback.log records 1649->1653 with EXIT=0, but the done_when's replay-admits-0 condition is unmet, replay-preview.log showing 4 re-admitted.",
+    "fit": "run.py matches the sibling docs/evidence/fragments/*/*-run.py instrument idiom and introduces no plan label in a symbol name.",
+    "goal_fidelity": "run.py:174-233 builds four supersede rows that imas_codex/standard_names/signed_manifest.py:7566 applied, and the fragment at docs/evidence/fragments/sn-integrity-backlog/sib-link-lost-successors.html lists the ten names the plan's escape clause allows to remain unadjudicated.",
+    "reuse": "run.py:212 write_authority and run.py:174 authority_row hand-roll the imas-codex.repair-authority.v1 build that imas_codex/standard_names/repair_authority.py:135 build_repair_authority owns and validates for the same signed loader.",
+    "scope_discipline": "git diff --name-status c8ab3575 9d57bbd1 adds only the three paths inside the fence at prompt.txt:193-197."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to add a signed successor edge for each superseded name that lost one (prompt.txt:30); the landed authority docs/evidence/fragments/sn-integrity-backlog/sib-link-lost-successors-authority.json carries four supersede rows and apply_signed_manifest (imas_codex/standard_names/signed_manifest.py:7566) stamped them, so four of the fourteen names now carry a HAS_SUCCESSOR edge while the remaining ten are listed unadjudicated.\nVERDICT done_when: the source done_when (prompt.txt:218) requires a preview admitting the 2 legacy spellings plus every adjudicated refine product with one control refused, the apply digest, a readback of exactly one receipt-stamped edge per adjudicated name, and a replay preview admitting 0; preview-final.log records 4 admitted and 1 refused, apply.log the digest, readback.log the four receipt edges and excluded 1649->1653, but replay-preview.log records 4 re-admitted, not 0.\nVERDICT write_paths: the fence at prompt.txt:193-197 names the source node's fragment, authority JSON, run.py and a docs/figures/sn-integrity-backlog/sib-link-lost-successors directory; git diff --name-status c8ab3575 9d57bbd1 adds exactly the three files inside it and no figure.\nVERDICT manifest: read; it records status complete, commits 5cad9fa35 and 9d57bbd10, runs no product test because the node is docs-only, names the readback and replay logs, and reports the replay re-admission under blockers.\nVERDICT diff: read commit 5cad9fa35 (authority JSON and run.py) and commit 9d57bbd10 (run.py readback tightening and the fragment HTML) against base c8ab3575; both are inside the declared scope and add no product code or test.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:7566, imas_codex/cli/sn.py:8941\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: run.py:174-233 builds four supersede rows that imas_codex/standard_names/signed_manifest.py:7566 applied, and the fragment at docs/evidence/fragments/sn-integrity-backlog/sib-link-lost-successors.html lists the ten names the plan's escape clause allows to remain unadjudicated.\nSCORE evidence: 14\nJUSTIFICATION evidence: run.py:311 asserts excluded == before_excluded + len(TARGETS) and readback.log records 1649->1653 with EXIT=0, but the done_when's replay-admits-0 condition is unmet, replay-preview.log showing 4 re-admitted.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status c8ab3575 9d57bbd1 adds only the three paths inside the fence at prompt.txt:193-197.\nSCORE durability: 6\nJUSTIFICATION durability: run.py:311 is a genuine independent assertion against before_excluded and the live graph, but the node adds no test and no suite invocation, so nothing reddens in a suite on regression.\nSCORE fit: 17\nJUSTIFICATION fit: run.py matches the sibling docs/evidence/fragments/*/*-run.py instrument idiom and introduces no plan label in a symbol name.\nSCORE reuse: 4\nJUSTIFICATION reuse: run.py:212 write_authority and run.py:174 authority_row hand-roll the imas-codex.repair-authority.v1 build that imas_codex/standard_names/repair_authority.py:135 build_repair_authority owns and validates for the same signed loader.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-link-lost-successors-run.py:212 follow-on: write_authority, with authority_row at :174, hand-rolls the signed repair-authority build imas_codex/standard_names/repair_authority.py:135 build_repair_authority already owns and duplicates it without extending it; the owner validates selection, receipt_policy and the RepairAuthorityArtifact and serializes with sort_keys, so the fork's missing validation is what let the rejected expected_name_stage field reach preview.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-link-lost-successors-run.py:320 follow-on: the target assertion compares the graph edge against TARGETS at run.py:10, the same map write_authority at :212 used to generate the applied authority, so both sides move together and the assertion cannot catch a wrong adjudication, only a graph write that diverges from the committed JSON.\n",
+  "review_run_id": "r-20261014T213325462037-review-of-sib-link-lost-successors-9d57bbd10966",
+  "reviewed_base_sha": "c8ab3575c264e481b99d733c92ad69c83534bf20",
+  "reviewed_head_sha": "9d57bbd1096616acd7e4d73f3c07af578734e11e",
+  "reviewed_run_id": "r-20261014T205317956687-sib-link-lost-successors",
+  "scores": {
+    "durability": 6,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "subject": "r-20261014T205317956687-sib-link-lost-successors",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T21:48:29.249267+00:00",
+  "total": 76
+}
