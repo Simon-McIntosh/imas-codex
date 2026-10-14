@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest carries neither a baseline_suite nor an after_suite gate log because no test path was in scope for it (its gate is the reproducibility rescore), so the derived suite delta is zero added failures",
+  "backend": "clive",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-14T18:01:19.615Z",
+  "dispatched_at": "2026-10-14T17:44:52Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-path-measure-run.py",
+      "line": "143",
+      "severity": "follow-on",
+      "text": "follow-on: guidance() decides \"separates\" only from excludes entries whose neighbour matches and quotes scope and excludes alone, so the includes guidance line the brief names is never read and a pair separated only by its includes lists is reported silent."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-path-measure-run.py",
+      "line": "82",
+      "severity": "follow-on",
+      "text": "follow-on: score() and confusion() duplicate the classifier-accuracy/confusion capability owned by imas_codex/discovery/base/evaluation.py:208 classification_metrics rather than extending it; the overlap is two trivial primitives inside a self-contained evidence script and matches the sibling fragment scripts."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the landed revision 152ff25b7 against base 31465e77d; four files changed, all inside the declared scope, adding the evidence fragment, its run script, the results JSON and one confusion-matrix SVG.",
+    "done_when": "the done-when names the fragment, the results JSON, a final rescore pass at EXIT=0 and one SVG; the landed fragment and results JSON carry the path-label count, both classifiers' accuracy by split, the tree's accuracy by probability band, every none-name with its cause and every confused path with its guidance verdict, and the manifest records the rescore.",
+    "goal": "the node's goal is to measure the two domain classifiers at the DD-path level and separate their errors; scg-domain-path-measure-run.py labels each labelled name's source DD paths in the 856-path benchmark set and scores both classifiers' recorded per-path answers against those labels.",
+    "manifest": "read; it reports 201 paths from 147 names, tree 0.700/0.654 and chat 0.713/0.716 on calibration/validation, the three probability bands, 11 none-validation names and 43 tree / 39 chat confusion groups, and names the negative-control log.",
+    "write_paths": "read the manifest's four declared paths (the fragment .html, the .py, the -results.json and the figures/ directory); every path in the landed diff is inside them."
+  },
+  "justifications": {
+    "durability": "scg-domain-path-measure-run.py:428 asserts the rescore reproduces every figure, a real round-trip guard against a hand-edited results JSON, but it recomputes through the same compute() that produced the stored values so it cannot fail on a computation regression, and no suite test runs it.",
+    "evidence": "every figure in scg-domain-path-measure-results.json reproduces independently from the label sheet and vocabulary results (my recompute of per_split, the bands and the confusion counts matched exactly, with 0 chat-answer mismatches), though the rescore result is recorded only in manifest prose and not as a log on disk.",
+    "fit": "the symbols in scg-domain-path-measure-run.py (build_labels, score, confusion, guidance) each name the mechanism they perform and the local score/confusion idiom matches the sibling fragment scripts, with no plan label in any symbol.",
+    "goal_fidelity": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-path-measure.html:12 reports every item the done-when names, from the 201-path label count to each confused path's guidance verdict.",
+    "reuse": "scg-domain-path-measure-run.py:82 score() and :87 confusion() re-implement the accuracy-and-confusion capability that imas_codex/discovery/base/evaluation.py:208 classification_metrics already owns, though the sibling evidence scripts each carry the same local idiom and the shared owner is scoped to signal-discovery integer arrays.",
+    "scope_discipline": "all four paths in the landed diff \u2014 scg-domain-path-measure-run.py, .html, -results.json and figures/sn-catalog-grouping/scg-domain-path-measure/path_confusion.svg \u2014 are inside the four declared write paths."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to measure the two domain classifiers at the DD-path level and separate their errors; scg-domain-path-measure-run.py labels each labelled name's source DD paths in the 856-path benchmark set and scores both classifiers' recorded per-path answers against those labels.\nVERDICT done_when: the done-when names the fragment, the results JSON, a final rescore pass at EXIT=0 and one SVG; the landed fragment and results JSON carry the path-label count, both classifiers' accuracy by split, the tree's accuracy by probability band, every none-name with its cause and every confused path with its guidance verdict, and the manifest records the rescore.\nVERDICT write_paths: read the manifest's four declared paths (the fragment .html, the .py, the -results.json and the figures/ directory); every path in the landed diff is inside them.\nVERDICT manifest: read; it reports 201 paths from 147 names, tree 0.700/0.654 and chat 0.713/0.716 on calibration/validation, the three probability bands, 11 none-validation names and 43 tree / 39 chat confusion groups, and names the negative-control log.\nVERDICT diff: read the landed revision 152ff25b7 against base 31465e77d; four files changed, all inside the declared scope, adding the evidence fragment, its run script, the results JSON and one confusion-matrix SVG.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-catalog-grouping/scg-domain-path-measure.html:12 reports every item the done-when names, from the 201-path label count to each confused path's guidance verdict.\nSCORE evidence: 16\nJUSTIFICATION evidence: every figure in scg-domain-path-measure-results.json reproduces independently from the label sheet and vocabulary results (my recompute of per_split, the bands and the confusion counts matched exactly, with 0 chat-answer mismatches), though the rescore result is recorded only in manifest prose and not as a log on disk.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all four paths in the landed diff \u2014 scg-domain-path-measure-run.py, .html, -results.json and figures/sn-catalog-grouping/scg-domain-path-measure/path_confusion.svg \u2014 are inside the four declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: scg-domain-path-measure-run.py:428 asserts the rescore reproduces every figure, a real round-trip guard against a hand-edited results JSON, but it recomputes through the same compute() that produced the stored values so it cannot fail on a computation regression, and no suite test runs it.\nSCORE fit: 18\nJUSTIFICATION fit: the symbols in scg-domain-path-measure-run.py (build_labels, score, confusion, guidance) each name the mechanism they perform and the local score/confusion idiom matches the sibling fragment scripts, with no plan label in any symbol.\nSCORE reuse: 12\nJUSTIFICATION reuse: scg-domain-path-measure-run.py:82 score() and :87 confusion() re-implement the accuracy-and-confusion capability that imas_codex/discovery/base/evaluation.py:208 classification_metrics already owns, though the sibling evidence scripts each carry the same local idiom and the shared owner is scoped to signal-discovery integer arrays.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-domain-path-measure-run.py:143 follow-on: guidance() decides \"separates\" only from excludes entries whose neighbour matches and quotes scope and excludes alone, so the includes guidance line the brief names is never read and a pair separated only by its includes lists is reported silent.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-domain-path-measure-run.py:82 follow-on: score() and confusion() duplicate the classifier-accuracy/confusion capability owned by imas_codex/discovery/base/evaluation.py:208 classification_metrics rather than extending it; the overlap is two trivial primitives inside a self-contained evidence script and matches the sibling fragment scripts.",
+  "review_run_id": "r-20261014T174436673818-review-of-scg-domain-path-measure-152ff25b7903",
+  "reviewed_base_sha": "31465e77de604903ae4a7431a64873126a8ca4ce",
+  "reviewed_head_sha": "152ff25b7903674d4a8beed759c137a4688d4a00",
+  "reviewed_run_id": "r-20261014T075227888360-scg-domain-path-measure",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T18:03:58.039771+00:00",
+  "total": 97
+}
