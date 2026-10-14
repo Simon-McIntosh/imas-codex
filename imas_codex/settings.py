@@ -1477,6 +1477,23 @@ def get_sn_dedup_threshold() -> float:
     return float(section.get("dedup-similarity-threshold", 0.85))
 
 
+def get_sn_domain_tree_threshold() -> float:
+    """Confidence bar below which a DD path is re-judged by chat.
+
+    The two-level category-then-domain tree returns a probability; a path
+    scoring below this is handed to the chat classifier reading the same
+    guidance. The bar is the one the tree benchmark calibrated on its held-out
+    rows, so it lives in the seat section rather than as a classifier constant.
+
+    Priority: IMAS_CODEX_SN_DOMAIN_TREE_THRESHOLD env
+              → [sn-domain-tree].threshold → ``0.9``.
+    """
+    if env := os.getenv("IMAS_CODEX_SN_DOMAIN_TREE_THRESHOLD"):
+        return float(env)
+    section = _get_section("sn-domain-tree")
+    return float(section.get("threshold", 0.9))
+
+
 def get_sn_staging_dir() -> Path:
     """Default staging directory for sn export/preview/publish.
 

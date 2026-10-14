@@ -1,0 +1,89 @@
+<article id="scg-dd-build-tree-wiring">
+  <h3>DD build classifies through the Jev tree, thresholded from settings</h3>
+
+  <p>
+    The full re-classification runs inside <code>imas-codex imas dd build
+    --reset-to embedded</code>. That command reaches the two-level
+    category-then-domain Choice tree along the path below, and the probability
+    below which a path is re-judged by the chat classifier is read from the
+    <code>[sn-domain-tree].threshold</code> setting rather than a classifier
+    constant. No graph data was written by this node; the full re-classification
+    awaits the lead.
+  </p>
+
+  <table id="scg-dd-build-tree-wiring-path">
+    <thead><tr><th>Step</th><th>Site</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>classify phase</td>
+        <td><code>imas_codex/graph/dd_workers.py:706</code>
+          (<code>classify_worker</code>)</td>
+        <td>Calls <code>classify_domains</code> for the embedded paths.</td>
+      </tr>
+      <tr>
+        <td>tier orchestration</td>
+        <td><code>imas_codex/graph/dd_domain_classifier.py:173</code>
+          (<code>classify_domains</code>)</td>
+        <td>Queries tier-1 candidates and dispatches them to tier 1.</td>
+      </tr>
+      <tr>
+        <td>tier-1 entry</td>
+        <td><code>imas_codex/graph/dd_domain_classifier.py:634</code>
+          (<code>classify_tier1_llm</code>)</td>
+        <td>Resolves the tree seat and, when no threshold is passed, calls
+          <code>_tree_threshold()</code> at line 676.</td>
+      </tr>
+      <tr>
+        <td>per-batch routing</td>
+        <td><code>imas_codex/graph/dd_domain_classifier.py:1180</code>
+          (<code>_classify_batch_tree</code>)</td>
+        <td>Runs the tree; resolves the threshold at line 1206 when none is
+          passed; routes below-bar paths to chat when the tree's two-level
+          probability is under it (<code>_route_below_threshold</code>,
+          line 1147).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="scg-dd-build-tree-wiring-setting">
+    <strong>The setting.</strong> <code>pyproject.toml:381</code> carries
+    <code>[tool.imas-codex.sn-domain-tree].threshold = 0.9</code>, the bar the
+    tree benchmark calibrated on its held-out rows. It is read by
+    <code>get_sn_domain_tree_threshold()</code>
+    (<code>imas_codex/settings.py:1480</code>), beside the other seat
+    accessors, and reached from the classifier through
+    <code>_tree_threshold()</code>
+    (<code>imas_codex/graph/dd_domain_classifier.py:137</code>). The former
+    <code>DEFAULT_TREE_THRESHOLD = 0.8</code> constant is gone;
+    <code>rg -n "DEFAULT_TREE_THRESHOLD" imas_codex tests</code> finds nothing.
+  </p>
+
+  <p id="scg-dd-build-tree-wiring-cli">
+    The re-classification entry point is the existing CLI, whose
+    <code>--reset-to</code> help reads:
+  </p>
+  <pre><code>--reset-to [built|enriched|refined|embedded]
+                                Re-run an LLM/embed stage on existing nodes
+                                (never deletes). built: clear enrichments
+                                and re-enrich all nodes. enriched: clear
+                                refinements and re-refine all nodes.
+                                refined: clear embeddings and re-embed all
+                                nodes. embedded: clear domain
+                                classifications and re-classify. Needed when
+                                a prompt/model change is invisible to the
+                                content hash.</code></pre>
+
+  <p id="scg-dd-build-tree-wiring-measure">
+    <strong>Measure.</strong> <code>tests/graph/test_dd_build_classify_tree.py</code>
+    drives <code>classify_worker</code> with the GraphClient, the decisions
+    batch and the chat call all stubbed. It shows tier-1 paths reach the
+    decisions endpoint on the <code>sn-domain-tree</code> seat; a path whose
+    two-level probability is below the configured bar reaches chat while one
+    above it does not; and changing the setting alone moves a path across that
+    boundary. Removing the tree from the classify path turns three of these red
+    (<code>logs/red-tree-bypass.log</code>, <code>EXIT=1</code>); holding the
+    threshold as a constant turns two red
+    (<code>logs/red-threshold-hardcoded.log</code>, <code>EXIT=1</code>). The
+    gate files pass 195 at head against 190 at base, zero added failures.
+  </p>
+</article>
