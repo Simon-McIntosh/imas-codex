@@ -18,13 +18,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S16">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;}">
   <title>Signal Search Finds the Measured Signal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="152">
+<meta name="plan-version" content="153">
 <meta name="plan-modified" content="2026-10-14">
-<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47,68c603525,97eac4222,b97d4bdf4,3b1e4a193,1e2dc0252,c0a17c176,72eb206e8,fe031856a,ce47976e0,a54ca1a0e,05d22929b,f746278c4,f13f1e582,dd7e64c92,be370b25b,c5f4bc3bd,bee82d5bd,f244d24d1,d6df6b678,a4f123848,2971756f3,5162f5fec">
+<meta name="plan-commits" content="045d63386,6e3b83550,196d42191,e9aac5b4a,a2069d5aa,1fc59fa52,155d152ee,768b7de47,a75130d50,b1b08f9cb,66b8deea1,1fae67664,585d69a40,b8a47a132,6d0847a69,75a6127f4,1602ff51b,3715b55f6,14d99f2e6,5cf8ff5ac,df7721c40,8d260cf4b,44792accf,58bf125c4,bd90ae832,65ec6ed34,7a5c056db,6bd69f40c,7c13967b7,c71a38be9,f21bdab86,66a9b173d,d60431215,93b083114,bc6c63d78,83c08fd4c,beccf77a5,177406c48,6d346ac86,e2639df98,329e8e230,fb6b0935e,0807206ea,6f8ebd4d7,9adce6cdc,b2df1380e,ecf73f22e,ef05cfa47,68c603525,97eac4222,b97d4bdf4,3b1e4a193,1e2dc0252,c0a17c176,72eb206e8,fe031856a,ce47976e0,a54ca1a0e,05d22929b,f746278c4,f13f1e582,dd7e64c92,be370b25b,c5f4bc3bd,bee82d5bd,f244d24d1,d6df6b678,a4f123848,2971756f3,5162f5fec,82e03fadd,b1b8e8e59,56641fdb4,9e2099212,e683d8341,c99b94b6f,7696c3c0c,8caa66abc,6e02044bb,9685f20f6,b5824d0a1,46531f088,ca33a8696,34d95ec04,b7038eacd,ad2c87a7b,c8cb6fd44,06beb17c0,33134fe28,612105f19,9a1ddd5b6,1d31c321a,b27b4b02c">
 </head>
 <body>
   <main class="plan-doc">
@@ -495,7 +495,7 @@
 <p>The third node owns this section's done-when. <strong>Done when</strong> every JT-60SA FacilitySignal has <code>enriched_at</code> at or after the reprocess start and none is left at <code>discovered</code>; the embedding census reports no mismatch; the role census reports no described signal without a role; the fixture's cutover is the reprocess start and no candidate in any question's RRF top 60 is unlabelled; and the harness table and §7's three passes are re-recorded, with the switch re-checked against §7's ship rule. The negative control is the count of JT-60SA signals enriched before 21:16:46Z on 2026-10-11, the member-individualisation fix: the sample node records it before its first reset, where it is not zero, and the third node records it at zero, so a run that reset nothing cannot pass. The spend, the wall time and the before-and-after tables are in <code>docs/evidence/fragments/signal-search-finds-the-measured-signal/reprocess.html</code>.</p>
 
     <h2 id="s13">§13 — Close what the reviews left open</h2>
-<section data-reckon="section" data-id="s13" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s13" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>
       The independent reviews of §7 to §12 left follow-ons open as their sections closed. Each is a guard that
       cannot fail, a message that misstates its check, a record that disagrees with its own data, or a gap in what
@@ -1027,7 +1027,10 @@
     <div class="r-comment-body"><p>independent review of run r-20261014T130553182473-ssfms-cleanup-integration at head f0ba4fc4a, stored as an imas-codex review record scoring goal_fidelity 20, evidence 19, scope_discipline 20, durability 14, fit 19, reuse 20 (total 112), verdict SOUND WITH FINDINGS, no blocking finding and two follow-on findings; added_failure_count 0 derived from the reviewed run's baseline_suite (770975edc, 0 failures) and after_suite (f0ba4fc4a, 0 failures) gate logs.</p></div>
 </div>
 <div class="r-comment" data-section="s13" data-id="c-run-r-20261014T130553182473-ssfms-cleanup-integration" data-who="reckon-build" data-when="2026-10-14T13:26:31.839Z">
-    <div class="r-comment-body"><p>signal-search-finds-the-measured-signal §13 — at merged head f0ba4fc4a both gate commands exit 0 (default markers 1707 passed, live-graph 9 passed), the RRF arm&#x27;s mean nDCG@10 reads 0.8473, and the JT-60SA role census reads 0 missing with 0 of its 225 underspecified signals carrying a role; base 770975edc is equally green so there are no added failures</p></div>
+    <div class="r-comment-body"><p>signal-search-finds-the-measured-signal §13 — at merged head f0ba4fc4a both gate commands exit 0 (default markers 1707 passed, live-graph 9 passed), the RRF arm's mean nDCG@10 reads 0.8473, and the JT-60SA role census reads 0 missing with 0 of its 225 underspecified signals carrying a role; base 770975edc is equally green so there are no added failures</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-close-s13" data-who="reckon-build" data-when="2026-10-14T13:36:00Z">
+    <div class="r-comment-body"><p>§13 landed (final merge <code>f0ba4fc4a</code>): the open review follow-ons are closed. Report rows render access lines through one helper; the golden guards name their depth, pin every label by digest and require a measurement per question; the signal tests share one recording graph double and pin what they claim. Underspecified signals do not get a role: a blind hand-read agreed with the judge on 26 of 30, below the 27 gate, so the 225 roles were cleared and marking a signal underspecified now clears its role. At the merged head 1,707 tests and 9 live-graph tests pass, RRF holds 0.8473, and no underspecified signal carries a role. Spend: Jev USD 0.0054. <a href="/imas-codex/evidence/archive/signal-search-finds-the-measured-signal-landed.html#s13">evidence</a></p></div>
 </div>
 </section>
 </main>
