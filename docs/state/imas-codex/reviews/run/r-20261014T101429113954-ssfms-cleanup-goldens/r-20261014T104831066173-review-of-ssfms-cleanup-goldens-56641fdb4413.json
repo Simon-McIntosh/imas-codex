@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed run's manifest names no baseline_suite/after_suite gate pair, so added_failure_count is stored as null rather than a measured zero: reckon's added_failures_from_gate_logs returns (None, []) when either named log is absent, and the reviewed scratch directory holds only head-arm and negative-control logs with no base arm. The one gate the manifest records (scratch/gate-graph-or-not.log, 20 passed, EXIT=0) is a head-only observation and cannot yield a delta.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-14T10:14:47Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "the \"shown to fire by\" cell records the new per-question assertion as fired by dropping role=\"measured\", but that mutant fails only test_filtered_call_returns_only_measured_signals and test_filtered_top_holds_no_grade2_command_or_reference (scratch/role-filter-mutant.log, 2 failed 2 passed) and leaves test_every_question_returns_a_grade3_measurement_in_its_filtered_top green, so the record names a control that does not reach the assertion it certifies."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101429113954-ssfms-cleanup-goldens/manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the manifest names no baseline_suite/after_suite gate pair, so this node's added-failure delta cannot be derived from its own logs and the review stores added_failure_count null rather than a measured zero."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none - the landed change is two test modules and four evidence fragments, and no runtime production path imports or reaches a file the node touched.",
+    "diff": "read commit by commit (b1b8e8e59 and 56641fdb4) against 7bbf44b5663c71078d6f94f84901867ba98430b8; two test modules and four docs/evidence fragments, +192/-26, all inside the declared scope.",
+    "done_when": "the plan's measure is that each added check fails without its change and the Section 4 fusion arm holds its mean nDCG@10; scratch/fixture-swap-negative-control.log and scratch/depth-negative-control.log show two checks reddening and scratch/rrf-arm-table.log records rrf 0.8472853917655051 matching 0.8473, but the third check's firing is not shown by the control the node declares for it.",
+    "goal": "the node's goal is to make the golden-set guards fail on the defects they name with the reprocess records agreeing with their own logs; tests/llm/test_signal_search_goldens.py:567 and :752, tests/llm/test_signal_role_filter_live.py:177 and the aligned 1,441 records carry exactly those changes, so the goal is met.",
+    "manifest": "read; it reports status complete, the combined gate 20 passed EXIT=0 and names seven scratch logs, but names no baseline_suite/after_suite gate pair.",
+    "write_paths": "read the manifest's six declared paths; every path in git diff --stat 7bbf44b5663c71078d6f94f84901867ba98430b8..56641fdb4413aaae38a87ca7c8ef9bd98d027a1c lies inside them and no path outside them changed."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_signal_search_goldens.py:585 reddens under the fixture label swap and :764 under the reverted depth change, both recorded as negative controls, while tests/llm/test_signal_role_filter_live.py:177 asserts an independent property of live results.",
+    "evidence": "the combined gate is recorded in scratch/gate-graph-or-not.log (20 passed, EXIT=0) and the arm table in scratch/rrf-arm-table.log records rrf 0.8472853917655051 against the 0.8473 fixed point, but docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html:20 overstates one check's demonstrated firing.",
+    "fit": "the additions extend the existing UnlabelledCandidates shape at tests/llm/test_signal_search_goldens.py:139 and carry no plan label, version suffix or author reference in any added name.",
+    "goal_fidelity": "tests/llm/test_signal_search_goldens.py:567 and :752 tighten two guards and tests/llm/test_signal_role_filter_live.py:177 tightens a third, with the reprocess records aligned at 1,441, which is the whole of the node's stated deliverable.",
+    "reuse": "a capability search over tests/ and imas_codex/ for a fixture-digest owner found only the signed-payload digests in tests/standard_names (a different capability), so _fixture_label_digest at tests/llm/test_signal_search_goldens.py:101 is this capability's first owner and it reuses the existing toy-question helpers.",
+    "scope_discipline": "every path in the two-commit diff against 7bbf44b5663c71078d6f94f84901867ba98430b8 is inside the six declared write paths in the reviewed manifest."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to make the golden-set guards fail on the defects they name with the reprocess records agreeing with their own logs; tests/llm/test_signal_search_goldens.py:567 and :752 tighten two guards, tests/llm/test_signal_role_filter_live.py:177 tightens a third, and the reprocess records are aligned at 1,441, so all four items landed.\nVERDICT done_when: the plan's measure is that each added check fails without its change and the Section 4 fusion arm holds its mean nDCG@10; scratch/fixture-swap-negative-control.log and scratch/depth-negative-control.log show two checks reddening under a reverted change, scratch/rrf-arm-table.log records rrf 0.8472853917655051 against the 0.8473 fixed point, but the third check's firing is not shown by the control the node declares for it.\nVERDICT write_paths: read the manifest's six declared paths; every path in git diff --stat 7bbf44b5663c71078d6f94f84901867ba98430b8..56641fdb4413aaae38a87ca7c8ef9bd98d027a1c lies inside them and no path outside them changed.\nVERDICT manifest: read; it reports status complete with the combined gate 20 passed EXIT=0 and names seven scratch logs, but names no baseline_suite/after_suite gate pair, so its added-failure delta is unmeasured.\nVERDICT diff: read commit by commit (b1b8e8e59 and 56641fdb4) against 7bbf44b5663c71078d6f94f84901867ba98430b8; two test modules and four docs/evidence fragments, +192/-26, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/llm/test_signal_search_goldens.py:567 and :752 tighten two guards, tests/llm/test_signal_role_filter_live.py:177 tightens a third, and the reprocess records now agree at 1,441, which is the whole of the node's stated deliverable.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate is recorded in scratch/gate-graph-or-not.log (20 passed, EXIT=0) and scratch/rrf-arm-table.log records rrf 0.8472853917655051 against the 0.8473 fixed point, but docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html:20 names a control that does not reach the assertion it certifies.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the two-commit diff (tests/llm/test_signal_search_goldens.py, tests/llm/test_signal_role_filter_live.py and four docs/evidence fragments) lies inside the six declared write paths in the reviewed manifest.\nSCORE durability: 18\nJUSTIFICATION durability: tests/llm/test_signal_search_goldens.py:585 reddens under the fixture label swap (scratch/fixture-swap-negative-control.log) and :764 reddens with the change reverted (scratch/depth-negative-control.log), while tests/llm/test_signal_role_filter_live.py:177 is a genuine property of live results whose declared control never exercises it.\nSCORE fit: 19\nJUSTIFICATION fit: the additions extend the existing shape of tests/llm/test_signal_search_goldens.py:139 UnlabelledCandidates and :96 FIXTURE_LABEL_DIGEST, and no added name carries a plan label, version suffix or author reference.\nSCORE reuse: 19\nJUSTIFICATION reuse: a capability search over tests/ and imas_codex/ for a fixture-digest owner found only the signed-payload digests in tests/standard_names (a different capability), so _fixture_label_digest at tests/llm/test_signal_search_goldens.py:101 is this capability's first owner and it reuses the existing toy-question helpers.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-goldens.html:20 follow-on: the \"shown to fire by\" cell records the new per-question assertion as fired by dropping role=\"measured\", but that mutant fails only test_filtered_call_returns_only_measured_signals and test_filtered_top_holds_no_grade2_command_or_reference (scratch/role-filter-mutant.log, 2 failed 2 passed) and leaves test_every_question_returns_a_grade3_measurement_in_its_filtered_top green, so the record names a control that does not reach the assertion it certifies.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101429113954-ssfms-cleanup-goldens/manifest.md:1 follow-on: the manifest names no baseline_suite/after_suite gate pair, so this node's added-failure delta cannot be derived from its own logs and the review stores added_failure_count null rather than a measured zero.\n",
+  "review_run_id": "r-20261014T104831066173-review-of-ssfms-cleanup-goldens-56641fdb4413",
+  "reviewed_base_sha": "7bbf44b5663c71078d6f94f84901867ba98430b8",
+  "reviewed_head_sha": "56641fdb4413aaae38a87ca7c8ef9bd98d027a1c",
+  "reviewed_run_id": "r-20261014T101429113954-ssfms-cleanup-goldens",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T11:28:56.627330+00:00",
+  "total": 111
+}
