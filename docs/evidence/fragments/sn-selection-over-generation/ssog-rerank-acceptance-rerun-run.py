@@ -42,8 +42,10 @@ import os
 import random
 import sys
 import tempfile
+import time
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 SEED = 20261014
 N_ITEMS = 40
@@ -106,7 +108,7 @@ def draw_held_out(
     domains = sorted(by_domain)
     for domain in domains:
         rng.shuffle(by_domain[domain])
-    pointers = {d: 0 for d in domains}
+    pointers = dict.fromkeys(domains, 0)
     chosen: list[dict[str, Any]] = []
     while len(chosen) < count:
         progressed = False
@@ -297,7 +299,10 @@ def acceptance_interval(
 
     labels = [1.0 if a or b else 0.0 for a, b in zip(accept_a, accept_b, strict=True)]
     interval = bootstrap_interval(
-        labels, [float(b) for b in accept_b], scores_b=[float(a) for a in accept_a], seed=123
+        labels,
+        [float(b) for b in accept_b],
+        scores_b=[float(a) for a in accept_a],
+        seed=123,
     )
     return interval
 
@@ -357,6 +362,65 @@ def _recorded_sources(records: Sequence[dict[str, Any]]) -> set[str]:
     return {r["source_id"] for r in records if r.get("source_id")}
 
 
+def batch_sources(batch: dict[str, Any]) -> set[str]:
+    """The sources one extraction batch composes."""
+    return {it.get("source_id", it.get("path", "")) for it in batch.get("items", [])}
+
+
+async def drain_arm(
+    arm_key: str,
+    switch: str | None,
+    queue: list[dict[str, Any]],
+    source_paths: list[str],
+    state: dict[str, Any],
+    out: Path,
+    scratch: Path,
+    *,
+    concurrency: int,
+    budget_s: float,
+) -> int:
+    """Compose *queue* through one arm, up to *concurrency* units in flight.
+
+    Each unit is persisted the moment it completes, so a pass cut short by the
+    shell's wall bound loses only what was still in flight. No unit is launched
+    after *budget_s*, which is what lets the pass return and write its summary
+    rather than dying under ``timeout`` with nothing recorded and no exit line.
+    """
+    done = _recorded_sources(state[arm_key]["records"]) | set(
+        state[arm_key].get("sources_done", [])
+    )
+    stop = time.monotonic() + budget_s
+    sem = asyncio.Semaphore(max(1, concurrency))
+    lock = asyncio.Lock()
+    launched = 0
+
+    async def one(idx: int, batch: dict[str, Any]) -> None:
+        nonlocal launched
+        async with sem:
+            if time.monotonic() >= stop:
+                return
+            launched += 1
+            records, cost = await run_arm_batch(
+                batch, source_paths, switch, scratch / f"{arm_key}-{idx}.json"
+            )
+            async with lock:
+                state[arm_key]["records"].extend(records)
+                state[arm_key]["cost_usd"] = round(state[arm_key]["cost_usd"] + cost, 6)
+                done.update(_recorded_sources(records) | batch_sources(batch))
+                state[arm_key]["sources_done"] = sorted(done)
+                state[arm_key]["units_completed"] = (
+                    state[arm_key].get("units_completed", 0) + 1
+                )
+                _write_results(out, state)
+                print(
+                    f"{arm_key} {batch.get('group_key')} records={len(records)} "
+                    f"done={len(done)}"
+                )
+
+    await asyncio.gather(*(one(i, b) for i, b in enumerate(queue)))
+    return launched
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -411,9 +475,14 @@ async def _amain(args: argparse.Namespace) -> int:
             "switch_env": SWITCH_ENV,
         }
     )
-    state.setdefault("positive_control", {"batches": [],
-                                          "switch_changes_harness_compose_prompt": False,
-                                          "rerank_cost_usd": 0.0})
+    state.setdefault(
+        "positive_control",
+        {
+            "batches": [],
+            "switch_changes_harness_compose_prompt": False,
+            "rerank_cost_usd": 0.0,
+        },
+    )
     state.setdefault("arm_a", {"records": [], "cost_usd": 0.0})
     state.setdefault("arm_b", {"records": [], "cost_usd": 0.0})
     state["status"] = "in-progress"
@@ -429,13 +498,19 @@ async def _amain(args: argparse.Namespace) -> int:
         if not row:
             continue
         state["positive_control"]["batches"].append(row)
-        state["positive_control"]["n_batches"] = len(state["positive_control"]["batches"])
+        state["positive_control"]["n_batches"] = len(
+            state["positive_control"]["batches"]
+        )
         state["positive_control"]["switch_changes_harness_compose_prompt"] = any(
             r.get("differs") for r in state["positive_control"]["batches"]
         )
         state["positive_control"]["rerank_cost_usd"] = round(
-            sum(r.get("rerank_cost_usd", 0.0)
-                for r in state["positive_control"]["batches"]), 6)
+            sum(
+                r.get("rerank_cost_usd", 0.0)
+                for r in state["positive_control"]["batches"]
+            ),
+            6,
+        )
         _write_results(out, state)
         print(f"control {row['group_key']} differs={row['differs']}")
 
@@ -448,33 +523,34 @@ async def _amain(args: argparse.Namespace) -> int:
         print("POSITIVE CONTROL FAILED — wrote", out)
         return 3
 
-    # 4. Both arms, per batch, persisted as each batch completes; a batch whose
-    #    sources are all recorded is skipped, so a later pass never recomposes
-    #    a recorded source.
-    for arm_key, switch in (("arm_a", None), ("arm_b", "1")):
-        # A source is done once it has been composed in this arm, whether or not
-        # it yielded a scoring candidate: a batch the model answers with only
-        # vocabulary gaps leaves no record, and without the attempted set it
-        # would be recomposed on every pass and never advance.
+    # 4. One arm per pass. The rerank switch is read from the environment at
+    #    call time (``comparator_rerank_enabled``), so two settings in flight
+    #    together would rerank the arm meant to run without it: the pass serves
+    #    whichever arm has more sources left, up to ``--concurrency`` units in
+    #    flight, and the other arm gets a fresh process on the next pass.
+    def remaining(arm_key: str) -> list[dict[str, Any]]:
         done = _recorded_sources(state[arm_key]["records"]) | set(
             state[arm_key].get("sources_done", [])
         )
-        for batch in batches:
-            batch_sources = {
-                it.get("source_id", it.get("path", "")) for it in batch.get("items", [])
-            }
-            if not batch_sources or batch_sources <= done:
-                continue
-            records, cost = await run_arm_batch(
-                batch, source_paths, switch, scratch / f"{arm_key}.json"
-            )
-            state[arm_key]["records"].extend(records)
-            state[arm_key]["cost_usd"] = round(
-                state[arm_key]["cost_usd"] + cost, 6)
-            done |= _recorded_sources(records) | batch_sources
-            state[arm_key]["sources_done"] = sorted(done)
-            _write_results(out, state)
-            print(f"{arm_key} {batch.get('group_key')} records={len(records)}")
+        return [b for b in batches if batch_sources(b) and not batch_sources(b) <= done]
+
+    arm_key, switch = max(
+        (("arm_a", None), ("arm_b", "1")), key=lambda kv: len(remaining(kv[0]))
+    )
+    queue = remaining(arm_key)
+    if queue:
+        launched = await drain_arm(
+            arm_key,
+            switch,
+            queue,
+            source_paths,
+            state,
+            out,
+            scratch,
+            concurrency=args.concurrency,
+            budget_s=args.pass_budget,
+        )
+        print(f"pass {arm_key} launched={launched} queued={len(queue)}")
 
     state["summary"] = summarise(state["arm_a"], state["arm_b"])
     state["spend_usd"] = round(
@@ -483,20 +559,38 @@ async def _amain(args: argparse.Namespace) -> int:
         + state["arm_b"]["cost_usd"],
         6,
     )
-    state["status"] = "ok"
+    left = {k: len(remaining(k)) for k in ("arm_b", "arm_a")}
+    state["sources_remaining"] = left
+    state["status"] = "ok" if not any(left.values()) else "blocked"
     _write_results(out, state)
-    print(json.dumps({"summary": state["summary"],
-                      "spend_usd": state["spend_usd"]}, indent=2))
+    print(
+        json.dumps(
+            {
+                "summary": state["summary"],
+                "spend_usd": state["spend_usd"],
+                "sources_remaining": left,
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--out", default=str(Path(__file__).resolve().parent / "ssog-rerank-acceptance-rerun-results.json"))
+    ap.add_argument(
+        "--out",
+        default=str(
+            Path(__file__).resolve().parent
+            / "ssog-rerank-acceptance-rerun-results.json"
+        ),
+    )
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--items", type=int, default=N_ITEMS)
     ap.add_argument("--boundary-suffix", default="_density_at_plasma_boundary")
     ap.add_argument("--draw-only", action="store_true")
+    ap.add_argument("--concurrency", type=int, default=4)
+    ap.add_argument("--pass-budget", type=float, default=300.0)
     args = ap.parse_args(argv)
     return asyncio.run(_amain(args))
 
