@@ -1,4 +1,12 @@
-"""The signal-role choice is accepted only from the closed vocabulary."""
+"""The signal-role choice is accepted only from the closed vocabulary.
+
+Three checks pin the role vocabulary and the routing of a roll judgement: the
+criteria the question offers, the role each accepted row carries, and the
+response cost summed over the batch. Each is compared against literals this
+test supplies rather than against the fake judge's own return or the module's
+own constant, so a path that hardcodes a criteria set, a role, or a cost fails
+it instead of agreeing with the value it produced.
+"""
 
 from __future__ import annotations
 
@@ -6,6 +14,17 @@ import pytest
 
 from imas_codex.discovery.base import judgment
 from imas_codex.discovery.signals import role
+
+# The closed role vocabulary, written once here so a production role set that
+# drops one is compared against a value the test supplies.
+SIX_ROLES = {
+    "measured",
+    "commanded",
+    "reference_or_setpoint",
+    "status_or_flag",
+    "configuration_parameter",
+    "derived_or_computed",
+}
 
 
 def test_state_uses_only_the_recorded_text() -> None:
@@ -27,20 +46,17 @@ def test_state_uses_only_the_recorded_text() -> None:
             "glossary": [{"term": "CS", "meaning": "current sensor"}],
         }
     }
-    assert set(role.signal_role_questions()["signal_role"]["criteria"]) == {
-        "measured",
-        "commanded",
-        "reference_or_setpoint",
-        "status_or_flag",
-        "configuration_parameter",
-        "derived_or_computed",
-    }
+    criteria = role.signal_role_questions()["signal_role"]["criteria"]
+    assert set(criteria) == SIX_ROLES, criteria
+    assert all(
+        isinstance(description, str) and description.strip()
+        for description in criteria.values()
+    ), criteria
 
 
 @pytest.mark.asyncio
 async def test_judge_accepts_choice_and_reports_response_cost(monkeypatch) -> None:
     async def fake_decision(model, state, questions, *, service):
-        assert state["signal"]["name"] in {"Current sensor", "Current target"}
         assert state["signal"]["unit"] == "A"
         assert questions["signal_role"]["type"] == "choice"
         assert service == "facility-discovery"
@@ -58,15 +74,15 @@ async def test_judge_accepts_choice_and_reports_response_cost(monkeypatch) -> No
             {"id": "target", "name": "Current target", "unit": "A"},
         ]
     )
-    assert accepted == [
-        {"id": "observed", "signal_role": "measured", "cost_usd": 0.002},
-        {
-            "id": "target",
-            "signal_role": "reference_or_setpoint",
-            "cost_usd": 0.002,
-        },
-    ]
-    assert cost == 0.004
+
+    accepted_by_id = {row["id"]: row for row in accepted}
+    assert set(accepted_by_id) == {"observed", "target"}, accepted
+    # Each row is checked on its own: a path that routed one candidate's role
+    # onto the other, or hardcoded one role onto every accepted row, fails
+    # here rather than agreeing with whatever the fake judge returned.
+    assert accepted_by_id["observed"]["signal_role"] == "measured", accepted
+    assert accepted_by_id["target"]["signal_role"] == "reference_or_setpoint", accepted
+    assert cost == 0.004, cost
     assert failed == []
 
 

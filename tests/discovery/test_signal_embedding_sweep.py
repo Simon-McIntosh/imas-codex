@@ -23,6 +23,8 @@ import re
 import pytest
 
 from imas_codex.discovery.signals import parallel
+from imas_codex.graph import GraphClient
+from tests.recording_graph_client import RecordingGraphClient
 
 
 def _embedding_of(text: str) -> list[float]:
@@ -231,17 +233,6 @@ def test_writer_and_census_share_one_embed_text_derivation(monkeypatch):
     )
 
 
-class _RecordingClient:
-    """Captures each statement and its parameters, answering with no rows."""
-
-    def __init__(self):
-        self.calls: list[tuple[str, dict]] = []
-
-    def query(self, cypher: str, **params):
-        self.calls.append((cypher, params))
-        return []
-
-
 def test_facility_scoped_state_query_separates_joining_clauses_from_return():
     """The facility clause is whitespace-separated from RETURN and binds $facility.
 
@@ -251,7 +242,7 @@ def test_facility_scoped_state_query_separates_joining_clauses_from_return():
     facility parameter must also reach the query, so the population is one
     facility's signals rather than every facility's.
     """
-    client = _RecordingClient()
+    client = RecordingGraphClient()
     parallel.census_signal_embeddings(facility="jt-60sa", gc=client)
 
     assert client.calls, "the census issued no state query"
@@ -267,13 +258,19 @@ def test_census_statement_runs_against_the_live_graph():
     ``census_signal_embeddings`` opens its own ``GraphClient``, reads every
     ``FacilitySignal`` and runs the hash-mismatch statement over them. Against
     the live graph it must return a population count and a mismatch count whose
-    parts add up, with one named id per mismatch. Run with ``-m graph``; the
-    default markers exclude it.
+    parts add up, with one named id per mismatch. The population must equal an
+    independent count of ``FacilitySignal`` nodes read in this test, and be
+    above zero: a census that read nothing reports zero on both sides and would
+    otherwise pass. Run with ``-m graph``; the default markers exclude it.
     """
     result = parallel.census_signal_embeddings()
+    with GraphClient() as client:
+        independent = client.query("MATCH (s:FacilitySignal) RETURN count(s) AS n")[0][
+            "n"
+        ]
 
-    assert isinstance(result["n"], int), result
-    assert result["n"] >= 0, result
+    assert result["n"] == independent, (result["n"], independent)
+    assert result["n"] > 0, result
     assert result["mismatch"] == result["missing_hash"] + result["differing"], result
     assert len(result["mismatch_ids"]) == result["mismatch"], result
 
