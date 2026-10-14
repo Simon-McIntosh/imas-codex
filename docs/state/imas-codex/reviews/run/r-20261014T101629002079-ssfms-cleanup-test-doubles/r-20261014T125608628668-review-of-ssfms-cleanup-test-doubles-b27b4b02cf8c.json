@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101456912610-ssfms-cleanup-test-doubles/logs. Baseline arm: base-default.log ends \"9 passed, 2 deselected\" EXIT=0 and base-graph.log ends \"2 passed, 5 deselected\" EXIT=0, so the baseline failure set is empty. After arm: head-default.log ends \"9 passed, 2 deselected\" EXIT=0 and head-graph.log ends \"2 passed, 5 deselected\" EXIT=0, so the after failure set is also empty. added_failure_count = |after - baseline| = 0 with added_failure_ids = [].",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/signals/role.py:judge_signal_roles",
+    "imas_codex/discovery/signals/role.py:signal_role_questions",
+    "imas_codex/discovery/signals/parallel.py:census_signal_embeddings"
+  ],
+  "completed_at": "2026-10-14T13:02:57.475Z",
+  "dispatched_at": "2026-10-14T12:56:22Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles.html",
+      "line": "146",
+      "severity": "follow-on",
+      "text": "follow-on: the head gate arm names revision 1d31c321a91ec1075ca77be1c23e676c69a1fab4 while the reviewed head is b27b4b02cf8ce77b90242e5ccd16dd59f76238be, and the manifest describes that arm as \"measured at the final head\"; the reviewed head is a docs-only change to this fragment, so the measured test state is identical, but the revision the record names is not the revision being promoted."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "three production call sites verified: imas_codex/discovery/signals/role.py:judge_signal_roles, :signal_role_questions and imas_codex/discovery/signals/parallel.py:census_signal_embeddings, reached by tests/discovery/test_signal_role.py:15 and tests/discovery/test_signal_embedding_sweep.py:25.",
+    "diff": "read the three gained commits against base 612105f19 \u2014 9a1ddd5b6 (per-row cost pin in test_signal_role.py plus an independent JT-60SA count in test_signal_embedding_sweep.py), 1d31c321a (fragment corrections and figure regeneration) and b27b4b02c (gate-result paragraph names its revision) \u2014 four files, all inside the declared scope.",
+    "done_when": "the done_when requires the role checks to fail under a mutation and the gate to pass at head with zero added failures against base; the manifest's base arm (logs/base-default.log \"9 passed, 2 deselected\" EXIT=0) and head arm (logs/head-default.log same counts, EXIT=0) give zero added failures, and logs/nc-06-row-cost.log reproduces the row-cost mutation failing with EXIT=1.",
+    "goal": "read the source node's goal (\"replace the signal tests' unfalsifiable checks with ones a regression fails, sharing one statement-capturing graph double\"); the three gained commits continue that node \u2014 tests/discovery/test_signal_role.py:90-91 restores the per-row cost pin and tests/discovery/test_signal_embedding_sweep.py:298 replaces the frozen 15111 literal with an independent JT-60SA count.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101456912610-ssfms-cleanup-test-doubles/manifest.md; status complete, repair_notes_3 records answering the prior review's blocking finding by 9a1ddd5b6 with logs/nc-06-row-cost.log, and each log now names its revision in its header.",
+    "write_paths": "the source node's declared write_paths list eight paths including tests/discovery/test_signal_role.py, tests/discovery/test_signal_embedding_sweep.py, the evidence fragment and the figure directory; the increment's four changed paths are all inside that set."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_signal_role.py:90 fails under the row-cost mutation that the answering commit guards (logs/nc-repair3-control.log: 3 passed with 612105f19 restored, 1 failed at the head) and tests/discovery/test_signal_embedding_sweep.py:298 fails under the zeroed census (logs/nc-04-hardcoded-population.log, AssertionError (0, 15111)).",
+    "evidence": "logs/head-default.log and logs/base-default.log each end \"9 passed, 2 deselected\" EXIT=0 with the revision named in the header, and logs/nc-06-row-cost.log and logs/nc-repair3-control.log reproduce the repaired regression reddening; the head arm names revision 1d31c321a rather than the reviewed head b27b4b02c.",
+    "fit": "the added comments at tests/discovery/test_signal_role.py:87-89 and the new docstring at tests/discovery/test_signal_embedding_sweep.py:285-288 state the mechanism and carry no plan, version, sprint or ticket identifier, matching the surrounding test idiom.",
+    "goal_fidelity": "tests/discovery/test_signal_role.py:90 pins each accepted row's cost_usd to the 0.002 literal the fake judge prices one decision at, restoring the guard the prior review found dropped, and tests/discovery/test_signal_embedding_sweep.py:298 compares the facility-scoped census against an independent count.",
+    "reuse": "the increment adds no definition \u2014 it reads the existing GraphClient (tests/discovery/test_signal_embedding_sweep.py:26) and the shared RecordingGraphClient owner tests/recording_graph_client.py:18 that the suite already imports.",
+    "scope_discipline": "the increment's four changed paths \u2014 tests/discovery/test_signal_role.py, tests/discovery/test_signal_embedding_sweep.py, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles.html and its figure \u2014 are all inside the source node's declared write_paths, with no product source touched by this increment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the source node's goal (\"replace the signal tests' unfalsifiable checks with ones a regression fails, sharing one statement-capturing graph double\"); the three gained commits continue that node \u2014 tests/discovery/test_signal_role.py:90-91 restores the per-row cost pin and tests/discovery/test_signal_embedding_sweep.py:298 replaces the frozen 15111 literal with an independent JT-60SA count.\nVERDICT done_when: the done_when requires the role checks to fail under a mutation and the gate to pass at head with zero added failures against base; the manifest's base arm (logs/base-default.log \"9 passed, 2 deselected\" EXIT=0) and head arm (logs/head-default.log same counts, EXIT=0) give zero added failures, and logs/nc-06-row-cost.log reproduces the row-cost mutation failing with EXIT=1.\nVERDICT write_paths: the source node's declared write_paths list eight paths including tests/discovery/test_signal_role.py, tests/discovery/test_signal_embedding_sweep.py, the evidence fragment and the figure directory; the increment's four changed paths are all inside that set.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T101456912610-ssfms-cleanup-test-doubles/manifest.md; status complete, repair_notes_3 records answering the prior review's blocking finding by 9a1ddd5b6 with logs/nc-06-row-cost.log, and each log now names its revision in its header.\nVERDICT diff: read the three gained commits against base 612105f19 \u2014 9a1ddd5b6 (per-row cost pin in test_signal_role.py plus an independent JT-60SA count in test_signal_embedding_sweep.py), 1d31c321a (fragment corrections and figure regeneration) and b27b4b02c (gate-result paragraph names its revision) \u2014 four files, all inside the declared scope.\nCALL_SITES: imas_codex/discovery/signals/role.py:judge_signal_roles, imas_codex/discovery/signals/role.py:signal_role_questions, imas_codex/discovery/signals/parallel.py:census_signal_embeddings\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/discovery/test_signal_role.py:90 pins each accepted row's cost_usd to the 0.002 literal the fake judge prices one decision at, restoring the guard the prior review found dropped, and tests/discovery/test_signal_embedding_sweep.py:298 compares the facility-scoped census against an independent count.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/head-default.log and logs/base-default.log each end \"9 passed, 2 deselected\" EXIT=0 with the revision named in the header, and logs/nc-06-row-cost.log and logs/nc-repair3-control.log reproduce the repaired regression reddening; the head arm names revision 1d31c321a rather than the reviewed head b27b4b02c.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the increment's four changed paths \u2014 tests/discovery/test_signal_role.py, tests/discovery/test_signal_embedding_sweep.py, docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles.html and its figure \u2014 are all inside the source node's declared write_paths, with no product source touched by this increment.\nSCORE durability: 19\nJUSTIFICATION durability: tests/discovery/test_signal_role.py:90 fails under the row-cost mutation that the answering commit guards (logs/nc-repair3-control.log: 3 passed with 612105f19 restored, 1 failed at the head) and tests/discovery/test_signal_embedding_sweep.py:298 fails under the zeroed census (logs/nc-04-hardcoded-population.log, AssertionError (0, 15111)).\nSCORE fit: 19\nJUSTIFICATION fit: the added comments at tests/discovery/test_signal_role.py:87-89 and the new docstring at tests/discovery/test_signal_embedding_sweep.py:285-288 state the mechanism and carry no plan, version, sprint or ticket identifier, matching the surrounding test idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the increment adds no definition \u2014 it reads the existing GraphClient (tests/discovery/test_signal_embedding_sweep.py:26) and the shared RecordingGraphClient owner tests/recording_graph_client.py:18 that the suite already imports.\nFINDING docs/evidence/fragments/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles.html:146 follow-on: the head gate arm names revision 1d31c321a91ec1075ca77be1c23e676c69a1fab4 while the reviewed head is b27b4b02cf8ce77b90242e5ccd16dd59f76238be, and the manifest describes that arm as \"measured at the final head\"; the reviewed head is a docs-only change to this fragment, so the measured test state is identical, but the revision the record names is not the revision being promoted.\n",
+  "review_run_id": "r-20261014T125608628668-review-of-ssfms-cleanup-test-doubles-b27b4b02cf8c",
+  "reviewed_base_sha": "612105f19fba38855af48392502afc7d5b020113",
+  "reviewed_head_sha": "b27b4b02cf8ce77b90242e5ccd16dd59f76238be",
+  "reviewed_run_id": "r-20261014T101629002079-ssfms-cleanup-test-doubles",
+  "reviewer": "review-of-ssfms-cleanup-test-doubles",
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T13:01:18.448522+00:00",
+  "total": 115
+}
