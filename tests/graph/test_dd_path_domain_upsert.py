@@ -3,12 +3,19 @@
 import re
 
 from imas_codex.graph.build_dd import _batch_create_path_nodes
+from tests.recording_graph_client import RecordingGraphClient
 
 
-class _RecordingClient:
-    """Record path upserts and apply their domain assignment to fixture nodes."""
+class _DomainCompletingClient(RecordingGraphClient):
+    """Record path upserts and apply their domain assignment to fixture nodes.
+
+    The statement capture and the empty default answer come from the shared
+    :class:`RecordingGraphClient`; this subclass keeps the fixture's nodes and
+    the domain-assignment logic the test asserts on.
+    """
 
     def __init__(self) -> None:
+        super().__init__()
         self.nodes = {
             "core_profiles/classified": {
                 "physics_domain": "core_plasma_physics",
@@ -24,6 +31,7 @@ class _RecordingClient:
         self.upsert = ""
 
     def query(self, cypher: str, **parameters: object) -> list[dict]:
+        self.calls.append((cypher, parameters))
         if "MERGE (path:IMASNode {id: p.id})" not in cypher:
             return []
         self.upsert = cypher
@@ -50,7 +58,7 @@ class _RecordingClient:
 
 
 def test_path_upsert_keeps_classified_domain_and_defaults_unclassified_path() -> None:
-    client = _RecordingClient()
+    client = _DomainCompletingClient()
     classified_before = client.nodes["core_profiles/classified"].copy()
 
     _batch_create_path_nodes(

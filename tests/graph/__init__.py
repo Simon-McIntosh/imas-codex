@@ -1,7 +1,9 @@
 """Graph quality and compliance tests.
 
-These tests require a live Neo4j connection and are excluded from
-default test runs. Run explicitly with:
+Only tests marked ``graph`` need a live Neo4j connection; the default run
+excludes that marker. The package also holds guards that need no graph — a
+graph-client double stands in for the server — and those run by default. Run
+the live tests explicitly with:
 
     uv run pytest tests/graph/ -m graph -v
 

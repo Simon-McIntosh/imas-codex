@@ -16,24 +16,39 @@ from pathlib import Path
 
 from imas_codex.discovery.signals.role import ROLE_CRITERIA, judge_signal_roles
 
-FIXTURE = Path(__file__).parent / "fixtures" / "signal_role_random_labels.json"
+DEFAULT_FIXTURE = Path(__file__).parent / "fixtures" / "signal_role_random_labels.json"
 REPORT = (
     Path(__file__).parents[2]
     / "docs/evidence/fragments/signal-search-finds-the-measured-signal/signal-role-random.html"
 )
 MAX_SPEND_USD = 0.5
+UNIFORM_SAMPLE_ROWS = 200
 
 
-def load_fixture() -> dict:
-    fixture = json.loads(FIXTURE.read_text())
+def load_fixture(fixture_path: Path) -> dict:
+    """Load a role fixture and check the invariants every set must hold.
+
+    Both the uniform random sample and the stratified hand labels carry signals
+    with the text sent to the judge and one hand label from the closed role
+    vocabulary. A fixture that also declares a ``selection`` block is the
+    uniform sample: it must carry exactly the drawn row count and declare its
+    uniform-sampling method, so a reshuffled or top-up fixture is refused.
+    """
+    fixture = json.loads(fixture_path.read_text())
     rows = fixture["signals"]
-    if len(rows) != 200 or len({row["id"] for row in rows}) != 200:
-        raise ValueError("fixture must contain 200 distinct signals")
-    if (
-        fixture["selection"]["method"]
-        != "random.Random(seed).sample(sorted(eligible_ids), 200)"
-    ):
-        raise ValueError("fixture must declare uniform sampling")
+    if len({row["id"] for row in rows}) != len(rows):
+        raise ValueError("fixture has duplicate signal ids")
+    selection = fixture.get("selection")
+    if selection is not None:
+        if len(rows) != UNIFORM_SAMPLE_ROWS:
+            raise ValueError(
+                f"uniform-sample fixture must contain {UNIFORM_SAMPLE_ROWS} signals"
+            )
+        if (
+            selection["method"]
+            != "random.Random(seed).sample(sorted(eligible_ids), 200)"
+        ):
+            raise ValueError("fixture must declare uniform sampling")
     if any(row.get("hand_label") not in ROLE_CRITERIA for row in rows):
         raise ValueError("fixture has a missing or invalid hand label")
     if any(
@@ -83,7 +98,7 @@ async def measure(rows: list[dict], receipt: Path) -> tuple[list[dict], float]:
             raise RuntimeError(
                 f"unanswered role choices at batch {offset // 10}: {ids}"
             )
-        print(f"judged={len(judged)}/200 spent_usd={spent:.6f}", flush=True)
+        print(f"judged={len(judged)}/{len(rows)} spent_usd={spent:.6f}", flush=True)
         if spent <= 0:
             raise RuntimeError("pilot returned no positive response-usage cost")
         if spent >= MAX_SPEND_USD:
@@ -92,8 +107,8 @@ async def measure(rows: list[dict], receipt: Path) -> tuple[list[dict], float]:
             raise RuntimeError("pilot cost predicts spend above USD 0.5")
     if abs(sum(row["cost_usd"] for row in judged) - spent) > 1e-8:
         raise ValueError("per-response usage does not reconcile with batch cost")
-    if len(judged) != 200:
-        raise ValueError("receipt does not cover all 200 signals")
+    if len(judged) != len(rows):
+        raise ValueError("receipt does not cover every fixture signal")
     return judged, spent
 
 
@@ -170,13 +185,25 @@ def render(fixture: dict, judged: list[dict], result: dict) -> str:
         for row in fixture["signals"]
         if row["hand_label"] != by_id[row["id"]]["signal_role"]
     )
-    selection = fixture["selection"]
+    selection = fixture.get("selection")
+    if selection:
+        provenance = (
+            "A seeded uniform draw without role-word selection: "
+            f"{len(fixture['signals'])} of {selection['population_size']} eligible "
+            f"JT-60SA signals, seed {selection['seed']}."
+        )
+    else:
+        provenance = escape(fixture["description"])
+    rule = fixture.get("label_rule")
+    rule_paragraph = (
+        f'<p id="ssfms-role-random-sample-rule">{escape(rule)}</p>' if rule else ""
+    )
     verdict = "meets" if result["threshold_met"] else "does not meet"
     return f"""<section id="ssfms-role-random-sample-results" data-reckon="fragment">
   <h2 id="ssfms-role-random-sample-title">Uniform random signal-role sample</h2>
-  <p id="ssfms-role-random-sample-selection">A seeded uniform draw without role-word selection: 200 of {selection["population_size"]} eligible JT-60SA signals, seed {selection["seed"]}. Eligible means enriched at or after {escape(fixture["eligibility"]["enriched_at_cutover"])}. Labels were frozen at {escape(fixture["labelled_at"])} before the judge ran. The judge read each fixture's name, description, unit and glossary. No signal_role property was written to the graph.</p>
-  <p id="ssfms-role-random-sample-rule">{escape(fixture["label_rule"])}</p>
-  <p id="ssfms-role-random-sample-summary">Overall agreement: <strong>{result["correct"]}/200 ({result["agreement"]:.1%})</strong>, which <strong>{verdict}</strong> the lead's 90% threshold for wiring the role into enrichment. Response-usage spend: <strong>USD {result["cost_usd"]:.6f}</strong>, or USD {result["cost_per_signal_usd"]:.7f} per signal.</p>
+  <p id="ssfms-role-random-sample-selection">{provenance} Eligible means enriched at or after {escape(fixture["eligibility"]["enriched_at_cutover"])}. Labels were frozen at {escape(fixture["labelled_at"])} before the judge ran. The judge read each fixture's name, description, unit and glossary. No signal_role property was written to the graph.</p>
+  {rule_paragraph}
+  <p id="ssfms-role-random-sample-summary">Overall agreement: <strong>{result["correct"]}/{len(fixture["signals"])} ({result["agreement"]:.1%})</strong>, which <strong>{verdict}</strong> the lead's 90% threshold for wiring the role into enrichment. Response-usage spend: <strong>USD {result["cost_usd"]:.6f}</strong>, or USD {result["cost_per_signal_usd"]:.7f} per signal.</p>
   <h3 id="ssfms-role-random-sample-distribution">Sample distribution and agreement by hand label</h3>
   <table><thead><tr><th>Role</th><th>Sampled</th><th>Correct</th><th>Agreement</th></tr></thead><tbody>{role_rows}</tbody></table>
   <h3 id="ssfms-role-random-sample-confusion">Confusion: hand label by judged role</h3>
@@ -188,14 +215,26 @@ def render(fixture: dict, judged: list[dict], result: dict) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
     parser.add_argument("--output", type=Path, default=REPORT)
     parser.add_argument(
         "--receipt",
         type=Path,
         default=Path(os.environ["TMPDIR"]) / "signal_role_random_receipt.jsonl",
     )
+    parser.add_argument(
+        "--load-only",
+        action="store_true",
+        help="load and validate the fixture, report its row count, spend nothing",
+    )
     args = parser.parse_args()
-    fixture = load_fixture()
+    fixture = load_fixture(args.fixture)
+    print(
+        f"fixture={args.fixture} rows={len(fixture['signals'])} spend_usd=0.000000",
+        flush=True,
+    )
+    if args.load_only:
+        return
     judged, spent = asyncio.run(measure(fixture["signals"], args.receipt))
     result = summarize(fixture["signals"], judged, spent)
     args.output.write_text(render(fixture, judged, result))

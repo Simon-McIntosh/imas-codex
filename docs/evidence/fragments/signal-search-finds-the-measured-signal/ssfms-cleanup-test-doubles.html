@@ -1,0 +1,181 @@
+<section id="ssfms-cleanup-test-doubles" data-plan="signal-search-finds-the-measured-signal" data-node="ssfms-cleanup-test-doubles">
+  <h3>ssfms-cleanup-test-doubles — one statement-capturing double, and checks a regression fails</h3>
+
+  <p id="ssfms-cleanup-test-doubles-landing">
+    The signal suites each carried a private recording graph client, so a change
+    to how a statement was captured had to be repeated in every copy. This node
+    lands one shared double in <code>tests/recording_graph_client.py</code> and
+    sharpens the role suite's checks, so each names the row, role or cost it
+    reads rather than comparing one composite literal: the criteria check now
+    also requires a non-empty description per role, and the accepted-row check
+    localises each role and cost to its row. A mutation log accompanies each
+    check, recording it failing when the value it reads is replaced by a
+    hardcoded answer.
+  </p>
+
+  <h4 id="ssfms-cleanup-test-doubles-changes">Changes, each with its check</h4>
+
+  <p id="ssfms-cleanup-test-doubles-shared-double">
+    <strong>One statement-capturing double.</strong>
+    <code>tests/recording_graph_client.py</code> holds
+    <code>RecordingGraphClient</code>, which records every
+    <code>(cypher, params)</code> pair it is handed and answers with no rows. It
+    replaces the private <code>_RecordingClient</code> in
+    <code>tests/discovery/test_signal_embedding_sweep.py</code> and the private
+    recording logic in <code>tests/graph/test_dd_path_domain_upsert.py</code>.
+    The DD-path test keeps its domain-assignment model by subclassing the shared
+    double (<code>_DomainCompletingClient</code>) and overriding
+    <code>query</code>, so the capture lives in one place and the fixture's
+    behaviour stays with the test that asserts on it. Check:
+    <code>grep -rn 'class _RecordingClient' tests/discovery tests/graph</code>
+    returns nothing, both suites run the shared class, and the DD-path test's
+    domain assertions still discriminate the two upsert forms.
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-criteria-check">
+    <strong>The offered criteria set is compared against a literal.</strong>
+    <code>tests/discovery/test_signal_role.py</code> writes the six-role
+    vocabulary once, as <code>SIX_ROLES</code>, and asserts
+    <code>set(criteria) == SIX_ROLES</code> over what
+    <code>signal_role_questions()</code> returns. The base check already
+    compared the criteria set against a six-name literal, so it too failed on a
+    lost role; what this adds is the description requirement — every role's
+    description must be a non-empty string — which the base check did not read.
+    Check: with <code>signal_role_questions</code> returning a hardcoded
+    two-role set, the criteria assertion fails
+    (<code>nc-01-hardcoded-criteria.log</code>).
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-accepted-row-check">
+    <strong>Each accepted row's role and cost are checked on their own.</strong>
+    The fake judge answers a different role per input (<code>measured</code> for
+    the sensor, <code>reference_or_setpoint</code> for the target) and prices
+    each decision at USD 0.002, and the test asserts each row's
+    <code>signal_role</code> and <code>cost_usd</code> by id against the literal
+    it expects for that row. The judge also asserts that the state it is handed
+    carries each row's name, which is the input the name-keyed branch reads; a
+    state delivered without the name fails there rather than quietly taking the
+    other branch. The base check compared the whole accepted list against one
+    literal, so it too would fail on a wrong role or a wrong per-row cost;
+    naming each row is what says which row moved, and the per-row cost keeps a
+    regression from hiding in the batch total. Check: with the judge's decision
+    discarded for a hardcoded <code>measured</code> on every row, the accepted-row
+    assertion fails with <code>assert 'measured' == 'reference_or_setpoint'</code>
+    (<code>nc-02-hardcoded-role.log</code>); with <code>judge_rows</code> putting
+    the batch cost on one row and zero on the other, the per-row cost assertion
+    fails while the batch total still reads 0.004
+    (<code>nc-06-row-cost.log</code>). <code>nc-02</code> is the node's declared
+    negative control. The name guard's own falsifiability is logged beside it:
+    with <code>signal_role_state</code> mutated to hand the judge an empty
+    name, the guard fires and the batch is refused
+    (<code>nc-05-judge-name-guard.log</code>), while the same mutation leaves
+    the guard silent once the guard itself is removed
+    (<code>nc-repair2-control.log</code>).
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-cost-check">
+    <strong>The batched response cost is compared against a literal.</strong>
+    The fake judge prices each decision at USD 0.002 over a two-row batch, and
+    the test asserts the returned cost equals 0.004 — a value the test supplies
+    rather than one read back out of the module's return. Check: with the
+    returned cost replaced by a hardcoded 0.0, the cost assertion fails with
+    <code>assert 0.0 == 0.004</code> (<code>nc-03-hardcoded-cost.log</code>).
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-census-check">
+    <strong>The live census population is checked against an independent
+    count.</strong> Both live census tests read the population from
+    <code>census_signal_embeddings()</code> and compare it to a
+    <code>FacilitySignal</code> count issued in the same test through a second
+    <code>GraphClient</code>, and require it above zero. The unscoped test
+    compares against a count of every <code>FacilitySignal</code>; the
+    facility-scoped test, whose base version asserted the frozen literal
+    <code>result["n"] == 15111</code>, now counts the JT-60SA
+    <code>FacilitySignal</code> nodes the same way. A frozen literal does catch
+    a census that reads nothing — <code>nc-04</code> records it failing at
+    <code>assert 0 == 15111</code> — so its defect was brittleness rather than
+    blindness: it reddens on any legitimate change in the population and sends
+    a reader after a non-defect. The independent count also catches a scope that
+    stops reaching the graph, since the census would then return every
+    facility's signals while the independent count stays at JT-60SA's. Check:
+    with the census's population hardcoded to 0, the live check fails with
+    <code>assert 0 == 61983</code> (<code>nc-04-hardcoded-population.log</code>).
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-fixture-argument">
+    <strong>The role measurement takes its fixture as an argument.</strong>
+    <code>tests/llm/measure_signal_role.py</code> binds its fixture through
+    <code>--fixture</code>, defaulting to
+    <code>tests/llm/fixtures/signal_role_random_labels.json</code>, and the one
+    loader validates both role fixtures. Check: each fixture loads and reports
+    its row count with no spend —
+    <code>--load-only</code> on the default prints 200 rows and on
+    <code>tests/llm/fixtures/signal_role_labels.json</code> prints 300 rows,
+    both at USD 0.000000, against the USD 0.02 ceiling for this check. A loader
+    that still accepted only the stratified set would refuse one of the two.
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-package-docstring">
+    <strong>The graph test package states what needs a live server.</strong>
+    <code>tests/graph/__init__.py</code>'s docstring now says that only the
+    tests marked <code>graph</code> need a live Neo4j, that the default run
+    excludes that marker, and that the package also holds guards which need no
+    graph and run by default — which is the case the DD-path guard establishes,
+    as it runs under the default markers. Check: the docstring's claim matches
+    observed behaviour, since <code>tests/graph/test_dd_path_domain_upsert.py</code>
+    is collected and passes under <code>-m 'not slow and not graph'</code>.
+  </p>
+
+  <figure id="ssfms-cleanup-test-doubles-figure">
+    <img src="/imas-codex/figures/signal-search-finds-the-measured-signal/ssfms-cleanup-test-doubles/falsifiability-matrix.svg" alt="Each rewritten check against the source state it is meant to fail under: every matched mutation pair fails, every unmatched pair passes.">
+    <figcaption>Rows are the production values the rewritten checks read; columns
+    are the source state. A filled marker is a check that failed, so the guard
+    fired; an open marker is a check that passed; an x is a pair never run
+    together, because the role mutations were exercised through the default
+    marker set, which excludes the graph-marked census check. Each column's
+    matched mutation sits on the diagonal, and each fails the check written for
+    it. The unmutated run passes all of them.</figcaption>
+  </figure>
+
+  <h4 id="ssfms-cleanup-test-doubles-gate">Gate</h4>
+
+  <p id="ssfms-cleanup-test-doubles-gate-result">
+    Base revision <code>7bbf44b5663c71078d6f94f84901867ba98430b8</code> ran the
+    three touched test files under the default markers at
+    <strong>9 passed, 2 deselected</strong> (exit 0). At the head the gate ran
+    against — the worktree head at that moment, <code>1d31c321a91ec1075ca77be1c23e676c69a1fab4</code>,
+    named again in each log's header — the same command gives
+    <strong>9 passed, 2 deselected</strong> (exit 0) — identical counts, so no
+    failure was added. The graph-marked sweep tests ran separately under
+    <code>-m graph</code> against the live graph:
+    <strong>2 passed</strong> at the base and <strong>2 passed</strong> at the
+    head, which is the run the census assertions above are observed in
+    (<code>head-default.log</code>, <code>head-graph.log</code>).
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-gate-provenance">
+    The base arm is a genuine run of the base revision, not an inference: the
+    base tree is materialised with
+    <code>git archive 7bbf44b5663c71078d6f94f84901867ba98430b8</code> into a
+    fresh directory under node-local <code>/tmp</code>, and the tree's
+    gitignored generated modules are copied in from the working checkout before
+    the run, because <code>tests/conftest.py</code> otherwise triggers
+    regeneration into the shared editable install. Each log names the revision
+    it ran at in its header and carries the command as its first line and the
+    command's own status as its final <code>EXIT=&lt;n&gt;</code> line, so a
+    reader can tell a completed run from a truncated one and can tell which
+    revision produced it.
+  </p>
+
+  <p id="ssfms-cleanup-test-doubles-mutation-method">
+    Each mutation was applied to a copy of the tree under node-local
+    <code>/tmp</code>, run there with the mutated module confirmed as the one
+    imported, and reverted between runs from a saved pristine source, one log
+    per mutation. Each log names the revision it ran at in its header, so a
+    result that predates a change cannot be read as evidence about it. The
+    check that a mutation actually took effect is in the driver: the anchor must
+    appear exactly once and the target must differ from the pristine source
+    afterwards. An unmutated run in the same tree passes, which is the positive
+    control for every mutation result.
+  </p>
+</section>
