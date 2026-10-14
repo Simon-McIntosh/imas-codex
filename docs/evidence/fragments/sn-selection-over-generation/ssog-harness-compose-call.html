@@ -1,0 +1,71 @@
+<section id="ssog-harness-compose-call-record">
+  <h3>One benchmark-harness compose call completes on the local seat</h3>
+  <p id="ssog-harness-compose-call-change">
+    The benchmark harness compose call in
+    <code>imas_codex/standard_names/benchmark.py</code> passed
+    <code>temperature=0.0</code> to <code>acall_llm_structured</code>. The
+    production compose worker in
+    <code>imas_codex/standard_names/workers.py</code> passes no temperature for
+    the same seat. Every other parameter the two calls reach the provider with
+    was already identical. With <code>temperature=0.0</code> the local seat
+    never returns within the shell's wall bound; with the parameter omitted the
+    same request returns. The fix removes the argument, so the harness sends
+    what production sends.
+  </p>
+
+  <p id="ssog-harness-compose-call-diff">
+    The two calls rendered through the shared kwargs builder
+    (<code>_build_kwargs</code>), for one source
+    (<code>distributions/distribution/ggd/orbit_frequency_tor/values</code>),
+    <code>comparator_block=True</code>, 48,977 message tokens. Only
+    <code>temperature</code> differs.
+  </p>
+
+  <table id="ssog-harness-compose-call-kwargs">
+    <thead>
+      <tr><th>effective request parameter</th><th>harness (before fix)</th><th>production</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>model</td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td></tr>
+      <tr><td>api_base</td><td><code>http://98dci4-gpu-0003:18802/v1</code></td><td><code>http://98dci4-gpu-0003:18802/v1</code></td></tr>
+      <tr><td>max_tokens</td><td>131072</td><td>131072</td></tr>
+      <tr><td>timeout</td><td>900</td><td>900</td></tr>
+      <tr><td>chat_template_kwargs</td><td><code>{"thinking": true, "reasoning_effort": "medium"}</code></td><td><code>{"thinking": true, "reasoning_effort": "medium"}</code></td></tr>
+      <tr><td>response_format</td><td><code>json_schema</code></td><td><code>json_schema</code></td></tr>
+      <tr><td>seed</td><td>absent</td><td>absent</td></tr>
+      <tr><td>temperature</td><td><strong>0.0</strong></td><td><strong>absent</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p id="ssog-harness-compose-call-repro">
+    Sending each request once under the same shell bound, with identical
+    messages, reproduces the defect at the parameter level: the production arm
+    returned <code>EXIT=0</code> in 266.3 s with 59,081 completion tokens; the
+    harness arm did not return and was killed at 540 s (<code>EXIT=124</code>).
+    The router was not congested for either (9 of 12 requests in flight, none
+    waiting). After the fix the harness path itself — not a hand-built request —
+    is the production request. Sent through <code>_run_model</code> with the
+    fix in place and <code>timeout 540</code>, the fixed path returns every
+    time: <code>EXIT=0</code> at 390.4 s with 67,731 tokens and one candidate,
+    and again at 142.3 s with 57,563 tokens and no candidates. The candidate
+    count follows the model's own output; completion under the bound is the
+    property the fix restores, and no batch errors were recorded in either run.
+  </p>
+
+  <p id="ssog-harness-compose-call-gate">
+    Gate <code>tests/standard_names/test_benchmark*.py</code>: 124 passed /
+    0 failed at head against 121 passed / 0 failed at base — the three added
+    bounds tests are the whole delta, with no added failures. The bounds test
+    fails with the fix reverted (<code>EXIT=1</code>, two failures:
+    <code>test_harness_compose_call_omits_temperature</code> and
+    <code>test_harness_compose_request_matches_production</code>), so the pass
+    is not vacuous.
+  </p>
+
+  <p id="ssog-harness-compose-call-note">
+    The brief framed the divergence as reasoning settings, bounds and timeout.
+    Measured against the production call for the same seat, those three were
+    already identical; temperature was the only parameter the harness set and
+    production omitted, and it alone separates the two wall-time outcomes.
+  </p>
+</section>

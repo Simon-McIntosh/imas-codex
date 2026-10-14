@@ -1675,15 +1675,14 @@ async def _run_model(
                 {"role": "user", "content": user_prompt},
             ]
 
-            # GPT-5.x models don't support temperature=0.0
-            temp = config.temperature
-            if "gpt-5" in model and temp == 0.0:
-                temp = None  # let the provider use its default
-
             try:
                 # Mirror production: compose runs at the [sn-compose] reasoning
                 # effort so bench name quality reflects campaign settings —
                 # unless the run overrides it for an effort-axis scan.
+                # No temperature is sent, matching the production compose call,
+                # which omits it and takes the provider default. A thinking
+                # seat given an explicit greedy temperature does not terminate
+                # and runs to the token budget, so the call never returns.
                 from imas_codex.settings import get_reasoning_effort
 
                 compose_effort = config.reasoning_effort or get_reasoning_effort(
@@ -1695,7 +1694,6 @@ async def _run_model(
                     model=model,
                     messages=messages,
                     response_model=StandardNameComposeBatch,
-                    temperature=temp,
                     service="standard-names",
                     reasoning_effort=compose_effort,
                     max_retries=2,
@@ -2309,6 +2307,6 @@ def _render_cost_summary(console: Any, report: BenchmarkReport) -> None:
 
     console.print(
         f"\n[dim]Extraction: {report.extraction_count} items | "
-        f"Temperature: {report.config.temperature}{reviewer_str} | "
+        f"Temperature: provider default{reviewer_str} | "
         f"Timestamp: {report.timestamp}{prov_str}[/dim]"
     )
