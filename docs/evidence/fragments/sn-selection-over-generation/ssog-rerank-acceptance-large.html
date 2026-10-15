@@ -1,0 +1,50 @@
+<section id="ssog-rerank-acceptance-large-scope">
+  <h2>Comparator rerank acceptance on a large held-out draw</h2>
+  <p id="ssog-rerank-acceptance-large-state">Status: <strong>complete</strong>. Every drawn extraction batch carries a result in both arms, with no batch left uncomposed, so the figures below are the measure's own final pass summary rather than a partial pass.</p>
+  <p id="ssog-rerank-acceptance-large-draw">Draw seed <code>20261015</code> from a population of 7,692 source paths: 160 drawn, <strong>119 extraction batches (137 items)</strong>. Excluded set: 70 sources — the 40 drawn under seed <code>20261014</code> (read from that run's own results record), the 30 sources of the comparator label sheet, and the sheet's 9 boundary-density sources (already inside the 30; recorded as their own group). Composed and reviewed on <code>local/deepseek-v4.1-flash</code>; only arm B reranks the nearby-name comparator block, judged by <code>typesafe/jev-1.13</code>.</p>
+  <p id="ssog-rerank-acceptance-large-pass-shape">One arm runs per pass: the rerank switch is read from the environment at call time, so two settings in flight together would rerank the arm meant to run without it. Each pass serves whichever arm has more batches left, so the two arms advanced in alternation and their unit counts differed while the measure was in flight. Eighteen bounded passes were run in total.</p>
+</section>
+
+<section id="ssog-rerank-acceptance-large-positive-control">
+  <h2>Positive control</h2>
+  <p id="ssog-rerank-acceptance-large-control-result">Passed. All 129 control batches rendered the harness compose prompt under both switch settings and the switch changed the rendered-message hash on 117 of them (<code>switch_changes_harness_compose_prompt: true</code>). The 12 identical batches are ones where rerank returned the pool in the order retrieval already gave. Rerank cost of the control: <strong>USD 0.014903</strong>. The control is re-rendered at the head of every pass, so the recorded figure is the latest rendering rather than any earlier attempt's.</p>
+</section>
+
+<section id="ssog-rerank-acceptance-large-arms">
+  <h2>First-pass acceptance</h2>
+  <p id="ssog-rerank-acceptance-large-counts">A candidate the reviewer returned no score for is recorded with <code>scored: false</code>, counted separately, and excluded from the rate: it is a reviewer omission, not a rejection, so the rate is taken over scored candidates. Both counts are given per arm because a batch may compose no candidate and a few compose more than one.</p>
+  <p id="ssog-rerank-acceptance-large-unscored">Unscored candidates: 5 in arm A, 10 in arm B — 15 in total, which is 11 per cent of all 131 candidates and is why the rate is stated over scored candidates rather than over all of the arm's candidates.</p>
+  <table>
+    <thead><tr><th>arm</th><th>batches composed</th><th>candidates</th><th>scored</th><th>unscored</th><th>accepted (scored)</th><th>acceptance over scored</th></tr></thead>
+    <tbody>
+      <tr><td>A (rerank off)</td><td>120</td><td>67</td><td>62</td><td>5</td><td>23</td><td>0.371</td></tr>
+      <tr><td>B (rerank on)</td><td>120</td><td>64</td><td>54</td><td>10</td><td>21</td><td>0.389</td></tr>
+    </tbody>
+  </table>
+  <p id="ssog-rerank-acceptance-large-paired">Paired over the <strong>48 sources carrying a scored candidate in both arms</strong>: acceptance 0.396 in arm A and 0.396 in arm B, each 19 of 48, so the paired difference is <strong>0.000</strong>. The <code>bootstrap_interval</code> from <code>imas_codex/discovery/base/evaluation.py</code> has point 0.000 and spans <strong>[−0.140, 0.140]</strong> (95 per cent, 1000 resamples): it <strong>does not exclude 0</strong>, and the point sits exactly on it. The paired numerator is equal in the table and in the pairing, so this draw shows no first-pass acceptance difference between the arms.</p>
+  <p id="ssog-rerank-acceptance-large-limits">Two limits on what this decides. The paired denominator is 48 sources, under half of the 119 drawn batches, because a source contributes to the pairing only when both arms composed a candidate for it and the reviewer scored both; most batches compose no candidate at all, so the paired comparison rests on the minority of batches that do. And the pairing key is the candidate's own <code>source_id</code>, which the harness's candidate extraction derives per candidate rather than copying from the drawn path; a resume should key the pairing on the batch's drawn path instead.</p>
+  <p id="ssog-rerank-acceptance-large-unit-note">Residual to record: each arm completed 120 units against a 119-batch draw, so at least one batch was composed twice within an arm. The per-candidate records hold no duplicate <code>(source_id, name)</code> pair in either arm, so no candidate was counted twice; the excess is not explained further by the record.</p>
+</section>
+
+<section id="ssog-rerank-acceptance-large-spend">
+  <h2>Spend and per-pass logs</h2>
+  <p id="ssog-rerank-acceptance-large-spend-figure">Total spend <strong>USD 0.021814 of the USD 1.00 ceiling</strong> (control rerank 0.014903 plus arm B rerank 0.006911, arm A 0), which is the sum of those three recorded components. Compose and review ran on the free local seat, so only arm B's rerank and the control spend at all.</p>
+  <ul id="ssog-rerank-acceptance-large-pass-logs">
+    <li><code>pass1.log</code>, <code>pass2.log</code>, <code>pass4.log</code> — extraction, control, first arm passes; <code>EXIT=124</code></li>
+    <li><code>pass3.log</code> — returned cleanly; <code>EXIT=0</code></li>
+    <li><code>pass5.log</code> — arm A; <code>EXIT=124</code></li>
+    <li><code>pass6.log</code> — arm B; <code>EXIT=124</code></li>
+    <li><code>pass7.log</code> — arm A; <code>EXIT=124</code></li>
+    <li><code>pass8.log</code> — arm B; <code>EXIT=124</code></li>
+    <li><code>pass9.log</code> — arm A; <code>EXIT=124</code></li>
+    <li><code>pass10.log</code> — arm B; <code>EXIT=124</code></li>
+    <li><code>pass11.log</code> — returned cleanly; <code>EXIT=0</code></li>
+    <li><code>pass12.log</code>, <code>pass13.log</code> — arm B; <code>EXIT=124</code></li>
+    <li><code>pass14.log</code> — arm A; <code>EXIT=124</code></li>
+    <li><code>pass15.log</code> — arm A, 17 batches; <code>EXIT=124</code></li>
+    <li><code>pass16.log</code> — arm B, 18 batches; <code>EXIT=124</code></li>
+    <li><code>pass17.log</code> — arm A, 11 batches; <code>EXIT=0</code></li>
+    <li><code>pass18.log</code> — arm B, the last 2 batches; <code>EXIT=0</code>, and the pass that left nothing queued</li>
+  </ul>
+  <p id="ssog-rerank-acceptance-large-remaining">A pass cut by the shell's wall bound never reaches the driver's own summary write, so after such a pass the results JSON's <code>summary</code>, <code>sources_remaining</code> and <code>status</code> are stale; before every pass in the two later attempts those fields were recomputed from the per-unit records with the driver's own <code>summarise()</code>, so no reported figure ever depended on a pass reaching its own summary. The final figures above come from a pass that did reach its own summary write, with nothing left queued.</p>
+</section>
