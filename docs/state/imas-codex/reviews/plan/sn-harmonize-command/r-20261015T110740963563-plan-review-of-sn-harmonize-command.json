@@ -1,0 +1,51 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T11:23:12.484Z",
+  "dispatched_at": "2026-10-15T11:07:58Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-harmonize-command.html#s13",
+      "id": "reasoning-1",
+      "reason": "the plan asserts a complete count of two and scopes the repair to those two, so the enumeration and the node's write scope are both wrong and a spending recovery command stays unlogged for a reader who trusts \"Two\".",
+      "text": "\u00a713 states \"Two `sn` commands spend model calls but configure no file logging\" and repairs only `sn harmonize` and `sn edit`, but `sn rescore` (`imas_codex/cli/sn.py:8357`) is a third: it spends through `rescore_name` \u2192 the inline review (it carries `-c/--cost-limit` \"Max LLM spend (USD) for the inline review\", calls `_require_embed_ready(\"sn rescore\")` at sn.py:8404, and renders `_render_inline_review_outcome`), yet it calls neither `setup_logging` nor `configure_cli_logging` \u2014 nothing under `imas_codex/standard_names/` configures CLI logging \u2014 so its runs leave nothing under `~/.local/share/imas-codex/logs/` either",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "693358d5559ca14a3a15b45c4ae470e5952364c38792b11be991307e1203bb71",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 92,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261015T110740963563-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "64304a4294dc62c2ce03d797ca810002c30d132c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the \u00a713 citations resolve in `imas_codex/cli/sn.py` (6433, 3031, 5909, 6849, 7132), `imas_codex/cli/discover/common.py` (`setup_logging`, 219) and `imas_codex/cli/logging.py` (`configure_cli_logging`, 129).",
+    "done_when": "pass \u2014 \u00a713's done-when carries a declared negative control (\"fails with that call removed, recorded with `EXIT=`\") and judges the existing suite by delta against base.",
+    "evidence_paths": "pass \u2014 \u00a713 names no temporary path; its record is the negative-control logs under the plan's established fragment directory, and no session path is written.",
+    "naming": "pass \u2014 the stems this node introduces (`sn-harmonize`, `sn-edit`) are log labels, not plan labels or ticket numbers, and no changelog prose is added.",
+    "reasoning": "a finding \u2014 \u00a713's premise that exactly two `sn` commands spend model calls without file logging is false; `sn rescore` is a third, so the repair as scoped leaves a spending command unlogged.",
+    "single_goal": "pass \u2014 \u00a713 has one goal: the spending commands route through the shared logging helper.",
+    "wiring": "pass \u2014 every relationship the section map declares resolves (`s3` and `s4` name `sn-harmonize-command#s13`), and \u00a713 needs no prerequisite beyond the two commands, which already exist."
+  },
+  "section_digests": {
+    "_document": "5f566777994e3e2cdf9f086601e7bc065cdbc21a2f0ea427a851646137d94b95",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s10": "d1bb9bb9dfcae650a5653ea3bbdb319e3ecf676ab9a3cc351968b46d2f10607a",
+    "s11": "cb00438301915812ef678ff6517b2477e98180338b6d1863e1a73e87af25a889",
+    "s12": "783b5bfd673def7e7a1b834abaabe5858e0ea763e54aadcb2a31c7d0cab015a5",
+    "s13": "39751e79361b8cc9f2ccc1652c258cf160b92fc49ae568ffa47b6bcc40421521",
+    "s2": "767a2fe2b092486b6f4c5277a919edca224cd3a5f242f4bf747c1657bda4d5af",
+    "s3": "9416801e555c3ed92b47ddba985fbf47123b22c7ddd20d69a46baa82f2840272",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa",
+    "s5": "ebb66a7ebb10c4aad132f61567b089ce315607a670a86403166cdf201a496bbf",
+    "s6": "74bec4f3403c9293f29290ca6de60b070dd4973bb9e04aef58c53838d9ca9932",
+    "s7": "2eed016a7c36b87fbd866c3a21ae396d57071d75eebb6222595db5e505dd8701",
+    "s8": "bc1625cd02b97ea52367a81c977f73194ffee6eb11240f56cbecfd9adb7b9de9",
+    "s9": "a56a7ae67d3f4140a7d38abbe65fb56d981b5b3bff3ced30fa63005c9dfebcb3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T11:26:44.147943+00:00"
+}
