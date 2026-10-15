@@ -263,21 +263,24 @@
         <td>base <code>033ee2a30</code></td>
         <td><code>151 passed, 13 deselected</code>, <code>EXIT=0</code></td>
         <td>base's own expansion — 14 harmonize files plus the house-style file</td>
-        <td><code>base_gate.log</code></td>
+        <td><code>base_gate2.log</code></td>
       </tr>
       <tr>
-        <td>head</td>
+        <td>head <code>77a4d90fe</code></td>
         <td><code>155 passed, 13 deselected</code>, <code>EXIT=0</code></td>
         <td>the same 15 plus <code>test_harmonize_reverse_links.py</code></td>
-        <td><code>head_gate.log</code></td>
+        <td><code>head_gate2.log</code></td>
       </tr>
     </tbody>
   </table>
   <p>
     <strong>Zero added failures, measured rather than inferred.</strong> The
     four-test difference is exactly the four tests this node adds. The base run
-    was made from an extracted copy of the revision under node-local
-    <code>/tmp</code>, so no git state was touched. An earlier gate run of this
+    was made from an extracted copy of the revision under node-local scratch
+    (<code>git archive</code> into <code>$TMPDIR</code>, with the gitignored
+    generated models copied in and no <code>.git</code>), so no git state was
+    touched, and it is the same environment and the same command as the head
+    arm. An earlier gate run of this
     node's work showed
     <code>test_house_style_checks.py::test_audit_report_carries_the_conformance_findings</code>
     timing out at the suite's 30 s per-test bound; <strong>it passed in both
