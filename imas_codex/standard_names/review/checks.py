@@ -79,6 +79,12 @@ def _const_str(node: ast.AST) -> str | None:
     return None
 
 
+# The one polarity a Noul question may declare: its true case is the defect the
+# check names. The reader fails a Noul on a high probability, so this is the
+# value the loader requires and the only value it accepts.
+NOUL_TRUE_CASE = "defect"
+
+
 class JevQuestionKind(StrEnum):
     """The shape of the judgment a failed check asks of Jev."""
 
@@ -92,6 +98,13 @@ class JevQuestion(BaseModel):
     kind: JevQuestionKind
     text: str
     options: list[str] = Field(default_factory=list)
+    # A Noul carries its polarity explicitly: the field states that the
+    # question's true case is the defect the check names. The reader fails a
+    # Noul when its probability is high, so a question whose true case is the
+    # acceptable form would be read backwards. The loader requires every Noul
+    # to declare this field, and this value, so the one convention the reader
+    # applies is stated in the taxonomy rather than inferred from the wording.
+    true_case: str | None = None
 
     @model_validator(mode="after")
     def _shape(self) -> JevQuestion:
@@ -252,5 +265,26 @@ def load_review_checks(
         (path or CHECKS_PATH).read_text(encoding="utf-8")
     )
     checks = [ReviewCheck(**entry) for entry in data.get("checks", [])]
+    for check in checks:
+        _require_noul_true_case(check)
     reason_map = [ReasonMapEntry(**entry) for entry in data.get("human_reason_map", [])]
     return checks, reason_map
+
+
+def _require_noul_true_case(check: ReviewCheck) -> None:
+    """Refuse a Noul question that does not declare the reader's one polarity.
+
+    The reader fails a Noul when its probability is at or above the midpoint, so
+    it reads the question's true case as the defect. A Noul that omits the field,
+    or names any value but the defect, would be read backwards without saying so;
+    refusing it here keeps the convention single and stated in the data.
+    """
+    question = check.question
+    if question is None or question.kind is not JevQuestionKind.NOUL:
+        return
+    if question.true_case != NOUL_TRUE_CASE:
+        raise ValueError(
+            f"check {check.id!r} asks a Noul question whose true_case is "
+            f"{question.true_case!r}; every Noul question must declare "
+            f"true_case: {NOUL_TRUE_CASE}"
+        )

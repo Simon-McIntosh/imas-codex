@@ -100,6 +100,72 @@ def test_negative_control_unplanted_field_is_rejected() -> None:
     assert fields_not_carried([planted]) == ["field_absent_from_review_state"]
 
 
+def _write_taxonomy(tmp_path, question_block: str):
+    fixture = tmp_path / "checks.yaml"
+    fixture.write_text(
+        "checks:\n"
+        "- id: planted_check\n"
+        "  axis: name\n"
+        "  dimension: grammar\n"
+        "  evidence_fields:\n"
+        "  - physical_base\n"
+        "  retrieval: false\n"
+        "  question:\n" + question_block,
+        encoding="utf-8",
+    )
+    return fixture
+
+
+def test_loader_refuses_a_noul_without_the_polarity_field(tmp_path) -> None:
+    """A Noul that omits ``true_case`` is refused, not read by default.
+
+    The reader fails a Noul on a high probability, so a Noul that does not
+    declare its true case is the defect would be read backwards silently. The
+    loader is the boundary that refuses it.
+    """
+
+    fixture = _write_taxonomy(
+        tmp_path,
+        "    kind: noul\n    text: Does the planted check carry the polarity field?\n",
+    )
+    with pytest.raises(ValueError, match="true_case"):
+        load_review_checks(fixture)
+
+
+def test_loader_refuses_a_noul_with_any_polarity_but_the_defect(tmp_path) -> None:
+    fixture = _write_taxonomy(
+        tmp_path,
+        "    kind: noul\n    true_case: acceptable\n"
+        "    text: Does the planted check carry the polarity field?\n",
+    )
+    with pytest.raises(ValueError, match="true_case"):
+        load_review_checks(fixture)
+
+
+def test_loader_accepts_a_noul_that_declares_the_defect_polarity(tmp_path) -> None:
+    fixture = _write_taxonomy(
+        tmp_path,
+        "    kind: noul\n    true_case: defect\n"
+        "    text: Does the planted check carry the polarity field?\n",
+    )
+    checks, _ = load_review_checks(fixture)
+    assert checks[0].question.true_case == "defect"
+
+
+def test_every_shipped_noul_declares_the_defect_polarity(loaded) -> None:
+    checks, _ = loaded
+    nouls = [
+        check
+        for check in checks
+        if check.question is not None and check.question.kind is JevQuestionKind.NOUL
+    ]
+    assert nouls, "the taxonomy ships no Noul questions"
+    for check in nouls:
+        assert check.question.true_case == "defect", (
+            f"{check.id} Noul true_case is {check.question.true_case!r}"
+        )
+
+
 def test_check_ids_are_unique(loaded) -> None:
     checks, _ = loaded
     ids = [check.id for check in checks]
