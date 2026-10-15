@@ -1,0 +1,31 @@
+{
+  "acceptance_threshold": 0.85,
+  "families": {},
+  "fixture": {
+    "after": {
+      "fixture_low_scoring_member": 0.8,
+      "fixture_stable_member": 0.9
+    },
+    "before": {
+      "fixture_low_scoring_member": 0.95,
+      "fixture_stable_member": 0.9
+    },
+    "result": {
+      "below_threshold": [
+        {
+          "after": 0.8,
+          "before": 0.95,
+          "id": "fixture_low_scoring_member"
+        }
+      ],
+      "fell": [
+        {
+          "after": 0.8,
+          "before": 0.95,
+          "id": "fixture_low_scoring_member"
+        }
+      ]
+    },
+    "threshold": 0.85
+  }
+}
