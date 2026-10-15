@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/review/jev_review.py:133",
+    "imas_codex/standard_names/review/jev_review.py:441"
+  ],
+  "completed_at": "2026-10-15T13:25:59.659Z",
+  "dispatched_at": "2026-10-15T13:03:39Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity.html",
+      "line": "97",
+      "severity": "blocking",
+      "text": "blocking: the re-measure reports only the primary prototype arm; the brief requires the sign-aligned selected mean and the L2 logistic regression each fixed on calibration with validation read once \"as in the diagnosis\", and the diagnosis results JSON carries both under aggregations (docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-results.json) while the new results JSON srtj-noul-polarity-results.json has no aggregations key and the merged driver docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py computes neither, so two figures the brief names are missing from the re-measure; they are repairable from the saved name-decisions.jsonl receipts without new spend."
+    },
+    {
+      "file": "tests/standard_names/test_jev_name_review.py",
+      "line": "298",
+      "severity": "follow-on",
+      "text": "follow-on: assert check.question.true_case == \"defect\" compares the value the test itself passed to _noul(true_case=\"defect\") with the same value read back, so it holds whatever the reader does and would not redden on a regression in the taxonomy; the independent assertions beside it (lines 299-301) carry the guard."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity.html",
+      "line": "53",
+      "severity": "follow-on",
+      "text": "follow-on: the \"Question as it was\" column paraphrases rather than quotes the taxonomy for field_region_preposition_wrong (the yaml's old text was \"For an evaluated field at a position/region locus, is the join _at_ rather than _of_?\") and for non_canonical_render at line 58, where the old text was \"Is the spelling the canonical render of its parsed intermediate representation?\" and not \"the canonical render the grammar requires\" \u2014 a reader checking the table against the file finds a mismatch, and for non_canonical_render the paraphrase names a different referent."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit; 5edbba662 carries the 16 rewordings and the polarity field in review_checks.yaml, the NOUL_TRUE_CASE constant, the JevQuestion field and the loader refusal in checks.py, and four added tests across the two test files, and 106ce2f29 adds the measurement driver, the results JSON, the fragment and the two SVGs.",
+    "done_when": "the done_when names the loader's refusal of an unmarked Noul, both tests passing at head and red with their mechanism removed, the fragment and results JSON reporting the rewordings, the re-measure and the verdict, every pass log headed by its command and tailed by EXIT=, the two-file gate at base and head judged by delta, and one SVG; all are present (logs/base_gate.log 34 passed EXIT=0, logs/head_gate.log 40 passed EXIT=0, both negative-control logs red at EXIT=1, the nine polarity_*.log each opening with their command and closing EXIT=0, both SVGs present), but the brief's Re-measure section also requires the sign-aligned selected mean and the L2 logistic regression, which neither the fragment nor the results JSON reports.",
+    "goal": "the source run's goal is one polarity for every Noul check and a re-measure of the name review under it; imas_codex/llm/prompts/sn/review_checks.yaml carries true_case: defect on all 36 Noul questions (the 4 Choice questions are untouched), and imas_codex/standard_names/review/checks.py:107 adds JevQuestion.true_case with checks.py:269 calling _require_noul_true_case from load_review_checks.",
+    "manifest": "read; it names commits 5edbba662 and 106ce2f29, the base and head gate logs, both negative-control logs, and the headline 16 reworded / 14 inverted before / 5 after, and records status complete.",
+    "write_paths": "the brief declares eight write paths; git diff --name-only a68bf23f3670001879354291334bce1449c8e73f..106ce2f293a40a118c8643e215495c9be25e6944 lists exactly nine files (the figure directory expanding to two SVGs), every one inside the declared scope and nothing outside it."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_checks.py:131 and tests/standard_names/test_jev_name_review.py:301 each fail on the recorded mutation, but tests/standard_names/test_jev_name_review.py:298 asserts check.question.true_case == \"defect\" against the value the test itself passed to the helper.",
+    "evidence": "logs/base_gate.log records 34 passed EXIT=0 and logs/head_gate.log 40 passed EXIT=0 with no FAILED id, and both negative-control logs are red at EXIT=1, but docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity.html:97 reports only the primary arm while the brief also requires the sign-aligned selected mean and the L2 logistic regression.",
+    "fit": "the loader refusal at imas_codex/standard_names/review/checks.py:274 follows the module's existing raise-ValueError idiom (checks.py:281) and no added name carries a plan, section or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/review/checks.py:274 refuses any Noul whose true_case is not \"defect\" and imas_codex/llm/prompts/sn/review_checks.yaml carries the field on all 36 Nouls, so the reader's one convention is now stated in the data as the goal asks.",
+    "reuse": "checks.py owns the taxonomy schema and loader and the addition extends that owner rather than forking it; a search over imas_codex/ for an existing polarity field or Noul-polarity owner found only the Choice convention at imas_codex/standard_names/review/jev_review.py:276, which the new field does not duplicate.",
+    "scope_discipline": "git diff --name-only a68bf23f3670001879354291334bce1449c8e73f..106ce2f293a40a118c8643e215495c9be25e6944 lists nine paths, all inside the eight write paths the brief declares."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source run's goal is one polarity for every Noul check and a re-measure of the name review under it; imas_codex/llm/prompts/sn/review_checks.yaml carries true_case: defect on all 36 Noul questions (the 4 Choice questions are untouched), and imas_codex/standard_names/review/checks.py:107 adds JevQuestion.true_case with checks.py:269 calling _require_noul_true_case from load_review_checks.\nVERDICT done_when: the done_when names the loader's refusal of an unmarked Noul, both tests passing at head and red with their mechanism removed, the fragment and results JSON reporting the rewordings, the re-measure and the verdict, every pass log headed by its command and tailed by EXIT=, the two-file gate at base and head judged by delta, and one SVG; all are present (logs/base_gate.log 34 passed EXIT=0, logs/head_gate.log 40 passed EXIT=0, both negative-control logs red at EXIT=1, the nine polarity_*.log each opening with their command and closing EXIT=0, both SVGs present), but the brief's Re-measure section also requires the sign-aligned selected mean and the L2 logistic regression, which neither the fragment nor the results JSON reports.\nVERDICT write_paths: the brief declares eight write paths; git diff --name-only a68bf23f3670001879354291334bce1449c8e73f..106ce2f293a40a118c8643e215495c9be25e6944 lists exactly nine files (the figure directory expanding to two SVGs), every one inside the declared scope and nothing outside it.\nVERDICT manifest: read; it names commits 5edbba662 and 106ce2f29, the base and head gate logs, both negative-control logs, and the headline 16 reworded / 14 inverted before / 5 after, and records status complete.\nVERDICT diff: read commit by commit; 5edbba662 carries the 16 rewordings and the polarity field in review_checks.yaml, the NOUL_TRUE_CASE constant, the JevQuestion field and the loader refusal in checks.py, and four added tests across the two test files, and 106ce2f29 adds the measurement driver, the results JSON, the fragment and the two SVGs.\nCALL_SITES: imas_codex/standard_names/review/jev_review.py:133, imas_codex/standard_names/review/jev_review.py:441\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/checks.py:274 refuses any Noul whose true_case is not \"defect\" and imas_codex/llm/prompts/sn/review_checks.yaml carries the field on all 36 Nouls, so the reader's one convention is now stated in the data as the goal asks.\nSCORE evidence: 12\nJUSTIFICATION evidence: logs/base_gate.log records 34 passed EXIT=0 and logs/head_gate.log 40 passed EXIT=0 with no FAILED id, and both negative-control logs are red at EXIT=1, but docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity.html:97 reports only the primary arm while the brief also requires the sign-aligned selected mean and the L2 logistic regression.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only a68bf23f3670001879354291334bce1449c8e73f..106ce2f293a40a118c8643e215495c9be25e6944 lists nine paths, all inside the eight write paths the brief declares.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_review_checks.py:131 and tests/standard_names/test_jev_name_review.py:301 each fail on the recorded mutation, but tests/standard_names/test_jev_name_review.py:298 asserts check.question.true_case == \"defect\" against the value the test itself passed to the helper.\nSCORE fit: 19\nJUSTIFICATION fit: the loader refusal at imas_codex/standard_names/review/checks.py:274 follows the module's existing raise-ValueError idiom (checks.py:281) and no added name carries a plan, section or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: checks.py owns the taxonomy schema and loader and the addition extends that owner rather than forking it; a search over imas_codex/ for an existing polarity field or Noul-polarity owner found only the Choice convention at imas_codex/standard_names/review/jev_review.py:276, which the new field does not duplicate.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity.html:97 blocking: the re-measure reports only the primary prototype arm; the brief requires the sign-aligned selected mean and the L2 logistic regression each fixed on calibration with validation read once \"as in the diagnosis\", and the diagnosis results JSON carries both under aggregations (docs/evidence/fragments/sn-review-through-jev/srtj-name-signal-diagnosis-results.json) while the new results JSON srtj-noul-polarity-results.json has no aggregations key and the merged driver docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py computes neither, so two figures the brief names are missing from the re-measure; they are repairable from the saved name-decisions.jsonl receipts without new spend.\nFINDING tests/standard_names/test_jev_name_review.py:298 follow-on: assert check.question.true_case == \"defect\" compares the value the test itself passed to _noul(true_case=\"defect\") with the same value read back, so it holds whatever the reader does and would not redden on a regression in the taxonomy; the independent assertions beside it (lines 299-301) carry the guard.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity.html:53 follow-on: the \"Question as it was\" column paraphrases rather than quotes the taxonomy for field_region_preposition_wrong (the yaml's old text was \"For an evaluated field at a position/region locus, is the join _at_ rather than _of_?\") and for non_canonical_render at line 58, where the old text was \"Is the spelling the canonical render of its parsed intermediate representation?\" and not \"the canonical render the grammar requires\" \u2014 a reader checking the table against the file finds a mismatch, and for non_canonical_render the paraphrase names a different referent.\n",
+  "review_run_id": "r-20261015T130159465243-review-of-srtj-noul-polarity-106ce2f293a4",
+  "reviewed_base_sha": "a68bf23f3670001879354291334bce1449c8e73f",
+  "reviewed_head_sha": "106ce2f293a40a118c8643e215495c9be25e6944",
+  "reviewed_run_id": "r-20261015T120934498631-srtj-noul-polarity",
+  "scores": {
+    "durability": 17,
+    "evidence": 12,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T13:20:16.521646+00:00",
+  "total": 106
+}
