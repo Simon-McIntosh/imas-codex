@@ -155,10 +155,13 @@ def _readback(args: argparse.Namespace) -> int:
             )
         }
 
+    # each label entry is a per-path record; its adjudicated rule label is the
+    # "label" field, alongside the tree and chat answers that were compared
+    # when the label was set.
     matches = 0
     mismatches = []
     for path in label_paths:
-        lab = labels[path]
+        lab = labels[path]["label"]
         dom = graph_domains.get(path)
         if dom == lab:
             matches += 1
