@@ -8,14 +8,19 @@ quantities. This module computes a deterministic drift metric over sibling
 descriptions and assembles a harmonization worklist — families that are both
 large enough and drifted enough to be worth re-aligning.
 
-This module is read-only against the graph: it never writes StandardName
-properties. See :mod:`imas_codex.cli.sn` (``sn harmonize --report``) for
-the CLI surface.
+The report surface is read-only against the graph and never writes
+StandardName properties. The apply surface writes two things and no more:
+each member's docs pipeline is reset so a later ``sn run`` regenerates it
+(:func:`mark_members_for_regen`), and a converged family's sibling links are
+made reciprocal (:func:`reconcile_family_reverse_links`) through the
+``graph_ops`` field writer that already persists them. See
+:mod:`imas_codex.cli.sn` (``sn harmonize --report``) for the CLI surface.
 """
 
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -34,6 +39,8 @@ from imas_codex.standard_names.families import (
     fetch_pattern_family,
     select_anchor,
 )
+
+logger = logging.getLogger(__name__)
 
 #: Operator kinds eligible for parent-based family grouping.
 _FAMILY_OPERATOR_KINDS = DOCUMENTATION_FAMILY_OPERATOR_KINDS
@@ -914,6 +921,238 @@ def _clear_family_anchor(gc: Any, member_ids: list[str]) -> None:
     )
 
 
+# ── Post-convergence reverse links ──────────────────────────────────────────
+# A member's ``links`` are derived from its own documentation, and each member's
+# documentation is regenerated from its own prompt in which the family's sibling
+# block is one of many inputs. Two members told to link "at least one adjacent
+# sibling" therefore need not choose each other, so a converged family can carry
+# one-way sibling links: a ``name:m`` in one member's documentation with no
+# reverse in the sibling's. This step makes the sibling relation symmetric once
+# the family has converged: it adds the reverse of a sibling link, and removes a
+# link only when its target is not carried by the catalog at all, so no reverse
+# could exist. A ``name:`` link out of the family is a legitimate cross-family
+# reference and is left alone — the step reconciles the sibling relation, it does
+# not police the rest of a member's references.
+
+#: Prefix of a link that names a standard name. Every other link (a ``dd:``
+#: path, an external URL) carries no standard-name target and is left alone.
+_NAME_LINK_PREFIX = "name:"
+
+
+def _name_link_target(link: Any) -> str:
+    """The standard-name id a ``name:`` link points at, else ``""``."""
+    if isinstance(link, str) and link.startswith(_NAME_LINK_PREFIX):
+        return link[len(_NAME_LINK_PREFIX) :]
+    return ""
+
+
+def _drop_doc_reference(documentation: str, target: str) -> str:
+    """Remove the reference to *target* from documentation prose.
+
+    The derived link index is rebuilt from the documentation, so dropping a
+    link from the index alone would let the next derivation restore it. Both
+    spellings the derivation reads are removed, and a markdown link keeps its
+    visible text.
+    """
+    if not documentation:
+        return documentation or ""
+    text = re.sub(rf"\[([^\]]*)\]\(name:{re.escape(target)}\)", r"\1", documentation)
+    return re.sub(rf"(?<![\w:/])name:{re.escape(target)}(?![\w])", "", text)
+
+
+def reconcile_family_reverse_links(
+    gc: Any,
+    member_ids: list[str],
+    *,
+    write_fn: Any | None = None,
+) -> dict[str, Any]:
+    """Make every family sibling link reciprocal across a converged family.
+
+    Reads the members named by *member_ids* and writes each member's ``links``
+    so that:
+
+    * a ``name:`` link to a family sibling is kept, and that sibling links
+      back — a sibling the member's links reach gains the reverse when it lacks
+      it. A reverse is added only between family siblings; a reference to a name
+      outside the family is never made reciprocal, because the two are not
+      siblings and no such relation is being asserted;
+    * a ``name:`` link whose target no standard name in the catalog carries is
+      dropped, from the derived index and from the documentation prose, because
+      no reverse could ever exist for it;
+    * a ``name:`` link to a live name outside the family is carried through
+      unchanged. It is a legitimate cross-family reference, not a broken
+      sibling link, and dropping it would destroy a valid reference the member
+      wrote;
+    * every non-``name:`` link — a ``dd:`` path, an external URL — is carried
+      through unchanged, kept as ``links`` and untouched in the documentation.
+
+    A link is added to the member's documentation as well as to the derived
+    ``links``, since the index is derived from the prose and an index edited
+    alone would lose the addition at the next derivation.
+
+    A member whose ``name_stage`` is ``approved`` is catalog-edited: its
+    editorial fields belong to the catalog, so the reconciliation computed for
+    it is not written, and its ``description``, ``documentation`` and ``links``
+    stay exactly as the catalog left them. Such a member's row is withheld from
+    the writer entirely, because the writer does not *skip* a protected row — it
+    strips that row's fields and writes each now-absent field as empty, which
+    would clear the very documentation protection exists to keep. The withheld
+    ids are returned under ``"protected"`` so the caller can report them rather
+    than let a partial write look complete.
+
+    The write goes through the ``graph_ops`` function that already persists
+    these fields — ``write_enrichment_results`` — called from here rather than
+    re-issued; ``write_fn`` injects that writer for a test. Nothing is written
+    when the family's sibling links are already symmetric, so the step is
+    idempotent.
+
+    Returns ``{"members", "added", "removed", "written", "protected"}``.
+    """
+    from imas_codex.standard_names.graph_ops import write_enrichment_results
+
+    members = sorted({mid for mid in member_ids if mid})
+    if not members:
+        return {"members": 0, "added": 0, "removed": 0, "written": 0}
+
+    rows = (
+        gc.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.id IN $ids
+            RETURN sn.id AS id, sn.links AS links,
+                   sn.documentation AS documentation,
+                   sn.description AS description,
+                   sn.validity_domain AS validity_domain,
+                   sn.constraints AS constraints
+            """,
+            ids=members,
+        )
+        or []
+    )
+    state = {row["id"]: dict(row) for row in rows if row.get("id")}
+    if not state:
+        return {"members": 0, "added": 0, "removed": 0, "written": 0}
+    present = sorted(state)
+
+    # A name: link is dead only when no StandardName anywhere carries it, so
+    # deadness resolves against the catalog rather than against the family. The
+    # read names its row set: the members plus every target they reference.
+    referenced = sorted(
+        {
+            target
+            for row in state.values()
+            for link in (row.get("links") or [])
+            if (target := _name_link_target(link))
+        }
+    )
+    live_ids = {
+        row["id"]
+        for row in (
+            gc.query(
+                """
+                MATCH (sn:StandardName)
+                WHERE sn.id IN $ids
+                RETURN sn.id AS id
+                """,
+                ids=sorted(set(present) | set(referenced)),
+            )
+            or []
+        )
+        if row.get("id")
+    }
+
+    sibling = set(present)
+    linked = {
+        mid: {
+            target
+            for link in (state[mid].get("links") or [])
+            if (target := _name_link_target(link)) in sibling
+        }
+        for mid in present
+    }
+    inbound: dict[str, set[str]] = {mid: set() for mid in present}
+    for source, targets in linked.items():
+        for target in targets:
+            inbound[target].add(source)
+
+    # The counts are accumulated per member and summed over the rows the writer
+    # is actually given, because a member whose row is withheld is not written
+    # and counting its additions and removals would report a change that did
+    # not land.
+    batch: list[dict[str, Any]] = []
+    row_added: dict[str, int] = {}
+    row_removed: dict[str, int] = {}
+    for mid in present:
+        row = state[mid]
+        original_links = list(row.get("links") or [])
+        original_docs = row.get("documentation") or ""
+        kept: list[str] = []
+        documentation = original_docs
+        removed_here = 0
+        for link in original_links:
+            target = _name_link_target(link)
+            if not target:
+                kept.append(link)
+                continue
+            if target in live_ids:
+                if link not in kept:
+                    kept.append(link)
+                continue
+            removed_here += 1
+            documentation = _drop_doc_reference(documentation, target)
+
+        additions = [
+            source
+            for source in sorted(inbound[mid])
+            if f"{_NAME_LINK_PREFIX}{source}" not in kept
+        ]
+        if not additions and kept == original_links and documentation == original_docs:
+            continue
+        for source in additions:
+            kept.append(f"{_NAME_LINK_PREFIX}{source}")
+        row_added[mid] = len(additions)
+        row_removed[mid] = removed_here
+        if additions:
+            refs = ", ".join(f"[{s}](name:{s})" for s in additions)
+            documentation = f"{documentation.rstrip()}\n\nRelated quantities: {refs}."
+        batch.append(
+            {
+                "id": mid,
+                "description": row.get("description"),
+                "documentation": documentation,
+                "links": kept,
+                "validity_domain": row.get("validity_domain"),
+                "constraints": row.get("constraints"),
+            }
+        )
+
+    # Deliver the result through the writer, but never hand it a protected row.
+    # filter_protected does not skip a catalog-edited name: it strips that
+    # name's editorial fields and returns the stripped row, and the writer turns
+    # each absent field into an empty one (sn.documentation = "", sn.links =
+    # null). Passing the row through would therefore clear the documentation and
+    # links protection exists to keep. The protected rows are dropped before the
+    # writer sees them, and their ids returned, so a partially written family
+    # cannot read as a whole one.
+    protected: list[str] = []
+    written = 0
+    writable: list[dict[str, Any]] = []
+    if batch:
+        from imas_codex.standard_names.protection import filter_protected
+
+        _, protected = filter_protected(batch)
+        withheld = set(protected)
+        writable = [row for row in batch if row["id"] not in withheld]
+        written = int((write_fn or write_enrichment_results)(writable) or 0)
+    return {
+        "members": len(present),
+        "added": sum(row_added.get(row["id"], 0) for row in writable),
+        "removed": sum(row_removed.get(row["id"], 0) for row in writable),
+        "written": written,
+        "protected": sorted(protected),
+    }
+
+
 def plan_family_applies(
     gc: Any | None = None,
     *,
@@ -1323,7 +1562,23 @@ def apply_families(
                 **kwargs,
             )
             stamped = False
+            reverse_links: dict[str, Any] | None = None
             if not result.halted:
+                # Convergence is the first moment the family's member links are
+                # final for this run, and the last moment before the signature
+                # is stamped over their documentation — so the reverse-link
+                # reconciliation runs here and the stamp covers its result.
+                reverse_links = reconcile_family_reverse_links(
+                    resolved_gc, fam_plan["members"]
+                )
+                if reverse_links.get("protected"):
+                    logger.warning(
+                        "Family '%s': %d member(s) are catalog-edited, so their "
+                        "reconciled links were not written: %s",
+                        fam_plan["anchor"],
+                        len(reverse_links["protected"]),
+                        ", ".join(reverse_links["protected"]),
+                    )
                 stamped = _stamp_applied_family(resolved_gc, fam_plan["anchor"])
             after_scores = _family_docs_scores(resolved_gc, fam_plan["members"])
             regressions = docs_score_regressions(
@@ -1335,6 +1590,7 @@ def apply_families(
                     "applied": True,
                     "result": result,
                     "stamped": stamped,
+                    "reverse_links": reverse_links,
                     "scores_after": after_scores,
                     "score_regressions": regressions,
                 }
@@ -1366,6 +1622,7 @@ __all__ = [
     "DocCallCostEstimate",
     "plan_family_applies",
     "apply_families",
+    "reconcile_family_reverse_links",
     "docs_score_regressions",
     "apply_guard_targets",
     "preview_recommended_refusals",

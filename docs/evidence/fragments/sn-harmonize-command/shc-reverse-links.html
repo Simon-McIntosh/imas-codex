@@ -1,0 +1,292 @@
+<section>
+  <h2 id="shc-reverse-links">A harmonize apply leaves no sibling link without its reverse</h2>
+  <p>
+    A name's <code>links</code> are not authored; they are derived from its
+    documentation, and each member's documentation is regenerated from its own
+    prompt in which the family's sibling block is one of many inputs. The
+    contract that produces the asymmetry is the generation prompt's family rule
+    — "Cross-link the family … link the parent and at least one adjacent
+    sibling inline where the prose supports it"
+    (<code>imas_codex/llm/prompts/sn/generate_docs_user.md</code>, rule 3). Each
+    member satisfies it on its own, choosing a sibling its own prose supports,
+    and two members need not choose each other. Nothing in the apply then
+    closes the loop: the per-member regeneration is what created the asymmetry,
+    and it ran again for each member.
+  </p>
+  <h3 id="shc-reverse-links-findings">The twelve live findings and what wrote each one-way link</h3>
+  <p>
+    Reproduced against the live graph on the boundary-averaged density family
+    (17 members, all <code>flux_surface_averaged_*_density_at_plasma_boundary</code>,
+    anchor <code>flux_surface_averaged_tritium_density_at_plasma_boundary</code>)
+    by reading each member's <code>links</code> and running the audit function
+    itself, <code>run_link_integrity</code> in
+    <code>imas_codex/standard_names/review/audits.py</code>:
+    <code>missing_reverse count = 12</code>. Every one is the same shape — the
+    source's regenerated documentation rendered a <code>name:</code> reference
+    to a sibling, and the linked sibling's own regeneration chose a different
+    adjacent sibling, so the reverse is absent. The source wrote the link; the
+    target never wrote it back.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Finding</th><th>Source (wrote the one-way link)</th><th>Target (reverse absent)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td><code>argon</code></td><td><code>ion</code></td></tr>
+      <tr><td>2</td><td><code>argon</code></td><td><code>neon</code></td></tr>
+      <tr><td>3</td><td><code>beryllium</code></td><td><code>neon</code></td></tr>
+      <tr><td>4</td><td><code>deuterium</code></td><td><code>neon</code></td></tr>
+      <tr><td>5</td><td><code>electron</code></td><td><code>ion</code></td></tr>
+      <tr><td>6</td><td><code>hydrogen</code></td><td><code>deuterium</code></td></tr>
+      <tr><td>7</td><td><code>ion</code></td><td><code>total_ion</code></td></tr>
+      <tr><td>8</td><td><code>iron</code></td><td><code>neon</code></td></tr>
+      <tr><td>9</td><td><code>neon</code></td><td><code>ion</code></td></tr>
+      <tr><td>10</td><td><code>nitrogen</code></td><td><code>neon</code></td></tr>
+      <tr><td>11</td><td><code>oxygen</code></td><td><code>neon</code></td></tr>
+      <tr><td>12</td><td><code>total_ion</code></td><td><code>xenon</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    The names below are the members' species tokens; every id carries the
+    family's prefix and suffix. The distribution shows the mechanism at work:
+    a member that reads as a natural hub collects many one-way inbound links
+    (<code>neon</code> is the target of six of the twelve, <code>ion</code> of
+    three) while linking back to only the few siblings its own prose happened
+    to support. Members also carry links out of the family
+    (<code>name:poloidal_magnetic_flux</code>,
+    <code>name:volume_averaged_*_density</code>), which are not siblings and
+    are not what this step reconciles.
+  </p>
+  <h3 id="shc-reverse-links-writer">The writer used, and why no second one was added</h3>
+  <p>
+    During an apply the field that carries <code>links</code> is
+    <code>persist_generated_docs</code>
+    (<code>imas_codex/standard_names/graph_ops.py</code>, called from
+    <code>workers.py</code>), which derives them with
+    <code>_extract_links_from_docs(documentation, self_name=sn_id)</code>. It is
+    the wrong writer for this step: it requires a live <code>claim_token</code>
+    and sets <code>docs_stage='drafted'</code>, which would reopen the
+    documentation the apply had just converged.
+  </p>
+  <p>
+    The step therefore calls <code>write_enrichment_results</code> from
+    <code>harmonize.py</code> — the <code>graph_ops</code> function whose stated
+    job is exactly these fields (<code>description</code>,
+    <code>documentation</code>, <code>links</code>,
+    <code>validity_domain</code>, <code>constraints</code>), with the same
+    <code>_compute_link_status</code> derivation the pipeline uses, claim-free,
+    and leaving <code>docs_stage</code> alone. <code>graph_ops.py</code> is not
+    edited and no second writer is introduced; the members' current
+    <code>description</code>, <code>validity_domain</code> and
+    <code>constraints</code> are passed through unchanged, so only
+    <code>documentation</code> and <code>links</code> move. Clearing
+    <code>review_input_hash</code>, which that writer does, is correct here: the
+    documentation changed, so a stored review hash is stale.
+  </p>
+  <p>
+    <code>reconcile_family_reverse_links</code> in
+    <code>imas_codex/standard_names/harmonize.py</code> runs in
+    <code>apply_families</code> once a family's members converge and
+    <em>before</em> <code>_stamp_applied_family</code>, so the stamped
+    <code>harmonized_group_signature</code> covers the reconciled
+    documentation. It adds the reverse of every sibling link the family holds,
+    and removes a link only when no name in the catalog carries its target — so
+    no reverse could ever exist for it. A <code>name:</code> link to a live name
+    <em>outside</em> the family is a legitimate cross-family reference and is
+    kept, in the index and in the prose: the step reconciles the sibling
+    relation, it does not police the rest of a member's references. A reverse is
+    likewise added only between siblings — a reference to a name outside the
+    family is never made reciprocal, because the two are not siblings and no
+    such relation is being asserted. A <code>dd:</code> path or an external URL
+    carries no standard-name target and is untouched. An added link is written
+    into the member's documentation as well as its derived index: the index is
+    derived from the prose, so an index edited alone would lose the addition at
+    the next derivation. Nothing is written when the family's links are already
+    symmetric.
+  </p>
+  <p>
+    Two removals were considered and one was rejected. Removing a
+    <code>name:</code> link whose target is merely outside the family looks
+    tidy and is wrong: members legitimately carry cross-family references
+    (<code>name:poloidal_magnetic_flux</code>,
+    <code>name:volume_averaged_*_density</code>), and a rule of that shape
+    deletes them from every member the apply touches. A link is removed only
+    when it is <em>impossible</em>, never when it is merely inconvenient to
+    reconcile.
+  </p>
+  <p>
+    <strong>A member the catalog has edited is not written — and its row is not
+    handed to the writer either.</strong>
+    <code>write_enrichment_results</code> runs <code>filter_protected</code> with
+    protection in force, and that function does not <em>skip</em> a protected
+    name: it strips that name's editorial fields and returns the stripped row.
+    The writer then turns each absent field into an empty one
+    (<code>sn.documentation = ""</code>, <code>sn.links = null</code>), so
+    handing it the row <em>clears</em> the documentation and links protection
+    instead of keeping them. The step therefore resolves protection itself and
+    drops the protected rows before the writer is called: it never hands over a
+    name whose fields the writer would empty. The withheld ids are still
+    returned under <code>"protected"</code>, and the apply still logs them, so a
+    partly written family cannot read as a whole one. Protection is never
+    overridden — passing the batch through and letting the writer strip it is
+    not protection, it is the same write performed with the guard's own output
+    as the payload. The step's returned <code>added</code> and
+    <code>removed</code> counts cover the rows the writer was given and no
+    others: a withheld member's computed additions and removals are computed and
+    then left out of the totals, because counting them would report a change
+    that did not land. Without that, a protected member carrying a dead link
+    would raise <code>removed</code> by one while nothing about it was written.
+  </p>
+  <h3 id="shc-reverse-links-test">The test, its green run and its red runs</h3>
+  <p>
+    <code>tests/standard_names/test_harmonize_reverse_links.py</code> drives the
+    real <code>apply_families</code> over a three-member fixture family whose
+    regenerated members link one way — the anchor links to the boundary member,
+    the probe member links to the anchor, and the probe carries two planted
+    references: <code>name:other_at_axis</code>, live in the catalog but in
+    another pattern family, and <code>name:base_of_ghost</code>, which no
+    catalog name carries. Its graph's documentation-field writer is stubbed and
+    reproduces the real writer's protection handling down to the detail that
+    matters: a stripped row's editorial fields are written back <em>as
+    empty</em>, exactly as the writer's Cypher does, so the stub is capable of
+    failing on the behaviour production has. The audit function itself judges
+    the result.
+  </p>
+  <ul>
+    <li>
+      <strong>Green</strong> (<code>green3.log</code>:
+      <code>4 passed</code>, <code>EXIT=0</code>, at the same revision as the
+      head gate arm): the apply converges; the
+      audit reports <strong>zero <code>missing_reverse</code> findings</strong>
+      over the family's links; the live out-of-family reference
+      <code>name:other_at_axis</code> survives in the probe's
+      <code>links</code> and in its prose, and is not made reciprocal; the dead
+      reference <code>name:base_of_ghost</code> is gone from both, with no
+      <code>dead_link</code> finding left to report; and the anchor's external
+      URL is carried through untouched.
+    </li>
+    <li>
+      <strong>Red, step removed</strong>
+      (<code>red_step_removed.log</code>, out-of-tree plugin
+      <code>-p red_step_removed</code>, <code>EXIT=1</code>): with the step
+      patched to a no-op the fixture apply ends with
+      <code>missing_reverse</code> findings and
+      <code>test_apply_leaves_no_sibling_link_without_its_reverse</code> fails
+      on its empty-findings assertion. This is the declared negative control
+      <em>"remove the reverse-link step and the fixture apply ends with
+      <code>missing_reverse</code> findings"</em>.
+    </li>
+    <li>
+      <strong>Red, sibling-only keep rule</strong>
+      (<code>red_sibling_only_rule.log</code>, <code>EXIT=1</code>): restoring
+      the rejected rule — keep a <code>name:</code> link only when its target is
+      a family sibling — fails exactly
+      <code>test_a_live_name_outside_the_family_survives</code>
+      (<code>1 failed, 3 passed</code>). This is the run that shows the survival
+      assertion is load-bearing rather than decorative.
+    </li>
+    <li>
+      <strong>Red, removal rule absent</strong>
+      (<code>red_no_removal_rule.log</code>, <code>EXIT=1</code>): with the
+      removal rule gone — every <code>name:</code> link kept regardless of
+      whether the catalog carries its target —
+      <code>test_a_link_to_a_name_the_catalog_lacks_is_removed</code> fails on
+      the dead link it still finds (<code>2 failed, 2 passed</code>). The second
+      failure is a consequence worth naming: the probe is protected, and with no
+      removal computed for it the step computes no change for it at all, so it
+      enters no batch and has nothing to report as withheld. The step reports
+      protection only where it had a write to withhold, which is why the count
+      is a report rather than a census. With the fields assertion first the test
+      now fails at its opening assertion instead, <code>assert
+      step["protected"] == [_PROBE]</code>, reporting <code>[]</code> — the same
+      fact, stated where it belongs.
+    </li>
+    <li>
+      <strong>Red, the protected row handed to the writer</strong>
+      (<code>red_writer_unprotected_targeted.log</code>, <code>EXIT=1</code>):
+      with the step passing the whole batch through — the pre-repair
+      <code>write(batch)</code> — the writer strips the protected probe's five
+      editorial fields and writes them as empty, and the test fails at
+      <code>assert f"name:{_GHOST}" in probe["links"]</code> with
+      <code>TypeError: argument of type 'NoneType' is not iterable</code>:
+      <code>sn.links</code> is <code>null</code>. Run over the whole file the
+      same reversion fails one test of four
+      (<code>red_writer_unprotected.log</code>). This is the run that names the
+      harm the finding identified.
+    </li>
+    <li>
+      <strong>Red, with the stub as it was — the false green</strong>
+      (<code>red_stub_cannot_fail.log</code>, <code>EXIT=1</code>): the same
+      reverted step, but with the earlier stub that treated a stripped row as
+      <em>no change</em>. The two assertions that read the probe's fields then
+      <strong>pass</strong>; the test fails only on the bookkeeping below them,
+      <code>assert graph.protected_by_writer == []</code>. That is the second
+      finding measured directly — a stub that does not clear what the writer
+      clears cannot fail on the clear, so the first finding was invisible to it.
+      The pair differs in one file only: the stub.
+    </li>
+    <li>
+      <strong>Red, the counts covering the withheld rows</strong>
+      (<code>red_counts_include_withheld.log</code>, <code>EXIT=1</code>): with
+      the totals accumulated over every member that had a change computed rather
+      than over the rows the writer was given, the protected test fails at
+      <code>assert step["removed"] == 0</code> — <code>assert 1 == 0</code>,
+      the probe's dead link counted as a removal even though nothing about the
+      probe was written. The counts assert <code>2</code> added and
+      <code>0</code> removed, which is the anchor's and the boundary's two
+      additions and the withheld probe's removal left out.
+    </li>
+  </ul>
+  <p>
+    The red runs are produced by removing one mechanism each and re-running, so
+    each assertion is tied to the code it measures rather than to a shared
+    fixture. The step-removed control patches the whole step out from an
+    out-of-tree plugin file, so no test hook is carried in the repository or the
+    environment; the others change the step's own source, or the stub, for the
+    length of one run. Every reverted source was restored and verified
+    byte-identical to the committed file afterwards.
+  </p>
+  <p>
+    Gate, run identically at both revisions: the harmonize test files
+    (<code>grep -rl harmonize tests/standard_names/</code>) plus
+    <code>tests/standard_names/test_house_style_checks.py</code>, under
+    <code>-m "not graph and not slow"</code>. Each log opens with the literal
+    command, the revision sha it ran at and the tree path, and ends with a bare
+    <code>EXIT=</code> line, so the result is tied to the revision it was
+    measured at by the log itself rather than by this page.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Revision</th><th>Result</th><th>Targets</th><th>Log</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>base <code>033ee2a30</code></td>
+        <td><code>151 passed, 13 deselected</code>, <code>EXIT=0</code></td>
+        <td>base's own expansion — 14 harmonize files plus the house-style file</td>
+        <td><code>base_gate2.log</code></td>
+      </tr>
+      <tr>
+        <td>head <code>77a4d90fe</code></td>
+        <td><code>155 passed, 13 deselected</code>, <code>EXIT=0</code></td>
+        <td>the same 15 plus <code>test_harmonize_reverse_links.py</code></td>
+        <td><code>head_gate2.log</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>Zero added failures, measured rather than inferred.</strong> The
+    four-test difference is exactly the four tests this node adds. The base run
+    was made from an extracted copy of the revision under node-local scratch
+    (<code>git archive</code> into <code>$TMPDIR</code>, with the gitignored
+    generated models copied in and no <code>.git</code>), so no git state was
+    touched, and it is the same environment and the same command as the head
+    arm. An earlier gate run of this
+    node's work showed
+    <code>test_house_style_checks.py::test_audit_report_carries_the_conformance_findings</code>
+    timing out at the suite's 30 s per-test bound; <strong>it passed in both
+    paired runs above</strong>, and in neither paired run did it approach the
+    bound, so the earlier timeout was load, not this change — which is now a
+    measurement and no longer an inference from the import graph.
+  </p>
+</section>

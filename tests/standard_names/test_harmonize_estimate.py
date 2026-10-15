@@ -226,6 +226,9 @@ def _install_family_edges(monkeypatch: Any) -> None:
     monkeypatch.setattr(harmonize, "refuse_recommended_members", lambda *a, **k: {})
     monkeypatch.setattr(harmonize, "_stamp_applied_family", lambda *a, **k: True)
     monkeypatch.setattr(harmonize, "_family_docs_scores", lambda *a, **k: {})
+    monkeypatch.setattr(
+        harmonize, "reconcile_family_reverse_links", lambda *a, **k: {}
+    )
 
 
 def _run_stubbed_apply(drain: _RecordingDrain):
