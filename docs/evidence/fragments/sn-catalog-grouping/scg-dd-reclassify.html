@@ -14,10 +14,12 @@
    <h2>scg-dd-reclassify — DD path re-classification at threshold 0.8</h2>
 
    <p>
-     <strong>Status: blocked.</strong> Seven IDS groups are re-classified; the
-     time fence ended the run (60&nbsp;min) with 8,909 Tier-1 paths left.
-     The lead ruled on 2026-10-14 that the <code>sn-domain-tree</code> threshold
-     moves from 0.9 to 0.8.
+     <strong>Status: blocked.</strong> Ten IDS groups are re-classified over
+     6,350 of the 12,036 Tier-1 paths. The time fence ended the run with 5,686
+     paths left, and the spend projection to finish them lands at about
+     USD&nbsp;25.24 against the USD&nbsp;25 ceiling — so the run stops rather
+     than cross it. The lead ruled on 2026-10-14 that the
+     <code>sn-domain-tree</code> threshold moves from 0.9 to 0.8.
    </p>
 
    <h3 id="scg-dd-reclassify-threshold">Threshold set to 0.8</h3>
@@ -57,9 +59,8 @@ Tier 2 (inherited): 88 paths</code></pre>
    <h3 id="scg-dd-reclassify-run">The run</h3>
    <p>
      The classified tier across the whole graph is 12,036 paths (classifiable
-     node categories, outside infrastructure). Each pass is bounded by
-     <code>timeout 520</code> and runs one IDS group, reset once on its first
-     pass and never reset again. Completed: g01, g02, g03, g09, g10, g13, g15.
+     node categories, outside infrastructure). Each pass runs one IDS group,
+     reset once on its first pass and never reset twice.
    </p>
    <table>
     <thead><tr><th>pass</th><th>IDS members</th><th>Tier-1 paths</th><th>spend</th><th>classification</th></tr></thead>
@@ -67,46 +68,70 @@ Tier 2 (inherited): 88 paths</code></pre>
       <tr><td>g01</td><td>10 small IDSs</td><td>49</td><td>$0.16</td><td>complete</td></tr>
       <tr><td>g02</td><td>23 IDSs</td><td>524</td><td>$1.09</td><td>complete</td></tr>
       <tr><td>g03</td><td>11 IDSs</td><td>561</td><td>$1.12</td><td>complete</td></tr>
+      <tr><td>g04</td><td>plasma_transport</td><td>1162</td><td>$1.97</td><td>complete</td></tr>
+      <tr><td>g05</td><td>summary</td><td>1103</td><td>$2.46</td><td>complete</td></tr>
+      <tr><td>g06</td><td>edge_transport</td><td>958</td><td>$1.87</td><td>complete</td></tr>
       <tr><td>g09</td><td>equilibrium</td><td>465</td><td>$0.80</td><td>complete</td></tr>
       <tr><td>g10</td><td>distributions</td><td>454</td><td>$1.03</td><td>complete</td></tr>
       <tr><td>g13</td><td>core_profiles, waves</td><td>535</td><td>$1.01</td><td>complete</td></tr>
       <tr><td>g15</td><td>pulse_schedule, edge_sources, spectrometer_visible</td><td>539</td><td>$0.92</td><td>complete</td></tr>
+      <tr><td>g07</td><td>plasma_profiles</td><td>885</td><td>$1.68</td><td>reset, <strong>not landed</strong></td></tr>
     </tbody>
    </table>
    <p>
-     Total: 3,127 of 12,036 Tier-1 paths classified, across 7 groups, each reset
-     once and no group reset twice. The remaining 8,909 paths are ledgered in
-     <code>scg-dd-reclassify-results.json</code> as groups g04–g08 and g11–g19.
+     <strong>g07 spent and did not land.</strong> Its reset ran at 06:40:52Z
+     (3,568 nodes back to <code>embedded</code>) and the classify phase was
+     killed at the pass ceiling after 590&nbsp;s with Tier 1 unwritten — the
+     build writes the batch only once classification completes, and the log
+     carries no <code>Wrote … Tier 1 domain classifications</code> line. So the
+     paths are cleared and unclassified, not re-classified, and the group must
+     be drained by a later pass that <em>omits</em> the reset flag.
    </p>
    <ul>
-     <li><strong>Settled by the tree:</strong> 884 of the 1,993 paths this run
-       classified beyond g01–g03 (44.4%); <code>jev_tree</code> stands at 1,426
-       <code>IMASNode</code>s graph-wide.</li>
-     <li><strong>Sent to chat:</strong> 1,109 (55.6%).</li>
-     <li><strong>Total spend:</strong> USD 6.13 of the USD 25 ceiling, at a
-       measured USD 0.001960/path. The 8,909 remaining paths project to about
-       USD 17.46, i.e. about USD 23.59 cumulative — inside the ceiling.</li>
+     <li><strong>Settled by the tree:</strong> <code>jev_tree</code> stands at
+       1,928 <code>IMASNode</code> entries graph-wide, up from 1,426 before the run.</li>
+     <li><strong>Spend incurred:</strong> USD 14.11 of the USD 25 ceiling —
+       USD 12.43 landed on the graph and USD 1.68 spent on the g07 pass that
+       did not write.</li>
+     <li><strong>Projection:</strong> the 5,686 remaining paths at the measured
+       USD 0.001957/path project to about USD 11.13, so finishing lands at
+       about <strong>USD 25.24</strong>. That crosses the ceiling, so the run
+       stops blocked here rather than spend past it. The resume should project
+       before <em>each</em> pass and stop the same way.</li>
    </ul>
 
-   <h3 id="scg-dd-reclassify-readback">The 201 rule-labelled paths, read from the graph</h3>
+   <h3 id="scg-dd-reclassify-readback">The 201 rule-labelled paths, read back from the graph</h3>
    <p>
-     Only the 92 of the 201 paths whose IDS completed a group are read back as
-     re-classified. On that subset the graph's domain matches the rule label on
-     85 of 92 = <strong>0.9239</strong>, beside the plan's estimate of 0.89.
-     The whole-graph readback over all 201 is 0.6965, dominated by paths whose
-     group has not run. Log at <code>EXIT=0</code>.
+     The 201 rule-labelled paths are scored against the graph's current
+     <code>physics_domain</code>. Only those whose IDS belongs to a completed
+     group carry a re-classified domain; on that subset of 111 paths the graph
+     matches the label on 93 = <strong>0.8378</strong>, against the plan's
+     estimate of 0.89. The whole-graph readback over all 201 is 0.6965.
    </p>
    <p>
-     The seven mismatches are all a coordinate path taking its parent's
-     subsystem domain rather than the label's physics domain — for example
+     <strong>The eleven new misses are all <code>summary/*</code>, and they all
+     land on <code>data_management</code></strong> — the IDS's own subsystem
+     domain rather than the quantity's physics: <code>summary/fusion/neutron_rates/total/value</code>
+     reads <code>data_management</code> against a label of
+     <code>neutronics</code>, and the five
+     <code>summary/global_quantities/*</code> and
+     <code>summary/gas_injection_rates/*</code> paths do the same against
+     <code>core_plasma_physics</code> and <code>fueling</code>. That is a
+     classifier behaviour worth its own node, not a labelling defect: a
+     container IDS whose children are copies of other IDSs' quantities is being
+     classified by its container rather than by the quantity.
+   </p>
+   <p>
+     The earlier mismatches are the opposite shape — a coordinate path taking
+     its parent's subsystem domain, e.g.
      <code>core_profiles/profiles_1d/grid/rho_pol_norm</code> reads
-     <code>transport</code> against a label of <code>equilibrium</code>, and
-     <code>focs/outline/z</code> reads <code>magnetic_field_diagnostics</code>.
+     <code>transport</code> against a label of <code>equilibrium</code>.
    </p>
    <p>
      Post-run domain-source distribution over the whole graph:
-     <code>inherited_from_parent</code> 35,470, <code>llm_classified</code>
-     10,608, <code>none_metadata</code> 7,925, <code>jev_tree</code> 1,426.
+     <code>inherited_from_parent</code> 32,788, <code>llm_classified</code>
+     9,221, <code>none_metadata</code> 7,925, <code>jev_tree</code> 1,928,
+     <code>deterministic_override</code> 6.
    </p>
 
    <h3 id="scg-dd-reclassify-wiring-test">The build's tree wiring test</h3>
@@ -124,15 +149,25 @@ Tier 2 (inherited): 88 paths</code></pre>
 
    <h3 id="scg-dd-reclassify-blockers">What remains</h3>
    <ul>
-     <li>The time fence ended the remaining 8,909 Tier-1 paths across 12 groups;
-       resume from the ledger, one reset per group, never resetting a
-       completed group.</li>
-     <li>The five largest IDSs — <code>plasma_transport</code> (1162),
-       <code>summary</code> (1103), <code>edge_transport</code> (958),
-       <code>plasma_profiles</code> (885) and <code>edge_profiles</code> (833) —
-       each exceed a 540&nbsp;s pass and need a longer pass or a split.</li>
-     <li>Spend is inside the ceiling: USD 6.13 spent, about USD 23.59 projected
-       to finish.</li>
+     <li><strong>g07 must be drained without a reset.</strong> Its reset is
+       already spent and its Tier 1 was never written.</li>
+     <li>Nine groups are untouched: g08 (<code>edge_profiles</code>, 833),
+       g11 (<code>gyrokinetics_local</code>, 395), g12 (wall,
+       transport_solver_numerics, 615), g14 (plasma_sources,
+       core_instant_changes, spectrometer_x_ray_crystal, 647), g16
+       (neutron_diagnostic, gyrokinetics, mhd_linear, core_transport, 608),
+       g17 (runaway_electrons, mhd, bolometer, radiation, core_sources, ece,
+       langmuir_probes, 698), g18 (charge_exchange, spectrometer_uv,
+       hard_x_rays, pf_active, camera_visible, reflectometer_fluctuation,
+       camera_ir, soft_x_rays, 647) and g19 (camera_x_rays, spi, magnetics,
+       ic_antennas, reflectometer_profile, 358).</li>
+     <li>The spend projection to finish is about USD 25.24 against the
+       USD 25 ceiling, so the resume must project before each pass and stop
+       blocked if it would cross.</li>
+     <li>The five largest IDSs (plasma_transport, summary, edge_transport,
+       plasma_profiles, edge_profiles) each exceed a 540&nbsp;s pass and need a
+       longer pass; three of them have now been carried by one longer pass
+       each.</li>
    </ul>
   </section>
  </main>
