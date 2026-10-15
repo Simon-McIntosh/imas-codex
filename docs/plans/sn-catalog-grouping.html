@@ -25,7 +25,7 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="94">
+<meta name="plan-version" content="95">
 <meta name="plan-modified" content="2026-10-15">
 <meta name="plan-commits" content="58ad9b1a4e61408b2da7c9e8232bcb6bccb21c1f,38f0a7336ce3b86ab37ebf5cb353a00363c32274,5c666533b9b786ec14259e85d0a6eb42cae1125c,17f084e2d28d7145d9288c8a5a542d03a7519f4a,aea797386d61d8b3703afbad957f4ff707ea9fab,c5e94c099ff238c7925e506686016698bdb04b64,178cfa68ba0e7aae45c0b76ea3ccc0511eb8c07d,02a113fb8754bf9a57a279726afbdf1d85fc57f8">
 </head>
@@ -547,6 +547,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261015T110215252709-scg-reclassify-evidence-repair" data-who="reckon-build" data-when="2026-10-15T11:31:37.320Z">
     <div class="r-comment-body"><p>scg-reclassify-evidence-repair: the re-classification readback now divides by the 201 labelled paths and counts an absent path as a miss (184/201 revised, 135/201 prerevision, unchanged; 0/201 under the pre-repair bare-string control), the 0.89 estimate sits beside the result, the six unclassified grid coordinates are traced to `_query_unclassified_paths` reading `n.node_category` against `CLASSIFIABLE_CATEGORIES` at `imas_codex/graph/dd_domain_classifier.py:1544`/`:85`, and one before/after figure is drawn; record at docs/evidence/fragments/sn-catalog-grouping/scg-reclassify-evidence-repair.html</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-land-s3-domain-audit" data-who="reckon-build" data-when="2026-10-15T12:05:00Z">
+    <div class="r-comment-body"><p>The domain consistency audit landed (merge <code>ee0b24269</code>, review 109/120). After the re-classification, 1,477 of 2,677 live names carry a domain other than the derivation's answer, 1,701 carry the wrong <code>source_domains</code>, 777 have edges that disagree, and 212 have none. The re-classification evidence was made durable beside it (merge <code>3721e6a99</code>). Next in this section: one name-domain writer built on this audit's reader, then the repair. <a href="/imas-codex/evidence/archive/sn-catalog-grouping-landed.html#s3-domain-consistency-audit">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261014T182748718064-review-of-scg-domain-precedence-0faae66faa2c" data-who="reckon-build" data-when="2026-10-14T18:38:07.927Z">
     <div class="r-comment-body"><p>review of run r-20261014T180703200185-scg-domain-precedence (head 0faae66faa2ccd151b485115b287dd21cb5a16ff, base bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85) stored as a parsed six-dimension record — goal_fidelity 19, evidence 17, scope_discipline 20, durability 16, fit 18, reuse 17, total 107; one follow-on finding (the chat prompt's category list is not reordered by the precedence it claims to follow)</p></div>
