@@ -1,0 +1,139 @@
+<section>
+  <h2 id="shc-reverse-links">A harmonize apply leaves no sibling link without its reverse</h2>
+  <p>
+    A name's <code>links</code> are not authored; they are derived from its
+    documentation, and each member's documentation is regenerated from its own
+    prompt in which the family's sibling block is one of many inputs. The
+    contract that produces the asymmetry is the generation prompt's family rule
+    — "Cross-link the family … link the parent and at least one adjacent
+    sibling inline where the prose supports it"
+    (<code>imas_codex/llm/prompts/sn/generate_docs_user.md</code>, rule 3). Each
+    member satisfies it on its own, choosing a sibling its own prose supports,
+    and two members need not choose each other. Nothing in the apply then
+    closes the loop: the per-member regeneration is what created the asymmetry,
+    and it ran again for each member.
+  </p>
+  <h3 id="shc-reverse-links-findings">The twelve live findings and what wrote each one-way link</h3>
+  <p>
+    Reproduced against the live graph on the boundary-averaged density family
+    (17 members, all <code>flux_surface_averaged_*_density_at_plasma_boundary</code>,
+    anchor <code>flux_surface_averaged_tritium_density_at_plasma_boundary</code>)
+    by reading each member's <code>links</code> and running the audit function
+    itself, <code>run_link_integrity</code> in
+    <code>imas_codex/standard_names/review/audits.py</code>:
+    <code>missing_reverse count = 12</code>. Every one is the same shape — the
+    source's regenerated documentation rendered a <code>name:</code> reference
+    to a sibling, and the linked sibling's own regeneration chose a different
+    adjacent sibling, so the reverse is absent. The source wrote the link; the
+    target never wrote it back.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Finding</th><th>Source (wrote the one-way link)</th><th>Target (reverse absent)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td><code>argon</code></td><td><code>ion</code></td></tr>
+      <tr><td>2</td><td><code>argon</code></td><td><code>neon</code></td></tr>
+      <tr><tr><td>3</td><td><code>beryllium</code></td><td><code>neon</code></td></tr>
+      <tr><td>4</td><td><code>deuterium</code></td><td><code>neon</code></td></tr>
+      <tr><td>5</td><td><code>electron</code></td><td><code>ion</code></td></tr>
+      <tr><td>6</td><td><code>hydrogen</code></td><td><code>deuterium</code></td></tr>
+      <tr><td>7</td><td><code>ion</code></td><td><code>total_ion</code></td></tr>
+      <tr><td>8</td><td><code>iron</code></td><td><code>neon</code></td></tr>
+      <tr><td>9</td><td><code>neon</code></td><td><code>ion</code></td></tr>
+      <tr><td>10</td><td><code>nitrogen</code></td><td><code>neon</code></td></tr>
+      <tr><td>11</td><td><code>oxygen</code></td><td><code>neon</code></td></tr>
+      <tr><td>12</td><td><code>total_ion</code></td><td><code>xenon</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    The names below are the members' species tokens; every id carries the
+    family's prefix and suffix. The distribution shows the mechanism at work:
+    a member that reads as a natural hub collects many one-way inbound links
+    (<code>neon</code> is the target of six of the twelve, <code>ion</code> of
+    three) while linking back to only the few siblings its own prose happened
+    to support. Members also carry links out of the family
+    (<code>name:poloidal_magnetic_flux</code>,
+    <code>name:volume_averaged_*_density</code>), which are not siblings and
+    are not what this step reconciles.
+  </p>
+  <h3 id="shc-reverse-links-writer">The writer used, and why no second one was added</h3>
+  <p>
+    During an apply the field that carries <code>links</code> is
+    <code>persist_generated_docs</code>
+    (<code>imas_codex/standard_names/graph_ops.py</code>, called from
+    <code>workers.py</code>), which derives them with
+    <code>_extract_links_from_docs(documentation, self_name=sn_id)</code>. It is
+    the wrong writer for this step: it requires a live <code>claim_token</code>
+    and sets <code>docs_stage='drafted'</code>, which would reopen the
+    documentation the apply had just converged.
+  </p>
+  <p>
+    The step therefore calls <code>write_enrichment_results</code> from
+    <code>harmonize.py</code> — the <code>graph_ops</code> function whose stated
+    job is exactly these fields (<code>description</code>,
+    <code>documentation</code>, <code>links</code>,
+    <code>validity_domain</code>, <code>constraints</code>), with the same
+    <code>_compute_link_status</code> derivation the pipeline uses, claim-free,
+    and leaving <code>docs_stage</code> alone. <code>graph_ops.py</code> is not
+    edited and no second writer is introduced; the members' current
+    <code>description</code>, <code>validity_domain</code> and
+    <code>constraints</code> are passed through unchanged, so only
+    <code>documentation</code> and <code>links</code> move. Clearing
+    <code>review_input_hash</code>, which that writer does, is correct here: the
+    documentation changed, so a stored review hash is stale.
+  </p>
+  <p>
+    <code>reconcile_family_reverse_links</code> in
+    <code>imas_codex/standard_names/harmonize.py</code> runs in
+    <code>apply_families</code> once a family's members converge and
+    <em>before</em> <code>_stamp_applied_family</code>, so the stamped
+    <code>harmonized_group_signature</code> covers the reconciled
+    documentation. It adds the reverse of every sibling link the family holds,
+    drops a <code>name:</code> link whose target is not a member of the family
+    or is no longer carried by the catalog, and leaves every other link (a
+    <code>dd:</code> path, an external URL) untouched. An added link is written
+    into the member's documentation as well as its derived index: the index is
+    derived from the prose, so an index edited alone would lose the addition at
+    the next derivation. Nothing is written when the family's links are already
+    symmetric.
+  </p>
+  <h3 id="shc-reverse-links-test">The test, its green run and its red run</h3>
+  <p>
+    <code>tests/standard_names/test_harmonize_reverse_links.py</code> drives the
+    real <code>apply_families</code> over a three-member fixture family whose
+    regenerated members link one way — the anchor links to the boundary member,
+    the probe member links to the anchor, and the probe carries a planted
+    <code>name:other_at_axis</code> to a name that is live in the catalog but
+    not in the family. The graph's documentation-field writer is stubbed, so
+    what is asserted is the mechanism the apply runs, and the audit function
+    itself judges the result.
+  </p>
+  <ul>
+    <li>
+      <strong>Green</strong> (<code>grep green.log</code> for
+      <code>3 passed</code>, <code>EXIT=0</code>): the apply converges, the
+      audit reports <strong>zero <code>missing_reverse</code> findings</strong>
+      over the family's links, the planted out-of-family link is gone from both
+      the probe's <code>links</code> and its documentation prose, and the
+      anchor's external URL is carried through untouched.
+    </li>
+    <li>
+      <strong>Red</strong> (<code>EXIT=1</code>): with the step removed —
+      <code>SHC_NO_REVERSE_STEP=1</code>, the declared negative control
+      <em>"remove the reverse-link step and the fixture apply ends with
+      <code>missing_reverse</code> findings"</em> — the same fixture apply ends
+      with <code>missing_reverse</code> findings, and
+      <code>test_apply_leaves_no_sibling_link_without_its_reverse</code> fails
+      on <code>assert [LinkFinding(... link back.")] == []</code>. The
+      negative-control test that asserts the findings appear still passes,
+      which is what shows the two runs differ only by the step.
+    </li>
+  </ul>
+  <p>
+    Gate: the harmonize test files (<code>grep -rl harmonize
+    tests/standard_names/</code>) plus
+    <code>tests/standard_names/test_house_style_checks.py</code>, run against
+    the base revision and after the change; the change adds no failures.
+  </p>
+</section>
