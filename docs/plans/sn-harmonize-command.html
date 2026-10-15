@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-house-style#s4&quot;],&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;,&quot;sn-harmonize-command#s5&quot;,&quot;sn-harmonize-command#s6&quot;,&quot;sn-harmonize-command#s7&quot;,&quot;sn-harmonize-command#s8&quot;,&quot;sn-harmonize-command#s9&quot;,&quot;sn-harmonize-command#s10&quot;,&quot;sn-harmonize-command#s11&quot;,&quot;sn-harmonize-command#s12&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;implementable&quot;}">
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -225,7 +225,7 @@
 <p>The second forced apply over the boundary-density family spent USD 6.26 against a USD 5.00 cap, then stopped unstamped. Two defects caused it. <code>-c/--cost-limit</code> is applied to each drain batch, so the anchor batch (USD 1.03) and the member batch (USD 5.23) each received the whole cap. And the dry run's estimate of USD 0.85 was about a seventh of the real cost, which §12 repairs.</p><p>The cap bounds the sum over one family: the anchor and its members together, including the review that follows each regeneration. The members' share is whatever the anchor leaves. The live apply builds the drain's <code>CampaignBudget</code> in <code>imas_codex/cli/sn.py</code> (~6164, with <code>per_batch_cost_cap=cost_limit</code>); <code>harmonize.py</code>'s own <code>CampaignBudget()</code> (~1106) is only the fallback when no budget is passed. The repair belongs at the apply's construction site, and the fallback must hold the same rule.</p><p><strong>Done when:</strong> a stubbed test shows that a family whose anchor spends 60% of the cap leaves its members exactly the remaining 40%, and that the members stop at the cap. The test fails if the cap returns to per-batch.</p>
 
     <h2 id="s9">§9 — Every sibling link is returned</h2>
-<section data-reckon="section" data-id="s9" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s9" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>The second apply raised <code>link_missing_reverse</code> from 6 to 12. Regenerated documentation links its siblings, and those siblings do not link back. First find, from the twelve findings on the live family, which side adds the links and why the reverse is not written. The causes could be the prompt's sibling block, the order in which members regenerate, or the lint's definition of a reverse link. Then make the apply leave none.</p><p>The preferred mechanism is deterministic: after the members converge, each member's documentation gains a link to every sibling that links to it. A prompt instruction that the model may ignore is not the mechanism. A reverse link is added only when it is true; a sibling link that should not exist is removed instead.</p><p><strong>Done when:</strong> the fragment <code>docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html</code> names the cause of each of the twelve findings. A stubbed apply over a fixture family whose regenerated members link one-way ends with zero <code>link_missing_reverse</code> findings, and it fails with the reverse step removed.</p>
 
     <h2 id="s10">§10 — The report shows the anchor the apply will use</h2>
@@ -453,6 +453,9 @@ crew/reviews/imas-codex/r-20261013T145943345276-shc-pin-anchor.at-4ae756c8581cf6
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261015T064108500758-review-of-shc-reverse-links-2c3a78d39555" data-who="reckon-build" data-when="2026-10-15T07:06:24.010Z">
     <div class="r-comment-body"><p>Independent review of r-20261015T040733444496-shc-reverse-links — SOUND WITH FINDINGS, total 102/120 across six dimensions, zero added failures, one blocking capture defect and three follow-ons.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-close-s9" data-who="reckon-build" data-when="2026-10-15T08:40:00Z">
+    <div class="r-comment-body"><p>§9 closed. A converged family's sibling links are made reciprocal. Only links to names absent from the catalog are dropped, and protected members are withheld from the writer and reported (<code>77a4d90fe</code>; gate 155 against 151 at base). Reviews 102, 102 and 84/120. The duplicated dead-link rewrite goes to the next harmonize node. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s9-reverse-links">evidence</a></p></div>
 </div>
 </section>
 </main>
