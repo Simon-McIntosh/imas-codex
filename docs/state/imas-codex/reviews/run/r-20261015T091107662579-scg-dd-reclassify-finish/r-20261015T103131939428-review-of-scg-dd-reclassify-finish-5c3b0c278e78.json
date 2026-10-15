@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/imas_dd.py:61 (@dd.command(\"build\"))",
+    "imas_codex/graph/dd_workers.py:706 (classify_worker)",
+    "imas_codex/graph/client.py:155 (GraphClient)"
+  ],
+  "completed_at": "2026-10-15T10:46:02.299Z",
+  "dispatched_at": "2026-10-15T10:31:46Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish.html",
+      "line": "101",
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish.html:101 follow-on: the section scores the 201 paths as 0.915 against the revised labels with 0.672 beside it, but never reports the 0.89 estimate the node's own measure requires the result be scored beside, so a reader cannot judge the run against the bar it was commissioned to clear."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T091107662579-scg-dd-reclassify-finish/manifest.md",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T091107662579-scg-dd-reclassify-finish/manifest.md:13 follow-on: negative_control_log is not the bare path the field requires -- it carries two paths and prose on one line -- and the path it names, passes/readback-201.log, contains only the final green run (command, one wrote line, EXIT=0) with none of the 0/201 red state the note describes, so the declared control is unreadable as a control."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-run.py",
+      "line": "148",
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-run.py:148 follow-on: _score divides matches by len(graph) rather than the label count, so a labelled path absent from the graph leaves the denominator silently and inflates the reported accuracy; the two counts coincide at 201 here, which is why the defect is invisible in this run's numbers."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish.html",
+      "line": "101",
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish.html:101 follow-on: the 201-path score includes six mismatches the results JSON shows carry no domain_source (core_profiles/profiles_1d/grid/rho_pol_norm and five siblings), so they were never re-classified, against a measure that asks the paths be scored \"now all re-classified\"; the fragment discloses the six in prose but the headline figure is unchanged by them."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-results.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-results.json:1 follow-on: the node declared docs/figures/sn-catalog-grouping/scg-dd-reclassify-finish in its write scope and wrote no figure, while the doc's central before/after (summary at data_management 2474 -> 4, and the domain_source split) is the kind of comparison the graphics mandate asks be drawn."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-run.py",
+      "line": "75",
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-run.py:75 follow-on: the pass subcommand re-implements the subprocess-invoke-the-CLI-with-a-log capability the sibling docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-run.py:53 already carries, rather than extending it, so two drivers in one plan's evidence set now parse and terminate the same CLI."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 6d3260829 over 6ed29ff6d..5c3b0c278; six commits, three files, ~1104 added lines, all inside the declared paths and nothing else.",
+    "done_when": "the gate the worker ran asserts the measure: nine pass logs carry a literal command first line and EXIT=0 last, passes/spend.log records cumulative USD 28.31 under the USD 30.00 ceiling, passes/readback-201.log records summary/data_management 4 of 5216 and the 201 rule-labelled paths at 184/201 from the graph, EXIT=0, and passes/head-tests.log records the two classifier files at 9 passed, EXIT=0 -- but the \"0.89 estimate\" the measure says to report the score beside appears nowhere in the delivered fragment, results JSON or driver.",
+    "goal": "the node's goal is to finish the DD path re-classification under the corrected guidance; the diff lands the driver and the record for nine passes (docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish.html:1) that re-ran summary plus the eight untouched IDS groups, 5901 Tier-1 paths, all EXIT=0.",
+    "manifest": "read manifest.md; it reports the nine passes, the spend, the readback and the classifier tests, but its negative_control_log line names two paths with prose and points at passes/readback-201.log, which carries only the final green run (EXIT=0) and none of the 0/201 red state the note describes.",
+    "write_paths": "the manifest declares three fragment files and a docs/figures directory; git diff --name-only 6d3260829..5c3b0c278 lists exactly those three fragment files and nothing else."
+  },
+  "justifications": {
+    "durability": "the diff adds no test and no assertion, and the declared control log passes/readback-201.log carries only the green EXIT=0 run, so nothing here reddens if the driver or the readback instrument regresses.",
+    "evidence": "every figure the measure names is recorded in a log (nine EXIT=0 pass logs, USD 28.31 cumulative under the USD 30.00 ceiling, summary/data_management 4 of 5216, 184/201 from the graph at EXIT=0), but the 0.89 estimate the measure pairs the score with is absent from every delivered artefact, and the pass logs' own stop marker (dd_workers.py:746) was read directly rather than trusted.",
+    "fit": "the driver's subcommands and symbols (scg-dd-reclassify-finish-run.py:_run_pass, _readback, _score, _spend) are mechanism-named and follow the sibling fragment idiom, with no plan or gate label in code.",
+    "goal_fidelity": "the nine pass logs under the run's passes/ cover exactly summary and g08,g11,g12,g14,g16,g17,g18,g19 (pass-g05-reset.log through pass-g19.log), completing the 19-group re-classification the goal states.",
+    "reuse": "no repository owner exists for the log-based readback or spend summing (searched imas_codex/ for cost/spend/reporting helpers; imas_codex/graph/dd_workers.py:146 total_cost is in-process accounting, not log parsing), though the pass subcommand reproduces the sibling scg-dd-reclassify-run.py:53 invocation.",
+    "scope_discipline": "git diff --name-only 6d3260829..5c3b0c278 returns only the three declared fragment files, so the diff stays inside the fenced scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to finish the DD path re-classification under the corrected guidance; the diff lands the driver and the record for nine passes (docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish.html:1) that re-ran summary plus the eight untouched IDS groups, 5901 Tier-1 paths, all EXIT=0.\nVERDICT done_when: the gate the worker ran asserts the measure: nine pass logs carry a literal command first line and EXIT=0 last, passes/spend.log records cumulative USD 28.31 under the USD 30.00 ceiling, passes/readback-201.log records summary/data_management 4 of 5216 and the 201 rule-labelled paths at 184/201 from the graph, EXIT=0, and passes/head-tests.log records the two classifier files at 9 passed, EXIT=0 -- but the \"0.89 estimate\" the measure says to report the score beside appears nowhere in the delivered fragment, results JSON or driver.\nVERDICT write_paths: the manifest declares three fragment files and a docs/figures directory; git diff --name-only 6d3260829..5c3b0c278 lists exactly those three fragment files and nothing else.\nVERDICT manifest: read manifest.md; it reports the nine passes, the spend, the readback and the classifier tests, but its negative_control_log line names two paths with prose and points at passes/readback-201.log, which carries only the final green run (EXIT=0) and none of the 0/201 red state the note describes.\nVERDICT diff: read commit by commit against base 6d3260829 over 6ed29ff6d..5c3b0c278; six commits, three files, ~1104 added lines, all inside the declared paths and nothing else.\nCALL_SITES: imas_codex/cli/imas_dd.py:61 (@dd.command(\"build\")), imas_codex/graph/dd_workers.py:706 (classify_worker), imas_codex/graph/client.py:155 (GraphClient)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the nine pass logs under the run's passes/ cover exactly summary and g08,g11,g12,g14,g16,g17,g18,g19 (pass-g05-reset.log through pass-g19.log), completing the 19-group re-classification the goal states.\nSCORE evidence: 15\nJUSTIFICATION evidence: every figure the measure names is recorded in a log (nine EXIT=0 pass logs, USD 28.31 cumulative under the USD 30.00 ceiling, summary/data_management 4 of 5216, 184/201 from the graph at EXIT=0), but the 0.89 estimate the measure pairs the score with is absent from every delivered artefact, and the pass logs' own stop marker (dd_workers.py:746) was read directly rather than trusted.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 6d3260829..5c3b0c278 returns only the three declared fragment files, so the diff stays inside the fenced scope.\nSCORE durability: 9\nJUSTIFICATION durability: the diff adds no test and no assertion, and the declared control log passes/readback-201.log carries only the green EXIT=0 run, so nothing here reddens if the driver or the readback instrument regresses.\nSCORE fit: 18\nJUSTIFICATION fit: the driver's subcommands and symbols (scg-dd-reclassify-finish-run.py:_run_pass, _readback, _score, _spend) are mechanism-named and follow the sibling fragment idiom, with no plan or gate label in code.\nSCORE reuse: 17\nJUSTIFICATION reuse: no repository owner exists for the log-based readback or spend summing (searched imas_codex/ for cost/spend/reporting helpers; imas_codex/graph/dd_workers.py:146 total_cost is in-process accounting, not log parsing), though the pass subcommand reproduces the sibling scg-dd-reclassify-run.py:53 invocation.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish.html:101 follow-on: the section scores the 201 paths as 0.915 against the revised labels with 0.672 beside it, but never reports the 0.89 estimate the node's own measure requires the result be scored beside, so a reader cannot judge the run against the bar it was commissioned to clear.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T091107662579-scg-dd-reclassify-finish/manifest.md:13 follow-on: negative_control_log is not the bare path the field requires -- it carries two paths and prose on one line -- and the path it names, passes/readback-201.log, contains only the final green run (command, one wrote line, EXIT=0) with none of the 0/201 red state the note describes, so the declared control is unreadable as a control.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-run.py:148 follow-on: _score divides matches by len(graph) rather than the label count, so a labelled path absent from the graph leaves the denominator silently and inflates the reported accuracy; the two counts coincide at 201 here, which is why the defect is invisible in this run's numbers.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish.html:101 follow-on: the 201-path score includes six mismatches the results JSON shows carry no domain_source (core_profiles/profiles_1d/grid/rho_pol_norm and five siblings), so they were never re-classified, against a measure that asks the paths be scored \"now all re-classified\"; the fragment discloses the six in prose but the headline figure is unchanged by them.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-results.json:1 follow-on: the node declared docs/figures/sn-catalog-grouping/scg-dd-reclassify-finish in its write scope and wrote no figure, while the doc's central before/after (summary at data_management 2474 -> 4, and the domain_source split) is the kind of comparison the graphics mandate asks be drawn.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-run.py:75 follow-on: the pass subcommand re-implements the subprocess-invoke-the-CLI-with-a-log capability the sibling docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-run.py:53 already carries, rather than extending it, so two drivers in one plan's evidence set now parse and terminate the same CLI.\n",
+  "review_run_id": "r-20261015T103131939428-review-of-scg-dd-reclassify-finish-5c3b0c278e78",
+  "reviewed_base_sha": "6d326082998057063b4bd14ef513639e28392cc3",
+  "reviewed_head_sha": "5c3b0c278e78929eb0fd6b99b6217cb7aec8bcec",
+  "reviewed_run_id": "r-20261015T091107662579-scg-dd-reclassify-finish",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T10:42:17.520078+00:00",
+  "total": 98
+}
