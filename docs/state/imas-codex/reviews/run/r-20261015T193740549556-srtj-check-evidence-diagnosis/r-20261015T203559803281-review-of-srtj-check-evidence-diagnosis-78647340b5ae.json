@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T20:48:27.172Z",
+  "dispatched_at": "2026-10-15T20:36:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py",
+      "line": "187",
+      "severity": "follow-on",
+      "text": "follow-on: _repeated_content_token re-implements the repository's own repeated-content-token rule at imas_codex/standard_names/audits.py:3068 with a divergent stopword set \u2014 STOPWORDS at :81 is a 26-token superset of the owner's _GRAMMAR_CONNECTIVES at audits.py:3024 (10 tokens) \u2014 so the simulated re-score for redundant_repeated_segment measures a hand-rolled approximation that disagrees with the owner on any name containing \"and\", \"with\", \"a\", \"the\" or \"on\", and the remedy it recommends is to move that rule to code where it already exists; the faithful simulation would call repeated_token_check."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py",
+      "line": "344",
+      "severity": "follow-on",
+      "text": "follow-on: _score_of duplicates the prototype scorer _score owned by docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:440 and srtj-noul-polarity-run.py:441 \u2014 identical to them but for the added replace_code_rule branch \u2014 rather than importing or extending that owner."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py",
+      "line": "476",
+      "severity": "follow-on",
+      "text": "follow-on: the declared negative control cannot fail the run \u2014 control.within_tolerance is computed here and only printed at :507, and the script contains no assert and no non-zero exit path other than raise SystemExit(main()) at :751, so a run whose control is false would still end EXIT=0 and the gate log could not show it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py",
+      "line": "678",
+      "severity": "follow-on",
+      "text": "follow-on: the figure encodes the five inverted checks in a second colour but neither a legend nor a direct label identifies that colour, so the left panel's orange series of calibration-auc.svg is decodable only from the caption prose."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites reach the landed change: the run script is executed directly and imported by nothing; the fragment, results JSON and SVG are documentation consumed by prose.",
+    "diff": "read commit by commit against base a4a3f9368 \u2014 c8d0f0c16 adds the run script, results JSON, fragment HTML and SVG; 78647340b re-rasterises only the SVG (248 insertions against 248 deletions).",
+    "done_when": "the evidence fence asks for evidence-field coverage, firing on accepted and rejected calibration names, ten strongest accepted examples, a cause and remedy per check, and a calibration re-score plus one validation read; srtj-check-evidence-diagnosis-results.json carries all six blocks and gate-rerun.log ends EXIT=0.",
+    "goal": "read the node goal \"Find why five defect-worded name-review checks fire on accepted names\" against docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis.html:1-118 \u2014 the landed fragment answers it: four checks are starved of a declared evidence field in the review item they were handed and one answers a rule better decided in code, and the inversion is a recorded ranking inversion rather than a mis-set half threshold.",
+    "manifest": "read; status complete, commits c8d0f0c16 and 78647340b, control_within_tolerance true, gate-rerun.log named, and its control constants 0.6057/0.6378 independently match r-20261015T120934498631-srtj-noul-polarity/manifest.md:70 (calibration_auc after 0.6057, validation_auc after 0.6378).",
+    "write_paths": "the dispatch FENCE-SCOPE declares four paths \u2014 the three fragments plus docs/figures/sn-review-through-jev/srtj-check-evidence-diagnosis \u2014 and git diff a4a3f9368..78647340b touches exactly those four, nothing else."
+  },
+  "justifications": {
+    "durability": "no test is added (the node is fenced out of test paths), and the declared control at srtj-check-evidence-diagnosis-run.py:476 is placed in the results JSON and printed at :507 but never asserted, so no assertion exists that reddens on a regression.",
+    "evidence": "gate-rerun.log carries the literal command, EXIT=0 and control_within_tolerance true, and its 0.6057/0.6378 match the re-measure's recorded values in r-20261015T120934498631-srtj-noul-polarity/manifest.md:70.",
+    "fit": "the script follows the sibling evidence-script idiom \u2014 production loaders imported at srtj-check-evidence-diagnosis-run.py:392 and the data-ink style sheet at :676 \u2014 and adds no forbidden name.",
+    "goal_fidelity": "srtj-check-evidence-diagnosis-run.py:344-390 classifies each check against the saved states and :524 renders the cause-and-remedy fragment, which is the deliverable the goal names.",
+    "reuse": "srtj-check-evidence-diagnosis-run.py:187 and :344 each re-derive a mechanism the repository already owns (imas_codex/standard_names/audits.py:3068 and the sibling prototype at srtj-name-review-measure-run.py:440) instead of extending the owner.",
+    "scope_discipline": "git diff a4a3f9368..78647340b changes only the four paths the dispatch FENCE-SCOPE declares."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal \"Find why five defect-worded name-review checks fire on accepted names\" against docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis.html:1-118 \u2014 the landed fragment answers it: four checks are starved of a declared evidence field in the review item they were handed and one answers a rule better decided in code, and the inversion is a recorded ranking inversion rather than a mis-set half threshold.\nVERDICT done_when: the evidence fence asks for evidence-field coverage, firing on accepted and rejected calibration names, ten strongest accepted examples, a cause and remedy per check, and a calibration re-score plus one validation read; srtj-check-evidence-diagnosis-results.json carries all six blocks and gate-rerun.log ends EXIT=0.\nVERDICT write_paths: the dispatch FENCE-SCOPE declares four paths \u2014 the three fragments plus docs/figures/sn-review-through-jev/srtj-check-evidence-diagnosis \u2014 and git diff a4a3f9368..78647340b touches exactly those four, nothing else.\nVERDICT manifest: read; status complete, commits c8d0f0c16 and 78647340b, control_within_tolerance true, gate-rerun.log named, and its control constants 0.6057/0.6378 independently match r-20261015T120934498631-srtj-noul-polarity/manifest.md:70 (calibration_auc after 0.6057, validation_auc after 0.6378).\nVERDICT diff: read commit by commit against base a4a3f9368 \u2014 c8d0f0c16 adds the run script, results JSON, fragment HTML and SVG; 78647340b re-rasterises only the SVG (248 insertions against 248 deletions).\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: srtj-check-evidence-diagnosis-run.py:344-390 classifies each check against the saved states and :524 renders the cause-and-remedy fragment, which is the deliverable the goal names.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-rerun.log carries the literal command, EXIT=0 and control_within_tolerance true, and its 0.6057/0.6378 match the re-measure's recorded values in r-20261015T120934498631-srtj-noul-polarity/manifest.md:70.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff a4a3f9368..78647340b changes only the four paths the dispatch FENCE-SCOPE declares.\nSCORE durability: 8\nJUSTIFICATION durability: no test is added (the node is fenced out of test paths), and the declared control at srtj-check-evidence-diagnosis-run.py:476 is placed in the results JSON and printed at :507 but never asserted, so no assertion exists that reddens on a regression.\nSCORE fit: 16\nJUSTIFICATION fit: the script follows the sibling evidence-script idiom \u2014 production loaders imported at srtj-check-evidence-diagnosis-run.py:392 and the data-ink style sheet at :676 \u2014 and adds no forbidden name.\nSCORE reuse: 5\nJUSTIFICATION reuse: srtj-check-evidence-diagnosis-run.py:187 and :344 each re-derive a mechanism the repository already owns (imas_codex/standard_names/audits.py:3068 and the sibling prototype at srtj-name-review-measure-run.py:440) instead of extending the owner.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py:187 follow-on: _repeated_content_token re-implements the repository's own repeated-content-token rule at imas_codex/standard_names/audits.py:3068 with a divergent stopword set \u2014 STOPWORDS at :81 is a 26-token superset of the owner's _GRAMMAR_CONNECTIVES at audits.py:3024 (10 tokens) \u2014 so the simulated re-score for redundant_repeated_segment measures a hand-rolled approximation that disagrees with the owner on any name containing \"and\", \"with\", \"a\", \"the\" or \"on\", and the remedy it recommends is to move that rule to code where it already exists; the faithful simulation would call repeated_token_check.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py:344 follow-on: _score_of duplicates the prototype scorer _score owned by docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:440 and srtj-noul-polarity-run.py:441 \u2014 identical to them but for the added replace_code_rule branch \u2014 rather than importing or extending that owner.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py:476 follow-on: the declared negative control cannot fail the run \u2014 control.within_tolerance is computed here and only printed at :507, and the script contains no assert and no non-zero exit path other than raise SystemExit(main()) at :751, so a run whose control is false would still end EXIT=0 and the gate log could not show it.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-check-evidence-diagnosis-run.py:678 follow-on: the figure encodes the five inverted checks in a second colour but neither a legend nor a direct label identifies that colour, so the left panel's orange series of calibration-auc.svg is decodable only from the caption prose.\n",
+  "review_run_id": "r-20261015T203559803281-review-of-srtj-check-evidence-diagnosis-78647340b5ae",
+  "reviewed_base_sha": "a4a3f9368e9f7a4da275e87c70c397fdc6574e36",
+  "reviewed_head_sha": "78647340b5ae6770b4ad59c66ffb518103a329be",
+  "reviewed_run_id": "r-20261015T193740549556-srtj-check-evidence-diagnosis",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T20:46:48+00:00",
+  "total": 83
+}
