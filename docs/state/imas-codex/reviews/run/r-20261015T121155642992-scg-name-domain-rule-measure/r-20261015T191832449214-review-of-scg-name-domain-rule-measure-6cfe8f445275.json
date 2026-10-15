@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T19:49:02.683Z",
+  "dispatched_at": "2026-10-15T19:19:12Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py",
+      "line": "59",
+      "severity": "follow-on",
+      "text": "follow-on: sources_for re-implements the cycle-guarded derived-parent child-union recursion already owned by imas_codex/standard_names/domain_audit.py:186 (_expected_domains). The cycle guard and the child-union semantics are correct, but sharing the recursion would keep a future change to the derived-parent rule to one place."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py",
+      "line": "46",
+      "severity": "follow-on",
+      "text": "follow-on: source_rows patches the private module constant _LIVE_NAMES_QUERY (imas_codex/standard_names/domain_audit.py:85) by exact-whitespace string replacement. The two asserts make a drift fail loud, but per-path domains belong on the audit reader itself rather than in a caller-side splice."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "follow-on: the plurality branches index the local RANK map (scg-name-domain-rule-measure-run.py:34) with no unknown-domain guard, so an out-of-vocabulary domain raises a bare KeyError where the control path raises the named ValueError of select_primary_domain (imas_codex/standard_names/domain_ranking.py:24). Not reachable on today's all-in-table data."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py",
+      "line": "166",
+      "severity": "follow-on",
+      "text": "follow-on: the figure annotates each point at fontsize 14 (scg-name-domain-rule-measure-run.py:172) against the 20 pt direct-label size the plot-style rules mandate, and runs no on-save clip or text-overlap check. The committed SVG renders clean today; nothing refuses a future clipped or colliding label."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none \u2014 the change is a docs/evidence measurement script plus its data and figure; grep of imas_codex/ and tests/ for the fragment or script name returns nothing, so no production runtime code reaches it.",
+    "diff": "read commit by commit from base a68bf23f3670001879354291334bce1449c8e73f to head 6cfe8f445275a034ca1c9da00a10c3285a68ae3d; the three commits add and revise the measurement script, then add the results JSON, the fragment and the accuracy SVG, touching the four declared paths only.",
+    "done_when": "the fragment and its results JSON carry the per-rule accuracy with 95% intervals, the twenty per-name answers, the live blast radius and the misses no rule fixes; the manifest records measure-complete.log EXIT=0; I re-derived the committed accuracy.svg byte-identically (sha256 e271ab3947dbc7269fb33928deb646eb71fab6455422bee3cb83280f27f51b68) from the committed results JSON and script. Only the logged-rerun claim lacks a hash receipt in the node's own record.",
+    "goal": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py:86-105 implements the four selectors (set-precedence control, path plurality, IDS plurality, IDS-then-paths) over the source domains of 2,677 live names and scores them on the reference, calibration and validation cohorts in main.",
+    "manifest": "read; it names commits dfb2f2fd7, 38a571f25 and 6cfe8f445, the four changed paths, base-domain-audit.log at 21 passed EXIT=0, measure-complete.log at a 9/20 approved control EXIT=0 over 2,677 live names, control-refusal.log as the declared mutation going red at EXIT=1, and status complete.",
+    "write_paths": "the declared scope is docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure.html, ...-run.py, ...-results.json and docs/figures/sn-catalog-grouping/scg-name-domain-rule-measure; git diff --stat a68bf23f3 6cfe8f445 lists exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "scg-name-domain-rule-measure-run.py:337 fails if the set-precedence control stops reproducing 9/20 and control-refusal.log shows it red at EXIT=1, and :318-323 pin the live census and a known-present source domain, but the guards live in a one-shot evidence script and pin only the control, not the calibration, validation or blast-radius figures. No added assertion compares a value against an input the script itself supplied; each compares against the audit census, the brief's recorded 9, or the label sheet.",
+    "evidence": "measure-complete.log ends EXIT=0 reporting 2,677 live names and a 9/20 approved control, the control rule's blast radius of 1,477 changed names equals the audit's recorded physics_domain_not_derived count of 1,477, and the committed SVG reproduces byte-identically from the committed results, but the node records no head pytest arm and no hash receipt for the rerun it claims.",
+    "fit": "the script follows the sibling evidence-script idiom (matplotlib savefig with metadata Date None at scg-name-domain-rule-measure-run.py:183, as the sibling scg-domain-path evidence script already does) and its file, function and constant names carry no plan, section or ticket label.",
+    "goal_fidelity": "scg-name-domain-rule-measure-run.py:86 choose_domain implements the four required selectors with declared precedence breaking ties, and main scores each on the approved and calibration cohorts using the sheet's labels exactly as the brief directs.",
+    "reuse": "the control delegates to select_primary_domain (imas_codex/standard_names/domain_ranking.py:17) and the intervals to bootstrap_interval (imas_codex/discovery/base/evaluation.py) with no local re-implementation of either, but scg-name-domain-rule-measure-run.py:59 re-derives the derived-parent child-union recursion owned by imas_codex/standard_names/domain_audit.py:186.",
+    "scope_discipline": "git diff --stat a68bf23f3 6cfe8f445 touches only the four declared paths and the diff carries nothing the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: four selectors implemented at :86-105 and scored in main over 2,677 live names on the reference, calibration and validation cohorts.\nVERDICT done_when: the fragment and results JSON carry the required content; the committed SVG reproduces byte-identically; only the logged-rerun claim lacks a hash receipt.\nVERDICT write_paths: exactly the four declared paths.\nVERDICT manifest: read; names the three commits, four changed paths, 21-passed base arm, EXIT=0 measure gate, control-refusal at EXIT=1, status complete.\nVERDICT diff: read against base a68bf23f3; four declared paths only.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scg-name-domain-rule-measure-run.py:86 choose_domain implements the four required selectors with declared precedence breaking ties, and main scores each on the approved and calibration cohorts using the sheet's labels exactly as the brief directs.\nSCORE evidence: 17\nJUSTIFICATION evidence: measure-complete.log ends EXIT=0 reporting 2,677 live names and a 9/20 approved control, the control rule's blast radius of 1,477 changed names equals the audit's recorded physics_domain_not_derived count of 1,477, and the committed SVG reproduces byte-identically from the committed results, but the node records no head pytest arm and no hash receipt for the rerun it claims.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat a68bf23f3 6cfe8f445 touches only the four declared paths and the diff carries nothing the goal does not imply.\nSCORE durability: 15\nJUSTIFICATION durability: scg-name-domain-rule-measure-run.py:337 fails if the set-precedence control stops reproducing 9/20 and control-refusal.log shows it red at EXIT=1, and :318-323 pin the live census and a known-present source domain, but the guards live in a one-shot evidence script and pin only the control, not the calibration, validation or blast-radius figures. No added assertion compares a value against an input the script itself supplied; each compares against the audit census, the brief's recorded 9, or the label sheet.\nSCORE fit: 17\nJUSTIFICATION fit: the script follows the sibling evidence-script idiom (matplotlib savefig with metadata Date None at scg-name-domain-rule-measure-run.py:183, as the sibling scg-domain-path evidence script already does) and its file, function and constant names carry no plan, section or ticket label.\nSCORE reuse: 17\nJUSTIFICATION reuse: the control delegates to select_primary_domain (imas_codex/standard_names/domain_ranking.py:17) and the intervals to bootstrap_interval (imas_codex/discovery/base/evaluation.py) with no local re-implementation of either, but scg-name-domain-rule-measure-run.py:59 re-derives the derived-parent child-union recursion owned by imas_codex/standard_names/domain_audit.py:186.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py:59 follow-on: sources_for re-implements the cycle-guarded derived-parent child-union recursion already owned by imas_codex/standard_names/domain_audit.py:186 (_expected_domains). The cycle guard and the child-union semantics are correct, but sharing the recursion would keep a future change to the derived-parent rule to one place.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py:46 follow-on: source_rows patches the private module constant _LIVE_NAMES_QUERY (imas_codex/standard_names/domain_audit.py:85) by exact-whitespace string replacement. The two asserts make a drift fail loud, but per-path domains belong on the audit reader itself rather than in a caller-side splice.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py:104 follow-on: the plurality branches index the local RANK map (scg-name-domain-rule-measure-run.py:34) with no unknown-domain guard, so an out-of-vocabulary domain raises a bare KeyError where the control path raises the named ValueError of select_primary_domain (imas_codex/standard_names/domain_ranking.py:24). Not reachable on today's all-in-table data.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py:166 follow-on: the figure annotates each point at fontsize 14 (scg-name-domain-rule-measure-run.py:172) against the 20 pt direct-label size the plot-style rules mandate, and runs no on-save clip or text-overlap check. The committed SVG renders clean today; nothing refuses a future clipped or colliding label.",
+  "review_run_id": "r-20261015T191832449214-review-of-scg-name-domain-rule-measure-6cfe8f445275",
+  "reviewed_base_sha": "a68bf23f3670001879354291334bce1449c8e73f",
+  "reviewed_head_sha": "6cfe8f445275a034ca1c9da00a10c3285a68ae3d",
+  "reviewed_run_id": "r-20261015T121155642992-scg-name-domain-rule-measure",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T19:30:00+00:00",
+  "total": 105
+}
