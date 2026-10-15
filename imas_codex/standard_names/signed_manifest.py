@@ -3747,19 +3747,26 @@ def _change_id(manifest_sha256: str, row_id: str) -> str:
 
 
 def _receipt_rows(
-    query: _Query, operation: str, manifest_sha256: str
+    query: _Query, operation: str, payload_sha256: str
 ) -> list[dict[str, Any]]:
+    """Return the receipts minted for one authority payload.
+
+    The cohort is keyed on the payload, not the manifest digest: a row whose
+    signed mutation rewrites a participant's node properties moves the digest
+    the next preview computes, so a digest-keyed lookup would miss receipts
+    that a payload-keyed lookup still finds.
+    """
     return query.query(
         """
         MATCH (change:StandardNameChange {
           operation: $operation,
-          manifest_sha256: $manifest_sha256
+          authority_payload_sha256: $payload_sha256
         })
         RETURN properties(change) AS properties
         ORDER BY change.id
         """,
         operation=operation,
-        manifest_sha256=manifest_sha256,
+        payload_sha256=payload_sha256,
     )
 
 
@@ -4243,9 +4250,11 @@ def _verify_postconditions(
 
 
 def _replay(
-    query: _Query, authority: _Authority, manifest_sha256: str
+    query: _Query, authority: _Authority, manifest_sha256: str | None
 ) -> dict[str, Any] | None:
     if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
+        if manifest_sha256 is None:
+            return None
         signed_rows = list(authority.data["signed_rows"])
         event_ids = {
             row["source_id"]: "sn-change:stale-source-detach:"
@@ -4305,10 +4314,14 @@ def _replay(
             "manifest_sha256": manifest_sha256,
         }
     operation = str(authority.receipt_policy["operation"])
-    receipts = _receipt_rows(query, operation, manifest_sha256)
+    receipts = _receipt_rows(query, operation, authority.payload_sha256)
     if not receipts:
         return None
     properties = [dict(row["properties"]) for row in receipts]
+    minted_digests = {str(item.get("manifest_sha256") or "") for item in properties}
+    if len(minted_digests) != 1:
+        raise SignedManifestConflict("signed-manifest receipt cohort is inconsistent")
+    minted_manifest_sha256 = minted_digests.pop()
     admitted_ids = sorted(properties[0].get("cohort_admitted_ids") or [])
     expected_ids = sorted(item.get("row_id") for item in properties)
     receipt_names = {
@@ -4331,7 +4344,10 @@ def _replay(
         )
     ):
         raise SignedManifestConflict("signed-manifest receipt cohort is incomplete")
-    _verify_postconditions(query, authority, admitted_ids, manifest_sha256)
+    # Verify each admitted row's postcondition against the digest its receipt and
+    # successor edge were minted under, so a row whose node properties moved the
+    # digest is still recognised as applied.
+    _verify_postconditions(query, authority, admitted_ids, minted_manifest_sha256)
     return {
         "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
         "outcome": "already_applied",
@@ -7867,11 +7883,14 @@ def apply_signed_manifest(
             transaction = session.begin_transaction()
             query = _TransactionQuery(transaction)
             try:
-                if apply and manifest_sha256 is not None:
-                    replay = _replay(query, authority, str(manifest_sha256))
-                    if replay is not None:
-                        transaction.rollback()
-                        return _project_receipt(authority, replay)
+                replay = _replay(
+                    query,
+                    authority,
+                    None if manifest_sha256 is None else str(manifest_sha256),
+                )
+                if replay is not None:
+                    transaction.rollback()
+                    return _project_receipt(authority, replay)
 
                 preview = _build_preview(query, authority, reason)
                 authorized_manifest_sha256 = (

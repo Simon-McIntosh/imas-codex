@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-signed-replay-recognition">
+<title>Signed supersede replay recognition</title>
+</head>
+<body>
+<main>
+<h1 id="sib-signed-replay-recognition-title">Signed supersede replay recognition</h1>
+<p id="sib-signed-replay-recognition-summary">A signed supersede that names a
+successor rewrites the predecessor's node properties, and those properties are
+folded into the participant snapshot the manifest digest covers. The digest the
+next preview computes therefore differs from the one the apply was minted under,
+and the receipt lookup keyed on that digest missed the receipt and re-admitted
+the row. The replay recognition is now keyed on the authority payload instead,
+and it verifies each admitted row's postcondition against the digest its receipt
+and successor edge were minted under. Previewed live from the worktree's code,
+the committed authority from the sibling node now returns
+<code>already_applied</code> with zero changes.</p>
+
+<h2 id="sib-signed-replay-recognition-mechanism">Mechanism</h2>
+<p id="sib-signed-replay-recognition-mechanism-body">The supersede mutation
+writes node properties and stamps a successor edge in one statement
+(<code>imas_codex/standard_names/signed_manifest.py</code>):</p>
+<pre id="sib-signed-replay-recognition-mech-supersede"><code>4830  elif kind == RepairMutationKind.supersede.value:
+4834          else "target.source_paths = [],"
+4842      SET target.superseded_from_stage = coalesce(
+4843            target.superseded_from_stage, target.name_stage),
+4844          target.name_stage = 'superseded',
+4845          target.status = 'superseded',</code></pre>
+<p id="sib-signed-replay-recognition-mech-edge">The edge is written by
+<code>_supersede_successor_edge_write</code> (line 2367):</p>
+<pre id="sib-signed-replay-recognition-mech-edge-code"><code>2380    MERGE (target)-[edge:HAS_SUCCESSOR]-&gt;(successor)
+2381    SET edge.receipt_id = $receipt_id,
+2382        edge.signed_at = datetime()</code></pre>
+<p id="sib-signed-replay-recognition-mechanism-note">Those node properties are
+part of the participant snapshot <code>_participant_snapshot</code> folds
+(<code>properties(node)</code> plus <code>property_fingerprint</code>), so the
+manifest digest <code>_digest(manifest)</code> covers them. The successor edge
+itself is <em>not</em> in the snapshot: the relationship snapshot set
+<code>_RELATIONSHIP_TYPES</code> is <code>{"PRODUCED_NAME", "HAS_PARENT"}</code>,
+and <code>HAS_SUCCESSOR</code> is not among them. So the property rewrite alone
+moves the digest. The sibling node's authority wrote no new property values —
+its four targets were already <code>superseded</code> — so its digest was
+stable and its receipts were found by digest; the rows of a fresh supersede are
+not.</p>
+<p id="sib-signed-replay-recognition-mechanism-receipt">The fix keys the receipt
+lookup on the authority payload rather than the manifest digest, and verifies
+postcondition against the minted digest:</p>
+<pre id="sib-signed-replay-recognition-mech-receipt"><code>3749  def _receipt_rows(query, operation, payload_sha256):
+3763      authority_payload_sha256: $payload_sha256
+...
+4317  receipts = _receipt_rows(query, operation, authority.payload_sha256)
+4321  minted_digests = {str(item.get("manifest_sha256") or "") for item in properties}
+4324  minted_manifest_sha256 = minted_digests.pop()
+4348  _verify_postconditions(query, authority, admitted_ids, minted_manifest_sha256)</code></pre>
+<p id="sib-signed-replay-recognition-mechanism-caller">The caller now consults
+<code>_replay</code> on the preview path, not only on the apply path
+(<code>apply_signed_*</code>, line 7886), so a preview recognises an applied row
+without writing.</p>
+
+<h2 id="sib-signed-replay-recognition-second-apply">What a second apply would have written</h2>
+<p id="sib-signed-replay-recognition-second-apply-body">Under the digest the
+next preview computes, a second <code>apply</code> would have written
+<strong>a second receipt and no second edge</strong>. The receipt id is
+<code>_change_id(manifest_sha256, row_id)</code>
+(<code>sn-change:signed-manifest:&lt;digest&gt;:&lt;row_digest&gt;</code>), so a
+new digest mints a new node id and <code>_write_receipts</code> MERGEs a
+<em>second</em> <code>StandardNameChange</code> beside the first. The edge is
+<code>MERGE (target)-[edge:HAS_SUCCESSOR]-&gt;(successor) SET edge.receipt_id =
+$receipt_id</code>, an upsert on the one edge, so the second receipt only
+overwrites <code>edge.receipt_id</code> — no duplicate edge. The correct outcome
+for a replayed row is neither write: a preview returns <code>already_applied</code>
+with <code>changed = 0</code>.</p>
+
+<h2 id="sib-signed-replay-recognition-live">Live read-only preview</h2>
+<table id="sib-signed-replay-recognition-live-table">
+<thead><tr><th>input</th><th>observed result</th><th>run log</th></tr></thead>
+<tbody>
+<tr><td>Committed authority <code>docs/evidence/fragments/sn-integrity-backlog/sib-link-lost-successors-authority.json</code>, previewed from the worktree's code with <code>apply=False</code> against the live graph.</td><td><code>outcome = "already_applied"</code>, <code>changed = 0</code>. Nothing written.</td><td><code>live-preview.log</code> (EXIT=0)</td></tr>
+</tbody>
+</table>
+<p id="sib-signed-replay-recognition-live-note">The read-only script is
+<code>live-preview.py</code> in the run directory
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T041141672464-sib-signed-replay-recognition/</code>.
+It calls <code>apply_signed_manifest(..., apply=False)</code> and applies
+nothing. The prior run's <code>replay-preview.log</code> returned
+<code>would_change=4</code>; the same authority now returns
+<code>already_applied</code>.</p>
+
+<h2 id="sib-signed-replay-recognition-tests">Tests</h2>
+<p id="sib-signed-replay-recognition-tests-body">The new file
+<code>tests/standard_names/test_signed_supersede_replay.py</code> stubs the graph
+so the receipt lookup answers only when the query carries the authority payload.
+Two tests: a replayed supersede with a successor previews as
+<code>already_applied</code> with 0 changes; a row whose receipt exists but
+whose successor edge is missing is not <code>already_applied</code> and raises
+<code>SignedManifestConflict</code>. Each fails with its mechanism removed
+(<code>negative-control.log</code>, EXIT=1, 2 failed), and the 25 signed-manifest
+test files add 0 failures against base (base 234 passed, head 236 passed).</p>
+</main>
+</body>
+</html>
