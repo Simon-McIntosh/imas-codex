@@ -1,0 +1,1216 @@
+{
+ "method": {
+  "reader": "A Noul is read as a pass probability of one minus its defect probability; an AUC below a half is a question the model answers backwards against the golden label.",
+  "fire": "A check fires when its Noul defect probability is at or above 0.5.",
+  "control": "The unmodified prototype score reproduces the re-measure's calibration and validation AUC on the names that carry a description.",
+  "graph": "The source review's own comment is read through a bounded indexed query on StandardName.id and never put into a Jev state.",
+  "combined": "Drop the four field-starved checks and replace the repeated-segment check with the repeated-content-token code rule; the choice is fixed on calibration and validation is read once."
+ },
+ "fixture": {
+  "rows": 737,
+  "canonical_names": 720,
+  "base_receipts": 720
+ },
+ "control": {
+  "prototype_calibration": {
+   "n": 363,
+   "point": 0.6057335041639974,
+   "lower": 0.5526006085116071,
+   "upper": 0.6655391687925171,
+   "level": 0.95,
+   "n_resamples": 1000,
+   "seed": 123
+  },
+  "prototype_validation": {
+   "n": 338,
+   "point": 0.6378406708595388,
+   "lower": 0.5807330693550893,
+   "upper": 0.6924307267633903,
+   "level": 0.95,
+   "n_resamples": 1000,
+   "seed": 123
+  },
+  "expected_calibration": 0.6057,
+  "expected_validation": 0.6378,
+  "within_tolerance": true
+ },
+ "coverage": {
+  "advisory_alias_collapsed": {
+   "physical_base": {
+    "where": "name.segments",
+    "text": "605/720"
+   },
+   "coordinate": {
+    "where": "name.segments",
+    "text": "32/720"
+   },
+   "position": {
+    "where": "name.segments",
+    "text": "192/720"
+   },
+   "cocos_label": {
+    "where": "neighbourhood",
+    "text": "5/720 non-empty, 5/720 observed"
+   }
+  },
+  "minority_spelling_not_in_roster": {
+   "id": {
+    "where": "name (core scalar)",
+    "text": "720/720"
+   },
+   "existing_names": {
+    "where": "neighbourhood",
+    "text": "584/720 non-empty, 720/720 observed"
+   }
+  },
+  "over_qualified_modifier": {
+   "physical_base": {
+    "where": "name.segments",
+    "text": "605/720"
+   },
+   "subject": {
+    "where": "name.segments",
+    "text": "225/720"
+   },
+   "component": {
+    "where": "name.segments",
+    "text": "126/720"
+   },
+   "source_paths": {
+    "where": "neighbourhood",
+    "text": "302/720 non-empty, 629/720 observed"
+   },
+   "dd_source_docs": {
+    "where": "neighbourhood",
+    "text": "295/720 non-empty, 720/720 observed"
+   }
+  },
+  "owner_erased_outline": {
+   "physical_base": {
+    "where": "name.segments",
+    "text": "605/720"
+   },
+   "position": {
+    "where": "name.segments",
+    "text": "192/720"
+   },
+   "source_paths": {
+    "where": "neighbourhood",
+    "text": "302/720 non-empty, 629/720 observed"
+   }
+  },
+  "redundant_repeated_segment": {
+   "physical_base": {
+    "where": "name.segments",
+    "text": "605/720"
+   },
+   "subject": {
+    "where": "name.segments",
+    "text": "225/720"
+   },
+   "component": {
+    "where": "name.segments",
+    "text": "126/720"
+   }
+  }
+ },
+ "firing": {
+  "advisory_alias_collapsed": {
+   "calibration": {
+    "accepted": {
+     "fired": 11,
+     "n": 140
+    },
+    "rejected": {
+     "fired": 16,
+     "n": 223
+    }
+   },
+   "validation": {
+    "accepted": {
+     "fired": 9,
+     "n": 126
+    },
+    "rejected": {
+     "fired": 12,
+     "n": 212
+    }
+   }
+  },
+  "minority_spelling_not_in_roster": {
+   "calibration": {
+    "accepted": {
+     "fired": 11,
+     "n": 140
+    },
+    "rejected": {
+     "fired": 9,
+     "n": 223
+    }
+   },
+   "validation": {
+    "accepted": {
+     "fired": 6,
+     "n": 126
+    },
+    "rejected": {
+     "fired": 5,
+     "n": 212
+    }
+   }
+  },
+  "over_qualified_modifier": {
+   "calibration": {
+    "accepted": {
+     "fired": 10,
+     "n": 140
+    },
+    "rejected": {
+     "fired": 13,
+     "n": 223
+    }
+   },
+   "validation": {
+    "accepted": {
+     "fired": 2,
+     "n": 126
+    },
+    "rejected": {
+     "fired": 14,
+     "n": 212
+    }
+   }
+  },
+  "owner_erased_outline": {
+   "calibration": {
+    "accepted": {
+     "fired": 0,
+     "n": 140
+    },
+    "rejected": {
+     "fired": 0,
+     "n": 223
+    }
+   },
+   "validation": {
+    "accepted": {
+     "fired": 0,
+     "n": 126
+    },
+    "rejected": {
+     "fired": 0,
+     "n": 212
+    }
+   }
+  },
+  "redundant_repeated_segment": {
+   "calibration": {
+    "accepted": {
+     "fired": 3,
+     "n": 140
+    },
+    "rejected": {
+     "fired": 6,
+     "n": 223
+    }
+   },
+   "validation": {
+    "accepted": {
+     "fired": 3,
+     "n": 126
+    },
+    "rejected": {
+     "fired": 1,
+     "n": 212
+    }
+   }
+  }
+ },
+ "examples": {
+  "advisory_alias_collapsed": [
+   {
+    "name": "radial_wave_vector_normalized_of_beam_tracing_beam",
+    "noul": 0.57,
+    "fired": true,
+    "segments": {
+     "physical_base": "wave_vector",
+     "component": "radial"
+    }
+   },
+   {
+    "name": "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions",
+    "noul": 0.57,
+    "fired": true,
+    "segments": {
+     "physical_base": "torque_density",
+     "subject": "electron",
+     "component": "toroidal",
+     "process": "collisions"
+    }
+   },
+   {
+    "name": "vertical_wave_vector_normalized_of_beam_tracing_beam",
+    "noul": 0.56,
+    "fired": true,
+    "segments": {
+     "physical_base": "wave_vector",
+     "component": "vertical"
+    }
+   },
+   {
+    "name": "electron_collisionality_normalized_at_pedestal_top",
+    "noul": 0.55,
+    "fired": true,
+    "segments": {
+     "physical_base": "collisionality",
+     "subject": "electron",
+     "position": "pedestal_top"
+    }
+   },
+   {
+    "name": "poloidal_ion_velocity_at_charge_exchange_channel",
+    "noul": 0.54,
+    "fired": true,
+    "segments": {
+     "physical_base": "velocity",
+     "subject": "ion",
+     "component": "poloidal",
+     "position": "charge_exchange_channel"
+    }
+   },
+   {
+    "name": "linear_growth_rate_normalized_of_gyrokinetic_eigenmode",
+    "noul": 0.53,
+    "fired": true,
+    "segments": {
+     "physical_base": "growth_rate"
+    }
+   },
+   {
+    "name": "toroidal_deuterium_velocity_flux_surface_averaged_at_plasma_boundary",
+    "noul": 0.53,
+    "fired": true,
+    "segments": {
+     "physical_base": "velocity",
+     "subject": "deuterium",
+     "component": "toroidal",
+     "position": "plasma_boundary"
+    }
+   },
+   {
+    "name": "toroidal_suprathermal_electron_angle_perturbed_at_measurement_position",
+    "noul": 0.52,
+    "fired": true,
+    "segments": {
+     "physical_base": "angle",
+     "subject": "electron",
+     "component": "toroidal",
+     "position": "measurement_position"
+    }
+   },
+   {
+    "name": "magnetic_field_magnitude_at_pedestal_top_low_field_side",
+    "noul": 0.51,
+    "fired": true,
+    "segments": {
+     "physical_base": "magnetic_field",
+     "position": "pedestal_top_low_field_side"
+    }
+   },
+   {
+    "name": "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential",
+    "noul": 0.5,
+    "fired": true,
+    "segments": {
+     "physical_base": "momentum",
+     "subject": "gyrocenter",
+     "component": "parallel",
+     "process": "perturbed_parallel_vector_potential"
+    }
+   }
+  ],
+  "minority_spelling_not_in_roster": [
+   {
+    "name": "helium_4_density_flux_surface_averaged_at_plasma_boundary",
+    "noul": 0.59,
+    "fired": true,
+    "segments": {
+     "physical_base": "density",
+     "subject": "helium_4",
+     "position": "plasma_boundary"
+    }
+   },
+   {
+    "name": "radial_wave_vector_normalized_of_beam_tracing_beam",
+    "noul": 0.58,
+    "fired": true,
+    "segments": {
+     "physical_base": "wave_vector",
+     "component": "radial"
+    }
+   },
+   {
+    "name": "vertical_wave_vector_normalized_of_beam_tracing_beam",
+    "noul": 0.57,
+    "fired": true,
+    "segments": {
+     "physical_base": "wave_vector",
+     "component": "vertical"
+    }
+   },
+   {
+    "name": "lithium_density_flux_surface_averaged_at_plasma_boundary",
+    "noul": 0.54,
+    "fired": true,
+    "segments": {
+     "physical_base": "density",
+     "subject": "lithium",
+     "position": "plasma_boundary"
+    }
+   },
+   {
+    "name": "toroidal_ion_velocity_flux_surface_averaged_at_plasma_boundary",
+    "noul": 0.54,
+    "fired": true,
+    "segments": {
+     "physical_base": "velocity",
+     "subject": "ion",
+     "component": "toroidal",
+     "position": "plasma_boundary"
+    }
+   },
+   {
+    "name": "deuterated_methane_count_accumulated_due_to_gas_injection",
+    "noul": 0.53,
+    "fired": true,
+    "segments": {
+     "physical_base": "count",
+     "subject": "deuterated_methane",
+     "process": "gas_injection"
+    }
+   },
+   {
+    "name": "carbon_density_flux_surface_averaged_at_plasma_boundary",
+    "noul": 0.52,
+    "fired": true,
+    "segments": {
+     "physical_base": "density",
+     "subject": "carbon",
+     "position": "plasma_boundary"
+    }
+   },
+   {
+    "name": "parallel_normalized_gyrocenter_momentum_flux_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field",
+    "noul": 0.52,
+    "fired": true,
+    "segments": {
+     "physical_base": "momentum",
+     "subject": "gyrocenter",
+     "component": "parallel",
+     "process": "perturbed_parallel_magnetic_field"
+    }
+   },
+   {
+    "name": "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential",
+    "noul": 0.51,
+    "fired": true,
+    "segments": {
+     "physical_base": "momentum",
+     "subject": "gyrocenter",
+     "component": "parallel",
+     "process": "perturbed_parallel_vector_potential"
+    }
+   },
+   {
+    "name": "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary",
+    "noul": 0.5,
+    "fired": true,
+    "segments": {
+     "physical_base": "velocity",
+     "subject": "tritium",
+     "component": "toroidal",
+     "position": "plasma_boundary"
+    }
+   }
+  ],
+  "over_qualified_modifier": [
+   {
+    "name": "thermal_plasma_field_aligned_power_over_halo_region_due_to_conductive_losses",
+    "noul": 0.73,
+    "fired": true,
+    "segments": {
+     "physical_base": "power",
+     "process": "conductive_losses"
+    }
+   },
+   {
+    "name": "total_volumetric_ion_particle_source_rate",
+    "noul": 0.64,
+    "fired": true,
+    "segments": {}
+   },
+   {
+    "name": "surface_area_of_neutron_detector",
+    "noul": 0.62,
+    "fired": true,
+    "segments": {
+     "physical_base": "area"
+    }
+   },
+   {
+    "name": "toroidal_flux_coordinate_of_magnetic_axis",
+    "noul": 0.56,
+    "fired": true,
+    "segments": {
+     "physical_base": "toroidal_flux_coordinate",
+     "position": "magnetic_axis"
+    }
+   },
+   {
+    "name": "first_local_tangential_coordinate_of_filter",
+    "noul": 0.54,
+    "fired": true,
+    "segments": {
+     "physical_base": "first_local_tangential_coordinate"
+    }
+   },
+   {
+    "name": "neutral_gas_pressure_of_gauge",
+    "noul": 0.54,
+    "fired": true,
+    "segments": {
+     "physical_base": "pressure",
+     "subject": "neutral"
+    }
+   },
+   {
+    "name": "radius_of_optical_element",
+    "noul": 0.54,
+    "fired": true,
+    "segments": {
+     "physical_base": "radius"
+    }
+   },
+   {
+    "name": "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy",
+    "noul": 0.51,
+    "fired": true,
+    "segments": {
+     "physical_base": "heating_power"
+    }
+   },
+   {
+    "name": "parallel_current_density_due_to_bootstrap_current_drive",
+    "noul": 0.5,
+    "fired": true,
+    "segments": {
+     "physical_base": "current_density",
+     "component": "parallel",
+     "process": "bootstrap_current_drive"
+    }
+   },
+   {
+    "name": "spectral_bremsstrahlung_rate",
+    "noul": 0.5,
+    "fired": true,
+    "segments": {
+     "physical_base": "rate"
+    }
+   }
+  ],
+  "owner_erased_outline": [
+   {
+    "name": "first_local_tangential_coordinate_of_filter",
+    "noul": 0.4,
+    "fired": false,
+    "segments": {
+     "physical_base": "first_local_tangential_coordinate"
+    }
+   },
+   {
+    "name": "safety_factor",
+    "noul": 0.35,
+    "fired": false,
+    "segments": {
+     "physical_base": "safety_factor"
+    }
+   },
+   {
+    "name": "first_local_tangential_coordinate_of_reflectometer_antenna",
+    "noul": 0.34,
+    "fired": false,
+    "segments": {
+     "physical_base": "first_local_tangential_coordinate"
+    }
+   },
+   {
+    "name": "second_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror",
+    "noul": 0.34,
+    "fired": false,
+    "segments": {
+     "physical_base": "second_local_tangential_coordinate"
+    }
+   },
+   {
+    "name": "second_local_tangential_coordinate_of_optical_element",
+    "noul": 0.3,
+    "fired": false,
+    "segments": {
+     "physical_base": "second_local_tangential_coordinate"
+    }
+   },
+   {
+    "name": "poloidal_magnetic_field",
+    "noul": 0.3,
+    "fired": false,
+    "segments": {
+     "physical_base": "magnetic_field",
+     "component": "poloidal"
+    }
+   },
+   {
+    "name": "second_local_tangential_coordinate_of_hard_xray_detector",
+    "noul": 0.29,
+    "fired": false,
+    "segments": {
+     "physical_base": "second_local_tangential_coordinate"
+    }
+   },
+   {
+    "name": "stray_breakdown_magnetic_field_magnitude",
+    "noul": 0.29,
+    "fired": false,
+    "segments": {
+     "physical_base": "magnetic_field"
+    }
+   },
+   {
+    "name": "carbon_density_flux_surface_averaged_at_plasma_boundary",
+    "noul": 0.28,
+    "fired": false,
+    "segments": {
+     "physical_base": "density",
+     "subject": "carbon",
+     "position": "plasma_boundary"
+    }
+   },
+   {
+    "name": "resistance_of_correction_coil",
+    "noul": 0.28,
+    "fired": false,
+    "segments": {
+     "physical_base": "resistance"
+    }
+   }
+  ],
+  "redundant_repeated_segment": [
+   {
+    "name": "power_of_neutral_beam_injector",
+    "noul": 0.69,
+    "fired": true,
+    "segments": {
+     "physical_base": "power"
+    }
+   },
+   {
+    "name": "ion_state_diamagnetic_velocity_due_to_diamagnetic_drift",
+    "noul": 0.65,
+    "fired": true,
+    "segments": {
+     "physical_base": "velocity",
+     "subject": "ion_state",
+     "process": "diamagnetic_drift"
+    }
+   },
+   {
+    "name": "neutral_velocity_magnitude_due_to_diamagnetic_drift",
+    "noul": 0.5,
+    "fired": true,
+    "segments": {
+     "physical_base": "velocity",
+     "subject": "neutral",
+     "process": "diamagnetic_drift"
+    }
+   },
+   {
+    "name": "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential",
+    "noul": 0.39,
+    "fired": false,
+    "segments": {
+     "physical_base": "momentum",
+     "subject": "gyrocenter",
+     "component": "parallel",
+     "process": "perturbed_parallel_vector_potential"
+    }
+   },
+   {
+    "name": "parallel_current_density_due_to_bootstrap_current_drive",
+    "noul": 0.37,
+    "fired": false,
+    "segments": {
+     "physical_base": "current_density",
+     "component": "parallel",
+     "process": "bootstrap_current_drive"
+    }
+   },
+   {
+    "name": "momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field",
+    "noul": 0.36,
+    "fired": false,
+    "segments": {
+     "physical_base": "momentum",
+     "process": "perturbed_parallel_magnetic_field"
+    }
+   },
+   {
+    "name": "vertical_wave_vector_normalized_of_beam_tracing_beam",
+    "noul": 0.36,
+    "fired": false,
+    "segments": {
+     "physical_base": "wave_vector",
+     "component": "vertical"
+    }
+   },
+   {
+    "name": "parallel_normalized_gyrocenter_momentum_flux_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field",
+    "noul": 0.3,
+    "fired": false,
+    "segments": {
+     "physical_base": "momentum",
+     "subject": "gyrocenter",
+     "component": "parallel",
+     "process": "perturbed_parallel_magnetic_field"
+    }
+   },
+   {
+    "name": "radial_wave_vector_normalized_of_beam_tracing_beam",
+    "noul": 0.3,
+    "fired": false,
+    "segments": {
+     "physical_base": "wave_vector",
+     "component": "radial"
+    }
+   },
+   {
+    "name": "stray_breakdown_magnetic_field_magnitude",
+    "noul": 0.3,
+    "fired": false,
+    "segments": {
+     "physical_base": "magnetic_field"
+    }
+   }
+  ]
+ },
+ "quorum_comments": {
+  "ion_state_diamagnetic_velocity_due_to_diamagnetic_drift": {
+   "summary": null,
+   "review_comment": null
+  },
+  "thermal_plasma_field_aligned_power_over_halo_region_due_to_conductive_losses": {
+   "summary": null,
+   "review_comment": null
+  },
+  "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions": {
+   "summary": null,
+   "review_comment": null
+  },
+  "neutral_gas_pressure_of_gauge": {
+   "summary": "[Primary] Grammar: verified ISN round-trip to physical_base=pressure with subject=neutral, object=gauge (gas as registered source qualifier); canonical _of_ object locus; all tokens registered. Semantic: name is self-describing as the instrument reading of residual/neutral gas pressure owned by a barometry gauge, matching the pinned DD leaf and expert steering that this is NOT a kinetic neutral-particle pressure moment; Pa/scalar consistent; deliberately separated from kinetic siblings total_neutral_pressure, thermal_neutral_pressure, neutral_internal_state_pressure, and total_neutral_internal_state_pressure. Convention: snake_case, stable segment order, mirrors accepted non-plasma pressure patterns such as coolant_pressure / coolant_pressure_at_cooling_circuit_inlet while correctly using _of_gauge for the diagnostic owner rather than a plasma-profile locus. Completeness: subject, gas qualification, pressure base, and gauge owner all present; no missing thermal/fast/population scope because the quantity is a gauge gas reading, not a distribution moment.\n[Secondary] Grammar is fully supported by the verified ISN round trip: subject=`neutral`, physical_base=`pressure`, and object=`gauge`, with canonical `_of_` locus syntax and registered tokens. Semantically, the name identifies neutral gas pressure measured by a gauge and avoids conflation with the kinetic neutral-particle pressure concepts represented by `total_neutral_pressure`, `thermal_neutral_pressure`, and `neutral_internal_state_pressure`; the Pa unit is consistent. The snake_case ordering and object-locus construction are canonical. Completeness is strong because the neutral-gas context, pressure quantity, and gauge owner are all represented, and the gauge-array context does not require a more specific member token.",
+   "review_comment": "Grammar is fully supported by the verified ISN round trip: subject=`neutral`, physical_base=`pressure`, and object=`gauge`, with canonical `_of_` locus syntax and registered tokens. Semantically, the name identifies neutral gas pressure measured by a gauge and avoids conflation with the kinetic neutral-particle pressure concepts represented by `total_neutral_pressure`, `thermal_neutral_pressure`, and `neutral_internal_state_pressure`; the Pa unit is consistent. The snake_case ordering and object-locus construction are canonical. Completeness is strong because the neutral-gas context, pressure quantity, and gauge owner are all represented, and the gauge-array context does not require a more specific member token."
+  },
+  "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential": {
+   "summary": "[Primary] Grammar (20): Strict ISN round-trip holds with the verified decomposition physical_base=momentum, subject=gyrocenter, component=parallel, object=gyrokinetic_eigenmode, process=perturbed_parallel_vector_potential; same surface grammar as the accepted eigenmode sibling. Semantic (5): Critical source-fidelity failures force the hard cap. Primary pinned DD text for momentum_phi_parallel_b_field_parallel is the contribution of the perturbed parallel magnetic field to the parallel component of normalized toroidal momentum flux, but the name encodes due_to_perturbed_parallel_vector_potential (A∥, not B∥) and of_gyrokinetic_eigenmode despite a non_linear/fluxes_2d_k_x_sum parent that is not an eigenmode weight. The second bound path momentum_phi_perpendicular_a_field_parallel is a different quantity (perpendicular + A∥), so the name is a mash-up of two leaves plus a linear-eigenmode locus. Unit 1 matches normalized flux, but identity is wrong. Convention (15): Style and segment order match the family, yet the string is a near-clone of accepted parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field (vector neighbour, sim≈0.96), differing mainly by the wrong process token and thereby colliding with that established pattern. Completeness (8): Relative to the authoritative nonlinear parallel-B∥ leaf, the correct process perturbed_parallel_magnetic_field is absent, while gyrocenter and gyrokinetic_eigenmode are unsupported extras; nonlinear siblings such as parallel_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field carry neither eigenmode nor gyrocenter.\n[Secondary] Grammar is fully supported by the verified strict round trip: component=parallel, subject=gyrocenter, physical base=momentum, object=gyrokinetic_eigenmode, and process=perturbed_parallel_vector_potential are all registered. Semantically, however, the authoritative source path ends in `momentum_phi_parallel_b_field_parallel` and defines a magnetic-field contribution, not a vector-potential contribution; the nonlinear 2D parent also does not establish an eigenmode or gyrocenter carrier. The name is stylistically canonical but is a hybrid of two accepted sibling patterns. A source-faithful name should identify the magnetic-field mechanism and omit the unsupported eigenmode/gyrocenter qualifiers.",
+   "review_comment": "Grammar is fully supported by the verified strict round trip: component=parallel, subject=gyrocenter, physical base=momentum, object=gyrokinetic_eigenmode, and process=perturbed_parallel_vector_potential are all registered. Semantically, however, the authoritative source path ends in `momentum_phi_parallel_b_field_parallel` and defines a magnetic-field contribution, not a vector-potential contribution; the nonlinear 2D parent also does not establish an eigenmode or gyrocenter carrier. The name is stylistically canonical but is a hybrid of two accepted sibling patterns. A source-faithful name should identify the magnetic-field mechanism and omit the unsupported eigenmode/gyrocenter qualifiers."
+  },
+  "momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field": {
+   "summary": "[Primary] Grammar (20): Strict ISN round-trip holds under the verified decomposition (physical_base=momentum, process=perturbed_parallel_magnetic_field); all tokens are registered and the _due_to_ process attachment is canonical. Semantic (6): Authoritative DD text for every bound path states this is the parallel component of the normalized toroidal momentum flux from δB∥, but the candidate omits the parallel velocity-space channel and therefore reads as the generalized (parallel+perpendicular) flux—the same surface form already used by accepted momentum_flux_normalized_due_to_perturbed_parallel_vector_potential for the channel-summed quantity. That is a source-fidelity / near-duplicate defect against the sim=1.00 neighbour parallel_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field, which is the correct identity for this leaf; hard-capped. Convention (12): Snake_case and the momentum_flux_normalized_due_to_* family pattern match the catalogue, but dropping the parallel_ projection breaks the established parallel_/perpendicular_ differentiation used by parallel_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field and perpendicular_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field. Completeness (10): Required component=parallel (present on the parallel sibling and demanded by momentum_phi_parallel_* paths) is absent; unit=1 and scalar kind are otherwise consistent with a normalized flux.\n[Secondary] Grammar is fully supported by the verified strict round trip: `momentum` is the registered base and `perturbed_parallel_magnetic_field` is the registered process. Semantically, the name identifies a normalized momentum flux contribution but is under-specified because the source fixes the parallel component; it can be confused with the perpendicular contribution. Conventionally it is snake_case and ordered correctly, but it duplicates the accepted generic name `name:momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field` and fails to distinguish the component-qualified siblings. Completeness is reduced because the DD-required parallel component is absent, although the scalar kind and unit 1 are consistent.",
+   "review_comment": "Grammar (20): Strict ISN round-trip holds under the verified decomposition (physical_base=momentum, process=perturbed_parallel_magnetic_field); all tokens are registered and the _due_to_ process attachment is canonical. Semantic (6): Authoritative DD text for every bound path states this is the parallel component of the normalized toroidal momentum flux from δB∥, but the candidate omits the parallel velocity-space channel and therefore reads as the generalized (parallel+perpendicular) flux—the same surface form already used by accepted momentum_flux_normalized_due_to_perturbed_parallel_vector_potential for the channel-summed quantity. That is a source-fidelity / near-duplicate defect against the sim=1.00 neighbour parallel_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field, which is the correct identity for this leaf; hard-capped. Convention (12): Snake_case and the momentum_flux_normalized_due_to_* family pattern match the catalogue, but dropping the parallel_ projection breaks the established parallel_/perpendicular_ differentiation used by parallel_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field and perpendicular_momentum_flux_normalized_due_to_perturbed_parallel_magnetic_field. Completeness (10): Required component=parallel (present on the parallel sibling and demanded by momentum_phi_parallel_* paths) is absent; unit=1 and scalar kind are otherwise consistent with a normalized flux."
+  },
+  "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary": {
+   "summary": "[Primary] Grammar: verified ISN round-trip with registered tokens physical_base=velocity, subject=tritium, component=toroidal, transformation=flux_surface_averaged, position=plasma_boundary; no absorbed tokens or scope defects. Semantic: fully self-describing flux-surface-averaged toroidal tritium velocity at the plasma boundary/separatrix; unit m.s^-1 and DD lineage summary/local/separatrix_average/velocity_phi/tritium (v_φ FSA over the core-SOL separatrix) match exactly, and the name is consistent with accepted peers flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary and flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary. Convention: canonical operator_component_subject_base_at_position ordering, snake_case, no redundancy or model-specific tokens; mirrors the neon/D-T FSA velocity family. Completeness: averaging operator, toroidal component, tritium subject, velocity base, and plasma_boundary locus are all present; nothing required by the DD parent array or sibling pattern is missing.\n[Secondary] Grammar is fully supported by the strict round trip: flux_surface_averaged is the registered transformation, toroidal is the component, tritium is the subject, velocity is the registered physical base, and plasma_boundary is the registered position. Semantically, the name precisely identifies the flux-surface-averaged toroidal velocity of tritium at the plasma boundary, matching the m.s^-1 unit and the DD lineage describing per-species ion toroidal rotation velocity averaged over the separatrix boundary. The decomposition is consistent with accepted siblings such as flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary and flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary. The snake_case ordering and operator placement are canonical, and all source-relevant species, component, averaging operation, and evaluation locus are present.",
+   "review_comment": "Grammar: verified ISN round-trip with registered tokens physical_base=velocity, subject=tritium, component=toroidal, transformation=flux_surface_averaged, position=plasma_boundary; no absorbed tokens or scope defects. Semantic: fully self-describing flux-surface-averaged toroidal tritium velocity at the plasma boundary/separatrix; unit m.s^-1 and DD lineage summary/local/separatrix_average/velocity_phi/tritium (v_φ FSA over the core-SOL separatrix) match exactly, and the name is consistent with accepted peers flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary and flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary. Convention: canonical operator_component_subject_base_at_position ordering, snake_case, no redundancy or model-specific tokens; mirrors the neon/D-T FSA velocity family. Completeness: averaging operator, toroidal component, tritium subject, velocity base, and plasma_boundary locus are all present; nothing required by the DD parent array or sibling pattern is missing."
+  },
+  "linear_growth_rate_normalized_of_gyrokinetic_eigenmode": {
+   "summary": "[Primary] Grammar (20): Strict ISN round-trip holds; verified decomposition uses registered physical_base=growth_rate and object=gyrokinetic_eigenmode, with linear as a registered transport qualifier and the same normalized-of-object rendering already accepted for the frequency counterpart. Semantic (17): A domain expert reading only the name gets normalized growth rate of a gyrokinetic eigenmode (unit 1 matches); source path growth_rate_norm and parent eigenmode map cleanly with no wrong-feature substitution. Minor dock because linear is ambiguous (linear-in-amplitude mode vs. path segment under .../linear/) and is not needed once object=gyrokinetic_eigenmode is present—the paired accepted name frequency_normalized_of_gyrokinetic_eigenmode encodes the same linear eigenmode without the linear token. Convention (16): snake_case and _of_ object locus match frequency_normalized_of_gyrokinetic_eigenmode and poloidal_angle_of_gyrokinetic_eigenmode, but inserting linear breaks that family’s parallel naming for the (ω,γ) pair and is weaker than the bare growth_rate_normalized_of_gyrokinetic_eigenmode alignment. Completeness (19): growth_rate, normalized character, and gyrokinetic_eigenmode locus are all present; scalar/unit consistent; nothing physically required is missing—only the optional linear qualifier is extra rather than absent.\n[Secondary] Grammar is fully supported by the verified strict ISN round trip, with physical_base=growth_rate and the gyrokinetic_eigenmode locus; no unregistered-token or decomposition defect is present. Semantically, the name identifies a normalized exponential growth rate, specifies the linear context, and retains the exact gyrokinetic eigenmode owner required by the DD source; unit 1 is consistent. The naming follows canonical snake_case and the established eigenmode pattern seen in frequency_normalized_of_gyrokinetic_eigenmode, while the deliberate renderer migration is not a defect. Completeness is strong because the name includes the normalized growth-rate quantity, linear simulation context, and eigenmode locus; wavevector is an array-level carrier rather than a required additional identity token.",
+   "review_comment": "Grammar (20): Strict ISN round-trip holds; verified decomposition uses registered physical_base=growth_rate and object=gyrokinetic_eigenmode, with linear as a registered transport qualifier and the same normalized-of-object rendering already accepted for the frequency counterpart. Semantic (17): A domain expert reading only the name gets normalized growth rate of a gyrokinetic eigenmode (unit 1 matches); source path growth_rate_norm and parent eigenmode map cleanly with no wrong-feature substitution. Minor dock because linear is ambiguous (linear-in-amplitude mode vs. path segment under .../linear/) and is not needed once object=gyrokinetic_eigenmode is present—the paired accepted name frequency_normalized_of_gyrokinetic_eigenmode encodes the same linear eigenmode without the linear token. Convention (16): snake_case and _of_ object locus match frequency_normalized_of_gyrokinetic_eigenmode and poloidal_angle_of_gyrokinetic_eigenmode, but inserting linear breaks that family’s parallel naming for the (ω,γ) pair and is weaker than the bare growth_rate_normalized_of_gyrokinetic_eigenmode alignment. Completeness (19): growth_rate, normalized character, and gyrokinetic_eigenmode locus are all present; scalar/unit consistent; nothing physically required is missing—only the optional linear qualifier is extra rather than absent."
+  },
+  "neutral_velocity_magnitude_due_to_diamagnetic_drift": {
+   "summary": "Grammar: verified strict round-trip with registered subject=neutral, physical_base=velocity, postfix transformation=magnitude, process=diamagnetic_drift; segment order and _due_to_ attachment are canonical, no absorbed tokens. Semantic: the pinned DD leaf definition states 'Diamagnetic component, one scalar value is provided per element in the grid subset' and the parent array is 'Effective convection' -- i.e. the bound quantity is a signed diamagnetic contribution/component of an effective convection velocity, not an unsigned Euclidean vector magnitude. Applying the magnitude postfix operator asserts |v| >= 0, which over-claims relative to the source and diverges from the decomposition style of accepted same_base_neighbours binormal_ion_velocity_due_to_diamagnetic_drift and the hybrid-search sibling center_of_mass_velocity_due_to_diamagnetic_drift, both of which encode the diamagnetic contribution directly as a (possibly signed) velocity component without a magnitude wrapper. Convention: snake_case and the _due_to_ mechanism suffix are canonical, but adding magnitude clashes with the established diamagnetic-velocity family pattern (binormal_ion_velocity_due_to_diamagnetic_drift, center_of_mass_velocity_due_to_diamagnetic_drift) that names the component/contribution directly. Completeness: subject and process are present and correctly bound, but the magnitude transformation is extraneous relative to the pinned scalar-component leaf and the parent's 'effective convection' framing is left unexpressed; bare neutral_velocity_due_to_diamagnetic_drift would match the source scope more faithfully.",
+   "review_comment": "Grammar: verified strict round-trip with registered subject=neutral, physical_base=velocity, postfix transformation=magnitude, process=diamagnetic_drift; segment order and _due_to_ attachment are canonical, no absorbed tokens. Semantic: the pinned DD leaf definition states 'Diamagnetic component, one scalar value is provided per element in the grid subset' and the parent array is 'Effective convection' -- i.e. the bound quantity is a signed diamagnetic contribution/component of an effective convection velocity, not an unsigned Euclidean vector magnitude. Applying the magnitude postfix operator asserts |v| >= 0, which over-claims relative to the source and diverges from the decomposition style of accepted same_base_neighbours binormal_ion_velocity_due_to_diamagnetic_drift and the hybrid-search sibling center_of_mass_velocity_due_to_diamagnetic_drift, both of which encode the diamagnetic contribution directly as a (possibly signed) velocity component without a magnitude wrapper. Convention: snake_case and the _due_to_ mechanism suffix are canonical, but adding magnitude clashes with the established diamagnetic-velocity family pattern (binormal_ion_velocity_due_to_diamagnetic_drift, center_of_mass_velocity_due_to_diamagnetic_drift) that names the component/contribution directly. Completeness: subject and process are present and correctly bound, but the magnitude transformation is extraneous relative to the pinned scalar-component leaf and the parent's 'effective convection' framing is left unexpressed; bare neutral_velocity_due_to_diamagnetic_drift would match the source scope more faithfully."
+  },
+  "vertical_wave_vector_normalized_of_beam_tracing_beam": {
+   "summary": "[Primary] Grammar: strict ISN round-trip holds with verified decomposition physical_base=wave_vector, component=vertical, object=beam_tracing_beam; normalized is retained in the surface form under the migrated renderer and all tokens are registered. Semantic: name is fully self-describing as the vertical direction cosine k_z/|k| of the beam-tracing wave vector; matches both bound DD leaves (ece/.../k_z_norm and waves/.../k_z_norm) whose pinned definition is 'Normalized wave vector component in the vertical direction = k_z / norm(k)', unit 1 and scalar kind; frame token vertical correctly denotes cylindrical Z. Convention: identical decomposition and postfix-normalized pattern as accepted vector neighbour radial_wave_vector_normalized_of_beam_tracing_beam and toroidal_wave_vector_normalized_of_beam_tracing_beam; expert steering explicitly authorizes the renderer-migrated form, so dual prefix forms such as normalized_toroidal_wave_vector_of_beam_tracing_beam are not penalized. Completeness: component, base, normalized identity, and beam_tracing_beam object locus are all present; no missing subject/process/position is required for this path-wise direction cosine, matching the un-normalized sibling vertical_wave_vector_of_beam_tracing_beam pattern.\n[Secondary] Grammar is fully supported by the verified strict round trip: component=vertical, physical_base=wave_vector, normalized form retained in the canonical name, and object locus=beam_tracing_beam, with all tokens accepted by the ISN. Semantically, the name identifies the normalized vertical component k_z/|k| of the beam-tracing wave vector and matches the authoritative DD definition and dimensionless unit. It is consistent with the accepted radial_wave_vector_normalized_of_beam_tracing_beam sibling and does not collide with the distinct unnormalized vertical_wave_vector_of_beam_tracing_beam. The canonical snake_case ordering is readable and model-independent. Completeness is strong: the vertical component, normalization, wave-vector quantity, and beam-tracing beam locus are all represented; the array parent is correctly expressed through the generic beam object locus.",
+   "review_comment": "Grammar: strict ISN round-trip holds with verified decomposition physical_base=wave_vector, component=vertical, object=beam_tracing_beam; normalized is retained in the surface form under the migrated renderer and all tokens are registered. Semantic: name is fully self-describing as the vertical direction cosine k_z/|k| of the beam-tracing wave vector; matches both bound DD leaves (ece/.../k_z_norm and waves/.../k_z_norm) whose pinned definition is 'Normalized wave vector component in the vertical direction = k_z / norm(k)', unit 1 and scalar kind; frame token vertical correctly denotes cylindrical Z. Convention: identical decomposition and postfix-normalized pattern as accepted vector neighbour radial_wave_vector_normalized_of_beam_tracing_beam and toroidal_wave_vector_normalized_of_beam_tracing_beam; expert steering explicitly authorizes the renderer-migrated form, so dual prefix forms such as normalized_toroidal_wave_vector_of_beam_tracing_beam are not penalized. Completeness: component, base, normalized identity, and beam_tracing_beam object locus are all present; no missing subject/process/position is required for this path-wise direction cosine, matching the un-normalized sibling vertical_wave_vector_of_beam_tracing_beam pattern."
+  },
+  "electron_collisionality_normalized_at_pedestal_top": {
+   "summary": "[Primary] Grammar: deterministic ISN check reports a clean parse/round-trip with registered subject=electron, physical_base=collisionality, and position=pedestal_top; no unregistered tokens. Semantic: the name alone reads as normalised electron collisionality (ν*_e) evaluated at the pedestal top, matching unit 1 and the pinned DD prose 'Normalised collisionality at pressure pedestal top for electrons' on summary/pedestal_fits/mtanh/nustar_pedestal_top_electron; source-fidelity is exact (nustar + electron + pedestal_top), and the locus pattern matches accepted vector neighbours electron_density_at_pedestal_top, electron_temperature_at_pedestal_top, and electron_pressure_at_pedestal_top. Convention: snake_case and _at_pedestal_top are canonical; the surface order collisionality_normalized differs from the bare-prefix form established by same_base_neighbours normalized_electron_collisionality and normalized_collisionality, but expert steering explicitly attributes that difference to canonical renderer migration with unchanged semantic IR, so only a minor style dock. Completeness: electron subject, collisionality base, normalised sense, and pedestal_top locus are all present for the bound leaf; error-companion paths correctly remain outside the identity.\n[Secondary] Grammar is fully supported by the verified strict ISN round trip with physical_base=collisionality, subject=electron, and position=pedestal_top. The name is self-describing as normalized electron collisionality evaluated at the pedestal top, matching the authoritative DD definition and dimensionless unit. It uses canonical snake_case and contains no provenance, model-specific, or positional-sample wording. All source-defining semantic elements—normalization, electron subject, collisionality, and pedestal-top locus—are represented; the renderer migration does not create a substantive naming defect.",
+   "review_comment": "Grammar: deterministic ISN check reports a clean parse/round-trip with registered subject=electron, physical_base=collisionality, and position=pedestal_top; no unregistered tokens. Semantic: the name alone reads as normalised electron collisionality (ν*_e) evaluated at the pedestal top, matching unit 1 and the pinned DD prose 'Normalised collisionality at pressure pedestal top for electrons' on summary/pedestal_fits/mtanh/nustar_pedestal_top_electron; source-fidelity is exact (nustar + electron + pedestal_top), and the locus pattern matches accepted vector neighbours electron_density_at_pedestal_top, electron_temperature_at_pedestal_top, and electron_pressure_at_pedestal_top. Convention: snake_case and _at_pedestal_top are canonical; the surface order collisionality_normalized differs from the bare-prefix form established by same_base_neighbours normalized_electron_collisionality and normalized_collisionality, but expert steering explicitly attributes that difference to canonical renderer migration with unchanged semantic IR, so only a minor style dock. Completeness: electron subject, collisionality base, normalised sense, and pedestal_top locus are all present for the bound leaf; error-companion paths correctly remain outside the identity."
+  },
+  "parallel_current_density_due_to_bootstrap_current_drive": {
+   "summary": "[Primary] Grammar: Clean ISN round-trip as component=parallel + physical_base=current_density + process=bootstrap_current_drive; all tokens registered, _due_to_ mechanism correct, no absorption or unregistered segments. Semantic: Name is fully self-describing as the field-aligned bootstrap current density; matches the pinned DD definition average(J_Bootstrap.B)/B0 exactly (the conventional parallel scalar form). Unit A.m^-2 and scalar kind are consistent. Aligns with accepted sibling parallel_current_density_due_to_non_inductive_current_drive and is correctly distinct from the vector neighbour current_density_due_to_bootstrap_current_drive. Source-fidelity is exact (j_bootstrap → bootstrap drive; parallel from the ·B/B0 construction). Convention: Canonical snake_case and segment order matching the parallel_*_current_density_due_to_* family. Completeness: Parallel component, current_density base, and bootstrap_current_drive process are all present; no subject or locus is required by the 1D radial-profile leaf, and flux-surface averaging is the conventional identity of this parallel form (same omission as parallel_total_current_density and the non-inductive sibling).\n[Secondary] Grammar is fully canonical and round-trips as component=parallel, physical_base=current_density, and process=bootstrap_current_drive. Semantically, the name accurately represents the authoritative scalar definition average(J_Bootstrap·B)/B0, distinguishing it from the vector quantity current_density_due_to_bootstrap_current_drive and matching the accepted scalar pattern parallel_current_density_due_to_non_inductive_current_drive. The snake_case ordering and due_to mechanism construction follow the established sibling naming convention. The parallel component, bootstrap mechanism, scalar kind, and A.m^-2 unit are all complete and consistent; the radial-profile array context does not require an additional locus token.",
+   "review_comment": "Grammar is fully canonical and round-trips as component=parallel, physical_base=current_density, and process=bootstrap_current_drive. Semantically, the name accurately represents the authoritative scalar definition average(J_Bootstrap·B)/B0, distinguishing it from the vector quantity current_density_due_to_bootstrap_current_drive and matching the accepted scalar pattern parallel_current_density_due_to_non_inductive_current_drive. The snake_case ordering and due_to mechanism construction follow the established sibling naming convention. The parallel component, bootstrap mechanism, scalar kind, and A.m^-2 unit are all complete and consistent; the radial-profile array context does not require an additional locus token."
+  },
+  "poloidal_ion_velocity_at_charge_exchange_channel": {
+   "summary": "[Primary] Grammar: verified ISN round-trip with registered tokens only (component=poloidal, subject=ion, physical_base=velocity, position=charge_exchange_channel) and canonical _at_ locus attachment. Semantic: the name is self-describing as the poloidal ion-flow component evaluated at a CX channel measurement point, matches the pinned DD leaf (poloidal ion velocity at the channel measurement point), unit m.s^-1, and expert-steered locus token; minor residual ambiguity only that a reader must know charge_exchange_channel is the CXRS LOS/channel locus rather than a free-plasma coordinate. Convention: snake_case, canonical segment order, and consistent with accepted same-base/vector siblings such as poloidal_ion_velocity without inventing tokens or model labels. Completeness: component, subject, and diagnostic position are all present; ion (not ion charge state) matches the bound path ion/velocity_pol rather than an ion/state leaf, and array-indexed species selection is correctly left as provenance.\n[Secondary] Grammar is fully supported by the verified round trip: component=poloidal, subject=ion, physical_base=velocity, and position=charge_exchange_channel, all using registered canonical tokens and the correct `_at_` locus relation. Semantically, the name clearly identifies the poloidal ion velocity and preserves the authoritative channel measurement locus; `charge_exchange_channel` is the registered token for the source channel, while the generic ion member is intentional for the DD array. Naming follows canonical snake_case ordering and is consistent with accepted names such as `poloidal_ion_velocity` and `poloidal_electron_velocity`; the channel qualifier adds source-specific identity rather than creating a clash. The name is complete for the bound scalar quantity, including its ion subject, poloidal component, velocity base, and channel location.",
+   "review_comment": "Grammar is fully supported by the verified round trip: component=poloidal, subject=ion, physical_base=velocity, and position=charge_exchange_channel, all using registered canonical tokens and the correct `_at_` locus relation. Semantically, the name clearly identifies the poloidal ion velocity and preserves the authoritative channel measurement locus; `charge_exchange_channel` is the registered token for the source channel, while the generic ion member is intentional for the DD array. Naming follows canonical snake_case ordering and is consistent with accepted names such as `poloidal_ion_velocity` and `poloidal_electron_velocity`; the channel qualifier adds source-specific identity rather than creating a clash. The name is complete for the bound scalar quantity, including its ion subject, poloidal component, velocity base, and channel location."
+  },
+  "carbon_density_flux_surface_averaged_at_plasma_boundary": {
+   "summary": "Same family-wide operator-placement defect; balancing prior review scores.",
+   "review_comment": "Same family-wide operator-placement defect; balancing prior review scores."
+  },
+  "helium_4_density_flux_surface_averaged_at_plasma_boundary": {
+   "summary": "Same family defect; balancing the two prior reviews' grammar/convention severity.",
+   "review_comment": "Same family defect; balancing the two prior reviews' grammar/convention severity."
+  },
+  "lithium_density_flux_surface_averaged_at_plasma_boundary": {
+   "summary": "Same family-wide defect; splitting the difference on severity between the two prior reviewers.",
+   "review_comment": "Same family-wide defect; splitting the difference on severity between the two prior reviewers."
+  },
+  "deuterated_methane_count_accumulated_due_to_gas_injection": {
+   "summary": null,
+   "review_comment": "The candidate is physically self-descriptive and does not collapse the species into a generic gas count. Reordering accumulated is the concrete required fix."
+  },
+  "toroidal_deuterium_velocity_flux_surface_averaged_at_plasma_boundary": {
+   "summary": "Agree with secondary reviewer that mis-placed bare-prefix operators are a hard grammar failure mode, not a soft stylistic issue; semantic/completeness track both reviewers' consensus that the physical identity is fully and faithfully captured.",
+   "review_comment": "Agree with secondary reviewer that mis-placed bare-prefix operators are a hard grammar failure mode, not a soft stylistic issue; semantic/completeness track both reviewers' consensus that the physical identity is fully and faithfully captured."
+  },
+  "toroidal_ion_velocity_flux_surface_averaged_at_plasma_boundary": {
+   "summary": "Both reviewers agree ion is an appropriate generic subject for the species-unspecified path; grammar is scored per the family-wide hard operator-placement defect, slightly below the species-qualified siblings on semantic accuracy reflecting the broader umbrella nature of 'ion'.",
+   "review_comment": "Both reviewers agree ion is an appropriate generic subject for the species-unspecified path; grammar is scored per the family-wide hard operator-placement defect, slightly below the species-qualified siblings on semantic accuracy reflecting the broader umbrella nature of 'ion'."
+  },
+  "toroidal_suprathermal_electron_angle_perturbed_at_measurement_position": {
+   "summary": "Both prior reviewers agree the core defect is the same: `perturbed` is a prefix-only registered operator but is rendered postfix, between `angle` and `_at_measurement_position`. Secondary's 0/20 grammar treats this as a full parse failure; Primary's 12/20 treats it as a moderate defect since all lexical tokens are individually valid. I side closer to Secondary because the misplacement is a structural operator-position violation (same severity class as the rc20 `real_part_of_X` rejection), and it is compounded by the grammar_fields silently omitting both the operator and the population token that appear in the string — a real declaration/round-trip defect, not a false positive. I do not go to a full 0 because every token used is registered and the source-axis fidelity is intact (matches DD delta_position_suprathermal/phi and the accepted poloidal sibling). Convention is docked heavily for the same reason but not to Secondary's near-floor since the pattern is at least internally consistent with an existing sibling. Semantic accuracy and completeness remain strong — the name correctly identifies subject, axis, mechanism, and locus with no dropped or invented axis.",
+   "review_comment": "Both prior reviewers agree the core defect is the same: `perturbed` is a prefix-only registered operator but is rendered postfix, between `angle` and `_at_measurement_position`. Secondary's 0/20 grammar treats this as a full parse failure; Primary's 12/20 treats it as a moderate defect since all lexical tokens are individually valid. I side closer to Secondary because the misplacement is a structural operator-position violation (same severity class as the rc20 `real_part_of_X` rejection), and it is compounded by the grammar_fields silently omitting both the operator and the population token that appear in the string — a real declaration/round-trip defect, not a false positive. I do not go to a full 0 because every token used is registered and the source-axis fidelity is intact (matches DD delta_position_suprathermal/phi and the accepted poloidal sibling). Convention is docked heavily for the same reason but not to Secondary's near-floor since the pattern is at least internally consistent with an existing sibling. Semantic accuracy and completeness remain strong — the name correctly identifies subject, axis, mechanism, and locus with no dropped or invented axis."
+  },
+  "radial_wave_vector_normalized_of_beam_tracing_beam": {
+   "summary": "[Primary] Grammar: Strict public-ISN round-trip succeeds with verified decomposition physical_base=wave_vector, component=radial, object=beam_tracing_beam; all tokens are registered and the form matches the already-accepted sibling vertical_wave_vector_normalized_of_beam_tracing_beam. Semantic: Name self-describes the dimensionless radial direction cosine k_R/|k| of a beam-tracing wave vector; unit 1 and scalar kind match; source paths ece/.../k_r_norm and waves/.../k_r_norm map exactly (major-radius component, beam_tracing_beam owner) with correct cylindrical-R frame fidelity and no feature substitution. Slight residual ambiguity only in whether 'normalized' scopes the component or the full vector (equivalent here). Convention: Snake_case and segment order are fine and align with vertical_wave_vector_normalized_of_beam_tracing_beam; however the same beam-tracing family still publishes normalized_toroidal_wave_vector_of_beam_tracing_beam with bare-prefix normalized, so the family is not yet uniform—expert steering (canonical renderer migration) means this is not treated as a defect against a prior variant. Completeness: component, normalized sense, base, and beam_tracing_beam locus are all present; nothing required by same-path/same-base peers is missing.\n[Secondary] Grammar is fully supported by the verified strict round trip: physical_base=wave_vector, component=radial, and object=beam_tracing_beam. Semantically, the name accurately identifies the normalized wave-vector component in the major-radius direction, matching the authoritative DD definition, dimensionless unit, scalar kind, and beam-tracing-beam locus. The radial component is appropriate for the cylindrical major-radius direction; no unrelated feature or frame is substituted. Naming is snake_case and readable, and its component_wave_vector_normalized ordering is consistent with the accepted sibling vertical_wave_vector_normalized_of_beam_tracing_beam; the differing ordering in normalized_toroidal_wave_vector_of_beam_tracing_beam is not by itself a defect given the stated renderer migration. All identity-bearing information is present, including normalization, radial component, wave-vector quantity, and owning beam-tracing beam.",
+   "review_comment": "Grammar is fully supported by the verified strict round trip: physical_base=wave_vector, component=radial, and object=beam_tracing_beam. Semantically, the name accurately identifies the normalized wave-vector component in the major-radius direction, matching the authoritative DD definition, dimensionless unit, scalar kind, and beam-tracing-beam locus. The radial component is appropriate for the cylindrical major-radius direction; no unrelated feature or frame is substituted. Naming is snake_case and readable, and its component_wave_vector_normalized ordering is consistent with the accepted sibling vertical_wave_vector_normalized_of_beam_tracing_beam; the differing ordering in normalized_toroidal_wave_vector_of_beam_tracing_beam is not by itself a defect given the stated renderer migration. All identity-bearing information is present, including normalization, radial component, wave-vector quantity, and owning beam-tracing beam."
+  },
+  "magnetic_field_magnitude_at_pedestal_top_low_field_side": {
+   "summary": "[Primary] Grammar: strict public-ISN round-trip succeeds; decomposes as physical_base=magnetic_field + postfix operator magnitude + position=pedestal_top_low_field_side via _at_; all tokens registered and segment order canonical. Semantic: fully self-describing as Euclidean magnitude of total magnetic induction at the low-field-side pressure-pedestal top; matches DD lineage b_field_pedestal_top_lfs (total B at pedestal top LFS) and unit T; identical pattern to accepted neighbour magnetic_field_magnitude_at_pedestal_top_high_field_side; source-fidelity exact (no substituted locus). Convention: snake_case, no abbreviations or model names, no clash with same_base_neighbours—mirrors the established magnetic_field_magnitude_at_pedestal_top_<side> family. Completeness: magnitude operator and LFS pedestal-top locus present as required by the DD parent and HFS sibling; no missing component/process; unit/kind consistent; DD error companions correctly excluded from the name.\n[Secondary] Grammar is confirmed by the strict round trip: magnetic_field with the postfix magnitude operator and the registered pedestal_top_low_field_side position. The name is self-describing and exactly matches the DD quantity: total magnetic-field magnitude at the low-field-side pressure-pedestal top; the T unit and scalar kind are consistent. It follows the established sibling pattern shown by magnetic_field_magnitude_at_pedestal_top_high_field_side and the related poloidal/toroidal magnetic-field names, with canonical snake_case and no redundant or provenance-specific tokens. All identity-bearing information—quantity, magnitude representation, and evaluation locus—is present.",
+   "review_comment": "Grammar: strict public-ISN round-trip succeeds; decomposes as physical_base=magnetic_field + postfix operator magnitude + position=pedestal_top_low_field_side via _at_; all tokens registered and segment order canonical. Semantic: fully self-describing as Euclidean magnitude of total magnetic induction at the low-field-side pressure-pedestal top; matches DD lineage b_field_pedestal_top_lfs (total B at pedestal top LFS) and unit T; identical pattern to accepted neighbour magnetic_field_magnitude_at_pedestal_top_high_field_side; source-fidelity exact (no substituted locus). Convention: snake_case, no abbreviations or model names, no clash with same_base_neighbours—mirrors the established magnetic_field_magnitude_at_pedestal_top_<side> family. Completeness: magnitude operator and LFS pedestal-top locus present as required by the DD parent and HFS sibling; no missing component/process; unit/kind consistent; DD error companions correctly excluded from the name."
+  },
+  "spectral_bremsstrahlung_rate": {
+   "summary": "Grammar: the strict ISN round-trip parses cleanly with physical_base=rate and registered qualifiers spectral + bremsstrahlung, correctly ordered per the qualifier registry (source qualifier before diagnostic qualifier is fine given ISN's canonicalisation); no unregistered tokens, correct base per the deliberate expert steering toward 'rate' for the photon-number-per-volume-per-steradian-per-wavelength unit. Semantic: the name is reasonably self-describing for the visible-bremsstrahlung leaf, but the candidate is bound to a second authoritative source, charge_exchange/channel/spectrum/radiance_continuum, whose *pinned* authoritative definition says only 'continuum intensity in the middle of the spectrum' -- not bremsstrahlung. The enriched (non-authoritative) description does attribute this to 'background bremsstrahlung or continuum emission', which makes the identification physically defensible but not certain, since CXRS background continuum can include recombination and other continuum contributions distinct from pure free-free bremsstrahlung. This is a genuine, if moderate, source-fidelity concern across the bound cohort, compounded by the flagged 0.649 name-description similarity (just under the 0.65 self-descriptiveness threshold) -- together these justify a meaningful (not maximal) semantic dock rather than the full-mark reading given by the primary reviewer. Convention: snake_case and qualifier-before-base order match the accepted `spectral_rate` and `spectral_rate_of_spectrometer_channel` (same_base_neighbours) pattern, but inserting `bremsstrahlung` produces a denser, less-generic variant than the accepted `spectral_rate` used elsewhere for visually similar bremsstrahlung-adjacent leaves in hybrid neighbours, so a small dock is warranted for style divergence from that established shorter form. Completeness: physical_base and process/qualifier segments are present and the channel array-index locus is correctly treated as an intentional parent-array parameter rather than a missing subject/object (consistent with `spectral_rate_of_spectrometer_channel`'s pattern), but the name does not comfortably cover the second bound source (charge_exchange continuum), leaving the cohort only partially represented by a single qualifier choice.",
+   "review_comment": "Grammar is full-score: the strict public-ISN round trip succeeds with physical_base=`rate`, and both `spectral` and `bremsstrahlung` are registered qualifiers in the canonical order. Semantically, `spectral_bremsstrahlung_rate` is plausible for `bremsstrahlung_visible/channel/radiance_spectral`, and the m^-3.s^-1.sr^-1 unit is consistent with the deliberately intended photon-number spectral rate; however, the authoritative bound-source cohort also contains `charge_exchange/channel/spectrum/radiance_continuum`, which does not establish bremsstrahlung as the exact feature. This source-fidelity defect triggers the semantic hard cap. The name otherwise follows canonical naming style, but it is unnecessarily specific relative to accepted `spectral_rate`. A concrete common alternative is `spectral_rate`, which avoids substituting bremsstrahlung for the charge-exchange continuum source."
+  },
+  "power_of_neutral_beam_injector": {
+   "summary": "Grammar: strict round-trip succeeds with registered physical_base=power and object=neutral_beam_injector; no unregistered tokens, so grammar is clean (20/20). Semantic: the bound source cohort contains two physically distinct quantities \\u2014 the coupled/absorbed power (excluding shine-through and fast-ion orbit losses, per the pinned 'power/value' definition) and the pre-loss launched power (per 'power_launched/value') \\u2014 and a bare 'power' base cannot disambiguate between them. The deliberate-steering note confirms the anchoring path has drifted toward power_launched, which argues for an explicit 'launched' qualifier; leaving the name unqualified conflates two established quantities and is a real self-descriptiveness gap (capped well below full marks; both independent reviewers flagged this same launched-vs-absorbed ambiguity). Convention: the same_base_neighbours absorbed_power_of_neutral_beam_injector, total_power_of_neutral_beam_injector, and absorbed_power_of_beam_tracing_beam all show that this family carries an identity-bearing energy qualifier (absorbed/total) on the power base for the neutral_beam_injector object; the bare form breaks that established pattern and reads as a generic near-duplicate of absorbed_power_of_neutral_beam_injector. Completeness: missing the qualifier (launched or absorbed) that the sibling family treats as required to pin down which of the two DD-bound quantities is represented; the vector_neighbour total_power_of_neutral_beam_injector and same_base absorbed_power_of_neutral_beam_injector both carry this qualifier where the candidate omits it. [transient_failure] source migration compare-and-set failed: dd:summary/heating_current_drive/nbi/power/value(exists=True, status='attached', claimed=False, bindings=['neutral_beam_absorbed_power', 'power_of_neutral_beam_injector'], scalar='power_of_neutral_beam_injector') [grammar_invalid] refined candidate failed strict grammar validation: name is not canonical: flat segment order renders as 'neutral_beam_launched_power_of_neutral_beam_injector'",
+   "review_comment": "Grammar is fully validated by the supplied round trip as physical_base=`power` with object=`neutral_beam_injector`. Semantically, the name is readable and its unit and scalar kind match, but it is under-specified across the two bound DD leaves and is nearly redundant with the accepted absorbed-power name. Naming convention is otherwise clean, although the generic form clashes with the more specific accepted NBI power family. Completeness is reduced because neither the absorbed/coupled nor launched distinction is represented; if the corrected binding is the launched leaf, the name should explicitly use `launched`, while the original coupled leaf is best represented by the accepted absorbed form."
+  },
+  "surface_area_of_neutron_detector": {
+   "summary": "[Primary] Grammar: strict public-ISN round-trip succeeds; surface is a registered geometry qualifier, area is a registered physical_base, and neutron_detector is a registered device/object with canonical _of_ locus attachment. Semantic: a domain expert reading only the name gets geometric surface area of a neutron detector (m^2), matching the DD leaf neutron_diagnostic/detector/geometry/surface ('Surface of the detector/aperture') and aligning with accepted peers solid_angle_of_neutron_detector, radius_of_neutron_detector, width_of_neutron_detector, and especially surface_area_of_filter; minor residual ambiguity that the DD gloss pairs detector/aperture is not a source-fidelity substitution. Convention: snake_case, canonical segment order, no model tags or redundant tokens, and consistent with same-base area_of_* / surface_area_of_* patterns. Completeness: unit m^2 and scalar kind match area; object locus present; no missing subject/component for this geometric scalar.\n[Secondary] Grammar is nearly correct because `surface_area_of_neutron_detector` round-trips and uses registered `area` and `neutron_detector` tokens, but `surface` is a registered qualifier that is missing from the stated projection. Semantically, the name is self-descriptive and matches the m^2 DD leaf describing the detector/aperture surface; the generic detector locus is valid for the parent detector array. Naming convention is canonical snake_case with the expected area-plus-object pattern, consistent with `surface_area_of_filter` and `area_of_diagnostic_aperture`. Completeness is slightly reduced only because the supplied grammar fields omit the `surface` qualifier.",
+   "review_comment": "Grammar is nearly correct because `surface_area_of_neutron_detector` round-trips and uses registered `area` and `neutron_detector` tokens, but `surface` is a registered qualifier that is missing from the stated projection. Semantically, the name is self-descriptive and matches the m^2 DD leaf describing the detector/aperture surface; the generic detector locus is valid for the parent detector array. Naming convention is canonical snake_case with the expected area-plus-object pattern, consistent with `surface_area_of_filter` and `area_of_diagnostic_aperture`. Completeness is slightly reduced only because the supplied grammar fields omit the `surface` qualifier."
+  },
+  "resistance_of_correction_coil": {
+   "summary": "[Primary] Grammar: clean ISN round-trip with registered physical_base=resistance and object=correction_coil; _of_ correctly marks the coil locus. Semantic: fully self-describing ohmic resistance of a non-axisymmetric correction coil, matching both bound DD leaves (coil and conductor resistance) and unit ohm; aligns with accepted current_of_correction_coil and area_of_correction_coil and with resistance_of_poloidal_field_coil / resistance_of_toroidal_field_coil. Convention: canonical snake_case and segment order identical to the resistance_of_*_coil sibling pattern. Completeness: no missing subject/component/process; generic coil member locus is appropriate for the indexed coil/conductor arrays; error companions correctly excluded.\n[Secondary] Grammar is a clean strict round trip with the registered physical base `resistance` and registered object locus `correction_coil`, using the canonical `_of_` construction. Semantically, the ohm unit and scalar kind match coil/conductor electrical resistance, and the bound coil-level source directly supports the correction-coil identity; the conductor-level source is consistent with the coil-winding interpretation. The owner-level naming pattern is consistent with accepted `resistance_of_poloidal_field_coil`, `resistance_of_toroidal_field_coil`, and `resistance_of_passive_loop`. The name is canonical snake_case, avoids DD provenance and error-index terminology, and contains all required identity information without an unnecessary component, subject, or process qualifier.",
+   "review_comment": "Grammar is a clean strict round trip with the registered physical base `resistance` and registered object locus `correction_coil`, using the canonical `_of_` construction. Semantically, the ohm unit and scalar kind match coil/conductor electrical resistance, and the bound coil-level source directly supports the correction-coil identity; the conductor-level source is consistent with the coil-winding interpretation. The owner-level naming pattern is consistent with accepted `resistance_of_poloidal_field_coil`, `resistance_of_toroidal_field_coil`, and `resistance_of_passive_loop`. The name is canonical snake_case, avoids DD provenance and error-index terminology, and contains all required identity information without an unnecessary component, subject, or process qualifier."
+  },
+  "safety_factor": {
+   "summary": "[Primary] Grammar (20/20): Verified ISN round-trip; physical_base=`safety_factor` is the registered irreducible base with no absorbed qualifiers, components, or processes. Semantic (19/20): Bare `safety_factor` is the canonical MHD quantity (q) matching the pinned DD leaf text 'Safety factor' across the full bound-source cohort (core_profiles, edge_profiles, equilibrium, gyrokinetics_local, plasma_profiles, sawteeth). Unit 1 and kind=scalar match; cocos q_like is appropriate. Consistent with same_base_neighbours that reserve locus only for point samples (`safety_factor_at_magnetic_axis`, `safety_factor_at_internal_transport_barrier`, `minimum_safety_factor`) and with vector neighbour `rotational_transform` as the inverse concept. Minor self-descriptiveness caution from the automated name↔description similarity flag (0.613), but a domain expert needs no external context for this token. Convention (20/20): Strict snake_case, single registered base, no abbreviations or model tags; aligns with the accepted safety-factor family pattern. Completeness (20/20): No missing subject/component (geometry scalar, not species- or axis-resolved); profile membership is carried by the parent array index, not the name identity.\n[Secondary] Grammar is fully correct: `safety_factor` is an explicitly registered atomic physical base, parses and round-trips under ISN 0.8.0rc66, and requires no additional decomposition. Semantically, it correctly identifies the q safety-factor profile, matches the dimensionless unit and q_like COCOS metadata, and does not substitute a different source feature; however, the standalone name is generic and omits the field-line-winding interpretation, consistent with the supplied low name-to-description similarity warning. Naming convention is canonical snake_case, uses the accepted lexical base, and has no redundant, model-specific, or misplaced tokens. Completeness is appropriate because the DD leaf is a radial/profile quantity whose member is selected by the parent array index; no fixed position or species is imposed by the source, and the accepted `safety_factor` sibling establishes this generic profile form.",
+   "review_comment": "Grammar is fully correct: `safety_factor` is an explicitly registered atomic physical base, parses and round-trips under ISN 0.8.0rc66, and requires no additional decomposition. Semantically, it correctly identifies the q safety-factor profile, matches the dimensionless unit and q_like COCOS metadata, and does not substitute a different source feature; however, the standalone name is generic and omits the field-line-winding interpretation, consistent with the supplied low name-to-description similarity warning. Naming convention is canonical snake_case, uses the accepted lexical base, and has no redundant, model-specific, or misplaced tokens. Completeness is appropriate because the DD leaf is a radial/profile quantity whose member is selected by the parent array index; no fixed position or species is imposed by the source, and the accepted `safety_factor` sibling establishes this generic profile form."
+  },
+  "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy": {
+   "summary": "[Primary] Grammar: The name is a correctly-formed binary operator expression `difference_of_A_and_B` with A=`total_plasma_heating_power` (aggregation=total, channel_qualifier=plasma, physical_base=heating_power) and B=`time_derivative_of_plasma_stored_energy` (prefix operator time_derivative with explicit `_of_` scope marker, wrapping channel_qualifier=plasma + energy-qualifier=stored + physical_base=energy). This mirrors the sanctioned binary+nested-prefix pattern shown in the gm5/gm6 worked examples (flux_surface_averaged_ratio_of_...). The deterministic grammar check confirms the parse under rc63, and the domain-expert steering note confirms the plasma_stored_energy subject/base ordering inside the time-derivative operand is the canonical form; I defer to that ruling rather than penalizing a nonconforming alternative. Semantic: the quantity is physically well-defined — it is the instantaneous power-balance loss term (heating power minus rate of stored-energy change), the same quantity that underlies `energy_confinement_time` (nearest vector neighbour, sim=0.89) via τ_E = W/P_loss. Both operands are individually self-descriptive and the difference operator makes the composite meaning transparent to a domain expert without external context; unit (W) is consistent with a power quantity on both sides of the difference (power vs J/s). The aggregation+qualifier+base decomposition of `total_plasma_heating_power` parallels the accepted sibling `total_plasma_radiated_power`, and the plain `heating_power` base without subject parallels `ion_heating_power`'s pattern of species-agnostic aggregation when 'total' scope is intended. No near-duplicate exists among the shown siblings. Convention: strict snake_case, canonical binary-operator segment ordering, aggregation token placed outermost as required, no abbreviations, no model-author identifiers; length is justified by the composite physics expression per the no-length-cap rule for operator-composed quantities. Completeness: both operands carry all physically required segments (aggregation/qualifier/base on one side, operator+qualifiers+base on the other), unit/kind are consistent with a scalar power difference, and no segment pattern from the sibling set (e.g., species subject) is missing given the 'total' aggregation scope.\n[Secondary] Grammar (20/20): Verified parse under ISN v0.8.0rc63. Binary operator difference_of_A_and_B with nested time_derivative_of_ on the second operand is valid operator composition; physical_base=heating_power is registered; total (aggregation), plasma, stored (energy qualifier), and energy are correctly placed. Expert-steered plasma_stored_energy ordering inside the derivative operand is accepted as required by rc63 and is not penalized. Semantic (19/20): Fully self-describing as P_heat,total − dW_p/dt (net power leaving the plasma energy reservoir; the denominator of energy confinement time). Unit W matches both heating_power and ∂energy/∂t. Aligns conceptually with neighbour energy_confinement_time without duplicating it, and is distinct from total_plasma_radiated_power and same-base ion_heating_power / nuclear_heating_power_of_breeder_blanket*. Minor residual ambiguity only on whether plasma_stored_energy is strictly thermal versus total stored energy (W_th vs W_tot). Convention (20/20): Canonical snake_case, binary difference_of_…_and_… form, no abbreviations, no model-specific tokens; consistent with total_plasma_radiated_power and *heating_power sibling patterns. Completeness (20/20): All required operator, aggregation, qualifier/subject, and base segments present for a global power-balance scalar; kind=scalar and unit=W are consistent; no missing component/subject relative to same_base peers.",
+   "review_comment": "Grammar (20/20): Verified parse under ISN v0.8.0rc63. Binary operator difference_of_A_and_B with nested time_derivative_of_ on the second operand is valid operator composition; physical_base=heating_power is registered; total (aggregation), plasma, stored (energy qualifier), and energy are correctly placed. Expert-steered plasma_stored_energy ordering inside the derivative operand is accepted as required by rc63 and is not penalized. Semantic (19/20): Fully self-describing as P_heat,total − dW_p/dt (net power leaving the plasma energy reservoir; the denominator of energy confinement time). Unit W matches both heating_power and ∂energy/∂t. Aligns conceptually with neighbour energy_confinement_time without duplicating it, and is distinct from total_plasma_radiated_power and same-base ion_heating_power / nuclear_heating_power_of_breeder_blanket*. Minor residual ambiguity only on whether plasma_stored_energy is strictly thermal versus total stored energy (W_th vs W_tot). Convention (20/20): Canonical snake_case, binary difference_of_…_and_… form, no abbreviations, no model-specific tokens; consistent with total_plasma_radiated_power and *heating_power sibling patterns. Completeness (20/20): All required operator, aggregation, qualifier/subject, and base segments present for a global power-balance scalar; kind=scalar and unit=W are consistent; no missing component/subject relative to same_base peers."
+  },
+  "toroidal_flux_coordinate_of_magnetic_axis": {
+   "summary": "[Primary] Grammar: the name round-trips and uses only registered tokens (toroidal_flux_coordinate as base, magnetic_axis as locus); the deterministic check confirms this parses under v0.8.0rc60, so no hard grammar penalty, but the '_of_' preposition for a point-locus is questionable against the rubric's own discipline rules. Semantic: the quantity is self-descriptive and physically coherent (unit m matches the toroidal_flux_coordinate base per the same_base_neighbour `toroidal_flux_coordinate`), and it correctly reflects the DD-authoritative base term per the expert steering note, but the locus preposition diverges from the pattern set by `normalized_toroidal_flux_coordinate_at_magnetic_axis`, which is the closest vector neighbour for the same magnetic-axis anchoring. Convention: this is the most significant issue — the candidate should arguably mirror the '_at_magnetic_axis' pattern already established for the same locus token in the accepted corpus rather than '_of_magnetic_axis', producing an avoidable inconsistency. Completeness: all physically relevant segments (base + locus) are present, unit and kind are consistent with the base and analogous siblings, and no subject/component segment is needed for this scalar equilibrium geometry quantity.\n[Secondary] Grammar: verified parse with registered geometric/physical base `toroidal_flux_coordinate` and locus `magnetic_axis`; round-trips under the grammar. Semantic: self-describing toroidal-flux radius (m) of the magnetic-axis surface, consistent with unit/kind and with expert steering to the DD-authoritative toroidal-flux-coordinate term; only minor nuance is preposition shade (_of_ vs evaluation-at). Convention: sibling pattern for the same locus strongly prefers `_at_` (cite `normalized_toroidal_flux_coordinate_at_magnetic_axis` and `toroidal_flux_coordinate_at_plasma_boundary`), so `_of_magnetic_axis` is non-canonical even though `toroidal_flux_coordinate_of_neoclassical_tearing_mode_center` also uses `_of_`. Completeness: required base + magnetic-axis locus present; no missing subject/component for this scalar flux label.",
+   "review_comment": "Grammar: the name round-trips and uses only registered tokens (toroidal_flux_coordinate as base, magnetic_axis as locus); the deterministic check confirms this parses under v0.8.0rc60, so no hard grammar penalty, but the '_of_' preposition for a point-locus is questionable against the rubric's own discipline rules. Semantic: the quantity is self-descriptive and physically coherent (unit m matches the toroidal_flux_coordinate base per the same_base_neighbour `toroidal_flux_coordinate`), and it correctly reflects the DD-authoritative base term per the expert steering note, but the locus preposition diverges from the pattern set by `normalized_toroidal_flux_coordinate_at_magnetic_axis`, which is the closest vector neighbour for the same magnetic-axis anchoring. Convention: this is the most significant issue — the candidate should arguably mirror the '_at_magnetic_axis' pattern already established for the same locus token in the accepted corpus rather than '_of_magnetic_axis', producing an avoidable inconsistency. Completeness: all physically relevant segments (base + locus) are present, unit and kind are consistent with the base and analogous siblings, and no subject/component segment is needed for this scalar equilibrium geometry quantity."
+  },
+  "parallel_normalized_gyrocenter_momentum_flux_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field": {
+   "summary": "[Primary] Grammar: the name decomposes cleanly per the verified parse (physical_base=flux): component=parallel precedes the bare transformation=normalized, subject=gyrocenter, base=momentum_flux, locus=of_gyrokinetic_eigenmode, process=due_to_perturbed_parallel_magnetic_field — this matches the canonical [component][transformation][subject]base[locus][process] order established by the sibling `parallel_normalized_gyrocenter_momentum_flux_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential` (sim=0.95) and `perpendicular_normalized_momentum_flux_due_to_perturbed_parallel_magnetic_field`. `perturbed_parallel_magnetic_field` is a registered process token, `gyrocenter`/`gyrokinetic` are registered subjects, no unregistered tokens present. Semantic: the name is self-describing to a gyrokinetics domain expert (normalized parallel momentum flux of a gyrokinetic eigenmode driven by a perturbed parallel B-field); unit=1 correctly matches the `normalized` transformation, and physics_domain=turbulence is consistent. It closely mirrors the top vector neighbour differing only in the drive mechanism (vector_potential vs magnetic_field), which is a legitimate distinct physical process rather than a duplicate, but the double use of 'parallel' (component and field-component) creates minor cognitive overhead. Convention: snake_case and segment order are canonical and match the sibling family exactly (component before transformation, matching perpendicular/parallel siblings), though the repeated 'parallel' token is stylistically noisy even though sibling-consistent. Completeness: all physically relevant segments (component, subject, locus object, process) are present and match the pattern established by the same_base/vector neighbours; no missing subject or component qualification.\n[Secondary] Grammar (20/20): Verified parse with physical_base=flux; parallel is the component, normalized the bare-prefix transformation, gyrocenter the subject, momentum the transport channel, gyrokinetic_eigenmode the object locus via _of_, and perturbed_parallel_magnetic_field the registered process via _due_to_. Semantic (20/20): Fully self-describing as the parallel velocity-space channel of Gyro-Bohm-normalized gyrocenter momentum flux for a gyrokinetic eigenmode driven by the perturbed parallel magnetic field; unit 1 matches normalization; pattern is identical to the accepted sibling parallel_normalized_gyrocenter_momentum_flux_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential, differing only in the driving process. Convention (20/20): Snake_case and segment order follow the expert-steered canonical component-then-normalization order already established by that sibling and by parallel_normalized_momentum_flux_due_to_perturbed_parallel_vector_potential / perpendicular_normalized_momentum_flux_due_to_perturbed_parallel_magnetic_field. Completeness (20/20): All relevant segments present (component, normalization, subject, channel, object, process); no missing qualifiers relative to the same-family vector_neighbours.",
+   "review_comment": "Grammar (20/20): Verified parse with physical_base=flux; parallel is the component, normalized the bare-prefix transformation, gyrocenter the subject, momentum the transport channel, gyrokinetic_eigenmode the object locus via _of_, and perturbed_parallel_magnetic_field the registered process via _due_to_. Semantic (20/20): Fully self-describing as the parallel velocity-space channel of Gyro-Bohm-normalized gyrocenter momentum flux for a gyrokinetic eigenmode driven by the perturbed parallel magnetic field; unit 1 matches normalization; pattern is identical to the accepted sibling parallel_normalized_gyrocenter_momentum_flux_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential, differing only in the driving process. Convention (20/20): Snake_case and segment order follow the expert-steered canonical component-then-normalization order already established by that sibling and by parallel_normalized_momentum_flux_due_to_perturbed_parallel_vector_potential / perpendicular_normalized_momentum_flux_due_to_perturbed_parallel_magnetic_field. Completeness (20/20): All relevant segments present (component, normalization, subject, channel, object, process); no missing qualifiers relative to the same-family vector_neighbours."
+  },
+  "stray_breakdown_magnetic_field_magnitude": {
+   "summary": "[Primary] Grammar: the deterministic check confirms the name parses under the registered grammar (v0.8.0rc60); decomposing the surface tokens, 'stray' and 'breakdown' are both registered qualifier tokens, 'magnetic_field' is the registered physical_base, and 'magnitude' is the registered postfix operator, giving a canonical qualifier+qualifier+base+postfix_operator rendering consistent with the requested canonical segment order steering. Minor deduction only because stacking two qualifiers with no explicit precedence rule slightly reduces certainty of round-trip uniqueness. Semantic: the name is understandable to a tokamak-startup domain expert as 'the magnitude of the stray magnetic field during the breakdown phase', placing it in the 11-15 self-descriptiveness band; unit (T) and physics_domain (magnetic_field_diagnostics) are consistent with a magnetic_field base, and no cocos_label is present so no COCOS-sanity issue arises; no vector/same-base neighbours show a conflicting decomposition for this specific stray-breakdown concept, so no consistency penalty, but the unspecified stray-field source keeps it short of full marks. Convention: snake_case is consistent, no abbreviations or model-author names are present, and the postfix `_magnetic_field_magnitude` ending matches the pattern of `flux_surface_averaged_magnetic_field_magnitude` and `maximum_magnetic_field_magnitude`; the double-qualifier stack is legal but marginally less readable. Completeness: unit/kind match the base; no component is needed since this is a total-magnitude scalar (consistent with `maximum_magnetic_field_magnitude` lacking a component), but omission of an explicit process or position token for the 'stray' source leaves some physically relevant context absent.\n[Secondary] Grammar: verified parse under ISN v0.8.0rc60 with physical_base=breakdown_magnetic_field; stray is a registered qualifier, magnitude is the correct postfix operator, and surface order matches canonical [qualifier]* base + postfix (expert steering satisfied). Semantic: unit T and kind=scalar match a magnetic-field magnitude; to a fusion expert the name denotes the |B| of residual/stray field relevant to plasma breakdown (standard startup terminology), aligning with sibling patterns flux_surface_averaged_magnetic_field_magnitude and maximum_magnetic_field_magnitude; mild residual ambiguity remains about phase vs. purpose of 'breakdown' without a locus or source path. Convention: snake_case and segment order are clean and consistent with the |B| neighbours; dual-qualifier stack is slightly dense but not ungrammatical or model-specific. Completeness: magnitude is present (vector→scalar), both physics qualifiers are present, no missing subject/component for this scalar field strength; no source_paths given so no omitted locus can be proven.",
+   "review_comment": "Grammar: the deterministic check confirms the name parses under the registered grammar (v0.8.0rc60); decomposing the surface tokens, 'stray' and 'breakdown' are both registered qualifier tokens, 'magnetic_field' is the registered physical_base, and 'magnitude' is the registered postfix operator, giving a canonical qualifier+qualifier+base+postfix_operator rendering consistent with the requested canonical segment order steering. Minor deduction only because stacking two qualifiers with no explicit precedence rule slightly reduces certainty of round-trip uniqueness. Semantic: the name is understandable to a tokamak-startup domain expert as 'the magnitude of the stray magnetic field during the breakdown phase', placing it in the 11-15 self-descriptiveness band; unit (T) and physics_domain (magnetic_field_diagnostics) are consistent with a magnetic_field base, and no cocos_label is present so no COCOS-sanity issue arises; no vector/same-base neighbours show a conflicting decomposition for this specific stray-breakdown concept, so no consistency penalty, but the unspecified stray-field source keeps it short of full marks. Convention: snake_case is consistent, no abbreviations or model-author names are present, and the postfix `_magnetic_field_magnitude` ending matches the pattern of `flux_surface_averaged_magnetic_field_magnitude` and `maximum_magnetic_field_magnitude`; the double-qualifier stack is legal but marginally less readable. Completeness: unit/kind match the base; no component is needed since this is a total-magnitude scalar (consistent with `maximum_magnetic_field_magnitude` lacking a component), but omission of an explicit process or position token for the 'stray' source leaves some physically relevant context absent."
+  },
+  "total_volumetric_ion_particle_source_rate": {
+   "summary": "[Primary] Grammar: decomposes cleanly into aggregation=total (outermost, summed over ion species/charge states), qualifier=volumetric (registered qualifier token denoting per-unit-volume/local quantity), subject=ion, channel=particle, physical_base=source_rate. All tokens are registered (total: aggregation; volumetric: qualifier; ion: subject; particle: channel; source_rate: physical_base) and segment order (aggregation -> qualifier -> subject -> channel -> base) mirrors the accepted sibling `total_ion_particle_source_rate` and `volume_averaged_total_ion_density` (aggregation directly precedes subject). No operators, locus, or process are needed for this bare scalar rate. Semantic: unit m^-3.s^-1 is exactly matched by the added `volumetric` qualifier, correctly resolving the DD unit-mismatch problem noted by the domain expert (the accepted `total_ion_particle_source_rate` sibling is s^-1/volume-integrated, while `ion_state_source_rate` at m^-3.s^-1 is the single-charge-state local analogue) -- the candidate fills the missing 'summed-over-species, local-density' slot without colliding with either. The name is reasonably self-descriptive to a domain expert (total = species-summed, volumetric = local density, ion+particle+source_rate = ion particle production rate), though the co-occurrence of 'total' (usually implying volume-integration in this catalog per the sibling description) alongside 'volumetric' (implying NOT integrated) requires a moment of parsing, slightly short of a fully unambiguous top-tier name. Convention: snake_case, canonical ordering, no abbreviations or model-specific tokens; closely follows the established decomposition pattern of `total_ion_particle_source_rate` and `ion_state_source_rate` with only the qualifier insertion differing, so no clash or redundancy is introduced. Completeness: subject, channel, aggregation, qualifier and base are all present and unit/kind are internally consistent; no missing component (scalar quantity, no vector projection needed) or locus (no site-specific position implied by the source paths).\n[Secondary] Grammar (20/20): Clean decomposition — aggregation=`total`, qualifier=`volumetric`, subject=`ion`, channel=`particle`, physical_base=`source_rate`. All tokens are registered; round-trip is expected clean; no absorbed closed-vocab tokens and no invented compounds. Semantic (18/20): Self-describing as the per-unit-volume net particle production rate summed over ion species/charge states. Unit m^-3.s^-1 matches a volumetric source exactly and is deliberately distinguished from the integrated s^-1 siblings `total_ion_particle_source_rate` and `ion_particle_source_rate`, and from the charge-state-local `ion_state_source_rate` (also m^-3.s^-1). Slight dock only because bare family members omit an explicit volumetric marker and rely on unit/context, so `volumetric` is a somewhat heavy disambiguator, though necessary given the taken integrated names. Convention (19/20): Snake_case and segment order follow the established `*_ion_particle_source_rate` pattern from the neighbour set; only a trivial style docking because `volumetric` is less common in that family than operator-based integral markers (`cumulative_inside_flux_surface_*`, volume integrals). Completeness (19/20): Subject, aggregation, channel and base are all present; kind=scalar and unit match; no missing component (not a vector). Nothing physically required is omitted.",
+   "review_comment": "Grammar (20/20): Clean decomposition — aggregation=`total`, qualifier=`volumetric`, subject=`ion`, channel=`particle`, physical_base=`source_rate`. All tokens are registered; round-trip is expected clean; no absorbed closed-vocab tokens and no invented compounds. Semantic (18/20): Self-describing as the per-unit-volume net particle production rate summed over ion species/charge states. Unit m^-3.s^-1 matches a volumetric source exactly and is deliberately distinguished from the integrated s^-1 siblings `total_ion_particle_source_rate` and `ion_particle_source_rate`, and from the charge-state-local `ion_state_source_rate` (also m^-3.s^-1). Slight dock only because bare family members omit an explicit volumetric marker and rely on unit/context, so `volumetric` is a somewhat heavy disambiguator, though necessary given the taken integrated names. Convention (19/20): Snake_case and segment order follow the established `*_ion_particle_source_rate` pattern from the neighbour set; only a trivial style docking because `volumetric` is less common in that family than operator-based integral markers (`cumulative_inside_flux_surface_*`, volume integrals). Completeness (19/20): Subject, aggregation, channel and base are all present; kind=scalar and unit match; no missing component (not a vector). Nothing physically required is omitted."
+  },
+  "radius_of_optical_element": {
+   "summary": "[Primary] Grammar: parses cleanly as registered physical_base `radius` + `_of_` + registered object `optical_element`; canonical `_of_` scope marker; round-trips without issue, matching the exact construction of vector_neighbours `radius_of_diagnostic_aperture`, `radius_of_filter`, and `radius_of_neutron_detector`. Semantic: the name is self-descriptive as a geometric radius of an optical element and the unit (m) matches; however, `optical_element` also appears as the object of `spectral_surface_curvature_of_optical_element` (a Rowland-circle radius of curvature), which raises a minor risk of the reader conflating a physical/aperture radius with a curvature radius on the same object class — this is not a near-duplicate (distinct physical quantities) but does introduce a small self-descriptiveness residual, consistent with the deferred-detail pattern seen in `area_of_diagnostic_aperture` vs `radius_of_diagnostic_aperture`. Physics domain (radiation_measurement_diagnostics) and unit are consistent with an optical component's physical dimension. Convention: snake_case, canonical `quantity_of_object` ordering identical to the `radius_of_*` sibling family (`radius_of_diagnostic_aperture`, `radius_of_filter`, `radius_of_neutron_detector`); no abbreviations, no model-specific tokens, no clash. Completeness: object specified; no subject/component/position segment required for a scalar geometric radius, matching the completeness level of the cited siblings. The DD source-path rename (camera_visible → camera_ir) does not affect the name's grammar or physical intent per the steering note, so no penalty applied for that.\n[Secondary] Grammar: verified parse as registered physical_base `radius` + canonical `_of_` + registered object `optical_element`; round-trips with no unregistered tokens (grammar v0.8.0rc55). Semantic: fully self-describing geometric radius of an optical element; unit m matches a length; source path camera_ir/optical_element/geometry/radius is fidelity-preserving (no feature substitution); pattern identical to accepted vector neighbours `radius_of_diagnostic_aperture`, `radius_of_filter`, and `radius_of_neutron_detector`, and distinct from curvature (`spectral_surface_curvature_of_optical_element`). Minor residual is only which radius of a possibly non-circular element is meant—same deferred detail level as those siblings. Convention: snake_case, quantity_of_object ordering, no abbreviations or model tokens, no clash with inner_radius_* same-base siblings (those name annular bores). Completeness: object present; no subject/component/position required for a scalar geometric radius; consistent with radius_of_* sibling completeness; expert steering is a path refresh only and does not change the decomposition.",
+   "review_comment": "Grammar: verified parse as registered physical_base `radius` + canonical `_of_` + registered object `optical_element`; round-trips with no unregistered tokens (grammar v0.8.0rc55). Semantic: fully self-describing geometric radius of an optical element; unit m matches a length; source path camera_ir/optical_element/geometry/radius is fidelity-preserving (no feature substitution); pattern identical to accepted vector neighbours `radius_of_diagnostic_aperture`, `radius_of_filter`, and `radius_of_neutron_detector`, and distinct from curvature (`spectral_surface_curvature_of_optical_element`). Minor residual is only which radius of a possibly non-circular element is meant—same deferred detail level as those siblings. Convention: snake_case, quantity_of_object ordering, no abbreviations or model tokens, no clash with inner_radius_* same-base siblings (those name annular bores). Completeness: object present; no subject/component/position required for a scalar geometric radius; consistent with radius_of_* sibling completeness; expert steering is a path refresh only and does not change the decomposition."
+  },
+  "poloidal_magnetic_field": {
+   "summary": "[Primary] Grammar: component=poloidal is a registered token correctly prefixed to the registered base magnetic_field; the name round-trips cleanly with no unregistered tokens. Semantic: the name is self-descriptive on its own (poloidal component of the magnetic field, T unit consistent with magnetic_field base, scalar kind consistent with a vector component), matching the general un-located pattern already accepted for bare magnetic_field; however it is less specific than the closely-related vector_neighbours (poloidal_magnetic_field_of_poloidal_magnetic_field_probe, toroidal_magnetic_field_at_flux_surface) which both carry an explicit locus/subject, so the candidate can't be checked for source-fidelity without DD source_paths. Convention: snake_case, canonical component-before-base ordering, no clash with siblings (distinct from the probe-measured and flux-surface variants), no abbreviations or model-specific tokens. Completeness: unit/kind pairing is correct and tags plausibly cover the equilibrium domain, but the sibling toroidal_magnetic_field_at_flux_surface suggests a locus-qualified naming convention within this same family that the bare candidate may be missing if it represents an analogous grid/surface quantity rather than a fully generic field label.\n[Secondary] Grammar: `poloidal` is a registered component token and `magnetic_field` is a registered physical_base; the name round-trips as component+base with no unregistered tokens, wrong operator form, or locus defects. Semantic: Fully self-describing to a domain expert as the poloidal component of the magnetic field; unit T and scalar kind match a field component; pattern is identical to accepted siblings `poloidal_electric_field` and component forms such as `toroidal_magnetic_field_at_flux_surface`; bare form is consistent with the accepted parent `magnetic_field` and is not a near-duplicate of the probe-scoped `poloidal_magnetic_field_of_poloidal_magnetic_field_probe`. Convention: snake_case, canonical component-before-base ordering, no abbreviations or model-specific tokens; mirrors `poloidal_electric_field`. Completeness: component is supplied for the vector projection; no species/subject is required; position is appropriately omitted for the generic equilibrium field quantity (contrast position-bearing siblings only when the DD samples a surface).",
+   "review_comment": "Grammar: `poloidal` is a registered component token and `magnetic_field` is a registered physical_base; the name round-trips as component+base with no unregistered tokens, wrong operator form, or locus defects. Semantic: Fully self-describing to a domain expert as the poloidal component of the magnetic field; unit T and scalar kind match a field component; pattern is identical to accepted siblings `poloidal_electric_field` and component forms such as `toroidal_magnetic_field_at_flux_surface`; bare form is consistent with the accepted parent `magnetic_field` and is not a near-duplicate of the probe-scoped `poloidal_magnetic_field_of_poloidal_magnetic_field_probe`. Convention: snake_case, canonical component-before-base ordering, no abbreviations or model-specific tokens; mirrors `poloidal_electric_field`. Completeness: component is supplied for the vector projection; no species/subject is required; position is appropriately omitted for the generic equilibrium field quantity (contrast position-bearing siblings only when the DD samples a surface)."
+  },
+  "first_local_tangential_coordinate_of_filter": {
+   "summary": "Grammar: The deterministic check verifies a valid parse as registered geometric base `first_local_tangential_coordinate` scoped by `_of_` to registered object `filter`; no unregistered token or decomposition defect is present. Semantic: The name clearly denotes a scalar coordinate along the first local tangential axis of a filter, and the metre unit matches. The expert steering away from a DD-shaped `x1_coordinate` label is consistent with the required local-frame convention. The only semantic reservation is object scope: the accepted `first_local_tangential_coordinate_of_filter_window` appears to describe nearly the same aperture/window boundary geometry, while `second_local_tangential_coordinate_of_filter` supports the candidate's `of_filter` pattern. Convention: Snake_case and canonical `quantity_of_object` ordering are used; the local-tangential carrier follows the established sibling style. Completeness: The coordinate direction and owning object are both present; no subject or vector component is required for this scalar geometric coordinate.",
+   "review_comment": "Grammar: The deterministic check verifies a valid parse as registered geometric base `first_local_tangential_coordinate` scoped by `_of_` to registered object `filter`; no unregistered token or decomposition defect is present. Semantic: The name clearly denotes a scalar coordinate along the first local tangential axis of a filter, and the metre unit matches. The expert steering away from a DD-shaped `x1_coordinate` label is consistent with the required local-frame convention. The only semantic reservation is object scope: the accepted `first_local_tangential_coordinate_of_filter_window` appears to describe nearly the same aperture/window boundary geometry, while `second_local_tangential_coordinate_of_filter` supports the candidate's `of_filter` pattern. Convention: Snake_case and canonical `quantity_of_object` ordering are used; the local-tangential carrier follows the established sibling style. Completeness: The coordinate direction and owning object are both present; no subject or vector component is required for this scalar geometric coordinate."
+  },
+  "second_local_tangential_coordinate_of_hard_xray_detector": {
+   "summary": "[Primary] Grammar: The name parses cleanly under the verified ISN decomposition: physical_base=`second_local_tangential_coordinate` (registered geometric_base token) + `_of_` + `hard_xray_detector` (registered object token). Both tokens are in their respective closed registries. No decomposition defects; round-trip verified. Semantic: The name is fully self-descriptive to a domain expert — it identifies (1) what coordinate (signed coordinate along the second local tangential axis), (2) of what object (hard X-ray detector), in an object-local Cartesian frame. The unit (m) matches a coordinate/length quantity. Cross-name consistency is excellent: the name directly mirrors the accepted sibling patterns `second_local_tangential_coordinate_of_soft_xray_detector` (sim=0.93), `second_local_tangential_coordinate_of_neutron_detector` (sim=0.95), and the other detector-coordinate siblings. The expert steering note correctly explains the removal of a DD-shaped `x2` axis label in favour of the semantically descriptive `second_local_tangential` frame token, consistent with IMAS coordinate conventions (rule 6: object-local tangent axes use semantic ordinal directions). No vocab-gap needed — the concept is fully expressible with registered tokens. Convention: Snake_case, canonical `quantity_of_object` ordering, matching all nearest siblings exactly. No model names, abbreviations, or noise. The deliberate steering away from `x2_coordinate` to `second_local_tangential_coordinate` is the correct convention-aligned choice. Completeness: Object (`hard_xray_detector`) is specified and registered. The geometric_base token `second_local_tangential_coordinate` fully conveys the coordinate type. No subject, component, or position segments are needed for a scalar coordinate in an object-local frame. All segments present; unit and kind are consistent.\n[Secondary] **Grammar (20/20):** Parses cleanly under the ISN grammar (verified). Decomposes as physical_base=`second_local_tangential_coordinate` (registered geometric_base token, allowed lexicalised compound) + `_of_` scope marker + `hard_xray_detector` (registered object token). No decomposition defects — `second_local_tangential_coordinate` is a registered atom in the geometric_base registry. Round-trip verified. No missing or out-of-place prepositions, no prefix-operator scope errors.\n\n**Semantic (19/20):** Fully self-descriptive to a domain expert. A reader sees 'second local tangential coordinate of hard X-ray detector' and immediately understands: (1) it's a scalar coordinate, (2) along the X2 axis of the detector-local frame, (3) of a hard X-ray detector boundary vertex. The unit (m) matches a coordinate/length quantity. Cross-name consistency is excellent — directly mirrors accepted siblings `second_local_tangential_coordinate_of_neutron_detector`, `second_local_tangential_coordinate_of_soft_xray_detector`, and `second_local_tangential_coordinate_of_bragg_crystal` (all sim ≥0.93). The deliberate expert steering correctly justifies the removal of a DD-shaped x2 axis label in favor of the semantically descriptive `second_local_tangential` token, consistent with IMAS rule 6 (object-local tangent axes use semantic ordinal directions). Unit ↔ name match is consistent. Physics domain (radiation_measurement_diagnostics) matches the object. Source-fidelity: the candidate correctly expresses the second local tangential coordinate of the detector outline; no substitution of a different physical feature. Tiny dock only because the absolute numerical self-descriptiveness of the ordinal phrase 'second local tangential' depends slightly on the right-handed triad convention, but this is documented in all sibling descriptions.\n\n**Convention (19/20):** Snake_case, canonical `<nth>_local_tangential_coordinate_of_<detector>` ordering matches all nearest siblings exactly. No model names, no abbreviations, no noise. No clash — the candidate fills a specific gap (hard X-ray detector) that is NOT redundantly covered by `second_local_tangential_coordinate_of_soft_xray_detector` (different detector object). Readable and consistent.\n\n**Completeness (19/20):** Object (`hard_xray_detector`) is named and registered. The geometric_base token fully conveys the coordinate type and frame semantics. No subject/component/position segments needed for a scalar coordinate in an object-local frame. All physically relevant segments present.",
+   "review_comment": "**Grammar (20/20):** Parses cleanly under the ISN grammar (verified). Decomposes as physical_base=`second_local_tangential_coordinate` (registered geometric_base token, allowed lexicalised compound) + `_of_` scope marker + `hard_xray_detector` (registered object token). No decomposition defects — `second_local_tangential_coordinate` is a registered atom in the geometric_base registry. Round-trip verified. No missing or out-of-place prepositions, no prefix-operator scope errors.\n\n**Semantic (19/20):** Fully self-descriptive to a domain expert. A reader sees 'second local tangential coordinate of hard X-ray detector' and immediately understands: (1) it's a scalar coordinate, (2) along the X2 axis of the detector-local frame, (3) of a hard X-ray detector boundary vertex. The unit (m) matches a coordinate/length quantity. Cross-name consistency is excellent — directly mirrors accepted siblings `second_local_tangential_coordinate_of_neutron_detector`, `second_local_tangential_coordinate_of_soft_xray_detector`, and `second_local_tangential_coordinate_of_bragg_crystal` (all sim ≥0.93). The deliberate expert steering correctly justifies the removal of a DD-shaped x2 axis label in favor of the semantically descriptive `second_local_tangential` token, consistent with IMAS rule 6 (object-local tangent axes use semantic ordinal directions). Unit ↔ name match is consistent. Physics domain (radiation_measurement_diagnostics) matches the object. Source-fidelity: the candidate correctly expresses the second local tangential coordinate of the detector outline; no substitution of a different physical feature. Tiny dock only because the absolute numerical self-descriptiveness of the ordinal phrase 'second local tangential' depends slightly on the right-handed triad convention, but this is documented in all sibling descriptions.\n\n**Convention (19/20):** Snake_case, canonical `<nth>_local_tangential_coordinate_of_<detector>` ordering matches all nearest siblings exactly. No model names, no abbreviations, no noise. No clash — the candidate fills a specific gap (hard X-ray detector) that is NOT redundantly covered by `second_local_tangential_coordinate_of_soft_xray_detector` (different detector object). Readable and consistent.\n\n**Completeness (19/20):** Object (`hard_xray_detector`) is named and registered. The geometric_base token fully conveys the coordinate type and frame semantics. No subject/component/position segments needed for a scalar coordinate in an object-local frame. All physically relevant segments present."
+  },
+  "second_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror": {
+   "summary": "[Primary] Grammar: The name parses cleanly under verified ISN grammar with `physical_base=second_local_tangential_coordinate` and `_of_` locus pointing to `electron_cyclotron_launcher_mirror`. Both `second_local_tangential_coordinate` (a registered geometric_base token) and `electron_cyclotron_launcher_mirror` (a registered object) are in the closed registry. Round-trip is clean with no absorbed or invented tokens. Semantic: The name is highly self-descriptive — a domain expert reading only the name immediately understands this is the signed X2-axis coordinate of a point on the mirror's local outline in the object-local Cartesian (X1, X2) frame. The unit (m) is correct for a coordinate length. It is perfectly consistent with the accepted sibling `second_local_tangential_coordinate_of_neutron_detector`, `...of_optical_element`, and `...of_soft_xray_detector`, which all use the same decomposition pattern. The near-neighbour `first_local_tangential_coordinate_of_electron_cyclotron_launcher_mirror` confirms the sibling pair within the same object family. No near-duplication or ambiguity is present. Frame fidelity is correct: the second local tangential direction is used rather than a misapplied `vertical` or `y_coordinate`. Convention: Snake_case is followed, the canonical `<geometric_base>_of_<object>` ordering is correct, no abbreviations or model identifiers are present, and no clash exists among same_base_neighbours or vector_neighbours. Completeness: The name includes the full geometric base (`second_local_tangential_coordinate`) and the locus object (`electron_cyclotron_launcher_mirror`). Unit and kind are consistent. The only minor completeness consideration is that same_base_neighbours use other detector/class objects; no ECH-specific sibling with this geometric base existed previously, but the expert-steered replacement of the storage-shaped X2 label with the descriptive `second_local_tangential` is correct and complete.\n[Secondary] Grammar: Parses cleanly with physical_base=`second_local_tangential_coordinate` and locus=`electron_cyclotron_launcher_mirror`. All tokens are registered (second_local_tangential_coordinate is a registered geometric_base, electron_cyclotron_launcher_mirror is a registered object). The expert steering explicitly justifies replacing the DD-shaped `x2_coordinate` storage label with the descriptive `second_local_tangential_coordinate` per the locked local-frame design (right-handed object-local triad). Round-trips cleanly. Decomposition audit: no unregistered tokens absorbed into physical_base. Semantic: Self-descriptively conveys the X2 signed coordinate of a vertex on the outline contour of an electron cyclotron launcher mirror in its element-local planar (X1, X2) Cartesian frame. Consistent with same-base siblings `second_local_tangential_coordinate_of_neutron_detector`, `second_local_tangential_coordinate_of_optical_element`, `second_local_tangential_coordinate_of_soft_xray_detector`. The unit (m) matches the coordinate quantity. Frame fidelity: uses `second_local_tangential` rather than DD-shaped `x2_coordinate`, in line with the locked local-frame convention. No near-duplicate among vector neighbours. Convention: Snake_case and canonical geometric_base + _of_ + object ordering. Mirrors the established sibling pattern exactly. No model-specific identifiers, no abbreviations, no noisy suffixes. Completeness: All necessary segments present — geometric_base for the coordinate quantity and object for the locus. The coordinate form mirrors the same_base sibling pattern perfectly.",
+   "review_comment": "Grammar: Parses cleanly with physical_base=`second_local_tangential_coordinate` and locus=`electron_cyclotron_launcher_mirror`. All tokens are registered (second_local_tangential_coordinate is a registered geometric_base, electron_cyclotron_launcher_mirror is a registered object). The expert steering explicitly justifies replacing the DD-shaped `x2_coordinate` storage label with the descriptive `second_local_tangential_coordinate` per the locked local-frame design (right-handed object-local triad). Round-trips cleanly. Decomposition audit: no unregistered tokens absorbed into physical_base. Semantic: Self-descriptively conveys the X2 signed coordinate of a vertex on the outline contour of an electron cyclotron launcher mirror in its element-local planar (X1, X2) Cartesian frame. Consistent with same-base siblings `second_local_tangential_coordinate_of_neutron_detector`, `second_local_tangential_coordinate_of_optical_element`, `second_local_tangential_coordinate_of_soft_xray_detector`. The unit (m) matches the coordinate quantity. Frame fidelity: uses `second_local_tangential` rather than DD-shaped `x2_coordinate`, in line with the locked local-frame convention. No near-duplicate among vector neighbours. Convention: Snake_case and canonical geometric_base + _of_ + object ordering. Mirrors the established sibling pattern exactly. No model-specific identifiers, no abbreviations, no noisy suffixes. Completeness: All necessary segments present — geometric_base for the coordinate quantity and object for the locus. The coordinate form mirrors the same_base sibling pattern perfectly."
+  },
+  "first_local_tangential_coordinate_of_reflectometer_antenna": {
+   "summary": "Grammar (20/20): The candidate parses cleanly under the ISN grammar (verified: physical_base=`first_local_tangential_coordinate`, locus=`reflectometer_antenna`). `first_local_tangential_coordinate` is a registered geometric_base; `reflectometer_antenna` is a registered object. Locus is correctly expressed via the `_of_` preposition. No decomposition defects — `first_local_tangential` is a single registered component token, not a compound of smaller tokens. The explicit steering note confirms that the DD-shaped `x1_coordinate` label has been deliberately substituted with the registered, descriptive carrier per the locked local-frame design.\n\nSemantic (18/20): The name is self-descriptive and consistent with established siblings. The vector neighbour `second_local_tangential_coordinate_of_reflectometer_antenna` (sim=0.96) pairs perfectly — the candidate is its X1-axis counterpart, which is exactly the established pattern (compare with `second_local_tangential_coordinate_of_hard_xray_detector` vs `first_local_tangential_coordinate_of_neutron_detector`). Unit `m` matches the coordinate interpretation. The steering note clarifies the frame: the first local tangent is the more-horizontal in-plane tangent (e1), with e2 = e3 × e1 and e3 the plasma-facing normal — a clear, expert-defined local-frame convention. A domain expert reading only the name can immediately understand the quantity. Minor consideration: the term `first_local_tangential_coordinate` requires a reader to know the local-tangential convention, but this is the registered, model-neutral phrasing per the locked design and is consistent across all sibling names. Slight dock only because the X1-axis semantics (more-horizontal in-plane tangent toward positive toroidal angle) live entirely in the steering note and not in the name itself — but the rubric explicitly says not to penalise missing/terse documentation in name-only mode.\n\nConvention (19/20): snake_case, canonical segment ordering (geometric_base → object), no model-specific identifiers, no abbreviations, no redundancies. No clash with `second_local_tangential_coordinate_of_reflectometer_antenna` — the pair is intentionally complementary. Consistent with the established family (`first_local_tangential_coordinate_of_neutral_beam_injector`, `first_local_tangential_coordinate_of_neutron_detector`). One point docked because the candidate does not by itself reveal the local-frame basis (the reader must know what `first_local_tangential` means vs `second_local_tangential`), but this is the registered vocabulary and cannot be avoided.\n\nCompleteness (18/20): All physically relevant segments are present. The coordinate axis (first local tangential / X1) and owning object (reflectometer_antenna) are both explicit. The unit `m` matches a scalar coordinate. The candidate is the canonical complement to `second_local_tangential_coordinate_of_reflectometer_antenna`, and the sibling pair (plus the corresponding X1/X2 coordinate names for other reflectometer/diagnostic objects) establishes a complete family. Minor consideration: a position-style token (e.g., relating to the aperture outline vertex) is not present, but the established siblings in this family (e.g., `first_local_tangential_coordinate_of_neutron_detector`) carry no such marker either, so omitting it is consistent with the family convention.",
+   "review_comment": "Grammar (20/20): The candidate parses cleanly under the ISN grammar (verified: physical_base=`first_local_tangential_coordinate`, locus=`reflectometer_antenna`). `first_local_tangential_coordinate` is a registered geometric_base; `reflectometer_antenna` is a registered object. Locus is correctly expressed via the `_of_` preposition. No decomposition defects — `first_local_tangential` is a single registered component token, not a compound of smaller tokens. The explicit steering note confirms that the DD-shaped `x1_coordinate` label has been deliberately substituted with the registered, descriptive carrier per the locked local-frame design.\n\nSemantic (18/20): The name is self-descriptive and consistent with established siblings. The vector neighbour `second_local_tangential_coordinate_of_reflectometer_antenna` (sim=0.96) pairs perfectly — the candidate is its X1-axis counterpart, which is exactly the established pattern (compare with `second_local_tangential_coordinate_of_hard_xray_detector` vs `first_local_tangential_coordinate_of_neutron_detector`). Unit `m` matches the coordinate interpretation. The steering note clarifies the frame: the first local tangent is the more-horizontal in-plane tangent (e1), with e2 = e3 × e1 and e3 the plasma-facing normal — a clear, expert-defined local-frame convention. A domain expert reading only the name can immediately understand the quantity. Minor consideration: the term `first_local_tangential_coordinate` requires a reader to know the local-tangential convention, but this is the registered, model-neutral phrasing per the locked design and is consistent across all sibling names. Slight dock only because the X1-axis semantics (more-horizontal in-plane tangent toward positive toroidal angle) live entirely in the steering note and not in the name itself — but the rubric explicitly says not to penalise missing/terse documentation in name-only mode.\n\nConvention (19/20): snake_case, canonical segment ordering (geometric_base → object), no model-specific identifiers, no abbreviations, no redundancies. No clash with `second_local_tangential_coordinate_of_reflectometer_antenna` — the pair is intentionally complementary. Consistent with the established family (`first_local_tangential_coordinate_of_neutral_beam_injector`, `first_local_tangential_coordinate_of_neutron_detector`). One point docked because the candidate does not by itself reveal the local-frame basis (the reader must know what `first_local_tangential` means vs `second_local_tangential`), but this is the registered vocabulary and cannot be avoided.\n\nCompleteness (18/20): All physically relevant segments are present. The coordinate axis (first local tangential / X1) and owning object (reflectometer_antenna) are both explicit. The unit `m` matches a scalar coordinate. The candidate is the canonical complement to `second_local_tangential_coordinate_of_reflectometer_antenna`, and the sibling pair (plus the corresponding X1/X2 coordinate names for other reflectometer/diagnostic objects) establishes a complete family. Minor consideration: a position-style token (e.g., relating to the aperture outline vertex) is not present, but the established siblings in this family (e.g., `first_local_tangential_coordinate_of_neutron_detector`) carry no such marker either, so omitting it is consistent with the family convention."
+  },
+  "second_local_tangential_coordinate_of_optical_element": {
+   "summary": "**Grammar: 20/20.** The name parses cleanly under registered grammar: physical_base=`second_local_tangential_coordinate` (registered geometric_base), locus=`optical_element` (registered object), linked via canonical `_of_` scope marker. Round-trip verified by ISN validator. No decomposition defects — `second_local_tangential_coordinate` is an allowed lexicalised atom in the geometric_base registry. **Semantic: 19/20.** Self-descriptive to a domain expert: signed coordinate along the second local tangential axis (X2) of an optical element boundary in the element-local Cartesian (X1, X2) frame. The unit (m) matches a coordinate quantity. Cross-name consistency is excellent — the candidate mirrors the established pattern of accepted siblings: `second_local_tangential_coordinate_of_soft_xray_detector` (same_base_neighbour), `second_local_tangential_coordinate_of_neutron_detector` (sim=0.90), `second_local_tangential_coordinate_of_reflectometer_antenna` (sim=0.90), and pairs naturally with `first_local_tangential_coordinate_of_optical_element` (sim=0.91). The expert steering correctly aligns with IMAS coordinate rule 6 (object-local tangent axes use semantic ordinal directions, not DD-shaped `x2_coordinate` labels). Source-fidelity is consistent with the expert note about the locked local-frame design. **Convention: 20/20.** Snake_case, canonical `<quantity>_of_<object>` ordering matching every sibling in the comparison set. No model names, abbreviations, or noisy trailing tokens. The deliberate steering away from the storage-shaped `x2_coordinate` label to the descriptive `second_local_tangential_coordinate` is exactly the convention-aligned choice. **Completeness: 19/20.** Object (`optical_element`) is specified and registered. The geometric_base token fully conveys the coordinate direction. No subject, component, or position segments are needed for a scalar coordinate in an object-local frame. All physically relevant segments present.",
+   "review_comment": "**Grammar: 20/20.** The name parses cleanly under registered grammar: physical_base=`second_local_tangential_coordinate` (registered geometric_base), locus=`optical_element` (registered object), linked via canonical `_of_` scope marker. Round-trip verified by ISN validator. No decomposition defects — `second_local_tangential_coordinate` is an allowed lexicalised atom in the geometric_base registry. **Semantic: 19/20.** Self-descriptive to a domain expert: signed coordinate along the second local tangential axis (X2) of an optical element boundary in the element-local Cartesian (X1, X2) frame. The unit (m) matches a coordinate quantity. Cross-name consistency is excellent — the candidate mirrors the established pattern of accepted siblings: `second_local_tangential_coordinate_of_soft_xray_detector` (same_base_neighbour), `second_local_tangential_coordinate_of_neutron_detector` (sim=0.90), `second_local_tangential_coordinate_of_reflectometer_antenna` (sim=0.90), and pairs naturally with `first_local_tangential_coordinate_of_optical_element` (sim=0.91). The expert steering correctly aligns with IMAS coordinate rule 6 (object-local tangent axes use semantic ordinal directions, not DD-shaped `x2_coordinate` labels). Source-fidelity is consistent with the expert note about the locked local-frame design. **Convention: 20/20.** Snake_case, canonical `<quantity>_of_<object>` ordering matching every sibling in the comparison set. No model names, abbreviations, or noisy trailing tokens. The deliberate steering away from the storage-shaped `x2_coordinate` label to the descriptive `second_local_tangential_coordinate` is exactly the convention-aligned choice. **Completeness: 19/20.** Object (`optical_element`) is specified and registered. The geometric_base token fully conveys the coordinate direction. No subject, component, or position segments are needed for a scalar coordinate in an object-local frame. All physically relevant segments present."
+  }
+ },
+ "cause": {
+  "advisory_alias_collapsed": {
+   "class": "a",
+   "text": "evidence the state lacks"
+  },
+  "minority_spelling_not_in_roster": {
+   "class": "a",
+   "text": "evidence the state lacks"
+  },
+  "over_qualified_modifier": {
+   "class": "a",
+   "text": "evidence the state lacks"
+  },
+  "owner_erased_outline": {
+   "class": "a",
+   "text": "evidence the state lacks"
+  },
+  "redundant_repeated_segment": {
+   "class": "b",
+   "text": "a rule better decided in code than asked of a model"
+  }
+ },
+ "remedy": {
+  "advisory_alias_collapsed": {
+   "kind": "supply field",
+   "reader": "the COCOS reader that holds the source path's cocos_label",
+   "text": "Supply the check's declared cocos_label from the source path. The saved state carries it in few states, so the model is asked to weigh registered advisory aliases it was never shown and reads a legitimate alias as a collapse."
+  },
+  "minority_spelling_not_in_roster": {
+   "kind": "supply field",
+   "reader": "the closed-vocabulary roster reader holding established base spellings",
+   "text": "Supply the roster of established base spellings the check compares against. The state carries existing_names (linked neighbour names) but not the roster, and it is empty in most states, so a base that already follows the convention reads as an off-roster spelling."
+  },
+  "over_qualified_modifier": {
+   "kind": "supply field",
+   "reader": "the grammar decomposition reader holding the name's own qualifiers",
+   "text": "Supply the parsed aggregation/qualifier decomposition beside the dd_source_docs. The leaf source doc is usually a bare field label, so a registered aggregation or qualifier reads as an unstated modifier and accepted decompositions fire."
+  },
+  "owner_erased_outline": {
+   "kind": "supply field",
+   "reader": "the parent-path structure reader holding the owner segment",
+   "text": "Supply the parent path structure that names the owner. The leaf source path names no owner, so a legitimate bare outline cannot be told from an erased owner and accepted bare names fire."
+  },
+  "redundant_repeated_segment": {
+   "kind": "code rule",
+   "reader": "the name string itself",
+   "text": "Move to code. The rule is a substantive token repeated in the name (the check's own electron_electron example); asking a model fires it wherever a word echoes across two honest segments, such as diamagnetic in both the subject and the process of an accepted name."
+  }
+ },
+ "rescore": {
+  "prototype_calibration": {
+   "n": 363,
+   "point": 0.6057335041639974,
+   "lower": 0.5526006085116071,
+   "upper": 0.6655391687925171,
+   "level": 0.95,
+   "n_resamples": 1000,
+   "seed": 123
+  },
+  "prototype_validation": {
+   "n": 338,
+   "point": 0.6378406708595388,
+   "lower": 0.5807330693550893,
+   "upper": 0.6924307267633903,
+   "level": 0.95,
+   "n_resamples": 1000,
+   "seed": 123
+  },
+  "drop_one_calibration": {
+   "advisory_alias_collapsed": {
+    "n": 363,
+    "point": 0.6096732863549008,
+    "lower": 0.5555197574656089,
+    "upper": 0.6690535350428604,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "minority_spelling_not_in_roster": {
+    "n": 363,
+    "point": 0.6082158872517617,
+    "lower": 0.5546227565841781,
+    "upper": 0.6670017051126444,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "over_qualified_modifier": {
+    "n": 363,
+    "point": 0.6099295323510571,
+    "lower": 0.5569757533850366,
+    "upper": 0.6692178252738161,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "owner_erased_outline": {
+    "n": 363,
+    "point": 0.6063741191543882,
+    "lower": 0.5526926020877075,
+    "upper": 0.6652265578220304,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "redundant_repeated_segment": {
+    "n": 363,
+    "point": 0.6079916720051249,
+    "lower": 0.5551610954462189,
+    "upper": 0.6666348628621126,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   }
+  },
+  "combined_calibration": {
+   "n": 363,
+   "point": 0.6184176809737348,
+   "lower": 0.5660973747314512,
+   "upper": 0.6773588816222538,
+   "level": 0.95,
+   "n_resamples": 1000,
+   "seed": 123
+  },
+  "combined_validation": {
+   "n": 338,
+   "point": 0.6411537885594489,
+   "lower": 0.5836638661743505,
+   "upper": 0.694953382902455,
+   "level": 0.95,
+   "n_resamples": 1000,
+   "seed": 123
+  },
+  "per_check_calibration_auc": {
+   "malformed_physical_base": {
+    "point": 0.6142376681614349,
+    "lower": 0.570924853138002,
+    "upper": 0.6580121212121212,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "unregistered_token_in_closed_segment": {
+    "point": 0.5697629724535554,
+    "lower": 0.5206656766656981,
+    "upper": 0.6216073054413784,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "decomposition_group_absorbed_into_base": {
+    "point": 0.48377642536835364,
+    "lower": 0.42486214416896234,
+    "upper": 0.5385407176036603,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "field_region_preposition_wrong": {
+    "point": 0.5717648942985266,
+    "lower": 0.5232969327105648,
+    "upper": 0.6190994948678856,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "ordered_sample_positional_token": {
+    "point": 0.49388212684176813,
+    "lower": 0.4539429524390075,
+    "upper": 0.5366340971569944,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "retired_operator_spelling": {
+    "point": 0.5012652146060218,
+    "lower": 0.45878504995569935,
+    "upper": 0.5465195671803571,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "dropped_distinguishing_axis": {
+    "point": 0.557367072389494,
+    "lower": 0.5077436113188277,
+    "upper": 0.6081009347790636,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "ambiguity_in_isolation": {
+    "point": 0.6097053171044202,
+    "lower": 0.5651096019729795,
+    "upper": 0.6613862340880277,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "device_attributed_observable": {
+    "point": 0.5987347853939782,
+    "lower": 0.559727677069776,
+    "upper": 0.6410884763857152,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "over_qualified_modifier": {
+    "point": 0.4039397821909033,
+    "lower": 0.34774110794214275,
+    "upper": 0.46188646509740255,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "source_fidelity_unsupported_qualifier": {
+    "point": 0.5488148622677771,
+    "lower": 0.49590293280019704,
+    "upper": 0.6020837500788402,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "over_specialised_parent": {
+    "point": 0.5236226777706597,
+    "lower": 0.4700553559962563,
+    "upper": 0.5746229885329801,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "owner_erased_outline": {
+    "point": 0.4247757847533632,
+    "lower": 0.36764589053838986,
+    "upper": 0.4782248447237218,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "coupled_vs_launched_confusion": {
+    "point": 0.5971012171684817,
+    "lower": 0.5569267803988198,
+    "upper": 0.6376383658802096,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "value_provenance_in_name": {
+    "point": 0.5674567584881486,
+    "lower": 0.5208798675341638,
+    "upper": 0.6107348549061717,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "non_canonical_operator_join": {
+    "point": 0.6229820627802691,
+    "lower": 0.5740363601952824,
+    "upper": 0.6705292733000603,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "non_canonical_segment_order": {
+    "point": 0.45932094811018576,
+    "lower": 0.4084583567033099,
+    "upper": 0.5111596915505126,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "non_canonical_render": {
+    "point": 0.48790839205637415,
+    "lower": 0.4428773747630971,
+    "upper": 0.5362519932310151,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "non_canonical_locus_token": {
+    "point": 0.5742312620115311,
+    "lower": 0.5295095543260792,
+    "upper": 0.6213656276812528,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "advisory_alias_collapsed": {
+    "point": 0.44524343369634845,
+    "lower": 0.40057272351677237,
+    "upper": 0.49410055332588226,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "bare_shape_parameter_missing_surface": {
+    "point": 0.6168001281229981,
+    "lower": 0.5668643516013308,
+    "upper": 0.6635360488920067,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "model_surname_suffix": {
+    "point": 0.5642857142857142,
+    "lower": 0.5190223370642754,
+    "upper": 0.6125562001830548,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "minority_spelling_not_in_roster": {
+    "point": 0.435970531710442,
+    "lower": 0.39026563565415134,
+    "upper": 0.4853908022998132,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "redundant_repeated_segment": {
+    "point": 0.41287636130685457,
+    "lower": 0.3660979927479928,
+    "upper": 0.4604427508712899,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "missing_required_segment": {
+    "point": 0.5866111467008327,
+    "lower": 0.5457173509968897,
+    "upper": 0.6278436300733169,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "unit_kind_inconsistent": {
+    "point": 0.5810698270339526,
+    "lower": 0.5411377467893426,
+    "upper": 0.622053234937133,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   },
+   "source_binding_drift": {
+    "point": 0.571188340807175,
+    "lower": 0.5192368654900422,
+    "upper": 0.6230854145527152,
+    "level": 0.95,
+    "n_resamples": 1000,
+    "seed": 123
+   }
+  },
+  "n_calibration": 363,
+  "n_validation": 338
+ }
+}
