@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/sn.py:8941",
+    "imas_codex/standard_names/graph_ops.py:3426"
+  ],
+  "completed_at": "2026-10-15T05:00:30.917Z",
+  "dispatched_at": "2026-10-15T04:47:12Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": "4357",
+      "severity": "follow-on",
+      "text": "follow-on: the already_applied receipt returned by _replay reports \"manifest_sha256\": manifest_sha256, the caller's parameter, which is None on the preview route the change opens (imas_codex/standard_names/signed_manifest.py:7886 passes None when the caller supplied no digest), while the digest the cohort was actually verified under, minted digest minted_manifest_sha256 at :4324, is known and is what the receipt projection advertises; the CLI echoes the field at imas_codex/cli/sn.py:8974, so a preview of an applied supersede prints a null manifest_sha256."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s): the signed-manifest CLI apply/preview route imas_codex/cli/sn.py:8941 and the auto-apply route imas_codex/standard_names/graph_ops.py:3426 (_structural_edge_reconcile_apply, a functools.partial of apply_signed_manifest); both funnel through the changed _replay and are the paths a regression would reach.",
+    "diff": "read commit face44bfd against base ad5ca7a: three files, +363/-11, all inside the declared scope.",
+    "done_when": "the source done_when requires a stubbed supersede-with-successor previewed after its apply to return already_applied with 0 changes, the test to fail with the recognition removed, the fragment to state the mechanism and a second apply's writes, the live preview to return already_applied, and the signed-manifest files to add no failures; tests/standard_names/test_signed_supersede_replay.py asserts exactly that (gate-head.log 2 passed), negative-control.log shows both tests red with the payload keying removed, docs/evidence/fragments/sn-integrity-backlog/sib-signed-replay-recognition.html states the mechanism and that a second apply would have written a second receipt and no second edge, live-preview.log records already_applied changed 0, and gate-base.log 234 vs gate-head.log 236 gives 0 added failures.",
+    "goal": "the node goal is that a replayed signed supersede with a successor is recognised as applied; imas_codex/standard_names/signed_manifest.py:4317 now keys the receipt cohort on authority.payload_sha256 looked up by payload and :4350 verifies each admitted row's postcondition against the receipt's minted digest, so a replayed supersede-with-successor previews as already_applied with 0 changes, and the live preview of section 33's committed authority (live-preview.log) returns already_applied.",
+    "manifest": "read; it records status complete, commit face44bfd, the two new tests passing and the 25 signed-manifest files at 236 passed against a base of 234, negative control red (2 failed, EXIT=1) and the live read-only preview returning already_applied with 0 changes.",
+    "write_paths": "the source manifest declares imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_signed_supersede_replay.py and docs/evidence/fragments/sn-integrity-backlog/sib-signed-replay-recognition.html; git diff --name-status ad5ca7a face44bfd adds exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_signed_supersede_replay.py:219 asserts outcome equals already_applied and :220 changed equals 0, and negative-control.log shows both tests red once _replay keys the receipt lookup on the manifest digest, so a regression of the recognition reddens the suite.",
+    "evidence": "gate-head.log records 236 passed against gate-base.log's 234 passed (0 added failures), negative-control.log records 2 failed EXIT=1 with the payload keying removed, and live-preview.log records already_applied with changed 0 and EXIT=0.",
+    "fit": "the change follows the module's existing helper-and-docstring idiom at imas_codex/standard_names/signed_manifest.py:3749 and the test file introduces no plan, section or ticket label in any name.",
+    "goal_fidelity": "imas_codex/standard_names/signed_manifest.py:4317 looks the receipt cohort up by authority.payload_sha256 and :4350 verifies postconditions against minted_manifest_sha256 (:4324), so a supersede whose property write moved the manifest digest is still recognised, and live-preview.log confirms already_applied on the real committed authority.",
+    "reuse": "imas_codex/standard_names/signed_manifest.py:3749 _receipt_rows and :4252 _replay are extended in place and no new production definition duplicates an existing capability; a search of tests/ for a shared signed-manifest client stub found none (test_error_sibling_reconcile_graph.py:76 uses patch.object, a different mechanism).",
+    "scope_discipline": "git diff --name-status ad5ca7a face44bfd adds only imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_signed_supersede_replay.py and docs/evidence/fragments/sn-integrity-backlog/sib-signed-replay-recognition.html, the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that a replayed signed supersede with a successor is recognised as applied; imas_codex/standard_names/signed_manifest.py:4317 now keys the receipt cohort on authority.payload_sha256 looked up by payload and :4350 verifies each admitted row's postcondition against the receipt's minted digest, so a replayed supersede-with-successor previews as already_applied with 0 changes, and the live preview of section 33's committed authority (live-preview.log) returns already_applied.\nVERDICT done_when: the source done_when requires a stubbed supersede-with-successor previewed after its apply to return already_applied with 0 changes, the test to fail with the recognition removed, the fragment to state the mechanism and a second apply's writes, the live preview to return already_applied, and the signed-manifest files to add no failures; tests/standard_names/test_signed_supersede_replay.py asserts exactly that (gate-head.log 2 passed), negative-control.log shows both tests red with the payload keying removed, docs/evidence/fragments/sn-integrity-backlog/sib-signed-replay-recognition.html states the mechanism and that a second apply would have written a second receipt and no second edge, live-preview.log records already_applied changed 0, and gate-base.log 234 vs gate-head.log 236 gives 0 added failures.\nVERDICT write_paths: the source manifest declares imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_signed_supersede_replay.py and docs/evidence/fragments/sn-integrity-backlog/sib-signed-replay-recognition.html; git diff --name-status ad5ca7a face44bfd adds exactly those three paths and nothing else.\nVERDICT manifest: read; it records status complete, commit face44bfd, the two new tests passing and the 25 signed-manifest files at 236 passed against a base of 234, negative control red (2 failed, EXIT=1) and the live read-only preview returning already_applied with 0 changes.\nVERDICT diff: read commit face44bfd against base ad5ca7a: three files, +363/-11, all inside the declared scope.\nCALL_SITES: imas_codex/cli/sn.py:8941, imas_codex/standard_names/graph_ops.py:3426\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/signed_manifest.py:4317 looks the receipt cohort up by authority.payload_sha256 and :4350 verifies postconditions against minted_manifest_sha256 (:4324), so a supersede whose property write moved the manifest digest is still recognised, and live-preview.log confirms already_applied on the real committed authority.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-head.log records 236 passed against gate-base.log's 234 passed (0 added failures), negative-control.log records 2 failed EXIT=1 with the payload keying removed, and live-preview.log records already_applied with changed 0 and EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status ad5ca7a face44bfd adds only imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_signed_supersede_replay.py and docs/evidence/fragments/sn-integrity-backlog/sib-signed-replay-recognition.html, the declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_signed_supersede_replay.py:219 asserts outcome equals already_applied and :220 changed equals 0, and negative-control.log shows both tests red once _replay keys the receipt lookup on the manifest digest, so a regression of the recognition reddens the suite.\nSCORE fit: 18\nJUSTIFICATION fit: the change follows the module's existing helper-and-docstring idiom at imas_codex/standard_names/signed_manifest.py:3749 and the test file introduces no plan, section or ticket label in any name.\nSCORE reuse: 20\nJUSTIFICATION reuse: imas_codex/standard_names/signed_manifest.py:3749 _receipt_rows and :4252 _replay are extended in place and no new production definition duplicates an existing capability; a search of tests/ for a shared signed-manifest client stub found none (test_error_sibling_reconcile_graph.py:76 uses patch.object, a different mechanism).\nFINDING imas_codex/standard_names/signed_manifest.py:4357 follow-on: follow-on: the already_applied receipt returned by _replay reports \"manifest_sha256\": manifest_sha256, the caller's parameter, which is None on the preview route the change opens (imas_codex/standard_names/signed_manifest.py:7886 passes None when the caller supplied no digest), while the digest the cohort was actually verified under, minted digest minted_manifest_sha256 at :4324, is known and is what the receipt projection advertises; the CLI echoes the field at imas_codex/cli/sn.py:8974, so a preview of an applied supersede prints a null manifest_sha256.\n",
+  "review_run_id": "r-20261015T044607931107-review-of-sib-signed-replay-recognition-face44bfd25a",
+  "reviewed_base_sha": "ad5ca7a167ff27fd025ab0037e6ddb4571a66e8b",
+  "reviewed_head_sha": "face44bfd25aa734374f194b1678fda846f97931",
+  "reviewed_run_id": "r-20261015T041141672464-sib-signed-replay-recognition",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "subject": "r-20261015T041141672464-sib-signed-replay-recognition",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T05:01:29.642768+00:00",
+  "total": 114
+}
