@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/harmonize.py:1398",
+    "imas_codex/standard_names/harmonize.py:1432",
+    "imas_codex/cli/sn.py:6103"
+  ],
+  "completed_at": "2026-10-15T12:41:33.347Z",
+  "dispatched_at": "2026-10-15T12:31:01Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_roster_request_state.py",
+      "line": "60",
+      "severity": "follow-on",
+      "text": "follow-on: the brief and plan \u00a714 require every added test to fail with its mechanism removed, and the single recorded negative control (negative-control.log, 3 failed, EXIT=1) exercises only the MERGED/CLOSED-to-None branch, so test_open_request_protects_its_members (:60), test_unreadable_state_protects_with_evidence (:105), test_recorded_number_without_url_protects (:122) and test_malformed_url_protects (:148) are not shown red against their own mechanism; each is falsifiable by inspection (a None return on the open branch, an unprotected path, or an uncaught parse error would redden; the critical regression is controlled), and the brief's own working rules ('Show that once') relax the strict reading, so this is an evidence-completeness gap rather than a live defect."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-guard-open-requests.html",
+      "line": "42",
+      "severity": "follow-on",
+      "text": "follow-on: plan \u00a714's done-when asks for 'a read-only dry run of the boundary family plans its 17 members, with no refusal', but the fragment records only the protected-member count through recommended_name_protections (1 before, 0 after) and the 'before' value is attributed there to a coordinator baseline rather than measured by this node's live-check.log (which shows only protected_count: 0), so the end-to-end planning outcome the plan names is not demonstrated; the brief narrowed the live check to the count and this node was dispatched against the brief, so the gap belongs to the brief/plan divergence and the \u00a73 apply node is where the dry-run evidence is now expected."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/harmonize.py:1398 (preview_recommended_refusals), imas_codex/standard_names/harmonize.py:1432 (refuse_recommended_members), imas_codex/cli/sn.py:6103 (the sn harmonize command reaching preview via the CLI)",
+    "diff": "read from base a68bf23f3 (the direct parent) to head 0b6a35a34; the single commit changes three files (+305 -13), all inside the declared scope.",
+    "done_when": "the done_when names stubbed tests (open protects, closed/merged do not, unreadable protects with evidence, approved stays protected), each failing with its mechanism removed, judged by base/head delta on four files with the fragment recording the live check; gate-base.log records 19 passed and gate-head.log 26 passed at EXIT=0, the fragment records the live count 1 before to 0 after, but only 3 of the 7 added tests were shown red.",
+    "goal": "the node goal is that the recommended-name guard protects a roster's members only while its request is open; imas_codex/standard_names/protection.py:172-207 adds _request_evidence, which reads each roster's recorded request through the promote reader and maps OPEN to protects, MERGED/CLOSED to None, and unreadable to protects with evidence.",
+    "manifest": "read; it names commit 0b6a35a34, records the base (19 passed) and head (26 passed) gate logs, cites negative-control.log as 3 failed at EXIT=1, and records the live check 1 to 0 with the reader-reached-the-API argument.",
+    "write_paths": "the declared scope is imas_codex/standard_names/protection.py, tests/standard_names/test_roster_request_state.py and docs/evidence/fragments/sn-harmonize-command/shc-guard-open-requests.html; git diff --name-only a68bf23f3 0b6a35a34 names exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_roster_request_state.py:75,88,162 fail when the open-only mapping is reverted (negative-control.log, 3 failed, EXIT=1), but :60, :105, :122 and :148 have no recorded red run showing they fail when their own mechanism is removed.",
+    "evidence": "gate-base.log records 19 passed and gate-head.log 26 passed (EXIT=0) over the four named files, and negative-control.log records 3 failed at EXIT=1, but four of the seven added tests have no recorded red run against their own mechanism.",
+    "fit": "protection.py:172 places _request_evidence beside the function it serves, follows the module's local-import idiom, and its docstring and evidence strings name the mechanism with no plan, section or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/protection.py:186-207 maps OPEN to protects, MERGED/CLOSED to None and unreadable to protects, so a merged request whose fold-back never ran protects nothing, exactly as \u00a714 and the lead ruling state.",
+    "reuse": "protection.py:189-193 imports promote.py's parse_pull_request_url/_pull_request_call/_pull_request_state rather than adding a second GitHub client, and no existing owner maps a roster request state to a protection decision.",
+    "scope_discipline": "git diff --name-only between a68bf23f3 and 0b6a35a34 names only protection.py, tests/standard_names/test_roster_request_state.py and the fragment, all within the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that the recommended-name guard protects a roster's members only while its request is open; imas_codex/standard_names/protection.py:172-207 adds _request_evidence, which reads each roster's recorded request through the promote reader and maps OPEN to protects, MERGED/CLOSED to None, and unreadable to protects with evidence.\nVERDICT done_when: the done_when names stubbed tests (open protects, closed/merged do not, unreadable protects with evidence, approved stays protected), each failing with its mechanism removed, judged by base/head delta on four files with the fragment recording the live check; gate-base.log records 19 passed and gate-head.log 26 passed at EXIT=0, the fragment records the live count 1 before to 0 after, but only 3 of the 7 added tests were shown red.\nVERDICT write_paths: the declared scope is imas_codex/standard_names/protection.py, tests/standard_names/test_roster_request_state.py and docs/evidence/fragments/sn-harmonize-command/shc-guard-open-requests.html; git diff --name-only a68bf23f3 0b6a35a34 names exactly those three paths and nothing else.\nVERDICT manifest: read; it names commit 0b6a35a34, records the base (19 passed) and head (26 passed) gate logs, cites negative-control.log as 3 failed at EXIT=1, and records the live check 1 to 0 with the reader-reached-the-API argument.\nVERDICT diff: read from base a68bf23f3 (the direct parent) to head 0b6a35a34; the single commit changes three files (+305 -13), all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/harmonize.py:1398, imas_codex/standard_names/harmonize.py:1432, imas_codex/cli/sn.py:6103\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/protection.py:186-207 maps OPEN to protects, MERGED/CLOSED to None and unreadable to protects, so a merged request whose fold-back never ran protects nothing, exactly as \u00a714 and the lead ruling state.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate-base.log records 19 passed and gate-head.log 26 passed (EXIT=0) over the four named files, and negative-control.log records 3 failed at EXIT=1, but four of the seven added tests have no recorded red run against their own mechanism.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only between a68bf23f3 and 0b6a35a34 names only protection.py, tests/standard_names/test_roster_request_state.py and the fragment, all within the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_roster_request_state.py:75,88,162 fail when the open-only mapping is reverted (negative-control.log, 3 failed, EXIT=1), but :60, :105, :122 and :148 have no recorded red run showing they fail when their own mechanism is removed.\nSCORE fit: 18\nJUSTIFICATION fit: protection.py:172 places _request_evidence beside the function it serves, follows the module's local-import idiom, and its docstring and evidence strings name the mechanism with no plan, section or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: protection.py:189-193 imports promote.py's parse_pull_request_url/_pull_request_call/_pull_request_state rather than adding a second GitHub client, and no existing owner maps a roster request state to a protection decision.\nFINDING tests/standard_names/test_roster_request_state.py:60 follow-on: the brief and plan \u00a714 require every added test to fail with its mechanism removed, and the single recorded negative control (negative-control.log, 3 failed, EXIT=1) exercises only the MERGED/CLOSED-to-None branch, so test_open_request_protects_its_members (:60), test_unreadable_state_protects_with_evidence (:105), test_recorded_number_without_url_protects (:122) and test_malformed_url_protects (:148) are not shown red against their own mechanism; each is falsifiable by inspection (a None return on the open branch, an unprotected path, or an uncaught parse error would redden them), the critical regression is controlled, and the brief's own working rules ('Show that once') relax the strict reading, so this is an evidence-completeness gap rather than a live defect.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-guard-open-requests.html:42 follow-on: plan \u00a714's done-when asks for 'a read-only dry run of the boundary family plans its 17 members, with no refusal', but the fragment records only the protected-member count through recommended_name_protections (1 before, 0 after) and the 'before' value is attributed there to a coordinator baseline rather than measured by this node's live-check.log (which shows only protected_count: 0), so the end-to-end planning outcome the plan names is not demonstrated; the brief narrowed the live check to the count and this node was dispatched against the brief, so the gap belongs to the brief/plan divergence and the \u00a73 apply node is where the dry-run evidence is now expected.\n",
+  "review_run_id": "r-20261015T123045256234-review-of-shc-guard-open-requests-0b6a35a3465b",
+  "reviewed_base_sha": "a68bf23f3670001879354291334bce1449c8e73f",
+  "reviewed_head_sha": "0b6a35a3465b5be820800a77d26a6e08db805580",
+  "reviewed_run_id": "r-20261015T120625137515-shc-guard-open-requests",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T12:39:25.287156+00:00",
+  "total": 108
+}
