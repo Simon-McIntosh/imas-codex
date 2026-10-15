@@ -1,0 +1,23 @@
+{
+  "node": "scg-dd-reclassify-finish",
+  "status": "in-progress",
+  "threshold": 0.8,
+  "spend_ceiling_usd": 30.0,
+  "spend_prior_usd": 15.73,
+  "spend_available_usd": 14.27,
+  "spend_node_usd": 0.0,
+  "seeded_note": "ledger seeded from docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json",
+  "group_ledger": [
+    {"group": "g05", "ids": ["summary"], "reset": false, "tier1": 1103, "complete": false, "spend_usd": 0.0},
+    {"group": "g08", "ids": ["edge_profiles"], "reset": false, "tier1": 833, "complete": false, "spend_usd": 0.0},
+    {"group": "g11", "ids": ["gyrokinetics_local"], "reset": false, "tier1": 395, "complete": false, "spend_usd": 0.0},
+    {"group": "g12", "ids": ["wall", "transport_solver_numerics"], "reset": false, "tier1": 615, "complete": false, "spend_usd": 0.0},
+    {"group": "g14", "ids": ["plasma_sources", "core_instant_changes", "spectrometer_x_ray_crystal"], "reset": false, "tier1": 647, "complete": false, "spend_usd": 0.0},
+    {"group": "g16", "ids": ["neutron_diagnostic", "gyrokinetics", "mhd_linear", "core_transport"], "reset": false, "tier1": 608, "complete": false, "spend_usd": 0.0},
+    {"group": "g17", "ids": ["runaway_electrons", "mhd", "bolometer", "radiation", "core_sources", "ece", "langmuir_probes"], "reset": false, "tier1": 698, "complete": false, "spend_usd": 0.0},
+    {"group": "g18", "ids": ["charge_exchange", "spectrometer_uv", "hard_x_rays", "pf_active", "camera_visible", "reflectometer_fluctuation", "camera_ir", "soft_x_rays"], "reset": false, "tier1": 647, "complete": false, "spend_usd": 0.0},
+    {"group": "g19", "ids": ["camera_x_rays", "spi", "magnetics", "ic_antennas", "reflectometer_profile"], "reset": false, "tier1": 358, "complete": false, "spend_usd": 0.0}
+  ],
+  "readback": {},
+  "passes": []
+}

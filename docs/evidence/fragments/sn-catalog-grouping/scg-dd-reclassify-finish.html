@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-catalog-grouping">
+  <title>scg-dd-reclassify-finish — the DD re-classification finished under the corrected guidance</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <section id="scg-dd-reclassify-finish">
+   <h2>scg-dd-reclassify-finish — the DD re-classification finished under the corrected guidance</h2>
+
+   <p id="scg-dd-reclassify-finish-summary">
+     Status: in progress. This node finishes the DD path re-classification that
+     <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify.html">scg-dd-reclassify</a>
+     began at threshold 0.8 and stopped on: the <code>summary</code> IDS
+     classified to <code>data_management</code> because a container path decided
+     its domain. The guidance is corrected, and this node re-runs
+     <code>summary</code> and the eight IDS groups the first run left untouched.
+   </p>
+
+   <h3 id="scg-dd-reclassify-finish-code">The code state the run starts from</h3>
+   <p>
+     Confirmed before any pass, not assumed:
+   </p>
+   <ul>
+     <li><code>get_sn_domain_tree_threshold()</code> returns <code>0.8</code>,
+       read from <code>[tool.imas-codex.sn-domain-tree].threshold</code> in
+       <code>pyproject.toml</code>.</li>
+     <li><code>carries_own_subject</code> is present in
+       <code>imas_codex/graph/dd_domain_classifier.py</code> and a
+       <code>/value</code> leaf with the placeholder documentation no longer
+       states a subject of its own.</li>
+     <li>The corrected <code>imas_codex/definitions/physics/domains.yaml</code>
+       is on <code>main</code> (<code>48917a918</code>).</li>
+     <li><code>tests/graph/test_dd_build_classify_tree.py</code> and
+       <code>tests/graph/test_domain_classifier_state.py</code> pass at head.</li>
+   </ul>
+
+   <h3 id="scg-dd-reclassify-finish-run">The run</h3>
+   <p id="scg-dd-reclassify-finish-run-body">
+     One pass per IDS group, through the driver
+     <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-run.py">scg-dd-reclassify-finish-run.py</a>.
+     Each group is reset once, on its first pass, and never twice. A pass is
+     bounded and writes its classification once, after every batch completes.
+   </p>
+   <table id="scg-dd-reclassify-finish-ledger">
+     <thead>
+       <tr><th>pass</th><th>IDS members</th><th>Tier-1 paths</th><th>spend</th><th>classification</th></tr>
+     </thead>
+     <tbody>
+       <!-- rows added as passes complete -->
+     </tbody>
+   </table>
+
+   <h3 id="scg-dd-reclassify-finish-readback">Read back from the graph</h3>
+   <p id="scg-dd-reclassify-finish-readback-body">
+     <!-- filled after the run -->
+   </p>
+
+   <h3 id="scg-dd-reclassify-finish-spend">Spend</h3>
+   <p id="scg-dd-reclassify-finish-spend-body">
+     <!-- filled after the run -->
+   </p>
+  </section>
+ </main>
+</body>
+</html>
