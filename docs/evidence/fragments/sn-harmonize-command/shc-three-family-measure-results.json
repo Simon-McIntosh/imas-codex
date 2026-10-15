@@ -1,7 +1,148 @@
 {
   "acceptance_threshold": 0.85,
+  "apply_attempts": [
+    {
+      "command": "timeout 540 uv run imas-codex sn harmonize --family electron_number_density --apply --cost-limit 8.00 --json",
+      "exit_status": 124,
+      "llm_cost_rows": {
+        "generate_docs": {
+          "calls": 1,
+          "usd": 0.009678
+        },
+        "review_docs": {
+          "calls": 2,
+          "usd": 0.120358
+        }
+      },
+      "llm_run_id": "36afdad7-bf84-424b-9c3d-ec3c48189209",
+      "pipeline_elapsed_seconds": 540.640386,
+      "post_attempt_anchor_score": null,
+      "post_attempt_lint": {
+        "convention_violation": 3,
+        "link_dead_link": 1,
+        "link_missing_reverse": 1
+      },
+      "post_attempt_planned_calls": 7,
+      "receipt_cost_spent_usd": 0.130036,
+      "receipt_names_enriched": 1,
+      "receipt_names_reviewed": 0,
+      "seed": "electron_number_density",
+      "stop_reason": "interrupted",
+      "wall_seconds": 673
+    },
+    {
+      "seed": "electron_number_density",
+      "slurm_job_id": 1286605,
+      "command": "uv run imas-codex sn harmonize --family electron_number_density --apply --cost-limit 7.869964 --json",
+      "slurm_state": "FAILED",
+      "exit_status": 1,
+      "wall_seconds": 1385,
+      "anchor_batch": {
+        "stop_reason": "no_eligible_work",
+        "cost_spent_usd": 0.139569,
+        "cost_limit_usd": 7.869964,
+        "names_enriched": 1,
+        "names_reviewed": 1,
+        "pipeline_elapsed_seconds": 483.730311
+      },
+      "member_batch": {
+        "stop_reason": "no_eligible_work",
+        "cost_spent_usd": 1.317651,
+        "cost_limit_usd": 7.730395,
+        "names_enriched": 5,
+        "names_reviewed": 5,
+        "pipeline_elapsed_seconds": 744.440299
+      },
+      "receipt_cost_spent_usd": 1.45722,
+      "failure": "cannot confirm quarantined standard-name identities as valid: volume_averaged_electron_number_density_over_scrape_off_layer",
+      "post_attempt_planned_calls": 7,
+      "post_attempt_lint": {
+        "convention_violation": 1,
+        "link_missing_reverse": 3
+      }
+    }
+  ],
+  "budget": {
+    "ceiling_usd": 8.0,
+    "reviewed_names": 6,
+    "observed_spend_per_reviewed_name_usd": 0.264543,
+    "measured_cost_per_complete_family_name_usd": null,
+    "remaining_usd": 6.412744,
+    "spent_usd": 1.587256,
+    "west_limit_reason": "Six members were reviewed, but the family apply failed and its seven-call dry run remained nonzero. This partial run cannot set a defensible WEST limit.",
+    "west_limit_usd": null
+  },
+  "component_selection": {
+    "already_harmonized": "parallel_conductivity",
+    "chosen_seed": "parallel_vorticity",
+    "reason": "The first available, unharmonized non-WEST component family checked by report and dry run; six calls estimated at USD 2.48, within the approximately USD 3.03 reserved after the other two estimates.",
+    "unavailable_candidate": "parallel_current_density"
+  },
   "families": {
     "electron_number_density": {
+      "after_job": {
+        "anchor": "total_ion_number_density",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electron_number_density": 1.0,
+          "fast_neutral_internal_state_number_density": 1.0,
+          "normalized_ion_species_number_density": 1.0,
+          "thermal_ion_charge_state_number_density": 1.0,
+          "total_ion_number_density": 0.9375,
+          "total_neutral_number_density": 1.0,
+          "volume_averaged_electron_number_density_over_scrape_off_layer": null
+        },
+        "score_regressions": {
+          "below_threshold": [],
+          "fell": [
+            {
+              "id": "total_ion_number_density",
+              "before": 0.98125,
+              "after": 0.9375
+            }
+          ]
+        },
+        "unreviewed_member_state": {
+          "id": "volume_averaged_electron_number_density_over_scrape_off_layer",
+          "name_stage": "exhausted",
+          "docs_stage": "pending",
+          "validation_status": "quarantined",
+          "reviewer_score_docs": null
+        },
+        "estimate_basis": {
+          "calls": 29,
+          "mean_usd_per_call": 0.4233,
+          "runs": 12,
+          "total_usd": 12.2748
+        },
+        "estimate_usd": 2.9629,
+        "invariant": [
+          "number_density",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 1,
+          "link_missing_reverse": 3
+        },
+        "lint_total": 4,
+        "members": [
+          "electron_number_density",
+          "fast_neutral_internal_state_number_density",
+          "normalized_ion_species_number_density",
+          "thermal_ion_charge_state_number_density",
+          "total_ion_number_density",
+          "total_neutral_number_density",
+          "volume_averaged_electron_number_density_over_scrape_off_layer"
+        ],
+        "physical_base": "number_density",
+        "planned_calls": 7,
+        "refusals": {},
+        "seed": "electron_number_density"
+      },
       "before": {
         "anchor": "total_ion_number_density",
         "boundary_overlap": [],
@@ -215,61 +356,15 @@
     },
     "threshold": 0.85
   },
-  "component_selection": {
-    "already_harmonized": "parallel_conductivity",
-    "unavailable_candidate": "parallel_current_density",
-    "chosen_seed": "parallel_vorticity",
-    "reason": "The first available, unharmonized non-WEST component family checked by report and dry run; six calls estimated at USD 2.48, within the approximately USD 3.03 reserved after the other two estimates."
+  "result": {
+    "members_below_threshold_after_completed_apply": null,
+    "reason": "The SLURM apply completed six documentation reviews but failed revalidation of a quarantined seventh identity. The family was not stamped, and the second dry run still plans all seven calls.",
+    "three_families_applied": false
   },
   "west_roster_check": {
-    "searched": "imas_codex/standard_names/manifests/reviews",
     "chosen_family_member_matches": 0,
     "positive_control": "flux_surface_averaged_electron_density_at_plasma_boundary",
-    "positive_control_matches": "present in multiple review rosters"
-  },
-  "budget": {
-    "ceiling_usd": 8.0,
-    "spent_usd": 0.130036,
-    "remaining_usd": 7.869964,
-    "completed_names": 0,
-    "measured_cost_per_completed_name_usd": null,
-    "west_limit_usd": null,
-    "west_limit_reason": "No name completed a documentation review, so this run cannot measure a defensible per-name cost or set a WEST limit."
-  },
-  "apply_attempts": [
-    {
-      "seed": "electron_number_density",
-      "command": "timeout 540 uv run imas-codex sn harmonize --family electron_number_density --apply --cost-limit 8.00 --json",
-      "exit_status": 124,
-      "wall_seconds": 673,
-      "pipeline_elapsed_seconds": 540.640386,
-      "stop_reason": "interrupted",
-      "receipt_cost_spent_usd": 0.130036,
-      "llm_run_id": "36afdad7-bf84-424b-9c3d-ec3c48189209",
-      "llm_cost_rows": {
-        "generate_docs": {
-          "calls": 1,
-          "usd": 0.009678
-        },
-        "review_docs": {
-          "calls": 2,
-          "usd": 0.120358
-        }
-      },
-      "receipt_names_enriched": 1,
-      "receipt_names_reviewed": 0,
-      "post_attempt_planned_calls": 7,
-      "post_attempt_lint": {
-        "convention_violation": 3,
-        "link_dead_link": 1,
-        "link_missing_reverse": 1
-      },
-      "post_attempt_anchor_score": null
-    }
-  ],
-  "result": {
-    "three_families_applied": false,
-    "reason": "The first apply reached the mandatory 540-second timeout before its anchor was reviewed. A new dry run still plans all seven calls; repeating the same apply would restart the anchor-first run and full reconciliation.",
-    "members_below_threshold_after_completed_apply": null
+    "positive_control_matches": "present in multiple review rosters",
+    "searched": "imas_codex/standard_names/manifests/reviews"
   }
 }

@@ -1,19 +1,21 @@
 <section id="shc-three-family-measure">
-  <h2 id="shc-three-family-measure-title">Three-family measure: bounded apply interrupted before review</h2>
+  <h2 id="shc-three-family-measure-title">Three-family measure: density apply blocked by a quarantined member</h2>
   <p id="shc-three-family-measure-outcome">
-    The USD 8.00 measure remains incomplete. The first, seven-member
-    <code>number_density</code> apply entered the documentation pipeline under
-    <code>--cost-limit 8.00</code>. Its receipt says
-    <code>stop_reason=interrupted</code> at 540.640386 pipeline seconds:
-    one member was enriched, none was reviewed, and USD 0.130036 was spent.
-    The run's cost ledger confirms three LLM rows for the anchor:
-    one <code>generate_docs</code> call at USD 0.009678 and two
-    <code>review_docs</code> calls totaling USD 0.120358.
-    The foreground command returned 124 after 673 wall seconds while its
-    graceful shutdown finished. A fresh dry run still plans all seven members,
-    and the anchor's stored documentation score is now absent. No completed
-    family is available for a convergence or per-name-cost claim. The other
-    two applies were held to avoid repeating a known timeout and adding spend.
+    The USD 8.00 measure remains incomplete. The initial seven-member
+    <code>number_density</code> apply was interrupted at the mandatory
+    540-second command bound, spending USD 0.130036 before any review finished.
+    SLURM job <code>1286605</code> then ran the same unforced family with
+    <code>--cost-limit 7.869964</code> and outlived the command call.
+    Its anchor batch reviewed one member for USD 0.139569; the member batch
+    reviewed five for USD 1.317651. After 1,385 wall seconds the job failed
+    with <code>ValueError: cannot confirm quarantined standard-name identities
+    as valid: volume_averaged_electron_number_density_over_scrape_off_layer</code>.
+    <code>sacct</code> reports <code>FAILED 1:0</code>. The graph confirms that
+    member is <code>name_stage=exhausted</code>,
+    <code>validation_status=quarantined</code>, with no documentation score.
+    The family was not stamped; its second dry run still plans seven calls.
+    The locus and component applies were held after this second counted
+    failure, because identity repair lies outside this node's write paths.
   </p>
   <p id="shc-three-family-measure-authority">
     The threshold is <code>DEFAULT_MIN_SCORE = 0.85</code> in
@@ -30,7 +32,7 @@
   <table id="shc-three-family-measure-scopes-table">
     <thead><tr><th>Pattern kind</th><th>Seed; anchor</th><th>Members</th><th>Dry-run calls; estimate</th><th>Apply</th></tr></thead>
     <tbody>
-      <tr><td>Species</td><td><code>electron_number_density</code>; <code>total_ion_number_density</code></td><td>7</td><td>7; USD 2.90</td><td>Interrupted, USD 0.130036</td></tr>
+      <tr><td>Species</td><td><code>electron_number_density</code>; <code>total_ion_number_density</code></td><td>7</td><td>7; USD 2.90 before</td><td>Six reviewed; family failed, USD 1.587256 including the interrupted attempt</td></tr>
       <tr><td>Locus</td><td><code>electrostatic_potential</code>; <code>electrostatic_potential_at_langmuir_probe_position</code></td><td>5</td><td>5; USD 2.07 from the live estimate</td><td>Not started</td></tr>
       <tr><td>Component</td><td><code>parallel_vorticity</code>; <code>vorticity</code></td><td>6</td><td>6; USD 2.48</td><td>Not started</td></tr>
     </tbody>
@@ -47,17 +49,19 @@
     boundary-density apply, as checked from the live family query.
   </p>
   <p id="shc-three-family-measure-budget">
-    Total spend is USD 0.130036 of the approved USD 8.00 ceiling; USD 7.869964
-    remains. The completed-name denominator is zero, so this measure cannot
-    state a measured per-name cost or a defensible WEST limit. The dry-run
-    estimates remain planning figures, not a substitute for that measure.
+    Total spend is USD 1.587256 of the approved USD 8.00 ceiling; USD 6.412744
+    remains. Six members received completed reviews, or USD 0.264543 of total
+    node spend per reviewed member including the interrupted attempt. That is
+    a partial-run measure: the seventh identity prevented family completion,
+    so it does not set a defensible WEST limit. The recent-ledger dry-run mean
+    is USD 0.4233 per planned call, a planning estimate only.
   </p>
 
   <h3 id="shc-three-family-measure-lint">Lint findings by kind</h3>
   <table id="shc-three-family-measure-lint-table">
     <thead><tr><th>Family</th><th>Before</th><th>After attempt</th></tr></thead>
     <tbody>
-      <tr><td><code>number_density</code></td><td>convention_violation 3; link_dead_link 1; link_missing_reverse 1</td><td>Same counts, before any completed review</td></tr>
+      <tr><td><code>number_density</code></td><td>convention_violation 3; link_dead_link 1; link_missing_reverse 1</td><td>convention_violation 1; link_missing_reverse 3</td></tr>
       <tr><td><code>electrostatic_potential</code></td><td>defining_equation 1; link_missing_reverse 2</td><td>No apply</td></tr>
       <tr><td><code>vorticity</code></td><td>link_missing_reverse 4; symbol_definitions 1</td><td>No apply</td></tr>
     </tbody>
@@ -65,15 +69,15 @@
 
   <h3 id="shc-three-family-measure-scores">Documentation scores by member</h3>
   <table id="shc-three-family-measure-scores-table">
-    <thead><tr><th>Family</th><th>Member</th><th>Before</th><th>After attempt</th></tr></thead>
+    <thead><tr><th>Family</th><th>Member</th><th>Before</th><th>After SLURM job</th></tr></thead>
     <tbody>
-      <tr><td>Species</td><td><code>electron_number_density</code></td><td>0.95000</td><td>0.95000</td></tr>
-      <tr><td>Species</td><td><code>fast_neutral_internal_state_number_density</code></td><td>0.91875</td><td>0.91875</td></tr>
-      <tr><td>Species</td><td><code>normalized_ion_species_number_density</code></td><td>0.87500</td><td>0.87500</td></tr>
-      <tr><td>Species</td><td><code>thermal_ion_charge_state_number_density</code></td><td>0.88750</td><td>0.88750</td></tr>
-      <tr><td>Species</td><td><code>total_ion_number_density</code> (anchor)</td><td>0.98125</td><td>absent; review incomplete</td></tr>
-      <tr><td>Species</td><td><code>total_neutral_number_density</code></td><td>0.90000</td><td>0.90000</td></tr>
-      <tr><td>Species</td><td><code>volume_averaged_electron_number_density_over_scrape_off_layer</code></td><td>absent</td><td>absent</td></tr>
+      <tr><td>Species</td><td><code>electron_number_density</code></td><td>0.95000</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>fast_neutral_internal_state_number_density</code></td><td>0.91875</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>normalized_ion_species_number_density</code></td><td>0.87500</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>thermal_ion_charge_state_number_density</code></td><td>0.88750</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>total_ion_number_density</code> (anchor)</td><td>0.98125</td><td>0.93750</td></tr>
+      <tr><td>Species</td><td><code>total_neutral_number_density</code></td><td>0.90000</td><td>1.00000</td></tr>
+      <tr><td>Species</td><td><code>volume_averaged_electron_number_density_over_scrape_off_layer</code></td><td>absent</td><td>absent; quarantined identity</td></tr>
       <tr><td>Locus</td><td><code>electrostatic_potential</code></td><td>0.85625</td><td>no apply</td></tr>
       <tr><td>Locus</td><td><code>electrostatic_potential_at_langmuir_probe_position</code> (anchor)</td><td>0.93750</td><td>no apply</td></tr>
       <tr><td>Locus</td><td><code>floating_electrostatic_potential</code></td><td>0.85000</td><td>no apply</td></tr>
@@ -88,10 +92,13 @@
     </tbody>
   </table>
   <p id="shc-three-family-measure-next">
-    Next action: make a focused apply complete under the 540-second command
-    bound, or explicitly change that bound; then repeat the guarded dry-run
-    and apply sequence, using USD 7.869964 as the remaining total ceiling.
-    A zero-call second dry run, post-apply scores from the completed review,
-    and a WEST limit still require that run.
+    The score comparison detects one fall:
+    <code>total_ion_number_density</code> moved from 0.98125 to 0.93750, still
+    above the 0.85 acceptance threshold. No scored member fell below 0.85,
+    but the quarantined member has no after score. Next action: repair or
+    explicitly remove that exhausted identity from this family before
+    another apply, then repeat the guarded dry run and apply with at most
+    USD 6.412744 remaining. A zero-call second dry run and a WEST limit still
+    require a completed family.
   </p>
 </section>

@@ -108,7 +108,7 @@ def main() -> None:
     subcommands = parser.add_subparsers(dest="command", required=True)
     snap = subcommands.add_parser("snapshot")
     snap.add_argument("seed")
-    snap.add_argument("phase", choices=("before", "partial", "after"))
+    snap.add_argument("phase", choices=("before", "partial", "after_job", "after"))
     subcommands.add_parser("fixture")
     args = parser.parse_args()
     if args.command == "snapshot":
