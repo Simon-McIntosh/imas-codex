@@ -1,0 +1,1413 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "resolve-produced-supersession",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-sourced-disposition",
+    "link_participant_kind": "standard_name",
+    "operation": "resolve_sourced_supersession",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "accumulated_helium_4_prefill_count_due_to_gas_injection=>accumulated_helium_4_count_due_to_gas_injection",
+    "alpha_angle=>alpha_angle_of_iron_core_segment",
+    "density_at_separatrix=>flux_surface_averaged_ion_density_at_plasma_boundary",
+    "diamagnetic_heat_current_density_due_to_viscosity=>diamagnetic_current_density_due_to_heat_viscosity",
+    "inner_radius_of_passive_structure=>inner_radius_of_passive_loop",
+    "ion_power_due_to_recombination=>plasma_power_of_divertor_due_to_recombination",
+    "parallel_convection_velocity=>parallel_electron_energy_convection_velocity",
+    "parallel_total_ion_energy_diffusivity=>parallel_ion_energy_diffusivity",
+    "poloidal_diffusivity=>poloidal_neutral_energy_diffusivity",
+    "poloidal_heat_current_density_due_to_viscosity=>poloidal_current_density_due_to_heat_viscosity",
+    "poloidal_momentum_diffusivity=>poloidal_neutral_internal_state_momentum_diffusion_coefficient",
+    "radial_ion_state_effective_momentum_convection_velocity=>radial_ion_charge_state_momentum_convection_velocity",
+    "toroidal_diamagnetic_current_density=>toroidal_current_density_due_to_diamagnetic_drift",
+    "vertical_line_of_sight=>vertical_coordinate_of_pellet_path_point",
+    "x_coordinate_of_ferritic_insert=>x_coordinate_of_ferritic_element_centroid",
+    "energy_flux_at_first_wall",
+    "height_of_diagnostic_aperture",
+    "ion_state_particle_convection_velocity",
+    "major_length_of_coil_conductor_element",
+    "normalized_parallel_perturbed_heat_flux",
+    "normalized_perpendicular_perturbed_energy",
+    "radial_derivative_of_coefficient_of_flux_surface",
+    "toroidal_current_density_due_to_viscosity",
+    "vertical_coordinate_of_diagnostic_component_centre",
+    "x1_coordinate_of_diagnostic_aperture",
+    "absorbed_power_of_beam_tracing_beam"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "accumulated_helium_4_prefill_count_due_to_gas_injection=>accumulated_helium_4_count_due_to_gas_injection:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "accumulated_helium_4_prefill_count_due_to_gas_injection"
+          ]
+        },
+        {
+          "id": "accumulated_helium_4_prefill_count_due_to_gas_injection=>accumulated_helium_4_count_due_to_gas_injection:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "accumulated_helium_4_prefill_count_due_to_gas_injection",
+            "accumulated_helium_4_count_due_to_gas_injection"
+          ]
+        }
+      ],
+      "id": "accumulated_helium_4_prefill_count_due_to_gas_injection=>accumulated_helium_4_count_due_to_gas_injection",
+      "identity": {
+        "id": "accumulated_helium_4_prefill_count_due_to_gas_injection=>accumulated_helium_4_count_due_to_gas_injection",
+        "kind": "standard_name",
+        "target_id": "accumulated_helium_4_prefill_count_due_to_gas_injection"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "accumulated_helium_4_count_due_to_gas_injection"
+          },
+          "id": "accumulated_helium_4_prefill_count_due_to_gas_injection:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "accumulated_helium_4_prefill_count_due_to_gas_injection"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "accumulated_helium_4_prefill_count_due_to_gas_injection",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "accumulated_helium_4_count_due_to_gas_injection",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "alpha_angle=>alpha_angle_of_iron_core_segment:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "alpha_angle"
+          ]
+        },
+        {
+          "id": "alpha_angle=>alpha_angle_of_iron_core_segment:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "alpha_angle",
+            "alpha_angle_of_iron_core_segment"
+          ]
+        }
+      ],
+      "id": "alpha_angle=>alpha_angle_of_iron_core_segment",
+      "identity": {
+        "id": "alpha_angle=>alpha_angle_of_iron_core_segment",
+        "kind": "standard_name",
+        "target_id": "alpha_angle"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "alpha_angle_of_iron_core_segment"
+          },
+          "id": "alpha_angle:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "alpha_angle"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "alpha_angle",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "alpha_angle_of_iron_core_segment",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "density_at_separatrix=>flux_surface_averaged_ion_density_at_plasma_boundary:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "density_at_separatrix"
+          ]
+        },
+        {
+          "id": "density_at_separatrix=>flux_surface_averaged_ion_density_at_plasma_boundary:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "density_at_separatrix",
+            "flux_surface_averaged_ion_density_at_plasma_boundary"
+          ]
+        }
+      ],
+      "id": "density_at_separatrix=>flux_surface_averaged_ion_density_at_plasma_boundary",
+      "identity": {
+        "id": "density_at_separatrix=>flux_surface_averaged_ion_density_at_plasma_boundary",
+        "kind": "standard_name",
+        "target_id": "density_at_separatrix"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "flux_surface_averaged_ion_density_at_plasma_boundary"
+          },
+          "id": "density_at_separatrix:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "density_at_separatrix"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "density_at_separatrix",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_averaged_ion_density_at_plasma_boundary",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "diamagnetic_heat_current_density_due_to_viscosity=>diamagnetic_current_density_due_to_heat_viscosity:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "diamagnetic_heat_current_density_due_to_viscosity"
+          ]
+        },
+        {
+          "id": "diamagnetic_heat_current_density_due_to_viscosity=>diamagnetic_current_density_due_to_heat_viscosity:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "diamagnetic_heat_current_density_due_to_viscosity",
+            "diamagnetic_current_density_due_to_heat_viscosity"
+          ]
+        }
+      ],
+      "id": "diamagnetic_heat_current_density_due_to_viscosity=>diamagnetic_current_density_due_to_heat_viscosity",
+      "identity": {
+        "id": "diamagnetic_heat_current_density_due_to_viscosity=>diamagnetic_current_density_due_to_heat_viscosity",
+        "kind": "standard_name",
+        "target_id": "diamagnetic_heat_current_density_due_to_viscosity"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "diamagnetic_current_density_due_to_heat_viscosity"
+          },
+          "id": "diamagnetic_heat_current_density_due_to_viscosity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "diamagnetic_heat_current_density_due_to_viscosity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "diamagnetic_heat_current_density_due_to_viscosity",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "diamagnetic_current_density_due_to_heat_viscosity",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "inner_radius_of_passive_structure=>inner_radius_of_passive_loop:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "inner_radius_of_passive_structure"
+          ]
+        },
+        {
+          "id": "inner_radius_of_passive_structure=>inner_radius_of_passive_loop:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "inner_radius_of_passive_structure",
+            "inner_radius_of_passive_loop"
+          ]
+        }
+      ],
+      "id": "inner_radius_of_passive_structure=>inner_radius_of_passive_loop",
+      "identity": {
+        "id": "inner_radius_of_passive_structure=>inner_radius_of_passive_loop",
+        "kind": "standard_name",
+        "target_id": "inner_radius_of_passive_structure"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "inner_radius_of_passive_loop"
+          },
+          "id": "inner_radius_of_passive_structure:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "inner_radius_of_passive_structure"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "inner_radius_of_passive_structure",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "inner_radius_of_passive_loop",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "ion_power_due_to_recombination=>plasma_power_of_divertor_due_to_recombination:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "ion_power_due_to_recombination"
+          ]
+        },
+        {
+          "id": "ion_power_due_to_recombination=>plasma_power_of_divertor_due_to_recombination:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "ion_power_due_to_recombination",
+            "plasma_power_of_divertor_due_to_recombination"
+          ]
+        }
+      ],
+      "id": "ion_power_due_to_recombination=>plasma_power_of_divertor_due_to_recombination",
+      "identity": {
+        "id": "ion_power_due_to_recombination=>plasma_power_of_divertor_due_to_recombination",
+        "kind": "standard_name",
+        "target_id": "ion_power_due_to_recombination"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "plasma_power_of_divertor_due_to_recombination"
+          },
+          "id": "ion_power_due_to_recombination:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "ion_power_due_to_recombination"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "ion_power_due_to_recombination",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "plasma_power_of_divertor_due_to_recombination",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "parallel_convection_velocity=>parallel_electron_energy_convection_velocity:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "parallel_convection_velocity"
+          ]
+        },
+        {
+          "id": "parallel_convection_velocity=>parallel_electron_energy_convection_velocity:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "parallel_convection_velocity",
+            "parallel_electron_energy_convection_velocity"
+          ]
+        }
+      ],
+      "id": "parallel_convection_velocity=>parallel_electron_energy_convection_velocity",
+      "identity": {
+        "id": "parallel_convection_velocity=>parallel_electron_energy_convection_velocity",
+        "kind": "standard_name",
+        "target_id": "parallel_convection_velocity"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "parallel_electron_energy_convection_velocity"
+          },
+          "id": "parallel_convection_velocity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "parallel_convection_velocity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "parallel_convection_velocity",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "parallel_electron_energy_convection_velocity",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "parallel_total_ion_energy_diffusivity=>parallel_ion_energy_diffusivity:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "parallel_total_ion_energy_diffusivity"
+          ]
+        },
+        {
+          "id": "parallel_total_ion_energy_diffusivity=>parallel_ion_energy_diffusivity:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "parallel_total_ion_energy_diffusivity",
+            "parallel_ion_energy_diffusivity"
+          ]
+        }
+      ],
+      "id": "parallel_total_ion_energy_diffusivity=>parallel_ion_energy_diffusivity",
+      "identity": {
+        "id": "parallel_total_ion_energy_diffusivity=>parallel_ion_energy_diffusivity",
+        "kind": "standard_name",
+        "target_id": "parallel_total_ion_energy_diffusivity"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "parallel_ion_energy_diffusivity"
+          },
+          "id": "parallel_total_ion_energy_diffusivity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "parallel_total_ion_energy_diffusivity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "parallel_total_ion_energy_diffusivity",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "parallel_ion_energy_diffusivity",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "poloidal_diffusivity=>poloidal_neutral_energy_diffusivity:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "poloidal_diffusivity"
+          ]
+        },
+        {
+          "id": "poloidal_diffusivity=>poloidal_neutral_energy_diffusivity:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "poloidal_diffusivity",
+            "poloidal_neutral_energy_diffusivity"
+          ]
+        }
+      ],
+      "id": "poloidal_diffusivity=>poloidal_neutral_energy_diffusivity",
+      "identity": {
+        "id": "poloidal_diffusivity=>poloidal_neutral_energy_diffusivity",
+        "kind": "standard_name",
+        "target_id": "poloidal_diffusivity"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "poloidal_neutral_energy_diffusivity"
+          },
+          "id": "poloidal_diffusivity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "poloidal_diffusivity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "poloidal_diffusivity",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "poloidal_neutral_energy_diffusivity",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "poloidal_heat_current_density_due_to_viscosity=>poloidal_current_density_due_to_heat_viscosity:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "poloidal_heat_current_density_due_to_viscosity"
+          ]
+        },
+        {
+          "id": "poloidal_heat_current_density_due_to_viscosity=>poloidal_current_density_due_to_heat_viscosity:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "poloidal_heat_current_density_due_to_viscosity",
+            "poloidal_current_density_due_to_heat_viscosity"
+          ]
+        }
+      ],
+      "id": "poloidal_heat_current_density_due_to_viscosity=>poloidal_current_density_due_to_heat_viscosity",
+      "identity": {
+        "id": "poloidal_heat_current_density_due_to_viscosity=>poloidal_current_density_due_to_heat_viscosity",
+        "kind": "standard_name",
+        "target_id": "poloidal_heat_current_density_due_to_viscosity"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "poloidal_current_density_due_to_heat_viscosity"
+          },
+          "id": "poloidal_heat_current_density_due_to_viscosity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "poloidal_heat_current_density_due_to_viscosity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "poloidal_heat_current_density_due_to_viscosity",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "poloidal_current_density_due_to_heat_viscosity",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "poloidal_momentum_diffusivity=>poloidal_neutral_internal_state_momentum_diffusion_coefficient:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "poloidal_momentum_diffusivity"
+          ]
+        },
+        {
+          "id": "poloidal_momentum_diffusivity=>poloidal_neutral_internal_state_momentum_diffusion_coefficient:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "poloidal_momentum_diffusivity",
+            "poloidal_neutral_internal_state_momentum_diffusion_coefficient"
+          ]
+        }
+      ],
+      "id": "poloidal_momentum_diffusivity=>poloidal_neutral_internal_state_momentum_diffusion_coefficient",
+      "identity": {
+        "id": "poloidal_momentum_diffusivity=>poloidal_neutral_internal_state_momentum_diffusion_coefficient",
+        "kind": "standard_name",
+        "target_id": "poloidal_momentum_diffusivity"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "poloidal_neutral_internal_state_momentum_diffusion_coefficient"
+          },
+          "id": "poloidal_momentum_diffusivity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "poloidal_momentum_diffusivity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "poloidal_momentum_diffusivity",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "poloidal_neutral_internal_state_momentum_diffusion_coefficient",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "radial_ion_state_effective_momentum_convection_velocity=>radial_ion_charge_state_momentum_convection_velocity:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "radial_ion_state_effective_momentum_convection_velocity"
+          ]
+        },
+        {
+          "id": "radial_ion_state_effective_momentum_convection_velocity=>radial_ion_charge_state_momentum_convection_velocity:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "radial_ion_state_effective_momentum_convection_velocity",
+            "radial_ion_charge_state_momentum_convection_velocity"
+          ]
+        }
+      ],
+      "id": "radial_ion_state_effective_momentum_convection_velocity=>radial_ion_charge_state_momentum_convection_velocity",
+      "identity": {
+        "id": "radial_ion_state_effective_momentum_convection_velocity=>radial_ion_charge_state_momentum_convection_velocity",
+        "kind": "standard_name",
+        "target_id": "radial_ion_state_effective_momentum_convection_velocity"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "radial_ion_charge_state_momentum_convection_velocity"
+          },
+          "id": "radial_ion_state_effective_momentum_convection_velocity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "radial_ion_state_effective_momentum_convection_velocity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "radial_ion_state_effective_momentum_convection_velocity",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "radial_ion_charge_state_momentum_convection_velocity",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "toroidal_diamagnetic_current_density=>toroidal_current_density_due_to_diamagnetic_drift:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "toroidal_diamagnetic_current_density"
+          ]
+        },
+        {
+          "id": "toroidal_diamagnetic_current_density=>toroidal_current_density_due_to_diamagnetic_drift:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "toroidal_diamagnetic_current_density",
+            "toroidal_current_density_due_to_diamagnetic_drift"
+          ]
+        }
+      ],
+      "id": "toroidal_diamagnetic_current_density=>toroidal_current_density_due_to_diamagnetic_drift",
+      "identity": {
+        "id": "toroidal_diamagnetic_current_density=>toroidal_current_density_due_to_diamagnetic_drift",
+        "kind": "standard_name",
+        "target_id": "toroidal_diamagnetic_current_density"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "toroidal_current_density_due_to_diamagnetic_drift"
+          },
+          "id": "toroidal_diamagnetic_current_density:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "toroidal_diamagnetic_current_density"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "toroidal_diamagnetic_current_density",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "toroidal_current_density_due_to_diamagnetic_drift",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "vertical_line_of_sight=>vertical_coordinate_of_pellet_path_point:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "vertical_line_of_sight"
+          ]
+        },
+        {
+          "id": "vertical_line_of_sight=>vertical_coordinate_of_pellet_path_point:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "vertical_line_of_sight",
+            "vertical_coordinate_of_pellet_path_point"
+          ]
+        }
+      ],
+      "id": "vertical_line_of_sight=>vertical_coordinate_of_pellet_path_point",
+      "identity": {
+        "id": "vertical_line_of_sight=>vertical_coordinate_of_pellet_path_point",
+        "kind": "standard_name",
+        "target_id": "vertical_line_of_sight"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "vertical_coordinate_of_pellet_path_point"
+          },
+          "id": "vertical_line_of_sight:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "vertical_line_of_sight"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "vertical_line_of_sight",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "vertical_coordinate_of_pellet_path_point",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "x_coordinate_of_ferritic_insert=>x_coordinate_of_ferritic_element_centroid:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "x_coordinate_of_ferritic_insert"
+          ]
+        },
+        {
+          "id": "x_coordinate_of_ferritic_insert=>x_coordinate_of_ferritic_element_centroid:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "x_coordinate_of_ferritic_insert",
+            "x_coordinate_of_ferritic_element_centroid"
+          ]
+        }
+      ],
+      "id": "x_coordinate_of_ferritic_insert=>x_coordinate_of_ferritic_element_centroid",
+      "identity": {
+        "id": "x_coordinate_of_ferritic_insert=>x_coordinate_of_ferritic_element_centroid",
+        "kind": "standard_name",
+        "target_id": "x_coordinate_of_ferritic_insert"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "x_coordinate_of_ferritic_element_centroid"
+          },
+          "id": "x_coordinate_of_ferritic_insert:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "x_coordinate_of_ferritic_insert"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "x_coordinate_of_ferritic_insert",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "x_coordinate_of_ferritic_element_centroid",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "energy_flux_at_first_wall:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "energy_flux_at_first_wall"
+          ]
+        },
+        {
+          "id": "energy_flux_at_first_wall:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "energy_flux_at_first_wall"
+          ]
+        }
+      ],
+      "id": "energy_flux_at_first_wall",
+      "identity": {
+        "id": "energy_flux_at_first_wall",
+        "kind": "standard_name",
+        "target_id": "energy_flux_at_first_wall"
+      },
+      "mutations": [
+        {
+          "id": "energy_flux_at_first_wall:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "energy_flux_at_first_wall"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "energy_flux_at_first_wall",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "height_of_diagnostic_aperture:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "height_of_diagnostic_aperture"
+          ]
+        },
+        {
+          "id": "height_of_diagnostic_aperture:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "height_of_diagnostic_aperture"
+          ]
+        }
+      ],
+      "id": "height_of_diagnostic_aperture",
+      "identity": {
+        "id": "height_of_diagnostic_aperture",
+        "kind": "standard_name",
+        "target_id": "height_of_diagnostic_aperture"
+      },
+      "mutations": [
+        {
+          "id": "height_of_diagnostic_aperture:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "height_of_diagnostic_aperture"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "height_of_diagnostic_aperture",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "ion_state_particle_convection_velocity:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "ion_state_particle_convection_velocity"
+          ]
+        },
+        {
+          "id": "ion_state_particle_convection_velocity:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "ion_state_particle_convection_velocity"
+          ]
+        }
+      ],
+      "id": "ion_state_particle_convection_velocity",
+      "identity": {
+        "id": "ion_state_particle_convection_velocity",
+        "kind": "standard_name",
+        "target_id": "ion_state_particle_convection_velocity"
+      },
+      "mutations": [
+        {
+          "id": "ion_state_particle_convection_velocity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "ion_state_particle_convection_velocity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "ion_state_particle_convection_velocity",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "major_length_of_coil_conductor_element:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "major_length_of_coil_conductor_element"
+          ]
+        },
+        {
+          "id": "major_length_of_coil_conductor_element:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "major_length_of_coil_conductor_element"
+          ]
+        }
+      ],
+      "id": "major_length_of_coil_conductor_element",
+      "identity": {
+        "id": "major_length_of_coil_conductor_element",
+        "kind": "standard_name",
+        "target_id": "major_length_of_coil_conductor_element"
+      },
+      "mutations": [
+        {
+          "id": "major_length_of_coil_conductor_element:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "major_length_of_coil_conductor_element"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "major_length_of_coil_conductor_element",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "normalized_parallel_perturbed_heat_flux:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "normalized_parallel_perturbed_heat_flux"
+          ]
+        },
+        {
+          "id": "normalized_parallel_perturbed_heat_flux:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "normalized_parallel_perturbed_heat_flux"
+          ]
+        }
+      ],
+      "id": "normalized_parallel_perturbed_heat_flux",
+      "identity": {
+        "id": "normalized_parallel_perturbed_heat_flux",
+        "kind": "standard_name",
+        "target_id": "normalized_parallel_perturbed_heat_flux"
+      },
+      "mutations": [
+        {
+          "id": "normalized_parallel_perturbed_heat_flux:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "normalized_parallel_perturbed_heat_flux"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "normalized_parallel_perturbed_heat_flux",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "normalized_perpendicular_perturbed_energy:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "normalized_perpendicular_perturbed_energy"
+          ]
+        },
+        {
+          "id": "normalized_perpendicular_perturbed_energy:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "normalized_perpendicular_perturbed_energy"
+          ]
+        }
+      ],
+      "id": "normalized_perpendicular_perturbed_energy",
+      "identity": {
+        "id": "normalized_perpendicular_perturbed_energy",
+        "kind": "standard_name",
+        "target_id": "normalized_perpendicular_perturbed_energy"
+      },
+      "mutations": [
+        {
+          "id": "normalized_perpendicular_perturbed_energy:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "normalized_perpendicular_perturbed_energy"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "normalized_perpendicular_perturbed_energy",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "radial_derivative_of_coefficient_of_flux_surface:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "radial_derivative_of_coefficient_of_flux_surface"
+          ]
+        },
+        {
+          "id": "radial_derivative_of_coefficient_of_flux_surface:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "radial_derivative_of_coefficient_of_flux_surface"
+          ]
+        }
+      ],
+      "id": "radial_derivative_of_coefficient_of_flux_surface",
+      "identity": {
+        "id": "radial_derivative_of_coefficient_of_flux_surface",
+        "kind": "standard_name",
+        "target_id": "radial_derivative_of_coefficient_of_flux_surface"
+      },
+      "mutations": [
+        {
+          "id": "radial_derivative_of_coefficient_of_flux_surface:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "radial_derivative_of_coefficient_of_flux_surface"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "radial_derivative_of_coefficient_of_flux_surface",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "toroidal_current_density_due_to_viscosity:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "toroidal_current_density_due_to_viscosity"
+          ]
+        },
+        {
+          "id": "toroidal_current_density_due_to_viscosity:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "toroidal_current_density_due_to_viscosity"
+          ]
+        }
+      ],
+      "id": "toroidal_current_density_due_to_viscosity",
+      "identity": {
+        "id": "toroidal_current_density_due_to_viscosity",
+        "kind": "standard_name",
+        "target_id": "toroidal_current_density_due_to_viscosity"
+      },
+      "mutations": [
+        {
+          "id": "toroidal_current_density_due_to_viscosity:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "toroidal_current_density_due_to_viscosity"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "toroidal_current_density_due_to_viscosity",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "vertical_coordinate_of_diagnostic_component_centre:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "vertical_coordinate_of_diagnostic_component_centre"
+          ]
+        },
+        {
+          "id": "vertical_coordinate_of_diagnostic_component_centre:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "vertical_coordinate_of_diagnostic_component_centre"
+          ]
+        }
+      ],
+      "id": "vertical_coordinate_of_diagnostic_component_centre",
+      "identity": {
+        "id": "vertical_coordinate_of_diagnostic_component_centre",
+        "kind": "standard_name",
+        "target_id": "vertical_coordinate_of_diagnostic_component_centre"
+      },
+      "mutations": [
+        {
+          "id": "vertical_coordinate_of_diagnostic_component_centre:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "vertical_coordinate_of_diagnostic_component_centre"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "vertical_coordinate_of_diagnostic_component_centre",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "x1_coordinate_of_diagnostic_aperture:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "x1_coordinate_of_diagnostic_aperture"
+          ]
+        },
+        {
+          "id": "x1_coordinate_of_diagnostic_aperture:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "x1_coordinate_of_diagnostic_aperture"
+          ]
+        }
+      ],
+      "id": "x1_coordinate_of_diagnostic_aperture",
+      "identity": {
+        "id": "x1_coordinate_of_diagnostic_aperture",
+        "kind": "standard_name",
+        "target_id": "x1_coordinate_of_diagnostic_aperture"
+      },
+      "mutations": [
+        {
+          "id": "x1_coordinate_of_diagnostic_aperture:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "x1_coordinate_of_diagnostic_aperture"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "x1_coordinate_of_diagnostic_aperture",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    },
+    {
+      "guards": [
+        {
+          "id": "absorbed_power_of_beam_tracing_beam:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "absorbed_power_of_beam_tracing_beam"
+          ]
+        },
+        {
+          "id": "absorbed_power_of_beam_tracing_beam:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "absorbed_power_of_beam_tracing_beam"
+          ]
+        }
+      ],
+      "id": "absorbed_power_of_beam_tracing_beam",
+      "identity": {
+        "id": "absorbed_power_of_beam_tracing_beam",
+        "kind": "standard_name",
+        "target_id": "absorbed_power_of_beam_tracing_beam"
+      },
+      "mutations": [
+        {
+          "id": "absorbed_power_of_beam_tracing_beam:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "absorbed_power_of_beam_tracing_beam"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "absorbed_power_of_beam_tracing_beam",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "73489a6764a003dcc6f5d6b251f95bd64a8191f7be2a91016734c0c74ca4919a"
+  }
+}
