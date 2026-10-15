@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/harmonize.py:1555",
+    "imas_codex/cli/sn.py:6176",
+    "imas_codex/standard_names/graph_ops.py:9846"
+  ],
+  "completed_at": "2026-10-15T06:01:34.311Z",
+  "dispatched_at": "2026-10-15T05:35:22Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1130",
+      "severity": "blocking",
+      "text": "blocking: a protected row is still handed to the writer, which does not skip it -- filter_protected (imas_codex/standard_names/protection.py:386) returns the stripped row and the writer's Cypher (imas_codex/standard_names/graph_ops.py:9897-9901) then sets sn.description = \"\", sn.documentation = \"\", sn.links = null for it -- so a catalog-edited member's documentation and links are cleared rather than kept, and the docstring at imas_codex/standard_names/harmonize.py:992 and the log at imas_codex/standard_names/harmonize.py:1559 assert the opposite; the path is reachable through sn harmonize --apply --force (imas_codex/cli/sn.py:6176) whenever a family member is name_stage=approved."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_reverse_links.py",
+      "line": "191",
+      "severity": "blocking",
+      "text": "blocking: the stub writer treats a stripped row as no change (\"the real writer issues no SET for this row\"), which the real writer does not do, so the assertion at tests/standard_names/test_harmonize_reverse_links.py:394 that the protected member keeps its documentation holds for the stub and can never fail on the production writer's actual behaviour."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html",
+      "line": "119",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment records that write_enrichment_results \"runs filter_protected with protection in force, so a member whose name_stage is approved keeps its own editorial fields\", which is the guarantee the code does not provide, so the fragment publishes a protection the writer does not implement."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1011",
+      "severity": "follow-on",
+      "text": "follow-on: the documented return contract at imas_codex/standard_names/harmonize.py:1005 names a \"protected\" key that the two early returns at :1011 and :1030 omit, so a caller reading the contract raises KeyError; apply_families reads it with .get and is unaffected."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html",
+      "line": "209",
+      "severity": "follow-on",
+      "text": "follow-on: the gate table cites base_gate.log and head_gate.log as a paired measurement, but neither log's first line names the revision, tree or command it ran (both open with the pytest banner), so the pairing cannot be checked from the logs, and because the reviewed manifest writes baseline_suite/after_suite as free text after the path, reckon's own gate-log reader resolves neither and reports the added-failure count unmeasured."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read from 210eb60ae to 724ce106b; the single gained commit changes the three declared files, narrowing the keep rule at imas_codex/standard_names/harmonize.py:1088 and adding the protected report and its warning at imas_codex/standard_names/harmonize.py:1559, with nothing outside them.",
+    "done_when": "the done-when asks the fragment to name each cause and a fixture apply to end with zero missing_reverse findings and to fail with the step removed, at 0 added failures against base; tests/standard_names/test_harmonize_reverse_links.py:319 asserts zero findings through the audit function itself, red_step_removed.log records the failing arm, and base_gate.log/head_gate.log measure 151 then 155 passed, both EXIT=0.",
+    "goal": "the goal is that a harmonize apply leaves no sibling link unreturned; imas_codex/standard_names/harmonize.py:1088 now keeps a name: link whose target any catalog name carries and adds the reverse only among siblings, which is the goal, and the gained commit adds a protected-member report at imas_codex/standard_names/harmonize.py:1124.",
+    "manifest": "read; it carries six commits, the paired base/head gate, four test logs, one negative_control_log path and four follow-ons, and it states the gate pair as measured at both revisions rather than inferred.",
+    "write_paths": "the declared scope is imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_reverse_links.py and docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html, and git show --stat 724ce106b names exactly those three."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize_reverse_links.py:191 makes the stub skip a stripped row, so the assertion at tests/standard_names/test_harmonize_reverse_links.py:394 measures the stub's behaviour rather than the writer's.",
+    "evidence": "the paired gate at docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:207 is measured and log-backed, but the protection claim at docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:119 rests on a stub whose writer semantics differ from imas_codex/standard_names/graph_ops.py:9897.",
+    "fit": "the module logger at imas_codex/standard_names/harmonize.py:43 and the warning follow the surrounding style, but the return contract at imas_codex/standard_names/harmonize.py:1005 names \"protected\" while the early returns at :1011 and :1030 omit it.",
+    "goal_fidelity": "imas_codex/standard_names/harmonize.py:1088 makes the sibling rule the one the docstring claims, so the goal holds for sibling links, while the protection claim at imas_codex/standard_names/harmonize.py:992 does not hold.",
+    "reuse": "the step calls the existing writer imas_codex/standard_names/graph_ops.py:9846 and the existing filter imas_codex/standard_names/protection.py:331 rather than adding a second writer or a second protection test.",
+    "scope_discipline": "git show --stat 724ce106b names only the three declared write paths, and the out-of-scope fixture edits belong to the earlier commit 8a5dbf760, not to this one."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that a harmonize apply leaves no sibling link unreturned; imas_codex/standard_names/harmonize.py:1088 now keeps a name: link whose target any catalog name carries and adds the reverse only among siblings, which is the goal, and the gained commit adds a protected-member report at imas_codex/standard_names/harmonize.py:1124.\nVERDICT done_when: the done-when asks the fragment to name each cause and a fixture apply to end with zero missing_reverse findings and to fail with the step removed, at 0 added failures against base; tests/standard_names/test_harmonize_reverse_links.py:319 asserts zero findings through the audit function itself, red_step_removed.log records the failing arm, and base_gate.log/head_gate.log measure 151 then 155 passed, both EXIT=0.\nVERDICT write_paths: the declared scope is imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_reverse_links.py and docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html, and git show --stat 724ce106b names exactly those three.\nVERDICT manifest: read; it carries six commits, the paired base/head gate, four test logs, one negative_control_log path and four follow-ons, and it states the gate pair as measured at both revisions rather than inferred.\nVERDICT diff: read from 210eb60ae to 724ce106b; the single gained commit changes the three declared files, narrowing the keep rule at imas_codex/standard_names/harmonize.py:1088 and adding the protected report and its warning at imas_codex/standard_names/harmonize.py:1559, with nothing outside them.\nCALL_SITES: imas_codex/standard_names/harmonize.py:1555, imas_codex/cli/sn.py:6176, imas_codex/standard_names/graph_ops.py:9846\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/harmonize.py:1088 makes the sibling rule the one the docstring claims, so the goal holds for sibling links, while the protection claim at imas_codex/standard_names/harmonize.py:992 does not hold.\nSCORE evidence: 12\nJUSTIFICATION evidence: the paired gate at docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:207 is measured and log-backed, but the protection claim at docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:119 rests on a stub whose writer semantics differ from imas_codex/standard_names/graph_ops.py:9897.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 724ce106b names only the three declared write paths, and the out-of-scope fixture edits belong to the earlier commit 8a5dbf760, not to this one.\nSCORE durability: 12\nJUSTIFICATION durability: tests/standard_names/test_harmonize_reverse_links.py:191 makes the stub skip a stripped row, so the assertion at tests/standard_names/test_harmonize_reverse_links.py:394 measures the stub's behaviour rather than the writer's.\nSCORE fit: 16\nJUSTIFICATION fit: the module logger at imas_codex/standard_names/harmonize.py:43 and the warning follow the surrounding style, but the return contract at imas_codex/standard_names/harmonize.py:1005 names \"protected\" while the early returns at :1011 and :1030 omit it.\nSCORE reuse: 20\nJUSTIFICATION reuse: the step calls the existing writer imas_codex/standard_names/graph_ops.py:9846 and the existing filter imas_codex/standard_names/protection.py:331 rather than adding a second writer or a second protection test.\nFINDING imas_codex/standard_names/harmonize.py:1130 blocking: a protected row is still handed to the writer, which does not skip it -- filter_protected (imas_codex/standard_names/protection.py:386) returns the stripped row and the writer's Cypher (imas_codex/standard_names/graph_ops.py:9897-9901) then sets sn.description = \"\", sn.documentation = \"\", sn.links = null for it -- so a catalog-edited member's documentation and links are cleared rather than kept, and the docstring at imas_codex/standard_names/harmonize.py:992 and the log at imas_codex/standard_names/harmonize.py:1559 assert the opposite; the path is reachable through sn harmonize --apply --force (imas_codex/cli/sn.py:6176) whenever a family member is name_stage=approved.\nFINDING tests/standard_names/test_harmonize_reverse_links.py:191 blocking: the stub writer treats a stripped row as no change (\"the real writer issues no SET for this row\"), which the real writer does not do, so the assertion at tests/standard_names/test_harmonize_reverse_links.py:394 that the protected member keeps its documentation holds for the stub and can never fail on the production writer's actual behaviour.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:119 follow-on: the fragment records that write_enrichment_results \"runs filter_protected with protection in force, so a member whose name_stage is approved keeps its own editorial fields\", which is the guarantee the code does not provide, so the fragment publishes a protection the writer does not implement.\nFINDING imas_codex/standard_names/harmonize.py:1011 follow-on: the documented return contract at imas_codex/standard_names/harmonize.py:1005 names a \"protected\" key that the two early returns at :1011 and :1030 omit, so a caller reading the contract raises KeyError; apply_families reads it with .get and is unaffected.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:209 follow-on: the gate table cites base_gate.log and head_gate.log as a paired measurement, but neither log's first line names the revision, tree or command it ran (both open with the pytest banner), so the pairing cannot be checked from the logs, and because the reviewed manifest writes baseline_suite/after_suite as free text after the path, reckon's own gate-log reader resolves neither and reports the added-failure count unmeasured.",
+  "review_run_id": "r-20261015T053508105684-review-of-shc-reverse-links-724ce106bee2",
+  "reviewed_base_sha": "210eb60aedf608d3148084f4600e21617d9ba948",
+  "reviewed_head_sha": "724ce106bee2b1e79c720d0e7bf5f4bce215a102",
+  "reviewed_run_id": "r-20261015T040733444496-shc-reverse-links",
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T05:54:08.283006+00:00",
+  "total": 97
+}
