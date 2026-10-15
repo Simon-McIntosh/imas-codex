@@ -1,0 +1,65 @@
+<section id="srtj-name-signal-diagnosis">
+<h2 id="srtj-name-signal-diagnosis-title">Which name-review questions carry signal</h2>
+<p id="srtj-name-signal-diagnosis-control"><strong>Control.</strong> The existing prototype score reproduces the measurement: calibration 0.515 against the recorded 0.515, validation 0.560 against the recorded 0.560. The loader read 701 rich-state names from 720 saved base answers, 33 questions in all; every choice below is fixed on calibration before validation is read.</p>
+<h3 id="srtj-name-signal-diagnosis-questions-title">Each question alone</h3>
+<p id="srtj-name-signal-diagnosis-questions">Calibration AUC with a 95% copy-group bootstrap interval (1,000 resamples). ✱ marks a question whose interval excludes 0.5. A question scoring below 0.5 is inverted: it is informative, but its higher values point at rejection rather than acceptance.</p>
+<table id="srtj-name-signal-diagnosis-questions-table"><thead><tr><th>Question</th><th>Names</th><th>Min</th><th>Max</th><th>Std</th><th>Calibration AUC [95%]</th></tr></thead><tbody>
+<tr><td><code>dimension:completeness</code></td><td>363</td><td>0.180</td><td>0.970</td><td>0.146</td><td>0.662 [0.611, 0.714] ✱ — signal</td></tr>
+<tr><td><code>dimension:convention</code></td><td>363</td><td>0.260</td><td>0.960</td><td>0.159</td><td>0.553 [0.504, 0.607] ✱ — signal</td></tr>
+<tr><td><code>dimension:grammar</code></td><td>363</td><td>0.180</td><td>0.960</td><td>0.160</td><td>0.516 [0.464, 0.572]</td></tr>
+<tr><td><code>dimension:semantic</code></td><td>363</td><td>0.090</td><td>1.000</td><td>0.173</td><td>0.580 [0.534, 0.635] ✱ — signal</td></tr>
+<tr><td><code>check:malformed_physical_base</code></td><td>363</td><td>0.060</td><td>0.950</td><td>0.296</td><td>0.396 [0.345, 0.443] ✱ — inverted</td></tr>
+<tr><td><code>check:unregistered_token_in_closed_segment</code></td><td>363</td><td>0.270</td><td>0.730</td><td>0.087</td><td>0.400 [0.358, 0.443] ✱ — inverted</td></tr>
+<tr><td><code>check:decomposition_group_absorbed_into_base</code></td><td>363</td><td>0.670</td><td>0.890</td><td>0.037</td><td>0.477 [0.421, 0.531] — inverted</td></tr>
+<tr><td><code>check:field_region_preposition_wrong</code></td><td>363</td><td>0.320</td><td>0.730</td><td>0.080</td><td>0.461 [0.417, 0.505] — inverted</td></tr>
+<tr><td><code>check:ordered_sample_positional_token</code></td><td>363</td><td>0.300</td><td>0.970</td><td>0.163</td><td>0.489 [0.452, 0.532] — inverted</td></tr>
+<tr><td><code>check:retired_operator_spelling</code></td><td>363</td><td>0.740</td><td>0.920</td><td>0.033</td><td>0.516 [0.471, 0.564]</td></tr>
+<tr><td><code>check:dropped_distinguishing_axis</code></td><td>363</td><td>0.140</td><td>0.730</td><td>0.113</td><td>0.391 [0.343, 0.436] ✱ — inverted</td></tr>
+<tr><td><code>check:ambiguity_in_isolation</code></td><td>363</td><td>0.340</td><td>0.830</td><td>0.090</td><td>0.432 [0.383, 0.480] ✱ — inverted</td></tr>
+<tr><td><code>check:device_attributed_observable</code></td><td>363</td><td>0.030</td><td>0.950</td><td>0.135</td><td>0.395 [0.353, 0.433] ✱ — inverted</td></tr>
+<tr><td><code>check:over_qualified_modifier</code></td><td>363</td><td>0.230</td><td>0.890</td><td>0.112</td><td>0.405 [0.345, 0.464] ✱ — inverted</td></tr>
+<tr><td><code>check:source_fidelity_unsupported_qualifier</code></td><td>363</td><td>0.220</td><td>0.890</td><td>0.132</td><td>0.550 [0.499, 0.604]</td></tr>
+<tr><td><code>check:bound_to_wrong_object</code></td><td>363</td><td>0.030</td><td>0.990</td><td>0.315</td><td>0.623 [0.563, 0.690] ✱ — signal</td></tr>
+<tr><td><code>check:collapsed_two_quantities</code></td><td>363</td><td>0.020</td><td>1.000</td><td>0.181</td><td>0.495 [0.438, 0.556] — inverted</td></tr>
+<tr><td><code>check:over_specialised_parent</code></td><td>363</td><td>0.590</td><td>0.850</td><td>0.035</td><td>0.523 [0.469, 0.577]</td></tr>
+<tr><td><code>check:owner_erased_outline</code></td><td>363</td><td>0.570</td><td>0.810</td><td>0.025</td><td>0.402 [0.348, 0.452] ✱ — inverted</td></tr>
+<tr><td><code>check:coupled_vs_launched_confusion</code></td><td>363</td><td>0.450</td><td>0.960</td><td>0.087</td><td>0.608 [0.567, 0.650] ✱ — signal</td></tr>
+<tr><td><code>check:value_provenance_in_name</code></td><td>363</td><td>0.790</td><td>0.960</td><td>0.022</td><td>0.561 [0.516, 0.606] ✱ — signal</td></tr>
+<tr><td><code>check:non_canonical_operator_join</code></td><td>363</td><td>0.620</td><td>0.820</td><td>0.028</td><td>0.485 [0.447, 0.527] — inverted</td></tr>
+<tr><td><code>check:non_canonical_segment_order</code></td><td>363</td><td>0.170</td><td>0.710</td><td>0.121</td><td>0.408 [0.364, 0.451] ✱ — inverted</td></tr>
+<tr><td><code>check:non_canonical_render</code></td><td>363</td><td>0.380</td><td>0.630</td><td>0.044</td><td>0.446 [0.393, 0.499] ✱ — inverted</td></tr>
+<tr><td><code>check:non_canonical_locus_token</code></td><td>363</td><td>0.090</td><td>0.910</td><td>0.323</td><td>0.428 [0.380, 0.472] ✱ — inverted</td></tr>
+<tr><td><code>check:advisory_alias_collapsed</code></td><td>363</td><td>0.430</td><td>0.950</td><td>0.161</td><td>0.447 [0.401, 0.495] ✱ — inverted</td></tr>
+<tr><td><code>check:bare_shape_parameter_missing_surface</code></td><td>363</td><td>0.180</td><td>0.780</td><td>0.082</td><td>0.403 [0.357, 0.447] ✱ — inverted</td></tr>
+<tr><td><code>check:model_surname_suffix</code></td><td>363</td><td>0.760</td><td>0.980</td><td>0.024</td><td>0.556 [0.513, 0.604] ✱ — signal</td></tr>
+<tr><td><code>check:minority_spelling_not_in_roster</code></td><td>363</td><td>0.380</td><td>0.910</td><td>0.120</td><td>0.428 [0.382, 0.476] ✱ — inverted</td></tr>
+<tr><td><code>check:redundant_repeated_segment</code></td><td>363</td><td>0.270</td><td>0.960</td><td>0.097</td><td>0.414 [0.369, 0.460] ✱ — inverted</td></tr>
+<tr><td><code>check:missing_required_segment</code></td><td>363</td><td>0.120</td><td>0.950</td><td>0.208</td><td>0.592 [0.551, 0.633] ✱ — signal</td></tr>
+<tr><td><code>check:unit_kind_inconsistent</code></td><td>363</td><td>0.030</td><td>0.760</td><td>0.193</td><td>0.404 [0.364, 0.445] ✱ — inverted</td></tr>
+<tr><td><code>check:source_binding_drift</code></td><td>363</td><td>0.320</td><td>0.930</td><td>0.065</td><td>0.582 [0.529, 0.634] ✱ — signal</td></tr>
+</tbody></table>
+<h3 id="srtj-name-signal-diagnosis-aggregations-title">Aggregations</h3>
+<p id="srtj-name-signal-diagnosis-aggregations">Each aggregation was fixed on calibration and then validation was read once for it. The mean covers the 24 questions whose calibration interval excludes 0.5, sign-aligned; the logistic regression uses all questions. The L2 strength is chosen by grouped cross-validation inside calibration. Validation AUC is on all scored validation names; Δ is against the quorum’s own score on the names both cover, paired.</p>
+<table id="srtj-name-signal-diagnosis-aggregations-table"><thead><tr><th>Aggregation</th><th>Calibration AUC [95%]</th><th>Validation AUC [95%]</th><th>Matched names</th><th>Δ vs quorum [95%]</th></tr></thead><tbody>
+<tr><td>Existing prototype score (control)</td><td>0.515 [0.464, 0.568]</td><td>0.560 [0.505, 0.616]</td><td>259</td><td>-0.140 [-0.215, -0.061]</td></tr>
+<tr><td>Mean of selected questions, sign-aligned</td><td>0.688 [0.643, 0.736]</td><td>0.718 [0.670, 0.763]</td><td>259</td><td>+0.003 [-0.066, +0.066]</td></tr>
+<tr><td>L2 logistic regression over all questions</td><td>0.787 [0.737, 0.842]</td><td>0.739 [0.685, 0.786]</td><td>259</td><td>+0.027 [-0.038, +0.086]</td></tr>
+</tbody></table>
+<h3 id="srtj-name-signal-diagnosis-cut-title">Why the cut accepted nothing</h3>
+<p id="srtj-name-signal-diagnosis-cut">The prototype score is nearly flat across the two labels: the calibration cut 0.871 sits above almost every validation score, so it accepted none.</p>
+<figure id="srtj-name-signal-diagnosis-figure"><img src="/imas-codex/figures/sn-review-through-jev/srtj-name-signal-diagnosis/score-by-label.svg" alt="Prototype acceptance score distribution by golden label, calibration and validation panels"><figcaption>Prototype acceptance score by golden label on the calibration (left) and validation (right) splits. The dotted line is the calibration cut 0.871; it lies above the score mass of both labels, which is why it accepts no validation name.</figcaption></figure>
+<h3 id="srtj-name-signal-diagnosis-misses-title">What the questions miss</h3>
+<p id="srtj-name-signal-diagnosis-misses">The ten validation names the golden labels reject whose prototype score is highest, with the quorum score and the three questions on which Jev was most permissive.</p>
+<table id="srtj-name-signal-diagnosis-misses-table"><thead><tr><th>Name</th><th>Description</th><th>Quorum</th><th>Lowest three questions</th></tr></thead><tbody>
+<tr><td><code>normal_extent_of_magnetic_field_probe</code></td><td>Physical length of a magnetic field probe coil measured along the direction of its sensitive-axis normal vecto</td><td>0.925</td><td>check:bound_to_wrong_object=0.31, check:dropped_distinguishing_axis=0.31, check:missing_required_segment=0.37</td></tr>
+<tr><td><code>x2_coordinate_of_filter</code></td><td>X2 coordinate of filter window outline vertices in the local orthogonal (X1, X2) plane frame, giving the secon</td><td>n/a</td><td>check:dropped_distinguishing_axis=0.26, check:missing_required_segment=0.31, check:bound_to_wrong_object=0.32</td></tr>
+<tr><td><code>x1_coordinate_of_neutral_beam_injector</code></td><td>Position along X1 of a neutral beam injector source-outline vertex in the beam-local Cartesian (X1, X2) frame,</td><td>n/a</td><td>check:device_attributed_observable=0.07, check:dropped_distinguishing_axis=0.19, check:bound_to_wrong_object=0.31</td></tr>
+<tr><td><code>x2_coordinate_of_soft_xray_detector</code></td><td>Signed coordinate along the X2 axis of a vertex on the soft X-ray detector boundary in the detector-local Cart</td><td>n/a</td><td>check:dropped_distinguishing_axis=0.23, check:bound_to_wrong_object=0.29, check:missing_required_segment=0.31</td></tr>
+<tr><td><code>x2_coordinate_of_neutron_detector</code></td><td>Signed coordinate along the X2 axis of a vertex on the neutron detector boundary in the detector-local Cartesi</td><td>n/a</td><td>check:dropped_distinguishing_axis=0.22, check:bound_to_wrong_object=0.29, check:missing_required_segment=0.34</td></tr>
+<tr><td><code>x2_coordinate_of_neutral_beam_injector</code></td><td>Second-axis coordinate of a single neutral beam injector ion-source outline vertex in the beam-local Cartesian</td><td>n/a</td><td>check:device_attributed_observable=0.10, check:dropped_distinguishing_axis=0.23, check:missing_required_segment=0.32</td></tr>
+<tr><td><code>poloidal_cross_section_of_plasma_boundary</code></td><td>Poloidal cross-sectional area of the last closed flux surface</td><td>0.675</td><td>check:device_attributed_observable=0.06, check:missing_required_segment=0.21, check:bound_to_wrong_object=0.26</td></tr>
+<tr><td><code>x2_coordinate_of_bragg_crystal</code></td><td>Signed coordinate along the X2 axis of a Bragg-crystal outline vertex in the crystal-local Cartesian (X1, X2) </td><td>n/a</td><td>check:dropped_distinguishing_axis=0.18, check:bound_to_wrong_object=0.32, check:missing_required_segment=0.36</td></tr>
+<tr><td><code>cross_section_of_diagnostic_aperture</code></td><td>Area of the opening cross section of a diagnostic aperture.</td><td>0.575</td><td>check:device_attributed_observable=0.24, check:bound_to_wrong_object=0.24, check:missing_required_segment=0.24</td></tr>
+<tr><td><code>temperature_of_soft_xray_detector</code></td><td>Thermodynamic temperature of the soft X-ray detector assembly, describing its physical thermal state for calib</td><td>0.906</td><td>check:unit_kind_inconsistent=0.03, check:malformed_physical_base=0.06, check:non_canonical_segment_order=0.18</td></tr>
+</tbody></table>
+</section>
