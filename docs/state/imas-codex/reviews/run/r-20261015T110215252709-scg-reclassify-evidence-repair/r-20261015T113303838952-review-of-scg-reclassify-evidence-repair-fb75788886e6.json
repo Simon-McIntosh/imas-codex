@@ -9,6 +9,13 @@
     "imas_codex/cli/imas_dd.py:61 (@dd.command(\"build\"), invoked by the sibling pass driver)"
   ],
   "completed_at": "2026-10-15T11:48:24.879Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "this node repairs the evidence of a finished one-off run whose drivers will not run again; its figures reproduce from the committed results JSONs, the one literal before-value (2,474 summary paths at data_management) is the first run's recorded readback in scg-dd-reclassify-results.json, and a regression test for a retired evidence script's denominator protects nothing; the name-domain repair re-measures the labelled paths through the committed domain audit",
+      "recorded_at": "2026-10-15T11:53:25.626081+00:00"
+    }
+  },
   "dispatched_at": "2026-10-15T11:33:39Z",
   "findings": [
     {
