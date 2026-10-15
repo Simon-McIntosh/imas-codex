@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T05:51:17.900Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "a held-out acceptance measurement adds no product test; its controls are the positive control on the rendered compose prompt and the paired bootstrap interval",
+      "recorded_at": "2026-10-15T05:52:10.189148+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-15T05:32:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-large-run.py",
+      "line": "533",
+      "severity": "follow-on",
+      "text": "follow-on: extraction is re-run at the head of every pass and its batch set is not pinned to the drawn cohort, so the control accumulated 129 distinct group_keys while n_batches is 119 (results JSON positive_control.n_batches=129, n_batches=119) and each arm completed 120 units against 119 batches (arm_a.units_completed=120); the fragment and the closing commit report all 129 control batches beside a 119-batch draw, so a reader cannot reconcile the denominators or tell which batch set the arms actually measured."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-large-run.py",
+      "line": "325",
+      "severity": "follow-on",
+      "text": "follow-on: the paired comparison keys on the candidate's own source_id, which the harness derives per candidate, rather than the batch's drawn path, so a source enters the pairing only when both arms compose a candidate for it and the denominator falls to 48 of 119 sources; the fragment states this limit but the pairing key is not corrected."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T194441027023-ssog-rerank-acceptance-large/manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest's commits list names five commits while six are in the reviewed range, so 088f9340c is omitted and the record under-reports what landed."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against dffe121dbec0; six commits touch only ssog-rerank-acceptance-large-run.py, ssog-rerank-acceptance-large-results.json and ssog-rerank-acceptance-large.html.",
+    "done_when": "the done_when asks the fragment and results JSON to report the positive control, per-arm scored/unscored counts with acceptance over scored candidates, the paired difference with a bootstrap_interval stating whether it excludes 0, per-pass logs ending EXIT=, and spend under USD 1; ssog-rerank-acceptance-large.html:11-48 and ssog-rerank-acceptance-large-results.json report each element, and every pass*.log ends with an EXIT= line.",
+    "goal": "the node's goal is to measure the comparator rerank's first-pass acceptance on about 120 held-out sources per arm (source prompt line 30); the landed driver, results JSON and fragment deliver a 160-source draw that admits 119 batches / 137 items, run to about 120 units per arm.",
+    "manifest": "read; it reports status complete with the draw and per-arm figures, and lists 18 pass logs under test_logs with a negative_control_note that the node's declared mutation is the positive control.",
+    "write_paths": "the source prompt's scope names three fragment files plus the figures directory; the diff's three files are all inside those declared paths."
+  },
+  "justifications": {
+    "durability": "the driver's only added guard is the positive-control block at ssog-rerank-acceptance-large-run.py:594-601, no test file is in scope, and the guard was never shown to redden.",
+    "evidence": "ssog-rerank-acceptance-large-results.json summary carries the per-arm counts, the paired difference and the bootstrap_interval, but the fragment reports 129 control batches beside a 119-batch draw without reconciling the two.",
+    "fit": "ssog-rerank-acceptance-large-run.py carries module and function docstrings in the surrounding fragment idiom, and no name, comment or commit subject carries a plan or ticket label.",
+    "goal_fidelity": "ssog-rerank-acceptance-large-run.py:237 run_arm_batch and :358 summarise measure per-arm first-pass acceptance over the drawn cohort, which is what the goal asks for.",
+    "reuse": "imas_codex/discovery/base/evaluation.py:144 bootstrap_interval is used rather than forked, but ssog-rerank-acceptance-large-run.py:97 draw_held_out and :429 drain_arm copy the sibling drivers ssog-rerank-acceptance-rerun-run.py and ssog-rerank-held-out-acceptance-run.py, a measure capability no imas_codex module owns.",
+    "scope_discipline": "the diff against dffe121dbec0 shows only the three declared fragment paths and no out-of-scope file."
+  },
+  "node": "review-of-ssog-rerank-acceptance-large-6b6c459c0e09",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to measure the comparator rerank's first-pass acceptance on about 120 held-out sources per arm (source prompt line 30); the landed driver, results JSON and fragment deliver a 160-source draw that admits 119 batches / 137 items, run to about 120 units per arm.\nVERDICT done_when: the done_when asks the fragment and results JSON to report the positive control, per-arm scored/unscored counts with acceptance over scored candidates, the paired difference with a bootstrap_interval stating whether it excludes 0, per-pass logs ending EXIT=, and spend under USD 1; ssog-rerank-acceptance-large.html:11-48 and ssog-rerank-acceptance-large-results.json report each element, and every pass*.log ends with an EXIT= line.\nVERDICT write_paths: the source prompt's scope names three fragment files plus the figures directory; the diff's three files are all inside those declared paths.\nVERDICT manifest: read; it reports status complete with the draw and per-arm figures, and lists 18 pass logs under test_logs with a negative_control_note that the node's declared mutation is the positive control.\nVERDICT diff: read commit by commit against dffe121dbec0; six commits touch only ssog-rerank-acceptance-large-run.py, ssog-rerank-acceptance-large-results.json and ssog-rerank-acceptance-large.html.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: ssog-rerank-acceptance-large-run.py:237 run_arm_batch and :358 summarise measure per-arm first-pass acceptance over the drawn cohort, which is what the goal asks for.\nSCORE evidence: 16\nJUSTIFICATION evidence: ssog-rerank-acceptance-large-results.json summary carries the per-arm counts, the paired difference and the bootstrap_interval, but the fragment reports 129 control batches beside a 119-batch draw without reconciling the two.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff against dffe121dbec0 shows only the three declared fragment paths and no out-of-scope file.\nSCORE durability: 9\nJUSTIFICATION durability: the driver's only added guard is the positive-control block at ssog-rerank-acceptance-large-run.py:594-601, no test file is in scope, and the guard was never shown to redden.\nSCORE fit: 17\nJUSTIFICATION fit: ssog-rerank-acceptance-large-run.py carries module and function docstrings in the surrounding fragment idiom, and no name, comment or commit subject carries a plan or ticket label.\nSCORE reuse: 12\nJUSTIFICATION reuse: imas_codex/discovery/base/evaluation.py:144 bootstrap_interval is used rather than forked, but ssog-rerank-acceptance-large-run.py:97 draw_held_out and :429 drain_arm copy the sibling drivers ssog-rerank-acceptance-rerun-run.py and ssog-rerank-held-out-acceptance-run.py, a measure capability no imas_codex module owns.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-large-run.py:533 follow-on: extraction is re-run at the head of every pass and its batch set is not pinned to the drawn cohort, so the control accumulated 129 distinct group_keys while n_batches is 119 (results JSON positive_control.n_batches=129, n_batches=119) and each arm completed 120 units against 119 batches (arm_a.units_completed=120); the fragment and the closing commit report all 129 control batches beside a 119-batch draw, so a reader cannot reconcile the denominators or tell which batch set the arms actually measured.\nFINDING docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-large-run.py:325 follow-on: the paired comparison keys on the candidate's own source_id, which the harness derives per candidate, rather than the batch's drawn path, so a source enters the pairing only when both arms compose a candidate for it and the denominator falls to 48 of 119 sources; the fragment states this limit but the pairing key is not corrected.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T194441027023-ssog-rerank-acceptance-large/manifest.md:11 follow-on: the manifest's commits list names five commits while six are in the reviewed range, so 088f9340c is omitted and the record under-reports what landed.",
+  "review_run_id": "r-20261015T053235974427-review-of-ssog-rerank-acceptance-large-6b6c459c0e09",
+  "reviewed_base_sha": "dffe121dbec0a7fb5c784c86b8177cf4a4670676",
+  "reviewed_head_sha": "6b6c459c0e0902dd3e4468e58bdd9189fccd003a",
+  "reviewed_run_id": "r-20261014T194441027023-ssog-rerank-acceptance-large",
+  "rubric": "landed",
+  "scores": {
+    "durability": 9,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "subject": "node",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T05:50:27.059752+00:00",
+  "total": 91
+}
