@@ -1,0 +1,69 @@
+<section id="srtj-name-review-followons">
+  <h2 id="srtj-name-review-followons-title">The Jev name review reads an unrun audit as unknown and refuses an unsplittable Choice</h2>
+  <p id="srtj-name-review-followons-method">
+    Three follow-ons against <code>imas_codex/standard_names/review/jev_review.py</code>,
+    the name-axis judge that nothing in the pipeline calls yet. The module is not wired
+    and no threshold is settled; the review's cost and latency behaviour is unchanged.
+  </p>
+
+  <h3 id="srtj-name-review-followons-changes-title">Changes</h3>
+  <table id="srtj-name-review-followons-changes">
+    <thead>
+      <tr><th>Change</th><th>Before</th><th>After</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>An audit that never ran</td>
+        <td>An audit-decided check was recorded <code>answered: True</code> with <code>failed: finding is not None</code> even when no <code>audit_report</code> was supplied, so an audit that was never run read as answered-and-not-failed — the unrun audit read as a pass.</td>
+        <td><code>_item_record</code> records an audit check <code>answered</code> only when an <code>audit_report</code> was supplied; with no report the check is unanswerable and its derived decision is <code>unknown</code>, consistent with the module's own rule that an absent call is never read as an acceptance. A report that carries no finding for the name still answers the check (the audit ran) and accepts it.</td>
+      </tr>
+      <tr>
+        <td>A Choice the split cannot read</td>
+        <td>The comment promised a check whose options cannot be split is refused at table construction, but <code>_question_def</code> built the criteria with no refusal and <code>check_failed</code> read <code>options[0]</code> unconditionally, so a mis-authored options list was mis-decided silently.</td>
+        <td><code>choice_acceptable_form</code> states the taxonomy's own rule in one place — a Choice lists its acceptable form first and the defective forms after it, so the split is the first option against the rest — and refuses a question whose options carry no readable acceptable form (fewer than two options, or a blank first option). <code>_question_def</code> calls it at table construction and <code>check_failed</code> reads the acceptable form through it.</td>
+      </tr>
+      <tr>
+        <td>A plan reference in a comment</td>
+        <td>The <code>NOUL_FAIL_PROBABILITY</code> comment cited a superseding per-check threshold from a plan deliverable.</td>
+        <td>The comment states the mechanism: the model returns a probability rather than a verdict, and the fail is derived at that midpoint in code rather than asked of it.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="srtj-name-review-followons-tests-title">Tests</h3>
+  <p id="srtj-name-review-followons-tests-caption">
+    Four tests were added, to 34 passing at head, and each fails with its mechanism
+    removed. The endpoint is stubbed through the module's own seam (<code>decide_batch</code>
+    and the sibling reranker are replaced), so no test opens the live decisions endpoint.
+    The real taxonomy still builds: 32 name-axis checks yield 33 question-table entries,
+    and both name-axis Choice questions (<code>bound_to_wrong_object,
+    collapsed_two_quantities</code>) resolve their acceptable form.
+  </p>
+  <table id="srtj-name-review-followons-test-table">
+    <thead>
+      <tr><th>Test</th><th>Guards</th><th>Fails when the mechanism is removed</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>test_audit_check_without_a_report_is_unanswered_not_passed</code></td>
+        <td>the unrun audit is <code>answered: False</code> and decided <code>unknown</code></td>
+        <td>yes — restoring the unconditional <code>answered: True</code> turns it red</td>
+      </tr>
+      <tr>
+        <td><code>test_audit_check_with_a_report_is_answered_from_it</code></td>
+        <td>a report answers the check from it, accepting when the audit found no defect</td>
+        <td>yes — the same mutation moves the answered flag the other way</td>
+      </tr>
+      <tr>
+        <td><code>test_choice_without_an_identifiable_acceptable_form_is_refused</code></td>
+        <td>table construction raises on a Choice whose acceptable form cannot be read</td>
+        <td>yes — disabling the refusal stops the raise</td>
+      </tr>
+      <tr>
+        <td><code>test_choice_acceptable_form_reads_the_authored_first_option</code></td>
+        <td>the helper reads the first option and refuses an unsplittable one</td>
+        <td>yes — disabling the refusal stops the raise</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
