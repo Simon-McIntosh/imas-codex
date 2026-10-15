@@ -125,15 +125,27 @@
       <code>missing_reverse</code> findings"</em> — the same fixture apply ends
       with <code>missing_reverse</code> findings, and
       <code>test_apply_leaves_no_sibling_link_without_its_reverse</code> fails
-      on <code>assert [LinkFinding(... link back.")] == []</code>. The
-      negative-control test that asserts the findings appear still passes,
-      which is what shows the two runs differ only by the step.
+      on <code>assert [LinkFinding(... link back.")] == []</code>; the removal
+      test fails with it, because the step is also what drops the planted
+      out-of-family link (<code>2 failed, 1 passed</code>). The third test —
+      the negative control that asserts the findings <em>appear</em> — is the
+      one that still passes, which is what shows the two runs differ only by
+      the step.
     </li>
   </ul>
   <p>
     Gate: the harmonize test files (<code>grep -rl harmonize
     tests/standard_names/</code>) plus
-    <code>tests/standard_names/test_house_style_checks.py</code>, run against
-    the base revision and after the change; the change adds no failures.
+    <code>tests/standard_names/test_house_style_checks.py</code>. After the
+    change: <code>1 failed, 153 passed, 13 deselected in 153.82s</code>. The
+    one failure is
+    <code>test_house_style_checks.py::test_audit_report_carries_the_conformance_findings</code>
+    timing out at the suite's 30 s per-test bound; it passed in 15.47 s run
+    alone and in 18.11 s on a warm re-run of the same target set, it does not
+    import <code>harmonize</code>, and its first call is
+    <code>run_embedding_preflight</code>, so the timeout is embedding-server
+    latency under a loaded node rather than an effect of this change. The gate
+    was not re-run at the base revision, so that attribution is an argument
+    from the test's import graph rather than a paired measurement.
   </p>
 </section>
