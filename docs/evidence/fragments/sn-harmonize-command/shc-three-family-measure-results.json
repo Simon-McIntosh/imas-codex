@@ -1,6 +1,56 @@
 {
   "acceptance_threshold": 0.85,
-  "families": {},
+  "families": {
+    "electron_number_density": {
+      "before": {
+        "anchor": "total_ion_number_density",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electron_number_density": 0.95,
+          "fast_neutral_internal_state_number_density": 0.91875,
+          "normalized_ion_species_number_density": 0.875,
+          "thermal_ion_charge_state_number_density": 0.8875,
+          "total_ion_number_density": 0.98125,
+          "total_neutral_number_density": 0.9,
+          "volume_averaged_electron_number_density_over_scrape_off_layer": null
+        },
+        "estimate_basis": {
+          "calls": 23,
+          "mean_usd_per_call": 0.414,
+          "runs": 7,
+          "total_usd": 9.5226
+        },
+        "estimate_usd": 2.8982,
+        "invariant": [
+          "number_density",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 3,
+          "link_dead_link": 1,
+          "link_missing_reverse": 1
+        },
+        "lint_total": 5,
+        "members": [
+          "electron_number_density",
+          "fast_neutral_internal_state_number_density",
+          "normalized_ion_species_number_density",
+          "thermal_ion_charge_state_number_density",
+          "total_ion_number_density",
+          "total_neutral_number_density",
+          "volume_averaged_electron_number_density_over_scrape_off_layer"
+        ],
+        "physical_base": "number_density",
+        "planned_calls": 7,
+        "refusals": {},
+        "seed": "electron_number_density"
+      }
+    }
+  },
   "fixture": {
     "after": {
       "fixture_low_scoring_member": 0.8,
