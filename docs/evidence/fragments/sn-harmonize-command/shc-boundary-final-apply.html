@@ -1,0 +1,61 @@
+<section>
+  <h2 id="shc-boundary-final-apply">Applying the boundary-averaged density family, unforced — where the run stops</h2>
+  <p id="shc-boundary-final-apply-scope">
+    The boundary-averaged density family (<code>flux_surface_averaged_electron_density_at_plasma_boundary</code>,
+    17 members) was to be applied unforced, at a dry-run estimate of USD 7.04, and
+    then shown to converge. The dry run passes and the family is no longer
+    protected, so the guard no longer stands in the way — but the apply itself
+    does not finish: it needs far longer than any single command the harness
+    allows, and than this node's window. Every figure below is read from the CLI's
+    own output and its log; nothing was fabricated.
+  </p>
+
+  <h3 id="shc-boundary-final-apply-dry-run">Step 1 — dry run: PASS</h3>
+  <p id="shc-boundary-final-apply-dry-run-text">
+    The report dry run lists the 17-member family and its anchor and is not
+    refused. The <code>--apply --dry-run</code> (which is what prints the call
+    plan and cost) reports <code>decision=apply</code> with no protected-member
+    refusal, the same anchor, 17 planned calls, and an estimate of
+    <strong>USD 7.04</strong> at $0.41 per call — at or below the USD 8.50
+    ceiling. This is the state §14 promised: the family's one formerly-protected
+    member is released.
+  </p>
+
+  <h3 id="shc-boundary-final-apply-lint">Steps 2–4 — apply, convergence, idempotence: NOT met</h3>
+  <p id="shc-boundary-final-apply-lint-text">
+    The apply was attempted twice and both attempts were killed before the family
+    composed. Attempt 1 was cut by the brief's <code>timeout 540</code> at 563&nbsp;s;
+    the CLI had spent about eight minutes of that on fixed startup (graph resolve,
+    family lint, <code>derive_edges</code>, pool start) before the scoped run began,
+    so barely 90&nbsp;s of work ran (<code>names_composed=0</code>, spend
+    $0.009934). Attempt 2 was cut by the harness background cap (600&nbsp;s
+    foreground + 600&nbsp;s background = 1200&nbsp;s); at the kill only the anchor
+    had been generated and reviewed, its review cycling at <code>chain=1/3</code>
+    and held from acceptance on a <code>locus_definition</code> finding, with
+    <code>names_composed=0</code> and spend ~$1.0069. <strong>Twenty minutes
+    produced one member and no acceptance</strong>, so the 17-member family needs a
+    long-lived runner — not a single bounded command. The report and the
+    idempotence dry run below record the resulting state honestly.
+  </p>
+  <ul id="shc-boundary-final-apply-lint-figures">
+    <li><strong>Lint before</strong> (step 1 report): 29 — <code>convention_violation=17</code>, <code>link_missing_reverse=12</code>.</li>
+    <li><strong>Lint after</strong> (step 3 report): 30 — <code>convention_violation=17</code>, <code>link_missing_reverse=13</code>. Not zero; one reverse link was lost.</li>
+    <li><strong>Convergence</strong> (step 3): not met. The 17 <code>convention_violation</code> findings are unchanged; the family was not applied to completion, so the opening-template and canonical-equation checks are not reached family-wide.</li>
+    <li><strong>Idempotence</strong> (step 4, second <code>--apply --dry-run</code>): <strong>17 planned calls</strong>, not zero — the family remains pending.</li>
+    <li><strong>Per-member documentation scores</strong>: only the anchor's were produced by the run — <code>docs_stage=reviewed score=0.849</code> at <code>chain=0/3</code>, then <code>docs_stage=reviewed score=0.849</code> at <code>chain=1/3</code>, both held from acceptance. No member reached acceptance, so there is no before/after acceptance pair to report.</li>
+  </ul>
+
+  <h3 id="shc-boundary-final-apply-spend">Spend against the ceiling</h3>
+  <p id="shc-boundary-final-apply-spend-text">
+    Total spend ≈ <strong>USD 1.017</strong> of the USD 8.50 ceiling
+    (attempt 1 $0.009934 + attempt 2 ≈$1.0069). Roughly 12% of the authorized
+    budget was used: the work stopped on the time cap, not on cost — the USD 7.04
+    estimate would have fitted the ceiling had the apply been allowed to run.
+  </p>
+
+  <h3 id="shc-boundary-final-apply-evidence">Evidence</h3>
+  <ul id="shc-boundary-final-apply-evidence-list">
+    <li>CLI log (stem <code>sn-harmonize</code>): <code>~/.local/share/imas-codex/logs/sn_sn-harmonize.log</code>.</li>
+    <li>Run-directory captures, each carrying its command and <code>EXIT=</code>: <code>capture-01-dry-run-report.txt</code>, <code>capture-02-apply-dry-run.txt</code>, <code>capture-02b-apply-attempts.txt</code>, <code>capture-03-report-after.txt</code>, <code>capture-04-second-apply-dry-run.txt</code>.</li>
+  </ul>
+</section>
