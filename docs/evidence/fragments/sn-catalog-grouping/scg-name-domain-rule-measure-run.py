@@ -222,8 +222,22 @@ def render(payload: dict) -> None:
             + "".join(f"<td>{cell}</td>" for cell in cells)
             + f"<td>{payload['blast_radius'][rule]['changed']}</td></tr>"
         )
+    unresolved_approved = sum(
+        item["cohort"] == "approved" for item in payload["unfixed_misses"]
+    )
+    selected_validation = payload["accuracy"]["validation"][selected]["correct"]
+    control_validation = payload["accuracy"]["validation"]["set_precedence"]["correct"]
     lines.append(
-        "</table><p>The fourth rule, IDS then paths, resolves an IDS "
+        "</table><p>The selected rule still matches only "
+        f"{payload['accuracy']['approved'][selected]['correct']}/20 lead-approved "
+        "names, the same as set precedence. "
+        f"{unresolved_approved} approved misses are shared by all four rules. "
+        f"Validation improves by {selected_validation - control_validation} of 77 names. "
+        "The remaining approvals need source-classification review; a selector "
+        "alone does not settle them.</p>"
+    )
+    lines.append(
+        "<p>The fourth rule, IDS then paths, resolves an IDS "
         "plurality tie by path support before precedence. This tests "
         "whether repeated paths help only when distinct IDS evidence ties.</p>"
     )
@@ -446,6 +460,19 @@ def main() -> None:
         },
         "selection": "Maximum correct on approved plus calibration; approved count and rule order break ties.",
         "selected_rule": selected,
+        "decision_caveat": {
+            "selected_approved_correct": metrics["approved"][selected]["correct"],
+            "control_approved_correct": metrics["approved"]["set_precedence"][
+                "correct"
+            ],
+            "approved_misses_shared_by_all_rules": sum(
+                item["cohort"] == "approved" for item in unfixed
+            ),
+            "validation_gain_over_control": (
+                metrics["validation"][selected]["correct"]
+                - metrics["validation"]["set_precedence"]["correct"]
+            ),
+        },
         "accuracy": metrics,
         "approved_names": approved_detail,
         "validation_misses": misses,
