@@ -22,7 +22,10 @@ the "before" figure.
 3. ``source_domains`` equals the expected set — the domains of the name's
    current DD sources, or, for a derived parent with no DD source, the union of
    its live children's expected sets.
-4. The ``HAS_PHYSICS_DOMAIN`` edges are exactly ``source_domains``.
+4. The ``HAS_PHYSICS_DOMAIN`` edges are exactly ``source_domains``, and every
+   edge names the domain it points at. A name with no edge has an empty edge
+   set rather than a placeholder, so absence and an unnameable target are
+   reported as the different findings they are.
 
 Sets are compared, never lists: the order a source arrived in carries no
 meaning, and neither does the order domains sit in the graph property.
@@ -71,9 +74,11 @@ CHECK_DOMAIN_EDGES_SOURCE_DOMAINS = "edges_not_source_domains"
 #:   IMASNode``; a name with no DD source is a derived parent.
 #: * ``child_ids`` — the live children through ``(child)-[:HAS_PARENT]->(sn)``,
 #:   whose expected sets a derived parent unions.
-#: * ``edge_domains`` — the ``HAS_PHYSICS_DOMAIN`` targets. Matched without a
-#:   label so a stray edge to something that is not a ``PhysicsDomain`` still
-#:   surfaces and fails the edge check rather than being read past.
+#: * ``edge_domains`` / ``edge_count`` — the ``HAS_PHYSICS_DOMAIN`` targets,
+#:   matched without a label so an edge to something that is not a
+#:   ``PhysicsDomain`` still surfaces. A name with no such edge gets an empty
+#:   list, never a placeholder: absence and an unnamed target are different
+#:   findings and ``edge_count`` minus the collected ids tells them apart.
 #:
 #: The row set is the live names — a bounded label scan over ``StandardName``
 #: filtered by ``name_stage``; each walk is one hop.
@@ -94,7 +99,8 @@ CALL (sn) {
 }
 CALL (sn) {
   OPTIONAL MATCH (sn)-[:HAS_PHYSICS_DOMAIN]->(edge)
-  RETURN collect(DISTINCT coalesce(edge.id, 'unknown')) AS edge_domains
+  RETURN collect(DISTINCT edge.id) AS edge_domains,
+         count(edge) AS edge_count
 }
 RETURN sn.id AS sn_id,
        sn.name_stage AS name_stage,
@@ -103,7 +109,8 @@ RETURN sn.id AS sn_id,
        dd_paths,
        dd_domains,
        child_ids,
-       edge_domains
+       edge_domains,
+       edge_count
 ORDER BY sn_id
 """
 
@@ -143,6 +150,7 @@ class NameDomainState:
     derived_domain_error: str | None
     dd_source_count: int
     is_derived_parent: bool
+    unnamed_edge_count: int
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -156,6 +164,7 @@ class NameDomainState:
             "derived_domain_error": self.derived_domain_error,
             "dd_source_count": self.dd_source_count,
             "is_derived_parent": self.is_derived_parent,
+            "unnamed_edge_count": self.unnamed_edge_count,
         }
 
 
@@ -255,6 +264,7 @@ def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
         edges = frozenset(row.get("edge_domains") or [])
         derived, derivation_error = _derived_domain(expected)
         dd_paths = row.get("dd_paths") or []
+        unnamed_edges = max(0, (row.get("edge_count") or 0) - len(edges))
 
         states.append(
             NameDomainState(
@@ -268,6 +278,7 @@ def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
                 derived_domain_error=derivation_error,
                 dd_source_count=len(dd_paths),
                 is_derived_parent=not dd_paths,
+                unnamed_edge_count=unnamed_edges,
             )
         )
 
@@ -277,7 +288,7 @@ def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
             not_derived.append(sn_id)
         if stored_sources != expected:
             wrong_sources.append(sn_id)
-        if edges != stored_sources:
+        if edges != stored_sources or unnamed_edges:
             wrong_edges.append(sn_id)
 
     checks = {
@@ -305,7 +316,10 @@ def _build_result(rows: list[dict[str, Any]]) -> DomainAuditResult:
         ),
         CHECK_DOMAIN_EDGES_SOURCE_DOMAINS: DomainCheck(
             key=CHECK_DOMAIN_EDGES_SOURCE_DOMAINS,
-            description=("HAS_PHYSICS_DOMAIN edges are exactly source_domains"),
+            description=(
+                "HAS_PHYSICS_DOMAIN edges are exactly source_domains, and "
+                "every edge names the domain it points at"
+            ),
             names=tuple(wrong_edges),
         ),
     }

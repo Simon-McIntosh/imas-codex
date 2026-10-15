@@ -47,6 +47,7 @@ def _row(
     dd_domains: list[str] | None = None,
     child_ids: list[str] | None = None,
     edge_domains: list[str] | None = None,
+    edge_count: int | None = None,
 ) -> dict[str, Any]:
     return {
         "sn_id": sn_id,
@@ -57,6 +58,7 @@ def _row(
         "dd_domains": dd_domains or [],
         "child_ids": child_ids or [],
         "edge_domains": edge_domains or [],
+        "edge_count": len(edge_domains or []) if edge_count is None else edge_count,
     }
 
 
@@ -164,6 +166,7 @@ class TestSourceDomains:
         row = _consistent_name("sn:short-sources")
         row["source_domains"] = ["equilibrium"]
         row["edge_domains"] = ["equilibrium"]
+        row["edge_count"] = 1
         result = audit_domains(_StubGraph([row]))
         assert result.checks[CHECK_SOURCE_DOMAINS_EXPECTED].names == (
             "sn:short-sources",
@@ -196,6 +199,7 @@ class TestDomainEdges:
     def test_fails_when_an_edge_is_missing(self):
         row = _consistent_name("sn:edge-gap")
         row["edge_domains"] = ["equilibrium"]
+        row["edge_count"] = 1
         result = audit_domains(_StubGraph([row]))
         assert result.checks[CHECK_DOMAIN_EDGES_SOURCE_DOMAINS].names == (
             "sn:edge-gap",
@@ -209,6 +213,41 @@ class TestDomainEdges:
         assert result.checks[CHECK_DOMAIN_EDGES_SOURCE_DOMAINS].names == (
             "sn:edge-extra",
         )
+
+    def test_absent_edges_are_an_empty_set_not_a_placeholder(self):
+        # A name with no edge and nothing claimed: absence matches absence, so
+        # this check stays quiet and the row's edge set is empty rather than
+        # carrying a stand-in for a target the graph could not name.
+        row = _row("sn:no-edges", physics_domain=None, source_domains=[])
+        result = audit_domains(_StubGraph([row]))
+        assert result.checks[CHECK_DOMAIN_EDGES_SOURCE_DOMAINS].names == ()
+        state = result.state_for("sn:no-edges")
+        assert state is not None
+        assert state.edge_domains == frozenset()
+        assert state.unnamed_edge_count == 0
+
+    def test_fails_when_no_edge_carries_a_claimed_domain(self):
+        row = _consistent_name("sn:edge-none")
+        row["edge_domains"] = []
+        row["edge_count"] = 0
+        result = audit_domains(_StubGraph([row]))
+        assert result.checks[CHECK_DOMAIN_EDGES_SOURCE_DOMAINS].names == (
+            "sn:edge-none",
+        )
+
+    def test_fails_when_an_edge_names_no_domain(self):
+        # One edge, no id on its target: the derivation cannot be checked
+        # against it, so it is a finding even though the rest of the row agrees.
+        row = _consistent_name("sn:unnamed-edge")
+        row["edge_domains"] = []
+        row["edge_count"] = 1
+        result = audit_domains(_StubGraph([row]))
+        assert result.checks[CHECK_DOMAIN_EDGES_SOURCE_DOMAINS].names == (
+            "sn:unnamed-edge",
+        )
+        state = result.state_for("sn:unnamed-edge")
+        assert state is not None
+        assert state.unnamed_edge_count == 1
 
 
 class TestDerivedParent:

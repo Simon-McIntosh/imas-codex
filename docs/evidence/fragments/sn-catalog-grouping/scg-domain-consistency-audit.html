@@ -77,22 +77,30 @@
       </tr>
       <tr id="scg-domain-consistency-audit-check-edges">
         <td><code>HAS_PHYSICS_DOMAIN</code> edges equal <code>source_domains</code></td>
-        <td>1015</td>
+        <td>777</td>
         <td><code>edges_differ_from_source_domains</code></td>
         <td>777</td>
-        <td>Exact — same property pair, and the edge is matched unlabelled so a stray target surfaces rather than being read past.</td>
+        <td>Exact — the same property pair, over the same population. The edge is matched unlabelled so a stray target surfaces rather than being read past, and a name with no edge has an empty edge set rather than a placeholder, so absence and an unnameable target stay separate findings.</td>
       </tr>
     </tbody>
   </table>
 
   <p id="scg-domain-consistency-audit-census-notes">
-    Three of the four checks measure more names than their census row, and the
-    direction is the same in each case: this audit treats a disagreement as a
-    failure wherever it sits, while the census's rows partition the same
-    population differently. The edges check is the exception only in magnitude —
-    it agrees with the census exactly on method and reads 1,015 against 777,
-    which is what a 2,675-to-2,677 population change and a fresh measurement
-    look like together. The per-check ids are in
+    Two of the four checks measure more names than their census row, and the
+    direction is the same in both: this audit treats a disagreement as a failure
+    wherever it sits, while the census's rows partition the same population
+    differently. The edges check is exact — 777 against 777, which is the
+    strongest agreement available to a checker written independently of the
+    census, and the reason the two figures agree is worth stating, because it is
+    also where the count is decided: the check compares an <em>empty</em> edge set
+    to an empty <code>source_domains</code> as a match. Of the 984 live names that
+    carry no <code>HAS_PHYSICS_DOMAIN</code> edge, the 238 that claim no domains
+    either are not disagreements and drop out; the other 746 do fail the check,
+    correctly, because they claim domains the graph holds no edge for. The
+    remaining 31 are names whose <code>source_domains</code> and edge set are both
+    non-empty and disagree — 746 + 31 = 777. No edge on the live graph points at a
+    target without an <code>id</code>, so the unnameable-target half of the check
+    is armed and untriggered. The per-check ids are in
     <code>scg-domain-consistency-audit-results.json</code> beside these counts.
   </p>
 
@@ -141,7 +149,7 @@
     <tbody>
       <tr id="scg-domain-consistency-audit-largest-radial-coordinate"><td><code>radial_coordinate</code></td><td>auxiliary_heating, divertor_physics, electromagnetic_wave_diagnostics, equilibrium, fueling, gyrokinetics, magnetic_field_diagnostics, magnetic_field_systems, magnetohydrodynamics, mechanical_measurement_diagnostics, neutronics, particle_measurement_diagnostics, plasma_control, radiation_measurement_diagnostics, spectroscopy, waves</td><td>16</td></tr>
       <tr id="scg-domain-consistency-audit-largest-atomic-count"><td><code>atomic_count</code></td><td>auxiliary_heating, computational_workflow, core_plasma_physics, edge_plasma_physics, fast_particles, fueling, plant_systems, plasma_control, plasma_initiation, plasma_wall_interactions, radiation_measurement_diagnostics, spectroscopy, transport, turbulence, waves</td><td>15</td></tr>
-      <tr id="scg-domain-consistency-audit-largest-atomic-mass"><td><code>atomic_mass</code></td><td>auxiliary_heating, computational_workflow, core_plasma_physics, edge_plasma_physics, fast_particles, fueling, plant_systems, plasma_control, plasma_wall_interactions, spectroscopy, transport, waves</td><td>14</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-atomic-mass"><td><code>atomic_mass</code></td><td>auxiliary_heating, computational_workflow, core_plasma_physics, edge_plasma_physics, fast_particles, fueling, plant_systems, plasma_control, plasma_wall_interactions, spectroscopy, transport, waves</td><td>12</td></tr>
       <tr id="scg-domain-consistency-audit-largest-radial-coordinate-position"><td><code>radial_coordinate_of_measurement_position</code></td><td>auxiliary_heating, electromagnetic_wave_diagnostics, equilibrium, fueling, magnetic_field_diagnostics, magnetohydrodynamics, mechanical_measurement_diagnostics, neutronics, particle_measurement_diagnostics, radiation_measurement_diagnostics, spectroscopy, waves</td><td>12</td></tr>
       <tr id="scg-domain-consistency-audit-largest-atomic-number"><td><code>atomic_number</code></td><td>auxiliary_heating, core_plasma_physics, edge_plasma_physics, fueling, plant_systems, plasma_control, plasma_wall_interactions, spectroscopy, turbulence, waves</td><td>10</td></tr>
       <tr id="scg-domain-consistency-audit-largest-electric-field"><td><code>electric_field</code></td><td>core_plasma_physics, edge_plasma_physics, electromagnetic_wave_diagnostics, magnetic_field_systems, magnetohydrodynamics, plasma_initiation, radiation_measurement_diagnostics, spectroscopy, transport, waves</td><td>10</td></tr>
