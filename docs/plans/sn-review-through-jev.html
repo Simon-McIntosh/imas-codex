@@ -24,8 +24,8 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
-<meta name="plan-modified" content="2026-10-13">
+<meta name="plan-version" content="19">
+<meta name="plan-modified" content="2026-10-15">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
 <body>
@@ -184,7 +184,10 @@
       becomes the maximum probability over the checks whose retrieval flag (§2) is set (a check decided by an <code>AuditReport</code> finding class contributes 1.0 when its finding is present and 0.0 when absent; a Noul check contributes the probability of its true case; a categorising Choice check contributes the summed probability of every option other than its conforming ones, which this section adds to the taxonomy as a <code>conforming</code> list on each Choice question in <code>review_checks.yaml</code>, with the loader in <code>imas_codex/standard_names/review/checks.py</code> refusing a list that is empty or not a subset of the question's options, so an unverifiable claim counts as a failure because it is what retrieval resolves), compared with a
       calibrated threshold, which retires the keyword list in <code>refine-trigger-keywords</code> and the field that
       holds it in <code>imas_codex/standard_names/fanout/config.py</code>, together with <code>refine-trigger-comment-dims</code> and <code>refine-trigger-comment-chars</code>, whose only reader is that trigger call at <code>workers.py:7304</code>.
-      The free-text comment field remains for people and no code path reads it.
+      The free-text comment field remains for people. The fanout trigger and the refine instruction list stop reading it. Refine-chain history (<code>imas_codex/standard_names/chain_history.py</code>) still carries an ancestor's comments into the refine context, and that reader is left as it is.
+    </p>
+    <p>
+      <strong>Order.</strong> The A/B below needs the comment-driven path as its control arm, so it runs first, against the comment path as it stands. The keyword trigger and the comment-driven instruction list are retired only after the A/B is recorded.
     </p>
     <p>
       <strong>Done when:</strong> an A/B over a held-out cohort compares one refine rotation
