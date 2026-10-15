@@ -7,7 +7,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: Is the physical base a registered, well-formed single token?
+    true_case: defect
+    text: Is the physical base unregistered, malformed, or more than one token?
 - id: unregistered_token_in_closed_segment
   axis: name
   dimension: grammar
@@ -21,7 +22,8 @@ checks:
   retrieval: true
   question:
     kind: noul
-    text: Does every segment use a token registered in that closed segment?
+    true_case: defect
+    text: Does any segment use a token not registered in that closed segment?
 - id: decomposition_group_absorbed_into_base
   axis: name
   dimension: grammar
@@ -33,6 +35,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Is a token that belongs to another segment absorbed into physical_base?
 - id: field_region_preposition_wrong
   axis: name
@@ -43,7 +46,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: For an evaluated field at a position/region locus, is the join _at_ rather than _of_?
+    true_case: defect
+    text: For an evaluated field at a position/region locus, is the join _of_ rather than the required _at_?
 - id: ordered_sample_positional_token
   axis: name
   dimension: grammar
@@ -54,6 +58,7 @@ checks:
   retrieval: true
   question:
     kind: noul
+    true_case: defect
     text: Does the name encode a sample or endpoint position that indexes a point rather than naming a
       quantity?
 - id: retired_operator_spelling
@@ -65,6 +70,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Does the name use an operator spelling the installed grammar has retired?
 - id: grammar_round_trip_failure
   axis: name
@@ -94,7 +100,8 @@ checks:
   retrieval: true
   question:
     kind: noul
-    text: Does the name preserve every source-stated distinguishing axis of the observable?
+    true_case: defect
+    text: Does the name drop a distinguishing axis the source states for the observable?
 - id: ambiguity_in_isolation
   axis: name
   dimension: semantic
@@ -108,7 +115,8 @@ checks:
   retrieval: true
   question:
     kind: noul
-    text: Is the quantity unambiguous to a reader who sees only the name?
+    true_case: defect
+    text: Is the quantity ambiguous to a reader who sees only the name?
 - id: device_attributed_observable
   axis: name
   dimension: semantic
@@ -120,7 +128,8 @@ checks:
   retrieval: true
   question:
     kind: noul
-    text: Does the name describe the physical observable rather than the measuring instrument's own state?
+    true_case: defect
+    text: Does the name describe the measuring instrument's own state rather than the physical observable?
 - id: over_qualified_modifier
   axis: name
   dimension: semantic
@@ -133,6 +142,7 @@ checks:
   retrieval: true
   question:
     kind: noul
+    true_case: defect
     text: Does the name add a modifier the source does not state, on a form that makes it a claim?
 - id: source_fidelity_unsupported_qualifier
   axis: name
@@ -148,6 +158,7 @@ checks:
   retrieval: true
   question:
     kind: noul
+    true_case: defect
     text: Does the name assert a direction, mechanism, weighting or locus the authoritative DD doc does
       not support?
 - id: bound_to_wrong_object
@@ -192,6 +203,7 @@ checks:
   retrieval: true
   question:
     kind: noul
+    true_case: defect
     text: Is a derived family parent judged as an over-specialised standalone name rather than the abstraction
       of its children?
 - id: owner_erased_outline
@@ -204,6 +216,7 @@ checks:
   retrieval: true
   question:
     kind: noul
+    true_case: defect
     text: Does a bare outline form erase an owner the source identifies?
 - id: coupled_vs_launched_confusion
   axis: name
@@ -215,6 +228,7 @@ checks:
   retrieval: true
   question:
     kind: noul
+    true_case: defect
     text: Does the name conflate a coupled quantity with a launched/incident quantity?
 - id: value_provenance_in_name
   axis: name
@@ -225,6 +239,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Does the name encode value provenance (measured/reconstructed/reference) as a segment?
 - id: non_canonical_operator_join
   axis: name
@@ -236,7 +251,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: Does every operator use the installed grammar's canonical join form?
+    true_case: defect
+    text: Does any operator use a non-canonical join form the installed grammar does not carry?
 - id: non_canonical_segment_order
   axis: name
   dimension: convention
@@ -249,7 +265,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: Are the name's segments in the grammar's canonical order?
+    true_case: defect
+    text: Are the name's segments out of the grammar's canonical order?
 - id: non_canonical_render
   axis: name
   dimension: convention
@@ -264,7 +281,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: Is the spelling the canonical render of its parsed intermediate representation?
+    true_case: defect
+    text: Is the spelling a non-canonical render of its parsed intermediate representation?
 - id: non_canonical_locus_token
   axis: name
   dimension: convention
@@ -275,8 +293,9 @@ checks:
   retrieval: true
   question:
     kind: noul
-    text: Does the name use the registered locus/position token for its source object rather than a generic
-      or collapsed one?
+    true_case: defect
+    text: Does the name use a generic or collapsed locus/position token instead of the registered token for
+      its source object?
 - id: advisory_alias_collapsed
   axis: name
   dimension: convention
@@ -288,6 +307,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Does the name collapse one registered advisory alias into another?
 - id: bare_shape_parameter_missing_surface
   axis: name
@@ -298,7 +318,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: Does a plasma-shape parameter carry the surface locus that makes it meaningful?
+    true_case: defect
+    text: Does a plasma-shape parameter omit the surface locus that makes it meaningful?
 - id: model_surname_suffix
   axis: name
   dimension: convention
@@ -308,6 +329,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Does the name carry a model author surname or model-specific identifier?
 - id: minority_spelling_not_in_roster
   axis: name
@@ -318,6 +340,7 @@ checks:
   retrieval: true
   question:
     kind: noul
+    true_case: defect
     text: Does the name adopt a minority spelling against the catalog's established base?
 - id: redundant_repeated_segment
   axis: name
@@ -329,6 +352,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Does the name repeat a redundant segment (e.g. electron_electron)?
 - id: missing_required_segment
   axis: name
@@ -341,6 +365,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Is a physically required segment (subject, component) missing?
 - id: unit_kind_inconsistent
   axis: name
@@ -352,7 +377,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: Is the physical base consistent with the quantity's authoritative unit and kind?
+    true_case: defect
+    text: Is the physical base inconsistent with the quantity's authoritative unit and kind?
 - id: source_binding_drift
   axis: name
   dimension: completeness
@@ -363,6 +389,7 @@ checks:
   retrieval: true
   question:
     kind: noul
+    true_case: defect
     text: Has the anchored source path changed so the name/documentation no longer matches it?
 - id: duplicate_catalog_identity
   axis: name
@@ -391,7 +418,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: Is the description a precise single-line physical definition free of editorial filler?
+    true_case: defect
+    text: Is the description imprecise, multi-line, or editorial filler rather than a precise single-line physical definition?
 - id: description_template_opening_mismatch
   axis: docs
   dimension: description_quality
@@ -423,6 +451,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Does the documentation carry a unit anywhere in prose?
 - id: cocos_number_in_prose
   axis: docs
@@ -433,6 +462,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Does the documentation cite a COCOS number in prose rather than stating the direction?
 - id: latex_escaping_broken
   axis: docs
@@ -442,7 +472,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: Is the LaTeX escaped cleanly, with no corrupted backslashes?
+    true_case: defect
+    text: Is the LaTeX escaping broken, with corrupted backslashes?
 - id: non_normative_documentation
   axis: docs
   dimension: documentation_quality
@@ -451,7 +482,8 @@ checks:
   retrieval: false
   question:
     kind: noul
-    text: Is the documentation a strict normative definition, free of diagnostic lists, recipes and padding?
+    true_case: defect
+    text: Is the documentation a diagnostic list, recipe or padding rather than a strict normative definition?
 - id: symbols_undefined
   axis: docs
   dimension: documentation_quality
@@ -519,6 +551,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Does the documentation cite a raw DD path or IDS name as storage context?
 - id: sign_convention_missing
   axis: docs
@@ -576,6 +609,7 @@ checks:
   retrieval: true
   question:
     kind: noul
+    true_case: defect
     text: Does the documentation equate the quantity with a related one it is not equal to?
 - id: incompatible_physics_qualifier
   axis: docs
@@ -587,6 +621,7 @@ checks:
   retrieval: false
   question:
     kind: noul
+    true_case: defect
     text: Does the documentation apply a qualifier the physics of the quantity does not admit?
 - id: equation_physically_incorrect
   axis: docs
@@ -597,7 +632,8 @@ checks:
   retrieval: true
   question:
     kind: noul
-    text: Are the stated equations physically correct and dimensionally consistent with the quantity?
+    true_case: defect
+    text: Are the stated equations physically incorrect or dimensionally inconsistent with the quantity?
 human_reason_map:
 - reason: canonical renderer migration; semantic IR unchanged
   count: 136

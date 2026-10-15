@@ -22,14 +22,20 @@ from imas_codex.standard_names.review.checks import (
 )
 
 
-def _noul(check_id: str, dimension: str, fields: list[str], text: str) -> ReviewCheck:
+def _noul(
+    check_id: str,
+    dimension: str,
+    fields: list[str],
+    text: str,
+    true_case: str | None = None,
+) -> ReviewCheck:
     return ReviewCheck(
         id=check_id,
         axis="name",
         dimension=dimension,
         evidence_fields=fields,
         retrieval=False,
-        question=JevQuestion(kind=JevQuestionKind.NOUL, text=text),
+        question=JevQuestion(kind=JevQuestionKind.NOUL, text=text, true_case=true_case),
     )
 
 
@@ -68,7 +74,8 @@ def _small_checks() -> list[ReviewCheck]:
             "malformed_physical_base",
             "grammar",
             ["physical_base", "source_paths"],
-            "Is the physical base well formed?",
+            "Is the physical base unregistered, malformed, or more than one token?",
+            true_case="defect",
         ),
         _choice(
             "bound_to_wrong_object",
@@ -166,7 +173,8 @@ def test_question_table_is_generated_from_the_checks_it_is_given(tmp_path):
               retrieval: false
               question:
                 kind: noul
-                text: Is the physical base well formed?
+                true_case: defect
+                text: Is the physical base unregistered, malformed, or more than one token?
             """
         ),
         encoding="utf-8",
@@ -270,6 +278,41 @@ def test_noul_check_fails_above_the_probability_midpoint():
     check = _noul("c", "grammar", ["physical_base"], "q?")
     assert jev_review.check_failed(check, {"noul": 0.9}) is True
     assert jev_review.check_failed(check, {"noul": 0.1}) is False
+
+
+def test_defect_worded_noul_high_probability_is_read_as_a_failure():
+    """A defect-worded Noul's high probability is the defect holding.
+
+    The taxonomy declares every Noul's true case as the defect, and the reader
+    fails it at or above the probability midpoint. A high answer to a
+    defect-worded question — the shipped convention — must therefore read as a
+    failure, and a low answer as no failure.
+    """
+    check = _noul(
+        "malformed_physical_base",
+        "grammar",
+        ["physical_base"],
+        "Is the physical base unregistered, malformed, or more than one token?",
+        true_case="defect",
+    )
+    assert check.question.true_case == "defect"
+    assert jev_review.check_failed(check, {"noul": 0.9}) is True
+    assert jev_review.check_failed(check, {"noul": 0.1}) is False
+    assert jev_review.check_failed(check, None) is False
+
+
+def test_shipped_defect_worded_nouls_read_high_probability_as_failure():
+    """The shipped taxonomy's Nouls are defect-worded, so the reader holds."""
+    checks, _ = load_review_checks()
+    nouls = [
+        check
+        for check in checks
+        if check.question is not None and check.question.kind is JevQuestionKind.NOUL
+    ]
+    assert nouls
+    for check in nouls:
+        assert check.question.true_case == "defect"
+        assert jev_review.check_failed(check, {"noul": 1.0}) is True
 
 
 def test_choice_check_fails_when_a_defective_form_is_chosen():
