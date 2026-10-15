@@ -32,6 +32,7 @@ import argparse
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 VENV = Path("/home/ITER/mcintos/Code/imas-codex/.venv")
@@ -63,21 +64,43 @@ def _run_pass(args: argparse.Namespace) -> int:
 
     log_path = Path(args.log)
     log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def _log_has(marker: str) -> bool:
+        try:
+            return marker in log_path.read_text(errors="ignore")
+        except FileNotFoundError:
+            return False
+
     with log_path.open("w") as fh:
         fh.write("command: " + " ".join(cmd) + "\n")
         fh.flush()
+        proc = subprocess.Popen(
+            cmd, cwd=str(REPO), stdout=fh, stderr=subprocess.STDOUT
+        )
+        deadline = time.monotonic() + args.timeout
+        code: int
+        while proc.poll() is None:
+            if time.monotonic() > deadline:
+                fh.write(f"\n[pass driver] timeout after {args.timeout}s\n")
+                fh.flush()
+                proc.terminate()
+                break
+            if args.stop_after_classify and _log_has(
+                "classify_worker: Classification complete"
+            ):
+                fh.write(
+                    "\n[pass driver] classify complete; stopping before the "
+                    "cluster phase\n"
+                )
+                fh.flush()
+                proc.terminate()
+                break
+            time.sleep(2)
         try:
-            proc = subprocess.run(
-                cmd,
-                cwd=str(REPO),
-                stdout=fh,
-                stderr=subprocess.STDOUT,
-                timeout=args.timeout,
-            )
-            code = proc.returncode
+            code = proc.wait(timeout=60)
         except subprocess.TimeoutExpired:
-            fh.write(f"\n[pass driver] timeout after {args.timeout}s\n")
-            code = 124
+            proc.kill()
+            code = proc.wait()
         fh.write(f"\nEXIT={code}\n")
     print(f"wrote {log_path} EXIT={code}")
     return 0
@@ -167,6 +190,12 @@ def main() -> int:
     p.add_argument("--reset", action="store_true")
     p.add_argument("--dry", action="store_true")
     p.add_argument("--timeout", type=int, default=540)
+    p.add_argument(
+        "--stop-after-classify",
+        action="store_true",
+        help="terminate the pass once classification has completed and written, "
+        "skipping the graph-wide re-embed and cluster phases a reset triggers",
+    )
     p.add_argument("--log", required=True)
     p.set_defaults(func=_run_pass)
 
