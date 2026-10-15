@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T13:54:24.674Z",
+  "dispatched_at": "2026-10-15T13:41:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-run.py",
+      "line": "1587",
+      "severity": "follow-on",
+      "text": "follow-on: the guard that fires when an aggregation arm is missing is a manual verify action with no automated caller, so a later edit that drops the arms from the results JSON or the fragment reddens no test or gate."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-run.py",
+      "line": "1185",
+      "severity": "follow-on",
+      "text": "follow-on: _aggregations execs a sibling evidence script by path, so renaming or moving srtj-name-signal-diagnosis-run.py breaks the aggregations action at runtime with a file-not-found rather than a message naming the dependency."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit; the single gained commit adds _diagnosis_module, _aggregations, _aggregation_rows and _verify to srtj-noul-polarity-run.py, appends the two arms to srtj-noul-polarity-results.json, deduplicates five element ids and appends the aggregation block to srtj-noul-polarity.html.",
+    "done_when": "the reviewed run's brief done-when names the re-measure figures; the manifest records the repaired gate, and I re-ran the verify action at head (review-verify-rerun.log EXIT=0) and against the pre-repair artifacts (review-verify-negative-control.log EXIT=1).",
+    "goal": "the gained commit is a repair of the blocking finding on the earlier review, to report the sign-aligned selected mean and the L2 logistic regression; docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-results.json:1 now carries an aggregations block with both arms, and the fragment reports them at srtj-noul-polarity.html:103.",
+    "manifest": "read; it names commit b1576711e, the aggregation arms with their calibration and validation values, the verify head log and the verify negative-control log, and records status complete.",
+    "write_paths": "the goal names three paths for the gained commit; git diff --name-only 106ce2f293a40a118c8643e215495c9be25e6944..b1576711e48723e0a3f347f6ba70de3a2ab20bf5 lists exactly those three and nothing else."
+  },
+  "justifications": {
+    "durability": "srtj-noul-polarity-run.py:1587 defines _verify which raises when an arm is absent and is shown red against the pre-repair artifacts, but it is a manual argparse action that no test file or CI gate invokes, so the arms could be dropped from the artifacts again without reddening an automatic check.",
+    "evidence": "I re-ran the named verify action at b1576711e (EXIT=0, both arms echoed with validation 0.7083 and 0.7359) and against the same action reading the 106ce2f29 artifacts (EXIT=1, RuntimeError naming the missing arms), so the recorded result reproduces and its negative control fires.",
+    "fit": "the new functions follow the module's action idiom (srtj-noul-polarity-run.py:1679 selects _verify from the action choices) and the five element-id renames remove the duplicate ids that the assembled fragment carried, verified as 41 ids with no duplicate.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-results.json:1 carries aggregations.selected_mean and aggregations.logistic_l2 each with calibration and validation AUC, so the two arms the finding said were missing are now reported.",
+    "reuse": "srtj-noul-polarity-run.py:1185 imports the diagnosis script and _aggregations calls its own aggregation functions, so the aggregation is reused rather than copied; a search of imas_codex/ for an existing sign-aligned-mean or logistic aggregation owner found none.",
+    "scope_discipline": "git diff --name-only 106ce2f293a40a118c8643e215495c9be25e6944..b1576711e48723e0a3f347f6ba70de3a2ab20bf5 lists only the three paths the goal names, and no file outside them changed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the gained commit is a repair of the blocking finding on the earlier review, to report the sign-aligned selected mean and the L2 logistic regression; docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-results.json:1 now carries an aggregations block with both arms, and the fragment reports them at srtj-noul-polarity.html:103.\nVERDICT done_when: the reviewed run's brief done-when names the re-measure figures; the manifest records the repaired gate, and I re-ran the verify action at head (review-verify-rerun.log EXIT=0) and against the pre-repair artifacts (review-verify-negative-control.log EXIT=1).\nVERDICT write_paths: the goal names three paths for the gained commit; git diff --name-only 106ce2f293a40a118c8643e215495c9be25e6944..b1576711e48723e0a3f347f6ba70de3a2ab20bf5 lists exactly those three and nothing else.\nVERDICT manifest: read; it names commit b1576711e, the aggregation arms with their calibration and validation values, the verify head log and the verify negative-control log, and records status complete.\nVERDICT diff: read commit by commit; the single gained commit adds _diagnosis_module, _aggregations, _aggregation_rows and _verify to srtj-noul-polarity-run.py, appends the two arms to srtj-noul-polarity-results.json, deduplicates five element ids and appends the aggregation block to srtj-noul-polarity.html.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-results.json:1 carries aggregations.selected_mean and aggregations.logistic_l2 each with calibration and validation AUC, so the two arms the finding said were missing are now reported.\nSCORE evidence: 18\nJUSTIFICATION evidence: I re-ran the named verify action at b1576711e (EXIT=0, both arms echoed with validation 0.7083 and 0.7359) and against the same action reading the 106ce2f29 artifacts (EXIT=1, RuntimeError naming the missing arms), so the recorded result reproduces and its negative control fires.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 106ce2f293a40a118c8643e215495c9be25e6944..b1576711e48723e0a3f347f6ba70de3a2ab20bf5 lists only the three paths the goal names, and no file outside them changed.\nSCORE durability: 15\nJUSTIFICATION durability: srtj-noul-polarity-run.py:1587 defines _verify which raises when an arm is absent and is shown red against the pre-repair artifacts, but it is a manual argparse action that no test file or CI gate invokes, so the arms could be dropped from the artifacts again without reddening an automatic check.\nSCORE fit: 16\nJUSTIFICATION fit: the new functions follow the module's action idiom (srtj-noul-polarity-run.py:1679 selects _verify from the action choices) and the five element-id renames remove the duplicate ids that the assembled fragment carried, verified as 41 ids with no duplicate.\nSCORE reuse: 20\nJUSTIFICATION reuse: srtj-noul-polarity-run.py:1185 imports the diagnosis script and _aggregations calls its own aggregation functions, so the aggregation is reused rather than copied; a search of imas_codex/ for an existing sign-aligned-mean or logistic aggregation owner found none.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-run.py:1587 follow-on: the guard that fires when an aggregation arm is missing is a manual verify action with no automated caller, so a later edit that drops the arms from the results JSON or the fragment reddens no test or gate.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-noul-polarity-run.py:1185 follow-on: _aggregations execs a sibling evidence script by path, so renaming or moving srtj-name-signal-diagnosis-run.py breaks the aggregations action at runtime with a file-not-found rather than a message naming the dependency.\n",
+  "review_run_id": "r-20261015T134119612612-review-of-srtj-noul-polarity-b1576711e487",
+  "reviewed_base_sha": "106ce2f293a40a118c8643e215495c9be25e6944",
+  "reviewed_head_sha": "b1576711e48723e0a3f347f6ba70de3a2ab20bf5",
+  "reviewed_run_id": "r-20261015T120934498631-srtj-noul-polarity",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T13:49:43.131027+00:00",
+  "total": 108
+}
