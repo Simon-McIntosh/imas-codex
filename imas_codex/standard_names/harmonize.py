@@ -20,6 +20,7 @@ made reciprocal (:func:`reconcile_family_reverse_links`) through the
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -38,6 +39,8 @@ from imas_codex.standard_names.families import (
     fetch_pattern_family,
     select_anchor,
 )
+
+logger = logging.getLogger(__name__)
 
 #: Operator kinds eligible for parent-based family grouping.
 _FAMILY_OPERATOR_KINDS = DOCUMENTATION_FAMILY_OPERATOR_KINDS
@@ -925,8 +928,11 @@ def _clear_family_anchor(gc: Any, member_ids: list[str]) -> None:
 # sibling" therefore need not choose each other, so a converged family can carry
 # one-way sibling links: a ``name:m`` in one member's documentation with no
 # reverse in the sibling's. This step makes the sibling relation symmetric once
-# the family has converged, and drops a sibling link whose target is not a
-# member of the family (or is no longer carried by the catalog).
+# the family has converged: it adds the reverse of a sibling link, and removes a
+# link only when its target is not carried by the catalog at all, so no reverse
+# could exist. A ``name:`` link out of the family is a legitimate cross-family
+# reference and is left alone — the step reconciles the sibling relation, it does
+# not police the rest of a member's references.
 
 #: Prefix of a link that names a standard name. Every other link (a ``dd:``
 #: path, an external URL) carries no standard-name target and is left alone.
@@ -966,16 +972,29 @@ def reconcile_family_reverse_links(
     so that:
 
     * a ``name:`` link to a family sibling is kept, and that sibling links
-      back — a sibling the member links to gains the reverse when it lacks it;
-    * a ``name:`` link whose target is not a standard name in the catalog is
-      dropped, because no reverse can exist for it;
-    * every other link — a ``dd:`` path, an external URL — is carried through
-      unchanged, kept as ``links`` and untouched in the documentation. The step
-      reconciles sibling links, not references.
+      back — a sibling the member's links reach gains the reverse when it lacks
+      it. A reverse is added only between family siblings; a reference to a name
+      outside the family is never made reciprocal, because the two are not
+      siblings and no such relation is being asserted;
+    * a ``name:`` link whose target no standard name in the catalog carries is
+      dropped, from the derived index and from the documentation prose, because
+      no reverse could ever exist for it;
+    * a ``name:`` link to a live name outside the family is carried through
+      unchanged. It is a legitimate cross-family reference, not a broken
+      sibling link, and dropping it would destroy a valid reference the member
+      wrote;
+    * every non-``name:`` link — a ``dd:`` path, an external URL — is carried
+      through unchanged, kept as ``links`` and untouched in the documentation.
 
     A link is added to the member's documentation as well as to the derived
     ``links``, since the index is derived from the prose and an index edited
     alone would lose the addition at the next derivation.
+
+    A member whose ``name_stage`` is ``approved`` is catalog-edited, and
+    ``write_enrichment_results`` refuses to move its fields while leaving
+    protection in force. That member's reconciliation is therefore *not*
+    written, and the ids are returned under ``"protected"`` so the caller can
+    report them rather than let a partial write look complete.
 
     The write goes through the ``graph_ops`` function that already persists
     these fields — ``write_enrichment_results`` — called from here rather than
@@ -983,7 +1002,7 @@ def reconcile_family_reverse_links(
     when the family's sibling links are already symmetric, so the step is
     idempotent.
 
-    Returns ``{"members", "added", "removed", "written"}``.
+    Returns ``{"members", "added", "removed", "written", "protected"}``.
     """
     from imas_codex.standard_names.graph_ops import write_enrichment_results
 
@@ -1066,7 +1085,7 @@ def reconcile_family_reverse_links(
             if not target:
                 kept.append(link)
                 continue
-            if target in sibling and target in live_ids:
+            if target in live_ids:
                 if link not in kept:
                     kept.append(link)
                 continue
@@ -1097,14 +1116,24 @@ def reconcile_family_reverse_links(
             }
         )
 
+    # Deliver the result through the writer, but never past protection. A member
+    # the catalog has edited keeps its own fields: filter_protected runs with the
+    # same defaults the writer uses, so what it reports as skipped is exactly what
+    # the writer would not have written. Read before writing, and reported, so a
+    # partially written family cannot read as a whole one.
+    protected: list[str] = []
     written = 0
     if batch:
+        from imas_codex.standard_names.protection import filter_protected
+
+        _, protected = filter_protected(batch)
         written = int((write_fn or write_enrichment_results)(batch) or 0)
     return {
         "members": len(present),
         "added": added,
         "removed": removed,
         "written": written,
+        "protected": sorted(protected),
     }
 
 
@@ -1526,6 +1555,14 @@ def apply_families(
                 reverse_links = reconcile_family_reverse_links(
                     resolved_gc, fam_plan["members"]
                 )
+                if reverse_links.get("protected"):
+                    logger.warning(
+                        "Family '%s': %d member(s) are catalog-edited, so their "
+                        "reconciled links were not written: %s",
+                        fam_plan["anchor"],
+                        len(reverse_links["protected"]),
+                        ", ".join(reverse_links["protected"]),
+                    )
                 stamped = _stamp_applied_family(resolved_gc, fam_plan["anchor"])
             after_scores = _family_docs_scores(resolved_gc, fam_plan["members"])
             regressions = docs_score_regressions(

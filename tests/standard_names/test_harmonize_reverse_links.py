@@ -4,27 +4,33 @@ A member's ``links`` are derived from its own documentation, and each member's
 documentation is regenerated from its own prompt, so two members told to link
 "at least one adjacent sibling" need not choose each other: a converged family
 can carry a one-way sibling link. The apply's last step before it stamps the
-family therefore makes the sibling relation symmetric, and drops a link whose
-target is not a member of the family.
+family makes the sibling relation symmetric.
+
+Removal is a separate rule with a much narrower reach: a ``name:`` link goes
+only when no name in the catalog carries its target, so no reverse could ever
+exist. A reference to a live name outside the family is a legitimate
+cross-family reference and survives — the step reconciles the sibling relation,
+it does not police the rest of a member's references.
 
 The tests drive the real ``apply_families`` against a fixture graph whose
 documentation-field writer is stubbed, so what they assert is the mechanism the
 apply runs, not a mock of it:
 
-* after the apply, the audit function itself reports zero ``missing_reverse``
-  findings over the family's links;
-* a planted link to a name outside the family is removed from the member's
-  ``links`` and from its documentation prose, while a non-name link (an
-  external URL) is carried through untouched;
-* a member outside the family is not written at all;
-* removing the step makes the first test fail — the same fixture apply then
-  ends with ``missing_reverse`` findings, which is the negative control logged
-  beside the run.
+* after the fixture apply, the audit function itself reports zero
+  ``missing_reverse`` findings over the family's links;
+* a link to a live name outside the family survives, in the member's ``links``
+  and in its documentation prose, and is not made reciprocal;
+* a link to a name the catalog does not carry is removed, from the ``links``
+  index and from the prose it is derived from;
+* a member the catalog has edited is not written, and the step reports it
+  rather than reporting a write that did not land.
+
+Each assertion is coupled to its mechanism by a red run recorded beside the
+green one, produced by removing that mechanism and running the same command.
 """
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
@@ -32,8 +38,10 @@ from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
 _ANCHOR = "base_at_axis"
 _BOUNDARY = "base_at_boundary"
 _PROBE = "base_of_probe"
-#: A live name in the catalog that is NOT a member of the fixture family.
+#: A live name in the catalog, in another pattern family — not a sibling.
 _OUTSIDE = "other_at_axis"
+#: A name no StandardName in the catalog carries: the target of a dead link.
+_GHOST = "base_of_ghost"
 _HANDBOOK = "https://example.org/handbook"
 
 _ANCHOR_DOC = (
@@ -43,8 +51,8 @@ _ANCHOR_DOC = (
 )
 _BOUNDARY_DOC = "The base quantity at the boundary."
 _PROBE_DOC = (
-    "The base quantity of the probe. See [base at axis](name:base_at_axis) "
-    "and [other at axis](name:other_at_axis)."
+    "The base quantity of the probe. See [base at axis](name:base_at_axis), "
+    "[other at axis](name:other_at_axis) and [the ghost](name:base_of_ghost)."
 )
 _OUTSIDE_DOC = "A base quantity documented elsewhere."
 
@@ -55,6 +63,7 @@ def _node(
     physical_base: str = "base",
     documentation: str = "",
     links: list[str] | None = None,
+    name_stage: str = "accepted",
 ) -> dict[str, Any]:
     return {
         "id": node_id,
@@ -64,14 +73,20 @@ def _node(
         "links": list(links or []),
         "docs_stage": "accepted",
         "reviewer_score_docs": 0.9,
-        "name_stage": "accepted",
+        "name_stage": name_stage,
         "harmonized_group_signature": None,
     }
 
 
-def _family_nodes() -> list[dict[str, Any]]:
-    """The fixture family: one one-way sibling link and one link out of family."""
+def _family_nodes(*, probe_stage: str = "accepted") -> list[dict[str, Any]]:
+    """The fixture family plus two names outside it.
+
+    ``probe_stage`` makes the probe catalog-edited, so its reconciliation is
+    refused by the writer's protection filter.
+    """
     return [
+        _node(_OUTSIDE, physical_base="other", documentation=_OUTSIDE_DOC),
+    ] + [
         _node(
             _ANCHOR, documentation=_ANCHOR_DOC, links=[f"name:{_BOUNDARY}", _HANDBOOK]
         ),
@@ -79,11 +94,14 @@ def _family_nodes() -> list[dict[str, Any]]:
         _node(
             _PROBE,
             documentation=_PROBE_DOC,
-            links=[f"name:{_ANCHOR}", f"name:{_OUTSIDE}"],
+            links=[
+                f"name:{_ANCHOR}",
+                f"name:{_OUTSIDE}",
+                f"name:{_GHOST}",
+            ],
+            name_stage=probe_stage,
         ),
-        # Carried in the graph so it is a live catalog name, but its grammar
-        # puts it in another family — the target of the planted link.
-    ] + [_node(_OUTSIDE, physical_base="other", documentation=_OUTSIDE_DOC)]
+    ]
 
 
 def _invariant(node: dict[str, Any]) -> tuple[str, ...]:
@@ -91,17 +109,19 @@ def _invariant(node: dict[str, Any]) -> tuple[str, ...]:
 
 
 class _LinkGraph:
-    """GraphClient stand-in answering the pattern-family read and the link reads.
+    """GraphClient stand-in answering the pattern-family reads and the link reads.
 
-    Mirrors the fixture graph the family reads use, and answers the two link
-    reads the reverse-link step issues — the member doc/link state and the set
-    of live catalog ids — by dispatching on the query's own projection.
+    Mirrors the fixture graph the family reads use, and answers the link reads
+    the reverse-link step issues — the member doc/link state, the set of live
+    catalog ids, and the approved-state read protection makes — by dispatching
+    on each query's own projection.
     """
 
     def __init__(self, nodes: list[dict[str, Any]]):
         self.nodes = [dict(n) for n in nodes]
         self.queries: list[str] = []
         self.written: list[list[dict[str, Any]]] = []
+        self.protected_by_writer: list[str] = []
 
     def __enter__(self) -> _LinkGraph:
         return self
@@ -123,6 +143,13 @@ class _LinkGraph:
         if "sn.links AS links" in cypher:
             wanted = set(params.get("ids") or [])
             return [dict(n) for n in self.nodes if n["id"] in wanted]
+        if "name_stage = 'approved'" in cypher:
+            names = set(params.get("names") or [])
+            return [
+                {"id": n["id"]}
+                for n in self.nodes
+                if n["id"] in names and n.get("name_stage") == "approved"
+            ]
         if "sn.name_stage AS name_stage" in cypher:
             names = set(params.get("names") or [])
             return [
@@ -149,15 +176,28 @@ class _LinkGraph:
     # ── The stubbed documentation-field writer ─────────────────────────────
 
     def write_enrichment_results(self, results: list[dict[str, Any]]) -> int:
-        """Stand in for the graph_ops writer that persists docs + links."""
-        self.written.append([dict(r) for r in results])
-        for item in results:
+        """Stand in for the graph_ops writer that persists docs + links.
+
+        It honours protection exactly as the real writer does — an
+        ``approved`` name keeps its own editorial fields — so a test that
+        plants a catalog-edited member sees the write refused here too.
+        """
+        from imas_codex.standard_names.protection import filter_protected
+
+        filtered, skipped = filter_protected(results)
+        self.protected_by_writer.extend(skipped)
+        self.written.append([dict(r) for r in filtered])
+        for item in filtered:
+            if "documentation" not in item:
+                # Every editorial field was stripped: the real writer issues no
+                # SET for this row, so nothing about the name moves.
+                continue
             node = self.node(item["id"])
             if node is None:
                 continue
             node["documentation"] = item["documentation"]
             node["links"] = list(item["links"])
-        return len(results)
+        return len(filtered)
 
 
 class _ApplyHarness:
@@ -165,10 +205,8 @@ class _ApplyHarness:
 
     def __init__(self, accepted_after: set[str]):
         self.accepted_after = accepted_after
-        self.marked_batches: list[list[str]] = []
 
     def mark_fn(self, batch: list[str], dry_run: bool = False) -> dict[str, Any]:
-        self.marked_batches.append(list(batch))
         return {"run_id": "fixture", "eligible": len(batch), "reset": len(batch)}
 
     def clear_quarantine_fn(self, gc: Any, batch: list[str]) -> int:
@@ -199,29 +237,31 @@ class _ApplyHarness:
         return 0.0
 
 
-def _reverse_step_or_removed(monkeypatch: Any) -> None:
-    """Disable the reverse-link step when the declared mutation is set.
+def _without_the_step(monkeypatch: Any) -> None:
+    """Remove the reverse-link step, which is the mechanism these tests measure.
 
-    ``SHC_NO_REVERSE_STEP`` removes the step, so the fixture apply ends with
-    ``missing_reverse`` findings and the assertions below fail.
+    The step is the thing under test, so removing it is the negative control the
+    red run records. It is patched out directly rather than through a switch, so
+    nothing in production code or in the environment has to carry a test hook.
     """
-    if os.environ.get("SHC_NO_REVERSE_STEP"):
-        from imas_codex.standard_names import harmonize
+    from imas_codex.standard_names import harmonize
 
-        monkeypatch.setattr(
-            harmonize,
-            "reconcile_family_reverse_links",
-            lambda gc, member_ids, **kw: {
-                "members": len(member_ids),
-                "added": 0,
-                "removed": 0,
-                "written": 0,
-            },
-        )
+    monkeypatch.setattr(
+        harmonize,
+        "reconcile_family_reverse_links",
+        lambda gc, member_ids, **kw: {
+            "members": len(member_ids),
+            "added": 0,
+            "removed": 0,
+            "written": 0,
+            "protected": [],
+        },
+    )
 
 
 def _apply(graph: _LinkGraph, monkeypatch: Any) -> dict[str, Any]:
     """Run the real apply over the fixture with the graph's writer stubbed."""
+    from imas_codex.graph import client as graph_client
     from imas_codex.standard_names import graph_ops, harmonize
 
     monkeypatch.setattr(
@@ -230,7 +270,9 @@ def _apply(graph: _LinkGraph, monkeypatch: Any) -> dict[str, Any]:
     monkeypatch.setattr(
         graph_ops, "stamp_harmonized_families", lambda families: len(families)
     )
-    _reverse_step_or_removed(monkeypatch)
+    # ``filter_protected`` reaches the graph for the approved-name set through
+    # its own client, so the stub answers that read too.
+    monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
 
     harness = _ApplyHarness(accepted_after={_ANCHOR, _BOUNDARY, _PROBE})
     return harmonize.apply_families(
@@ -249,7 +291,7 @@ def _apply(graph: _LinkGraph, monkeypatch: Any) -> dict[str, Any]:
     )
 
 
-def _missing_reverse(graph: _LinkGraph) -> list[Any]:
+def _findings(graph: _LinkGraph, finding_type: str) -> list[Any]:
     """The audit's own findings over the family's post-apply links."""
     from imas_codex.standard_names.review.audits import run_link_integrity
 
@@ -262,12 +304,11 @@ def _missing_reverse(graph: _LinkGraph) -> list[Any]:
     return [
         f
         for f in run_link_integrity(rows, known_ids=known_ids)
-        if f.finding_type == "missing_reverse"
+        if f.finding_type == finding_type
     ]
 
 
 def test_apply_leaves_no_sibling_link_without_its_reverse(monkeypatch: Any) -> None:
-    """The audit reports zero missing_reverse findings after the fixture apply."""
     graph = _LinkGraph(_family_nodes())
 
     outcome = _apply(graph, monkeypatch)
@@ -275,43 +316,82 @@ def test_apply_leaves_no_sibling_link_without_its_reverse(monkeypatch: Any) -> N
     entry = outcome["applied"][0]
     assert entry["applied"] is True
     assert entry["result"].halted is False
-    assert _missing_reverse(graph) == []
+    assert _findings(graph, "missing_reverse") == []
     # The reverse the step added is on the member's documentation too, since
     # the link index is derived from it.
     assert f"name:{_ANCHOR}" in graph.node(_BOUNDARY)["documentation"]
 
 
-def test_apply_removes_a_link_out_of_the_family(monkeypatch: Any) -> None:
-    """A link to a live name outside the family is dropped, an URL is kept."""
+def test_a_live_name_outside_the_family_survives(monkeypatch: Any) -> None:
+    """A cross-family reference is kept, in the index and in the prose."""
     graph = _LinkGraph(_family_nodes())
 
     _apply(graph, monkeypatch)
 
     probe = graph.node(_PROBE)
-    assert probe["links"] == [f"name:{_ANCHOR}"]
-    # The dropped reference is gone from the prose the index is derived from...
-    assert f"name:{_OUTSIDE}" not in probe["documentation"]
-    # ...while the non-name link is carried through untouched.
+    # The reference to the out-of-family name is present in the index, once.
+    assert [link for link in probe["links"] if link.startswith("name:")].count(
+        f"name:{_OUTSIDE}"
+    ) == 1
+    # The prose the index is derived from still carries the reference...
+    assert f"name:{_OUTSIDE}" in probe["documentation"]
+    # ...and the out-of-family name was not made reciprocal: it is not a
+    # sibling, so no such relation is being asserted.
+    assert graph.node(_OUTSIDE)["documentation"] == _OUTSIDE_DOC
+    assert graph.node(_OUTSIDE)["links"] == []
+    # The non-name link is carried through untouched.
     assert graph.node(_ANCHOR)["links"] == [
         f"name:{_BOUNDARY}",
         _HANDBOOK,
         f"name:{_PROBE}",
     ]
-    # A name outside the family is not written at all.
-    assert graph.node(_OUTSIDE)["documentation"] == _OUTSIDE_DOC
-    assert graph.node(_OUTSIDE)["links"] == []
 
 
-def test_removing_the_step_leaves_missing_reverse_findings(monkeypatch: Any) -> None:
-    """The declared negative control: without the step the findings remain."""
-    monkeypatch.setenv("SHC_NO_REVERSE_STEP", "1")
+def test_a_link_to_a_name_the_catalog_lacks_is_removed(monkeypatch: Any) -> None:
+    """A dead name: link goes, from the index and from the prose."""
     graph = _LinkGraph(_family_nodes())
+    assert _GHOST not in {n["id"] for n in graph.nodes}
 
     _apply(graph, monkeypatch)
 
-    findings = _missing_reverse(graph)
-    assert findings, "the fixture must show missing_reverse without the step"
-    assert {(f.name_id, f.target) for f in findings} == {
-        (_ANCHOR, _BOUNDARY),
-        (_PROBE, _ANCHOR),
-    }
+    probe = graph.node(_PROBE)
+    assert f"name:{_GHOST}" not in probe["links"]
+    assert f"name:{_GHOST}" not in probe["documentation"]
+    # The audit agrees: nothing dead is left to report.
+    assert _findings(graph, "dead_link") == []
+
+
+def test_a_catalog_edited_member_is_reported_not_silently_skipped(
+    monkeypatch: Any,
+) -> None:
+    """Protection is not overridden, and the step names what it could not write.
+
+    Driven against the step rather than through the apply: an apply over a
+    committed member is refused earlier by ``refuse_recommended_members``, so
+    the apply alone cannot reach this state. The step is reached directly here
+    because it is the layer that must not overstate what it wrote.
+    """
+    from imas_codex.graph import client as graph_client
+    from imas_codex.standard_names import graph_ops, harmonize
+
+    graph = _LinkGraph(_family_nodes(probe_stage="approved"))
+    monkeypatch.setattr(
+        graph_ops, "write_enrichment_results", graph.write_enrichment_results
+    )
+    monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
+
+    step = harmonize.reconcile_family_reverse_links(graph, [_ANCHOR, _BOUNDARY, _PROBE])
+
+    # The step reports the member protection refused...
+    assert step["protected"] == [_PROBE]
+    # ...and that report agrees with what the writer actually withheld.
+    assert graph.protected_by_writer == [_PROBE]
+    # The member keeps its own editorial fields, dead link and all: that is the
+    # price of not overriding a catalog edit, and the step says so rather than
+    # counting the member among those it reconciled.
+    probe = graph.node(_PROBE)
+    assert f"name:{_GHOST}" in probe["links"]
+    assert probe["documentation"] == _PROBE_DOC
+    # The members that were not protected did get their reconciliation.
+    assert f"name:{_PROBE}" in graph.node(_ANCHOR)["links"]
+    assert f"name:{_ANCHOR}" in graph.node(_BOUNDARY)["links"]

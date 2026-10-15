@@ -90,62 +90,142 @@
     <em>before</em> <code>_stamp_applied_family</code>, so the stamped
     <code>harmonized_group_signature</code> covers the reconciled
     documentation. It adds the reverse of every sibling link the family holds,
-    drops a <code>name:</code> link whose target is not a member of the family
-    or is no longer carried by the catalog, and leaves every other link (a
-    <code>dd:</code> path, an external URL) untouched. An added link is written
+    and removes a link only when no name in the catalog carries its target — so
+    no reverse could ever exist for it. A <code>name:</code> link to a live name
+    <em>outside</em> the family is a legitimate cross-family reference and is
+    kept, in the index and in the prose: the step reconciles the sibling
+    relation, it does not police the rest of a member's references. A reverse is
+    likewise added only between siblings — a reference to a name outside the
+    family is never made reciprocal, because the two are not siblings and no
+    such relation is being asserted. A <code>dd:</code> path or an external URL
+    carries no standard-name target and is untouched. An added link is written
     into the member's documentation as well as its derived index: the index is
     derived from the prose, so an index edited alone would lose the addition at
     the next derivation. Nothing is written when the family's links are already
     symmetric.
   </p>
-  <h3 id="shc-reverse-links-test">The test, its green run and its red run</h3>
+  <p>
+    Two removals were considered and one was rejected. Removing a
+    <code>name:</code> link whose target is merely outside the family looks
+    tidy and is wrong: members legitimately carry cross-family references
+    (<code>name:poloidal_magnetic_flux</code>,
+    <code>name:volume_averaged_*_density</code>), and a rule of that shape
+    deletes them from every member the apply touches. A link is removed only
+    when it is <em>impossible</em>, never when it is merely inconvenient to
+    reconcile.
+  </p>
+  <p>
+    <strong>A member the catalog has edited is not written.</strong>
+    <code>write_enrichment_results</code> runs <code>filter_protected</code> with
+    protection in force, so a member whose <code>name_stage</code> is
+    <code>approved</code> keeps its own editorial fields and the reconciliation
+    computed for it is discarded. The step therefore calls the same filter
+    before writing and returns the members it withheld under
+    <code>"protected"</code>, and the apply logs them, so a partly written
+    family cannot read as a whole one. Protection is never overridden: an
+    invisible skip is a defect, but silently overwriting a catalog edit would be
+    a worse one.
+  </p>
+  <h3 id="shc-reverse-links-test">The test, its green run and its red runs</h3>
   <p>
     <code>tests/standard_names/test_harmonize_reverse_links.py</code> drives the
     real <code>apply_families</code> over a three-member fixture family whose
     regenerated members link one way — the anchor links to the boundary member,
-    the probe member links to the anchor, and the probe carries a planted
-    <code>name:other_at_axis</code> to a name that is live in the catalog but
-    not in the family. The graph's documentation-field writer is stubbed, so
-    what is asserted is the mechanism the apply runs, and the audit function
-    itself judges the result.
+    the probe member links to the anchor, and the probe carries two planted
+    references: <code>name:other_at_axis</code>, live in the catalog but in
+    another pattern family, and <code>name:base_of_ghost</code>, which no
+    catalog name carries. The graph's documentation-field writer is stubbed and
+    honours protection as the real one does, so what is asserted is the
+    mechanism the apply runs, and the audit function itself judges the result.
   </p>
   <ul>
     <li>
-      <strong>Green</strong> (<code>grep green.log</code> for
-      <code>3 passed</code>, <code>EXIT=0</code>): the apply converges, the
+      <strong>Green</strong> (<code>green.log</code>:
+      <code>4 passed</code>, <code>EXIT=0</code>): the apply converges; the
       audit reports <strong>zero <code>missing_reverse</code> findings</strong>
-      over the family's links, the planted out-of-family link is gone from both
-      the probe's <code>links</code> and its documentation prose, and the
-      anchor's external URL is carried through untouched.
+      over the family's links; the live out-of-family reference
+      <code>name:other_at_axis</code> survives in the probe's
+      <code>links</code> and in its prose, and is not made reciprocal; the dead
+      reference <code>name:base_of_ghost</code> is gone from both, with no
+      <code>dead_link</code> finding left to report; and the anchor's external
+      URL is carried through untouched.
     </li>
     <li>
-      <strong>Red</strong> (<code>EXIT=1</code>): with the step removed —
-      <code>SHC_NO_REVERSE_STEP=1</code>, the declared negative control
-      <em>"remove the reverse-link step and the fixture apply ends with
-      <code>missing_reverse</code> findings"</em> — the same fixture apply ends
-      with <code>missing_reverse</code> findings, and
+      <strong>Red, step removed</strong>
+      (<code>red_step_removed.log</code>, out-of-tree plugin
+      <code>-p red_step_removed</code>, <code>EXIT=1</code>): with the step
+      patched to a no-op the fixture apply ends with
+      <code>missing_reverse</code> findings and
       <code>test_apply_leaves_no_sibling_link_without_its_reverse</code> fails
-      on <code>assert [LinkFinding(... link back.")] == []</code>; the removal
-      test fails with it, because the step is also what drops the planted
-      out-of-family link (<code>2 failed, 1 passed</code>). The third test —
-      the negative control that asserts the findings <em>appear</em> — is the
-      one that still passes, which is what shows the two runs differ only by
-      the step.
+      on its empty-findings assertion. This is the declared negative control
+      <em>"remove the reverse-link step and the fixture apply ends with
+      <code>missing_reverse</code> findings"</em>.
+    </li>
+    <li>
+      <strong>Red, sibling-only keep rule</strong>
+      (<code>red_sibling_only_rule.log</code>, <code>EXIT=1</code>): restoring
+      the rejected rule — keep a <code>name:</code> link only when its target is
+      a family sibling — fails exactly
+      <code>test_a_live_name_outside_the_family_survives</code>
+      (<code>1 failed, 3 passed</code>). This is the run that shows the survival
+      assertion is load-bearing rather than decorative.
+    </li>
+    <li>
+      <strong>Red, removal rule absent</strong>
+      (<code>red_no_removal_rule.log</code>, <code>EXIT=1</code>): with the
+      removal rule gone — every <code>name:</code> link kept regardless of
+      whether the catalog carries its target —
+      <code>test_a_link_to_a_name_the_catalog_lacks_is_removed</code> fails on
+      the dead link it still finds (<code>2 failed, 2 passed</code>). The second
+      failure is a consequence worth naming: the probe is protected, and with no
+      removal computed for it the step computes no change for it at all, so it
+      enters no batch and has nothing to report as withheld. The step reports
+      protection only where it had a write to withhold, which is why the count
+      is a report rather than a census.
     </li>
   </ul>
   <p>
-    Gate: the harmonize test files (<code>grep -rl harmonize
-    tests/standard_names/</code>) plus
-    <code>tests/standard_names/test_house_style_checks.py</code>. After the
-    change: <code>1 failed, 153 passed, 13 deselected in 153.82s</code>. The
-    one failure is
+    The red runs are produced by removing one mechanism each and re-running, so
+    each assertion is tied to the code it measures rather than to a shared
+    fixture. Two of them are the step's own source, temporarily changed and
+    restored; the third patches the whole step out from an out-of-tree plugin
+    file, so no test hook is carried in the repository or the environment.
+  </p>
+  <p>
+    Gate, run identically at both revisions: the harmonize test files
+    (<code>grep -rl harmonize tests/standard_names/</code>) plus
+    <code>tests/standard_names/test_house_style_checks.py</code>, under
+    <code>-m "not graph and not slow"</code>.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Revision</th><th>Result</th><th>Targets</th><th>Log</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>base <code>033ee2a30</code></td>
+        <td><code>151 passed, 13 deselected</code>, <code>EXIT=0</code></td>
+        <td>base's own expansion — 14 harmonize files plus the house-style file</td>
+        <td><code>base_gate.log</code></td>
+      </tr>
+      <tr>
+        <td>head</td>
+        <td><code>155 passed, 13 deselected</code>, <code>EXIT=0</code></td>
+        <td>the same 15 plus <code>test_harmonize_reverse_links.py</code></td>
+        <td><code>head_gate.log</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>Zero added failures, measured rather than inferred.</strong> The
+    four-test difference is exactly the four tests this node adds. The base run
+    was made from an extracted copy of the revision under node-local
+    <code>/tmp</code>, so no git state was touched. An earlier gate run of this
+    node's work showed
     <code>test_house_style_checks.py::test_audit_report_carries_the_conformance_findings</code>
-    timing out at the suite's 30 s per-test bound; it passed in 15.47 s run
-    alone and in 18.11 s on a warm re-run of the same target set, it does not
-    import <code>harmonize</code>, and its first call is
-    <code>run_embedding_preflight</code>, so the timeout is embedding-server
-    latency under a loaded node rather than an effect of this change. The gate
-    was not re-run at the base revision, so that attribution is an argument
-    from the test's import graph rather than a paired measurement.
+    timing out at the suite's 30 s per-test bound; <strong>it passed in both
+    paired runs above</strong>, and in neither paired run did it approach the
+    bound, so the earlier timeout was load, not this change — which is now a
+    measurement and no longer an inference from the import graph.
   </p>
 </section>
