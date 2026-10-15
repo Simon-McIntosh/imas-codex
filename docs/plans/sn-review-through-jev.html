@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-10-15">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -299,6 +299,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261015T120934498631-srtj-noul-polarity" data-who="reckon-build" data-when="2026-10-15T13:40:53.089Z">
     <div class="r-comment-body"><p>local commits only; the coordinator owns the merge to main</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-land-s3-noul-polarity" data-who="reckon-build" data-when="2026-10-15T19:40:00Z">
+    <div class="r-comment-body"><p>Polarity fixed and re-measured (merge <code>a19b27351</code>, review 108/120, USD 0.152). The prototype score rises to 0.638 against the quorum's 0.726 on matched names. The calibration-fit logistic reaches 0.736, a Δ of +0.028 with a lower bound of −0.036 against the −0.02 bar. Next arm: the five checks that still fire on accepted names, starting with whether the state carries what they need (the roster's spellings, the source's modifiers and owner). <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#s3-noul-polarity">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s5-choice-probability" data-who="reckon-build" data-when="2026-10-13T18:05:00Z">
     <div class="r-comment-body"><p>The content review of version 10 found that the trigger's maximum was undefined for checks decided by a categorising Choice. A Choice returns an option, not a failure probability. The section now defines it: a Choice check contributes the summed probability of its non-conforming options, and the taxonomy names the conforming options for each Choice question.</p><p>Each of the four Choice checks in <code>review_checks.yaml</code> has one conforming option: <em>the bound source object</em>, <em>one quantity</em>, <em>true of all</em> and <em>supports</em>. For the claim-support check, <em>says nothing</em> counts as a failure, because an unverifiable claim is the case retrieval exists to resolve. A Noul check contributes the probability of its true case. The same review's two stale anchors in §1 are corrected: the fanout call is at <code>workers.py:7304</code>, and <code>_run_rd_quorum_cycles</code> is defined at line 7992.</p></div>
