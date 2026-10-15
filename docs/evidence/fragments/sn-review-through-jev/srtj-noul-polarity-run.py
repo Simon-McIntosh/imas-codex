@@ -6,6 +6,7 @@ import argparse
 import asyncio
 import hashlib
 import html
+import importlib.util
 import json
 import os
 import time
@@ -815,7 +816,7 @@ def _render_fragment(result, context, receipts, checks):
     fragment = [
         '<section id="srtj-noul-polarity">',
         '<h2 id="srtj-noul-polarity-title">Name review against the incumbent quorum</h2>',
-        '<p id="srtj-noul-polarity-verdict"><strong>Verdict: shadow.</strong> '
+        '<p id="srtj-noul-polarity-reread-verdict"><strong>Verdict: shadow.</strong> '
         "The validation paired AUC lower bound against the quorum is "
         f"{result['splits']['validation']['comparisons']['quorum']['difference_interval']['lower']:+.3f}, "
         "below the required −0.02. The judge remains unwired. "
@@ -837,14 +838,14 @@ def _render_fragment(result, context, receipts, checks):
         "reviewer comments were read or handed to Jev. Three audit-only checks were not run "
         "because the complete audit preflight writes graph state; they remain unknown and are "
         "excluded from the continuous score.</p>",
-        '<p id="srtj-noul-polarity-score"><strong>Acceptance score.</strong> '
+        '<p id="srtj-noul-polarity-reread"><strong>Acceptance score.</strong> '
         "For each of four dimension Choices, average the code-derived accept indicator and the "
         "probability of its accepting category. For each of 29 answered checks, average the "
         "code-derived pass indicator and its pass probability: 1 − the Noul defect probability "
         "or the authored acceptable Choice option probability. Average the four dimension "
         "values and the 29 check values separately, then average those two means. A missing "
         "answer excludes a name. This score was fixed before the saved answers were rescored.</p>",
-        '<figure id="srtj-noul-polarity-figure">'
+        '<figure id="srtj-noul-polarity-auc-figure">'
         '<img src="/imas-codex/figures/sn-review-through-jev/srtj-noul-polarity/paired-auc.svg" '
         'alt="Validation AUC and 95 percent intervals for Jev and six incumbent reviewers plus quorum, '
         'with paired AUC differences at right">'
@@ -884,8 +885,8 @@ def _render_fragment(result, context, receipts, checks):
     cost = result["cost_latency_per_name"]
     fragment.extend(
         [
-            '<h3 id="srtj-noul-polarity-stability-title">Stability and operating point</h3>',
-            f'<p id="srtj-noul-polarity-stability">On the same fixed {stability["names"]} names, reversing every '
+            '<h3 id="srtj-noul-polarity-frozen-state-title">Stability and operating point</h3>',
+            f'<p id="srtj-noul-polarity-frozen-state">On the same fixed {stability["names"]} names, reversing every '
             f"Choice changed {stability['option_order']['flips']} of "
             f"{stability['option_order']['n']} decisions "
             f"({stability['option_order']['flip_rate']:.2%}); asking the frozen state twice changed "
@@ -897,8 +898,8 @@ def _render_fragment(result, context, receipts, checks):
             f"{result['operating_point']['report']['confusion'][1][0]} positive names were "
             "missed, so accuracy at that cut is "
             f"{result['operating_point']['report']['accuracy']:.3f}.</p>",
-            '<h3 id="srtj-noul-polarity-cost-title">Booked cost and latency</h3>',
-            f'<p id="srtj-noul-polarity-cost">The {cost["n"]} base decisions booked '
+            '<h3 id="srtj-noul-polarity-judge-cost-title">Booked cost and latency</h3>',
+            f'<p id="srtj-noul-polarity-judge-cost">The {cost["n"]} base decisions booked '
             f"USD {cost['total_cost']:.6f}, or USD {cost['mean_cost']:.6f} per name, "
             f"at {cost['mean_latency_s']:.3f} seconds mean and "
             f"{cost['median_latency_s']:.3f} seconds median wall time per name. "
@@ -1119,9 +1120,7 @@ def _polarity():
 
     def inverted(table):
         return sorted(
-            check_id
-            for check_id, row in table.items()
-            if row["auc"]["upper"] < 0.5
+            check_id for check_id, row in table.items() if row["auc"]["upper"] < 0.5
         )
 
     result = json.loads(RESULTS.read_text())
@@ -1183,6 +1182,180 @@ def _interval(row):
     )
 
 
+DIAGNOSIS = HERE / "srtj-name-signal-diagnosis-run.py"
+
+
+def _diagnosis_module():
+    """Import the diagnosis script so its aggregation arms are reused, not copied."""
+
+    spec = importlib.util.spec_from_file_location("_srtj_diagnosis", DIAGNOSIS)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _aggregations():
+    """Read validation once through the two arms the diagnosis fixed on calibration.
+
+    The diagnosis fixed a selection on the calibration split, then read the
+    validation split once through each arm. Both arms are recomputed here from
+    the re-measurement receipts by calling the diagnosis script's own functions,
+    so the aggregation is the same aggregation and only its input answers
+    differ.
+    """
+
+    diagnosis = _diagnosis_module()
+    context = json.loads(CONTEXT.read_text())
+    answers = {
+        name: row["answers"]
+        for (mode, name), row in _load_receipts().items()
+        if mode == "base" and row["answered"]
+    }
+    checks = [check for check in load_review_checks()[0] if check.axis == NAME_AXIS]
+    table = diagnosis._question_table(checks)
+    accepted = diagnosis._accepted_dimension(table)
+    rows = diagnosis._build_rows(
+        load_labelled_fixture(FIXTURE), context, answers, checks, table, accepted
+    )
+    calibration = [row for row in rows if row["split"] == "calibration"]
+    validation = [row for row in rows if row["split"] == "validation"]
+    question_names = list(table.keys())
+    per_question = diagnosis._per_question(calibration, question_names)
+    selected = [item["question"] for item in per_question if item["excludes_half"]]
+    aligned = {
+        item["question"]: item["auc"]["point"] >= 0.5
+        for item in per_question
+        if item["excludes_half"] and item["auc"] is not None
+    }
+    model = diagnosis._fit_logistic(calibration, question_names)
+    arms = {
+        "selected_mean": diagnosis._mean_over_selected(rows, selected, aligned),
+        "logistic_l2": diagnosis._logistic_scores(model, rows, question_names),
+    }
+    diagnosis_result = json.loads(diagnosis.RESULTS.read_text())
+    result = json.loads(RESULTS.read_text())
+    result["aggregations"] = {}
+    for key, scores in arms.items():
+        report = {
+            "calibration": diagnosis._aggregate_report(calibration, scores),
+            "validation": diagnosis._aggregate_report(validation, scores),
+            "c": float(model.C_[0]) if key == "logistic_l2" else None,
+        }
+        report["validation"].update(diagnosis._quorum_comparison(validation, scores))
+        prior = diagnosis_result["aggregations"].get(key, {}).get("validation", {})
+        if prior.get("auc"):
+            report["diagnosis_validation"] = {
+                "auc": prior["auc"],
+                "quorum_difference": prior["quorum_difference_interval"]["point"],
+            }
+        result["aggregations"][key] = report
+    result["aggregation_selection"] = {
+        "rule": (
+            "A question is selected when its calibration 95% copy-group bootstrap "
+            "interval excludes 0.5; a selected question whose AUC is below 0.5 is "
+            "sign-aligned by complementing its value. The L2 logistic regression is "
+            "fitted on the calibration split alone, its regularisation chosen by "
+            "grouped cross-validation inside calibration."
+        ),
+        "questions": len(question_names),
+        "selected_n": len(selected),
+        "selected": selected,
+    }
+    result["validation_reads"] = {"selected_mean": 1, "logistic_l2": 1}
+    _save_json(RESULTS, result)
+    print(
+        json.dumps(
+            {
+                "selected_n": len(selected),
+                "validation": {
+                    key: result["aggregations"][key]["validation"]["auc"]
+                    for key in result["aggregations"]
+                },
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    _polarity_fragment(result)
+
+
+def _aggregation_rows(result):
+    """The fragment's report of the two arms the diagnosis fixed on calibration."""
+
+    aggregations = result.get("aggregations")
+    if not aggregations:
+        return []
+    selection = result.get("aggregation_selection", {})
+    rows = [
+        '<h3 id="srtj-noul-polarity-aggregations-title">The two further aggregation '
+        "arms, fixed on calibration</h3>",
+        '<p id="srtj-noul-polarity-aggregations-note">The brief names three readings of '
+        "the same receipts. The primary score is the prototype arm above; the other two "
+        "are the sign-aligned mean of the selected questions and an L2 logistic "
+        "regression over every question. Both are fixed on the calibration split — "
+        "selection by a calibration interval excluding a half, and the regression's "
+        "regularisation by grouped cross-validation inside calibration — and the "
+        "validation split is then read once per arm. The arms are computed by calling "
+        "the diagnosis script's own functions on the re-measured answers, so the "
+        "aggregation is the diagnosis's and only its input differs.</p>",
+        '<p id="srtj-noul-polarity-aggregations-selection">The selection rule keeps '
+        f"{selection.get('selected_n', 0)} of the {selection.get('questions', 0)} "
+        "questions on the calibration split, each sign-aligned so its higher values "
+        "point at acceptance.</p>",
+        '<table id="srtj-noul-polarity-aggregations-table"><thead><tr><th>Arm</th>'
+        "<th>Calibration AUC</th><th>Validation AUC</th>"
+        "<th>Paired difference against the quorum on validation</th></tr></thead><tbody>",
+    ]
+    for key, label in (
+        ("selected_mean", "Sign-aligned mean of the selected questions"),
+        ("logistic_l2", "L2 logistic regression over every question"),
+    ):
+        arm = aggregations.get(key)
+        if not arm:
+            continue
+        calibration = arm["calibration"]["auc"]
+        validation = arm["validation"]["auc"]
+        difference = arm["validation"]["quorum_difference_interval"]
+        rows.append(
+            f"<tr><td>{label}</td>"
+            f"<td>{calibration['point']:.3f} "
+            f"[{calibration['lower']:.3f}, {calibration['upper']:.3f}]</td>"
+            f"<td>{validation['point']:.3f} "
+            f"[{validation['lower']:.3f}, {validation['upper']:.3f}]</td>"
+            f"<td>{difference['point']:+.3f} "
+            f"[{difference['lower']:+.3f}, {difference['upper']:+.3f}] on "
+            f"{arm['validation']['quorum_matched_n']} names</td></tr>"
+        )
+    regularisation = aggregations.get("logistic_l2", {}).get("c")
+    rows += [
+        "</tbody></table>",
+        '<p id="srtj-noul-polarity-aggregations-fit">The regression settles on '
+        f"regularisation C = {regularisation:.2f} by grouped cross-validation on the "
+        "calibration names alone.</p>",
+    ]
+    prior = [
+        (
+            key,
+            aggregations[key]["diagnosis_validation"],
+        )
+        for key in ("selected_mean", "logistic_l2")
+        if aggregations.get(key, {}).get("diagnosis_validation")
+    ]
+    if len(prior) == 2:
+        rows.append(
+            '<p id="srtj-noul-polarity-aggregations-comparison">Against the diagnosis, '
+            "which read the same two arms from the pre-rewording answers on the same "
+            "fixture, the sign-aligned mean moves from "
+            f"{prior[0][1]['auc']['point']:.3f} to "
+            f"{aggregations['selected_mean']['validation']['auc']['point']:.3f} and the "
+            "regression from "
+            f"{prior[1][1]['auc']['point']:.3f} to "
+            f"{aggregations['logistic_l2']['validation']['auc']['point']:.3f}; the "
+            "regression leads the mean in both readings.</p>"
+        )
+    return rows
+
+
 def _polarity_fragment(result):
     """Append the rewording and polarity sections to the measurement fragment."""
 
@@ -1232,9 +1405,9 @@ def _polarity_fragment(result):
         "excludes a half. The survivors are defect-worded "
         "questions no rewording touches, so their inversions are model behaviour rather "
         "than wording.</p>",
-        '<figure id="srtj-noul-polarity-figure">'
+        '<figure id="srtj-noul-polarity-auc-figure">'
         '<img src="/imas-codex/figures/sn-review-through-jev/srtj-noul-polarity/per-question-polarity.svg" '
-        "alt=\"Per-question calibration AUC before and after rewording, one line per Noul "
+        'alt="Per-question calibration AUC before and after rewording, one line per Noul '
         'from its old to its new AUC"></figure>',
         '<table id="srtj-noul-polarity-table"><thead><tr><th>Check</th>'
         "<th>Reworded</th><th>Before</th><th>After</th></tr></thead><tbody>",
@@ -1251,8 +1424,8 @@ def _polarity_fragment(result):
         )
     rows += [
         "</tbody></table>",
-        '<h3 id="srtj-noul-polarity-score-title">The re-measure</h3>',
-        '<p id="srtj-noul-polarity-score">Golden A was re-run through the same driver, '
+        '<h3 id="srtj-noul-polarity-reread-title">The re-measure</h3>',
+        '<p id="srtj-noul-polarity-reread">Golden A was re-run through the same driver, '
         "fixture, splits, state and comparators, changing only the taxonomy's Noul "
         "wording and its polarity field. The primary score's calibration AUC moves from "
         "0.515 [0.464, 0.568] to "
@@ -1278,7 +1451,7 @@ def _polarity_fragment(result):
         f"Of the fixed {stability['names']} names, reversing every Choice list flips "
         f"{stability['option_order']['flips']} of {stability['option_order']['n']} "
         "answers.</p>",
-        '<p id="srtj-noul-polarity-stability">Frozen-state variation over the same names '
+        '<p id="srtj-noul-polarity-frozen-state">Frozen-state variation over the same names '
         "changes "
         + ", ".join(
             f"{name} {row['change_rate']:.2f}"
@@ -1290,7 +1463,7 @@ def _polarity_fragment(result):
         f"calibration names and reported on the {operating['n']} validation names at "
         f"accuracy {operating['report']['accuracy']:.3f} and macro F1 "
         f"{operating['report']['macro_f1']:.3f}.</p>",
-        '<p id="srtj-noul-polarity-cost">The '
+        '<p id="srtj-noul-polarity-judge-cost">The '
         f"{cost['n']} base decisions booked USD {cost['total_cost']:.6f}, a mean USD "
         f"{cost['mean_cost']:.6f} and a median {cost['median_latency_s']:.2f} s per name; "
         "the incumbent reviewer's recorded cost per name runs from USD "
@@ -1301,7 +1474,7 @@ def _polarity_fragment(result):
             )
         )
         + ".</p>",
-        '<p id="srtj-noul-polarity-verdict"><strong>Verdict: '
+        '<p id="srtj-noul-polarity-reread-verdict"><strong>Verdict: '
         f"{result['verdict']['status']}, unchanged.</strong> The rewording raises the "
         "primary score by "
         f"{result['splits']['validation']['jev']['auc']['point'] - 0.5602:+.3f} AUC on "
@@ -1314,14 +1487,15 @@ def _polarity_fragment(result):
         "incumbent quorum; what changed is that the polarity is now stated in the data "
         "rather than inferred from a question's wording.</p>",
     ]
+    rows += _aggregation_rows(result)
     text = FRAGMENT.read_text()
-    marker = '\n<h3 id="srtj-noul-polarity-rewording-title">'
+    marker = '<h3 id="srtj-noul-polarity-rewording-title">'
     if marker in text:
         text = text.split(marker)[0] + "\n"
-    if not text.rstrip().endswith("</section>"):
-        raise RuntimeError("the measurement fragment does not end in its section close")
-    head = text.rstrip()[: -len("</section>")]
-    FRAGMENT.write_text(head + "\n".join(rows) + "\n</section>\n")
+    stripped = text.rstrip()
+    if stripped.endswith("</section>"):
+        stripped = stripped[: -len("</section>")]
+    FRAGMENT.write_text(stripped + "\n" + "\n".join(rows) + "\n</section>\n")
 
 
 def _polarity_plot(before, after):
@@ -1410,6 +1584,62 @@ def _polarity_plot(before, after):
     )
 
 
+def _verify(results_path=None, fragment_path=None):
+    """Assert the re-measure reports both aggregation arms, in JSON and fragment.
+
+    The two arms are the sign-aligned mean of the selected questions and the L2
+    logistic regression, each fixed on calibration. The check reads the
+    committed artifacts rather than the run's own receipts, so it fails when an
+    arm is missing from what a reader of the fragment or the results JSON sees.
+    """
+
+    results = json.loads((results_path or RESULTS).read_text())
+    fragment = (fragment_path or FRAGMENT).read_text()
+    aggregations = results.get("aggregations") or {}
+    missing = [
+        key for key in ("selected_mean", "logistic_l2") if key not in aggregations
+    ]
+    if missing:
+        raise RuntimeError(
+            f"the results JSON reports no {', '.join(missing)} arm under aggregations"
+        )
+    for key in ("selected_mean", "logistic_l2"):
+        arm = aggregations[key]
+        for split in ("calibration", "validation"):
+            if not arm.get(split, {}).get("auc"):
+                raise RuntimeError(f"the {key} arm reports no {split} AUC")
+        if not arm["validation"].get("quorum_difference_interval"):
+            raise RuntimeError(f"the {key} arm reports no paired quorum difference")
+    if aggregations["logistic_l2"].get("c") is None:
+        raise RuntimeError("the regression arm reports no chosen regularisation")
+    if aggregations["selected_mean"].get("c") is not None:
+        raise RuntimeError("the mean arm reports a regularisation it does not have")
+    if "aggregations-table" not in fragment:
+        raise RuntimeError("the fragment carries no aggregation table")
+    for label in (
+        "Sign-aligned mean of the selected questions",
+        "L2 logistic regression over every question",
+    ):
+        if label not in fragment:
+            raise RuntimeError(f"the fragment does not report the {label!r} arm")
+    print(
+        json.dumps(
+            {
+                "arms": sorted(aggregations),
+                "selected_n": results.get("aggregation_selection", {}).get(
+                    "selected_n"
+                ),
+                "validation": {
+                    key: aggregations[key]["validation"]["auc"]["point"]
+                    for key in aggregations
+                },
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1424,9 +1654,13 @@ def main():
             "rescore",
             "plot",
             "polarity",
+            "aggregations",
+            "verify",
         ),
     )
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--results", type=Path, default=None)
+    parser.add_argument("--fragment", type=Path, default=None)
     parser.add_argument("--concurrency", type=int, default=8)
     args = parser.parse_args()
     RUN.mkdir(parents=True, exist_ok=True)
@@ -1442,6 +1676,10 @@ def main():
         _plot()
     elif args.action == "polarity":
         _polarity()
+    elif args.action == "aggregations":
+        _aggregations()
+    elif args.action == "verify":
+        _verify(args.results, args.fragment)
     else:
         asyncio.run(_run(args.action, args.limit, args.concurrency))
 
