@@ -1,0 +1,527 @@
+{
+    "authority_mode": "external_reviewed",
+    "operation_id": "record-unlinked-refine-product-retirement-that-history-left-unrecorded",
+    "orphan_policy": "refuse",
+    "receipt_policy": {
+        "cardinality": "per_target",
+        "expected_count": "admitted_rows",
+        "id": "one-per-retired-identity",
+        "link_participant_kind": "standard_name",
+        "operation": "supersede_exhausted_orphan",
+        "replay_projection": ["manifest_sha256", "row_id"],
+    },
+    "repair_rows": [
+        "beam_area_of_neutral_beam_injector",
+        "equilibrium_weight_of_poloidal_magnetic_field_probe",
+        "initial_incident_wave_stokes_parameter_at_line_of_sight",
+        "ion_vibrational_level",
+        "radial_outline_of_plasma_facing_component",
+        "radial_plasma_momentum_source",
+        "ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density",
+        "time_derivative_of_bremsstrahlung_count_at_detector_pixel",
+        "toroidal_plasma_beta",
+        "wave_power_at_measurement_position",
+        "absorbed_power_of_beam_tracing_beam",
+    ],
+    "rows": [
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": ["beam_area_of_neutral_beam_injector"],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": ["beam_area_of_neutral_beam_injector"],
+                },
+            ],
+            "id": "beam_area_of_neutral_beam_injector",
+            "identity": {
+                "id": "beam_area_of_neutral_beam_injector",
+                "kind": "standard_name",
+                "target_id": "beam_area_of_neutral_beam_injector",
+            },
+            "mutations": [
+                {
+                    "id": "beam_area_of_neutral_beam_injector:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "beam_area_of_neutral_beam_injector",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "beam_area_of_neutral_beam_injector",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": [
+                        "equilibrium_weight_of_poloidal_magnetic_field_probe"
+                    ],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": [
+                        "equilibrium_weight_of_poloidal_magnetic_field_probe"
+                    ],
+                },
+            ],
+            "id": "equilibrium_weight_of_poloidal_magnetic_field_probe",
+            "identity": {
+                "id": "equilibrium_weight_of_poloidal_magnetic_field_probe",
+                "kind": "standard_name",
+                "target_id": "equilibrium_weight_of_poloidal_magnetic_field_probe",
+            },
+            "mutations": [
+                {
+                    "id": "equilibrium_weight_of_poloidal_magnetic_field_probe:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "equilibrium_weight_of_poloidal_magnetic_field_probe",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "equilibrium_weight_of_poloidal_magnetic_field_probe",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": [
+                        "initial_incident_wave_stokes_parameter_at_line_of_sight"
+                    ],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": [
+                        "initial_incident_wave_stokes_parameter_at_line_of_sight"
+                    ],
+                },
+            ],
+            "id": "initial_incident_wave_stokes_parameter_at_line_of_sight",
+            "identity": {
+                "id": "initial_incident_wave_stokes_parameter_at_line_of_sight",
+                "kind": "standard_name",
+                "target_id": "initial_incident_wave_stokes_parameter_at_line_of_sight",
+            },
+            "mutations": [
+                {
+                    "id": "initial_incident_wave_stokes_parameter_at_line_of_sight:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "initial_incident_wave_stokes_parameter_at_line_of_sight",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "initial_incident_wave_stokes_parameter_at_line_of_sight",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": ["ion_vibrational_level"],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": ["ion_vibrational_level"],
+                },
+            ],
+            "id": "ion_vibrational_level",
+            "identity": {
+                "id": "ion_vibrational_level",
+                "kind": "standard_name",
+                "target_id": "ion_vibrational_level",
+            },
+            "mutations": [
+                {
+                    "id": "ion_vibrational_level:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "ion_vibrational_level",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "ion_vibrational_level",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": ["radial_outline_of_plasma_facing_component"],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": ["radial_outline_of_plasma_facing_component"],
+                },
+            ],
+            "id": "radial_outline_of_plasma_facing_component",
+            "identity": {
+                "id": "radial_outline_of_plasma_facing_component",
+                "kind": "standard_name",
+                "target_id": "radial_outline_of_plasma_facing_component",
+            },
+            "mutations": [
+                {
+                    "id": "radial_outline_of_plasma_facing_component:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "radial_outline_of_plasma_facing_component",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "radial_outline_of_plasma_facing_component",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": ["radial_plasma_momentum_source"],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": ["radial_plasma_momentum_source"],
+                },
+            ],
+            "id": "radial_plasma_momentum_source",
+            "identity": {
+                "id": "radial_plasma_momentum_source",
+                "kind": "standard_name",
+                "target_id": "radial_plasma_momentum_source",
+            },
+            "mutations": [
+                {
+                    "id": "radial_plasma_momentum_source:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "radial_plasma_momentum_source",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "radial_plasma_momentum_source",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": [
+                        "ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density"
+                    ],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": [
+                        "ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density"
+                    ],
+                },
+            ],
+            "id": "ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density",
+            "identity": {
+                "id": "ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density",
+                "kind": "standard_name",
+                "target_id": "ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density",
+            },
+            "mutations": [
+                {
+                    "id": "ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "ratio_of_neutral_hydrogenic_density_to_difference_of_total_neutral_hydrogenic_density_and_neutral_hydrogenic_density",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": [
+                        "time_derivative_of_bremsstrahlung_count_at_detector_pixel"
+                    ],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": [
+                        "time_derivative_of_bremsstrahlung_count_at_detector_pixel"
+                    ],
+                },
+            ],
+            "id": "time_derivative_of_bremsstrahlung_count_at_detector_pixel",
+            "identity": {
+                "id": "time_derivative_of_bremsstrahlung_count_at_detector_pixel",
+                "kind": "standard_name",
+                "target_id": "time_derivative_of_bremsstrahlung_count_at_detector_pixel",
+            },
+            "mutations": [
+                {
+                    "id": "time_derivative_of_bremsstrahlung_count_at_detector_pixel:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "time_derivative_of_bremsstrahlung_count_at_detector_pixel",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "time_derivative_of_bremsstrahlung_count_at_detector_pixel",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": ["toroidal_plasma_beta"],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": ["toroidal_plasma_beta"],
+                },
+            ],
+            "id": "toroidal_plasma_beta",
+            "identity": {
+                "id": "toroidal_plasma_beta",
+                "kind": "standard_name",
+                "target_id": "toroidal_plasma_beta",
+            },
+            "mutations": [
+                {
+                    "id": "toroidal_plasma_beta:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "toroidal_plasma_beta",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "toroidal_plasma_beta",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": ["wave_power_at_measurement_position"],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": ["wave_power_at_measurement_position"],
+                },
+            ],
+            "id": "wave_power_at_measurement_position",
+            "identity": {
+                "id": "wave_power_at_measurement_position",
+                "kind": "standard_name",
+                "target_id": "wave_power_at_measurement_position",
+            },
+            "mutations": [
+                {
+                    "id": "wave_power_at_measurement_position:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "wave_power_at_measurement_position",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "wave_power_at_measurement_position",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+        {
+            "guards": [
+                {
+                    "id": "structural-legitimacy",
+                    "implementation": "structural-legitimacy",
+                    "kind": "semantic_authority",
+                    "participant_ids": ["absorbed_power_of_beam_tracing_beam"],
+                },
+                {
+                    "id": "out-of-allowlist-immutability",
+                    "implementation": "out-of-allowlist-immutability",
+                    "kind": "collateral_immutability",
+                    "participant_ids": ["absorbed_power_of_beam_tracing_beam"],
+                },
+            ],
+            "id": "absorbed_power_of_beam_tracing_beam",
+            "identity": {
+                "id": "absorbed_power_of_beam_tracing_beam",
+                "kind": "standard_name",
+                "target_id": "absorbed_power_of_beam_tracing_beam",
+            },
+            "mutations": [
+                {
+                    "id": "absorbed_power_of_beam_tracing_beam:supersede",
+                    "kind": "supersede",
+                    "order": 0,
+                    "participant_id": "absorbed_power_of_beam_tracing_beam",
+                }
+            ],
+            "orphan_policy": "refuse",
+            "participants": [
+                {
+                    "graph_label": "StandardName",
+                    "id": "absorbed_power_of_beam_tracing_beam",
+                    "kind": "node",
+                }
+            ],
+            "selection": {
+                "id": "artifact-rows",
+                "mode": "exact_complete_signed_cohort",
+                "predicate": "artifact-rows",
+            },
+        },
+    ],
+    "schema": "imas-codex.repair-authority.v1",
+    "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows",
+    },
+    "signature": {
+        "canonicalization": "json-sort-keys-v1",
+        "sha256": "056f273b4034076cd05c3b7a11348aad04d4499421005b4e19ae40328036a0c8",
+    },
+}
