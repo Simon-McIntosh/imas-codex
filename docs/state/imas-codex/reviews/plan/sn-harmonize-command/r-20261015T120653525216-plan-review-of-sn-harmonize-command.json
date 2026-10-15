@@ -1,0 +1,43 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T12:14:03.128Z",
+  "dispatched_at": "2026-10-15T12:07:15Z",
+  "findings": [],
+  "plan_fingerprint": "827a09798a879a7db4a95608ed3cf0d921bae722b572da3835ba068e4a4b22fa",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 97,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261015T120653525216-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "92a08824134a0af4a68827967aaf686d416d417b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `recommended_name_protections` (protection.py:212), `preview_recommended_refusals` (harmonize.py:1382) and `refuse_recommended_members` (harmonize.py:1412), `mark_members_for_regen` (harmonize.py:677), `select_anchor`/`fetch_pattern_family` (families.py:479/605) all resolve, and the cited fragment exists.",
+    "done_when": "pass \u2014 \u00a73's done-when names measurable criteria (zero lint errors, one opening template, no non-canonical flux-surface-average equation, a second `--apply` planning zero calls) with negative controls (a deliberately failed anchor leaves its members untouched; the refusal test fails when the guard is removed), which is unchanged by this revision.",
+    "evidence_paths": "pass \u2014 \u00a73's convergence evidence is the durable fragment `docs/evidence/fragments/sn-harmonize-command/shc-convergence-diagnosis.html`, not a scratchpad.",
+    "naming": "pass \u2014 the changed paragraph names real symbols (`recommended_name_protections`, `preview_recommended_refusals`, `refuse_recommended_members`) with no plan label, stage name, ticket number or changelog prose.",
+    "reasoning": "pass \u2014 the revised sentence's mechanism claim matches the code: `protection.py:212` defines `recommended_name_protections`, whose docstring names the roster/`approved`/`contested` classes, and both harmonize.py callers named on the line import and invoke it, so the refusal runs on the real path with its callers named and \u00a714 supplies the open-request limit.",
+    "single_goal": "pass \u2014 \u00a73 remains one deliverable, the anchor-first apply mechanism and the converged outcome it must produce; the four convergence repairs each live in their own section.",
+    "wiring": "pass \u2014 \u00a73's `plan-section-depends-on` (s3 \u2192 sn-house-style#s4, sn-catalog-grouping#s2, \u00a75\u2013\u00a714) matches its own done-when \"after \u00a75 to \u00a714 have landed\", and the changed sentence's \"\u00a714 limits the roster reason to open requests\" agrees with \u00a714's scope."
+  },
+  "section_digests": {
+    "_document": "d03539a976c09b73da85fb1de622180df319c0e89b1ee54e3357cff3c98f02df",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s10": "d1bb9bb9dfcae650a5653ea3bbdb319e3ecf676ab9a3cc351968b46d2f10607a",
+    "s11": "cb00438301915812ef678ff6517b2477e98180338b6d1863e1a73e87af25a889",
+    "s12": "783b5bfd673def7e7a1b834abaabe5858e0ea763e54aadcb2a31c7d0cab015a5",
+    "s13": "88983292b8300bd95f94fff195f64665cac496fa8f55525c8c1193a87f733c8a",
+    "s14": "67e7f4935cc4e5d291b08ba3905246ae0c06beab096f9c9149e7f3aecb07773b",
+    "s2": "767a2fe2b092486b6f4c5277a919edca224cd3a5f242f4bf747c1657bda4d5af",
+    "s3": "e3d3d86221bf6b467ad28d838cc1f43d37f5c8088c1318d3e488553f05b12146",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa",
+    "s5": "ebb66a7ebb10c4aad132f61567b089ce315607a670a86403166cdf201a496bbf",
+    "s6": "74bec4f3403c9293f29290ca6de60b070dd4973bb9e04aef58c53838d9ca9932",
+    "s7": "2eed016a7c36b87fbd866c3a21ae396d57071d75eebb6222595db5e505dd8701",
+    "s8": "bc1625cd02b97ea52367a81c977f73194ffee6eb11240f56cbecfd9adb7b9de9",
+    "s9": "a56a7ae67d3f4140a7d38abbe65fb56d981b5b3bff3ced30fa63005c9dfebcb3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T12:15:28.647535+00:00"
+}
