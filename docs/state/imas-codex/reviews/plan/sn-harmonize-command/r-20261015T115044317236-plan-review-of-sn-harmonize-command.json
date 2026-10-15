@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T11:59:13.288Z",
+  "dispatched_at": "2026-10-15T11:51:19Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:141",
+      "id": "reasoning-1",
+      "reason": "a node implementing \u00a73's guard from this sentence would extend `automatic_deletion_protections` (a deletion-path query reading `catalog_pr_number`/`exported_at`) and find roster/contested already written, so the sentence must be corrected to name `recommended_name_protections`/`_frozen_roster_requests` and drop the stale \"gains\".",
+      "text": "\u00a73 states \"The refusal reads ... protection.py ... (`automatic_deletion_protections` names `approved` and a recorded catalog pull request): it gains the roster and `contested` reasons, and the code at `imas_codex/standard_names/harmonize.py:1396` and `:1427` shows the apply refusal imports and calls `recommended_name_protections`, not `automatic_deletion_protections`, and that function already returns roster, `approved` and `contested` reasons (`protection.py:235-254`) \u2014 so the named function is not on the refusal path and the change \u00a73 describes is already present in a different function",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "94261f85db604b48a9690aa1ea95d2a75aca2c1b785331bc1c6cbba6348bf141",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 96,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261015T115044317236-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "cbdc020c01bb2a00f990cccc6292b03fe82167de",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `shc-convergence-diagnosis.html` and `shc-reverse-links.html` exist under `docs/evidence/fragments/sn-harmonize-command/`, comment `c-s3-lead-ruling-guard` is present, and the extensionless hrefs resolve as `<path>.html`.",
+    "done_when": "pass \u2014 \u00a73 names controls (a deliberately failed anchor leaves members untouched; the refusal test fails when the guard is removed; a second `--apply` plans zero calls) and \u00a714 names one per test (\"fails with its mechanism removed\"); both measures (lint counts, per-state refusal) can fail.",
+    "evidence_paths": "pass \u2014 \u00a73 cites the convergence-diagnosis fragment on a durable path; \u00a714's evidence is the live dry-run run, which \u00a713 (a declared s3 dependency) makes log to `~/.local/share/imas-codex/logs/`.",
+    "naming": "pass \u2014 \u00a714's symbols are mechanism-named (`_frozen_roster_requests`, `recommended_name_protections`) and no plan label or ticket number is proposed for code.",
+    "reasoning": "a finding \u2014 \u00a73 names `automatic_deletion_protections` as the function the apply refusal reads and says it \"gains the roster and contested reasons\", but the refusal path is `recommended_name_protections`/`_frozen_roster_requests`, which already carry those reasons and read different evidence.",
+    "single_goal": "pass \u2014 \u00a73 is the apply mechanism alone (the four convergence repairs now each have their own section) and \u00a714 is one deliverable, the open-request guard scope.",
+    "wiring": "pass \u2014 s3's `plan-section-depends-on` now lists \u00a75\u2013\u00a714 and its own done-when reads \"after \u00a75 to \u00a714 have landed\"; \u00a714 declares no plan-section dependency and needs none."
+  },
+  "section_digests": {
+    "_document": "d03539a976c09b73da85fb1de622180df319c0e89b1ee54e3357cff3c98f02df",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s10": "d1bb9bb9dfcae650a5653ea3bbdb319e3ecf676ab9a3cc351968b46d2f10607a",
+    "s11": "cb00438301915812ef678ff6517b2477e98180338b6d1863e1a73e87af25a889",
+    "s12": "783b5bfd673def7e7a1b834abaabe5858e0ea763e54aadcb2a31c7d0cab015a5",
+    "s13": "88983292b8300bd95f94fff195f64665cac496fa8f55525c8c1193a87f733c8a",
+    "s14": "67e7f4935cc4e5d291b08ba3905246ae0c06beab096f9c9149e7f3aecb07773b",
+    "s2": "767a2fe2b092486b6f4c5277a919edca224cd3a5f242f4bf747c1657bda4d5af",
+    "s3": "c6d9b66481857cc66d875baccfb5043cc79d3ac2396802ef2b1877f0bde1fa69",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa",
+    "s5": "ebb66a7ebb10c4aad132f61567b089ce315607a670a86403166cdf201a496bbf",
+    "s6": "74bec4f3403c9293f29290ca6de60b070dd4973bb9e04aef58c53838d9ca9932",
+    "s7": "2eed016a7c36b87fbd866c3a21ae396d57071d75eebb6222595db5e505dd8701",
+    "s8": "bc1625cd02b97ea52367a81c977f73194ffee6eb11240f56cbecfd9adb7b9de9",
+    "s9": "a56a7ae67d3f4140a7d38abbe65fb56d981b5b3bff3ced30fa63005c9dfebcb3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T12:05:17.944612+00:00"
+}
