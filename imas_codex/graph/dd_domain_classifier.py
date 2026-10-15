@@ -1491,6 +1491,29 @@ def compute_domain_input_hash(path_context: dict[str, Any]) -> str:
 # =============================================================================
 
 
+#: DD documentation clauses that name a container slot rather than a subject.
+_PLACEHOLDER_DOCUMENTATION = frozenset({"value", "values", "n/a", "none"})
+
+
+def carries_own_subject(path: Mapping[str, Any]) -> bool:
+    """Whether a path states a subject a classifier can judge on its own.
+
+    A path's own evidence is its enriched description. A leaf that fills a
+    container slot carries the container's documentation instead, and for a
+    ``value`` leaf that documentation is the placeholder ``Value``. Judging
+    such a path on the placeholder asserts a subject it does not have, so it is
+    left to the inheritance pass, where it takes its parent's domain rather
+    than a domain invented for the word "Value".
+
+    A path with no documentation either keeps the older behaviour: its path and
+    units still carry judgeable context, and it is classified as before.
+    """
+    if str(path.get("description") or "").strip():
+        return True
+    documentation = str(path.get("documentation") or "").strip().casefold()
+    return documentation not in _PLACEHOLDER_DOCUMENTATION
+
+
 def _query_unclassified_paths(
     gc: GraphClient,
     *,
@@ -1502,8 +1525,9 @@ def _query_unclassified_paths(
     Returns paths that:
     - Have a classifiable node_category (not coordinate/identifier/error)
     - Are not in infrastructure subtrees
-    - Have a description (structural paths without descriptions fall
-      through to Tier 2 inheritance instead)
+    - Carry a subject of their own (a description, or documentation that is
+      not a container placeholder; see :func:`carries_own_subject`). A path
+      lacking one falls through to Tier 2 inheritance instead.
     - Have not been classified yet (or force=True)
     """
     ids_clause = _ids_filter_clause(ids_filter, "n")
@@ -1524,9 +1548,10 @@ def _query_unclassified_paths(
       {needs_clause}
       {ids_clause}
     RETURN n.id AS id, n.node_category AS node_category,
-           n.description AS description, n.unit AS units
+           n.description AS description, n.unit AS units,
+           n.documentation AS documentation
     """
-    return gc.query(cypher, **params)
+    return [row for row in gc.query(cypher, **params) if carries_own_subject(row)]
 
 
 def _count_residual_unclassified(

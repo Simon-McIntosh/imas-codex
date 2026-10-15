@@ -1,0 +1,61 @@
+<section id="scg-summary-domain-guidance">
+<h2>A summary quantity takes the domain of the physics it names</h2>
+<p>The guidance told the classifier that a summary container decides the domain of everything filed under it, so a DD path such as <code>summary/fusion/neutron_rates/total/value</code> could read as a data product rather than as neutronics. The graph holds that reading: eight of the seventeen labelled <code>summary</code> paths below carry <code>data_management</code> in the graph today, and the stored answers agree with the paths' physics labels on only 0.3529 of them. The rule is corrected here, the classifier's path selection is corrected with it, and both changes are measured at the path.</p>
+
+<h3>Changed guidance rules</h3>
+<p>Ten clauses, five in <code>data_management</code> and five outside it, decided a domain by the container a path is filed in, or by the IDS it sits under. Each is corrected to the physics the path names.</p>
+<table><thead><tr><th>Where</th><th>Before</th><th>After</th></tr></thead><tbody>
+<tr><td><code>data_management.includes</code></td><td>“summary and integrated global quantities — <code>summary/*</code>”, plus “assembled data products that combine several sources” and “archives and derived products intended for downstream use”</td><td>Dataset description, provenance and FAIR metadata (<code>dataset_description/*</code>, <code>dataset_fair/*</code>); archives, catalogues and manifests of a dataset; records of what a dataset holds, when it was produced and by what. The <code>summary/*</code> claim is removed.</td></tr>
+<tr><td><code>data_management.scope</code></td><td>Claimed the summary product and its global quantities as the domain's own subject</td><td>“The dataset as such rather than the physics it records… A quantity that names a physical quantity takes that quantity's domain even when it is stored under a container such as <code>summary</code>, because the container records where the value is filed and not what it measures.”</td></tr>
+<tr><td><code>data_management.excludes[1].rule</code> (vs <code>core_plasma_physics</code>)</td><td>“…a product that summarises many of them is data_management. <strong>The summary's own container decides the domain, not the physical quantity it happens to name.</strong>”</td><td>“…a summary quantity takes the domain of the physical quantity it names: an elongation under <code>summary</code> is equilibrium, a fusion neutron rate is neutronics, a plasma composition is the composition's domain. <code>data_management</code> holds only data about the dataset itself.”</td></tr>
+<tr><td><code>machine_operations.excludes[2].rule</code></td><td>“Operational metadata about a shot is machine_operations; the archived summary data products from it are data_management.”</td><td>“Operational metadata about a shot is machine_operations; the operation's own records do not become a data product by being summarised, and a summary of a physical quantity takes that quantity's domain instead.”</td></tr>
+<tr><td><code>computational_workflow.excludes[3]</code></td><td>quantity “an archived summary product”; rule “a summary product assembled from a run is data_management.”</td><td>quantity “a physics quantity delivered as an assembled product”; rule “Tooling and reference data are computational_workflow; a product that summarises physical quantities takes the domain of the quantities it names, never that of the container it is delivered in.”</td></tr>
+<tr><td><code>general.excludes[2].rule</code></td><td>“A product assembled from a run is data_management; general is for a physical quantity itself, not a container around many, so a summary product does not default to general.”</td><td>“A summary product takes the domain of the physical quantity it names; general is for a quantity with no single subject, and a container around many quantities does not supply one. A product about the dataset itself is data_management.”</td></tr>
+<tr><td><code>data_computing</code> category scope</td><td>Claimed “archived and summary results” for the category</td><td>“A physical quantity stored under a data container keeps the domain of the physics it names.”</td></tr>
+</tbody></table>
+
+<h3>Changed classifier rule</h3>
+<p>Only <code>structural</code> paths needed a description to reach Tier 1, so a <code>quantity</code> leaf whose enriched description was missing was sent to the LLM with nothing but the DD placeholder <code>Value</code> in front of it. <code>carries_own_subject</code> (<code>imas_codex/graph/dd_domain_classifier.py</code>) now requires every path to carry a subject of its own — an enriched description, or documentation that is not a container placeholder — and <code>_query_unclassified_paths</code> drops the rest from the Tier-1 selection, so they fall through to the inheritance pass that already exists (<code>_inherit_remaining_unclassified</code>) rather than being classified on the word “Value”. No second classification path is introduced.</p>
+
+<h3>Tests</h3>
+<table><thead><tr><th>Test</th><th>Holds</th><th>Red with its mechanism removed</th></tr></thead><tbody>
+<tr><td><code>test_domain_classifier_state.py::test_state_carries_the_description_parent_description_and_siblings</code></td><td>A <code>Value</code> leaf reaches the tree with its enriched description, its parent's description and its siblings</td><td>Removing the fields from <code>tree_state</code> fails it</td></tr>
+<tr><td><code>::test_chat_fallback_prompt_renders_the_same_state</code></td><td>The chat fallback's prompt renders the same three fields</td><td>Same export, same red</td></tr>
+<tr><td><code>::test_a_leaf_without_an_enriched_description_is_not_judged_on_its_placeholder</code></td><td>“Value” alone is not a subject</td><td>Making the predicate always true fails it</td></tr>
+<tr><td><code>::test_the_placeholder_leaf_is_not_a_tier_one_candidate</code></td><td>The Tier-1 selection applies the same rule, so the leaf inherits instead</td><td>Same red</td></tr>
+<tr><td><code>test_physics_domain_guidance.py::test_data_management_claims_no_ids_it_does_not_own</code></td><td>The dataset domain names by path pattern only IDSs the IDS map places in it</td><td>Runs red on the <code>aae1ac667</code> copy of <code>domains.yaml</code>: “data_management claims <code>summary/*</code> by path pattern, but the IDS map places summary in 'general'”</td></tr>
+<tr><td><code>test_physics_domain_guidance.py::test_no_rule_lets_a_container_decide_the_domain</code></td><td>No clause of any domain or category makes a container decide the domain</td><td>Runs red on the same copy, naming <code>data_management excludes[1].rule</code></td></tr>
+</tbody></table>
+<p>Red runs: <code>red-classifier-state.log</code> (4 failed, <code>EXIT=1</code>) and <code>red-guidance-aae1ac667.log</code> (2 failed, <code>EXIT=1</code>).</p>
+
+<h3>Measured at the path</h3>
+<p>Both arms are one instrument: the seventeen labelled <code>summary</code> paths of the 201-path set, classified through <code>_classify_batch_tree</code> with the chat fallback on and the seat threshold from settings (<code>get_sn_domain_tree_threshold()</code>, 0.9). Nothing was written to the graph. The before arm ran against the <code>aae1ac667</code> revision of <code>domains.yaml</code> (sha1 <code>5facfe79eb8ea3b4d6909284c4227bd4a60df877</code>), forced by path so the revision is pinned rather than inferred; an earlier arm that ran before the guidance was edited is kept as <code>summary-domain-before-incumbent-guidance.json</code> and is not reported, because the revision it read is not pinned.</p>
+<table><thead><tr><th>Arm</th><th>Accuracy vs label</th><th>Graph's stored answer</th><th>Spend (USD)</th></tr></thead><tbody>
+<tr><td>before — <code>aae1ac667</code> guidance</td><td>0.1176 (2/17)</td><td>0.3529 (6/17)</td><td>0.089191</td></tr>
+<tr><td>after — corrected guidance</td><td>0.7647 (13/17)</td><td>0.3529 (6/17)</td><td>0.116840</td></tr>
+</tbody></table>
+<p>15 of 17 paths changed domain, and every change is a container reading replaced by a physics reading. The corrected guidance agrees with the measurement the graph is compared against, path for path, on 13 of 17.</p>
+<table><thead><tr><th>Path</th><th>Label</th><th>Graph now</th><th>Before</th><th>After</th></tr></thead><tbody>
+<tr><td><code>summary/boundary/minor_radius/value</code></td><td>equilibrium</td><td>data_management</td><td>data_management</td><td>equilibrium</td></tr>
+<tr><td><code>summary/composition/carbon/value</code></td><td>core_plasma_physics</td><td>data_management</td><td>data_management</td><td>core_plasma_physics</td></tr>
+<tr><td><code>summary/fusion/current/value</code></td><td>current_drive</td><td>current_drive</td><td>data_management</td><td>current_drive</td></tr>
+<tr><td><code>summary/fusion/neutron_rates/total/value</code></td><td>neutronics</td><td>data_management</td><td>data_management</td><td>neutronics</td></tr>
+<tr><td><code>summary/gas_injection_rates/beryllium/value</code></td><td>fueling</td><td>data_management</td><td>data_management</td><td>fueling</td></tr>
+<tr><td><code>summary/gas_injection_rates/bottom/value</code></td><td>fueling</td><td>data_management</td><td>data_management</td><td>fueling</td></tr>
+<tr><td><code>summary/global_quantities/power_loss/value</code></td><td>core_plasma_physics</td><td>data_management</td><td>data_management</td><td>core_plasma_physics</td></tr>
+<tr><td><code>summary/global_quantities/power_radiated/value</code></td><td>core_plasma_physics</td><td>data_management</td><td>data_management</td><td>radiation_measurement_diagnostics</td></tr>
+<tr><td><code>summary/heating_current_drive/ic/k_perpendicular/value</code></td><td>auxiliary_heating</td><td>waves</td><td>data_management</td><td>waves</td></tr>
+<tr><td><code>summary/heating_current_drive/lh/current/value</code></td><td>current_drive</td><td>current_drive</td><td>current_drive</td><td>current_drive</td></tr>
+<tr><td><code>summary/heating_current_drive/lh/n_parallel/value</code></td><td>waves</td><td>waves</td><td>data_management</td><td>waves</td></tr>
+<tr><td><code>summary/local/itb/q/value</code></td><td>equilibrium</td><td>data_management</td><td>data_management</td><td>equilibrium</td></tr>
+<tr><td><code>summary/pedestal_fits/linear/b_field_tor_pedestal_top_lfs/value</code></td><td>equilibrium</td><td>equilibrium</td><td>data_management</td><td>equilibrium</td></tr>
+<tr><td><code>summary/pedestal_fits/linear/n_e/pedestal_position/value</code></td><td>equilibrium</td><td>edge_plasma_physics</td><td>data_management</td><td>edge_plasma_physics</td></tr>
+<tr><td><code>summary/pedestal_fits/linear/pressure_electron/pedestal_position/value</code></td><td>equilibrium</td><td>edge_plasma_physics</td><td>data_management</td><td>edge_plasma_physics</td></tr>
+<tr><td><code>summary/pedestal_fits/mtanh/b_field_tor_pedestal_top_lfs/value</code></td><td>equilibrium</td><td>equilibrium</td><td>data_management</td><td>equilibrium</td></tr>
+<tr><td><code>summary/volume_average/t_i_average/value</code></td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>core_plasma_physics</td></tr>
+</tbody></table>
+<p>Four paths remain wrong after, and none of them by container: <code>power_radiated…</code>'s radiated power reads as the radiation diagnostic rather than as the plasma quantity, <code>ic/k_perpendicular</code> reads as waves rather than as auxiliary heating, and the two <code>pedestal_position</code> values read as edge physics rather than equilibrium. Those four are domain-boundary judgements between neighbouring physics domains, not container readings, and the guidance correction does not claim them.</p>
+
+<h3>Gate</h3>
+<p>The five gate files pass at both revisions with no added failures: base <code>89f18bdd6</code> 138 passed / 0 failed (<code>gate-base.log</code>), head 144 passed / 0 failed (<code>gate-head.log</code>) — the six extra tests are the six added here. Total spend across the three measurement arms, against the USD 0.50 ceiling: <strong>USD 0.362</strong>.</p>
+</section>

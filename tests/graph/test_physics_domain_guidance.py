@@ -6,12 +6,20 @@ covers and the exclusions that separate it from a named neighbour. It is keyed
 by ISN's values, so it must not fall behind that vocabulary: a domain or a
 category added upstream without an entry here would be classified with no
 guidance at all, and nothing would say so. These tests make that a failure.
+
+A domain is judged on the physics a path describes, so guidance must not claim
+an IDS hierarchy as a reason to take a domain. A path filed under a container
+takes the domain of the quantity it names, whatever the container is called.
 """
 
 from __future__ import annotations
 
+import json
+import re
+
 from imas_codex.core.physics_domain import PhysicsDomain
 from imas_codex.definitions.physics import (
+    IDS_DOMAINS_FILE,
     load_domain_guidance,
     load_isn_physics_domains,
 )
@@ -106,3 +114,86 @@ def test_provider_returns_the_guidance_per_domain_and_category() -> None:
     assert {c["value"] for c in categories} == isn_categories
     for category in categories:
         assert category["scope"].strip(), f"{category['value']}: empty category scope"
+
+
+#: An IDS named as a path hierarchy in a guidance clause, as in ``summary/*``.
+_PATH_PATTERN = re.compile(r"\b([a-z][a-z0-9_]*)/\*")
+
+#: A clause that makes a container — rather than the quantity it carries — decide.
+_CONTAINER_DECIDES = re.compile(
+    r"\b(?:container|wrapper|interface\s+data\s+structure|ids)\b[^.]{0,80}?"
+    r"\b(?:decides?|determines?|governs?|sets?)\b[^.]{0,60}?\bdomain\b",
+    re.IGNORECASE | re.DOTALL,
+)
+
+_DATASET_DOMAIN = "data_management"
+
+
+def _ids_domain_mapping() -> dict[str, str | None]:
+    """The IDS-to-domain map, so a path-pattern claim can be checked against it."""
+    payload = json.loads(IDS_DOMAINS_FILE.read_text(encoding="utf-8"))
+    return payload["ids_domain_mappings"]
+
+
+def _guidance_clauses(entry: dict) -> list[tuple[str, str]]:
+    """Every prose clause of one domain or category entry, with its location."""
+    clauses = [("scope", entry.get("scope", ""))]
+    for i, include in enumerate(entry.get("includes") or []):
+        clauses.append((f"includes[{i}]", str(include)))
+    for i, exclusion in enumerate(entry.get("excludes") or []):
+        for key in ("quantity", "rule"):
+            clauses.append((f"excludes[{i}].{key}", exclusion.get(key, "")))
+    return clauses
+
+
+def test_data_management_claims_no_ids_it_does_not_own() -> None:
+    """The dataset domain names as datasets only the IDSs the map gives it.
+
+    A quantity filed under a physics IDS keeps the domain of the physics it
+    names, so claiming that IDS here would hand every path beneath it to the
+    dataset's domain by container. ``summary`` holds physical quantities, so a
+    ``summary/*`` claim on this domain is exactly the defect this rejects; the
+    IDS map is what settles the question.
+
+    The map does not settle it the other way: a physics domain may legitimately
+    name an IDS whose map entry is another domain, because there the claim is
+    about the physics of those paths (a spectroscopy domain reading ``mse``).
+    This test therefore binds only the dataset domain, whose subject is the
+    dataset and never the physics it records.
+    """
+    includes = load_domain_guidance()["domains"][_DATASET_DOMAIN]["includes"]
+    claimed = {
+        ids_name: clause
+        for clause in map(str, includes)
+        for ids_name in _PATH_PATTERN.findall(clause)
+    }
+    assert claimed, "no IDS path pattern found — the check cannot see its subject"
+
+    mapping = _ids_domain_mapping()
+    for ids_name, clause in claimed.items():
+        assert mapping.get(ids_name) == _DATASET_DOMAIN, (
+            f"{_DATASET_DOMAIN} claims `{ids_name}/*` by path pattern, but the IDS "
+            f"map places {ids_name} in {mapping.get(ids_name)!r}: {clause!r}"
+        )
+
+
+def test_no_rule_lets_a_container_decide_the_domain() -> None:
+    """A quantity takes the domain of the physics it names, not of its container.
+
+    Where a clause lets the container decide, every path filed beneath it takes
+    the container's domain whatever it measures — an elongation under a summary
+    container reading as a data product rather than as equilibrium physics. No
+    clause of any domain or category may say so.
+    """
+    guidance = load_domain_guidance()
+    offenders = [
+        (name, location, match.group(0))
+        for section in ("categories", "domains")
+        for name, entry in guidance[section].items()
+        for location, clause in _guidance_clauses(entry)
+        if (match := _CONTAINER_DECIDES.search(clause or ""))
+    ]
+    assert not offenders, (
+        "a container is made to decide the domain rather than the quantity it "
+        f"carries: {offenders}"
+    )
