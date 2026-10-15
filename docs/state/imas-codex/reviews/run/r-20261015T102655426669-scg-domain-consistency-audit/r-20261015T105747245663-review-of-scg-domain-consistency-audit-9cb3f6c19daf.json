@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit-run.py:83 (audit_domains, evidence driver, not production)"
+  ],
+  "completed_at": "2026-10-15T11:23:44.559Z",
+  "dispatched_at": "2026-10-15T10:58:05Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit.html",
+      "line": "232",
+      "severity": "blocking",
+      "text": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit.html:232 blocking: the landing record states the mechanism-removed run as \"(8 failed, 10 passed, recorded in negative-control.log)\", while the log it names records \"10 failed, 37 passed, 1 warning\" at its line 101 with 47 collected (the audit test file alone accounts for 10 failed and 11 passed) -- no reading of that log yields 8/10, so the record misstates the control the done-when rests on and a reader checking it against the log it cites finds it contradicted."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit.html",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit.html:23 follow-on: the section says the census ran \"at revision f17b64387\", but census.log line 2 records revision 9cb3f6c19dafe653c5eda4c0780d0a30dbc23f1b -- the fix commit whose rerun produced the 777 edge count the fragment reports -- so the citation names a tree that did not produce the figures sitting beside it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit.html",
+      "line": "101",
+      "severity": "follow-on",
+      "text": "docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit.html:101 follow-on: the edge-count decomposition (984 no-edge names, 746 + 31 = 777) and the absence claim that no edge on the live graph points at a target without an id are not derivable from any recorded artefact -- the results JSON carries only per-check ids and counts, no query log records the no-edge population, and the zero is reported without a check shown to see an id-less target present."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 37bf04533 over f17b64387..9cb3f6c19; four commits, five files, and the last (9cb3f6c19) replaces the edge-set placeholder with an empty set plus an edge_count, corroborated by the pre-fix results JSON reading 1015 edge failures against the post-fix 777.",
+    "done_when": "the done_when names the gate (test_domain_audit.py plus test_domain_ranking.py and test_domain_selector.py, judged by delta against base) and the census the fragment and results JSON must report; head-gate.log records 47 passed, EXIT=0 and base-gate.log 26 passed, EXIT=0, which is the delta the measure asks for, and census.log records the 2,677 live names with the command first and EXIT=0 last.",
+    "goal": "the node's goal is one read-only audit of every live name's domain against its DD sources; imas_codex/standard_names/domain_audit.py:329 (audit_domains) opens a client, runs one bounded label scan over the live stages and returns a count and the failing ids per check, and the four checks at domain_audit.py:285-291 are exactly the goal's four.",
+    "manifest": "read manifest.md; it reports the four commits, the head gate at 47 passed and the census at 2,677 names with 212/1477/1701/777, quotes the three scaffolding failures it fixed, and names negative-control.log's red run at 10 failed -- but the fragment it landed reports that same control as 8 failed and 10 passed.",
+    "write_paths": "the manifest declares the module, the test file, three docs/evidence fragments and a docs/figures directory; git diff --name-only 37bf04533 9cb3f6c19 lists exactly the module, the test file and the three fragments and nothing else, and the figures directory is unused."
+  },
+  "justifications": {
+    "durability": "negative-control.log line 101 records 10 failures with the four comparisons at domain_audit.py:285-291 removed, so the added assertions redden on that regression; the query at domain_audit.py:100-103 is reachable only through the stub, so reinstating the unknown placeholder would leave every test green.",
+    "evidence": "head-gate.log records 47 passed with EXIT=0 against base-gate.log's 26 passed with EXIT=0 and census.log records the live census with EXIT=0, so the measure is recorded rather than claimed; the fragment's own count for the control (its line 232) does not match negative-control.log line 101.",
+    "fit": "domain_audit.py follows the sibling imas_codex/standard_names/attachment_audit.py idiom (bounded label scan, per-check dataclass, read-only) and no symbol carries a plan, stage or ticket label.",
+    "goal_fidelity": "domain_audit.py:285-291 implements the four checks the goal names and the census it produces is the before figure the repair node is to consume.",
+    "reuse": "the module reuses the ranking owner (domain_audit.py:42 imports select_primary_domain) instead of re-ranking; searched consolidation.py:_resolve_physics_domains, domain_priority.py, families.py:_LIVE_STAGE_EXCLUSION and edit.py:_FOLD_LIVE_STAGES and found no owner of a DD-source-derived expected domain set.",
+    "scope_discipline": "git diff --name-only 37bf04533 9cb3f6c19 returns only the five declared paths, so the diff carries nothing outside the fenced scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is one read-only audit of every live name's domain against its DD sources; imas_codex/standard_names/domain_audit.py:329 (audit_domains) opens a client, runs one bounded label scan over the live stages and returns a count and the failing ids per check, and the four checks at domain_audit.py:285-291 are exactly the goal's four.\nVERDICT done_when: the done_when names the gate (test_domain_audit.py plus test_domain_ranking.py and test_domain_selector.py, judged by delta against base) and the census the fragment and results JSON must report; head-gate.log records 47 passed, EXIT=0 and base-gate.log 26 passed, EXIT=0, which is the delta the measure asks for, and census.log records the 2,677 live names with the command first and EXIT=0 last.\nVERDICT write_paths: the manifest declares the module, the test file, three docs/evidence fragments and a docs/figures directory; git diff --name-only 37bf04533 9cb3f6c19 lists exactly the module, the test file and the three fragments and nothing else, and the figures directory is unused.\nVERDICT manifest: read manifest.md; it reports the four commits, the head gate at 47 passed and the census at 2,677 names with 212/1477/1701/777, quotes the three scaffolding failures it fixed, and names negative-control.log's red run at 10 failed -- but the fragment it landed reports that same control as 8 failed and 10 passed.\nVERDICT diff: read commit by commit against base 37bf04533 over f17b64387..9cb3f6c19; four commits, five files, and the last (9cb3f6c19) replaces the edge-set placeholder with an empty set plus an edge_count, corroborated by the pre-fix results JSON reading 1015 edge failures against the post-fix 777.\nCALL_SITES: docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit-run.py:83 (audit_domains, evidence driver, not production)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: domain_audit.py:285-291 implements the four checks the goal names and the census it produces is the before figure the repair node is to consume.\nSCORE evidence: 17\nJUSTIFICATION evidence: head-gate.log records 47 passed with EXIT=0 against base-gate.log's 26 passed with EXIT=0 and census.log records the live census with EXIT=0, so the measure is recorded rather than claimed; the fragment's own count for the control (its line 232) does not match negative-control.log line 101.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-only 37bf04533 9cb3f6c19 returns only the five declared paths, so the diff carries nothing outside the fenced scope.\nSCORE durability: 15\nJUSTIFICATION durability: negative-control.log line 101 records 10 failures with the four comparisons at domain_audit.py:285-291 removed, so the added assertions redden on that regression; the query at domain_audit.py:100-103 is reachable only through the stub, so reinstating the unknown placeholder would leave every test green.\nSCORE fit: 17\nJUSTIFICATION fit: domain_audit.py follows the sibling imas_codex/standard_names/attachment_audit.py idiom (bounded label scan, per-check dataclass, read-only) and no symbol carries a plan, stage or ticket label.\nSCORE reuse: 18\nJUSTIFICATION reuse: the module reuses the ranking owner (domain_audit.py:42 imports select_primary_domain) instead of re-ranking; searched consolidation.py:_resolve_physics_domains, domain_priority.py, families.py:_LIVE_STAGE_EXCLUSION and edit.py:_FOLD_LIVE_STAGES and found no owner of a DD-source-derived expected domain set.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit.html:232 blocking: the landing record states the mechanism-removed run as \"(8 failed, 10 passed, recorded in negative-control.log)\", while the log it names records \"10 failed, 37 passed, 1 warning\" at its line 101 with 47 collected (the audit test file alone accounts for 10 failed and 11 passed) -- no reading of that log yields 8/10, so the record misstates the control the done-when rests on and a reader checking it against the log it cites finds it contradicted.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit.html:23 follow-on: the section says the census ran \"at revision f17b64387\", but census.log line 2 records revision 9cb3f6c19dafe653c5eda4c0780d0a30dbc23f1b -- the fix commit whose rerun produced the 777 edge count the fragment reports -- so the citation names a tree that did not produce the figures sitting beside it.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-domain-consistency-audit.html:101 follow-on: the edge-count decomposition (984 no-edge names, 746 + 31 = 777) and the absence claim that no edge on the live graph points at a target without an id are not derivable from any recorded artefact -- the results JSON carries only per-check ids and counts, no query log records the no-edge population, and the zero is reported without a check shown to see an id-less target present.\n",
+  "review_run_id": "r-20261015T105747245663-review-of-scg-domain-consistency-audit-9cb3f6c19daf",
+  "reviewed_base_sha": "37bf04533e9441297ebf5fb7b8dff00d927b48d8",
+  "reviewed_head_sha": "9cb3f6c19dafe653c5eda4c0780d0a30dbc23f1b",
+  "reviewed_run_id": "r-20261015T102655426669-scg-domain-consistency-audit",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T11:08:42.451814+00:00",
+  "total": 104
+}
