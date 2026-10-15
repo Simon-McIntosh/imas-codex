@@ -125,6 +125,11 @@
     <p>A structural test walks the <code>sn</code> group. Every command that can spend must call <code>setup_logging</code>, with the stem <code>sn-&lt;command&gt;</code>. The test found six that did not: <code>harmonize</code>, <code>edit</code>, <code>rescore</code>, <code>bench</code>, <code>release</code> and <code>approve</code>. Each now does, and behavioural tests cover harmonize, edit and rescore (merge <code>0db9968da</code>, 5 tests; review 103/120). Its gate ran only the harmonize and edit CLI tests, so a verification node runs the bench, release, approve and rescore CLI tests at the merged head, judged by delta.</p>
   </section>
 
+  <section id="s13-run-log-verify">
+    <h2>§13 — the changed commands&#x27; CLI tests, by delta</h2>
+    <p>The CLI tests of every command the run-log change touched (bench, release, approve, rescore, edit and harmonize) ran at its merged head <code>0db9968da</code> and at its first parent <code>db4d66dd1</code>. Each revision ran from its own archive extraction. The base passed 146; the head passed 151, the extra five being the new logging tests. There were zero added failures (merge <code>59b317d4d</code>, review 114/120).</p>
+  </section>
+
 </main>
 </body>
 </html>
