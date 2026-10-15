@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6176",
+    "imas_codex/standard_names/harmonize.py:1571",
+    "imas_codex/standard_names/graph_ops.py:9846"
+  ],
+  "completed_at": "2026-10-15T08:40:42.625Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the duplicated dead-link rewrite is carried into the next harmonize node, shc-estimate-whole-runs, whose brief now requires calling resolve_doc_links and find_name_links in place of the local copy; it cannot go in this run's repair round, which is scoped to the blocking evidence finding",
+      "recorded_at": "2026-10-15T08:34:17.751736+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-15T08:21:19Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html",
+      "line": "158",
+      "severity": "blocking",
+      "text": "blocking: the fragment states green3.log passed \"at the same revision as the head gate arm\", but green3.log's own header names 2c3a78d39 while the head gate arm head_gate2.log ran at 77a4d90fe, and the counts fix 77a4d90fe sits between them, so the focused green run predates the code it is offered as evidence for; the manifest repeats the false revision at manifest.md:40 (\"revision 77a4d90fe in the header\"). The tests do pass at the tip, but only head_gate2.log shows it, and this node's prior holding findings were of exactly this class."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "1015",
+      "severity": "follow-on",
+      "text": "follow-on: the documented return contract at :1008 names a \"protected\" key that the two early returns at :1015 and :1034 omit, so a caller reading the contract raises KeyError; apply_families reads it with .get and is unaffected."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "949",
+      "severity": "follow-on",
+      "text": "follow-on: _drop_doc_reference removes a dead name: reference from documentation prose while keeping the visible text, which is the operation imas_codex/standard_names/graph_ops.py:9684 resolve_doc_links already owns, and its two syntax regexes restate imas_codex/standard_names/doc_links.py:107 find_name_links; the step neither calls nor extends either owner, so two implementations of the same rewrite can drift."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize_cost_cap.py",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "follow-on: this file and tests/standard_names/test_harmonize_estimate.py:229 are outside the node's declared write paths, and the manifest's \"accepted by the coordinator\" claim cannot be checked from any artefact in the run."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the node declared a figures path but the fragment carries no figure, though the twelve findings it tabulates are a link topology (neon the target of six, ion of three) that a one-way-link diagram would state at a glance."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit from 033ee2a30 to a4e9c1687; twelve commits, five files, 951 insertions and 3 deletions, the code commits adding the step and the protection-drop fix at harmonize.py:1136-1148, the test file, two one-line graph-edge stubs in existing harmonize fixtures, and the evidence fragment.",
+    "done_when": "the done_when asks the fragment to name each of the twelve findings' cause and the writer used, and the harmonize test files plus tests/standard_names/test_house_style_checks.py to add 0 failures against base; the fragment names the cause at docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:11-19 and the writer at :66-88, tests/standard_names/test_harmonize_reverse_links.py:319 ends the apply with zero missing_reverse findings through the audit function itself, and base_gate2.log (151 passed, EXIT=0, revision 033ee2a30) against head_gate2.log (155 passed, EXIT=0, revision 77a4d90fe) is 0 added failures; the fragment's green-run citation at :158 is the one part of this measure that does not hold.",
+    "goal": "the node's goal is that a harmonize apply leaves no sibling link unreturned; imas_codex/standard_names/harmonize.py:963 adds reconcile_family_reverse_links, called from apply_families at :1571 once a family converges and before _stamp_applied_family, and its keep/remove/add rules at :1093-1107 implement the sibling reconciliation the goal names; the brief's second removal clause (drop a link whose target is not a family sibling) is narrowed to a target the catalog does not carry at all, disclosed in the manifest as a deliberate correction of an over-broad clause and accepted by an earlier review.",
+    "manifest": "read; it carries the twelve commits, the paired base/head gate with a revision in each log's header, six red-run logs, one negative_control_log path and five follow-ons, but its green-run line at :40 states a revision the log it names does not carry.",
+    "write_paths": "the declared scope is imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_reverse_links.py, docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html and docs/figures/sn-harmonize-command/shc-reverse-links; git diff --stat 033ee2a30 a4e9c1687 names those plus tests/standard_names/test_harmonize_cost_cap.py and tests/standard_names/test_harmonize_estimate.py, which are outside the declared paths and are disclosed as a coordinator-accepted expansion in the manifest follow_ons."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_harmonize_reverse_links.py:319 fails on red_step_removed.log when the step is removed, :337 on red_sibling_only_rule.log when the keep rule is restored, and :393 on red_writer_unprotected_targeted.log when the protected row is handed to the writer, each a separately recorded red run.",
+    "evidence": "the done-when's failure count is measured by base_gate2.log and head_gate2.log at their own recorded revisions, but docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:158 places green3.log at the head gate arm's revision while that log's own header at green3.log:2 names 2c3a78d39.",
+    "fit": "the module's logger and naming follow the surrounding style, but the return contract at imas_codex/standard_names/harmonize.py:1008 names a protected key the early returns at :1015 and :1034 omit.",
+    "goal_fidelity": "imas_codex/standard_names/harmonize.py:1093-1107 keeps a live name: link, drops only one the catalog does not carry, and adds the reverse only between siblings, which is the reconciliation the goal states.",
+    "reuse": "imas_codex/standard_names/harmonize.py:949 _drop_doc_reference re-implements the dead name-link removal the repository owns at imas_codex/standard_names/graph_ops.py:9684 resolve_doc_links and re-declares the two name-link syntax regexes owned at imas_codex/standard_names/doc_links.py:107.",
+    "scope_discipline": "tests/standard_names/test_harmonize_cost_cap.py:104 and tests/standard_names/test_harmonize_estimate.py:229 sit outside the declared write paths, disclosed in the manifest as an accepted expansion."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a harmonize apply leaves no sibling link unreturned; imas_codex/standard_names/harmonize.py:963 adds reconcile_family_reverse_links, called from apply_families at :1571 once a family converges and before _stamp_applied_family, and its keep/remove/add rules at :1093-1107 implement the sibling reconciliation the goal names; the brief's second removal clause (drop a link whose target is not a family sibling) is narrowed to a target the catalog does not carry at all, disclosed in the manifest as a deliberate correction of an over-broad clause and accepted by an earlier review.\nVERDICT done_when: the done_when asks the fragment to name each of the twelve findings' cause and the writer used, and the harmonize test files plus tests/standard_names/test_house_style_checks.py to add 0 failures against base; the fragment names the cause at docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:11-19 and the writer at :66-88, tests/standard_names/test_harmonize_reverse_links.py:319 ends the apply with zero missing_reverse findings through the audit function itself, and base_gate2.log (151 passed, EXIT=0, revision 033ee2a30) against head_gate2.log (155 passed, EXIT=0, revision 77a4d90fe) is 0 added failures; the fragment's green-run citation at :158 is the one part of this measure that does not hold.\nVERDICT write_paths: the declared scope is imas_codex/standard_names/harmonize.py, tests/standard_names/test_harmonize_reverse_links.py, docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html and docs/figures/sn-harmonize-command/shc-reverse-links; git diff --stat 033ee2a30 a4e9c1687 names those plus tests/standard_names/test_harmonize_cost_cap.py and tests/standard_names/test_harmonize_estimate.py, which are outside the declared paths and are disclosed as a coordinator-accepted expansion in the manifest follow_ons.\nVERDICT manifest: read; it carries the twelve commits, the paired base/head gate with a revision in each log's header, six red-run logs, one negative_control_log path and five follow-ons, but its green-run line at :40 states a revision the log it names does not carry.\nVERDICT diff: read commit by commit from 033ee2a30 to a4e9c1687; twelve commits, five files, 951 insertions and 3 deletions, the code commits adding the step and the protection-drop fix at harmonize.py:1136-1148, the test file, two one-line graph-edge stubs in existing harmonize fixtures, and the evidence fragment.\nCALL_SITES: imas_codex/cli/sn.py:6176, imas_codex/standard_names/harmonize.py:1571, imas_codex/standard_names/graph_ops.py:9846\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/harmonize.py:1093-1107 keeps a live name: link, drops only one the catalog does not carry, and adds the reverse only between siblings, which is the reconciliation the goal states.\nSCORE evidence: 13\nJUSTIFICATION evidence: the done-when's failure count is measured by base_gate2.log and head_gate2.log at their own recorded revisions, but docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:158 places green3.log at the head gate arm's revision while that log's own header at green3.log:2 names 2c3a78d39.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: tests/standard_names/test_harmonize_cost_cap.py:104 and tests/standard_names/test_harmonize_estimate.py:229 sit outside the declared write paths, disclosed in the manifest as an accepted expansion.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_harmonize_reverse_links.py:319 fails on red_step_removed.log when the step is removed, :337 on red_sibling_only_rule.log when the keep rule is restored, and :393 on red_writer_unprotected_targeted.log when the protected row is handed to the writer, each a separately recorded red run.\nSCORE fit: 15\nJUSTIFICATION fit: the module's logger and naming follow the surrounding style, but the return contract at imas_codex/standard_names/harmonize.py:1008 names a protected key the early returns at :1015 and :1034 omit.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/standard_names/harmonize.py:949 _drop_doc_reference re-implements the dead name-link removal the repository owns at imas_codex/standard_names/graph_ops.py:9684 resolve_doc_links and re-declares the two name-link syntax regexes owned at imas_codex/standard_names/doc_links.py:107.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:158 blocking: the fragment states green3.log passed \"at the same revision as the head gate arm\", but green3.log's own header names 2c3a78d39 while the head gate arm head_gate2.log ran at 77a4d90fe, and the counts fix 77a4d90fe sits between them, so the focused green run predates the code it is offered as evidence for; the manifest repeats the false revision at manifest.md:40 (\"revision 77a4d90fe in the header\"). The tests do pass at the tip, but only head_gate2.log shows it, and this node's prior holding findings were of exactly this class.\nFINDING imas_codex/standard_names/harmonize.py:1015 follow-on: the documented return contract at :1008 names a \"protected\" key that the two early returns at :1015 and :1034 omit, so a caller reading the contract raises KeyError; apply_families reads it with .get and is unaffected.\nFINDING imas_codex/standard_names/harmonize.py:949 follow-on: _drop_doc_reference removes a dead name: reference from documentation prose while keeping the visible text, which is the operation imas_codex/standard_names/graph_ops.py:9684 resolve_doc_links already owns, and its two syntax regexes restate imas_codex/standard_names/doc_links.py:107 find_name_links; the step neither calls nor extends either owner, so two implementations of the same rewrite can drift.\nFINDING tests/standard_names/test_harmonize_cost_cap.py:104 follow-on: this file and tests/standard_names/test_harmonize_estimate.py:229 are outside the node's declared write paths, and the manifest's \"accepted by the coordinator\" claim cannot be checked from any artefact in the run.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-reverse-links.html:20 follow-on: the node declared a figures path but the fragment carries no figure, though the twelve findings it tabulates are a link topology (neon the target of six, ion of three) that a one-way-link diagram would state at a glance.\n",
+  "review_run_id": "r-20261015T082056563312-review-of-shc-reverse-links-a4e9c1687cd0",
+  "reviewed_base_sha": "033ee2a3080ac841bf27b1c77986ea343d75e28c",
+  "reviewed_head_sha": "a4e9c1687cd0bb924eb000fe0092297b4bff2ad4",
+  "reviewed_run_id": "r-20261015T040733444496-shc-reverse-links",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T08:33:32.713118+00:00",
+  "total": 84
+}
