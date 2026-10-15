@@ -1,0 +1,127 @@
+<section>
+  <h2 id="shc-run-log">Every spending <code>sn</code> command writes a run log</h2>
+  <p id="shc-run-log-scope">
+    A command that can spend places model calls whose record is the run log
+    under <code>~/.local/share/imas-codex/logs/</code>. A command that calls no
+    logging helper leaves nothing behind, so its evidence can cite only the
+    command line and its exit status. Every qualifying command now starts with a
+    <code>setup_logging</code> call. Write paths:
+    <code>imas_codex/cli/sn.py</code>,
+    <code>tests/standard_names/test_sn_command_logging.py</code>.
+  </p>
+
+  <h3 id="shc-run-log-set">The spending set, established structurally</h3>
+  <p id="shc-run-log-set-rule">
+    The set is derived from what each command <em>is</em>, not from a hard-coded
+    roster, so a newly added spending command is caught before it runs unlogged.
+    A command qualifies when it takes a cost-limit option (<code>cost_limit</code>)
+    or when its callback reaches a compose / review / documentation /
+    inline-review entry point through this module's call graph. The walk over the
+    <code>sn</code> click group, recursing into sub-groups, found eight:
+  </p>
+  <ul id="shc-run-log-set-list">
+    <li><code>run</code> — takes a cost-limit option.</li>
+    <li><code>bench</code> — reaches <code>rescore_descriptions_report</code>,
+      <code>run_benchmark</code>, <code>run_calibration_gate</code>.</li>
+    <li><code>release</code> — reaches <code>run_review_release</code> (LLM notes
+      under <code>--llm-notes</code>).</li>
+    <li><code>approve</code> — reaches <code>tag_fold_back</code>, which composes
+      notes when <code>--llm-notes</code> is set.</li>
+    <li><code>harmonize</code> — takes a cost-limit option.</li>
+    <li><code>review</code> — takes a cost-limit option.</li>
+    <li><code>edit</code> — takes a cost-limit option; spends through
+      <code>run_inline_review</code>.</li>
+    <li><code>rescore</code> — takes a cost-limit option; spends through
+      <code>rescore_name</code>.</li>
+  </ul>
+  <p id="shc-run-log-set-already">
+    <code>run</code> and <code>review</code> already logged and were left as
+    they are, as were the helper calls inside <code>_run_sn_cmd</code>. The six
+    remaining commands each received one added call.
+  </p>
+
+  <h3 id="shc-run-log-calls">The added calls, with file and line</h3>
+  <ul id="shc-run-log-calls-list">
+    <li><code>imas_codex/cli/sn.py:3558</code> (in <code>sn_bench</code>) —
+      <code>setup_logging("sn", "sn-bench", use_rich=True)</code></li>
+    <li><code>imas_codex/cli/sn.py:4931</code> (in <code>sn_release</code>) —
+      <code>setup_logging("sn", "sn-release", use_rich=True)</code></li>
+    <li><code>imas_codex/cli/sn.py:5321</code> (in <code>sn_approve</code>) —
+      <code>setup_logging("sn", "sn-approve", use_rich=True)</code></li>
+    <li><code>imas_codex/cli/sn.py:6045</code> (in <code>sn_harmonize</code>) —
+      <code>setup_logging("sn", "sn-harmonize", use_rich=True)</code></li>
+    <li><code>imas_codex/cli/sn.py:7028</code> (in <code>sn_edit</code>) —
+      <code>setup_logging("sn", "sn-edit", use_rich=True)</code></li>
+    <li><code>imas_codex/cli/sn.py:8423</code> (in <code>sn_rescore</code>) —
+      <code>setup_logging("sn", "sn-rescore", use_rich=True)</code></li>
+  </ul>
+  <p id="shc-run-log-calls-where">
+    Each call sits at the top of its command body, after the docstring, before
+    any work. The <code>setup_logging</code> import is function-local in each
+    command, matching how these command bodies import their other helpers.
+  </p>
+
+  <h3 id="shc-run-log-rich"><code>use_rich=True</code>: why</h3>
+  <p id="shc-run-log-rich-text">
+    These six commands print through the module-level rich console
+    (<code>console = Console()</code> at the top of <code>sn.py</code>). With
+    <code>use_rich=True</code>, <code>setup_logging</code> configures the log file
+    and returns a rich <code>Console</code> without touching
+    <code>logging.basicConfig</code>, so console output is exactly as it was
+    and no stderr handler is added. <code>use_rich=False</code> would attach a
+    <code>basicConfig</code> handler and change what the command prints — the
+    choice is made to leave output unchanged, not for a logging preference.
+  </p>
+
+  <h3 id="shc-run-log-tests">Tests</h3>
+  <p id="shc-run-log-tests-structural">
+    <code>tests/standard_names/test_sn_command_logging.py</code> holds five
+    tests. One structural test walks every command of the <code>sn</code> click
+    group, prints each qualifying command and its reason, and asserts each calls
+    <code>setup_logging</code>; it also asserts <code>harmonize</code>,
+    <code>edit</code> and <code>rescore</code> are among those found, so it can
+    never pass vacuously because the walk stopped resolving. It reports:
+  </p>
+  <pre id="shc-run-log-tests-findings">spending sn commands found:
+  run: takes a cost-limit option -> setup_logging=True
+  bench: reaches rescore_descriptions_report, run_benchmark, run_calibration_gate -> setup_logging=True
+  release: reaches run_review_release -> setup_logging=True
+  approve: reaches tag_fold_back -> setup_logging=True
+  harmonize: takes a cost-limit option -> setup_logging=True
+  review: takes a cost-limit option -> setup_logging=True
+  edit: takes a cost-limit option -> setup_logging=True
+  rescore: takes a cost-limit option -> setup_logging=True</pre>
+  <p id="shc-run-log-tests-behavioural">
+    Three behavioural <code>CliRunner</code> tests run <code>sn harmonize
+    --all --report</code> (stub graph, family rows stubbed empty), <code>sn
+    edit</code> (inline review stubbed) and <code>sn rescore</code> (rescore
+    stubbed), and assert the log writer is reached with domain <code>sn</code>
+    and the command stem <code>sn-harmonize</code>, <code>sn-edit</code>,
+    <code>sn-rescore</code>. Every test patches
+    <code>configure_cli_logging</code>, the only writer, so no test creates a
+    real log file under the home directory. The fifth test asserts the
+    structural walk finds the command group at all.
+  </p>
+
+  <h3 id="shc-run-log-negative-control">Negative control</h3>
+  <p id="shc-run-log-negative-control-text">
+    Declared mutation: remove each <code>setup_logging</code> call and its tests
+    fail. Removing every <code>setup_logging("sn"</code> line from
+    <code>sn.py</code> and re-running the file gave <code>4 failed, 1
+    passed</code> (<code>EXIT=1</code>): the structural test names the commands
+    left unlogged, and the three behavioural tests find no call reached. The
+    source was then restored byte-identical from the pre-mutation copy
+    (<code>diff</code> reported no difference; the call count returned to the
+    expected figure). The guard is live rather than vacuous.
+  </p>
+
+  <h3 id="shc-run-log-gate">Gate, by delta</h3>
+  <p id="shc-run-log-gate-text">
+    The gate files are the new file plus the four tests covering the touched
+    command paths. At the base revision (the new file absent, <code>sn.py</code>
+    at its pre-change content) the four shared files gave <code>52 passed</code>,
+    <code>EXIT=0</code>; at head all five files gave <code>57 passed</code>,
+    <code>EXIT=0</code>. The five additional passes are the new file; no test
+    that passed at base fails at head, so the change adds zero failures.
+  </p>
+</section>

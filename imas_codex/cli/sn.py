@@ -3553,6 +3553,10 @@ def sn_bench(
       imas-codex sn bench --models anthropic/claude-sonnet-4.6,openai/gpt-5.4
       imas-codex sn bench --include-docs
     """
+    from imas_codex.cli.discover.common import setup_logging
+
+    setup_logging("sn", "sn-bench", use_rich=True)
+
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
@@ -4922,6 +4926,10 @@ def sn_release(
       imas-codex sn release --batch <manifest.yaml> --bump minor --no-pr -m "WEST batch"
       imas-codex sn release --batch <manifest.yaml> --pr-title "WEST review batch" --pr-body-file pr.md -m "WEST batch"
     """
+    from imas_codex.cli.discover.common import setup_logging
+
+    setup_logging("sn", "sn-release", use_rich=True)
+
     from pathlib import Path
 
     from rich.table import Table
@@ -5308,6 +5316,10 @@ def sn_approve(
     accepted drafts become approved active names. --undo unwinds both lifecycle
     transitions of a folded approval.
     """
+    from imas_codex.cli.discover.common import setup_logging
+
+    setup_logging("sn", "sn-approve", use_rich=True)
+
     import subprocess as _subprocess
     from pathlib import Path
 
@@ -6028,6 +6040,10 @@ def sn_harmonize(
       imas-codex sn harmonize --family ion_temperature --apply
       imas-codex sn harmonize --family ion_temperature --apply --force "typo in anchor"
     """
+    from imas_codex.cli.discover.common import setup_logging
+
+    setup_logging("sn", "sn-harmonize", use_rich=True)
+
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.harmonize import (
         concept_member_ids,
@@ -7007,6 +7023,10 @@ def sn_edit(
           --reason "ambiguous vs ion_temperature in review" --axis docs
       imas-codex sn edit old_name --rename new_name --reason "..." --stage-only
     """
+    from imas_codex.cli.discover.common import setup_logging
+
+    setup_logging("sn", "sn-edit", use_rich=True)
+
     provided = [
         name
         for name, val in (
@@ -8398,6 +8418,10 @@ def sn_rescore(
       imas-codex sn rescore second_local_tangential_coordinate_of_bragg_crystal
       imas-codex sn rescore <name> --stage-only   # embed server down: defer review
     """
+    from imas_codex.cli.discover.common import setup_logging
+
+    setup_logging("sn", "sn-rescore", use_rich=True)
+
     from imas_codex.standard_names.edit import rescore_name
 
     if not (dry_run or stage_only):
