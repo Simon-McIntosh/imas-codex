@@ -72,6 +72,16 @@
        <tr><td colspan="2"><strong>total</strong></td><td><strong>5901</strong></td><td><strong>18243</strong></td><td></td><td><strong>9/9</strong></td></tr>
      </tbody>
    </table>
+   <p>
+     <strong>The pass invocation is not duplicated.</strong> It is implemented
+     once, as <code>run_pass</code> in the sibling
+     <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-run.py">scg-dd-reclassify-run.py</a>,
+     which this driver imports by path and calls. The sibling gained one flag,
+     <code>--stop-after-classify</code>, to carry the behaviour this node needed
+     — terminating a pass once its classify phase has written — and its default
+     path is unchanged, so the first run's pass logs and their recorded figures
+     still describe the code that produced them.
+   </p>
 
    <h3 id="scg-dd-reclassify-finish-readback">Read back from the graph</h3>
    <p id="scg-dd-reclassify-finish-readback-body">
@@ -103,14 +113,45 @@
      <strong>Primary figure: 184/201 = 0.915</strong>, scored against the
      <em>revised</em> rule labels in
      <code>scg-tree-rerun-revised-guidance-results.json</code>, which relabelled
-     56 of these 201 paths under the corrected scope rules. Beside it, the same
-     graph scored against the label set this node's predecessor used,
-     <code>scg-domain-path-measure-results.json</code>, which predates the
-     revised rules: <strong>135/201 = 0.672</strong>. The two figures differ
-     only in the labels they are measured against — the graph is the same — and
-     the gap is the measure of how much the label set, not the classifier,
-     moved. Both are logged at <code>EXIT=0</code> in
-     <code>passes/readback-201.log</code>.
+     56 of these 201 paths under the corrected scope rules. It sits beside the
+     <strong>0.89</strong> estimate the plan carried for this classifier before
+     the run. Beside it, the same graph scored against the label set this node's
+     predecessor used, <code>scg-domain-path-measure-results.json</code>, which
+     predates the revised rules: <strong>135/201 = 0.672</strong>. The two
+     figures differ only in the labels they are measured against — the graph is
+     the same — and the gap is the measure of how much the label set, not the
+     classifier, moved.
+   </p>
+   <p>
+     <strong>The denominator is the label count, not the graph's row count.</strong>
+     The labelled set is the fixed quantity: a labelled path the graph does not
+     hold is counted as a miss rather than dropping quietly out of the
+     denominator, which would let a shrinking graph raise the score. Here the
+     two agree — 201 labelled paths, 201 graph rows, 0 absent — and the readback
+     records all three counts so a later reader can see they agree rather than
+     assume it. Each of the three runs below writes its own log, carrying the
+     literal command on its first line and <code>EXIT=</code> on its last.
+   </p>
+   <table id="scg-dd-reclassify-finish-score-runs">
+     <thead>
+       <tr><th>instrument</th><th>label set</th><th>labelled</th><th>graph rows</th><th>absent</th><th>matches</th><th>score</th><th>log</th></tr>
+     </thead>
+     <tbody>
+       <tr><td>corrected</td><td><code>scg-tree-rerun-revised-guidance-results.json</code></td><td>201</td><td>201</td><td>0</td><td>184</td><td>0.915</td><td><code>passes/readback-revised-labels.log</code></td></tr>
+       <tr><td>corrected</td><td><code>scg-domain-path-measure-results.json</code></td><td>201</td><td>201</td><td>0</td><td>135</td><td>0.672</td></tr>
+       <tr><td>pre-repair</td><td><code>scg-tree-rerun-revised-guidance-results.json</code></td><td>201</td><td>201</td><td>0</td><td>0</td><td>0.000</td><td><code>passes/readback-control-bare-string.log</code></td></tr>
+     </tbody>
+   </table>
+   <p>
+     <strong>The third row is the negative control: the same graph, read by the
+     pre-repair instrument, scores 0 of 201.</strong> That instrument read each
+     labelled entry as a bare domain string rather than its adjudicated
+     <code>label</code> field, and every label file here maps a path to a
+     record, so nothing can match. It is kept as a runnable
+     <code>readback --instrument bare-string</code> mode rather than deleted, so
+     the zero can be re-shown beside the reading that replaced it. A control
+     that scored anything on the same graph would mean the instrument was not
+     what the readback says it is.
    </p>
    <p>The 17 paths the graph still disagrees with under the revised labels:</p>
    <table id="scg-dd-reclassify-finish-mismatches">
@@ -145,6 +186,71 @@
      re-classification, so their disagreement is with the label rather than
      with a decision this node made, and they are the reason the revised score
      cannot reach 201.
+   </p>
+
+   <h4 id="scg-dd-reclassify-finish-unclassified">Why the six grid coordinates were never classified</h4>
+   <p>
+     The six are <code>core_profiles/profiles_1d/grid/rho_pol_norm</code>,
+     <code>core_profiles/profiles_1d/grid/rho_tor_norm</code>,
+     <code>core_sources/source/profiles_1d/grid/rho_pol_norm</code>,
+     <code>core_sources/source/profiles_1d/grid/rho_tor_norm</code>,
+     <code>ece/channel/beam_tracing/beam/position/rho_tor_norm</code> and
+     <code>waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm</code>.
+     All six carry <code>node_category = 'coordinate'</code> and a null
+     <code>domain_source</code>, and each still holds its IDS's default domain
+     (<code>transport</code> for the <code>core_profiles</code> and
+     <code>core_sources</code> paths, <code>transport</code> replaced by
+     <code>electromagnetic_wave_diagnostics</code> under <code>ece</code> and
+     <code>auxiliary_heating</code> under <code>waves</code>).
+   </p>
+   <p>
+     The exclusion is in <code>_query_unclassified_paths</code>
+     (<code>imas_codex/graph/dd_domain_classifier.py</code>, defined at line 1517):
+     its selection reads <code>n.node_category</code> at line 1544,
+     <code>WHERE n.node_category IN $categories</code>, where
+     <code>$categories</code> is <code>CLASSIFIABLE_CATEGORIES</code>
+     (<code>imas_codex/graph/dd_domain_classifier.py:85</code>), whose members
+     are <code>quantity</code>, <code>structural</code>,
+     <code>representation</code>, <code>geometry</code> and
+     <code>fit_artifact</code>. <code>coordinate</code> is not among them, so
+     the Tier-1 classifier is
+     never handed a grid axis. Excluding it is right: a grid axis names a
+     coordinate, not a quantity with a subject of its own, and the constant's
+     own docstring says coordinates inherit from a parent.
+   </p>
+   <p>
+     What failed is the inheritance that was supposed to cover them. The Tier-2
+     fallback for coordinates, <code>_inherit_from_parent_by_category</code>
+     (<code>imas_codex/graph/dd_domain_classifier.py</code>, defined at line 491),
+     inherits only from an ancestor with <code>ancestor.domain_source IS NOT
+     NULL</code> (line 535) inside a five-hop <code>HAS_PARENT</code> walk. The
+     only ancestors of a grid coordinate — <code>core_profiles/profiles_1d</code>
+     and <code>core_profiles/profiles_1d/grid</code> — are themselves structural
+     with a null <code>domain_source</code>, so nothing is inherited and the
+     build upsert's IDS default stands. The classifier's category filter is
+     working as designed; the gap is that a coordinate whose whole ancestry is
+     unclassified has no path to a domain at all. Correcting it means giving
+     those container paths a classification, which is a change to the DD build
+     or its scope rather than to this node's evidence.
+   </p>
+
+   <figure id="scg-dd-reclassify-finish-figure">
+     <img src="/imas-codex/figures/sn-catalog-grouping/scg-dd-reclassify-finish/domain-source-and-summary-before-after.svg"
+          alt="domain_source split and summary paths at data_management, before and after the completed re-classification">
+   </figure>
+   <p>
+     <strong>Figure.</strong> Left: the <code>domain_source</code> split over
+     all 61,366 <code>IMASNode</code> paths before and after, from
+     <code>scg-dd-reclassify-results.json</code> (before) and
+     <code>scg-dd-reclassify-finish-results.json</code> (after). The two values
+     this node moved are <code>llm_classified</code> 9,758 &rarr; 7,551 and
+     <code>jev_tree</code> 2,276 &rarr; 4,480: 2,204 paths that fell through to
+     the chat classifier now settle at the tree. Right: the
+     <code>summary</code> paths at <code>data_management</code>, 2,474 &rarr; 4
+     of 5,216. The <code>null</code> before-bar is the residual
+     <code>61366 &minus; &Sigma;(recorded before-categories)</code>; the before
+     file records no null bucket of its own, so that bar is a derived remainder
+     and is labelled as one.
    </p>
 
    <h3 id="scg-dd-reclassify-finish-spend">Spend</h3>

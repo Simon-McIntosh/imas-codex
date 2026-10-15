@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-catalog-grouping">
+  <title>scg-reclassify-evidence-repair — the DD re-classification record, made durable</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <section id="scg-reclassify-evidence-repair">
+   <h2>scg-reclassify-evidence-repair — the DD re-classification record, made durable</h2>
+
+   <p id="scg-reclassify-evidence-repair-summary">
+     This node repairs the evidence left by
+     <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish.html">scg-dd-reclassify-finish</a>,
+     whose review scored durability 9. It spends nothing and writes nothing to the
+     graph: every query it makes is a bounded read. Five repairs, below, and one
+     deduplication.
+   </p>
+
+   <h3 id="scg-reclassify-evidence-repair-denominator">1. The score's denominator</h3>
+   <p id="scg-reclassify-evidence-repair-denominator-body">
+     <code>_score</code> divided by the number of graph rows, so a labelled path
+     the graph does not hold would have dropped silently out of the denominator
+     and raised the score. It now divides by the number of labelled paths and
+     counts an absent path as a miss, recording the labelled count, the
+     graph-row count and the absent count side by side. On this graph the three
+     agree — <strong>201 labelled, 201 graph rows, 0 absent</strong> — so the
+     repaired figure is unchanged at <strong>184/201 = 0.915</strong>, now with
+     the denominator it is actually measured against.
+   </p>
+
+   <h3 id="scg-reclassify-evidence-repair-control">2. A negative control a reader can open</h3>
+   <p>
+     The pre-repair instrument read each labelled entry as a bare domain string
+     against a label file that maps every path to a record, so it could not
+     match anything. It is kept as a runnable mode,
+     <code>readback --instrument bare-string</code>, and re-run: it scores
+     <strong>0 of 201</strong> on the same graph. The corrected instrument is
+     re-run once against each label set. Each run has its own log carrying the
+     literal command on its first line and <code>EXIT=</code> on its last.
+   </p>
+   <table id="scg-reclassify-evidence-repair-readbacks">
+     <thead>
+       <tr><th>instrument</th><th>label set</th><th>matches</th><th>score</th><th>exit</th></tr>
+     </thead>
+     <tbody>
+       <tr><td>pre-repair</td><td><code>scg-tree-rerun-revised-guidance-results.json</code></td><td>0/201</td><td>0.000</td><td>0</td></tr>
+       <tr><td>corrected</td><td><code>scg-tree-rerun-revised-guidance-results.json</code></td><td>184/201</td><td>0.915</td><td>0</td></tr>
+       <tr><td>corrected</td><td><code>scg-domain-path-measure-results.json</code></td><td>135/201</td><td>0.672</td><td>0</td></tr>
+     </tbody>
+   </table>
+   <p>
+     Logs:
+     <code>passes/readback-control-bare-string.log</code>,
+     <code>passes/readback-revised-labels.log</code>,
+     <code>passes/readback-prerevision-labels.log</code>.
+   </p>
+
+   <h3 id="scg-reclassify-evidence-repair-estimate">3. The estimate beside the result</h3>
+   <p>
+     The plan's <strong>0.89</strong> estimate now sits beside the 0.915 result
+     in both the fragment and the results file, so the result is read against
+     the expectation it was commissioned under rather than alone.
+   </p>
+
+   <h3 id="scg-reclassify-evidence-repair-grid">4. The six unclassified grid coordinates</h3>
+   <p>
+     <code>core_profiles/profiles_1d/grid/rho_pol_norm</code> and five siblings
+     carry <code>node_category = 'coordinate'</code> and a null
+     <code>domain_source</code>, because <code>_query_unclassified_paths</code>
+     (<code>imas_codex/graph/dd_domain_classifier.py:1517</code>) selects
+     <code>WHERE n.node_category IN $categories</code> against
+     <code>CLASSIFIABLE_CATEGORIES</code> (<code>dd_domain_classifier.py:85</code>),
+     which holds <code>quantity</code>, <code>structural</code>,
+     <code>representation</code>, <code>geometry</code> and
+     <code>fit_artifact</code> — and not <code>coordinate</code>. The exclusion
+     is right for a grid axis. What failed is the Tier-2 inheritance meant to
+     cover coordinates, which requires
+     <code>ancestor.domain_source IS NOT NULL</code>
+     (<code>dd_domain_classifier.py:535</code>, in
+     <code>_inherit_from_parent_by_category</code> at line 491): both ancestors
+     of these paths are structural with a null <code>domain_source</code>, so
+     nothing is inherited and the IDS default stands. No product code changed.
+   </p>
+
+   <h3 id="scg-reclassify-evidence-repair-figure">5. The figure</h3>
+   <figure id="scg-reclassify-evidence-repair-figure-img">
+     <img src="/imas-codex/figures/sn-catalog-grouping/scg-dd-reclassify-finish/domain-source-and-summary-before-after.svg"
+          alt="domain_source split over all IMASNode paths and summary paths at data_management, before and after the completed re-classification">
+   </figure>
+   <p>
+     Left: <code>domain_source</code> before and after over all 61,366 paths,
+     from the two results files. Right: <code>summary</code> paths at
+     <code>data_management</code>, 2,474 &rarr; 4 of 5,216. The before-file
+     records no <code>null</code> bucket, so that bar is a labelled remainder.
+   </p>
+
+   <h3 id="scg-reclassify-evidence-repair-driver">6. One pass driver, not two</h3>
+   <p>
+     The pass invocation now lives once, as <code>run_pass</code> in
+     <code>scg-dd-reclassify-run.py</code>, which the readback driver imports by
+     path. The sibling gained the single flag the later node needed
+     (<code>--stop-after-classify</code>) and its default timeout path is
+     byte-for-byte the one the first run used, so the earlier pass logs and their
+     recorded figures still describe the code that produced them.
+   </p>
+  </section>
+ </main>
+</body>
+</html>
