@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:7566",
+    "imas_codex/standard_names/repair_authority.py:135"
+  ],
+  "completed_at": "2026-10-15T05:05:50.095Z",
+  "dispatched_at": "2026-10-15T04:50:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products.html",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "the fragment cites the graph it read as bolt://98d4-gpu-0002:7687 while the run's own log 01-read.log records bolt://98dci4-gpu-0002:7687, so a reader following the citation to reproduce the read lands on a host that does not exist; the identical mis-citation was raised as a follow-on against the sibling \u00a731 fragment."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products.html",
+      "line": "87",
+      "severity": "follow-on",
+      "text": "the fragment credits the replay's already_applied result to the in-flight plan section \u00a734, but the already_applied recognition path is present on the reviewed base at imas_codex/standard_names/signed_manifest.py:4302 and :4337, so this run demonstrates no \u00a734 behaviour; the same line puts a plan-section label in a durable record, which churns if the plan is renumbered."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py",
+      "line": "262",
+      "severity": "follow-on",
+      "text": "receipts_per_name_max falls back to 1 when the receipt map is empty while receipts_per_name_min falls back to 0, so a readback that found no receipts at all would report a maximum of one receipt per name and mislead a reader skimming the pair."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py",
+      "line": "69",
+      "severity": "follow-on",
+      "text": "build_row, run and readback duplicate the signed-retirement instrument scaffold of docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py:86, :263 and :280 without a shared owner module, so the next retirement cohort copies it a third time; no library owner exists for the scaffold, and the authority build itself correctly extends imas_codex/standard_names/repair_authority.py:135."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no runtime module imports the landed artefact: a grep over imas_codex/ and tests/ finds no importer of the fragment or the instrument, which is a manual docs script; the production code the change exercises, and which I verified the write against, is imas_codex/standard_names/signed_manifest.py:7566 apply_signed_manifest and imas_codex/standard_names/repair_authority.py:135 build_repair_authority.",
+    "diff": "read the single commit c419ab325 against base dc81adca9 (git show --stat: 3 files added, 905 insertions) and read all three files in full; the change is the fragment HTML, the 11-row authority JSON and the instrument, with no product module or test altered.",
+    "done_when": "the brief's done_when requires the fragment to record the re-read, the preview (10 admitted, 1 refused), the apply digest and 10 receipts, the readback and the replay, each citing its log; docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products.html:30-85 records all six and its measure table cites 02-build.log through 06-replay.log, each of which begins with its literal command and ends EXIT=0.",
+    "goal": "the goal is to record a signed retirement on the ten unlinked refine products and leave them superseded without a successor edge; commit c419ab325 adds the 11-row authority and its instrument, and a live bounded re-read of the ten against bolt://98dci4-gpu-0002:7687 returns all ten name_stage=superseded with 0 outgoing HAS_SUCCESSOR, 0 incoming REFINED_FROM and exactly 1 supersede_exhausted_orphan receipt each under authority_file_sha256 c185e8cf2ebb687844cae87550ad187b050d2461bb1a0548bab11011ce5d3f7a.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T042445570608-sib-retire-unlinked-refine-products/manifest.md; status complete, commits [c419ab3258edb3bf926a2903e123235cdb9bab53], tests recorded as the six instrument steps each EXIT=0 with all six log paths named, and negative_control_log declared as 'none: <reason>' because no write path reaches a test path.",
+    "write_paths": "read the '## Write scope' block in the reviewed run's brief and the manifest's orientation_write_paths; the three paths the diff adds are exactly the first three declared paths (html, authority json, run.py) and no product code or test file is touched."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py:228 readback() prints names_without_receipt and still_superseded but raises on neither, so no committed check reddens if the retirement is undone; the only control that fires is the pipeline control row.",
+    "evidence": "03-preview.log records would_change=10 and refused=1 while 04-apply.log records changed=10, receipt_rows=10 and 05-readback.log records receipts_per_name_min=1, receipts_per_name_max=1 and still_superseded=10.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products.html carries the fragment meta tags and node-named files, but line :87 cites the plan section label '\u00a734' inside a durable record, which the repository naming rules keep out of committed artefacts.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py:69 build_row emits a supersede mutation with no successor_id and a live re-read of the ten returns 1 receipt each at name_stage=superseded.",
+    "reuse": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py:69 build_row, :211 run and :228 readback duplicate the scaffold of the same-purpose sibling docs/evidence/fragments/sn-integrity-backlog/sib-record-orphan-retirements-run.py:86, :263 and :280, while the domain capability itself is correctly delegated to the owners at imas_codex/standard_names/repair_authority.py:135 and imas_codex/standard_names/signed_manifest.py:7566 rather than forked.",
+    "scope_discipline": "git show --stat c419ab325 lists only the fragment, the authority JSON and the instrument, every one inside the three declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to record a signed retirement on the ten unlinked refine products and leave them superseded with no successor edge; the live re-read returns all ten at name_stage=superseded with 0 outgoing HAS_SUCCESSOR, 0 incoming REFINED_FROM and exactly 1 supersede_exhausted_orphan receipt each under authority_file_sha256 c185e8cf2ebb687844cae87550ad187b050d2461bb1a0548bab11011ce5d3f7a.\nVERDICT done_when: the brief's done_when names the re-read, the preview (10 admitted, 1 refused), the apply digest and 10 receipts, the readback and the replay, each citing its log; docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products.html:30-85 records all six and cites 02-build.log through 06-replay.log, each ending EXIT=0.\nVERDICT write_paths: the three paths the diff adds are exactly the first three of the run brief's declared write scope and of the manifest's orientation_write_paths; no product code and no test is touched.\nVERDICT manifest: read; status complete, head c419ab3258edb3bf926a2903e123235cdb9bab53, the six instrument steps each recorded EXIT=0 with all six log paths named, and the control declared as the authority's refused row since no write path reaches a test path.\nVERDICT diff: read the single commit c419ab325 against base dc81adca9 commit by commit (3 files added, 905 insertions) and read all three files in full; all three are inside the declared scope.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:7566, imas_codex/standard_names/repair_authority.py:135\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py:69 build_row emits a supersede mutation with no successor_id, and a live re-read of the ten returns 1 receipt each at name_stage=superseded.\nSCORE evidence: 18\nJUSTIFICATION evidence: 03-preview.log records would_change=10 and refused=1, 04-apply.log records changed=10 and receipt_rows=10, and 05-readback.log records receipts_per_name_min=1, receipts_per_name_max=1 and still_superseded=10.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat c419ab325 lists only the fragment, the authority JSON and the instrument, every one inside the three declared write paths.\nSCORE durability: 8\nJUSTIFICATION durability: docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py:228 readback() prints names_without_receipt and still_superseded but raises on neither, so nothing committed reddens if the retirement is undone.\nSCORE fit: 16\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products.html follows the fragment meta-tag idiom and node-named files, but line :87 carries the plan-section label '\u00a734' in a durable record.\nSCORE reuse: 12\nJUSTIFICATION reuse: docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py:69, :211 and :228 duplicate the scaffold of the same-purpose sibling sib-record-orphan-retirements-run.py:86, :263 and :280, while the domain capability is delegated to imas_codex/standard_names/repair_authority.py:135 and imas_codex/standard_names/signed_manifest.py:7566.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products.html:30 follow-on: the fragment cites the graph it read as bolt://98d4-gpu-0002:7687 while 01-read.log records bolt://98dci4-gpu-0002:7687, so the citation a reader would follow to reproduce the read names no host that exists.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products.html:87 follow-on: the fragment credits the replay's already_applied result to the in-flight plan section \u00a734, though the recognition path is present on the reviewed base at imas_codex/standard_names/signed_manifest.py:4302 and :4337, so this run demonstrates no \u00a734 behaviour and the line carries a plan-section label in a durable record.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py:262 follow-on: receipts_per_name_max falls back to 1 on an empty receipt map while receipts_per_name_min falls back to 0, so a readback that found no receipts reports a maximum of one per name.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retire-unlinked-refine-products-run.py:69 follow-on: build_row, run and readback duplicate the signed-retirement instrument scaffold of sib-record-orphan-retirements-run.py:86, :263 and :280 with no shared owner module, so the next retirement cohort copies it a third time.",
+  "review_run_id": "r-20261015T045026400285-review-of-sib-retire-unlinked-refine-products-c419ab3258ed",
+  "reviewed_base_sha": "dc81adca9fc238367b890488807d2759c53c9f2e",
+  "reviewed_head_sha": "c419ab3258edb3bf926a2903e123235cdb9bab53",
+  "reviewed_run_id": "r-20261015T042445570608-sib-retire-unlinked-refine-products",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "subject": "sib-retire-unlinked-refine-products",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T05:07:59.676294+00:00",
+  "total": 93
+}
