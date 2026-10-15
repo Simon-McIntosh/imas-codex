@@ -137,14 +137,18 @@
   <p id="shc-apply-scope-estimates-zero-ops">
     The plan and the guard disagree, and both numbers are given because the gap
     is the point. <em>Unguarded</em>, the anchor-gated plan would batch all
-    four families: <strong>29 planned calls, estimated $12.01</strong>
+    four families: <strong>29 planned calls, estimated $12.0068</strong>
     (<code>total_planned_calls</code> and <code>total_estimate_usd</code> in
     the results JSON). <em>Guarded</em>, the recommended-name protection refuses
     the boundary family for its one member carrying an open catalog request, so
-    the apply plans <strong>12 calls, estimated $4.97</strong>. The $5.15
-    difference — nearly half the unguarded figure — is spend the guard prevents
-    on a family this plan is otherwise trying to complete, which is the honest
-    cost of the freeze rather than a defect in the estimate.
+    the apply plans <strong>12 calls</strong>, estimated at the same measured
+    mean of $0.41403 per call as <strong>$4.9683</strong>; on the CLI's own
+    $2.90 and $2.07 rows that is <strong>$4.97</strong>. The difference is
+    <strong>$7.0385</strong> — 17 calls at that mean, exactly the boundary
+    family's own <code>estimate_usd</code> in the results JSON, and 59% of the
+    unguarded figure rather than half of it. That $7.04 is spend the guard
+    prevents on the one family this plan is otherwise trying to complete, which
+    is the honest cost of the freeze rather than a defect in the estimate.
   </p>
 
   <h3 id="shc-apply-scope-estimates-refusals">Members the recommended-name protection refuses</h3>
