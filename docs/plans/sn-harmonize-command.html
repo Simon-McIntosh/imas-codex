@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="75">
+<meta name="plan-version" content="76">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -441,6 +441,9 @@ crew/reviews/imas-codex/r-20261013T145943345276-shc-pin-anchor.at-4ae756c8581cf6
 </div>
 <div class="r-comment" data-section="s10" data-id="c-close-s10" data-who="reckon-build" data-when="2026-10-15T06:08:00Z">
     <div class="r-comment-body"><p>§10 closed. The report and the dry run resolve the anchor through one pin-reading helper, so what the operator sees is what the apply does (<code>c6f003721</code>, review 115/120). <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s10-report-pin">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261014T205529707057-shc-report-pin" data-who="reckon-build" data-when="2026-10-14T21:26:16.684Z">
+    <div class="r-comment-body"><p>shc-report-pin — the harmonize report and dry run now name the same anchor: report_family_rows and plan_family_applies both resolve through the new resolve_family_anchor, which reads the recorded pin via pinned_family_anchor and falls back to select_anchor only when no pin is recorded or the family is stamped; measure: with the report&#x27;s pin read removed the stubbed pin-vs-outscorer test fails (assert &#x27;base_at_axis&#x27; == &#x27;base_at_axis&#x27; vs the outscorer named), while the harmonize gate is 135 passed at head against 134 at base (0 added failures).</p></div>
 </div>
 </section>
 </main>
