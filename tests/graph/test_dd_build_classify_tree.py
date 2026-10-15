@@ -16,6 +16,8 @@ leaving it green by accident.
 
 from __future__ import annotations
 
+import tomllib
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -176,9 +178,28 @@ def first_category_domain() -> tuple[str, str]:
     return category, domain
 
 
-def test_the_configured_threshold_is_read_from_the_seat_section() -> None:
+def threshold_bar() -> float:
+    """The routing bar the classifier will apply, read through its accessor."""
+    bar = get_sn_domain_tree_threshold()
+    assert 0.0 < bar < 1.0, f"the configured threshold is unusable: {bar}"
+    return bar
+
+
+def probes_bracketing(bar: float) -> tuple[float, float]:
+    """A two-level probability just below the bar and one just above it.
+
+    Both derive from the bar rather than being pinned, so the routing tests hold
+    for any threshold the seat is given. The gap is wide enough that endpoint
+    rounding cannot move a probe across the classifier's comparison.
+    """
+    return bar * 0.5, bar + (1.0 - bar) * 0.5
+
+
+def test_the_configured_threshold_is_read_from_the_seat_setting() -> None:
     """The bar the classifier routes on is the seat's setting, not a code constant."""
-    assert get_sn_domain_tree_threshold() == pytest.approx(0.9)
+    pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    seat = tomllib.loads(pyproject.read_text())["tool"]["imas-codex"]["sn-domain-tree"]
+    assert get_sn_domain_tree_threshold() == pytest.approx(seat["threshold"])
 
 
 @pytest.mark.asyncio
@@ -207,11 +228,13 @@ async def test_tier_one_paths_reach_the_tree_on_its_configured_seat() -> None:
 async def test_a_path_below_the_configured_threshold_reaches_chat() -> None:
     """A path the tree scores below the bar is re-judged by the chat classifier.
 
-    The configured bar is 0.9, so a two-level probability of 0.85 belongs to
-    the chat classifier; the domain it replies carries into the written result.
+    The probe sits just below whatever bar the seat carries, so a path the tree
+    scores there belongs to the chat classifier; the domain it replies carries
+    into the written result.
     """
+    below, _above = probes_bracketing(threshold_bar())
     category, domain = first_category_domain()
-    decide = tree_stub(category=category, domain=domain, probability=0.85)
+    decide = tree_stub(category=category, domain=domain, probability=below)
     chat = chat_stub(reply="transport")
 
     fake = await drive(decide, chat)
@@ -227,11 +250,12 @@ async def test_a_path_below_the_configured_threshold_reaches_chat() -> None:
 async def test_a_path_above_the_configured_threshold_does_not_reach_chat() -> None:
     """A path the tree scores at or above the bar keeps the tree's decision.
 
-    A two-level probability of 0.95 clears the 0.9 bar, so the path is written
-    from the tree and the chat classifier is never called for it.
+    The probe sits just above whatever bar the seat carries, so the path is
+    written from the tree and the chat classifier is never called for it.
     """
+    _below, above = probes_bracketing(threshold_bar())
     category, domain = first_category_domain()
-    decide = tree_stub(category=category, domain=domain, probability=0.95)
+    decide = tree_stub(category=category, domain=domain, probability=above)
     chat = chat_stub()
 
     fake = await drive(decide, chat)
@@ -248,26 +272,31 @@ async def test_a_path_above_the_configured_threshold_does_not_reach_chat() -> No
 async def test_the_threshold_setting_decides_the_routing(monkeypatch) -> None:
     """Changing the setting alone moves a path across the routing boundary.
 
-    The same 0.85 two-level probability is below the configured 0.9 and reaches
-    chat; lowering the setting to 0.8 puts the same path on the tree. The
-    routing follows the setting rather than any constant, which is what a
-    threshold held in code could not do.
+    One probe, scored by the tree, is first held against the configured bar and
+    reaches chat; lowering the setting below that probe puts the same path on
+    the tree. The routing follows the setting rather than any constant, which is
+    what a threshold held in code could not do.
     """
+    bar = threshold_bar()
+    below, _above = probes_bracketing(bar)
+    probe = below
     category, domain = first_category_domain()
 
-    below = tree_stub(category=category, domain=domain, probability=0.85)
+    keep = tree_stub(category=category, domain=domain, probability=probe)
     chat_below = chat_stub()
-    await drive(below, chat_below)
+    await drive(keep, chat_below)
     assert chat_below.batches == [[PATH]], (
-        "0.85 is below the configured 0.9 but did not reach chat"
+        f"a path scored {probe} below the configured {bar} did not reach chat"
     )
 
-    monkeypatch.setattr("imas_codex.settings.get_sn_domain_tree_threshold", lambda: 0.8)
-    above = tree_stub(category=category, domain=domain, probability=0.85)
+    monkeypatch.setattr(
+        "imas_codex.settings.get_sn_domain_tree_threshold", lambda: probe * 0.5
+    )
+    above = tree_stub(category=category, domain=domain, probability=probe)
     chat_above = chat_stub()
     fake = await drive(above, chat_above)
     assert chat_above.batches == [], (
-        "lowering the setting to 0.8 did not keep the 0.85 path on the tree"
+        "lowering the setting below the path's score did not keep it on the tree"
     )
     items = fake.written_items()
     assert items and items[0]["domain_source"] == "jev_tree"

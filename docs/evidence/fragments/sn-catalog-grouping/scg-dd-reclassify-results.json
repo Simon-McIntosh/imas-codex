@@ -1,0 +1,487 @@
+{
+  "node": "scg-dd-reclassify",
+  "status": "blocked",
+  "threshold": 0.8,
+  "tier1_classified": 7235,
+  "tier1_total": 12036,
+  "tree_settled": 884,
+  "tree_settled_share": 0.4436,
+  "chat_share": 0.5564,
+  "spend_usd": 12.43,
+  "spend_ceiling_usd": 25.0,
+  "spend_per_path_usd": 0.001942,
+  "projected_finish_usd": 11.13,
+  "projected_finish_total_usd": 23.56,
+  "group_ledger": [
+    {
+      "group": "g01",
+      "ids": [
+        "numerics",
+        "sdn",
+        "dataset_fair",
+        "ec_antennas",
+        "real_time_data",
+        "dataset_description",
+        "gas_pumping",
+        "barometry",
+        "workflow",
+        "spectrometer_mass"
+      ],
+      "reset": true,
+      "tier1": 49,
+      "complete": true,
+      "spend_usd": 0.16
+    },
+    {
+      "group": "g02",
+      "ids": [
+        "controllers",
+        "calorimetry",
+        "b_field_non_axisymmetric",
+        "bremsstrahlung_visible",
+        "polarimeter",
+        "operational_instrumentation",
+        "turbulence",
+        "balance_of_plant",
+        "refractometer",
+        "interferometer",
+        "focs",
+        "cryostat",
+        "pf_plasma",
+        "amns_data",
+        "coils_non_axisymmetric",
+        "breeding_blanket",
+        "pellets",
+        "pf_passive",
+        "lh_antennas",
+        "iron_core",
+        "plasma_initiation",
+        "disruption",
+        "gas_injection"
+      ],
+      "reset": true,
+      "tier1": 524,
+      "complete": true,
+      "spend_usd": 1.09
+    },
+    {
+      "group": "g03",
+      "ids": [
+        "ntms",
+        "thomson_scattering",
+        "em_coupling",
+        "divertors",
+        "sawteeth",
+        "mse",
+        "ferritic",
+        "ec_launchers",
+        "distribution_sources",
+        "tf",
+        "nbi"
+      ],
+      "reset": true,
+      "tier1": 561,
+      "complete": true,
+      "spend_usd": 1.12
+    },
+    {
+      "group": "g04",
+      "ids": [
+        "plasma_transport"
+      ],
+      "reset": true,
+      "tier1": 1162,
+      "complete": true,
+      "spend_usd": 1.97
+    },
+    {
+      "group": "g05",
+      "ids": [
+        "summary"
+      ],
+      "reset": true,
+      "tier1": 1103,
+      "complete": true,
+      "spend_usd": 2.46
+    },
+    {
+      "group": "g06",
+      "ids": [
+        "edge_transport"
+      ],
+      "reset": true,
+      "tier1": 958,
+      "complete": true,
+      "spend_usd": 1.8683,
+      "exit": null,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T041014331937-scg-dd-reclassify/pass-g06-a.log",
+      "note": "classify reported complete at 06:45:41Z; the cluster phase was stopped afterwards, so the log carries no exit line."
+    },
+    {
+      "group": "g07",
+      "ids": [
+        "plasma_profiles"
+      ],
+      "reset": true,
+      "tier1": 885,
+      "complete": true,
+      "spend_usd": 1.62,
+      "exit": 0,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T041014331937-scg-dd-reclassify/pass-g07-a.log",
+      "note": "two passes: the reset pass spent and wrote nothing, the drain pass (without a reset) landed the classification. The reset was applied once.",
+      "spend_unlanded_usd": 1.68,
+      "passes": [
+        {
+          "log": "pass-g07-a.log",
+          "landed": false,
+          "spend_usd": 1.68,
+          "note": "killed at the launch ceiling with Tier 1 unwritten"
+        },
+        {
+          "log": "pass-g07-b.log",
+          "landed": true,
+          "spend_usd": 1.62,
+          "note": "no reset; wrote 885 Tier 1 and 2,562 inherited"
+        }
+      ]
+    },
+    {
+      "group": "g08",
+      "ids": [
+        "edge_profiles"
+      ],
+      "reset": false,
+      "tier1": 833,
+      "complete": false,
+      "spend_usd": 0.0
+    },
+    {
+      "group": "g09",
+      "ids": [
+        "equilibrium"
+      ],
+      "reset": true,
+      "tier1": 465,
+      "complete": true,
+      "spend_usd": 0.8
+    },
+    {
+      "group": "g10",
+      "ids": [
+        "distributions"
+      ],
+      "reset": true,
+      "tier1": 454,
+      "complete": true,
+      "spend_usd": 1.03
+    },
+    {
+      "group": "g11",
+      "ids": [
+        "gyrokinetics_local"
+      ],
+      "reset": false,
+      "tier1": 395,
+      "complete": false,
+      "spend_usd": 0.0
+    },
+    {
+      "group": "g12",
+      "ids": [
+        "wall",
+        "transport_solver_numerics"
+      ],
+      "reset": false,
+      "tier1": 615,
+      "complete": false,
+      "spend_usd": 0.0
+    },
+    {
+      "group": "g13",
+      "ids": [
+        "core_profiles",
+        "waves"
+      ],
+      "reset": true,
+      "tier1": 535,
+      "complete": true,
+      "spend_usd": 1.01
+    },
+    {
+      "group": "g14",
+      "ids": [
+        "plasma_sources",
+        "core_instant_changes",
+        "spectrometer_x_ray_crystal"
+      ],
+      "reset": false,
+      "tier1": 647,
+      "complete": false,
+      "spend_usd": 0.0
+    },
+    {
+      "group": "g15",
+      "ids": [
+        "pulse_schedule",
+        "edge_sources",
+        "spectrometer_visible"
+      ],
+      "reset": true,
+      "tier1": 539,
+      "complete": true,
+      "spend_usd": 0.92
+    },
+    {
+      "group": "g16",
+      "ids": [
+        "neutron_diagnostic",
+        "gyrokinetics",
+        "mhd_linear",
+        "core_transport"
+      ],
+      "reset": false,
+      "tier1": 608,
+      "complete": false,
+      "spend_usd": null
+    },
+    {
+      "group": "g17",
+      "ids": [
+        "runaway_electrons",
+        "mhd",
+        "bolometer",
+        "radiation",
+        "core_sources",
+        "ece",
+        "langmuir_probes"
+      ],
+      "reset": false,
+      "tier1": 698,
+      "complete": false,
+      "spend_usd": 0.0
+    },
+    {
+      "group": "g18",
+      "ids": [
+        "charge_exchange",
+        "spectrometer_uv",
+        "hard_x_rays",
+        "pf_active",
+        "camera_visible",
+        "reflectometer_fluctuation",
+        "camera_ir",
+        "soft_x_rays"
+      ],
+      "reset": false,
+      "tier1": 647,
+      "complete": false,
+      "spend_usd": 0.0
+    },
+    {
+      "group": "g19",
+      "ids": [
+        "camera_x_rays",
+        "spi",
+        "magnetics",
+        "ic_antennas",
+        "reflectometer_profile"
+      ],
+      "reset": false,
+      "tier1": 358,
+      "complete": false,
+      "spend_usd": 0.0
+    }
+  ],
+  "readback": {
+    "note": "The full re-classification did not complete inside the fence; only the paths whose IDS belongs to a completed group are read back as re-classified. The covered subset is scored; the remainder still carries the pre-run graph value.",
+    "labelled_paths_total": 201,
+    "completed_groups": [
+      "g01",
+      "g02",
+      "g03",
+      "g04",
+      "g05",
+      "g06",
+      "g07",
+      "g09",
+      "g10",
+      "g13",
+      "g15"
+    ],
+    "reclassified_subset": 113,
+    "reclassified_correct": 95,
+    "reclassified_accuracy": 0.8407,
+    "reclassified_mismatches": [
+      {
+        "path": "core_profiles/profiles_1d/grid/rho_pol_norm",
+        "label": "equilibrium",
+        "graph": "transport"
+      },
+      {
+        "path": "core_profiles/profiles_1d/grid/rho_tor_norm",
+        "label": "equilibrium",
+        "graph": "transport"
+      },
+      {
+        "path": "disruption/profiles_1d/grid/psi",
+        "label": "magnetohydrodynamics",
+        "graph": "equilibrium"
+      },
+      {
+        "path": "distributions/distribution/ggd/orbit_frequency_pol/values",
+        "label": "fast_particles",
+        "graph": "transport"
+      },
+      {
+        "path": "divertors/divertor/target/extension_r",
+        "label": "divertor_physics",
+        "graph": "structural_components"
+      },
+      {
+        "path": "focs/outline/z",
+        "label": "equilibrium",
+        "graph": "magnetic_field_diagnostics"
+      },
+      {
+        "path": "summary/boundary/minor_radius/value",
+        "label": "equilibrium",
+        "graph": "data_management"
+      },
+      {
+        "path": "summary/composition/carbon/value",
+        "label": "core_plasma_physics",
+        "graph": "data_management"
+      },
+      {
+        "path": "summary/fusion/neutron_rates/total/value",
+        "label": "neutronics",
+        "graph": "data_management"
+      },
+      {
+        "path": "summary/gas_injection_rates/beryllium/value",
+        "label": "fueling",
+        "graph": "data_management"
+      },
+      {
+        "path": "summary/gas_injection_rates/bottom/value",
+        "label": "fueling",
+        "graph": "data_management"
+      },
+      {
+        "path": "summary/global_quantities/power_loss/value",
+        "label": "core_plasma_physics",
+        "graph": "data_management"
+      },
+      {
+        "path": "summary/global_quantities/power_radiated/value",
+        "label": "core_plasma_physics",
+        "graph": "data_management"
+      },
+      {
+        "path": "summary/heating_current_drive/ic/k_perpendicular/value",
+        "label": "auxiliary_heating",
+        "graph": "waves"
+      },
+      {
+        "path": "summary/local/itb/q/value",
+        "label": "equilibrium",
+        "graph": "data_management"
+      },
+      {
+        "path": "summary/pedestal_fits/linear/n_e/pedestal_position/value",
+        "label": "equilibrium",
+        "graph": "edge_plasma_physics"
+      },
+      {
+        "path": "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value",
+        "label": "equilibrium",
+        "graph": "edge_plasma_physics"
+      },
+      {
+        "path": "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm",
+        "label": "equilibrium",
+        "graph": "auxiliary_heating"
+      }
+    ],
+    "whole_graph_accuracy_vs_labels": 0.7413,
+    "estimate_from_plan": 0.89,
+    "domain_source_distribution": {
+      "inherited_from_parent": 35380,
+      "llm_classified": 9758,
+      "none_metadata": 7925,
+      "jev_tree": 2276,
+      "deterministic_override": 6
+    }
+  },
+  "domain_source_distribution": {
+    "inherited_from_parent": 35380,
+    "llm_classified": 9758,
+    "none_metadata": 7925,
+    "jev_tree": 2276,
+    "deterministic_override": 6
+  },
+  "spend_landed_usd": 14.05,
+  "spend_unlanded_usd": 1.68,
+  "spend_incurred_usd": 15.73,
+  "groups_complete": [
+    "g01",
+    "g02",
+    "g03",
+    "g04",
+    "g05",
+    "g06",
+    "g07",
+    "g09",
+    "g10",
+    "g13",
+    "g15"
+  ],
+  "groups_remaining": [
+    "g08",
+    "g11",
+    "g12",
+    "g14",
+    "g16",
+    "g17",
+    "g18",
+    "g19"
+  ],
+  "tier1_paths_remaining": 4801,
+  "projected_remaining_usd": 11.13,
+  "projected_total_usd": 25.24,
+  "stopped_for": "lead decision on the remaining groups and the summary classification",
+  "plasma_profiles_recovery": {
+    "why": "the first pass was killed with its Tier 1 unwritten after its reset had already cleared 3,577 nodes, leaving the IDS with no classification",
+    "total_nodes": 3670,
+    "with_domain_source_before": 93,
+    "with_domain_source_after": 3570,
+    "without_domain_source_after": 100,
+    "without_domain_source_note": "the infrastructure paths under /ids_properties/ and /code/, which the classifier excludes by construction",
+    "passes": [
+      {
+        "log": "pass-g07-a.log",
+        "reset": true,
+        "landed": false,
+        "spend_usd": 1.68,
+        "outcome": "killed at 590 s, Tier 1 unwritten"
+      },
+      {
+        "log": "pass-g07-b.log",
+        "reset": false,
+        "landed": true,
+        "spend_usd": 1.62,
+        "tier1": 885,
+        "inherited": 2562,
+        "outcome": "classification complete, EXIT=0"
+      },
+      {
+        "log": "pass-g07-c.log",
+        "reset": false,
+        "landed": true,
+        "tier1": 0,
+        "outcome": "Tier 1 candidates 0 paths, EXIT=0"
+      }
+    ],
+    "reset_count": 1
+  }
+}
