@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T11:42:32.761Z",
+  "dispatched_at": "2026-10-15T11:31:23Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:182",
+      "id": "wiring-1",
+      "reason": "as written a node reading \u00a73's measure would treat the family as applyable once \u00a712 lands, while the declared dependency (and reality) requires \u00a714 first; the done-when's prerequisite range must be extended through \u00a714 (and \u00a713 for its log).",
+      "text": "\u00a73's done-when states the family converges \"after \u00a75 to \u00a712 have landed\", but _document (line 23) now declares s3 depending on \u00a713 and \u00a714, and \u00a714 is a hard prerequisite: the live apply is refused until the recommended-name guard stops protecting the merged PR #3, so \u00a73 cannot meet its done-when without \u00a714 (its own comment c-s3-lead-ruling-guard says \"After \u00a713 and \u00a714 land, the boundary-averaged density family applies unforced\").",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:249",
+      "id": "reasoning-1",
+      "reason": "the plan needs to say what protects a merged request whose fold-back has not landed (protect until approved, or record the lead's acceptance of the gap); the stated justification does not hold against its own evidence.",
+      "text": "\u00a714 argues a merged request needs no roster protection because \"a merged request protects through the fold-back it triggers, which sets name_stage=approved\", yet the same section's own evidence is a merged request (catalog PR #3, merged 2026-09-01) whose fold-back never ran \u2014 the member still reads name_stage=accepted \u2014 so the compensating mechanism it invokes did not fire in the one case \u00a714 and \u00a73 act on, leaving catalog-published text that a physicist already reviewed with no protection at all, which is precisely what \u00a73 (line 155, \"or has already reviewed\") says the guard exists to prevent.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:249",
+      "id": "reasoning-2",
+      "reason": "the ten-rosters count for the member is correct and the one null-pr roster changes neither the guard's mechanism nor the done-when.",
+      "text": "\u00a714 says the member \"sits in the ten WEST task-2e rosters, which recorded fork pull requests 3 to 15\", but of the ten rosters that name the member, `v0.3.0rc7+west-task-2e.sn_names.yaml` records `pr_number: null`, so only nine recorded a candidate request and only those nine contribute evidence (`protection.py:203` skips a roster with no pr_number/pr_url).",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "6fbe80636f67753883e654ff87f216b63bb1e48c1df4932bcacdf4b95ad3af80",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 95,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261015T112851705988-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "aa007f0a07f39b4c214d7406d3710817815b5efd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited symbol resolves: `sn.py` harmonize 5909, `sn edit` 6849, `run_inline_review` call 7132, `sn rescore` 8357, `sn review` 6433, `sn run` 3031; `protection.py` `_frozen_roster_requests` 172 and `recommended_name_protections` 212; `promote.py` `parse_pull_request_url` 1448, `_pull_request_call` 1459, `_pull_request_state` 1557; `harmonize.py` `preview_recommended_refusals` 1382 and `refuse_recommended_members` 1412; extensionless hrefs are the house convention.",
+    "done_when": "pass \u2014 \u00a713's structural and behavioural tests each name a removing-the-call control (\"Each test fails with its call removed, recorded with EXIT=\"), and \u00a714's four bullets each state \"Each test fails with its mechanism removed\"; each is a control that can redden.",
+    "evidence_paths": "pass \u2014 neither \u00a713 nor \u00a714 routes evidence to a scratchpad or node-local path; their gate logs land under the run and evidence directories the plan's other nodes already use.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach \u00a713's or \u00a714's new symbols; the stem token `sn-<command>` is a format, not a label (note: the existing `sn run` uses stem `sn`, so the stated stem rule is not what that command already does; the tests do not assert the stem for it).",
+    "reasoning": "a finding \u2014 \u00a714 justifies treating a merged request as non-protecting by asserting \"a merged request protects through the fold-back it triggers, which sets name_stage=approved\" (plan.html:249), a mechanism its own evidence in the same paragraph shows did not fire for exactly this case.",
+    "single_goal": "pass \u2014 \u00a713 carries one deliverable (every spending `sn` command writes a log) and \u00a714 one (the guard protects only an open request); neither joins two separately-failing repairs.",
+    "wiring": "a finding \u2014 \u00a73's done-when still reserves the family apply for \"after \u00a75 to \u00a712 have landed\" (plan.html:182), while _document now declares s3 depending on \u00a713 and \u00a714 (plan.html:23), and \u00a73's own recorded reasoning says the family cannot apply until \u00a714 lands."
+  },
+  "section_digests": {
+    "_document": "d03539a976c09b73da85fb1de622180df319c0e89b1ee54e3357cff3c98f02df",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s10": "d1bb9bb9dfcae650a5653ea3bbdb319e3ecf676ab9a3cc351968b46d2f10607a",
+    "s11": "cb00438301915812ef678ff6517b2477e98180338b6d1863e1a73e87af25a889",
+    "s12": "783b5bfd673def7e7a1b834abaabe5858e0ea763e54aadcb2a31c7d0cab015a5",
+    "s13": "88983292b8300bd95f94fff195f64665cac496fa8f55525c8c1193a87f733c8a",
+    "s14": "716af55d1bea22ae6d2862d34b495d8caabe7a9d89c5c9f0d3c2fc4c0cad6294",
+    "s2": "767a2fe2b092486b6f4c5277a919edca224cd3a5f242f4bf747c1657bda4d5af",
+    "s3": "9416801e555c3ed92b47ddba985fbf47123b22c7ddd20d69a46baa82f2840272",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa",
+    "s5": "ebb66a7ebb10c4aad132f61567b089ce315607a670a86403166cdf201a496bbf",
+    "s6": "74bec4f3403c9293f29290ca6de60b070dd4973bb9e04aef58c53838d9ca9932",
+    "s7": "2eed016a7c36b87fbd866c3a21ae396d57071d75eebb6222595db5e505dd8701",
+    "s8": "bc1625cd02b97ea52367a81c977f73194ffee6eb11240f56cbecfd9adb7b9de9",
+    "s9": "a56a7ae67d3f4140a7d38abbe65fb56d981b5b3bff3ced30fa63005c9dfebcb3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T11:47:03.789261+00:00"
+}
