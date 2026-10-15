@@ -1,0 +1,5007 @@
+{
+  "read_only": true,
+  "measured_at_utc": "2026-10-15T12:30:44.754226+00:00",
+  "live_names": 2677,
+  "query_seconds": 0.312,
+  "source_control": {
+    "name": "electron_temperature",
+    "contains_core_plasma_physics": true,
+    "set_precedence_approved": "9/20"
+  },
+  "rule_descriptions": {
+    "set_precedence": "Highest declared precedence among source domains.",
+    "path_plurality": "Most DD source paths, then precedence.",
+    "ids_plurality": "Most distinct source IDS, counting each domain once per IDS, then precedence.",
+    "ids_then_paths": "Most distinct source IDS, then path count, then precedence."
+  },
+  "selection": "Maximum correct on approved plus calibration; approved count and rule order break ties.",
+  "selected_rule": "ids_then_paths",
+  "decision_caveat": {
+    "selected_approved_correct": 9,
+    "control_approved_correct": 9,
+    "approved_misses_shared_by_all_rules": 8,
+    "validation_gain_over_control": 1
+  },
+  "accuracy": {
+    "approved": {
+      "set_precedence": {
+        "count": 20,
+        "correct": 9,
+        "accuracy": 0.45,
+        "lower": 0.25,
+        "upper": 0.6499999999999999
+      },
+      "path_plurality": {
+        "count": 20,
+        "correct": 8,
+        "accuracy": 0.4,
+        "lower": 0.19999999999999996,
+        "upper": 0.6000000000000001
+      },
+      "ids_plurality": {
+        "count": 20,
+        "correct": 9,
+        "accuracy": 0.45,
+        "lower": 0.25,
+        "upper": 0.6499999999999999
+      },
+      "ids_then_paths": {
+        "count": 20,
+        "correct": 9,
+        "accuracy": 0.45,
+        "lower": 0.25,
+        "upper": 0.6499999999999999
+      }
+    },
+    "calibration": {
+      "set_precedence": {
+        "count": 73,
+        "correct": 53,
+        "accuracy": 0.726027397260274,
+        "lower": 0.6164383561643836,
+        "upper": 0.8356164383561644
+      },
+      "path_plurality": {
+        "count": 73,
+        "correct": 56,
+        "accuracy": 0.7671232876712328,
+        "lower": 0.6575342465753424,
+        "upper": 0.8630136986301369
+      },
+      "ids_plurality": {
+        "count": 73,
+        "correct": 55,
+        "accuracy": 0.7534246575342466,
+        "lower": 0.6438356164383561,
+        "upper": 0.8493150684931507
+      },
+      "ids_then_paths": {
+        "count": 73,
+        "correct": 56,
+        "accuracy": 0.7671232876712328,
+        "lower": 0.6575342465753424,
+        "upper": 0.8630136986301369
+      }
+    },
+    "validation": {
+      "set_precedence": {
+        "count": 77,
+        "correct": 52,
+        "accuracy": 0.6753246753246753,
+        "lower": 0.5714285714285714,
+        "upper": 0.7792207792207793
+      },
+      "ids_then_paths": {
+        "count": 77,
+        "correct": 53,
+        "accuracy": 0.6883116883116883,
+        "lower": 0.5844155844155843,
+        "upper": 0.7922077922077921
+      }
+    }
+  },
+  "approved_names": [
+    {
+      "name": "electron_temperature",
+      "approved_domain": "core_plasma_physics",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "core_profiles/profiles_1d/electrons/temperature": "core_plasma_physics",
+        "edge_profiles/ggd/electrons/temperature/values": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/electrons/temperature": "edge_plasma_physics",
+        "langmuir_probes/embedded/multi_temperature_fits/t_e": "particle_measurement_diagnostics",
+        "langmuir_probes/embedded/t_e": "particle_measurement_diagnostics",
+        "langmuir_probes/reciprocating/plunge/collector/t_e": "edge_plasma_physics",
+        "mhd/ggd/electrons/temperature/values": "magnetohydrodynamics",
+        "plasma_profiles/ggd/electrons/temperature/values": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/electrons/temperature": "core_plasma_physics",
+        "sawteeth/profiles_1d/t_e": "core_plasma_physics",
+        "spectrometer_x_ray_crystal/channel/profiles_line_integrated/t_e": "spectroscopy",
+        "thomson_scattering/channel/t_e": "particle_measurement_diagnostics",
+        "turbulence/profiles_2d/electrons/temperature": "turbulence"
+      },
+      "path_counts": {
+        "core_plasma_physics": 4,
+        "edge_plasma_physics": 3,
+        "magnetohydrodynamics": 1,
+        "particle_measurement_diagnostics": 3,
+        "spectroscopy": 1,
+        "turbulence": 1
+      },
+      "answers": {
+        "set_precedence": "magnetohydrodynamics",
+        "path_plurality": "core_plasma_physics",
+        "ids_plurality": "core_plasma_physics",
+        "ids_then_paths": "core_plasma_physics"
+      }
+    },
+    {
+      "name": "electron_density",
+      "approved_domain": "core_plasma_physics",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "equilibrium/time_slice/constraints/n_e/measured": "equilibrium",
+        "equilibrium/time_slice/constraints/n_e/reconstructed": "equilibrium",
+        "langmuir_probes/embedded/n_e": "edge_plasma_physics",
+        "langmuir_probes/reciprocating/plunge/n_e": "edge_plasma_physics",
+        "reflectometer_profile/channel/n_e": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/n_e": "core_plasma_physics",
+        "sawteeth/profiles_1d/n_e": "core_plasma_physics",
+        "spectrometer_visible/channel/polarization_spectroscopy/n_e": "spectroscopy",
+        "thomson_scattering/channel/n_e": "particle_measurement_diagnostics"
+      },
+      "path_counts": {
+        "core_plasma_physics": 2,
+        "edge_plasma_physics": 2,
+        "electromagnetic_wave_diagnostics": 1,
+        "equilibrium": 2,
+        "particle_measurement_diagnostics": 1,
+        "spectroscopy": 1
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "equilibrium",
+        "ids_plurality": "core_plasma_physics",
+        "ids_then_paths": "core_plasma_physics"
+      }
+    },
+    {
+      "name": "safety_factor",
+      "approved_domain": "equilibrium",
+      "answer": "equilibrium",
+      "sources": {
+        "core_profiles/profiles_1d/q": "equilibrium",
+        "edge_profiles/profiles_1d/q": "equilibrium",
+        "equilibrium/time_slice/constraints/q/measured": "equilibrium",
+        "equilibrium/time_slice/constraints/q/reconstructed": "equilibrium",
+        "equilibrium/time_slice/profiles_1d/q": "equilibrium",
+        "gyrokinetics_local/flux_surface/q": "equilibrium",
+        "plasma_profiles/profiles_1d/q": "equilibrium",
+        "sawteeth/profiles_1d/q": "equilibrium"
+      },
+      "path_counts": {
+        "equilibrium": 8
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "equilibrium",
+        "ids_plurality": "equilibrium",
+        "ids_then_paths": "equilibrium"
+      }
+    },
+    {
+      "name": "plasma_current",
+      "approved_domain": "equilibrium",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "core_profiles/global_quantities/ip": "core_plasma_physics",
+        "equilibrium/time_slice/constraints/ip/measured": "equilibrium",
+        "equilibrium/time_slice/constraints/ip/reconstructed": "equilibrium",
+        "equilibrium/time_slice/global_quantities/ip": "equilibrium",
+        "focs/current": "magnetic_field_diagnostics",
+        "magnetics/ip": "magnetic_field_diagnostics",
+        "plasma_initiation/global_quantities/ip": "core_plasma_physics",
+        "plasma_profiles/global_quantities/ip": "core_plasma_physics",
+        "summary/global_quantities/ip/value": "core_plasma_physics"
+      },
+      "path_counts": {
+        "core_plasma_physics": 4,
+        "equilibrium": 3,
+        "magnetic_field_diagnostics": 2
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "core_plasma_physics",
+        "ids_plurality": "core_plasma_physics",
+        "ids_then_paths": "core_plasma_physics"
+      }
+    },
+    {
+      "name": "poloidal_magnetic_flux",
+      "approved_domain": "equilibrium",
+      "answer": "equilibrium",
+      "sources": {
+        "core_sources/source/profiles_1d/grid/psi": "equilibrium",
+        "disruption/profiles_1d/grid/psi": "equilibrium",
+        "distribution_sources/source/profiles_1d/grid/psi": "equilibrium",
+        "distributions/distribution/profiles_1d/grid/psi": "equilibrium",
+        "distributions/distribution/profiles_2d/grid/psi": "equilibrium",
+        "edge_profiles/ggd/psi/values": "equilibrium",
+        "edge_profiles/profiles_1d/grid/psi": "equilibrium",
+        "equilibrium/time_slice/ggd/psi/values": "equilibrium",
+        "equilibrium/time_slice/profiles_2d/psi": "equilibrium",
+        "mhd/ggd/psi/values": "magnetohydrodynamics",
+        "plasma_profiles/ggd/psi/values": "equilibrium",
+        "plasma_profiles/profiles_1d/grid/psi": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_d/psi": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_flux/psi": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_v/psi": "equilibrium",
+        "runaway_electrons/profiles_1d/grid/psi": "equilibrium",
+        "transport_solver_numerics/solver_1d/grid/psi": "equilibrium",
+        "wall/description_ggd/ggd/psi/values": "equilibrium",
+        "waves/coherent_wave/profiles_1d/grid/psi": "equilibrium",
+        "waves/coherent_wave/profiles_2d/grid/psi": "equilibrium"
+      },
+      "path_counts": {
+        "equilibrium": 19,
+        "magnetohydrodynamics": 1
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "equilibrium",
+        "ids_plurality": "equilibrium",
+        "ids_then_paths": "equilibrium"
+      }
+    },
+    {
+      "name": "atomic_count",
+      "approved_domain": "general",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "amns_data/process/products/element/atoms_n": "computational_workflow",
+        "amns_data/process/reactants/element/atoms_n": "computational_workflow",
+        "core_profiles/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "core_profiles/profiles_1d/neutral/element/atoms_n": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/element/atoms_n": "core_plasma_physics",
+        "core_sources/source/profiles_1d/ion/element/atoms_n": "transport",
+        "core_sources/source/profiles_1d/neutral/element/atoms_n": "transport",
+        "core_sources/source/species/ion/element/atoms_n": "transport",
+        "core_sources/source/species/neutral/element/atoms_n": "transport",
+        "core_transport/model/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "core_transport/model/profiles_1d/neutral/element/atoms_n": "core_plasma_physics",
+        "distribution_sources/source/species/ion/element/atoms_n": "fast_particles",
+        "distribution_sources/source/species/neutral/element/atoms_n": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_1d/co_passing/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_1d/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_1d/counter_passing/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_1d/trapped/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_2d/co_passing/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_2d/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_2d/counter_passing/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_2d/trapped/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/species/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/species/neutral/element/atoms_n": "fast_particles",
+        "edge_profiles/ggd/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_profiles/ggd/neutral/element/atoms_n": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/neutral/element/atoms_n": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_sources/source/ggd/neutral/element/atoms_n": "edge_plasma_physics",
+        "edge_sources/source/species/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_sources/source/species/neutral/element/atoms_n": "edge_plasma_physics",
+        "edge_transport/model/ggd/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_transport/model/ggd/neutral/element/atoms_n": "edge_plasma_physics",
+        "gas_injection/pipe/species/element/atoms_n": "fueling",
+        "gas_injection/valve/species/element/atoms_n": "fueling",
+        "gas_pumping/duct/species/element/atoms_n": "plant_systems",
+        "pellets/time_slice/pellet/propellant_gas/element/atoms_n": "fueling",
+        "plasma_initiation/global_quantities/ion/element/atoms_n": "plasma_initiation",
+        "plasma_initiation/global_quantities/neutral/element/atoms_n": "plasma_initiation",
+        "plasma_profiles/ggd/ion/element/atoms_n": "edge_plasma_physics",
+        "plasma_profiles/ggd/neutral/element/atoms_n": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/neutral/element/atoms_n": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/element/atoms_n": "core_plasma_physics",
+        "plasma_sources/source/ggd/ion/element/atoms_n": "core_plasma_physics",
+        "plasma_sources/source/ggd/neutral/element/atoms_n": "transport",
+        "plasma_sources/source/profiles_1d/ion/element/atoms_n": "transport",
+        "plasma_sources/source/profiles_1d/neutral/element/atoms_n": "transport",
+        "plasma_sources/source/species/ion/element/atoms_n": "transport",
+        "plasma_sources/source/species/neutral/element/atoms_n": "transport",
+        "plasma_transport/model/ggd/ion/element/atoms_n": "transport",
+        "plasma_transport/model/ggd/neutral/element/atoms_n": "transport",
+        "plasma_transport/model/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "plasma_transport/model/profiles_1d/neutral/element/atoms_n": "transport",
+        "pulse_schedule/density_control/ion/element/atoms_n": "plasma_control",
+        "pulse_schedule/density_control/valve/species/element/atoms_n": "fueling",
+        "pulse_schedule/nbi/unit/species/element/atoms_n": "auxiliary_heating",
+        "radiation/process/ggd/neutral/element/atoms_n": "radiation_measurement_diagnostics",
+        "radiation/process/profiles_1d/neutral/element/atoms_n": "radiation_measurement_diagnostics",
+        "spectrometer_visible/channel/isotope_ratios/isotope/element/atoms_n": "spectroscopy",
+        "turbulence/profiles_2d/ion/element/atoms_n": "turbulence",
+        "turbulence/profiles_2d/neutral/element/atoms_n": "turbulence",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/incident_species/element/atoms_n": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/element/atoms_n": "waves",
+        "waves/coherent_wave/global_quantities/ion/element/atoms_n": "waves",
+        "waves/coherent_wave/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "waves/coherent_wave/profiles_2d/ion/element/atoms_n": "core_plasma_physics"
+      },
+      "path_counts": {
+        "auxiliary_heating": 1,
+        "computational_workflow": 2,
+        "core_plasma_physics": 13,
+        "edge_plasma_physics": 11,
+        "fast_particles": 13,
+        "fueling": 4,
+        "plant_systems": 1,
+        "plasma_control": 1,
+        "plasma_initiation": 2,
+        "plasma_wall_interactions": 10,
+        "radiation_measurement_diagnostics": 2,
+        "spectroscopy": 1,
+        "transport": 12,
+        "turbulence": 2,
+        "waves": 2
+      },
+      "answers": {
+        "set_precedence": "transport",
+        "path_plurality": "core_plasma_physics",
+        "ids_plurality": "core_plasma_physics",
+        "ids_then_paths": "core_plasma_physics"
+      }
+    },
+    {
+      "name": "atomic_mass",
+      "approved_domain": "general",
+      "answer": "fueling",
+      "sources": {
+        "amns_data/a": "computational_workflow",
+        "core_profiles/profiles_1d/ion/element/a": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/element/a": "core_plasma_physics",
+        "core_sources/source/profiles_1d/ion/element/a": "transport",
+        "core_sources/source/species/ion/element/a": "transport",
+        "distribution_sources/source/species/ion/element/a": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_1d/co_passing/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_1d/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_1d/counter_passing/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_1d/trapped/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_2d/co_passing/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_2d/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_2d/counter_passing/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_2d/trapped/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/species/ion/element/a": "fast_particles",
+        "edge_profiles/ggd/ion/element/a": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/element/a": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/element/a": "edge_plasma_physics",
+        "edge_sources/source/species/ion/element/a": "edge_plasma_physics",
+        "edge_transport/model/ggd/ion/element/a": "edge_plasma_physics",
+        "gas_injection/pipe/species/element/a": "fueling",
+        "gas_injection/valve/species/element/a": "fueling",
+        "gas_pumping/duct/species/element/a": "plant_systems",
+        "nbi/unit/species/a": "auxiliary_heating",
+        "pellets/time_slice/pellet/species/a": "fueling",
+        "plasma_profiles/ggd/ion/element/a": "edge_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/element/a": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/element/a": "core_plasma_physics",
+        "plasma_sources/source/ggd/ion/element/a": "core_plasma_physics",
+        "plasma_sources/source/profiles_1d/ion/element/a": "transport",
+        "plasma_sources/source/species/ion/element/a": "transport",
+        "plasma_transport/model/ggd/ion/element/a": "transport",
+        "pulse_schedule/density_control/ion/element/a": "plasma_control",
+        "pulse_schedule/density_control/valve/species/element/a": "fueling",
+        "spectrometer_mass/channel/a": "spectroscopy",
+        "spectrometer_mass/residual_spectrum/a": "spectroscopy",
+        "spectrometer_visible/channel/isotope_ratios/isotope/element/a": "spectroscopy",
+        "spi/injector/fragment/species/a": "fueling",
+        "spi/injector/fragmentation_gas/species/a": "fueling",
+        "spi/injector/pellet/core/species/a": "fueling",
+        "spi/injector/pellet/shell/species/a": "fueling",
+        "spi/injector/propellant_gas/species/a": "fueling",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/neutral/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/neutral/element/a": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/element/a": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/incident_species/element/a": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/element/a": "waves",
+        "waves/coherent_wave/global_quantities/ion/element/a": "waves"
+      },
+      "path_counts": {
+        "auxiliary_heating": 1,
+        "computational_workflow": 1,
+        "core_plasma_physics": 5,
+        "edge_plasma_physics": 6,
+        "fast_particles": 11,
+        "fueling": 9,
+        "plant_systems": 1,
+        "plasma_control": 1,
+        "plasma_wall_interactions": 10,
+        "spectroscopy": 3,
+        "transport": 5,
+        "waves": 2
+      },
+      "answers": {
+        "set_precedence": "transport",
+        "path_plurality": "fast_particles",
+        "ids_plurality": "edge_plasma_physics",
+        "ids_then_paths": "fueling"
+      }
+    },
+    {
+      "name": "radial_coordinate_of_line_of_sight",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "radiation_measurement_diagnostics",
+      "sources": {
+        "bolometer/camera/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/line_of_sight/third_point/r": "radiation_measurement_diagnostics",
+        "bremsstrahlung_visible/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "bremsstrahlung_visible/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "camera_x_rays/camera/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "camera_x_rays/camera/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "ece/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "ece/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "ece/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "ece/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "gas_injection/pipe/second_point/r": "fueling",
+        "hard_x_rays/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "hard_x_rays/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "interferometer/channel/line_of_sight/first_point/r": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/line_of_sight/second_point/r": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/line_of_sight/third_point/r": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/n_e/positions/r": "electromagnetic_wave_diagnostics",
+        "mse/channel/line_of_sight/first_point/r": "spectroscopy",
+        "mse/channel/line_of_sight/second_point/r": "spectroscopy",
+        "pellets/time_slice/pellet/path_geometry/first_point/r": "fueling",
+        "pellets/time_slice/pellet/path_geometry/second_point/r": "fueling",
+        "polarimeter/channel/line_of_sight/first_point/r": "electromagnetic_wave_diagnostics",
+        "polarimeter/channel/line_of_sight/second_point/r": "electromagnetic_wave_diagnostics",
+        "polarimeter/channel/line_of_sight/third_point/r": "electromagnetic_wave_diagnostics",
+        "pulse_schedule/density_control/n_e_line_of_sight/first_point/r": "plasma_control",
+        "pulse_schedule/density_control/n_e_line_of_sight/second_point/r": "plasma_control",
+        "pulse_schedule/density_control/n_e_line_of_sight/third_point/r": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/first_point/r": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/second_point/r": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/third_point/r": "plasma_control",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/first_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/second_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/first_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/second_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_detection/first_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_detection/second_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_emission/first_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_emission/second_point/r": "electromagnetic_wave_diagnostics",
+        "refractometer/channel/line_of_sight/first_point/r": "electromagnetic_wave_diagnostics",
+        "refractometer/channel/line_of_sight/second_point/r": "electromagnetic_wave_diagnostics",
+        "soft_x_rays/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "soft_x_rays/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "spectrometer_uv/channel/line_of_sight/first_point/r": "spectroscopy",
+        "spectrometer_uv/channel/line_of_sight/second_point/r": "spectroscopy",
+        "spectrometer_visible/channel/line_of_sight/first_point/r": "spectroscopy",
+        "spectrometer_visible/channel/line_of_sight/second_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/bin/line_of_sight/first_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/bin/line_of_sight/second_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/camera/line_of_sight/first_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/camera/line_of_sight/second_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/profiles_line_integrated/lines_of_sight_second_point/r": "radiation_measurement_diagnostics",
+        "thomson_scattering/channel/line_of_sight/first_point/r": "particle_measurement_diagnostics",
+        "thomson_scattering/channel/line_of_sight/second_point/r": "particle_measurement_diagnostics"
+      },
+      "path_counts": {
+        "electromagnetic_wave_diagnostics": 17,
+        "fueling": 3,
+        "particle_measurement_diagnostics": 2,
+        "plasma_control": 6,
+        "radiation_measurement_diagnostics": 16,
+        "spectroscopy": 10
+      },
+      "answers": {
+        "set_precedence": "fueling",
+        "path_plurality": "electromagnetic_wave_diagnostics",
+        "ids_plurality": "radiation_measurement_diagnostics",
+        "ids_then_paths": "radiation_measurement_diagnostics"
+      }
+    },
+    {
+      "name": "vertical_coordinate_of_line_of_sight",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "radiation_measurement_diagnostics",
+      "sources": {
+        "bolometer/camera/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/line_of_sight/third_point/z": "radiation_measurement_diagnostics",
+        "bremsstrahlung_visible/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "bremsstrahlung_visible/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "camera_x_rays/camera/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "camera_x_rays/camera/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "ece/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "ece/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "ece/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "ece/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "ferritic/object/axisymmetric/thick_line/first_point/z": "magnetic_field_systems",
+        "ferritic/object/axisymmetric/thick_line/second_point/z": "magnetic_field_systems",
+        "gas_injection/pipe/second_point/z": "fueling",
+        "hard_x_rays/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "hard_x_rays/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "interferometer/channel/line_of_sight/first_point/z": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/line_of_sight/second_point/z": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/line_of_sight/third_point/z": "electromagnetic_wave_diagnostics",
+        "mse/channel/line_of_sight/first_point/z": "spectroscopy",
+        "mse/channel/line_of_sight/second_point/z": "spectroscopy",
+        "polarimeter/channel/line_of_sight/first_point/z": "electromagnetic_wave_diagnostics",
+        "polarimeter/channel/line_of_sight/second_point/z": "electromagnetic_wave_diagnostics",
+        "polarimeter/channel/line_of_sight/third_point/z": "electromagnetic_wave_diagnostics",
+        "pulse_schedule/density_control/n_e_line_of_sight/first_point/z": "plasma_control",
+        "pulse_schedule/density_control/n_e_line_of_sight/second_point/z": "plasma_control",
+        "pulse_schedule/density_control/n_e_line_of_sight/third_point/z": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/first_point/z": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/second_point/z": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/third_point/z": "plasma_control",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/first_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/second_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/first_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/second_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_detection/first_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_detection/second_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_emission/first_point/z": "electromagnetic_wave_diagnostics",
+        "refractometer/channel/line_of_sight/first_point/z": "electromagnetic_wave_diagnostics",
+        "refractometer/channel/line_of_sight/second_point/z": "electromagnetic_wave_diagnostics",
+        "soft_x_rays/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "soft_x_rays/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "spectrometer_uv/channel/line_of_sight/first_point/z": "spectroscopy",
+        "spectrometer_uv/channel/line_of_sight/second_point/z": "spectroscopy",
+        "spectrometer_visible/channel/geometry_matrix/interpolated/z": "spectroscopy",
+        "spectrometer_visible/channel/line_of_sight/first_point/z": "spectroscopy",
+        "spectrometer_visible/channel/line_of_sight/second_point/z": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/bin/line_of_sight/first_point/z": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/camera/line_of_sight/first_point/z": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/camera/line_of_sight/second_point/z": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/profiles_line_integrated/lines_of_sight_second_point/z": "spectroscopy",
+        "thomson_scattering/channel/line_of_sight/second_point/z": "particle_measurement_diagnostics",
+        "thomson_scattering/channel/position_per_laser/z": "particle_measurement_diagnostics"
+      },
+      "path_counts": {
+        "electromagnetic_wave_diagnostics": 15,
+        "fueling": 1,
+        "magnetic_field_systems": 2,
+        "particle_measurement_diagnostics": 2,
+        "plasma_control": 6,
+        "radiation_measurement_diagnostics": 15,
+        "spectroscopy": 11
+      },
+      "answers": {
+        "set_precedence": "fueling",
+        "path_plurality": "electromagnetic_wave_diagnostics",
+        "ids_plurality": "radiation_measurement_diagnostics",
+        "ids_then_paths": "radiation_measurement_diagnostics"
+      }
+    },
+    {
+      "name": "atomic_number",
+      "approved_domain": "general",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "core_profiles/profiles_1d/ion/element/z_n": "core_plasma_physics",
+        "core_profiles/profiles_1d/neutral/element/z_n": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/element/z_n": "core_plasma_physics",
+        "edge_profiles/ggd/ion/element/z_n": "edge_plasma_physics",
+        "edge_profiles/ggd/neutral/element/z_n": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/element/z_n": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/neutral/element/z_n": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/element/z_n": "edge_plasma_physics",
+        "edge_sources/source/ggd/neutral/element/z_n": "edge_plasma_physics",
+        "edge_sources/source/species/ion/element/z_n": "edge_plasma_physics",
+        "edge_sources/source/species/neutral/element/z_n": "edge_plasma_physics",
+        "gas_injection/pipe/species/element/z_n": "fueling",
+        "gas_injection/valve/species/element/z_n": "fueling",
+        "gas_pumping/duct/species/element/z_n": "plant_systems",
+        "pellets/time_slice/pellet/species/z_n": "fueling",
+        "plasma_initiation/global_quantities/ion/element/z_n": "core_plasma_physics",
+        "plasma_initiation/global_quantities/neutral/element/z_n": "core_plasma_physics",
+        "plasma_profiles/ggd/ion/element/z_n": "core_plasma_physics",
+        "plasma_profiles/ggd/neutral/element/z_n": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/element/z_n": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/neutral/element/z_n": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/element/z_n": "core_plasma_physics",
+        "pulse_schedule/density_control/ion/element/z_n": "plasma_control",
+        "pulse_schedule/density_control/valve/species/element/z_n": "fueling",
+        "pulse_schedule/nbi/unit/species/element/z_n": "auxiliary_heating",
+        "spectrometer_visible/channel/isotope_ratios/isotope/element/z_n": "spectroscopy",
+        "spi/injector/fragmentation_gas/species/z_n": "fueling",
+        "summary/heating_current_drive/nbi/species/z_n/value": "auxiliary_heating",
+        "turbulence/profiles_2d/ion/element/z_n": "turbulence",
+        "turbulence/profiles_2d/neutral/element/z_n": "turbulence",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/incident_species/element/z_n": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/element/z_n": "waves",
+        "waves/coherent_wave/global_quantities/ion/element/z_n": "waves",
+        "waves/coherent_wave/profiles_1d/ion/element/z_n": "core_plasma_physics",
+        "waves/coherent_wave/profiles_2d/ion/element/z_n": "core_plasma_physics"
+      },
+      "path_counts": {
+        "auxiliary_heating": 2,
+        "core_plasma_physics": 12,
+        "edge_plasma_physics": 8,
+        "fueling": 5,
+        "plant_systems": 1,
+        "plasma_control": 1,
+        "plasma_wall_interactions": 10,
+        "spectroscopy": 1,
+        "turbulence": 2,
+        "waves": 2
+      },
+      "answers": {
+        "set_precedence": "core_plasma_physics",
+        "path_plurality": "core_plasma_physics",
+        "ids_plurality": "core_plasma_physics",
+        "ids_then_paths": "core_plasma_physics"
+      }
+    },
+    {
+      "name": "ion_charge",
+      "approved_domain": "core_plasma_physics",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "charge_exchange/channel/ion/z_ion": "spectroscopy",
+        "core_profiles/profiles_1d/ion/z_ion": "core_plasma_physics",
+        "core_profiles/profiles_1d/ion/z_ion_1d": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/z_ion": "core_plasma_physics",
+        "core_sources/source/profiles_1d/ion/z_ion": "transport",
+        "core_sources/source/species/ion/z_ion": "transport",
+        "core_transport/model/profiles_1d/ion/z_ion": "core_plasma_physics",
+        "distribution_sources/source/species/ion/z_ion": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/z_ion": "fast_particles",
+        "distributions/distribution/profiles_1d/co_passing/collisions/ion/z_ion": "fast_particles",
+        "distributions/distribution/profiles_1d/counter_passing/collisions/ion/z_ion": "fast_particles",
+        "distributions/distribution/profiles_1d/trapped/collisions/ion/z_ion": "fast_particles",
+        "distributions/distribution/profiles_2d/co_passing/collisions/ion/z_ion": "fast_particles",
+        "distributions/distribution/profiles_2d/collisions/ion/z_ion": "fast_particles",
+        "distributions/distribution/profiles_2d/counter_passing/collisions/ion/z_ion": "fast_particles",
+        "distributions/distribution/profiles_2d/trapped/collisions/ion/z_ion": "fast_particles",
+        "distributions/distribution/species/ion/z_ion": "core_plasma_physics",
+        "edge_profiles/ggd/ion/z_ion": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/z_ion": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/z_ion": "edge_plasma_physics",
+        "edge_sources/source/species/ion/z_ion": "edge_plasma_physics",
+        "edge_transport/model/ggd/ion/z_ion": "edge_plasma_physics",
+        "plasma_profiles/ggd/ion/z_ion": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/z_ion_1d": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/z_ion": "core_plasma_physics",
+        "plasma_sources/source/ggd/ion/z_ion": "core_plasma_physics",
+        "plasma_sources/source/profiles_1d/ion/z_ion": "transport",
+        "plasma_sources/source/species/ion/z_ion": "transport",
+        "plasma_transport/model/ggd/ion/z_ion": "transport",
+        "plasma_transport/model/profiles_1d/ion/z_ion": "core_plasma_physics",
+        "pulse_schedule/density_control/ion/z_ion": "plasma_control",
+        "turbulence/profiles_2d/ion/z_ion": "turbulence",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/z_ion": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/z_ion": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/z_ion": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/z_ion": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/z_ion": "waves",
+        "waves/coherent_wave/global_quantities/ion/z_ion": "waves",
+        "waves/coherent_wave/profiles_1d/ion/z_ion": "waves",
+        "waves/coherent_wave/profiles_2d/ion/z_ion": "waves"
+      },
+      "path_counts": {
+        "core_plasma_physics": 10,
+        "edge_plasma_physics": 5,
+        "fast_particles": 9,
+        "plasma_control": 1,
+        "plasma_wall_interactions": 4,
+        "spectroscopy": 1,
+        "transport": 5,
+        "turbulence": 1,
+        "waves": 4
+      },
+      "answers": {
+        "set_precedence": "transport",
+        "path_plurality": "core_plasma_physics",
+        "ids_plurality": "core_plasma_physics",
+        "ids_then_paths": "core_plasma_physics"
+      }
+    },
+    {
+      "name": "ion_state_maximum_charge_number",
+      "approved_domain": "core_plasma_physics",
+      "answer": "transport",
+      "sources": {
+        "core_profiles/profiles_1d/ion/state/z_max": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/state/z_max": "core_plasma_physics",
+        "core_sources/source/profiles_1d/ion/state/z_max": "transport",
+        "core_sources/source/species/ion/state/z_max": "transport",
+        "core_transport/model/profiles_1d/ion/state/z_max": "transport",
+        "distribution_sources/source/species/ion/state/z_max": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_1d/co_passing/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_1d/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_1d/counter_passing/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_1d/trapped/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_2d/co_passing/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_2d/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_2d/counter_passing/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_2d/trapped/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/species/ion/state/z_max": "fast_particles",
+        "edge_profiles/ggd/ion/state/z_max": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/state/z_max": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/state/z_max": "transport",
+        "edge_sources/source/species/ion/state/z_max": "edge_plasma_physics",
+        "edge_transport/model/ggd/ion/state/z_max": "edge_plasma_physics",
+        "plasma_profiles/ggd/ion/state/z_max": "edge_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/state/z_max": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/state/z_max": "core_plasma_physics",
+        "plasma_sources/source/ggd/ion/state/z_max": "core_plasma_physics",
+        "plasma_sources/source/profiles_1d/ion/state/z_max": "transport",
+        "plasma_sources/source/species/ion/state/z_max": "transport",
+        "plasma_transport/model/ggd/ion/state/z_max": "transport",
+        "plasma_transport/model/profiles_1d/ion/state/z_max": "transport",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/state/z_max": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/z_max": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/state/z_max": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/state/z_max": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/state/z_max": "waves",
+        "waves/coherent_wave/global_quantities/ion/state/z_max": "waves",
+        "waves/coherent_wave/profiles_1d/ion/state/z_max": "waves",
+        "waves/coherent_wave/profiles_2d/ion/state/z_max": "waves"
+      },
+      "path_counts": {
+        "core_plasma_physics": 5,
+        "edge_plasma_physics": 5,
+        "fast_particles": 11,
+        "plasma_wall_interactions": 4,
+        "transport": 8,
+        "waves": 4
+      },
+      "answers": {
+        "set_precedence": "transport",
+        "path_plurality": "fast_particles",
+        "ids_plurality": "transport",
+        "ids_then_paths": "transport"
+      }
+    },
+    {
+      "name": "normalized_poloidal_flux_coordinate",
+      "approved_domain": "equilibrium",
+      "answer": "transport",
+      "sources": {
+        "core_profiles/profiles_1d/grid/rho_pol_norm": "transport",
+        "core_sources/source/profiles_1d/grid/rho_pol_norm": "transport",
+        "core_transport/model/profiles_1d/grid_d/rho_pol_norm": "transport",
+        "core_transport/model/profiles_1d/grid_flux/rho_pol_norm": "transport",
+        "core_transport/model/profiles_1d/grid_v/rho_pol_norm": "transport",
+        "disruption/profiles_1d/grid/rho_pol_norm": "magnetohydrodynamics",
+        "distribution_sources/source/profiles_1d/grid/rho_pol_norm": "transport",
+        "distributions/distribution/profiles_1d/grid/rho_pol_norm": "transport",
+        "edge_profiles/profiles_1d/electrons/density_fit/rho_pol_norm": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/electrons/temperature_fit/rho_pol_norm": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/grid/rho_pol_norm": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/density_fit/rho_pol_norm": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/temperature_fit/rho_pol_norm": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/t_i_average_fit/rho_pol_norm": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/zeff_fit/rho_pol_norm": "edge_plasma_physics",
+        "neutron_diagnostic/reconstructed_emissivity/psi_norm": "equilibrium",
+        "plasma_profiles/profiles_1d/electrons/density_fit/rho_pol_norm": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/electrons/temperature_fit/rho_pol_norm": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/grid/rho_pol_norm": "transport",
+        "plasma_profiles/profiles_1d/ion/density_fit/rho_pol_norm": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/temperature_fit/rho_pol_norm": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/t_i_average_fit/rho_pol_norm": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/zeff_fit/rho_pol_norm": "transport",
+        "plasma_sources/source/profiles_1d/grid/rho_pol_norm": "transport",
+        "plasma_transport/model/profiles_1d/grid_d/rho_pol_norm": "transport",
+        "plasma_transport/model/profiles_1d/grid_flux/rho_pol_norm": "transport",
+        "plasma_transport/model/profiles_1d/grid_v/rho_pol_norm": "transport",
+        "reflectometer_profile/position/rho_pol_norm": "electromagnetic_wave_diagnostics",
+        "runaway_electrons/profiles_1d/grid/rho_pol_norm": "transport",
+        "sawteeth/profiles_1d/grid/rho_pol_norm": "magnetohydrodynamics",
+        "transport_solver_numerics/solver_1d/grid/rho_pol_norm": "computational_workflow",
+        "waves/coherent_wave/profiles_1d/grid/rho_pol_norm": "auxiliary_heating"
+      },
+      "path_counts": {
+        "auxiliary_heating": 1,
+        "computational_workflow": 1,
+        "core_plasma_physics": 5,
+        "edge_plasma_physics": 7,
+        "electromagnetic_wave_diagnostics": 1,
+        "equilibrium": 1,
+        "magnetohydrodynamics": 2,
+        "transport": 14
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "transport",
+        "ids_plurality": "transport",
+        "ids_then_paths": "transport"
+      }
+    },
+    {
+      "name": "poloidal_magnetic_flux_at_plasma_boundary",
+      "approved_domain": "equilibrium",
+      "answer": "equilibrium",
+      "sources": {
+        "core_profiles/profiles_1d/grid/psi_boundary": "equilibrium",
+        "core_sources/source/profiles_1d/grid/psi_boundary": "equilibrium",
+        "core_transport/model/profiles_1d/grid_d/psi_boundary": "equilibrium",
+        "core_transport/model/profiles_1d/grid_flux/psi_boundary": "equilibrium",
+        "core_transport/model/profiles_1d/grid_v/psi_boundary": "equilibrium",
+        "disruption/profiles_1d/grid/psi_boundary": "equilibrium",
+        "distribution_sources/source/profiles_1d/grid/psi_boundary": "equilibrium",
+        "distributions/distribution/profiles_1d/grid/psi_boundary": "equilibrium",
+        "ece/psi_normalization/psi_boundary": "equilibrium",
+        "edge_profiles/profiles_1d/grid/psi_boundary": "equilibrium",
+        "equilibrium/time_slice/boundary/psi": "equilibrium",
+        "equilibrium/time_slice/global_quantities/psi_boundary": "equilibrium",
+        "plasma_profiles/profiles_1d/grid/psi_boundary": "equilibrium",
+        "plasma_sources/source/profiles_1d/grid/psi_boundary": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_d/psi_boundary": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_flux/psi_boundary": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_v/psi_boundary": "equilibrium",
+        "reflectometer_fluctuation/psi_normalization/psi_boundary": "equilibrium",
+        "reflectometer_profile/psi_normalization/psi_boundary": "equilibrium",
+        "runaway_electrons/profiles_1d/grid/psi_boundary": "equilibrium",
+        "sawteeth/profiles_1d/grid/psi_boundary": "equilibrium",
+        "summary/local/separatrix/position/psi": "equilibrium",
+        "summary/local/separatrix_average/position/psi": "equilibrium",
+        "transport_solver_numerics/solver_1d/grid/psi_boundary": "equilibrium",
+        "waves/coherent_wave/profiles_1d/grid/psi_boundary": "equilibrium"
+      },
+      "path_counts": {
+        "equilibrium": 25
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "equilibrium",
+        "ids_plurality": "equilibrium",
+        "ids_then_paths": "equilibrium"
+      }
+    },
+    {
+      "name": "toroidal_angle_of_measurement_position",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "auxiliary_heating",
+      "sources": {
+        "barometry/gauge/position/phi": "mechanical_measurement_diagnostics",
+        "ece/channel/position/phi": "radiation_measurement_diagnostics",
+        "equilibrium/time_slice/constraints/j_parallel/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/j_phi/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/n_e/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/pressure/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/pressure_rotational/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/q/position/phi": "equilibrium",
+        "ic_antennas/antenna/module/current/position/phi": "auxiliary_heating",
+        "ic_antennas/antenna/module/pressure/position/phi": "auxiliary_heating",
+        "ic_antennas/antenna/module/voltage/position/phi": "auxiliary_heating",
+        "langmuir_probes/embedded/position/phi": "particle_measurement_diagnostics",
+        "langmuir_probes/reciprocating/plunge/collector/position/phi": "particle_measurement_diagnostics",
+        "magnetics/b_field_phi_probe/position/phi": "magnetic_field_diagnostics",
+        "magnetics/b_field_pol_probe/position/phi": "magnetic_field_diagnostics",
+        "magnetics/flux_loop/position/phi": "magnetic_field_diagnostics",
+        "magnetics/rogowski_coil/position/phi": "magnetic_field_diagnostics",
+        "reflectometer_fluctuation/channel/doppler/position/phi": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/fluctuations_level/position/phi": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/position/phi": "electromagnetic_wave_diagnostics",
+        "spectrometer_visible/channel/light_collection_efficiencies/positions/phi": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/reflector/centre/phi": "spectroscopy",
+        "spi/injector/optical_pellet_diagnostic/position/phi": "fueling",
+        "summary/heating_current_drive/nbi/position/phi/value": "auxiliary_heating",
+        "thomson_scattering/channel/position/phi": "particle_measurement_diagnostics"
+      },
+      "path_counts": {
+        "auxiliary_heating": 4,
+        "electromagnetic_wave_diagnostics": 3,
+        "equilibrium": 6,
+        "fueling": 1,
+        "magnetic_field_diagnostics": 4,
+        "mechanical_measurement_diagnostics": 1,
+        "particle_measurement_diagnostics": 3,
+        "radiation_measurement_diagnostics": 1,
+        "spectroscopy": 2
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "equilibrium",
+        "ids_plurality": "auxiliary_heating",
+        "ids_then_paths": "auxiliary_heating"
+      }
+    },
+    {
+      "name": "normalized_toroidal_flux_coordinate",
+      "approved_domain": "equilibrium",
+      "answer": "transport",
+      "sources": {
+        "core_profiles/profiles_1d/grid/rho_tor_norm": "transport",
+        "core_sources/source/profiles_1d/grid/rho_tor_norm": "transport",
+        "core_transport/model/profiles_1d/grid_d/rho_tor_norm": "transport",
+        "core_transport/model/profiles_1d/grid_flux/rho_tor_norm": "transport",
+        "core_transport/model/profiles_1d/grid_v/rho_tor_norm": "transport",
+        "disruption/profiles_1d/grid/rho_tor_norm": "magnetohydrodynamics",
+        "distribution_sources/source/profiles_1d/grid/rho_tor_norm": "transport",
+        "distributions/distribution/profiles_1d/grid/rho_tor_norm": "transport",
+        "distributions/distribution/profiles_2d/grid/rho_tor_norm": "transport",
+        "edge_profiles/profiles_1d/grid/rho_tor_norm": "edge_plasma_physics",
+        "equilibrium/time_slice/profiles_1d/rho_tor_norm": "equilibrium",
+        "hard_x_rays/emissivity_profile_1d/rho_tor_norm": "radiation_measurement_diagnostics",
+        "neutron_diagnostic/reconstructed_emissivity/rho_tor_norm": "particle_measurement_diagnostics",
+        "plasma_profiles/profiles_1d/grid/rho_tor_norm": "transport",
+        "plasma_sources/source/profiles_1d/grid/rho_tor_norm": "transport",
+        "plasma_transport/model/profiles_1d/grid_d/rho_tor_norm": "transport",
+        "plasma_transport/model/profiles_1d/grid_flux/rho_tor_norm": "transport",
+        "plasma_transport/model/profiles_1d/grid_v/rho_tor_norm": "transport",
+        "reflectometer_profile/position/rho_tor_norm": "electromagnetic_wave_diagnostics",
+        "runaway_electrons/profiles_1d/grid/rho_tor_norm": "transport",
+        "sawteeth/profiles_1d/grid/rho_tor_norm": "magnetohydrodynamics",
+        "transport_solver_numerics/solver_1d/grid/rho_tor_norm": "computational_workflow",
+        "waves/coherent_wave/profiles_1d/grid/rho_tor_norm": "auxiliary_heating",
+        "waves/coherent_wave/profiles_2d/grid/rho_tor_norm": "auxiliary_heating"
+      },
+      "path_counts": {
+        "auxiliary_heating": 2,
+        "computational_workflow": 1,
+        "edge_plasma_physics": 1,
+        "electromagnetic_wave_diagnostics": 1,
+        "equilibrium": 1,
+        "magnetohydrodynamics": 2,
+        "particle_measurement_diagnostics": 1,
+        "radiation_measurement_diagnostics": 1,
+        "transport": 14
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "transport",
+        "ids_plurality": "transport",
+        "ids_then_paths": "transport"
+      }
+    },
+    {
+      "name": "area_of_diagnostic_aperture",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "spectroscopy",
+      "sources": {
+        "bolometer/camera/channel/aperture/surface": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/detector/surface": "radiation_measurement_diagnostics",
+        "camera_visible/channel/aperture/surface": "radiation_measurement_diagnostics",
+        "camera_x_rays/aperture/surface": "radiation_measurement_diagnostics",
+        "charge_exchange/aperture/surface": "spectroscopy",
+        "charge_exchange/channel/aperture/surface": "spectroscopy",
+        "hard_x_rays/channel/aperture/surface": "radiation_measurement_diagnostics",
+        "hard_x_rays/channel/detector/surface": "radiation_measurement_diagnostics",
+        "mse/channel/aperture/surface": "spectroscopy",
+        "nbi/unit/aperture/surface": "auxiliary_heating",
+        "neutron_diagnostic/detector/aperture/surface": "neutronics",
+        "reflectometer_fluctuation/channel/antenna_detection_static/surface": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antenna_emission_static/surface": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/antenna_detection/surface": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/antenna_emission/surface": "electromagnetic_wave_diagnostics",
+        "soft_x_rays/channel/aperture/surface": "radiation_measurement_diagnostics",
+        "soft_x_rays/channel/detector/surface": "radiation_measurement_diagnostics",
+        "spectrometer_uv/channel/aperture/surface": "spectroscopy",
+        "spectrometer_uv/channel/detector/surface": "spectroscopy",
+        "spectrometer_visible/channel/aperture/surface": "spectroscopy",
+        "spectrometer_visible/channel/detector/surface": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/aperture/surface": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/reflector/surface": "spectroscopy"
+      },
+      "path_counts": {
+        "auxiliary_heating": 1,
+        "electromagnetic_wave_diagnostics": 4,
+        "neutronics": 1,
+        "radiation_measurement_diagnostics": 8,
+        "spectroscopy": 9
+      },
+      "answers": {
+        "set_precedence": "auxiliary_heating",
+        "path_plurality": "spectroscopy",
+        "ids_plurality": "radiation_measurement_diagnostics",
+        "ids_then_paths": "spectroscopy"
+      }
+    },
+    {
+      "name": "volume_of_flux_surface",
+      "approved_domain": "equilibrium",
+      "answer": "equilibrium",
+      "sources": {
+        "core_profiles/profiles_1d/grid/volume": "equilibrium",
+        "core_sources/source/profiles_1d/grid/volume": "equilibrium",
+        "core_transport/model/profiles_1d/grid_d/volume": "equilibrium",
+        "core_transport/model/profiles_1d/grid_flux/volume": "equilibrium",
+        "core_transport/model/profiles_1d/grid_v/volume": "equilibrium",
+        "disruption/profiles_1d/grid/volume": "equilibrium",
+        "distribution_sources/source/profiles_1d/grid/volume": "equilibrium",
+        "distributions/distribution/profiles_1d/grid/volume": "equilibrium",
+        "distributions/distribution/profiles_2d/grid/volume": "equilibrium",
+        "edge_profiles/profiles_1d/grid/volume": "edge_plasma_physics",
+        "equilibrium/time_slice/global_quantities/volume": "equilibrium",
+        "equilibrium/time_slice/profiles_1d/volume": "equilibrium",
+        "plasma_profiles/profiles_1d/grid/volume": "equilibrium",
+        "plasma_sources/source/profiles_1d/grid/volume": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_d/volume": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_flux/volume": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_v/volume": "equilibrium",
+        "runaway_electrons/profiles_1d/grid/volume": "equilibrium",
+        "sawteeth/profiles_1d/grid/volume": "equilibrium",
+        "transport_solver_numerics/solver_1d/grid/volume": "equilibrium",
+        "waves/coherent_wave/profiles_1d/grid/volume": "equilibrium",
+        "waves/coherent_wave/profiles_2d/grid/volume": "equilibrium"
+      },
+      "path_counts": {
+        "edge_plasma_physics": 1,
+        "equilibrium": 21
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "equilibrium",
+        "ids_plurality": "equilibrium",
+        "ids_then_paths": "equilibrium"
+      }
+    },
+    {
+      "name": "toroidal_flux_coordinate",
+      "approved_domain": "equilibrium",
+      "answer": "equilibrium",
+      "sources": {
+        "core_profiles/profiles_1d/grid/rho_tor": "equilibrium",
+        "core_sources/source/profiles_1d/grid/rho_tor": "equilibrium",
+        "core_transport/model/profiles_1d/grid_d/rho_tor": "equilibrium",
+        "core_transport/model/profiles_1d/grid_flux/rho_tor": "equilibrium",
+        "core_transport/model/profiles_1d/grid_v/rho_tor": "equilibrium",
+        "disruption/profiles_1d/grid/rho_tor": "equilibrium",
+        "distribution_sources/source/profiles_1d/grid/rho_tor": "equilibrium",
+        "distributions/distribution/profiles_1d/grid/rho_tor": "equilibrium",
+        "distributions/distribution/profiles_2d/grid/rho_tor": "equilibrium",
+        "edge_profiles/profiles_1d/grid/rho_tor": "equilibrium",
+        "equilibrium/time_slice/profiles_1d/rho_tor": "equilibrium",
+        "plasma_profiles/profiles_1d/grid/rho_tor": "equilibrium",
+        "plasma_sources/source/profiles_1d/grid/rho_tor": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_d/rho_tor": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_flux/rho_tor": "equilibrium",
+        "plasma_transport/model/profiles_1d/grid_v/rho_tor": "equilibrium",
+        "runaway_electrons/profiles_1d/grid/rho_tor": "equilibrium",
+        "sawteeth/profiles_1d/grid/rho_tor": "equilibrium",
+        "transport_solver_numerics/solver_1d/grid/rho_tor": "equilibrium",
+        "waves/coherent_wave/profiles_1d/grid/rho_tor": "equilibrium",
+        "waves/coherent_wave/profiles_2d/grid/rho_tor": "equilibrium"
+      },
+      "path_counts": {
+        "equilibrium": 21
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "equilibrium",
+        "ids_plurality": "equilibrium",
+        "ids_then_paths": "equilibrium"
+      }
+    },
+    {
+      "name": "reference_major_radius",
+      "approved_domain": "equilibrium",
+      "answer": "equilibrium",
+      "sources": {
+        "core_profiles/vacuum_toroidal_field/r0": "equilibrium",
+        "core_sources/vacuum_toroidal_field/r0": "equilibrium",
+        "core_transport/vacuum_toroidal_field/r0": "equilibrium",
+        "disruption/vacuum_toroidal_field/r0": "equilibrium",
+        "distribution_sources/vacuum_toroidal_field/r0": "equilibrium",
+        "distributions/vacuum_toroidal_field/r0": "equilibrium",
+        "edge_profiles/vacuum_toroidal_field/r0": "equilibrium",
+        "equilibrium/vacuum_toroidal_field/r0": "equilibrium",
+        "mhd_linear/vacuum_toroidal_field/r0": "equilibrium",
+        "ntms/vacuum_toroidal_field/r0": "equilibrium",
+        "plasma_profiles/vacuum_toroidal_field/r0": "equilibrium",
+        "plasma_sources/vacuum_toroidal_field/r0": "equilibrium",
+        "plasma_transport/vacuum_toroidal_field/r0": "equilibrium",
+        "radiation/vacuum_toroidal_field/r0": "equilibrium",
+        "runaway_electrons/vacuum_toroidal_field/r0": "equilibrium",
+        "sawteeth/vacuum_toroidal_field/r0": "equilibrium",
+        "summary/global_quantities/r0/value": "equilibrium",
+        "tf/r0": "magnetic_field_systems",
+        "transport_solver_numerics/vacuum_toroidal_field/r0": "equilibrium",
+        "waves/vacuum_toroidal_field/r0": "equilibrium"
+      },
+      "path_counts": {
+        "equilibrium": 19,
+        "magnetic_field_systems": 1
+      },
+      "answers": {
+        "set_precedence": "equilibrium",
+        "path_plurality": "equilibrium",
+        "ids_plurality": "equilibrium",
+        "ids_then_paths": "equilibrium"
+      }
+    }
+  ],
+  "validation_misses": [
+    {
+      "name": "total_absorbed_wave_power_at_inside_flux_surface",
+      "approved_domain": "auxiliary_heating",
+      "answer": "waves",
+      "sources": {
+        "waves/coherent_wave/profiles_1d/power_inside": "waves"
+      }
+    },
+    {
+      "name": "current_density_due_to_non_inductive_current_drive",
+      "approved_domain": "current_drive",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "core_profiles/profiles_1d/j_non_inductive": "core_plasma_physics",
+        "edge_profiles/profiles_1d/j_non_inductive": "current_drive",
+        "plasma_profiles/profiles_1d/j_non_inductive": "core_plasma_physics",
+        "sawteeth/profiles_1d/j_non_inductive": "core_plasma_physics"
+      }
+    },
+    {
+      "name": "poloidal_suprathermal_electron_angle_perturbed_at_ece_channel_emission_position",
+      "approved_domain": "electromagnetic_wave_diagnostics",
+      "answer": "radiation_measurement_diagnostics",
+      "sources": {
+        "ece/channel/delta_position_suprathermal/theta": "radiation_measurement_diagnostics"
+      }
+    },
+    {
+      "name": "time",
+      "approved_domain": "general",
+      "answer": "magnetohydrodynamics",
+      "sources": {
+        "mhd_linear/time_slice/toroidal_mode/plasma/tau_alfven": "magnetohydrodynamics"
+      }
+    },
+    {
+      "name": "first_local_tangential_width_of_diagnostic_aperture",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "radiation_measurement_diagnostics",
+      "sources": {
+        "bolometer/camera/channel/aperture/x1_width": "radiation_measurement_diagnostics",
+        "neutron_diagnostic/detector/geometry/x1_width": "neutronics"
+      }
+    },
+    {
+      "name": "total_thermal_coolant_absorbed_power_at_wall",
+      "approved_domain": "plasma_wall_interactions",
+      "answer": "plant_systems",
+      "sources": {
+        "wall/global_quantities/power_to_cooling": "plant_systems"
+      }
+    },
+    {
+      "name": "poloidal_gyrocenter_frequency",
+      "approved_domain": "fast_particles",
+      "answer": "transport",
+      "sources": {
+        "distributions/distribution/ggd/orbit_frequency_pol/values": "transport"
+      }
+    },
+    {
+      "name": "diameter_of_diagnostic_aperture",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "spectroscopy",
+      "sources": {
+        "charge_exchange/channel/cone_diameter": "spectroscopy"
+      }
+    },
+    {
+      "name": "nuclear_heating_power_of_limiter_tile",
+      "approved_domain": "neutronics",
+      "answer": "plasma_wall_interactions",
+      "sources": {
+        "wall/description_2d/limiter/unit/power_nuclear": "plasma_wall_interactions"
+      }
+    },
+    {
+      "name": "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope",
+      "approved_domain": "edge_plasma_physics",
+      "answer": "spectroscopy",
+      "sources": {
+        "spectrometer_visible/channel/isotope_ratios/isotope/density_ratio": "spectroscopy"
+      }
+    },
+    {
+      "name": "toroidal_angle_of_active_limiter_point",
+      "approved_domain": "plasma_wall_interactions",
+      "answer": "transport",
+      "sources": {
+        "edge_transport/model/ggd/ion/momentum/flux_limiter/phi": "transport"
+      }
+    },
+    {
+      "name": "torque_due_to_collisions",
+      "approved_domain": "transport",
+      "answer": "fast_particles",
+      "sources": {
+        "distributions/distribution/global_quantities/collisions/electrons/torque_thermal_phi": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/torque_fast_phi": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/torque_thermal_phi": "fast_particles"
+      }
+    },
+    {
+      "name": "vertical_velocity_at_current_center",
+      "approved_domain": "plasma_control",
+      "answer": "equilibrium",
+      "sources": {
+        "equilibrium/time_slice/global_quantities/current_centre/velocity_z": "equilibrium"
+      }
+    },
+    {
+      "name": "radial_outline_of_ferritic_element",
+      "approved_domain": "structural_components",
+      "answer": "magnetic_field_systems",
+      "sources": {
+        "ferritic/object/axisymmetric/outline/r": "magnetic_field_systems"
+      }
+    },
+    {
+      "name": "hot_neutral_velocity",
+      "approved_domain": "edge_plasma_physics",
+      "answer": "spectroscopy",
+      "sources": {
+        "spectrometer_visible/channel/polarization_spectroscopy/velocity_hot_neutrals": "spectroscopy"
+      }
+    },
+    {
+      "name": "y_coordinate_of_divertor_target",
+      "approved_domain": "plasma_wall_interactions",
+      "answer": "radiation_measurement_diagnostics",
+      "sources": {
+        "camera_ir/channel/target_surface_center/y": "radiation_measurement_diagnostics"
+      }
+    },
+    {
+      "name": "flux_at_limiter",
+      "approved_domain": "plasma_wall_interactions",
+      "answer": null,
+      "sources": {}
+    },
+    {
+      "name": "total_electron_count",
+      "approved_domain": "core_plasma_physics",
+      "answer": "electromagnetic_wave_diagnostics",
+      "sources": {
+        "interferometer/electrons_n": "electromagnetic_wave_diagnostics"
+      }
+    },
+    {
+      "name": "alpha_angle_of_passive_loop_element",
+      "approved_domain": "structural_components",
+      "answer": "magnetic_field_systems",
+      "sources": {
+        "pf_passive/loop/element/geometry/oblique/alpha": "magnetic_field_systems"
+      }
+    },
+    {
+      "name": "radial_current_density_due_to_ion_neutral_friction",
+      "approved_domain": "edge_plasma_physics",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "edge_profiles/ggd/j_ion_neutral_friction/r": "edge_plasma_physics",
+        "edge_profiles/ggd/j_ion_neutral_friction/radial": "edge_plasma_physics",
+        "plasma_profiles/ggd/j_ion_neutral_friction/r": "core_plasma_physics",
+        "plasma_profiles/ggd/j_ion_neutral_friction/radial": "core_plasma_physics"
+      }
+    },
+    {
+      "name": "normalized_toroidal_flux_coordinate_at_beam_tracing_point",
+      "approved_domain": "equilibrium",
+      "answer": "auxiliary_heating",
+      "sources": {
+        "ece/channel/beam_tracing/beam/position/rho_tor_norm": "electromagnetic_wave_diagnostics",
+        "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm": "auxiliary_heating"
+      }
+    },
+    {
+      "name": "perpendicular_wave_vector_of_ion_cyclotron_heating_antenna",
+      "approved_domain": "auxiliary_heating",
+      "answer": "waves",
+      "sources": {
+        "summary/heating_current_drive/ic/k_perpendicular/value": "waves"
+      }
+    },
+    {
+      "name": "normalized_poloidal_flux_coordinate_of_pedestal",
+      "approved_domain": "equilibrium",
+      "answer": "edge_plasma_physics",
+      "sources": {
+        "summary/pedestal_fits/linear/n_e/pedestal_position/value": "edge_plasma_physics",
+        "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value": "edge_plasma_physics",
+        "summary/pedestal_fits/linear/t_e/pedestal_position/value": "edge_plasma_physics",
+        "summary/pedestal_fits/mtanh/n_e/pedestal_position/value": "edge_plasma_physics",
+        "summary/pedestal_fits/mtanh/pressure_electron/pedestal_position/value": "edge_plasma_physics",
+        "summary/pedestal_fits/mtanh/t_e/pedestal_position/value": "edge_plasma_physics"
+      }
+    },
+    {
+      "name": "total_power_at_separatrix",
+      "approved_domain": "edge_plasma_physics",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "summary/global_quantities/power_loss/value": "core_plasma_physics"
+      }
+    }
+  ],
+  "unfixed_misses": [
+    {
+      "name": "atomic_count",
+      "approved_domain": "general",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "amns_data/process/products/element/atoms_n": "computational_workflow",
+        "amns_data/process/reactants/element/atoms_n": "computational_workflow",
+        "core_profiles/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "core_profiles/profiles_1d/neutral/element/atoms_n": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/element/atoms_n": "core_plasma_physics",
+        "core_sources/source/profiles_1d/ion/element/atoms_n": "transport",
+        "core_sources/source/profiles_1d/neutral/element/atoms_n": "transport",
+        "core_sources/source/species/ion/element/atoms_n": "transport",
+        "core_sources/source/species/neutral/element/atoms_n": "transport",
+        "core_transport/model/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "core_transport/model/profiles_1d/neutral/element/atoms_n": "core_plasma_physics",
+        "distribution_sources/source/species/ion/element/atoms_n": "fast_particles",
+        "distribution_sources/source/species/neutral/element/atoms_n": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_1d/co_passing/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_1d/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_1d/counter_passing/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_1d/trapped/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_2d/co_passing/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_2d/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_2d/counter_passing/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/profiles_2d/trapped/collisions/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/species/ion/element/atoms_n": "fast_particles",
+        "distributions/distribution/species/neutral/element/atoms_n": "fast_particles",
+        "edge_profiles/ggd/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_profiles/ggd/neutral/element/atoms_n": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/neutral/element/atoms_n": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_sources/source/ggd/neutral/element/atoms_n": "edge_plasma_physics",
+        "edge_sources/source/species/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_sources/source/species/neutral/element/atoms_n": "edge_plasma_physics",
+        "edge_transport/model/ggd/ion/element/atoms_n": "edge_plasma_physics",
+        "edge_transport/model/ggd/neutral/element/atoms_n": "edge_plasma_physics",
+        "gas_injection/pipe/species/element/atoms_n": "fueling",
+        "gas_injection/valve/species/element/atoms_n": "fueling",
+        "gas_pumping/duct/species/element/atoms_n": "plant_systems",
+        "pellets/time_slice/pellet/propellant_gas/element/atoms_n": "fueling",
+        "plasma_initiation/global_quantities/ion/element/atoms_n": "plasma_initiation",
+        "plasma_initiation/global_quantities/neutral/element/atoms_n": "plasma_initiation",
+        "plasma_profiles/ggd/ion/element/atoms_n": "edge_plasma_physics",
+        "plasma_profiles/ggd/neutral/element/atoms_n": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/neutral/element/atoms_n": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/element/atoms_n": "core_plasma_physics",
+        "plasma_sources/source/ggd/ion/element/atoms_n": "core_plasma_physics",
+        "plasma_sources/source/ggd/neutral/element/atoms_n": "transport",
+        "plasma_sources/source/profiles_1d/ion/element/atoms_n": "transport",
+        "plasma_sources/source/profiles_1d/neutral/element/atoms_n": "transport",
+        "plasma_sources/source/species/ion/element/atoms_n": "transport",
+        "plasma_sources/source/species/neutral/element/atoms_n": "transport",
+        "plasma_transport/model/ggd/ion/element/atoms_n": "transport",
+        "plasma_transport/model/ggd/neutral/element/atoms_n": "transport",
+        "plasma_transport/model/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "plasma_transport/model/profiles_1d/neutral/element/atoms_n": "transport",
+        "pulse_schedule/density_control/ion/element/atoms_n": "plasma_control",
+        "pulse_schedule/density_control/valve/species/element/atoms_n": "fueling",
+        "pulse_schedule/nbi/unit/species/element/atoms_n": "auxiliary_heating",
+        "radiation/process/ggd/neutral/element/atoms_n": "radiation_measurement_diagnostics",
+        "radiation/process/profiles_1d/neutral/element/atoms_n": "radiation_measurement_diagnostics",
+        "spectrometer_visible/channel/isotope_ratios/isotope/element/atoms_n": "spectroscopy",
+        "turbulence/profiles_2d/ion/element/atoms_n": "turbulence",
+        "turbulence/profiles_2d/neutral/element/atoms_n": "turbulence",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/element/atoms_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/element/atoms_n": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/incident_species/element/atoms_n": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/element/atoms_n": "waves",
+        "waves/coherent_wave/global_quantities/ion/element/atoms_n": "waves",
+        "waves/coherent_wave/profiles_1d/ion/element/atoms_n": "core_plasma_physics",
+        "waves/coherent_wave/profiles_2d/ion/element/atoms_n": "core_plasma_physics"
+      },
+      "cohort": "approved",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override cannot fix the selected rule"
+    },
+    {
+      "name": "atomic_mass",
+      "approved_domain": "general",
+      "answer": "fueling",
+      "sources": {
+        "amns_data/a": "computational_workflow",
+        "core_profiles/profiles_1d/ion/element/a": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/element/a": "core_plasma_physics",
+        "core_sources/source/profiles_1d/ion/element/a": "transport",
+        "core_sources/source/species/ion/element/a": "transport",
+        "distribution_sources/source/species/ion/element/a": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_1d/co_passing/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_1d/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_1d/counter_passing/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_1d/trapped/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_2d/co_passing/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_2d/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_2d/counter_passing/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/profiles_2d/trapped/collisions/ion/element/a": "fast_particles",
+        "distributions/distribution/species/ion/element/a": "fast_particles",
+        "edge_profiles/ggd/ion/element/a": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/element/a": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/element/a": "edge_plasma_physics",
+        "edge_sources/source/species/ion/element/a": "edge_plasma_physics",
+        "edge_transport/model/ggd/ion/element/a": "edge_plasma_physics",
+        "gas_injection/pipe/species/element/a": "fueling",
+        "gas_injection/valve/species/element/a": "fueling",
+        "gas_pumping/duct/species/element/a": "plant_systems",
+        "nbi/unit/species/a": "auxiliary_heating",
+        "pellets/time_slice/pellet/species/a": "fueling",
+        "plasma_profiles/ggd/ion/element/a": "edge_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/element/a": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/element/a": "core_plasma_physics",
+        "plasma_sources/source/ggd/ion/element/a": "core_plasma_physics",
+        "plasma_sources/source/profiles_1d/ion/element/a": "transport",
+        "plasma_sources/source/species/ion/element/a": "transport",
+        "plasma_transport/model/ggd/ion/element/a": "transport",
+        "pulse_schedule/density_control/ion/element/a": "plasma_control",
+        "pulse_schedule/density_control/valve/species/element/a": "fueling",
+        "spectrometer_mass/channel/a": "spectroscopy",
+        "spectrometer_mass/residual_spectrum/a": "spectroscopy",
+        "spectrometer_visible/channel/isotope_ratios/isotope/element/a": "spectroscopy",
+        "spi/injector/fragment/species/a": "fueling",
+        "spi/injector/fragmentation_gas/species/a": "fueling",
+        "spi/injector/pellet/core/species/a": "fueling",
+        "spi/injector/pellet/shell/species/a": "fueling",
+        "spi/injector/propellant_gas/species/a": "fueling",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/neutral/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/element/a": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/neutral/element/a": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/element/a": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/incident_species/element/a": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/element/a": "waves",
+        "waves/coherent_wave/global_quantities/ion/element/a": "waves"
+      },
+      "cohort": "approved",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override cannot fix the selected rule"
+    },
+    {
+      "name": "radial_coordinate_of_line_of_sight",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "radiation_measurement_diagnostics",
+      "sources": {
+        "bolometer/camera/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/line_of_sight/third_point/r": "radiation_measurement_diagnostics",
+        "bremsstrahlung_visible/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "bremsstrahlung_visible/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "camera_x_rays/camera/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "camera_x_rays/camera/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "ece/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "ece/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "ece/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "ece/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "gas_injection/pipe/second_point/r": "fueling",
+        "hard_x_rays/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "hard_x_rays/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "interferometer/channel/line_of_sight/first_point/r": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/line_of_sight/second_point/r": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/line_of_sight/third_point/r": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/n_e/positions/r": "electromagnetic_wave_diagnostics",
+        "mse/channel/line_of_sight/first_point/r": "spectroscopy",
+        "mse/channel/line_of_sight/second_point/r": "spectroscopy",
+        "pellets/time_slice/pellet/path_geometry/first_point/r": "fueling",
+        "pellets/time_slice/pellet/path_geometry/second_point/r": "fueling",
+        "polarimeter/channel/line_of_sight/first_point/r": "electromagnetic_wave_diagnostics",
+        "polarimeter/channel/line_of_sight/second_point/r": "electromagnetic_wave_diagnostics",
+        "polarimeter/channel/line_of_sight/third_point/r": "electromagnetic_wave_diagnostics",
+        "pulse_schedule/density_control/n_e_line_of_sight/first_point/r": "plasma_control",
+        "pulse_schedule/density_control/n_e_line_of_sight/second_point/r": "plasma_control",
+        "pulse_schedule/density_control/n_e_line_of_sight/third_point/r": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/first_point/r": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/second_point/r": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/third_point/r": "plasma_control",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/first_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/second_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/first_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/second_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_detection/first_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_detection/second_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_emission/first_point/r": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_emission/second_point/r": "electromagnetic_wave_diagnostics",
+        "refractometer/channel/line_of_sight/first_point/r": "electromagnetic_wave_diagnostics",
+        "refractometer/channel/line_of_sight/second_point/r": "electromagnetic_wave_diagnostics",
+        "soft_x_rays/channel/line_of_sight/first_point/r": "radiation_measurement_diagnostics",
+        "soft_x_rays/channel/line_of_sight/second_point/r": "radiation_measurement_diagnostics",
+        "spectrometer_uv/channel/line_of_sight/first_point/r": "spectroscopy",
+        "spectrometer_uv/channel/line_of_sight/second_point/r": "spectroscopy",
+        "spectrometer_visible/channel/line_of_sight/first_point/r": "spectroscopy",
+        "spectrometer_visible/channel/line_of_sight/second_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/bin/line_of_sight/first_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/bin/line_of_sight/second_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/camera/line_of_sight/first_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/camera/line_of_sight/second_point/r": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/profiles_line_integrated/lines_of_sight_second_point/r": "radiation_measurement_diagnostics",
+        "thomson_scattering/channel/line_of_sight/first_point/r": "particle_measurement_diagnostics",
+        "thomson_scattering/channel/line_of_sight/second_point/r": "particle_measurement_diagnostics"
+      },
+      "cohort": "approved",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override cannot fix the selected rule"
+    },
+    {
+      "name": "vertical_coordinate_of_line_of_sight",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "radiation_measurement_diagnostics",
+      "sources": {
+        "bolometer/camera/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/line_of_sight/third_point/z": "radiation_measurement_diagnostics",
+        "bremsstrahlung_visible/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "bremsstrahlung_visible/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "camera_x_rays/camera/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "camera_x_rays/camera/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "ece/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "ece/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "ece/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "ece/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "ferritic/object/axisymmetric/thick_line/first_point/z": "magnetic_field_systems",
+        "ferritic/object/axisymmetric/thick_line/second_point/z": "magnetic_field_systems",
+        "gas_injection/pipe/second_point/z": "fueling",
+        "hard_x_rays/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "hard_x_rays/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "interferometer/channel/line_of_sight/first_point/z": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/line_of_sight/second_point/z": "electromagnetic_wave_diagnostics",
+        "interferometer/channel/line_of_sight/third_point/z": "electromagnetic_wave_diagnostics",
+        "mse/channel/line_of_sight/first_point/z": "spectroscopy",
+        "mse/channel/line_of_sight/second_point/z": "spectroscopy",
+        "polarimeter/channel/line_of_sight/first_point/z": "electromagnetic_wave_diagnostics",
+        "polarimeter/channel/line_of_sight/second_point/z": "electromagnetic_wave_diagnostics",
+        "polarimeter/channel/line_of_sight/third_point/z": "electromagnetic_wave_diagnostics",
+        "pulse_schedule/density_control/n_e_line_of_sight/first_point/z": "plasma_control",
+        "pulse_schedule/density_control/n_e_line_of_sight/second_point/z": "plasma_control",
+        "pulse_schedule/density_control/n_e_line_of_sight/third_point/z": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/first_point/z": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/second_point/z": "plasma_control",
+        "pulse_schedule/density_control/zeff_line_of_sight/third_point/z": "plasma_control",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/first_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_detection/second_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/first_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antennas_orientation/line_of_sight_emission/second_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_detection/first_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_detection/second_point/z": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/line_of_sight_emission/first_point/z": "electromagnetic_wave_diagnostics",
+        "refractometer/channel/line_of_sight/first_point/z": "electromagnetic_wave_diagnostics",
+        "refractometer/channel/line_of_sight/second_point/z": "electromagnetic_wave_diagnostics",
+        "soft_x_rays/channel/line_of_sight/first_point/z": "radiation_measurement_diagnostics",
+        "soft_x_rays/channel/line_of_sight/second_point/z": "radiation_measurement_diagnostics",
+        "spectrometer_uv/channel/line_of_sight/first_point/z": "spectroscopy",
+        "spectrometer_uv/channel/line_of_sight/second_point/z": "spectroscopy",
+        "spectrometer_visible/channel/geometry_matrix/interpolated/z": "spectroscopy",
+        "spectrometer_visible/channel/line_of_sight/first_point/z": "spectroscopy",
+        "spectrometer_visible/channel/line_of_sight/second_point/z": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/bin/line_of_sight/first_point/z": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/camera/line_of_sight/first_point/z": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/camera/line_of_sight/second_point/z": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/profiles_line_integrated/lines_of_sight_second_point/z": "spectroscopy",
+        "thomson_scattering/channel/line_of_sight/second_point/z": "particle_measurement_diagnostics",
+        "thomson_scattering/channel/position_per_laser/z": "particle_measurement_diagnostics"
+      },
+      "cohort": "approved",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override cannot fix the selected rule"
+    },
+    {
+      "name": "atomic_number",
+      "approved_domain": "general",
+      "answer": "core_plasma_physics",
+      "sources": {
+        "core_profiles/profiles_1d/ion/element/z_n": "core_plasma_physics",
+        "core_profiles/profiles_1d/neutral/element/z_n": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/element/z_n": "core_plasma_physics",
+        "edge_profiles/ggd/ion/element/z_n": "edge_plasma_physics",
+        "edge_profiles/ggd/neutral/element/z_n": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/element/z_n": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/neutral/element/z_n": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/element/z_n": "edge_plasma_physics",
+        "edge_sources/source/ggd/neutral/element/z_n": "edge_plasma_physics",
+        "edge_sources/source/species/ion/element/z_n": "edge_plasma_physics",
+        "edge_sources/source/species/neutral/element/z_n": "edge_plasma_physics",
+        "gas_injection/pipe/species/element/z_n": "fueling",
+        "gas_injection/valve/species/element/z_n": "fueling",
+        "gas_pumping/duct/species/element/z_n": "plant_systems",
+        "pellets/time_slice/pellet/species/z_n": "fueling",
+        "plasma_initiation/global_quantities/ion/element/z_n": "core_plasma_physics",
+        "plasma_initiation/global_quantities/neutral/element/z_n": "core_plasma_physics",
+        "plasma_profiles/ggd/ion/element/z_n": "core_plasma_physics",
+        "plasma_profiles/ggd/neutral/element/z_n": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/element/z_n": "core_plasma_physics",
+        "plasma_profiles/profiles_1d/neutral/element/z_n": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/element/z_n": "core_plasma_physics",
+        "pulse_schedule/density_control/ion/element/z_n": "plasma_control",
+        "pulse_schedule/density_control/valve/species/element/z_n": "fueling",
+        "pulse_schedule/nbi/unit/species/element/z_n": "auxiliary_heating",
+        "spectrometer_visible/channel/isotope_ratios/isotope/element/z_n": "spectroscopy",
+        "spi/injector/fragmentation_gas/species/z_n": "fueling",
+        "summary/heating_current_drive/nbi/species/z_n/value": "auxiliary_heating",
+        "turbulence/profiles_2d/ion/element/z_n": "turbulence",
+        "turbulence/profiles_2d/neutral/element/z_n": "turbulence",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/element/z_n": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/element/z_n": "plasma_wall_interactions",
+        "wall/global_quantities/neutral/incident_species/element/z_n": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/element/z_n": "waves",
+        "waves/coherent_wave/global_quantities/ion/element/z_n": "waves",
+        "waves/coherent_wave/profiles_1d/ion/element/z_n": "core_plasma_physics",
+        "waves/coherent_wave/profiles_2d/ion/element/z_n": "core_plasma_physics"
+      },
+      "cohort": "approved",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override cannot fix the selected rule"
+    },
+    {
+      "name": "ion_state_maximum_charge_number",
+      "approved_domain": "core_plasma_physics",
+      "answer": "transport",
+      "sources": {
+        "core_profiles/profiles_1d/ion/state/z_max": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/state/z_max": "core_plasma_physics",
+        "core_sources/source/profiles_1d/ion/state/z_max": "transport",
+        "core_sources/source/species/ion/state/z_max": "transport",
+        "core_transport/model/profiles_1d/ion/state/z_max": "transport",
+        "distribution_sources/source/species/ion/state/z_max": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_1d/co_passing/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_1d/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_1d/counter_passing/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_1d/trapped/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_2d/co_passing/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_2d/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_2d/counter_passing/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/profiles_2d/trapped/collisions/ion/state/z_max": "fast_particles",
+        "distributions/distribution/species/ion/state/z_max": "fast_particles",
+        "edge_profiles/ggd/ion/state/z_max": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/state/z_max": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/state/z_max": "transport",
+        "edge_sources/source/species/ion/state/z_max": "edge_plasma_physics",
+        "edge_transport/model/ggd/ion/state/z_max": "edge_plasma_physics",
+        "plasma_profiles/ggd/ion/state/z_max": "edge_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/state/z_max": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/state/z_max": "core_plasma_physics",
+        "plasma_sources/source/ggd/ion/state/z_max": "core_plasma_physics",
+        "plasma_sources/source/profiles_1d/ion/state/z_max": "transport",
+        "plasma_sources/source/species/ion/state/z_max": "transport",
+        "plasma_transport/model/ggd/ion/state/z_max": "transport",
+        "plasma_transport/model/profiles_1d/ion/state/z_max": "transport",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/state/z_max": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/z_max": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/state/z_max": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/state/z_max": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/state/z_max": "waves",
+        "waves/coherent_wave/global_quantities/ion/state/z_max": "waves",
+        "waves/coherent_wave/profiles_1d/ion/state/z_max": "waves",
+        "waves/coherent_wave/profiles_2d/ion/state/z_max": "waves"
+      },
+      "cohort": "approved",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": false,
+      "override_assessment": "some DD sources carry the approved domain but lose the vote; one path override cannot fix the selected rule"
+    },
+    {
+      "name": "toroidal_angle_of_measurement_position",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "auxiliary_heating",
+      "sources": {
+        "barometry/gauge/position/phi": "mechanical_measurement_diagnostics",
+        "ece/channel/position/phi": "radiation_measurement_diagnostics",
+        "equilibrium/time_slice/constraints/j_parallel/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/j_phi/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/n_e/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/pressure/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/pressure_rotational/position/phi": "equilibrium",
+        "equilibrium/time_slice/constraints/q/position/phi": "equilibrium",
+        "ic_antennas/antenna/module/current/position/phi": "auxiliary_heating",
+        "ic_antennas/antenna/module/pressure/position/phi": "auxiliary_heating",
+        "ic_antennas/antenna/module/voltage/position/phi": "auxiliary_heating",
+        "langmuir_probes/embedded/position/phi": "particle_measurement_diagnostics",
+        "langmuir_probes/reciprocating/plunge/collector/position/phi": "particle_measurement_diagnostics",
+        "magnetics/b_field_phi_probe/position/phi": "magnetic_field_diagnostics",
+        "magnetics/b_field_pol_probe/position/phi": "magnetic_field_diagnostics",
+        "magnetics/flux_loop/position/phi": "magnetic_field_diagnostics",
+        "magnetics/rogowski_coil/position/phi": "magnetic_field_diagnostics",
+        "reflectometer_fluctuation/channel/doppler/position/phi": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/fluctuations_level/position/phi": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/position/phi": "electromagnetic_wave_diagnostics",
+        "spectrometer_visible/channel/light_collection_efficiencies/positions/phi": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/reflector/centre/phi": "spectroscopy",
+        "spi/injector/optical_pellet_diagnostic/position/phi": "fueling",
+        "summary/heating_current_drive/nbi/position/phi/value": "auxiliary_heating",
+        "thomson_scattering/channel/position/phi": "particle_measurement_diagnostics"
+      },
+      "cohort": "approved",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override cannot fix the selected rule"
+    },
+    {
+      "name": "area_of_diagnostic_aperture",
+      "approved_domain": "plasma_measurement_diagnostics",
+      "answer": "spectroscopy",
+      "sources": {
+        "bolometer/camera/channel/aperture/surface": "radiation_measurement_diagnostics",
+        "bolometer/camera/channel/detector/surface": "radiation_measurement_diagnostics",
+        "camera_visible/channel/aperture/surface": "radiation_measurement_diagnostics",
+        "camera_x_rays/aperture/surface": "radiation_measurement_diagnostics",
+        "charge_exchange/aperture/surface": "spectroscopy",
+        "charge_exchange/channel/aperture/surface": "spectroscopy",
+        "hard_x_rays/channel/aperture/surface": "radiation_measurement_diagnostics",
+        "hard_x_rays/channel/detector/surface": "radiation_measurement_diagnostics",
+        "mse/channel/aperture/surface": "spectroscopy",
+        "nbi/unit/aperture/surface": "auxiliary_heating",
+        "neutron_diagnostic/detector/aperture/surface": "neutronics",
+        "reflectometer_fluctuation/channel/antenna_detection_static/surface": "electromagnetic_wave_diagnostics",
+        "reflectometer_fluctuation/channel/antenna_emission_static/surface": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/antenna_detection/surface": "electromagnetic_wave_diagnostics",
+        "reflectometer_profile/channel/antenna_emission/surface": "electromagnetic_wave_diagnostics",
+        "soft_x_rays/channel/aperture/surface": "radiation_measurement_diagnostics",
+        "soft_x_rays/channel/detector/surface": "radiation_measurement_diagnostics",
+        "spectrometer_uv/channel/aperture/surface": "spectroscopy",
+        "spectrometer_uv/channel/detector/surface": "spectroscopy",
+        "spectrometer_visible/channel/aperture/surface": "spectroscopy",
+        "spectrometer_visible/channel/detector/surface": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/aperture/surface": "spectroscopy",
+        "spectrometer_x_ray_crystal/channel/reflector/surface": "spectroscopy"
+      },
+      "cohort": "approved",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override cannot fix the selected rule"
+    },
+    {
+      "name": "wave_curvature_of_electron_cyclotron_beam",
+      "approved_domain": "waves",
+      "answer": "auxiliary_heating",
+      "sources": {
+        "ec_launchers/beam/phase/curvature": "auxiliary_heating",
+        "waves/coherent_wave/beam_tracing/beam/phase/curvature": "waves"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "ec_launchers/beam/phase/curvature",
+      "all_source_domains_conflict": false,
+      "override_assessment": "some DD sources carry the approved domain but lose the vote; one path override at ec_launchers/beam/phase/curvature fixes the selected rule"
+    },
+    {
+      "name": "radius_of_bragg_crystal",
+      "approved_domain": "radiation_measurement_diagnostics",
+      "answer": "spectroscopy",
+      "sources": {
+        "spectrometer_x_ray_crystal/channel/crystal/radius": "spectroscopy"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "spectrometer_x_ray_crystal/channel/crystal/radius",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at spectrometer_x_ray_crystal/channel/crystal/radius fixes the selected rule"
+    },
+    {
+      "name": "neutral_gas_pressure_of_gauge",
+      "approved_domain": "particle_measurement_diagnostics",
+      "answer": "mechanical_measurement_diagnostics",
+      "sources": {
+        "barometry/gauge/pressure": "mechanical_measurement_diagnostics"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "barometry/gauge/pressure",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at barometry/gauge/pressure fixes the selected rule"
+    },
+    {
+      "name": "electrostatic_potential_amplitude",
+      "approved_domain": "turbulence",
+      "answer": "gyrokinetics",
+      "sources": {
+        "gyrokinetics_local/linear/wavevector/eigenmode/fields/phi_potential_perturbed_weight": "gyrokinetics"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "gyrokinetics_local/linear/wavevector/eigenmode/fields/phi_potential_perturbed_weight",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at gyrokinetics_local/linear/wavevector/eigenmode/fields/phi_potential_perturbed_weight fixes the selected rule"
+    },
+    {
+      "name": "fast_ion_charge_state_power_density",
+      "approved_domain": "auxiliary_heating",
+      "answer": "waves",
+      "sources": {
+        "waves/coherent_wave/profiles_1d/ion/state/power_density_fast": "waves",
+        "waves/coherent_wave/profiles_2d/ion/state/power_density_fast": "waves"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "waves/coherent_wave/profiles_1d/ion/state/power_density_fast",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at waves/coherent_wave/profiles_1d/ion/state/power_density_fast fixes the selected rule"
+    },
+    {
+      "name": "radial_coordinate_of_active_wall_point",
+      "approved_domain": "plasma_wall_interactions",
+      "answer": "magnetohydrodynamics",
+      "sources": {
+        "disruption/halo_currents/active_wall_point/r": "magnetohydrodynamics"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "disruption/halo_currents/active_wall_point/r",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at disruption/halo_currents/active_wall_point/r fixes the selected rule"
+    },
+    {
+      "name": "ratio_of_ion_density_to_electron_density",
+      "approved_domain": "core_plasma_physics",
+      "answer": "spectroscopy",
+      "sources": {
+        "charge_exchange/channel/ion/n_i_over_n_e": "spectroscopy"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "charge_exchange/channel/ion/n_i_over_n_e",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at charge_exchange/channel/ion/n_i_over_n_e fixes the selected rule"
+    },
+    {
+      "name": "y_coordinate_of_ferritic_element_centroid",
+      "approved_domain": "structural_components",
+      "answer": "magnetic_field_systems",
+      "sources": {
+        "ferritic/object/centroid/y": "magnetic_field_systems"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "ferritic/object/centroid/y",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at ferritic/object/centroid/y fixes the selected rule"
+    },
+    {
+      "name": "radial_length_of_divertor_target",
+      "approved_domain": "plasma_wall_interactions",
+      "answer": "structural_components",
+      "sources": {
+        "divertors/divertor/target/extension_r": "structural_components"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "divertors/divertor/target/extension_r",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at divertors/divertor/target/extension_r fixes the selected rule"
+    },
+    {
+      "name": "nuclear_power_density_of_limiter_tile",
+      "approved_domain": "neutronics",
+      "answer": "plasma_wall_interactions",
+      "sources": {
+        "wall/description_2d/limiter/unit/midplane_power_density_nuclear": "plasma_wall_interactions"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "wall/description_2d/limiter/unit/midplane_power_density_nuclear",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at wall/description_2d/limiter/unit/midplane_power_density_nuclear fixes the selected rule"
+    },
+    {
+      "name": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+      "approved_domain": "edge_plasma_physics",
+      "answer": null,
+      "sources": {},
+      "cohort": "calibration",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": false,
+      "override_assessment": "no DD source binding; a path override has no target"
+    },
+    {
+      "name": "incident_neutral_particle_flux_at_wall_due_to_recombination",
+      "approved_domain": "plasma_wall_interactions",
+      "answer": null,
+      "sources": {},
+      "cohort": "calibration",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": false,
+      "override_assessment": "no DD source binding; a path override has no target"
+    },
+    {
+      "name": "ion_charge_state_lower_bound_charge",
+      "approved_domain": "core_plasma_physics",
+      "answer": "transport",
+      "sources": {
+        "core_profiles/profiles_1d/ion/state/z_min": "core_plasma_physics",
+        "core_profiles/profiles_2d/ion/state/z_min": "core_plasma_physics",
+        "core_sources/source/profiles_1d/ion/state/z_min": "transport",
+        "core_sources/source/species/ion/state/z_min": "transport",
+        "core_transport/model/profiles_1d/ion/state/z_min": "transport",
+        "distribution_sources/source/species/ion/state/z_min": "fast_particles",
+        "distributions/distribution/global_quantities/collisions/ion/state/z_min": "fast_particles",
+        "distributions/distribution/profiles_1d/co_passing/collisions/ion/state/z_min": "fast_particles",
+        "distributions/distribution/profiles_1d/collisions/ion/state/z_min": "fast_particles",
+        "distributions/distribution/profiles_1d/counter_passing/collisions/ion/state/z_min": "fast_particles",
+        "distributions/distribution/profiles_1d/trapped/collisions/ion/state/z_min": "fast_particles",
+        "distributions/distribution/profiles_2d/co_passing/collisions/ion/state/z_min": "fast_particles",
+        "distributions/distribution/profiles_2d/collisions/ion/state/z_min": "fast_particles",
+        "distributions/distribution/profiles_2d/counter_passing/collisions/ion/state/z_min": "fast_particles",
+        "distributions/distribution/profiles_2d/trapped/collisions/ion/state/z_min": "fast_particles",
+        "distributions/distribution/species/ion/state/z_min": "fast_particles",
+        "edge_profiles/ggd/ion/state/z_min": "edge_plasma_physics",
+        "edge_profiles/profiles_1d/ion/state/z_min": "edge_plasma_physics",
+        "edge_sources/source/ggd/ion/state/z_min": "transport",
+        "edge_sources/source/species/ion/state/z_min": "edge_plasma_physics",
+        "edge_transport/model/ggd/ion/state/z_min": "edge_plasma_physics",
+        "plasma_profiles/ggd/ion/state/z_min": "edge_plasma_physics",
+        "plasma_profiles/profiles_1d/ion/state/z_min": "core_plasma_physics",
+        "plasma_profiles/profiles_2d/ion/state/z_min": "core_plasma_physics",
+        "plasma_sources/source/ggd/ion/state/z_min": "core_plasma_physics",
+        "plasma_sources/source/profiles_1d/ion/state/z_min": "transport",
+        "plasma_sources/source/species/ion/state/z_min": "transport",
+        "plasma_transport/model/ggd/ion/state/z_min": "transport",
+        "plasma_transport/model/profiles_1d/ion/state/z_min": "transport",
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/state/z_min": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/energy_fluxes/recombination/ion/state/z_min": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/particle_fluxes/ion/state/z_min": "plasma_wall_interactions",
+        "wall/description_ggd/ggd/recycling/ion/state/z_min": "plasma_wall_interactions",
+        "waves/coherent_wave/beam_tracing/beam/ion/state/z_min": "waves",
+        "waves/coherent_wave/global_quantities/ion/state/z_min": "waves",
+        "waves/coherent_wave/profiles_1d/ion/state/z_min": "waves",
+        "waves/coherent_wave/profiles_2d/ion/state/z_min": "waves"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": false,
+      "override_assessment": "some DD sources carry the approved domain but lose the vote; one path override cannot fix the selected rule"
+    },
+    {
+      "name": "vertical_front_surface_radius_of_optical_element",
+      "approved_domain": "radiation_measurement_diagnostics",
+      "answer": "spectroscopy",
+      "sources": {
+        "spectrometer_x_ray_crystal/channel/reflector/x2_curvature": "spectroscopy"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "spectrometer_x_ray_crystal/channel/reflector/x2_curvature",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at spectrometer_x_ray_crystal/channel/reflector/x2_curvature fixes the selected rule"
+    },
+    {
+      "name": "flux_surface_averaged_current_density_due_to_wave_driven_current_drive",
+      "approved_domain": "current_drive",
+      "answer": null,
+      "sources": {},
+      "cohort": "calibration",
+      "one_path_override_suffices": false,
+      "one_path_override_example": null,
+      "all_source_domains_conflict": false,
+      "override_assessment": "no DD source binding; a path override has no target"
+    },
+    {
+      "name": "thickness_of_bragg_crystal",
+      "approved_domain": "radiation_measurement_diagnostics",
+      "answer": "spectroscopy",
+      "sources": {
+        "spectrometer_x_ray_crystal/channel/crystal/thickness": "spectroscopy"
+      },
+      "cohort": "calibration",
+      "one_path_override_suffices": true,
+      "one_path_override_example": "spectrometer_x_ray_crystal/channel/crystal/thickness",
+      "all_source_domains_conflict": true,
+      "override_assessment": "approved label conflicts with every DD source classification; one path override at spectrometer_x_ray_crystal/channel/crystal/thickness fixes the selected rule"
+    }
+  ],
+  "blast_radius": {
+    "set_precedence": {
+      "changed": 1477,
+      "moves": [
+        {
+          "from": "transport",
+          "to": "core_plasma_physics",
+          "count": 288
+        },
+        {
+          "from": "transport",
+          "to": "fast_particles",
+          "count": 187
+        },
+        {
+          "from": "plant_systems",
+          "to": "fueling",
+          "count": 104
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "transport",
+          "count": 72
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "waves",
+          "count": 59
+        },
+        {
+          "from": "turbulence",
+          "to": "gyrokinetics",
+          "count": 49
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 45
+        },
+        {
+          "from": "\u2205",
+          "to": "transport",
+          "count": 33
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "edge_plasma_physics",
+          "count": 24
+        },
+        {
+          "from": "\u2205",
+          "to": "edge_plasma_physics",
+          "count": 24
+        },
+        {
+          "from": "transport",
+          "to": "\u2205",
+          "count": 22
+        },
+        {
+          "from": "transport",
+          "to": "runaway_electrons",
+          "count": 19
+        },
+        {
+          "from": "\u2205",
+          "to": "radiation_measurement_diagnostics",
+          "count": 19
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "waves",
+          "count": 18
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "core_plasma_physics",
+          "count": 15
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "neutronics",
+          "count": 15
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "\u2205",
+          "count": 15
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetic_field_systems",
+          "count": 15
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 14
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "radiation_measurement_diagnostics",
+          "count": 14
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetohydrodynamics",
+          "count": 14
+        },
+        {
+          "from": "\u2205",
+          "to": "equilibrium",
+          "count": 13
+        },
+        {
+          "from": "\u2205",
+          "to": "plasma_wall_interactions",
+          "count": 12
+        },
+        {
+          "from": "structural_components",
+          "to": "plasma_wall_interactions",
+          "count": 11
+        },
+        {
+          "from": "transport",
+          "to": "edge_plasma_physics",
+          "count": 11
+        },
+        {
+          "from": "transport",
+          "to": "equilibrium",
+          "count": 11
+        },
+        {
+          "from": "\u2205",
+          "to": "auxiliary_heating",
+          "count": 11
+        },
+        {
+          "from": "\u2205",
+          "to": "gyrokinetics",
+          "count": 11
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 10
+        },
+        {
+          "from": "\u2205",
+          "to": "spectroscopy",
+          "count": 10
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "radiation_measurement_diagnostics",
+          "count": 9
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "core_plasma_physics",
+          "count": 9
+        },
+        {
+          "from": "structural_components",
+          "to": "magnetic_field_systems",
+          "count": 9
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "neutronics",
+          "count": 8
+        },
+        {
+          "from": "structural_components",
+          "to": "neutronics",
+          "count": 8
+        },
+        {
+          "from": "transport",
+          "to": "magnetohydrodynamics",
+          "count": 8
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "current_drive",
+          "count": 7
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "\u2205",
+          "count": 7
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "\u2205",
+          "count": 7
+        },
+        {
+          "from": "\u2205",
+          "to": "neutronics",
+          "count": 7
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "particle_measurement_diagnostics",
+          "count": 6
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "equilibrium",
+          "count": 6
+        },
+        {
+          "from": "\u2205",
+          "to": "waves",
+          "count": 6
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "auxiliary_heating",
+          "count": 5
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetic_field_systems",
+          "count": 5
+        },
+        {
+          "from": "transport",
+          "to": "auxiliary_heating",
+          "count": 5
+        },
+        {
+          "from": "\u2205",
+          "to": "mechanical_measurement_diagnostics",
+          "count": 5
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "equilibrium",
+          "count": 4
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "fast_particles",
+          "count": 4
+        },
+        {
+          "from": "divertor_physics",
+          "to": "plasma_wall_interactions",
+          "count": 4
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "magnetic_field_diagnostics",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "core_plasma_physics",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "edge_plasma_physics",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "equilibrium",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "fueling",
+          "count": 4
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "runaway_electrons",
+          "count": 4
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "particle_measurement_diagnostics",
+          "count": 4
+        },
+        {
+          "from": "\u2205",
+          "to": "core_plasma_physics",
+          "count": 4
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetic_field_diagnostics",
+          "count": 4
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "divertor_physics",
+          "to": "structural_components",
+          "count": 3
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "equilibrium",
+          "count": 3
+        },
+        {
+          "from": "equilibrium",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "transport",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "plasma_initiation",
+          "count": 3
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "equilibrium",
+          "count": 3
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "radiation_measurement_diagnostics",
+          "count": 3
+        },
+        {
+          "from": "turbulence",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "current_drive",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "divertor_physics",
+          "count": 3
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "spectroscopy",
+          "count": 2
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "magnetohydrodynamics",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "spectroscopy",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "\u2205",
+          "count": 2
+        },
+        {
+          "from": "equilibrium",
+          "to": "core_plasma_physics",
+          "count": 2
+        },
+        {
+          "from": "general",
+          "to": "magnetohydrodynamics",
+          "count": 2
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "neutronics",
+          "count": 2
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "gyrokinetics",
+          "count": 2
+        },
+        {
+          "from": "mechanical_measurement_diagnostics",
+          "to": "particle_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "plant_systems",
+          "to": "mechanical_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "magnetic_field_systems",
+          "count": 2
+        },
+        {
+          "from": "structural_components",
+          "to": "plant_systems",
+          "count": 2
+        },
+        {
+          "from": "transport",
+          "to": "neutronics",
+          "count": 2
+        },
+        {
+          "from": "turbulence",
+          "to": "core_plasma_physics",
+          "count": 2
+        },
+        {
+          "from": "turbulence",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "fast_particles",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "fueling",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "plant_systems",
+          "count": 2
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "magnetic_field_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "neutronics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "particle_measurement_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "\u2205",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "fueling",
+          "count": 1
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "particle_measurement_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "edge_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "gyrokinetics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetic_field_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "general",
+          "to": "magnetic_field_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "machine_operations",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "magnetic_field_systems",
+          "count": 1
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "gyrokinetics",
+          "count": 1
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "core_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "fast_particles",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "core_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "plasma_control",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "neutronics",
+          "count": 1
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "fueling",
+          "count": 1
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "current_drive",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "radiation_measurement_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "turbulence",
+          "to": "fast_particles",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "general",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "runaway_electrons",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "structural_components",
+          "count": 1
+        }
+      ],
+      "largest_moves": [
+        {
+          "from": "transport",
+          "to": "core_plasma_physics",
+          "count": 288
+        },
+        {
+          "from": "transport",
+          "to": "fast_particles",
+          "count": 187
+        },
+        {
+          "from": "plant_systems",
+          "to": "fueling",
+          "count": 104
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "transport",
+          "count": 72
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "waves",
+          "count": 59
+        },
+        {
+          "from": "turbulence",
+          "to": "gyrokinetics",
+          "count": 49
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 45
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "edge_plasma_physics",
+          "count": 24
+        },
+        {
+          "from": "transport",
+          "to": "runaway_electrons",
+          "count": 19
+        }
+      ]
+    },
+    "path_plurality": {
+      "changed": 1523,
+      "moves": [
+        {
+          "from": "transport",
+          "to": "core_plasma_physics",
+          "count": 290
+        },
+        {
+          "from": "transport",
+          "to": "fast_particles",
+          "count": 202
+        },
+        {
+          "from": "plant_systems",
+          "to": "fueling",
+          "count": 104
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "transport",
+          "count": 72
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "waves",
+          "count": 59
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 51
+        },
+        {
+          "from": "turbulence",
+          "to": "gyrokinetics",
+          "count": 49
+        },
+        {
+          "from": "\u2205",
+          "to": "transport",
+          "count": 33
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "transport",
+          "to": "edge_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "\u2205",
+          "to": "edge_plasma_physics",
+          "count": 25
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "edge_plasma_physics",
+          "count": 24
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "waves",
+          "count": 22
+        },
+        {
+          "from": "transport",
+          "to": "\u2205",
+          "count": 22
+        },
+        {
+          "from": "transport",
+          "to": "runaway_electrons",
+          "count": 19
+        },
+        {
+          "from": "\u2205",
+          "to": "radiation_measurement_diagnostics",
+          "count": 19
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "neutronics",
+          "count": 16
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 15
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "\u2205",
+          "count": 15
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetic_field_systems",
+          "count": 15
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "core_plasma_physics",
+          "count": 14
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetohydrodynamics",
+          "count": 14
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "radiation_measurement_diagnostics",
+          "count": 13
+        },
+        {
+          "from": "\u2205",
+          "to": "equilibrium",
+          "count": 13
+        },
+        {
+          "from": "\u2205",
+          "to": "plasma_wall_interactions",
+          "count": 12
+        },
+        {
+          "from": "structural_components",
+          "to": "plasma_wall_interactions",
+          "count": 11
+        },
+        {
+          "from": "\u2205",
+          "to": "auxiliary_heating",
+          "count": 11
+        },
+        {
+          "from": "\u2205",
+          "to": "gyrokinetics",
+          "count": 11
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "radiation_measurement_diagnostics",
+          "count": 10
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 10
+        },
+        {
+          "from": "transport",
+          "to": "equilibrium",
+          "count": 10
+        },
+        {
+          "from": "\u2205",
+          "to": "spectroscopy",
+          "count": 10
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "core_plasma_physics",
+          "count": 9
+        },
+        {
+          "from": "structural_components",
+          "to": "magnetic_field_systems",
+          "count": 9
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetic_field_systems",
+          "count": 8
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "neutronics",
+          "count": 8
+        },
+        {
+          "from": "structural_components",
+          "to": "neutronics",
+          "count": 8
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "current_drive",
+          "count": 7
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "\u2205",
+          "count": 7
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "\u2205",
+          "count": 7
+        },
+        {
+          "from": "\u2205",
+          "to": "neutronics",
+          "count": 7
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "particle_measurement_diagnostics",
+          "count": 6
+        },
+        {
+          "from": "equilibrium",
+          "to": "core_plasma_physics",
+          "count": 6
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "core_plasma_physics",
+          "count": 6
+        },
+        {
+          "from": "\u2205",
+          "to": "waves",
+          "count": 6
+        },
+        {
+          "from": "general",
+          "to": "core_plasma_physics",
+          "count": 5
+        },
+        {
+          "from": "transport",
+          "to": "auxiliary_heating",
+          "count": 5
+        },
+        {
+          "from": "\u2205",
+          "to": "mechanical_measurement_diagnostics",
+          "count": 5
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "equilibrium",
+          "count": 4
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "fast_particles",
+          "count": 4
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "magnetic_field_diagnostics",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "edge_plasma_physics",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "fueling",
+          "count": 4
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "runaway_electrons",
+          "count": 4
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetic_field_diagnostics",
+          "count": 4
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "divertor_physics",
+          "to": "structural_components",
+          "count": 3
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "equilibrium",
+          "count": 3
+        },
+        {
+          "from": "equilibrium",
+          "to": "radiation_measurement_diagnostics",
+          "count": 3
+        },
+        {
+          "from": "equilibrium",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "equilibrium",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "transport",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "plasma_initiation",
+          "count": 3
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "particle_measurement_diagnostics",
+          "count": 3
+        },
+        {
+          "from": "transport",
+          "to": "magnetohydrodynamics",
+          "count": 3
+        },
+        {
+          "from": "turbulence",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "core_plasma_physics",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "current_drive",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "divertor_physics",
+          "count": 3
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "radiation_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "spectroscopy",
+          "count": 2
+        },
+        {
+          "from": "divertor_physics",
+          "to": "plasma_wall_interactions",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "spectroscopy",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "\u2205",
+          "count": 2
+        },
+        {
+          "from": "equilibrium",
+          "to": "edge_plasma_physics",
+          "count": 2
+        },
+        {
+          "from": "general",
+          "to": "magnetohydrodynamics",
+          "count": 2
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "neutronics",
+          "count": 2
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "gyrokinetics",
+          "count": 2
+        },
+        {
+          "from": "mechanical_measurement_diagnostics",
+          "to": "particle_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "radiation_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "plant_systems",
+          "to": "mechanical_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "magnetic_field_systems",
+          "count": 2
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "structural_components",
+          "to": "plant_systems",
+          "count": 2
+        },
+        {
+          "from": "transport",
+          "to": "neutronics",
+          "count": 2
+        },
+        {
+          "from": "transport",
+          "to": "radiation_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "turbulence",
+          "to": "core_plasma_physics",
+          "count": 2
+        },
+        {
+          "from": "turbulence",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "fast_particles",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "fueling",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "plant_systems",
+          "count": 2
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "magnetic_field_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "neutronics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "particle_measurement_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "\u2205",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "divertor_physics",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "divertor_physics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "fueling",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "gyrokinetics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetic_field_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "transport",
+          "count": 1
+        },
+        {
+          "from": "general",
+          "to": "structural_components",
+          "count": 1
+        },
+        {
+          "from": "machine_operations",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "magnetic_field_systems",
+          "count": 1
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "edge_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "transport",
+          "count": 1
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "fast_particles",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "core_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "plasma_control",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "neutronics",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "spectroscopy",
+          "count": 1
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "current_drive",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "magnetic_field_systems",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "turbulence",
+          "to": "fast_particles",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "general",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "runaway_electrons",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "structural_components",
+          "count": 1
+        }
+      ],
+      "largest_moves": [
+        {
+          "from": "transport",
+          "to": "core_plasma_physics",
+          "count": 290
+        },
+        {
+          "from": "transport",
+          "to": "fast_particles",
+          "count": 202
+        },
+        {
+          "from": "plant_systems",
+          "to": "fueling",
+          "count": 104
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "transport",
+          "count": 72
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "waves",
+          "count": 59
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 51
+        },
+        {
+          "from": "turbulence",
+          "to": "gyrokinetics",
+          "count": 49
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "transport",
+          "to": "edge_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "edge_plasma_physics",
+          "count": 24
+        }
+      ]
+    },
+    "ids_plurality": {
+      "changed": 1502,
+      "moves": [
+        {
+          "from": "transport",
+          "to": "core_plasma_physics",
+          "count": 295
+        },
+        {
+          "from": "transport",
+          "to": "fast_particles",
+          "count": 193
+        },
+        {
+          "from": "plant_systems",
+          "to": "fueling",
+          "count": 104
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "transport",
+          "count": 72
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "waves",
+          "count": 59
+        },
+        {
+          "from": "turbulence",
+          "to": "gyrokinetics",
+          "count": 49
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 48
+        },
+        {
+          "from": "\u2205",
+          "to": "transport",
+          "count": 33
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "edge_plasma_physics",
+          "count": 24
+        },
+        {
+          "from": "\u2205",
+          "to": "edge_plasma_physics",
+          "count": 24
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "waves",
+          "count": 22
+        },
+        {
+          "from": "transport",
+          "to": "\u2205",
+          "count": 22
+        },
+        {
+          "from": "transport",
+          "to": "runaway_electrons",
+          "count": 19
+        },
+        {
+          "from": "\u2205",
+          "to": "radiation_measurement_diagnostics",
+          "count": 19
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "core_plasma_physics",
+          "count": 15
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "neutronics",
+          "count": 15
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 15
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "\u2205",
+          "count": 15
+        },
+        {
+          "from": "transport",
+          "to": "edge_plasma_physics",
+          "count": 15
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetic_field_systems",
+          "count": 15
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetohydrodynamics",
+          "count": 14
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "radiation_measurement_diagnostics",
+          "count": 13
+        },
+        {
+          "from": "\u2205",
+          "to": "equilibrium",
+          "count": 13
+        },
+        {
+          "from": "\u2205",
+          "to": "plasma_wall_interactions",
+          "count": 12
+        },
+        {
+          "from": "structural_components",
+          "to": "plasma_wall_interactions",
+          "count": 11
+        },
+        {
+          "from": "\u2205",
+          "to": "auxiliary_heating",
+          "count": 11
+        },
+        {
+          "from": "\u2205",
+          "to": "gyrokinetics",
+          "count": 11
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "radiation_measurement_diagnostics",
+          "count": 10
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 10
+        },
+        {
+          "from": "transport",
+          "to": "equilibrium",
+          "count": 10
+        },
+        {
+          "from": "\u2205",
+          "to": "spectroscopy",
+          "count": 10
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "core_plasma_physics",
+          "count": 9
+        },
+        {
+          "from": "structural_components",
+          "to": "magnetic_field_systems",
+          "count": 9
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "neutronics",
+          "count": 8
+        },
+        {
+          "from": "structural_components",
+          "to": "neutronics",
+          "count": 8
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "current_drive",
+          "count": 7
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "\u2205",
+          "count": 7
+        },
+        {
+          "from": "equilibrium",
+          "to": "core_plasma_physics",
+          "count": 7
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "\u2205",
+          "count": 7
+        },
+        {
+          "from": "\u2205",
+          "to": "neutronics",
+          "count": 7
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "particle_measurement_diagnostics",
+          "count": 6
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetic_field_systems",
+          "count": 6
+        },
+        {
+          "from": "\u2205",
+          "to": "waves",
+          "count": 6
+        },
+        {
+          "from": "general",
+          "to": "core_plasma_physics",
+          "count": 5
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "core_plasma_physics",
+          "count": 5
+        },
+        {
+          "from": "transport",
+          "to": "auxiliary_heating",
+          "count": 5
+        },
+        {
+          "from": "\u2205",
+          "to": "mechanical_measurement_diagnostics",
+          "count": 5
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "equilibrium",
+          "count": 4
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "fast_particles",
+          "count": 4
+        },
+        {
+          "from": "divertor_physics",
+          "to": "plasma_wall_interactions",
+          "count": 4
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "magnetic_field_diagnostics",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "edge_plasma_physics",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "fueling",
+          "count": 4
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "runaway_electrons",
+          "count": 4
+        },
+        {
+          "from": "transport",
+          "to": "magnetohydrodynamics",
+          "count": 4
+        },
+        {
+          "from": "\u2205",
+          "to": "core_plasma_physics",
+          "count": 4
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetic_field_diagnostics",
+          "count": 4
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "divertor_physics",
+          "to": "structural_components",
+          "count": 3
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "equilibrium",
+          "count": 3
+        },
+        {
+          "from": "equilibrium",
+          "to": "radiation_measurement_diagnostics",
+          "count": 3
+        },
+        {
+          "from": "equilibrium",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "equilibrium",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "transport",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "plasma_initiation",
+          "count": 3
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "radiation_measurement_diagnostics",
+          "count": 3
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "particle_measurement_diagnostics",
+          "count": 3
+        },
+        {
+          "from": "turbulence",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "current_drive",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "divertor_physics",
+          "count": 3
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "radiation_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "spectroscopy",
+          "count": 2
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "magnetohydrodynamics",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "spectroscopy",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "\u2205",
+          "count": 2
+        },
+        {
+          "from": "general",
+          "to": "magnetohydrodynamics",
+          "count": 2
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "neutronics",
+          "count": 2
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "gyrokinetics",
+          "count": 2
+        },
+        {
+          "from": "mechanical_measurement_diagnostics",
+          "to": "particle_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "plant_systems",
+          "to": "mechanical_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "magnetic_field_systems",
+          "count": 2
+        },
+        {
+          "from": "structural_components",
+          "to": "plant_systems",
+          "count": 2
+        },
+        {
+          "from": "transport",
+          "to": "neutronics",
+          "count": 2
+        },
+        {
+          "from": "turbulence",
+          "to": "core_plasma_physics",
+          "count": 2
+        },
+        {
+          "from": "turbulence",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "fast_particles",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "fueling",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "plant_systems",
+          "count": 2
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "magnetic_field_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "neutronics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "particle_measurement_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "\u2205",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "edge_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "fueling",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "gyrokinetics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetic_field_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "transport",
+          "count": 1
+        },
+        {
+          "from": "general",
+          "to": "magnetic_field_systems",
+          "count": 1
+        },
+        {
+          "from": "machine_operations",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "magnetic_field_systems",
+          "count": 1
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "gyrokinetics",
+          "count": 1
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "transport",
+          "count": 1
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "fast_particles",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "core_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "plasma_control",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "neutronics",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "spectroscopy",
+          "count": 1
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "current_drive",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "radiation_measurement_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "turbulence",
+          "to": "fast_particles",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "general",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "runaway_electrons",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "structural_components",
+          "count": 1
+        }
+      ],
+      "largest_moves": [
+        {
+          "from": "transport",
+          "to": "core_plasma_physics",
+          "count": 295
+        },
+        {
+          "from": "transport",
+          "to": "fast_particles",
+          "count": 193
+        },
+        {
+          "from": "plant_systems",
+          "to": "fueling",
+          "count": 104
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "transport",
+          "count": 72
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "waves",
+          "count": 59
+        },
+        {
+          "from": "turbulence",
+          "to": "gyrokinetics",
+          "count": 49
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 48
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "edge_plasma_physics",
+          "count": 24
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "waves",
+          "count": 22
+        }
+      ]
+    },
+    "ids_then_paths": {
+      "changed": 1519,
+      "moves": [
+        {
+          "from": "transport",
+          "to": "core_plasma_physics",
+          "count": 291
+        },
+        {
+          "from": "transport",
+          "to": "fast_particles",
+          "count": 198
+        },
+        {
+          "from": "plant_systems",
+          "to": "fueling",
+          "count": 104
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "transport",
+          "count": 72
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "waves",
+          "count": 59
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 49
+        },
+        {
+          "from": "turbulence",
+          "to": "gyrokinetics",
+          "count": 49
+        },
+        {
+          "from": "\u2205",
+          "to": "transport",
+          "count": 33
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "transport",
+          "to": "edge_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "\u2205",
+          "to": "edge_plasma_physics",
+          "count": 25
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "edge_plasma_physics",
+          "count": 24
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "waves",
+          "count": 22
+        },
+        {
+          "from": "transport",
+          "to": "\u2205",
+          "count": 22
+        },
+        {
+          "from": "transport",
+          "to": "runaway_electrons",
+          "count": 19
+        },
+        {
+          "from": "\u2205",
+          "to": "radiation_measurement_diagnostics",
+          "count": 19
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "neutronics",
+          "count": 16
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 15
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "\u2205",
+          "count": 15
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetic_field_systems",
+          "count": 15
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "core_plasma_physics",
+          "count": 14
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetohydrodynamics",
+          "count": 14
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "radiation_measurement_diagnostics",
+          "count": 13
+        },
+        {
+          "from": "\u2205",
+          "to": "equilibrium",
+          "count": 13
+        },
+        {
+          "from": "\u2205",
+          "to": "plasma_wall_interactions",
+          "count": 12
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "radiation_measurement_diagnostics",
+          "count": 11
+        },
+        {
+          "from": "structural_components",
+          "to": "plasma_wall_interactions",
+          "count": 11
+        },
+        {
+          "from": "\u2205",
+          "to": "auxiliary_heating",
+          "count": 11
+        },
+        {
+          "from": "\u2205",
+          "to": "gyrokinetics",
+          "count": 11
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 10
+        },
+        {
+          "from": "transport",
+          "to": "equilibrium",
+          "count": 10
+        },
+        {
+          "from": "\u2205",
+          "to": "spectroscopy",
+          "count": 10
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "core_plasma_physics",
+          "count": 9
+        },
+        {
+          "from": "structural_components",
+          "to": "magnetic_field_systems",
+          "count": 9
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetic_field_systems",
+          "count": 8
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "neutronics",
+          "count": 8
+        },
+        {
+          "from": "structural_components",
+          "to": "neutronics",
+          "count": 8
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "current_drive",
+          "count": 7
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "\u2205",
+          "count": 7
+        },
+        {
+          "from": "equilibrium",
+          "to": "core_plasma_physics",
+          "count": 7
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "\u2205",
+          "count": 7
+        },
+        {
+          "from": "\u2205",
+          "to": "neutronics",
+          "count": 7
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "particle_measurement_diagnostics",
+          "count": 6
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "core_plasma_physics",
+          "count": 6
+        },
+        {
+          "from": "\u2205",
+          "to": "waves",
+          "count": 6
+        },
+        {
+          "from": "general",
+          "to": "core_plasma_physics",
+          "count": 5
+        },
+        {
+          "from": "transport",
+          "to": "auxiliary_heating",
+          "count": 5
+        },
+        {
+          "from": "\u2205",
+          "to": "mechanical_measurement_diagnostics",
+          "count": 5
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "equilibrium",
+          "count": 4
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "fast_particles",
+          "count": 4
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "magnetic_field_diagnostics",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "edge_plasma_physics",
+          "count": 4
+        },
+        {
+          "from": "general",
+          "to": "fueling",
+          "count": 4
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "runaway_electrons",
+          "count": 4
+        },
+        {
+          "from": "\u2205",
+          "to": "magnetic_field_diagnostics",
+          "count": 4
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "divertor_physics",
+          "to": "structural_components",
+          "count": 3
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "equilibrium",
+          "count": 3
+        },
+        {
+          "from": "equilibrium",
+          "to": "radiation_measurement_diagnostics",
+          "count": 3
+        },
+        {
+          "from": "equilibrium",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "equilibrium",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "transport",
+          "count": 3
+        },
+        {
+          "from": "general",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "plasma_initiation",
+          "count": 3
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "particle_measurement_diagnostics",
+          "count": 3
+        },
+        {
+          "from": "transport",
+          "to": "magnetohydrodynamics",
+          "count": 3
+        },
+        {
+          "from": "turbulence",
+          "to": "\u2205",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "core_plasma_physics",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "current_drive",
+          "count": 3
+        },
+        {
+          "from": "\u2205",
+          "to": "divertor_physics",
+          "count": 3
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "radiation_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "spectroscopy",
+          "count": 2
+        },
+        {
+          "from": "divertor_physics",
+          "to": "plasma_wall_interactions",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "spectroscopy",
+          "count": 2
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "\u2205",
+          "count": 2
+        },
+        {
+          "from": "general",
+          "to": "magnetohydrodynamics",
+          "count": 2
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "magnetic_field_systems",
+          "to": "neutronics",
+          "count": 2
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "gyrokinetics",
+          "count": 2
+        },
+        {
+          "from": "mechanical_measurement_diagnostics",
+          "to": "particle_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "radiation_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "plant_systems",
+          "to": "mechanical_measurement_diagnostics",
+          "count": 2
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "magnetic_field_systems",
+          "count": 2
+        },
+        {
+          "from": "structural_components",
+          "to": "plant_systems",
+          "count": 2
+        },
+        {
+          "from": "transport",
+          "to": "neutronics",
+          "count": 2
+        },
+        {
+          "from": "turbulence",
+          "to": "core_plasma_physics",
+          "count": 2
+        },
+        {
+          "from": "turbulence",
+          "to": "equilibrium",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "fast_particles",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "fueling",
+          "count": 2
+        },
+        {
+          "from": "\u2205",
+          "to": "plant_systems",
+          "count": 2
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "magnetic_field_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "neutronics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "particle_measurement_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "divertor_physics",
+          "to": "\u2205",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "divertor_physics",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "electromagnetic_wave_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "divertor_physics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "edge_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "fueling",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "gyrokinetics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetic_field_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "equilibrium",
+          "to": "transport",
+          "count": 1
+        },
+        {
+          "from": "general",
+          "to": "magnetic_field_systems",
+          "count": 1
+        },
+        {
+          "from": "machine_operations",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "magnetic_field_diagnostics",
+          "to": "magnetic_field_systems",
+          "count": 1
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "edge_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "magnetohydrodynamics",
+          "to": "transport",
+          "count": 1
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "auxiliary_heating",
+          "count": 1
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "fast_particles",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "core_plasma_physics",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "plant_systems",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "plasma_control",
+          "to": "equilibrium",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "neutronics",
+          "count": 1
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "spectroscopy",
+          "count": 1
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "magnetohydrodynamics",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "current_drive",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "fueling",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "magnetic_field_systems",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "transport",
+          "to": "radiation_measurement_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "turbulence",
+          "to": "fast_particles",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "electromagnetic_wave_diagnostics",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "general",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "plasma_initiation",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "runaway_electrons",
+          "count": 1
+        },
+        {
+          "from": "\u2205",
+          "to": "structural_components",
+          "count": 1
+        }
+      ],
+      "largest_moves": [
+        {
+          "from": "transport",
+          "to": "core_plasma_physics",
+          "count": 291
+        },
+        {
+          "from": "transport",
+          "to": "fast_particles",
+          "count": 198
+        },
+        {
+          "from": "plant_systems",
+          "to": "fueling",
+          "count": 104
+        },
+        {
+          "from": "edge_plasma_physics",
+          "to": "transport",
+          "count": 72
+        },
+        {
+          "from": "auxiliary_heating",
+          "to": "waves",
+          "count": 59
+        },
+        {
+          "from": "radiation_measurement_diagnostics",
+          "to": "spectroscopy",
+          "count": 49
+        },
+        {
+          "from": "turbulence",
+          "to": "gyrokinetics",
+          "count": 49
+        },
+        {
+          "from": "particle_measurement_diagnostics",
+          "to": "core_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "transport",
+          "to": "edge_plasma_physics",
+          "count": 28
+        },
+        {
+          "from": "plasma_wall_interactions",
+          "to": "edge_plasma_physics",
+          "count": 24
+        }
+      ]
+    }
+  }
+}
