@@ -9,6 +9,13 @@
     "imas_codex/cli/sn.py:8941"
   ],
   "completed_at": "2026-10-14T21:46:35.732Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "an operational signed apply against the live graph adds no test by design; its controls are the refused control row, the readback's independent excluded-count assertion, and the replay preview",
+      "recorded_at": "2026-10-15T03:57:37.941299+00:00"
+    }
+  },
   "dispatched_at": "2026-10-14T21:33:49Z",
   "findings": [
     {
