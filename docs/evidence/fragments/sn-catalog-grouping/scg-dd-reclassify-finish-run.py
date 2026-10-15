@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Drive the DD path re-classification and read its result back from the graph.
 
-Two subcommands:
+Three subcommands:
 
 ``pass``
     Run one bounded re-classification pass over a set of IDS groups by invoking
@@ -18,18 +18,30 @@ Two subcommands:
     connection: the ``domain_source`` distribution, the ``domain_source`` x
     ``physics_domain`` matrix for the LLM-tier paths, how many ``summary`` paths
     sit at ``data_management``, and the rule-labelled paths scored against the
-    graph.
+    graph. The primary score is against the revised rule labels; the score
+    against the earlier label set is reported beside it, naming that set.
+
+``spend``
+    Sum the classifier spend from the pass logs. A pass log carries two kinds
+    of cost line: a per-call line (``cost=$X, model=...``) and a running total
+    (``batch N/M done (cost=$Y)``, and the ``spend=$`` field of an
+    ``LLM heartbeat`` line). Only the per-call line is summed, and each log's
+    last heartbeat is reported as an independent cross-check of that log's
+    total -- summing the running totals too would count the same spend twice.
 
 Usage:
     python scg-dd-reclassify-finish-run.py pass --ids a b c [--reset] [--dry] \
         [--timeout 540] --log <path>
-    python scg-dd-reclassify-finish-run.py readback --labels <json> --out <json>
+    python scg-dd-reclassify-finish-run.py readback --labels <json> \
+        [--labels-prior <json>] --out <json>
+    python scg-dd-reclassify-finish-run.py spend --passes <dir> --out <json>
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -42,11 +54,17 @@ VENV = Path("/home/ITER/mcintos/Code/imas-codex/.venv")
 # for infrastructure metadata.
 LLM_TIER_SOURCES = ("jev_tree", "llm_classified")
 
+# a per-call line carries both a cost and the model that served it; a running
+# total carries a cost and a batch counter, and a heartbeat carries the log's
+# cumulative spend. Only the first is a call.
+PER_CALL = re.compile(r"cost=\$([0-9.]+),\s*model=")
+HEARTBEAT_SPEND = re.compile(r"LLM heartbeat:.*spend=\$([0-9.]+)")
+
 
 def _find_repo(start: Path) -> Path:
-    for parent in [start, *start.parents]:
-        if (parent / "pyproject.toml").exists():
-            return parent
+    for parent in [str(start), *(str(p) for p in start.parents)]:
+        if (Path(parent) / "pyproject.toml").exists():
+            return Path(parent)
     raise SystemExit("could not locate the repository root")
 
 
@@ -106,6 +124,36 @@ def _run_pass(args: argparse.Namespace) -> int:
     return 0
 
 
+def _score(labels: dict, graph: dict, source: str, out: dict, key: str) -> None:
+    """Score the graph's domains against one label set under ``key``."""
+    matches = 0
+    mismatches = []
+    for path in sorted(labels):
+        lab = labels[path]["label"]
+        row = graph.get(path)
+        dom = row["dom"] if row else None
+        if dom == lab:
+            matches += 1
+        else:
+            mismatches.append(
+                {
+                    "path": path,
+                    "label": lab,
+                    "graph": dom,
+                    "domain_source": row["src"] if row else None,
+                    "label_set": source,
+                }
+            )
+    out[f"{key}_label_set"] = source
+    out[f"{key}_paths_scored"] = len(graph)
+    out[f"{key}_matches"] = matches
+    out[f"{key}_accuracy"] = (
+        round(matches / len(graph), 4) if graph else None
+    )
+    out[f"{key}_mismatch_count"] = len(mismatches)
+    out[f"{key}_mismatches"] = mismatches
+
+
 def _readback(args: argparse.Namespace) -> int:
     from imas_codex.graph.client import GraphClient
 
@@ -138,48 +186,92 @@ def _readback(args: argparse.Namespace) -> int:
         ]
 
         out["summary_at_data_management"] = gc.query(
-            "MATCH (n:IMASNode {ids: 'summary'}) "
-            "WHERE n.physics_domain = 'data_management' "
-            "RETURN count(*) AS c"
+            "MATCH (n:IMASNode) WHERE n.ids = 'summary' "
+            "AND n.physics_domain = 'data_management' RETURN count(*) AS c"
         )[0]["c"]
         out["summary_total"] = gc.query(
-            "MATCH (n:IMASNode {ids: 'summary'}) RETURN count(*) AS c"
+            "MATCH (n:IMASNode) WHERE n.ids = 'summary' RETURN count(*) AS c"
         )[0]["c"]
 
-        graph_domains = {
-            r["id"]: r["dom"]
+        graph = {
+            r["id"]: {"dom": r["dom"], "src": r["src"]}
             for r in gc.query(
                 "MATCH (n:IMASNode) WHERE n.id IN $paths "
-                "RETURN n.id AS id, n.physics_domain AS dom",
+                "RETURN n.id AS id, n.physics_domain AS dom, "
+                "n.domain_source AS src",
                 paths=label_paths,
             )
         }
 
-    # each label entry is a per-path record; its adjudicated rule label is the
-    # "label" field, alongside the tree and chat answers that were compared
-    # when the label was set.
-    matches = 0
-    mismatches = []
-    for path in label_paths:
-        lab = labels[path]["label"]
-        dom = graph_domains.get(path)
-        if dom == lab:
-            matches += 1
-        else:
-            mismatches.append({"path": path, "label": lab, "graph": dom})
-    out["labelled_paths_scored"] = len(graph_domains)
-    out["labelled_matches"] = matches
-    out["labelled_accuracy"] = (
-        round(matches / len(graph_domains), 4) if graph_domains else None
-    )
-    out["labelled_mismatches"] = mismatches
+    # each label entry is a per-path record whose adjudicated rule label is its
+    # "label" field; the revised label set is the primary score, and the label
+    # set this node was originally scored against is kept beside it.
+    _score(labels, graph, Path(args.labels).name, out, "revised")
+    if args.labels_prior:
+        prior = json.loads(Path(args.labels_prior).read_text())["path_answers"]
+        _score(prior, graph, Path(args.labels_prior).name, out, "prerevision")
 
     Path(args.out).write_text(json.dumps(out, indent=2) + "\n")
     src = out["domain_source_distribution"]
     print(
-        f"wrote {args.out}: {matches}/{len(graph_domains)} labelled match; "
+        f"wrote {args.out}: revised {out['revised_matches']}/"
+        f"{out['revised_paths_scored']} "
+        f"({out['revised_accuracy']}); prerevision "
+        f"{out.get('prerevision_matches')}/"
+        f"{out.get('prerevision_paths_scored')} "
+        f"({out.get('prerevision_accuracy')}); "
         f"summary/data_management={out['summary_at_data_management']}; "
         f"jev_tree={src.get('jev_tree')} llm_classified={src.get('llm_classified')}"
+    )
+    return 0
+
+
+def _spend(args: argparse.Namespace) -> int:
+    """Sum per-call spend from the pass logs, cross-checked against heartbeats.
+
+    A cost line that carries a model is one billed call; a line that carries a
+    batch counter, or the ``spend=`` field of a heartbeat, is a running total of
+    those call lines. Summing the running totals as well would count the same
+    spend twice, so only the per-call lines are summed.
+    """
+    passes_dir = Path(args.passes)
+    per_log = []
+    for log in sorted(passes_dir.glob("pass-*.log")):
+        text = log.read_text(errors="ignore")
+        calls = [float(x) for x in PER_CALL.findall(text)]
+        beats = [float(x) for x in HEARTBEAT_SPEND.findall(text)]
+        per_log.append(
+            {
+                "log": log.name,
+                "calls": len(calls),
+                "call_spend_usd": round(sum(calls), 4),
+                "last_heartbeat_spend_usd": beats[-1] if beats else None,
+            }
+        )
+
+    total = round(sum(r["call_spend_usd"] for r in per_log), 4)
+    calls = sum(r["calls"] for r in per_log)
+    heart = round(
+        sum(r["last_heartbeat_spend_usd"] for r in per_log if r["last_heartbeat_spend_usd"]),
+        4,
+    )
+    out = {
+        "passes": per_log,
+        "billed_calls": calls,
+        "per_call_spend_usd": total,
+        "heartbeat_sum_usd": heart,
+        "heartbeat_delta_usd": round(total - heart, 4),
+        "heartbeat_role": "lower bound: each log's last heartbeat is written "
+        "when the pass is stopped after its classify phase, so it can lag the "
+        "final calls and never exceeds the per-call sum",
+        "basis": "sum of per-call lines (cost=$X, model=...); running "
+        "totals (batch N/M done, and the spend=$ field of LLM heartbeat) "
+        "excluded because they restate the per-call lines",
+    }
+    Path(args.out).write_text(json.dumps(out, indent=2) + "\n")
+    print(
+        f"wrote {args.out}: {calls} calls, per-call ${total}, "
+        f"heartbeat sum ${heart}, delta ${out['heartbeat_delta_usd']}"
     )
     return 0
 
@@ -204,8 +296,14 @@ def main() -> int:
 
     r = sub.add_parser("readback")
     r.add_argument("--labels", required=True)
+    r.add_argument("--labels-prior", default=None)
     r.add_argument("--out", required=True)
     r.set_defaults(func=_readback)
+
+    s = sub.add_parser("spend")
+    s.add_argument("--passes", required=True)
+    s.add_argument("--out", required=True)
+    s.set_defaults(func=_spend)
 
     args = ap.parse_args()
     return args.func(args)

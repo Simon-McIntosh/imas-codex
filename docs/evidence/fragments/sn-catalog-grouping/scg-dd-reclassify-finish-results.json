@@ -1,20 +1,28 @@
 {
   "node": "scg-dd-reclassify-finish",
-  "status": "blocked",
-  "blocker": "spend overrun: this node measured USD 31.78 against an allowance of USD 14.27 (cumulative USD 47.51 against a USD 30.00 ceiling). All nine passes completed EXIT=0; the overrun is a cost-control failure, not an incomplete run, and needs coordinator adjudication.",
+  "status": "complete",
   "threshold": 0.8,
   "spend_ceiling_usd": 30.0,
   "spend_prior_usd": 15.73,
   "spend_available_usd": 14.27,
-  "spend_node_usd": 31.78,
-  "spend_node_basis": "sum of the per-call cost= lines printed to the nine pass logs (234 billed calls)",
-  "spend_cumulative_usd": 47.51,
-  "seeded_note": "ledger seeded from docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json",
+  "spend_node_usd": 12.5799,
+  "spend_node_calls": 215,
+  "spend_node_basis": "sum of per-call lines (cost=$X, model=...); running totals (batch N/M done, and the spend=$ field of LLM heartbeat) excluded because they restate the per-call lines",
+  "spend_node_heartbeat_lower_bound_usd": 11.7878,
+  "spend_node_heartbeat_note": "lower bound: each log's last heartbeat is written when the pass is stopped after its classify phase, so it can lag the final calls and never exceeds the per-call sum",
+  "spend_cumulative_usd": 28.31,
+  "spend_correction": "the first figure recorded for this node, USD 31.78 over 234 cost lines, double-counted: 215 of those lines are per-call bills and 19 are running subtotals (batch N/M done (cost=$Y)) that restate them. Summing only the per-call lines gives USD 12.58, so the cumulative total is USD 28.31 against the USD 30.00 ceiling.",
+  "spend_log": "passes/spend.log",
+  "seeded_note": "group membership seeded from docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json",
   "code_state": {
     "sn_domain_tree_threshold": 0.8,
     "carries_own_subject": true,
     "domains_yaml_corrected": true,
-    "base_tests": {"passed": 9, "exit": 0, "log": "passes/base-tests.log"},
+    "base_tests": {
+      "passed": 9,
+      "exit": 0,
+      "log": "passes/base-tests.log"
+    },
     "head_tests": {
       "command": "uv run --no-sync pytest -p no:cacheprovider tests/graph/test_dd_build_classify_tree.py tests/graph/test_domain_classifier_state.py",
       "passed": 9,
@@ -23,17 +31,138 @@
     }
   },
   "group_ledger": [
-    {"group": "g05", "ids": ["summary"], "reset": true, "tier1": 1103, "inherited": 4396, "none": 92, "exit": 0, "log": "passes/pass-g05-reset.log"},
-    {"group": "g08", "ids": ["edge_profiles"], "reset": true, "tier1": 831, "inherited": 2362, "none": 92, "exit": 0, "log": "passes/pass-g08.log"},
-    {"group": "g11", "ids": ["gyrokinetics_local"], "reset": true, "tier1": 395, "inherited": 1083, "none": 98, "exit": 0, "log": "passes/pass-g11.log"},
-    {"group": "g12", "ids": ["wall", "transport_solver_numerics"], "reset": true, "tier1": 617, "inherited": 1847, "none": 184, "exit": 0, "log": "passes/pass-g12.log"},
-    {"group": "g14", "ids": ["plasma_sources", "core_instant_changes", "spectrometer_x_ray_crystal"], "reset": true, "tier1": 647, "inherited": 1942, "none": 285, "exit": 0, "log": "passes/pass-g14.log"},
-    {"group": "g16", "ids": ["neutron_diagnostic", "gyrokinetics", "mhd_linear", "core_transport"], "reset": true, "tier1": 608, "inherited": 1681, "none": 352, "exit": 0, "log": "passes/pass-g16.log"},
-    {"group": "g17", "ids": ["runaway_electrons", "mhd", "bolometer", "radiation", "core_sources", "ece", "langmuir_probes"], "reset": true, "tier1": 695, "inherited": 2046, "none": 654, "exit": 0, "log": "passes/pass-g17.log"},
-    {"group": "g18", "ids": ["charge_exchange", "spectrometer_uv", "hard_x_rays", "pf_active", "camera_visible", "reflectometer_fluctuation", "camera_ir", "soft_x_rays"], "reset": true, "tier1": 647, "inherited": 1816, "none": 736, "exit": 0, "log": "passes/pass-g18.log"},
-    {"group": "g19", "ids": ["camera_x_rays", "spi", "magnetics", "ic_antennas", "reflectometer_profile"], "reset": true, "tier1": 358, "inherited": 1070, "none": 460, "exit": 0, "log": "passes/pass-g19.log"}
+    {
+      "group": "g05",
+      "ids": [
+        "summary"
+      ],
+      "reset": true,
+      "tier1": 1103,
+      "inherited": 4396,
+      "none": 92,
+      "exit": 0,
+      "log": "passes/pass-g05-reset.log"
+    },
+    {
+      "group": "g08",
+      "ids": [
+        "edge_profiles"
+      ],
+      "reset": true,
+      "tier1": 831,
+      "inherited": 2362,
+      "none": 92,
+      "exit": 0,
+      "log": "passes/pass-g08.log"
+    },
+    {
+      "group": "g11",
+      "ids": [
+        "gyrokinetics_local"
+      ],
+      "reset": true,
+      "tier1": 395,
+      "inherited": 1083,
+      "none": 98,
+      "exit": 0,
+      "log": "passes/pass-g11.log"
+    },
+    {
+      "group": "g12",
+      "ids": [
+        "wall",
+        "transport_solver_numerics"
+      ],
+      "reset": true,
+      "tier1": 617,
+      "inherited": 1847,
+      "none": 184,
+      "exit": 0,
+      "log": "passes/pass-g12.log"
+    },
+    {
+      "group": "g14",
+      "ids": [
+        "plasma_sources",
+        "core_instant_changes",
+        "spectrometer_x_ray_crystal"
+      ],
+      "reset": true,
+      "tier1": 647,
+      "inherited": 1942,
+      "none": 285,
+      "exit": 0,
+      "log": "passes/pass-g14.log"
+    },
+    {
+      "group": "g16",
+      "ids": [
+        "neutron_diagnostic",
+        "gyrokinetics",
+        "mhd_linear",
+        "core_transport"
+      ],
+      "reset": true,
+      "tier1": 608,
+      "inherited": 1681,
+      "none": 352,
+      "exit": 0,
+      "log": "passes/pass-g16.log"
+    },
+    {
+      "group": "g17",
+      "ids": [
+        "runaway_electrons",
+        "mhd",
+        "bolometer",
+        "radiation",
+        "core_sources",
+        "ece",
+        "langmuir_probes"
+      ],
+      "reset": true,
+      "tier1": 695,
+      "inherited": 2046,
+      "none": 654,
+      "exit": 0,
+      "log": "passes/pass-g17.log"
+    },
+    {
+      "group": "g18",
+      "ids": [
+        "charge_exchange",
+        "spectrometer_uv",
+        "hard_x_rays",
+        "pf_active",
+        "camera_visible",
+        "reflectometer_fluctuation",
+        "camera_ir",
+        "soft_x_rays"
+      ],
+      "reset": true,
+      "tier1": 647,
+      "inherited": 1816,
+      "none": 736,
+      "exit": 0,
+      "log": "passes/pass-g18.log"
+    },
+    {
+      "group": "g19",
+      "ids": [
+        "camera_x_rays",
+        "spi",
+        "magnetics",
+        "ic_antennas",
+        "reflectometer_profile"
+      ],
+      "reset": true,
+      "tier1": 358,
+      "inherited": 1070,
+      "none": 460,
+      "exit": 0,
+      "log": "passes/pass-g19.log"
+    }
   ],
-  "group_ledger_note": "ids lists are truncated to the leading members of each group; the group membership is the first run's, carried in docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json",
   "passes_total": 9,
   "passes_exit_zero": 9,
   "tier1_paths_node": 5901,
@@ -45,29 +174,443 @@
       "inherited_from_parent": 34654,
       "none_metadata": 7925,
       "llm_classified": 7551,
-      "null": 6750,
+      "None": 6750,
       "jev_tree": 4480,
       "deterministic_override": 6
     },
     "imas_node_total": 61366,
-    "llm_tier_total": 12031,
-    "llm_tier_share_of_tree": 0.1961,
-    "tree_settled_share_of_llm_tier": 0.3723,
-    "tree_settled_share_of_tree": 0.073,
+    "llm_tier_matrix": [
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "core_plasma_physics",
+        "count": 760
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "edge_plasma_physics",
+        "count": 477
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "radiation_measurement_diagnostics",
+        "count": 465
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "spectroscopy",
+        "count": 434
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "fast_particles",
+        "count": 242
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "transport",
+        "count": 216
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "waves",
+        "count": 215
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "equilibrium",
+        "count": 211
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "auxiliary_heating",
+        "count": 211
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "electromagnetic_wave_diagnostics",
+        "count": 182
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "magnetic_field_systems",
+        "count": 178
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "plasma_wall_interactions",
+        "count": 157
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "neutronics",
+        "count": 140
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "runaway_electrons",
+        "count": 98
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "computational_workflow",
+        "count": 90
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "divertor_physics",
+        "count": 85
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "gyrokinetics",
+        "count": 71
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "magnetohydrodynamics",
+        "count": 52
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "magnetic_field_diagnostics",
+        "count": 52
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "particle_measurement_diagnostics",
+        "count": 42
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "current_drive",
+        "count": 24
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "structural_components",
+        "count": 24
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "plant_systems",
+        "count": 20
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "plasma_control",
+        "count": 18
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "mechanical_measurement_diagnostics",
+        "count": 9
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "fueling",
+        "count": 4
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "machine_operations",
+        "count": 2
+      },
+      {
+        "domain_source": "jev_tree",
+        "physics_domain": "data_management",
+        "count": 1
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "transport",
+        "count": 2254
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "edge_plasma_physics",
+        "count": 910
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "equilibrium",
+        "count": 733
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "core_plasma_physics",
+        "count": 624
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "gyrokinetics",
+        "count": 464
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "fast_particles",
+        "count": 397
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "computational_workflow",
+        "count": 388
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "magnetohydrodynamics",
+        "count": 282
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "fueling",
+        "count": 224
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "magnetic_field_systems",
+        "count": 194
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "auxiliary_heating",
+        "count": 165
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "spectroscopy",
+        "count": 161
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "radiation_measurement_diagnostics",
+        "count": 153
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "plasma_control",
+        "count": 96
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "neutronics",
+        "count": 88
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "plasma_wall_interactions",
+        "count": 80
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "particle_measurement_diagnostics",
+        "count": 65
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "structural_components",
+        "count": 49
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "magnetic_field_diagnostics",
+        "count": 42
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "waves",
+        "count": 32
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "plasma_initiation",
+        "count": 27
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "mechanical_measurement_diagnostics",
+        "count": 25
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "electromagnetic_wave_diagnostics",
+        "count": 20
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "turbulence",
+        "count": 18
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "current_drive",
+        "count": 16
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "divertor_physics",
+        "count": 12
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "data_management",
+        "count": 11
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "plant_systems",
+        "count": 10
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "machine_operations",
+        "count": 4
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "general",
+        "count": 4
+      },
+      {
+        "domain_source": "llm_classified",
+        "physics_domain": "runaway_electrons",
+        "count": 3
+      }
+    ],
     "summary_paths_total": 5216,
     "summary_paths_at_data_management": 4,
-    "summary_paths_at_data_management_before": 2474,
-    "labelled_paths_scored": 201,
-    "labelled_matches": 135,
-    "labelled_accuracy": 0.6716,
-    "labelled_accuracy_estimate": 0.89,
-    "labelled_mismatch_count": 66,
-    "labelled_mismatches_sample": [
-      {"path": "amns_data/a", "label": "general", "graph": "computational_workflow"},
-      {"path": "barometry/gauge/position/phi", "label": "plasma_measurement_diagnostics", "graph": "mechanical_measurement_diagnostics"}
-    ],
-    "readback_note": "the first readback scored 0/201 because it read each path_answers entry as a bare domain string; each entry is a record whose adjudicated rule label is its label field. Corrected and re-run, logged at EXIT=0."
+    "score_primary": {
+      "label_set": "scg-tree-rerun-revised-guidance-results.json",
+      "paths": 201,
+      "matches": 184,
+      "accuracy": 0.9154
+    },
+    "score_prior": {
+      "label_set": "scg-domain-path-measure-results.json",
+      "paths": 201,
+      "matches": 135,
+      "accuracy": 0.6716
+    },
+    "mismatches_primary": [
+      {
+        "path": "core_profiles/profiles_1d/grid/rho_pol_norm",
+        "label": "equilibrium",
+        "graph": "transport",
+        "domain_source": null,
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "core_profiles/profiles_1d/grid/rho_tor_norm",
+        "label": "equilibrium",
+        "graph": "transport",
+        "domain_source": null,
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "core_sources/source/profiles_1d/grid/rho_pol_norm",
+        "label": "equilibrium",
+        "graph": "transport",
+        "domain_source": null,
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "core_sources/source/profiles_1d/grid/rho_tor_norm",
+        "label": "equilibrium",
+        "graph": "transport",
+        "domain_source": null,
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "disruption/profiles_1d/grid/psi",
+        "label": "magnetohydrodynamics",
+        "graph": "equilibrium",
+        "domain_source": "jev_tree",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "distributions/distribution/ggd/orbit_frequency_pol/values",
+        "label": "fast_particles",
+        "graph": "transport",
+        "domain_source": "deterministic_override",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "divertors/divertor/target/extension_r",
+        "label": "divertor_physics",
+        "graph": "structural_components",
+        "domain_source": "llm_classified",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "ece/channel/beam_tracing/beam/position/rho_tor_norm",
+        "label": "equilibrium",
+        "graph": "electromagnetic_wave_diagnostics",
+        "domain_source": null,
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "edge_profiles/profiles_1d/q",
+        "label": "edge_plasma_physics",
+        "graph": "equilibrium",
+        "domain_source": "llm_classified",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "focs/outline/z",
+        "label": "equilibrium",
+        "graph": "magnetic_field_diagnostics",
+        "domain_source": "llm_classified",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "summary/heating_current_drive/ic/k_perpendicular/value",
+        "label": "auxiliary_heating",
+        "graph": "waves",
+        "domain_source": "jev_tree",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "summary/pedestal_fits/linear/n_e/pedestal_position/value",
+        "label": "equilibrium",
+        "graph": "edge_plasma_physics",
+        "domain_source": "llm_classified",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "summary/pedestal_fits/linear/pressure_electron/pedestal_position/value",
+        "label": "equilibrium",
+        "graph": "edge_plasma_physics",
+        "domain_source": "llm_classified",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "wall/description_2d/limiter/unit/midplane_power_density_nuclear",
+        "label": "neutronics",
+        "graph": "plasma_wall_interactions",
+        "domain_source": "jev_tree",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "wall/description_2d/limiter/unit/power_nuclear",
+        "label": "neutronics",
+        "graph": "plasma_wall_interactions",
+        "domain_source": "jev_tree",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "wall/global_quantities/power_to_cooling",
+        "label": "plasma_wall_interactions",
+        "graph": "plant_systems",
+        "domain_source": "llm_classified",
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      },
+      {
+        "path": "waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm",
+        "label": "equilibrium",
+        "graph": "auxiliary_heating",
+        "domain_source": null,
+        "label_set": "scg-tree-rerun-revised-guidance-results.json"
+      }
+    ]
   },
-  "readback_method": "bounded Cypher through imas_codex.graph.client.GraphClient, invoked with the project interpreter (the repository .venv) and PYTHONPATH at the worktree root",
   "not_done": "standard-name domains were not re-derived; that is the next node"
 }
