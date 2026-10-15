@@ -1,0 +1,32 @@
+<section id="shc-run-log-verify">
+  <h2 id="shc-run-log-verify-title">CLI regression check at the merged revision</h2>
+  <p id="shc-run-log-verify-scope">
+    The same nine existing Standard Names CLI test files ran once at the first
+    parent <code>db4d66dd177e510e2d4f6b27387e6277f99da7b0</code> and once
+    at the merged revision <code>0db9968da0046c08550eb173b233f878a4abad80</code>.
+    The merged run also included
+    <code>tests/standard_names/test_sn_command_logging.py</code>, which does not
+    exist at the base revision. Each revision ran from its own archive extraction
+    using the shared project environment and its own pytest basetemp.
+  </p>
+  <table id="shc-run-log-verify-results">
+    <thead><tr><th>Revision</th><th>Test files</th><th>Result</th><th>Failing IDs</th></tr></thead>
+    <tbody>
+      <tr><td>Base</td><td>Nine existing files</td><td>146 passed; EXIT=0</td><td>None</td></tr>
+      <tr><td>Merged head</td><td>The same nine files plus the new logging file</td><td>151 passed; EXIT=0</td><td>None</td></tr>
+    </tbody>
+  </table>
+  <p id="shc-run-log-verify-delta">
+    <strong>Added failures: 0.</strong> The five additional passes are the five
+    tests in the new logging file. No failure is shared by base and head, and
+    no added failure needs a traceback or logging-call attribution. All ten
+    named files were exercised at head.
+  </p>
+  <p id="shc-run-log-verify-logs">
+    Complete receipts, including revision, imported <code>sn.py</code> path,
+    working directory, command, pytest summary and final <code>EXIT=</code>:
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T192418977789-shc-run-log-verify/base-cli.log</code>
+    and
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T192418977789-shc-run-log-verify/head-cli.log</code>.
+  </p>
+</section>
