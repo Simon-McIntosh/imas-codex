@@ -1,0 +1,379 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "35bd9f9851f7340d75c1ccb1ad08d780f653e35d",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T094427504023-shc-apply-scope-estimates/brief.md",
+    "sha256": "a115494780e9145359601b4ad2de0e6cb766b5804d2af79411bcfd26e06e3554"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 1972986,
+      "input_tokens_cumulative": 1972986,
+      "output_tokens": 6984,
+      "output_tokens_cumulative": 6984,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 704,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "f67cd08a0f30141ed77cb42d780fa8982867bca4",
+    "5df63e828143a3de0ae78c03eb77edd332c0f6dc"
+  ],
+  "completed_at": "2026-10-15T10:20:18.832Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-15T09:44:46Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8333333333333334,
+    "plan": "sn-harmonize-command",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-15T10:29:30.098208+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-15T09:44:30Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 21,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 8,
+    "headroom": 4,
+    "mean_context": 155556,
+    "observed_at": "2026-10-15T09:44:11Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 21,
+      "aggregate_tokens_per_second": 375.467,
+      "detail": "",
+      "mean_tokens_per_second": 49.404,
+      "observed_at": "2026-10-15T09:44:11Z",
+      "runs": 7.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-15T10:20:18.832Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T094427504023-shc-apply-scope-estimates/manifest.md",
+  "member": "disposable-r-20261015T094427504023-shc-apply-scope-estimates",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "shc-apply-scope-estimates",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/shc-apply-scope-estimates.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T094427504023-shc-apply-scope-estimates/brief.md",
+    "brief_sha256": "a115494780e9145359601b4ad2de0e6cb766b5804d2af79411bcfd26e06e3554",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 910,
+          "cached_input_tokens": 818659,
+          "input_tokens": 819571,
+          "output_tokens": 1926,
+          "reasoning_output_tokens": 217,
+          "total_tokens": 821497,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "the fragment and results JSON give, for the 17-member boundary family and one chosen non-WEST family per pattern kind, members, planned calls, the measured estimate with its basis, the anchor, protection refusals, lint findings by kind and current documentation scores, with the total estimate and confirmation that nothing was written, each citing a log ending in EXIT=",
+    "estimated_hours": null,
+    "goal": "Estimate the spend of the final family apply and the three-family measure by dry run",
+    "id": "shc-apply-scope-estimates",
+    "images": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-15T09:44:30Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 21,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 8,
+      "headroom": 4,
+      "mean_context": 155556,
+      "observed_at": "2026-10-15T09:44:11Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 21,
+        "aggregate_tokens_per_second": 375.467,
+        "detail": "",
+        "mean_tokens_per_second": 49.404,
+        "observed_at": "2026-10-15T09:44:11Z",
+        "runs": 7.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T094427504023-shc-apply-scope-estimates/manifest.md",
+    "negative_control": "none: a dry-run estimate adds no test and writes nothing; its control is the boundary family's estimate set beside the USD 6.26 its last apply spent",
+    "plan": "sn-harmonize-command",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates.html",
+      "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-run.py",
+      "docs/evidence/fragments/sn-harmonize-command/shc-apply-scope-estimates-results.json",
+      "docs/figures/sn-harmonize-command/shc-apply-scope-estimates"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 6620769.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "shc-apply-scope-estimates",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-15T09:44:38.676050+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:state-render",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.918,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 246.541,
+      "context-estimate": 16.154,
+      "records": 293.475,
+      "verdict-inputs": 222.597
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.8333333333333334,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "5df63e828143a3de0ae78c03eb77edd332c0f6dc",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "35bd9f9851f7340d75c1ccb1ad08d780f653e35d",
+    "reviewed_head_sha": "5df63e828143a3de0ae78c03eb77edd332c0f6dc",
+    "scores": {
+      "durability": 10,
+      "evidence": 13,
+      "fit": 15,
+      "goal_fidelity": 16,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 93
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261015T094427504023-shc-apply-scope-estimates",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "6ef4ed35-699b-48be-b847-952c4c92ff58",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 13316990,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 164.467,
+    "generated_tokens": 61707,
+    "generation_seconds": 133.507,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 58.9,
+    "machine_seconds": 30.96,
+    "peak_input_tokens": 135490,
+    "tokens_per_second": 462.2,
+    "wall_tokens_per_second": 375.19
+  },
+  "time_budget": "45m",
+  "tool_steps": 95.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2132,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-15T10:20:22Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-15T10:17:30Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261015T094427504023-shc-apply-scope-estimates",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8867,
+    "worker_pid": 291552
+  },
+  "worker_seconds": 2106,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
