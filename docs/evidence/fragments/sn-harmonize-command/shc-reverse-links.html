@@ -115,16 +115,22 @@
     reconcile.
   </p>
   <p>
-    <strong>A member the catalog has edited is not written.</strong>
+    <strong>A member the catalog has edited is not written — and its row is not
+    handed to the writer either.</strong>
     <code>write_enrichment_results</code> runs <code>filter_protected</code> with
-    protection in force, so a member whose <code>name_stage</code> is
-    <code>approved</code> keeps its own editorial fields and the reconciliation
-    computed for it is discarded. The step therefore calls the same filter
-    before writing and returns the members it withheld under
-    <code>"protected"</code>, and the apply logs them, so a partly written
-    family cannot read as a whole one. Protection is never overridden: an
-    invisible skip is a defect, but silently overwriting a catalog edit would be
-    a worse one.
+    protection in force, and that function does not <em>skip</em> a protected
+    name: it strips that name's editorial fields and returns the stripped row.
+    The writer then turns each absent field into an empty one
+    (<code>sn.documentation = ""</code>, <code>sn.links = null</code>), so
+    handing it the row <em>clears</em> the documentation and links protection
+    instead of keeping them. The step therefore resolves protection itself and
+    drops the protected rows before the writer is called: it never hands over a
+    name whose fields the writer would empty. The withheld ids are still
+    returned under <code>"protected"</code>, and the apply still logs them, so a
+    partly written family cannot read as a whole one. Protection is never
+    overridden — passing the batch through and letting the writer strip it is
+    not protection, it is the same write performed with the guard's own output
+    as the payload.
   </p>
   <h3 id="shc-reverse-links-test">The test, its green run and its red runs</h3>
   <p>
@@ -134,9 +140,12 @@
     the probe member links to the anchor, and the probe carries two planted
     references: <code>name:other_at_axis</code>, live in the catalog but in
     another pattern family, and <code>name:base_of_ghost</code>, which no
-    catalog name carries. The graph's documentation-field writer is stubbed and
-    honours protection as the real one does, so what is asserted is the
-    mechanism the apply runs, and the audit function itself judges the result.
+    catalog name carries. Its graph's documentation-field writer is stubbed and
+    reproduces the real writer's protection handling down to the detail that
+    matters: a stripped row's editorial fields are written back <em>as
+    empty</em>, exactly as the writer's Cypher does, so the stub is capable of
+    failing on the behaviour production has. The audit function itself judges
+    the result.
   </p>
   <ul>
     <li>
@@ -181,7 +190,34 @@
       removal computed for it the step computes no change for it at all, so it
       enters no batch and has nothing to report as withheld. The step reports
       protection only where it had a write to withhold, which is why the count
-      is a report rather than a census.
+      is a report rather than a census. With the fields assertion first the test
+      now fails at its opening assertion instead, <code>assert
+      step["protected"] == [_PROBE]</code>, reporting <code>[]</code> — the same
+      fact, stated where it belongs.
+    </li>
+    <li>
+      <strong>Red, the protected row handed to the writer</strong>
+      (<code>red_writer_unprotected_targeted.log</code>, <code>EXIT=1</code>):
+      with the step passing the whole batch through — the pre-repair
+      <code>write(batch)</code> — the writer strips the protected probe's five
+      editorial fields and writes them as empty, and the test fails at
+      <code>assert f"name:{_GHOST}" in probe["links"]</code> with
+      <code>TypeError: argument of type 'NoneType' is not iterable</code>:
+      <code>sn.links</code> is <code>null</code>. Run over the whole file the
+      same reversion fails one test of four
+      (<code>red_writer_unprotected.log</code>). This is the run that names the
+      harm the finding identified.
+    </li>
+    <li>
+      <strong>Red, with the stub as it was — the false green</strong>
+      (<code>red_stub_cannot_fail.log</code>, <code>EXIT=1</code>): the same
+      reverted step, but with the earlier stub that treated a stripped row as
+      <em>no change</em>. The two assertions that read the probe's fields then
+      <strong>pass</strong>; the test fails only on the bookkeeping below them,
+      <code>assert graph.protected_by_writer == []</code>. That is the second
+      finding measured directly — a stub that does not clear what the writer
+      clears cannot fail on the clear, so the first finding was invisible to it.
+      The pair differs in one file only: the stub.
     </li>
   </ul>
   <p>
