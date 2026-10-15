@@ -49,6 +49,96 @@
         "refusals": {},
         "seed": "electron_number_density"
       }
+    },
+    "electrostatic_potential": {
+      "before": {
+        "anchor": "electrostatic_potential_at_langmuir_probe_position",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electrostatic_potential": 0.85625,
+          "electrostatic_potential_at_langmuir_probe_position": 0.9375,
+          "floating_electrostatic_potential": 0.85,
+          "plasma_electrostatic_potential_at_outboard_midplane": null,
+          "plasma_electrostatic_potential_at_wall": null
+        },
+        "estimate_basis": {
+          "calls": 23,
+          "mean_usd_per_call": 0.414,
+          "runs": 7,
+          "total_usd": 9.5226
+        },
+        "estimate_usd": 2.0701,
+        "invariant": [
+          "electrostatic_potential",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "defining_equation": 1,
+          "link_missing_reverse": 2
+        },
+        "lint_total": 3,
+        "members": [
+          "electrostatic_potential",
+          "electrostatic_potential_at_langmuir_probe_position",
+          "floating_electrostatic_potential",
+          "plasma_electrostatic_potential_at_outboard_midplane",
+          "plasma_electrostatic_potential_at_wall"
+        ],
+        "physical_base": "electrostatic_potential",
+        "planned_calls": 5,
+        "refusals": {},
+        "seed": "electrostatic_potential"
+      }
+    },
+    "parallel_vorticity": {
+      "before": {
+        "anchor": "vorticity",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "parallel_vorticity": 0.91875,
+          "poloidal_vorticity": 0.89375,
+          "radial_vorticity": 0.9375,
+          "toroidal_vorticity": 0.8687499999999999,
+          "vertical_vorticity": 0.91875,
+          "vorticity": 0.9625
+        },
+        "estimate_basis": {
+          "calls": 23,
+          "mean_usd_per_call": 0.414,
+          "runs": 7,
+          "total_usd": 9.5226
+        },
+        "estimate_usd": 2.4842,
+        "invariant": [
+          "vorticity",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "link_missing_reverse": 4,
+          "symbol_definitions": 1
+        },
+        "lint_total": 5,
+        "members": [
+          "parallel_vorticity",
+          "poloidal_vorticity",
+          "radial_vorticity",
+          "toroidal_vorticity",
+          "vertical_vorticity",
+          "vorticity"
+        ],
+        "physical_base": "vorticity",
+        "planned_calls": 6,
+        "refusals": {},
+        "seed": "parallel_vorticity"
+      }
     }
   },
   "fixture": {
