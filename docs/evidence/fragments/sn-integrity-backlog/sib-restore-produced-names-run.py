@@ -179,7 +179,17 @@ def signed_call(*, apply: bool, digest: str | None = None) -> None:
     print(json.dumps(receipt, indent=2, default=str))
 
 
-def readback(digest: str, before_population: int, before_successorless: int) -> None:
+def readback(
+    digest: str,
+    before_population: int,
+    before_successorless: int,
+    before_log: Path,
+) -> None:
+    lines = before_log.read_text().splitlines()
+    if not lines[0].startswith("command: ") or lines[-1] != "EXIT=0":
+        raise RuntimeError("the baseline read log is incomplete")
+    baseline = json.loads("\n".join(lines[1:-1]))
+    before_sources = {row["id"]: set(row["sources"]) for row in baseline["cohort"]}
     control = json.loads(AUTHORITY.read_bytes())["rows"][-1]["id"]
     ids = sorted(set(LINKS) | set(RETIRE) | {control})
     with GraphClient() as graph:
@@ -223,6 +233,11 @@ def readback(digest: str, before_population: int, before_successorless: int) -> 
                     "successorless": before_successorless,
                 },
                 "after": counts,
+                "source_ids_match_baseline": all(
+                    set(row["source_ids"]) == before_sources.get(row["id"])
+                    for row in rows
+                    if row["id"] in before_sources
+                ),
                 "rows": rows,
             },
             indent=2,
@@ -244,25 +259,37 @@ def readback(digest: str, before_population: int, before_successorless: int) -> 
             continue
         if row["stage"] != "superseded" or row["status"] != "superseded":
             raise RuntimeError(f"{name_id} lost terminal status")
+        if set(row["source_ids"]) != before_sources[name_id]:
+            raise RuntimeError(f"{name_id} changed producing sources")
         if not row["source_ids"] or len(row["receipts"]) != 1:
             raise RuntimeError(f"{name_id} lost its source or receipt")
         receipt = row["receipts"][0]
-        if receipt["operation"] != OPERATION or digest not in receipt["id"]:
+        expected_row_id = (
+            f"{name_id}=>{LINKS[name_id]}" if name_id in LINKS else name_id
+        )
+        if (
+            receipt["operation"] != OPERATION
+            or digest not in receipt["id"]
+            or receipt["row_id"] != expected_row_id
+        ):
             raise RuntimeError(f"{name_id} has the wrong receipt")
         if name_id in LINKS:
+            edge = row["edges"][0] if len(row["edges"]) == 1 else None
             if (
-                len(row["edges"]) != 1
-                or row["edges"][0]
-                != {
-                    "target": LINKS[name_id],
-                    "receipt_id": receipt["id"],
-                    "signed_at": row["edges"][0]["signed_at"],
-                }
-                or row["edges"][0]["signed_at"] is None
+                edge is None
+                or edge["target"] != LINKS[name_id]
+                or edge["receipt_id"] != receipt["id"]
+                or edge["signed_at"] is None
             ):
                 raise RuntimeError(f"{name_id} has the wrong successor edge")
-        elif row["edges"]:
-            raise RuntimeError(f"{name_id} gained a successor while retiring")
+        else:
+            if row["edges"]:
+                raise RuntimeError(f"{name_id} gained a successor while retiring")
+            if name_id in SPLIT and any(
+                accepted not in receipt["reason"]
+                for accepted in SPLIT_ACCEPTED[name_id]
+            ):
+                raise RuntimeError(f"{name_id} lost its split rationale")
 
 
 def inspect() -> dict:
@@ -386,6 +413,7 @@ def main() -> None:
     parser.add_argument("--digest")
     parser.add_argument("--before-population", type=int)
     parser.add_argument("--before-successorless", type=int)
+    parser.add_argument("--before-log", type=Path)
     args = parser.parse_args()
     if args.action == "inspect":
         inspect()
@@ -402,9 +430,15 @@ def main() -> None:
             not args.digest
             or args.before_population is None
             or args.before_successorless is None
+            or args.before_log is None
         ):
             raise SystemExit("readback requires digest and baseline counts")
-        readback(args.digest, args.before_population, args.before_successorless)
+        readback(
+            args.digest,
+            args.before_population,
+            args.before_successorless,
+            args.before_log,
+        )
 
 
 if __name__ == "__main__":

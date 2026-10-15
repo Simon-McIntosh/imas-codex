@@ -5,51 +5,145 @@
 <meta name="reckon-type" content="evidence-fragment">
 <meta name="plan-slug" content="sn-integrity-backlog">
 <meta name="node-id" content="sib-restore-produced-names">
-<title>Produced names: cohort re-read blocked the restore</title>
+<title>Sourced superseded names: signed dispositions</title>
 </head>
 <body>
 <main>
-<h1 id="sib-restore-produced-names-title">The recorded stage split no longer holds</h1>
-<p id="sib-restore-produced-names-result">No authority was signed and no graph
-mutation was applied. The re-read found 25 superseded names with an incoming
-<code>PRODUCED_NAME</code>, no outgoing <code>HAS_SUCCESSOR</code>, no incoming
-<code>REFINED_FROM</code>, and no change operation beyond
-<code>realign_grammar_segments</code>. Only <strong>one</strong> has
-<code>superseded_from_stage</code>, against the recorded nine. The instrument
-stopped on that difference. The read and explicit refusal are in
-<code>cohort-guard.log</code> (<code>EXIT=1</code>); the completed read is in
-<code>confirm-split.log</code> (<code>EXIT=0</code>), both under run
-<code>r-20261014T211159251701-sib-restore-produced-names</code>.</p>
-<p id="sib-restore-produced-names-positive-control">The graph still has
-2,166 superseded names. A separate bounded count found 1,341 of them with a
-non-null <code>superseded_from_stage</code>, so the property read can see known
-values. The successor-less subset is 513 after adjacent graph work. Every one
-of the 25 has at least one producing source edge; their source ids and source
-states are listed in <code>confirm-split.log</code>. The property and edge names
-were checked against <code>imas_codex/schemas/standard_name.yaml</code>.</p>
-<p id="sib-restore-produced-names-examples"><code>energy_flux_at_first_wall</code>
-is the sole member with a prior stage, <code>refining</code>, and has source
-<code>derived:energy_flux_at_first_wall</code>. <code>alpha_angle</code> and
-<code>density_at_separatrix</code> have producing DD sources but no prior stage.
-The complete 25-name row set is in <code>confirm-split.log</code>.</p>
-<p id="sib-restore-produced-names-review-rule">The name review claim in
-<code>imas_codex/standard_names/graph_ops.py</code> requires
-<code>name_stage='drafted'</code>, <code>validation_status='valid'</code>, a real
-description, and a non-derived origin, aside from a separately scoped drain.
-Four members of the 25 are currently quarantined:
-<code>radial_ion_state_effective_momentum_convection_velocity</code>,
-<code>vertical_coordinate_of_diagnostic_component_centre</code>,
-<code>vertical_line_of_sight</code>, and
-<code>x1_coordinate_of_diagnostic_aperture</code>. Moving them to
-<code>drafted</code> alone would not make the review pool claim them. The pool
-predicate is quoted by the read in <code>graph_ops.py</code> at
-<code>REVIEW_NAME_ELIGIBILITY_WHERE</code>; the four live validation states are
-in <code>confirm-split.log</code>.</p>
-<p id="sib-restore-produced-names-next">A new ruling must identify the eight
-missing prior-stage records or revise the stage assignment for those names,
-and state how the four quarantined names become eligible for regeneration.
-The recorded 25/9 split is a stop condition, so preview, apply, readback and
-replay were not attempted.</p>
+<h1 id="sib-restore-produced-names-title">The 25 sourced superseded names now have signed dispositions</h1>
+<p id="sib-restore-produced-names-summary">
+The revised ruling keeps every name at <code>name_stage='superseded'</code>:
+15 stale identities now point to an accepted name produced by one of their own
+sources, and 10 have a retirement receipt without a single successor. Nothing
+re-entered review. The prior diagnostic found that only one name carried a
+recorded prior stage; that finding led to this ruling, not to a stage restore.
+The authority was emitted by <code>build_repair_authority</code> from
+<code>sib-restore-produced-names-run.py</code>, not assembled as signed JSON by
+the instrument. Its file SHA-256 is
+<code>8771f7158d1ba6174b1124da3745adeadce4ed4b6f8140f74c287c6b8f9bf10f</code>.
+The builder invocation and exact live roster are in <code>build.log</code>
+(<code>EXIT=0</code>).
+</p>
+
+<h2 id="sib-restore-produced-names-reread">Live re-read and source bindings</h2>
+<p id="sib-restore-produced-names-reread-body">
+The prewrite <code>inspect.log</code> (<code>EXIT=0</code>) read all 25 as
+superseded with at least one incoming <code>PRODUCED_NAME</code>, no successor
+edge or incoming refinement, and no recorded supersession operation. It
+verified that each of the following 15 targets is at
+<code>name_stage='accepted'</code> and is produced by a source that also
+produces its predecessor. For example,
+<code>alpha_angle</code> and <code>alpha_angle_of_iron_core_segment</code>
+share <code>dd:iron_core/segment/geometry/oblique/alpha</code>;
+<code>poloidal_diffusivity</code> and
+<code>poloidal_neutral_energy_diffusivity</code> share
+<code>dd:edge_transport/model/ggd/neutral/energy/d_pol/values</code>;
+and <code>vertical_line_of_sight</code> and
+<code>vertical_coordinate_of_pellet_path_point</code> share
+<code>dd:pellets/time_slice/pellet/path_geometry/first_point/z</code>.
+The log lists the exact shared source ids for every pair.
+</p>
+<table id="sib-restore-produced-names-links">
+<thead><tr><th>Superseded name</th><th>Accepted successor</th></tr></thead>
+<tbody>
+<tr><td><code>accumulated_helium_4_prefill_count_due_to_gas_injection</code></td><td><code>accumulated_helium_4_count_due_to_gas_injection</code></td></tr>
+<tr><td><code>alpha_angle</code></td><td><code>alpha_angle_of_iron_core_segment</code></td></tr>
+<tr><td><code>density_at_separatrix</code></td><td><code>flux_surface_averaged_ion_density_at_plasma_boundary</code></td></tr>
+<tr><td><code>diamagnetic_heat_current_density_due_to_viscosity</code></td><td><code>diamagnetic_current_density_due_to_heat_viscosity</code></td></tr>
+<tr><td><code>inner_radius_of_passive_structure</code></td><td><code>inner_radius_of_passive_loop</code></td></tr>
+<tr><td><code>ion_power_due_to_recombination</code></td><td><code>plasma_power_of_divertor_due_to_recombination</code></td></tr>
+<tr><td><code>parallel_convection_velocity</code></td><td><code>parallel_electron_energy_convection_velocity</code></td></tr>
+<tr><td><code>parallel_total_ion_energy_diffusivity</code></td><td><code>parallel_ion_energy_diffusivity</code></td></tr>
+<tr><td><code>poloidal_diffusivity</code></td><td><code>poloidal_neutral_energy_diffusivity</code></td></tr>
+<tr><td><code>poloidal_heat_current_density_due_to_viscosity</code></td><td><code>poloidal_current_density_due_to_heat_viscosity</code></td></tr>
+<tr><td><code>poloidal_momentum_diffusivity</code></td><td><code>poloidal_neutral_internal_state_momentum_diffusion_coefficient</code></td></tr>
+<tr><td><code>radial_ion_state_effective_momentum_convection_velocity</code></td><td><code>radial_ion_charge_state_momentum_convection_velocity</code></td></tr>
+<tr><td><code>toroidal_diamagnetic_current_density</code></td><td><code>toroidal_current_density_due_to_diamagnetic_drift</code></td></tr>
+<tr><td><code>vertical_line_of_sight</code></td><td><code>vertical_coordinate_of_pellet_path_point</code></td></tr>
+<tr><td><code>x_coordinate_of_ferritic_insert</code></td><td><code>x_coordinate_of_ferritic_element_centroid</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-restore-produced-names-retirements">Ten terminal records</h2>
+<p id="sib-restore-produced-names-retirements-body">
+The other 10 received the same <code>supersede</code> mutation with no signed
+successor as the orphan-retirement authority. Three source identities split
+among multiple accepted names. Their accepted names appear explicitly in the
+signed apply's receipt reason:
+</p>
+<table id="sib-restore-produced-names-splits">
+<thead><tr><th>Retired name</th><th>Accepted names produced by its sources</th></tr></thead>
+<tbody>
+<tr><td><code>toroidal_current_density_due_to_viscosity</code></td><td><code>toroidal_current_density_due_to_heat_viscosity</code>, <code>toroidal_current_density_due_to_parallel_viscosity</code>, <code>toroidal_current_density_due_to_perpendicular_viscosity</code></td></tr>
+<tr><td><code>vertical_coordinate_of_diagnostic_component_centre</code></td><td><code>vertical_coordinate_of_line_of_sight</code>, <code>vertical_coordinate_of_measurement_position</code>, <code>z_coordinate_of_ferritic_element_centroid</code></td></tr>
+<tr><td><code>x1_coordinate_of_diagnostic_aperture</code></td><td><code>first_local_tangential_coordinate_of_filter</code>, <code>first_local_tangential_coordinate_of_optical_element</code>, <code>first_local_tangential_coordinate_of_reflectometer_antenna</code></td></tr>
+</tbody>
+</table>
+<p id="sib-restore-produced-names-unmatched">
+The seven with no accepted counterpart through their producing sources are
+<code>height_of_diagnostic_aperture</code>,
+<code>major_length_of_coil_conductor_element</code>,
+<code>normalized_parallel_perturbed_heat_flux</code>,
+<code>normalized_perpendicular_perturbed_energy</code>,
+<code>radial_derivative_of_coefficient_of_flux_surface</code>,
+<code>energy_flux_at_first_wall</code>, and
+<code>ion_state_particle_convection_velocity</code>.
+The signed-manifest API gives one reason to this authority's receipts; that
+common reason states all three split maps, so each split name's retirement
+receipt includes its accepted names. The prewrite source read is in
+<code>inspect.log</code>; the stamped reason is in <code>readback-final.log</code>
+(both <code>EXIT=0</code>).
+</p>
+
+<h2 id="sib-restore-produced-names-transaction">Preview, apply and readback</h2>
+<p id="sib-restore-produced-names-transaction-body">
+<code>preview.log</code> (<code>EXIT=0</code>) reported
+<code>outcome=would_apply</code>, 26 authority rows, 25 admitted and one
+refused. The control, accepted
+<code>absorbed_power_of_beam_tracing_beam</code>, was refused because it has a
+live structural child. The apply used the preview's manifest digest
+<code>6e19ede31b59b2008874a59a53b14742b0a7f82cd30dbfffc1a2151150255544</code>.
+Its receipt in <code>apply.log</code> (<code>EXIT=0</code>) reported
+<code>outcome=applied</code>, 25 mutations, 25 receipt rows, 50 persistent
+writes and the same one refusal. The control stayed accepted and has no
+receipt from this digest.
+</p>
+<table id="sib-restore-produced-names-counts">
+<thead><tr><th>Live measure</th><th>Before</th><th>After</th></tr></thead>
+<tbody>
+<tr><td>Superseded population</td><td>2,166</td><td>2,166</td></tr>
+<tr><td>Superseded with no successor relation</td><td>513</td><td>498</td></tr>
+<tr><td>Named identities with a new receipt</td><td>0</td><td>25</td></tr>
+</tbody>
+</table>
+<p id="sib-restore-produced-names-readback">
+<code>readback-final.log</code> (<code>EXIT=0</code>) checks all 26 rows
+against the digest: each linked name has exactly one
+<code>HAS_SUCCESSOR</code> edge to the stated target, with
+<code>receipt_id</code> equal to its sole change receipt and a non-null
+<code>signed_at</code>; each retirement has one change receipt, no successor
+edge, and remains superseded. All 25 have the same producing source ids as
+<code>inspect.log</code> (<code>source_ids_match_baseline=true</code>).
+The focused Cypher property check in <code>cypher-property-check.log</code>
+completed with 4 passed and <code>EXIT=0</code>.
+</p>
+
+<h2 id="sib-restore-produced-names-replay">Replay preview</h2>
+<p id="sib-restore-produced-names-replay-body">
+The second preview in <code>replay.log</code> (<code>EXIT=0</code>) made no
+write (<code>changed=0</code>) but again said
+<code>would_change=25</code>: it re-admitted all 15 link rows and all 10
+retirement rows, and refused the same control. Its new preview digest is
+<code>ae922937a268735bd05f9a8f43d09c73f0f3c3640e706b12550e9ff02477849a</code>.
+The known successor-link replay guard gap therefore also covers these ten
+retirement previews. The applied digest is evidenced by the graph readback;
+this second digest was not applied.
+</p>
+<p id="sib-restore-produced-names-logs">
+Logs cited above are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261014T211159251701-sib-restore-produced-names/</code>.
+Every command log has its command on the first line and an <code>EXIT=</code>
+line last.
+</p>
 </main>
 </body>
 </html>
