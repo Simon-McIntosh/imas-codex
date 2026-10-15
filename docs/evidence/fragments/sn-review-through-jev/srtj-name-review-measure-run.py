@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import hashlib
+import html
 import json
 import os
 import time
@@ -34,6 +35,7 @@ from imas_codex.standard_names.review.jev_review import (
 HERE = Path(__file__).resolve().parent
 FIXTURE = HERE.parent / "sn-judgment-evaluation" / "golden-name-acceptable.json"
 RESULTS = HERE / "srtj-name-review-measure-results.json"
+FRAGMENT = HERE / "srtj-name-review-measure.html"
 RUN = Path(os.environ["RECKON_MEASURE_RUN"])
 CONTEXT = RUN / "name-context.json"
 RECEIPTS = RUN / "name-decisions.jsonl"
@@ -42,6 +44,7 @@ MODEL = get_model("sn-judge")
 SPEND_CEILING = 4.0
 OPTION_FLIP_LIMIT = 0.05
 FROZEN_CHANGE_LIMIT = 0.05
+QUORATE_METHODS = frozenset({"quorum_consensus", "authoritative_escalation"})
 INCUMBENTS = (
     "openrouter/x-ai/grok-4.5",
     "openrouter/openai/gpt-5.6-luna",
@@ -216,11 +219,112 @@ def _read_incumbent_costs():
     print(f"cost receipts {len(reviews)}", flush=True)
 
 
+def _read_resolutions():
+    context = json.loads(CONTEXT.read_text())
+    names = sorted(context["entries"])
+    graph = GraphClient()
+    rows = {}
+    query = """
+    UNWIND $names AS name
+    OPTIONAL MATCH (sn:StandardName {id:name})
+    OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(rv:StandardNameReview {review_axis:'name'})
+    RETURN name, sn.review_resolution_method AS method,
+      sn.review_quorum_shortfall AS shortfall,
+      collect({group:rv.review_group_id, role:rv.resolution_role,
+        method:rv.resolution_method, score:rv.score,
+        reviewed_at:rv.reviewed_at}) AS reviews
+    """
+    for group in _batches(names, 80):
+        for row in graph.query(query, names=group):
+            rows[row["name"]] = row
+    if len(rows) != len(names):
+        raise RuntimeError("quorum resolution query missed a golden name")
+    for name, row in rows.items():
+        entry = context["entries"][name]
+        method = row["method"]
+        provenance = "name_record" if method in QUORATE_METHODS else None
+        if method is None and row["shortfall"] is None and entry["quorum"] is not None:
+            groups = defaultdict(list)
+            for review in row["reviews"]:
+                if review["group"] is not None:
+                    groups[review["group"]].append(review)
+            if groups:
+                latest = max(
+                    groups.values(),
+                    key=lambda reviews: max(
+                        str(review["reviewed_at"] or "") for review in reviews
+                    ),
+                )
+                final = next(
+                    (
+                        review
+                        for review in latest
+                        if review["method"] in QUORATE_METHODS
+                    ),
+                    None,
+                )
+                if final is not None:
+                    primary = next(
+                        (review for review in latest if review["role"] == "primary"),
+                        None,
+                    )
+                    secondary = next(
+                        (review for review in latest if review["role"] == "secondary"),
+                        None,
+                    )
+                    if final["method"] == "quorum_consensus" and primary and secondary:
+                        resolved_score = (
+                            float(primary["score"]) + float(secondary["score"])
+                        ) / 2
+                    elif (
+                        final["method"] == "authoritative_escalation"
+                        and final["role"] == "escalator"
+                    ):
+                        resolved_score = float(final["score"])
+                    else:
+                        resolved_score = None
+                    if (
+                        resolved_score is not None
+                        and abs(resolved_score - float(entry["quorum"])) < 1e-6
+                    ):
+                        method = final["method"]
+                        provenance = "verified_review_group"
+        entry["quorum_method"] = method
+        entry["quorum_provenance"] = provenance
+        entry["quorum_shortfall"] = row["shortfall"]
+    context["coverage"]["quorum_recorded"] = context["coverage"].get(
+        "quorum_recorded", context["coverage"]["quorum"]
+    )
+    context["coverage"]["quorum"] = sum(
+        entry["quorum"] is not None
+        and entry["quorum_method"] in QUORATE_METHODS
+        and entry["quorum_shortfall"] is None
+        for entry in context["entries"].values()
+    )
+    context["coverage"]["quorum_recovered_from_reviews"] = sum(
+        entry["quorum_provenance"] == "verified_review_group"
+        for entry in context["entries"].values()
+    )
+    if context["coverage"]["quorum"] == 0:
+        raise RuntimeError("quorum resolution query found no explicitly resolved name")
+    _save_json(CONTEXT, context)
+    print(json.dumps(context["coverage"], sort_keys=True), flush=True)
+
+
 def _item(row):
     return {
         "id": row["name"],
         **{
-            key: value for key, value in row.items() if key not in {"reviews", "quorum"}
+            key: value
+            for key, value in row.items()
+            if key
+            not in {
+                "reviews",
+                "quorum",
+                "quorum_method",
+                "quorum_provenance",
+                "quorum_shortfall",
+            }
         },
     }
 
@@ -410,6 +514,7 @@ def _rescore():
             "score": "Half the mean of four dimension acceptance values plus half the mean of answered Jev checks. Each value averages its code-derived accept/reject indicator and acceptance probability; Noul pass probability is 1 minus defect probability, Choice pass probability is the authored acceptable option's probability. Three audit-only checks were not run and are excluded. A missing Jev answer excludes the name.",
             "copy_group": "Canonical units are unique; paired bootstrap resamples their copy_group together.",
             "split": "Golden A's committed calibration/validation assignment is unchanged.",
+            "quorum": "The mirrored StandardName.reviewer_score_name is a quorum comparator only when the name record says quorum_consensus or authoritative_escalation without a shortfall, or the latest review group has that resolution and its primary/secondary mean or escalator score exactly matches the mirror.",
         },
         "fixture": {"rows": len(fixture), "canonical_names": len(canonical)},
         "coverage": {**context["coverage"], "jev_answered": len(scored)},
@@ -437,11 +542,15 @@ def _rescore():
             paired = []
             for row in split_rows:
                 entry = context["entries"][row["name"]]
-                value = (
-                    entry["quorum"]
-                    if model == "quorum"
-                    else _incumbent_scores(entry).get(model)
-                )
+                if model == "quorum":
+                    value = (
+                        entry["quorum"]
+                        if entry.get("quorum_method") in QUORATE_METHODS
+                        and entry.get("quorum_shortfall") is None
+                        else None
+                    )
+                else:
+                    value = _incumbent_scores(entry).get(model)
                 if value is not None:
                     paired.append((row, float(value)))
             if len({row["label"] for row, _ in paired}) < 2:
@@ -490,8 +599,14 @@ def _rescore():
                         sum(float(row["cost"]) for row in rows),
                     )
                 )
-        for groups in by_name.values():
-            quorum_costs.append(max(groups)[1])
+        for name, groups in by_name.items():
+            entry = context["entries"][name]
+            if (
+                entry["quorum"] is not None
+                and entry.get("quorum_method") in QUORATE_METHODS
+                and entry.get("quorum_shortfall") is None
+            ):
+                quorum_costs.append(max(groups)[1])
         result["incumbent_cost_per_name"] = {
             **{
                 model: {
@@ -594,6 +709,8 @@ def _rescore():
         else "shadow",
     }
     _save_json(RESULTS, result)
+    _plot()
+    _render_fragment(result, context, receipts, checks)
     print(
         json.dumps(
             {
@@ -618,6 +735,7 @@ def _plot():
         plt.style.use("data-ink")
     except OSError:
         pass
+    plt.rcParams["svg.hashsalt"] = "name-review-measure"
     figure, axis = plt.subplots(figsize=(14, 9))
     for position, model in enumerate(names):
         arm = comparisons[model]
@@ -650,13 +768,14 @@ def _plot():
             label="Jev on the same names" if position == 0 else None,
         )
         axis.text(
-            0.995,
+            1.03,
             position,
             f"Δ {difference['point']:+.3f} [{difference['lower']:+.3f}, {difference['upper']:+.3f}]",
-            ha="right",
+            ha="left",
             va="center",
-            fontsize=15,
+            fontsize=20,
             color="#333333",
+            transform=axis.get_yaxis_transform(),
         )
     axis.set_yticks(range(len(labels)), labels)
     axis.invert_yaxis()
@@ -665,8 +784,8 @@ def _plot():
     axis.spines["top"].set_visible(False)
     axis.spines["right"].set_visible(False)
     axis.grid(False)
-    axis.legend(frameon=False, loc="lower left")
-    figure.tight_layout()
+    axis.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2)
+    figure.tight_layout(rect=(0, 0.12, 0.78, 1))
     target = (
         HERE.parents[2]
         / "figures"
@@ -675,16 +794,195 @@ def _plot():
         / "paired-auc.svg"
     )
     target.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(target, format="svg")
+    figure.savefig(target, format="svg", metadata={"Date": None})
+    target.write_text(
+        "\n".join(line.rstrip() for line in target.read_text().splitlines()) + "\n"
+    )
     plt.close(figure)
     print(target, flush=True)
+
+
+def _render_fragment(result, context, receipts, checks):
+    def fmt(value):
+        return f"{value:.3f}"
+
+    def interval(value):
+        return f"{fmt(value['point'])} [{fmt(value['lower'])}, {fmt(value['upper'])}]"
+
+    def signed(value):
+        return f"{value['point']:+.3f} [{value['lower']:+.3f}, {value['upper']:+.3f}]"
+
+    fragment = [
+        '<section id="srtj-name-review-measure">',
+        '<h2 id="srtj-name-review-measure-title">Name review against the incumbent quorum</h2>',
+        '<p id="srtj-name-review-measure-verdict"><strong>Verdict: shadow.</strong> '
+        "The validation paired AUC lower bound against the quorum is "
+        f"{result['splits']['validation']['comparisons']['quorum']['difference_interval']['lower']:+.3f}, "
+        "below the required −0.02. The judge remains unwired. "
+        f"The full Golden A comparison also lacks {result['fixture']['canonical_names'] - result['coverage']['description']} graph descriptions; those names were judged "
+        "but excluded from AUC rather than treating an absent description as real context.</p>",
+        '<p id="srtj-name-review-measure-method">Golden A was loaded through '
+        "<code>load_labelled_fixture</code>: 737 rows, 720 canonical units, with its committed "
+        "calibration and validation splits unchanged. The graph snapshot was read in batches of "
+        "80 by indexed <code>StandardName.id</code> and <code>IMASNode.id</code>, with a bounded "
+        "6,000-name scan for sibling selection. It supplied 701 real descriptions, DD source "
+        f"documentation for {result['coverage']['dd_source_docs']} names, sibling candidates "
+        f"for {result['coverage']['siblings']}, and {result['coverage']['quorum_recorded']} "
+        f"recorded name scores, of which {result['coverage']['quorum']} had a verified "
+        "quorate resolution without a shortfall; "
+        f"{result['coverage']['quorum_recovered_from_reviews']} of those were verified from "
+        "the latest review group because the name-level resolution field was absent. "
+        "The Jev state carried the name, available grammar fields, kind, unit, description, "
+        "documentation, DD paths and DD text, and reranked sibling names. No incumbent "
+        "reviewer comments were read or handed to Jev. Three audit-only checks were not run "
+        "because the complete audit preflight writes graph state; they remain unknown and are "
+        "excluded from the continuous score.</p>",
+        '<p id="srtj-name-review-measure-score"><strong>Acceptance score.</strong> '
+        "For each of four dimension Choices, average the code-derived accept indicator and the "
+        "probability of its accepting category. For each of 29 answered checks, average the "
+        "code-derived pass indicator and its pass probability: 1 − the Noul defect probability "
+        "or the authored acceptable Choice option probability. Average the four dimension "
+        "values and the 29 check values separately, then average those two means. A missing "
+        "answer excludes a name. This score was fixed before the saved answers were rescored.</p>",
+        '<figure id="srtj-name-review-measure-figure">'
+        '<img src="/imas-codex/figures/sn-review-through-jev/srtj-name-review-measure/paired-auc.svg" '
+        'alt="Validation AUC and 95 percent intervals for Jev and six incumbent reviewers plus quorum, '
+        'with paired AUC differences at right">'
+        "<figcaption>Validation AUC on each comparator’s overlapping canonical names. "
+        "Points and intervals compare the same names; Δ is Jev minus the incumbent with a "
+        "paired 95% copy-group bootstrap interval. All intervals use 1,000 resamples.</figcaption>"
+        "</figure>",
+    ]
+    for split in ("validation", "calibration"):
+        data = result["splits"][split]
+        fragment.extend(
+            [
+                f'<h3 id="srtj-name-review-measure-{split}-title">{split.title()} split</h3>',
+                f'<p id="srtj-name-review-measure-{split}-overall">Jev on all {data["jev"]["n"]} '
+                f"rich-state names: AUC {interval(data['jev']['auc'])}.</p>",
+                f'<table id="srtj-name-review-measure-{split}-table">',
+                "<thead><tr><th>Incumbent</th><th>Matched names</th><th>Jev AUC [95%]</th>"
+                "<th>Incumbent AUC [95%]</th><th>Paired Δ [95%]</th></tr></thead><tbody>",
+            ]
+        )
+        for model in (*INCUMBENTS, "quorum"):
+            arm = data["comparisons"][model]
+            label = (
+                "Quorum" if model == "quorum" else f"<code>{html.escape(model)}</code>"
+            )
+            fragment.append(
+                f"<tr><td>{label}</td><td>{arm['n']}</td>"
+                f"<td>{interval(arm['jev_interval'])}</td>"
+                f"<td>{interval(arm['incumbent_interval'])}</td>"
+                f"<td>{signed(arm['difference_interval'])}</td></tr>"
+            )
+        fragment.append("</tbody></table>")
+    stability = result["stability"]
+    frozen = stability["frozen_state"]["fields"]
+    changed = sum(field["states_changed"] for field in frozen.values())
+    decisions = sum(field["states"] for field in frozen.values())
+    cost = result["cost_latency_per_name"]
+    fragment.extend(
+        [
+            '<h3 id="srtj-name-review-measure-stability-title">Stability and operating point</h3>',
+            f'<p id="srtj-name-review-measure-stability">On the same fixed {stability["names"]} names, reversing every '
+            f"Choice changed {stability['option_order']['flips']} of "
+            f"{stability['option_order']['n']} decisions "
+            f"({stability['option_order']['flip_rate']:.2%}); asking the frozen state twice changed "
+            f"{changed} of {decisions} decisions ({stability['frozen_decision_change_rate']:.2%}). "
+            "The prototype bounds declared for these rates are 5% each. "
+            f"The cut {result['operating_point']['threshold']:.6f} was chosen on "
+            f"{result['operating_point']['n_calibration']} calibration names with equal false "
+            "positive and false negative costs. On validation it accepted no names: "
+            f"{result['operating_point']['report']['confusion'][1][0]} positive names were "
+            "missed, so accuracy at that cut is "
+            f"{result['operating_point']['report']['accuracy']:.3f}.</p>",
+            '<h3 id="srtj-name-review-measure-cost-title">Booked cost and latency</h3>',
+            f'<p id="srtj-name-review-measure-cost">The {cost["n"]} base decisions booked '
+            f"USD {cost['total_cost']:.6f}, or USD {cost['mean_cost']:.6f} per name, "
+            f"at {cost['mean_latency_s']:.3f} seconds mean and "
+            f"{cost['median_latency_s']:.3f} seconds median wall time per name. "
+            f"The two stability passes added USD {result['spend']['booked_usd'] - cost['total_cost']:.6f}; "
+            f"actual total spend was USD {result['spend']['booked_usd']:.6f} "
+            f"under the USD {SPEND_CEILING:.2f} ceiling. All scheduled judgments answered, "
+            "so the rest of the ceiling was not spent. The incumbent graph receipts "
+            f"average USD {min(value['mean_usd'] for key, value in result['incumbent_cost_per_name'].items() if key != 'quorum'):.6f} "
+            "for the cheapest model (MiniMax) and "
+            f"USD {result['incumbent_cost_per_name']['quorum']['mean_usd']:.6f} "
+            "for the verified quorum groups; Jev costs less per decision.</p>",
+            '<h3 id="srtj-name-review-measure-samples-title">Representative bindings</h3>',
+            '<table id="srtj-name-review-measure-samples"><thead><tr><th>Name and label</th>'
+            "<th>Description</th><th>DD source path</th><th>Sibling</th><th>Jev score</th>"
+            "<th>Quorum score</th></tr></thead><tbody>",
+        ]
+    )
+    fixture = {row["canonical_unit"]: row for row in load_labelled_fixture(FIXTURE)}
+    for name in (
+        "ion_average_temperature",
+        "accumulated_deposited_thermal_energy_of_plasma_facing_component",
+        "accumulated_carbon_count_due_to_gas_injection",
+    ):
+        entry = context["entries"][name]
+        raw = receipts[("base", name)]
+        score = _score(raw["answers"], checks)
+        paths = entry["source_paths"] or []
+        siblings = entry["sibling_names"] or []
+        description = entry["description"] or ""
+        quorum_cell = (
+            f"<td>{entry['quorum']:.3f}</td>"
+            if entry["quorum"] is not None
+            and entry.get("quorum_method") in QUORATE_METHODS
+            and entry.get("quorum_shortfall") is None
+            else "<td>none</td>"
+        )
+        fragment.append(
+            f"<tr><td><code>{html.escape(name)}</code> ({fixture[name]['label']}, "
+            f"{fixture[name]['split']})</td>"
+            f"<td>{html.escape(description[:130])}</td>"
+            f"<td><code>{html.escape(paths[0] if paths else 'none')}</code></td>"
+            f"<td><code>{html.escape(siblings[0]['id'] if siblings else 'none')}</code></td>"
+            f"<td>{score:.3f}</td>{quorum_cell}</tr>"
+        )
+    fragment.extend(
+        [
+            "</tbody></table>",
+            '<h3 id="srtj-name-review-measure-rule-title">Deployment rule and receipt</h3>',
+            '<blockquote id="srtj-name-review-measure-rule"><p>A Jev judge replaces an incumbent '
+            "decision only when all four hold:</p><ul>"
+            "<li>On the golden’s validation split, the lower 95% bound of the paired AUC difference "
+            "(Jev minus incumbent) is above the margin locked below. The incumbent is reported per "
+            "model and as the quorum, since it is six models.</li>"
+            "<li>Its operating point was chosen on the calibration split.</li>"
+            "<li>Its option-order flip rate and frozen-state variation are reported and inside bounds "
+            "the prototype states.</li>"
+            "<li>Its cost per decision is lower.</li></ul></blockquote>"
+            "<p>The locked margin is −0.02 AUC at the 95% lower bound.</p>",
+            '<p id="srtj-name-review-measure-record">The validation quorum interval and several '
+            f"model intervals fail the AUC condition. The {result['fixture']['canonical_names'] - result['coverage']['description']} missing graph descriptions and the "
+            "unrun audit-only checks further limit a full replacement claim. "
+            "Per-name answers, states, costs and latencies are in the run’s "
+            "<code>name-decisions.jsonl</code>; the committed results JSON carries every figure "
+            "and the rescoring script recomputes the JSON, fragment and SVG from those receipts.</p>",
+            "</section>",
+        ]
+    )
+    FRAGMENT.write_text("\n".join(fragment) + "\n")
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "action",
-        choices=("prepare", "costs", "base", "repeat", "reverse", "rescore", "plot"),
+        choices=(
+            "prepare",
+            "costs",
+            "resolutions",
+            "base",
+            "repeat",
+            "reverse",
+            "rescore",
+            "plot",
+        ),
     )
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--concurrency", type=int, default=8)
@@ -694,6 +992,8 @@ def main():
         _graph_context()
     elif args.action == "costs":
         _read_incumbent_costs()
+    elif args.action == "resolutions":
+        _read_resolutions()
     elif args.action == "rescore":
         _rescore()
     elif args.action == "plot":
