@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/__init__.py:86"
+  ],
+  "completed_at": "2026-10-15T12:44:46.003Z",
+  "dispatched_at": "2026-10-15T12:32:58Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_sn_command_logging.py",
+      "line": "45",
+      "severity": "follow-on",
+      "text": "follow-on: the spending rule is a declared literal set of entry-point names combined with a within-module call walk, so a command that reaches a model call through a name not in the set and takes no cost-limit option runs with no run log while this test stays green; no such command exists in the tree today (the walk's eight match the group), but the guard is only as wide as the list, and the manifest already records this as a follow-on."
+    },
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": "3558",
+      "severity": "follow-on",
+      "text": "follow-on: the added call omits verbose=verbose although sn bench declares -v/--verbose (imas_codex/cli/sn.py:3416) and the sibling calls at imas_codex/cli/sn.py:3031 and imas_codex/cli/sn.py:6449 propagate it, so a run log written under sn bench -v keeps the default file level; console output is unchanged because sn_bench still calls logging.basicConfig from its verbose flag, and the file log is new so nothing regressed."
+    },
+    {
+      "file": "tests/standard_names/test_cli_release.py",
+      "line": "64",
+      "severity": "follow-on",
+      "text": "follow-on: the done_when names the existing CLI tests of every changed command, and the node changed sn bench, sn release and sn approve whose CLI tests (tests/standard_names/test_cli_release.py:64, tests/standard_names/test_cli_approve.py:27, tests/standard_names/test_benchmark.py:820) invoke the changed callbacks, but neither gate arm ran them, so the landed change carries no recorded evidence that the added call leaves those paths green."
+    },
+    {
+      "file": "tests/standard_names/test_sn_command_logging.py",
+      "line": "169",
+      "severity": "follow-on",
+      "text": "follow-on: the structural assertion requires setup_logging to be a direct call in the command callback body, so a future command that reaches the call through a helper it calls would be reported as unlogged although it logs; the flag is a false positive rather than a coverage hole, but it makes the guard over-strict on a refactor it should tolerate."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read from base 32dc866d to head 64d9d509e; the single commit adds 24 lines to imas_codex/cli/sn.py carrying the six setup_logging calls, a 277-line tests/standard_names/test_sn_command_logging.py and a 127-line fragment, +428 lines across the three declared paths, and touches no other module.",
+    "done_when": "the done_when asks for a structural walk of the sn command group, behavioural tests running sn harmonize --report, sn edit and sn rescore that assert configure_cli_logging is reached with domain sn and the command's stem, each test red with its call removed at EXIT=, and the existing CLI tests of every changed command green at head judged by delta; the manifest records gate-base.txt 52 passed EXIT=0 and gate-head.txt 57 passed EXIT=0, and logs/negative-control.txt shows 4 failed 1 passed at EXIT=1, but the existing CLI tests of sn bench, sn release and sn approve that the done_when names were not run in either arm.",
+    "goal": "the node's goal is that every spending sn command calls setup_logging at its start under the stem sn-<command> and adds no new helper; imas_codex/cli/sn.py:3558,4931,5321,6045,7028,8423 carry six added calls, one at the top of sn_bench, sn_release, sn_approve, sn_harmonize, sn_edit and sn_rescore, while sn run (imas_codex/cli/sn.py:3031) and sn review (imas_codex/cli/sn.py:6449) were left as they are.",
+    "manifest": "read; it names commit 64d9d509e, the five files of the gate with baseline_suite at 52 passed EXIT=0 and after_suite at 57 passed EXIT=0, both completed and failure-id free, cites logs/negative-control.txt as the declared mutation going red at EXIT=1, quotes each added call's file and line, and records the declared entry-point set as a follow-on.",
+    "write_paths": "the declared scope is imas_codex/cli/sn.py, tests/standard_names/test_sn_command_logging.py and docs/evidence/fragments/sn-harmonize-command/shc-run-log.html; git show --name-only 64d9d509e lists exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_sn_command_logging.py:169 fails when any spending command lacks the call and the recorded control shows it red at EXIT=1, and no added assertion compares a value against an input the test itself supplied (test_sn_command_logging.py:224,256,277 each compare the recorded facility against a literal the source sets), but the spending rule reads reachability against the declared literal set at test_sn_command_logging.py:45, so a spend path reached through an unlisted name would pass the guard.",
+    "evidence": "logs/gate-base.txt reports 52 passed EXIT=0 and logs/gate-head.txt 57 passed EXIT=0 with zero FAILED ids in either, and logs/negative-control.txt shows 4 failed 1 passed at EXIT=1, but neither arm ran the existing CLI tests of sn bench, sn release or sn approve that the done_when names and that tests/standard_names/test_cli_release.py:64 exercises.",
+    "fit": "the behavioural tests reuse the surrounding idiom of patching configure_cli_logging and driving the group with CliRunner, as tests/standard_names/test_review_axis_scoped_writes.py:136 already does, and the new file and symbol names carry no plan, section or ticket label.",
+    "goal_fidelity": "imas_codex/cli/sn.py:3558 adds setup_logging(\"sn\", \"sn-bench\", use_rich=True) at the top of sn_bench and five sibling calls do the same for release, approve, harmonize, edit and rescore, all inside the declared write path and with no new helper added.",
+    "reuse": "a search of tests/ and imas_codex/ for an existing call-graph, reachability or command-group walk found no owner, so tests/standard_names/test_sn_command_logging.py:83,108 break new ground, but the structural test re-asserts the sn review logging call already owned by tests/standard_names/test_review_axis_scoped_writes.py:122 without extending or retiring that owner.",
+    "scope_discipline": "git show --name-only 64d9d509e lists exactly the three declared write paths, and the diff carries nothing the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that every spending sn command calls setup_logging at its start under the stem sn-<command> and adds no new helper; imas_codex/cli/sn.py:3558,4931,5321,6045,7028,8423 carry six added calls, one at the top of sn_bench, sn_release, sn_approve, sn_harmonize, sn_edit and sn_rescore, while sn run (imas_codex/cli/sn.py:3031) and sn review (imas_codex/cli/sn.py:6449) were left as they are.\nVERDICT done_when: the done_when asks for a structural walk of the sn command group, behavioural tests running sn harmonize --report, sn edit and sn rescore that assert configure_cli_logging is reached with domain sn and the command's stem, each test red with its call removed at EXIT=, and the existing CLI tests of every changed command green at head judged by delta; the manifest records gate-base.txt 52 passed EXIT=0 and gate-head.txt 57 passed EXIT=0, and logs/negative-control.txt shows 4 failed 1 passed at EXIT=1, but the existing CLI tests of sn bench, sn release and sn approve that the done_when names were not run in either arm.\nVERDICT write_paths: the declared scope is imas_codex/cli/sn.py, tests/standard_names/test_sn_command_logging.py and docs/evidence/fragments/sn-harmonize-command/shc-run-log.html; git show --name-only 64d9d509e lists exactly those three paths and nothing else.\nVERDICT manifest: read; it names commit 64d9d509e, the five files of the gate with baseline_suite at 52 passed EXIT=0 and after_suite at 57 passed EXIT=0, both completed and failure-id free, cites logs/negative-control.txt as the declared mutation going red at EXIT=1, quotes each added call's file and line, and records the declared entry-point set as a follow-on.\nVERDICT diff: read from base 32dc866d to head 64d9d509e; the single commit adds 24 lines to imas_codex/cli/sn.py carrying the six setup_logging calls, a 277-line tests/standard_names/test_sn_command_logging.py and a 127-line fragment, +428 lines across the three declared paths, and touches no other module.\nCALL_SITES: imas_codex/cli/__init__.py:86\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/cli/sn.py:3558 adds setup_logging(\"sn\", \"sn-bench\", use_rich=True) at the top of sn_bench and five sibling calls do the same for release, approve, harmonize, edit and rescore, all inside the declared write path and with no new helper added.\nSCORE evidence: 13\nJUSTIFICATION evidence: logs/gate-base.txt reports 52 passed EXIT=0 and logs/gate-head.txt 57 passed EXIT=0 with zero FAILED ids in either, and logs/negative-control.txt shows 4 failed 1 passed at EXIT=1, but neither arm ran the existing CLI tests of sn bench, sn release or sn approve that the done_when names and that tests/standard_names/test_cli_release.py:64 exercises.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --name-only 64d9d509e lists exactly the three declared write paths, and the diff carries nothing the goal does not imply.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_sn_command_logging.py:169 fails when any spending command lacks the call and the recorded control shows it red at EXIT=1, and no added assertion compares a value against an input the test itself supplied (test_sn_command_logging.py:224,256,277 each compare the recorded facility against a literal the source sets), but the spending rule reads reachability against the declared literal set at test_sn_command_logging.py:45, so a spend path reached through an unlisted name would pass the guard.\nSCORE fit: 18\nJUSTIFICATION fit: the behavioural tests reuse the surrounding idiom of patching configure_cli_logging and driving the group with CliRunner, as tests/standard_names/test_review_axis_scoped_writes.py:136 already does, and the new file and symbol names carry no plan, section or ticket label.\nSCORE reuse: 16\nJUSTIFICATION reuse: a search of tests/ and imas_codex/ for an existing call-graph, reachability or command-group walk found no owner, so tests/standard_names/test_sn_command_logging.py:83,108 break new ground, but the structural test re-asserts the sn review logging call already owned by tests/standard_names/test_review_axis_scoped_writes.py:122 without extending or retiring that owner.\nFINDING tests/standard_names/test_sn_command_logging.py:45 follow-on: the spending rule is a declared literal set of entry-point names combined with a within-module call walk, so a command that reaches a model call through a name not in the set and takes no cost-limit option runs with no run log while this test stays green; no such command exists in the tree today (the walk's eight match the group), but the guard is only as wide as the list, and the manifest already records this as a follow-on.\nFINDING imas_codex/cli/sn.py:3558 follow-on: the added call omits verbose=verbose although sn bench declares -v/--verbose (imas_codex/cli/sn.py:3416) and the sibling calls at imas_codex/cli/sn.py:3031 and imas_codex/cli/sn.py:6449 propagate it, so a run log written under sn bench -v keeps the default file level; console output is unchanged because sn_bench still calls logging.basicConfig from its verbose flag, and the file log is new so nothing regressed.\nFINDING tests/standard_names/test_cli_release.py:64 follow-on: the done_when names the existing CLI tests of every changed command, and the node changed sn bench, sn release and sn approve whose CLI tests (tests/standard_names/test_cli_release.py:64, tests/standard_names/test_cli_approve.py:27, tests/standard_names/test_benchmark.py:820) invoke the changed callbacks, but neither gate arm ran them, so the landed change carries no recorded evidence that the added call leaves those paths green.\nFINDING tests/standard_names/test_sn_command_logging.py:169 follow-on: the structural assertion requires setup_logging to be a direct call in the command callback body, so a future command that reaches the call through a helper it calls would be reported as unlogged although it logs; the flag is a false positive rather than a coverage hole, but it makes the guard over-strict on a refactor it should tolerate.\n",
+  "review_run_id": "r-20261015T123243884448-review-of-shc-run-log-64d9d509e3bf",
+  "reviewed_base_sha": "32dc866d08c7605f9264ca5e2047d13cd52d0346",
+  "reviewed_head_sha": "64d9d509e3bf6e019e3b80f52d9f213e93572d28",
+  "reviewed_run_id": "r-20261015T115014182537-shc-run-log",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T12:42:53.896207+00:00",
+  "total": 103
+}
