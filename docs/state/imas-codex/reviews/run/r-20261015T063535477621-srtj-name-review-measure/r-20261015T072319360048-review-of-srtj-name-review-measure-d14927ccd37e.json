@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T07:39:54.200Z",
+  "dispatched_at": "2026-10-15T07:24:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py",
+      "line": "440",
+      "severity": "follow-on",
+      "text": "follow-on: the acceptance score derivation in _score (rebuilt by _rescore at :488) is guarded only by the manual rescore-and-compare-hash procedure; no committed test fails when the derivation or the four-dimension/29-check mix regresses, so a silent change to the score leaves the suite green and the fragment merely stale rather than red."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py",
+      "line": "735",
+      "severity": "follow-on",
+      "text": "follow-on: _plot swallows a missing data-ink style with `except OSError: pass`, so a reproduction on a host without the user's stylelib renders default sizing while the fragment declares compliance with the plot-style rules; the committed SVG is compliant (14 in wide, no gridlines) but a re-run elsewhere is not guaranteed to be."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from a55ccd0f6541 to d14927ccd37e; b8b2f1b0d adds the 706-line run.py and d14927ccd adds results.json, the html fragment, the paired-auc.svg and extends run.py (+330/-15) with the rescore, fragment-render and plot stages; no source module and no test file is touched.",
+    "done_when": "the done_when names the paired AUC of Jev against each of the six incumbent models and the quorum with 95% intervals on validation (docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure.html:8-18) and calibration (:20-30), the option-order flip rate and frozen-state variation on 100 names (:32), cost and latency per name (:34), the score derivation (:5), spend under USD 4 (:34) and the shadow verdict under the deployment rule (:41-42), a rescoring pass reproducing every figure at EXIT=0 (rescore-committed.log) and one SVG (paired-auc.svg); all are present and log-backed.",
+    "goal": "the node goal is to measure the Jev name review against the incumbent quorum over golden A; docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py judges all 720 canonical golden-A names through review_names and decide_batch and derives one acceptance score per name, compared against the six incumbent models and the quorum.",
+    "manifest": "read; it names commits b8b2f1b0d and d14927ccd, records the base and head gates (25 passed EXIT=0 each), the rescoring pass EXIT=0 with three identical artifact hashes, and states the landing figures with spend USD 0.151083 of USD 4; its negative_control is correctly declared none, since no test file lies in scope.",
+    "write_paths": "the declared scope is the fragment html, run.py, results.json and the figures directory docs/figures/sn-review-through-jev/srtj-name-review-measure; git show --stat over a55ccd0f..d14927ccd names exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:440 derives the acceptance score and :488 rebuilds the figures from receipts, but no committed test reddens when the derivation or the four-dimension/29-check mix regresses, so the guard is a manual rescore-and-compare-hash procedure rather than an automated failing test.",
+    "evidence": "the done_when measure is log-backed at rescore-committed.log (rescore regenerates results.json, the fragment and the SVG from receipts at EXIT=0 with three identical sha256 hashes), and every named figure appears in docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure.html:8-42; the head gate at committed-test.log tests an unmodified module, so it is a regression guard rather than the done_when measure.",
+    "fit": "docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:440 follows the module's derive-in-code idiom, its module docstring (:1) carries no plan, section or ticket label, and the committed SVG is 1008pt wide with no gridlines; the file names carry the coordinator-assigned node id.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:88-193 reads the golden-A names and their bounded graph context and :311-437 books one Jev decision per name, so the measure the goal names is what the script performs.",
+    "reuse": "the script extends the existing owners rather than forking them \u2014 paired_auc, bootstrap_interval, choose_operating_point, option_order_stability, frozen_state_violation-range helpers, judgment.decide_batch and jev_review.review_names/name_question_table are all imported, and a capability search over imas_codex/discovery/base and imas_codex/standard_names/review found no existing owner of a golden-A measurement odometer.",
+    "scope_discipline": "git show --stat b8b2f1b0d and d14927ccd names only the four declared paths under docs/evidence/fragments/sn-review-through-jev and docs/figures/sn-review-through-jev, with nothing extra."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to measure the Jev name review against the incumbent quorum over golden A; docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py judges all 720 canonical golden-A names through review_names and decide_batch and derives one acceptance score per name, compared against the six incumbent models and the quorum.\nVERDICT done_when: the done_when names the paired AUC of Jev against each of the six incumbent models and the quorum with 95% intervals on validation (docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure.html:8-18) and calibration (:20-30), the option-order flip rate and frozen-state variation on 100 names (:32), cost and latency per name (:34), the score derivation (:5), spend under USD 4 (:34) and the shadow verdict under the deployment rule (:41-42), a rescoring pass reproducing every figure at EXIT=0 (rescore-committed.log) and one SVG (paired-auc.svg); all are present and log-backed.\nVERDICT write_paths: the declared scope is the fragment html, run.py, results.json and the figures directory docs/figures/sn-review-through-jev/srtj-name-review-measure; git show --stat over a55ccd0f..d14927ccd names exactly those four paths and nothing else.\nVERDICT manifest: read; it names commits b8b2f1b0d and d14927ccd, records the base and head gates (25 passed EXIT=0 each), the rescoring pass EXIT=0 with three identical artifact hashes, and states the landing figures with spend USD 0.151083 of USD 4; its negative_control is correctly declared none, since no test file lies in scope.\nVERDICT diff: read commit by commit from a55ccd0f6541 to d14927ccd37e; b8b2f1b0d adds the 706-line run.py and d14927ccd adds results.json, the html fragment, the paired-auc.svg and extends run.py (+330/-15) with the rescore, fragment-render and plot stages; no source module and no test file is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:88-193 reads the golden-A names and their bounded graph context and :311-437 books one Jev decision per name, so the measure the goal names is what the script performs.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done_when measure is log-backed at rescore-committed.log (rescore regenerates results.json, the fragment and the SVG from receipts at EXIT=0 with three identical sha256 hashes), and every named figure appears in docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure.html:8-42; the head gate at committed-test.log tests an unmodified module, so it is a regression guard rather than the done_when measure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat b8b2f1b0d and d14927ccd names only the four declared paths under docs/evidence/fragments/sn-review-through-jev and docs/figures/sn-review-through-jev, with nothing extra.\nSCORE durability: 14\nJUSTIFICATION durability: docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:440 derives the acceptance score and :488 rebuilds the figures from receipts, but no committed test reddens when the derivation or the four-dimension/29-check mix regresses, so the guard is a manual rescore-and-compare-hash procedure rather than an automated failing test.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:440 follows the module's derive-in-code idiom, its module docstring (:1) carries no plan, section or ticket label, and the committed SVG is 1008pt wide with no gridlines; the file names carry the coordinator-assigned node id.\nSCORE reuse: 19\nJUSTIFICATION reuse: the script extends the existing owners rather than forking them \u2014 paired_auc, bootstrap_interval, choose_operating_point, option_order_stability, frozen_state_violation-range helpers, judgment.decide_batch and jev_review.review_names/name_question_table are all imported, and a capability search over imas_codex/discovery/base and imas_codex/standard_names/review found no existing owner of a golden-A measurement odometer.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:440 follow-on: the acceptance score derivation in _score (rebuilt by _rescore at :488) is guarded only by the manual rescore-and-compare-hash procedure; no committed test fails when the derivation or the four-dimension/29-check mix regresses, so a silent change to the score leaves the suite green and the fragment merely stale rather than red.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-name-review-measure-run.py:735 follow-on: _plot swallows a missing data-ink style with `except OSError: pass`, so a reproduction on a host without the user's stylelib renders default sizing while the fragment declares compliance with the plot-style rules; the committed SVG is compliant (14 in wide, no gridlines) but a re-run elsewhere is not guaranteed to be.\n",
+  "review_run_id": "r-20261015T072319360048-review-of-srtj-name-review-measure-d14927ccd37e",
+  "reviewed_base_sha": "a55ccd0f65415a1dcc95532310c5b702d30d6ccf",
+  "reviewed_head_sha": "d14927ccd37e1d4808edf9ea89abaf8ab983b55e",
+  "reviewed_run_id": "r-20261015T063535477621-srtj-name-review-measure",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T07:37:22.577483+00:00",
+  "total": 108
+}
