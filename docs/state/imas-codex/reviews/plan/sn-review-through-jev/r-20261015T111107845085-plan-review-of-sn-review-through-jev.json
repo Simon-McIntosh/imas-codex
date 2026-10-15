@@ -16,7 +16,24 @@
   "plan_slug": "sn-review-through-jev",
   "plan_version": 24,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "the call site at workers.py 7308 is the only production reader, so the retirement holds; the three tests in tests/standard_names/fanout/test_trigger_dims_align_with_review.py that read the field are named in the brief of the node that builds section 5, which updates them",
+      "when": "2026-10-15T11:31:15.585972+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the call site at workers.py 7308 is the only production reader, so the retirement holds; the three tests in tests/standard_names/fanout/test_trigger_dims_align_with_review.py that read the field are named in the brief of the node that builds section 5, which updates them",
+      "when": "2026-10-15T11:31:15.585972+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-review-through-jev/r-20261015T111107845085-plan-review-of-sn-review-through-jev.json",
   "review_run_id": "r-20261015T111107845085-plan-review-of-sn-review-through-jev",
   "reviewed_blob_sha": "61be505118c7c661128a57a8f17cc4bf8dd9686f",
   "rubric": "content",
