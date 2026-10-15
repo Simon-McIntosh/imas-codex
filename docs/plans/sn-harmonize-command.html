@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="96">
+<meta name="plan-version" content="97">
 <meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
@@ -136,11 +136,11 @@
       every identity, source binding and spend record survives. Names already recommended into
       a catalog pull request are refused, with the refusal naming each one, unless
       <code>--force</code> is given with a reason that the run records. The refusal reads
-      <code>imas_codex/standard_names/protection.py</code>, which already owns
-      "this name is committed, do not move it" (<code>automatic_deletion_protections</code>
-      names <code>approved</code> and a recorded catalog pull request): it gains the roster and
-      <code>contested</code> reasons, and the command reuses its evidence rather than a second
-      query. The lead ruled this on
+      <code>recommended_name_protections</code> in
+      <code>imas_codex/standard_names/protection.py</code>, which returns the roster,
+      <code>approved</code> and <code>contested</code> reasons. <code>harmonize.py</code> calls it
+      from <code>preview_recommended_refusals</code> and <code>refuse_recommended_members</code>,
+      and §14 limits the roster reason to open requests. The lead ruled this on
       2026-10-12. "Recommended" covers:
     </p>
     <ul>
