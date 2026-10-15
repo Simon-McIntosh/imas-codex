@@ -101,6 +101,9 @@ def _install_graph_edges(monkeypatch: Any) -> None:
     monkeypatch.setattr(harmonize, "refuse_recommended_members", lambda *a, **k: {})
     monkeypatch.setattr(harmonize, "_stamp_applied_family", lambda *a, **k: True)
     monkeypatch.setattr(harmonize, "_family_docs_scores", lambda *a, **k: {})
+    monkeypatch.setattr(
+        harmonize, "reconcile_family_reverse_links", lambda *a, **k: {}
+    )
 
 
 def _apply(drain: _RecordingDrain):
