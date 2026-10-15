@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-catalog-grouping">
+  <title>scg-dd-reclassify-finish — the DD re-classification finished under the corrected guidance</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <section id="scg-dd-reclassify-finish">
+   <h2>scg-dd-reclassify-finish — the DD re-classification finished under the corrected guidance</h2>
+
+   <p id="scg-dd-reclassify-finish-summary">
+     This node finishes the DD path re-classification that
+     <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify.html">scg-dd-reclassify</a>
+     began at threshold 0.8 and stopped on: the <code>summary</code> IDS
+     classified to <code>data_management</code> because a container path decided
+     its domain. The guidance is corrected, and this node re-ran
+     <code>summary</code> and the eight IDS groups the first run left untouched.
+     All nine passes completed at <code>EXIT=0</code>, totalling
+     <strong>5901</strong> Tier-1 paths. The headline result holds: the
+     <code>summary</code> paths at <code>data_management</code> fell from about
+     2474 to <strong>4</strong> of 5216.
+   </p>
+
+   <h3 id="scg-dd-reclassify-finish-code">The code state the run starts from</h3>
+   <ul>
+     <li><code>get_sn_domain_tree_threshold()</code> returns <code>0.8</code>,
+       read from <code>[tool.imas-codex.sn-domain-tree].threshold</code> in
+       <code>pyproject.toml</code>.</li>
+     <li><code>carries_own_subject</code> is present in
+       <code>imas_codex/graph/dd_domain_classifier.py</code>, and a
+       <code>/value</code> leaf carrying the placeholder documentation no longer
+       states a subject of its own.</li>
+     <li>The corrected <code>imas_codex/definitions/physics/domains.yaml</code>
+       is on <code>main</code>.</li>
+     <li><code>tests/graph/test_dd_build_classify_tree.py</code> and
+       <code>tests/graph/test_domain_classifier_state.py</code> pass at the base
+       and again at the head: <strong>9 passed, EXIT=0</strong> both times.</li>
+   </ul>
+
+   <h3 id="scg-dd-reclassify-finish-run">The run</h3>
+   <p id="scg-dd-reclassify-finish-run-body">
+     One pass per IDS group, through the driver
+     <a href="/imas-codex/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-finish-run.py">scg-dd-reclassify-finish-run.py</a>.
+     Each group was reset once, on its first pass, and never twice. A pass writes
+     its classification once, after every batch completes, so a pass cut off
+     before its write leaves the graph unchanged and loses only its spend. The
+     <code>summary</code> pass ran alone because a reset triggers a graph-wide
+     re-embed and cluster phase that two concurrent passes would contend on;
+     each group pass was stopped after its own classify phase for the same
+     reason. The group membership below is read from each pass log's own command
+     line, and the totals from its classify summary.
+   </p>
+   <table id="scg-dd-reclassify-finish-ledger">
+     <thead>
+       <tr><th>pass</th><th>IDS members</th><th>Tier-1 paths</th><th>inherited</th><th>metadata</th><th>exit</th></tr>
+     </thead>
+     <tbody>
+       <tr><td>g05</td><td>summary</td><td>1103</td><td>4396</td><td>92</td><td>0</td></tr>
+       <tr><td>g08</td><td>edge_profiles</td><td>831</td><td>2362</td><td>92</td><td>0</td></tr>
+       <tr><td>g11</td><td>gyrokinetics_local</td><td>395</td><td>1083</td><td>98</td><td>0</td></tr>
+       <tr><td>g12</td><td>wall, transport_solver_numerics</td><td>617</td><td>1847</td><td>184</td><td>0</td></tr>
+       <tr><td>g14</td><td>plasma_sources, core_instant_changes, spectrometer_x_ray_crystal</td><td>647</td><td>1942</td><td>285</td><td>0</td></tr>
+       <tr><td>g16</td><td>neutron_diagnostic, gyrokinetics, mhd_linear, core_transport</td><td>608</td><td>1681</td><td>352</td><td>0</td></tr>
+       <tr><td>g17</td><td>runaway_electrons, mhd, bolometer, radiation, core_sources, ece, langmuir_probes</td><td>695</td><td>2046</td><td>654</td><td>0</td></tr>
+       <tr><td>g18</td><td>charge_exchange, spectrometer_uv, hard_x_rays, pf_active, camera_visible, reflectometer_fluctuation, camera_ir, soft_x_rays</td><td>647</td><td>1816</td><td>736</td><td>0</td></tr>
+       <tr><td>g19</td><td>camera_x_rays, spi, magnetics, ic_antennas, reflectometer_profile</td><td>358</td><td>1070</td><td>460</td><td>0</td></tr>
+       <tr><td colspan="2"><strong>total</strong></td><td><strong>5901</strong></td><td><strong>18243</strong></td><td></td><td><strong>9/9</strong></td></tr>
+     </tbody>
+   </table>
+
+   <h3 id="scg-dd-reclassify-finish-readback">Read back from the graph</h3>
+   <p id="scg-dd-reclassify-finish-readback-body">
+     Bounded Cypher through <code>GraphClient</code>, logged at
+     <code>EXIT=0</code>. The headline result is the repair this node exists
+     for: <strong>the <code>summary</code> paths at <code>data_management</code>
+     fell from about 2474 to 4</strong>, out of 5216 <code>summary</code> paths,
+     and the <code>summary</code> domain distribution now reads as physics —
+     <code>edge_plasma_physics</code> 1492, <code>core_plasma_physics</code>
+     1410, <code>fueling</code> 498, <code>general</code> 353,
+     <code>equilibrium</code> 306, <code>divertor_physics</code> 292,
+     <code>auxiliary_heating</code> 208, <code>magnetohydrodynamics</code> 167.
+   </p>
+   <ul>
+     <li><strong>domain_source over 61366 IMASNode paths:</strong>
+       <code>inherited_from_parent</code> 34654, <code>none_metadata</code> 7925,
+       <code>llm_classified</code> 7551, null 6750, <code>jev_tree</code> 4480,
+       <code>deterministic_override</code> 6.</li>
+     <li><strong>LLM-tier paths</strong> (<code>jev_tree</code> +
+       <code>llm_classified</code>): 12031, 19.6% of the tree. Of those,
+       <strong>4480 (37.2%) were settled by the tree</strong> and 7551 fell
+       through to the chat classifier.</li>
+     <li><strong>summary at <code>data_management</code>: 4</strong>, from about
+       2474 before this pass.</li>
+   </ul>
+
+   <h4 id="scg-dd-reclassify-finish-readback-score">The 201 rule-labelled paths, scored from the graph</h4>
+   <p>
+     <strong>Primary figure: 184/201 = 0.915</strong>, scored against the
+     <em>revised</em> rule labels in
+     <code>scg-tree-rerun-revised-guidance-results.json</code>, which relabelled
+     56 of these 201 paths under the corrected scope rules. Beside it, the same
+     graph scored against the label set this node's predecessor used,
+     <code>scg-domain-path-measure-results.json</code>, which predates the
+     revised rules: <strong>135/201 = 0.672</strong>. The two figures differ
+     only in the labels they are measured against — the graph is the same — and
+     the gap is the measure of how much the label set, not the classifier,
+     moved. Both are logged at <code>EXIT=0</code> in
+     <code>passes/readback-201.log</code>.
+   </p>
+   <p>The 17 paths the graph still disagrees with under the revised labels:</p>
+   <table id="scg-dd-reclassify-finish-mismatches">
+     <thead>
+       <tr><th>path</th><th>revised label</th><th>graph domain</th><th>domain_source</th></tr>
+     </thead>
+     <tbody>
+       <tr><td>core_profiles/profiles_1d/grid/rho_pol_norm</td><td>equilibrium</td><td>transport</td><td>— (no domain_source)</td></tr>
+       <tr><td>core_profiles/profiles_1d/grid/rho_tor_norm</td><td>equilibrium</td><td>transport</td><td>— (no domain_source)</td></tr>
+       <tr><td>core_sources/source/profiles_1d/grid/rho_pol_norm</td><td>equilibrium</td><td>transport</td><td>— (no domain_source)</td></tr>
+       <tr><td>core_sources/source/profiles_1d/grid/rho_tor_norm</td><td>equilibrium</td><td>transport</td><td>— (no domain_source)</td></tr>
+       <tr><td>disruption/profiles_1d/grid/psi</td><td>magnetohydrodynamics</td><td>equilibrium</td><td>jev_tree</td></tr>
+       <tr><td>distributions/distribution/ggd/orbit_frequency_pol/values</td><td>fast_particles</td><td>transport</td><td>deterministic_override</td></tr>
+       <tr><td>divertors/divertor/target/extension_r</td><td>divertor_physics</td><td>structural_components</td><td>llm_classified</td></tr>
+       <tr><td>ece/channel/beam_tracing/beam/position/rho_tor_norm</td><td>equilibrium</td><td>electromagnetic_wave_diagnostics</td><td>— (no domain_source)</td></tr>
+       <tr><td>edge_profiles/profiles_1d/q</td><td>edge_plasma_physics</td><td>equilibrium</td><td>llm_classified</td></tr>
+       <tr><td>focs/outline/z</td><td>equilibrium</td><td>magnetic_field_diagnostics</td><td>llm_classified</td></tr>
+       <tr><td>summary/heating_current_drive/ic/k_perpendicular/value</td><td>auxiliary_heating</td><td>waves</td><td>jev_tree</td></tr>
+       <tr><td>summary/pedestal_fits/linear/n_e/pedestal_position/value</td><td>equilibrium</td><td>edge_plasma_physics</td><td>llm_classified</td></tr>
+       <tr><td>summary/pedestal_fits/linear/pressure_electron/pedestal_position/value</td><td>equilibrium</td><td>edge_plasma_physics</td><td>llm_classified</td></tr>
+       <tr><td>wall/description_2d/limiter/unit/midplane_power_density_nuclear</td><td>neutronics</td><td>plasma_wall_interactions</td><td>jev_tree</td></tr>
+       <tr><td>wall/description_2d/limiter/unit/power_nuclear</td><td>neutronics</td><td>plasma_wall_interactions</td><td>jev_tree</td></tr>
+       <tr><td>wall/global_quantities/power_to_cooling</td><td>plasma_wall_interactions</td><td>plant_systems</td><td>llm_classified</td></tr>
+       <tr><td>waves/coherent_wave/beam_tracing/beam/position/rho_tor_norm</td><td>equilibrium</td><td>auxiliary_heating</td><td>— (no domain_source)</td></tr>
+     </tbody>
+   </table>
+   <p>
+     Eleven of the seventeen were judged by this classifier (6
+     <code>llm_classified</code>, 4 <code>jev_tree</code>, 1
+     <code>deterministic_override</code>). The other six carry no
+     <code>domain_source</code> at all — they were never in scope of this
+     re-classification, so their disagreement is with the label rather than
+     with a decision this node made, and they are the reason the revised score
+     cannot reach 201.
+   </p>
+
+   <h3 id="scg-dd-reclassify-finish-spend">Spend</h3>
+   <p id="scg-dd-reclassify-finish-spend-body">
+     The node spent <strong>USD 12.58</strong> over <strong>215</strong> billed
+     classifier calls, against an allowance of USD 14.27. With the prior spend
+     of USD 15.73, the cumulative total is <strong>USD 28.31 against the
+     USD 30.00 ceiling</strong> — inside it, with USD 1.69 unspent.
+   </p>
+   <p>
+     <strong>A first figure of USD 31.78 was recorded for this node, and it was
+     wrong.</strong> It summed 234 cost lines from the pass logs, but only 215
+     of those are per-call bills (<code>cost=$X, model=…</code>); the other 19
+     are running subtotals (<code>batch N/M done (cost=$Y)</code>) that restate
+     the per-call lines, so the sum counted the same spend twice and read as an
+     overrun that did not happen. The corrected sum reads only the per-call
+     lines, cross-checks each log's last <code>LLM heartbeat … spend=$</code>
+     figure, and is re-produced by the driver's <code>spend</code> subcommand at
+     <code>EXIT=0</code> (<code>passes/spend.log</code>,
+     <code>passes/spend.json</code>). The heartbeat total, USD 11.79, sits just
+     below the per-call total: it is a lower bound, because a pass is stopped
+     after its classify phase and its final calls land after the last heartbeat,
+     never above it.
+   </p>
+  </section>
+ </main>
+</body>
+</html>
