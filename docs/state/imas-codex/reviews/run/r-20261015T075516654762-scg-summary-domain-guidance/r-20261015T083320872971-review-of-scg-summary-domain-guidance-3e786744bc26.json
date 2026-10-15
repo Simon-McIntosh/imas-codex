@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/dd_domain_classifier.py:classify_domains",
+    "imas_codex/graph/dd_domain_classifier.py:decide_domain_tree",
+    "imas_codex/llm/prompt_loader.py:_provide_physics_domains"
+  ],
+  "completed_at": "2026-10-15T08:48:07.274Z",
+  "dispatched_at": "2026-10-15T08:33:37Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-summary-domain-guidance.html",
+      "line": "6",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states \"Ten clauses, five in data_management and five outside it\", but the table that follows lists seven rows (three under data_management and four outside), and the commit touches seven prose hunks; the count a reader would check against the table does not reconcile, so the record overstates the number of corrected rules."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-summary-domain-guidance.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment is an evidence doc whose whole subject is a before/after comparison, yet it carries no figure; the node's declared write scope even reserved docs/figures/sn-catalog-grouping/scg-summary-domain-guidance, so a per-path before/after graphic (17 labelled paths, before vs after domain against label) was in scope and absent, leaving the comparison as a text table only."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T075516654762-scg-summary-domain-guidance/gate-head.log",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "follow-on: the head gate log names its revision as 89f18bdd6 (\"rev 89f18bdd6 (dirty worktree: guidance + classifier + two test files)\"), the base, not the head sha 3e786744b it was run against, so the 144-passed head arm cannot be pinned to a commit from the log as its first line requires; the reader must infer head from the dirty-worktree annotation and the manifest."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T075516654762-scg-summary-domain-guidance/manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's manifest carries no baseline_suite or after_suite JSON blocks, so added_failure_count and added_failure_ids cannot be read from the manifest's own fields; they had to be derived from the linked gate-base.log (138 passed, 0 failed) and gate-head.log (144 passed, 0 failed)."
+    },
+    {
+      "file": "imas_codex/graph/dd_domain_classifier.py",
+      "line": "1495",
+      "severity": "follow-on",
+      "text": "follow-on: _PLACEHOLDER_DOCUMENTATION {\"value\",\"values\",\"n/a\",\"none\"} re-expresses the repository's existing container/accessor-leaf vocabulary owned by imas_codex/graph/dd_enrichment.py:99 (ACCESSOR_TERMINAL_NAMES, which already lists \"value\" and \"values\"), without consulting or extending that owner; the two now disagree by construction (a leaf named value with a real enriched description is judged by carries_own_subject as carrying a subject), so a later change to the accessor vocabulary will not reach this predicate."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "imas_codex/graph/dd_domain_classifier.py:266 calls _query_unclassified_paths inside classify_domains (the live three-tier classifier), :1122 builds states with tree_state inside decide_domain_tree (the Jev tree), and imas_codex/llm/prompt_loader.py:598 reads the corrected domains.yaml through load_domain_guidance at runtime in _provide_physics_domains.",
+    "diff": "read commit by commit from 89f18bdd6 to 3e786744b: one commit, five files \u2014 domains.yaml (7 prose hunks, data_management no longer claims summary/* and its excludes rule is replaced), dd_domain_classifier.py (adds carries_own_subject and _PLACEHOLDER_DOCUMENTATION, RETURN n.documentation, and a Python filter in _query_unclassified_paths), tests/graph/test_domain_classifier_state.py (new, 4 tests), tests/graph/test_physics_domain_guidance.py (+2 tests), and the evidence fragment (new).",
+    "done_when": "the done_when is the brief's Done-when: new tests pass at head and red with the mechanism removed (gate-head.log 144 passed, red-classifier-state.log 4 failed EXIT=1), the guidance test reds on the aae1ac667 copy (red-guidance-aae1ac667.log 2 failed EXIT=1), accuracy is reported before and after (0.1176 vs 0.7647 in the fragment), the five gate files add 0 failures (138 base, 144 head, 0 failed each), and the fragment records the changed rules, tests and before/after table.",
+    "goal": "the node goal is the reviewed brief's correction: a summary quantity takes the domain of the physics it names; imas_codex/definitions/physics/domains.yaml no longer claims summary/* for data_management, dd_domain_classifier.py routes a leaf documented only \"Value\" to inheritance rather than judging it, and the two behaviours are held by tests.",
+    "manifest": "read; it records commit 3e786744b, the six new tests, the base 89f18bdd6 gate at 138 passed, the head gate at 144 passed, the red logs and the before/after JSON, and correctly names red-guidance-aae1ac667.log as the single negative_control_log; it lacks the baseline_suite/after_suite JSON blocks the current manifest contract wants.",
+    "write_paths": "the declared scope is imas_codex/definitions/physics/domains.yaml, imas_codex/graph/dd_domain_classifier.py, tests/graph/test_domain_classifier_state.py, tests/graph/test_physics_domain_guidance.py, the fragment html and a figures directory; git show --stat 3e786744b names exactly the five first paths, all inside scope, with the reserved figures directory unused."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_domain_classifier_state.py:95 and :114 fail when carries_own_subject always returns True or the Python filter is removed from imas_codex/graph/dd_domain_classifier.py:1554, and tests/graph/test_physics_domain_guidance.py:174 and the container-decides test red on the aae1ac667 guidance copy; the other two added tests hold tree_state and _format_batch_user_prompt, which the diff does not change, so their red is a plugin mutation of pre-existing code rather than a guard on this landing.",
+    "evidence": "the gate measures the done_when at gate-head.log (144 passed, matching the manifest) and gate-base.log (138 passed), and the before/after accuracy is recorded in the JSON arms and the fragment; the head log names the base revision, and the fragment's rule count does not reconcile with its own table, so the evidence is present and mostly log-backed but not cleanly pinned.",
+    "fit": "imas_codex/graph/dd_domain_classifier.py:1498 follows the module's predicate-helper idiom beside the neighbouring _is_* helpers, no plan, section or ticket label appears in the new names or the test module, and the guidance prose in imas_codex/definitions/physics/domains.yaml is corrected in the register of the surrounding clauses.",
+    "goal_fidelity": "imas_codex/definitions/physics/domains.yaml:1205 drops the summary/* claim and replaces the container rule, and imas_codex/graph/dd_domain_classifier.py:1498 sends a placeholder-documented leaf to the existing Tier 2 inheritance at :283, which is the goal's two parts.",
+    "reuse": "the classifier change extends the owner it belongs to (the _query_unclassified_paths selection it already had), but _PLACEHOLDER_DOCUMENTATION at imas_codex/graph/dd_domain_classifier.py:1495 does not extend imas_codex/graph/dd_enrichment.py:99, the repository's existing container/accessor-leaf vocabulary; a capability search over imas_codex/graph for \"placeholder\" and \"subject\" found only that owner and the unit-placeholder helpers in build_dd.py.",
+    "scope_discipline": "git show --stat 3e786744b names only the five declared write paths (domains.yaml, dd_domain_classifier.py, the new test module, test_physics_domain_guidance.py and the fragment), with nothing outside them and nothing the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to correct the domain guidance so a summary quantity takes the domain of the physics it names, and to assert the classifier state; imas_codex/definitions/physics/domains.yaml:1205 drops data_management's summary/* claim, imas_codex/graph/dd_domain_classifier.py:1498 routes a leaf documented only \"Value\" to inheritance.\nVERDICT done_when: the brief's Done-when names six requirements; all six are present and log-backed \u2014 gate-head.log 144 passed, red-classifier-state.log 4 failed EXIT=1, red-guidance-aae1ac667.log 2 failed EXIT=1, accuracy 0.1176 vs 0.7647, five gate files 0 added failures (base 138 / head 144), and the fragment's changed-rule, test and before/after tables.\nVERDICT write_paths: the declared scope is domains.yaml, dd_domain_classifier.py, tests/graph/test_domain_classifier_state.py, tests/graph/test_physics_domain_guidance.py, the fragment html and a figures directory; git show --stat 3e786744b names exactly the first five and no path outside them.\nVERDICT manifest: read; it records commit 3e786744b, six new tests, base 138-passed and head 144-passed gates, the red logs, and red-guidance-aae1ac667.log as its single negative_control_log; it carries no baseline_suite/after_suite blocks.\nVERDICT diff: read commit by commit from 89f18bdd6 to 3e786744b; one commit over five files \u2014 7 prose hunks in domains.yaml, carries_own_subject plus the documentation RETURN and the Python filter in dd_domain_classifier.py, the new 4-test state module, 2 guidance tests, and the new fragment.\nCALL_SITES: imas_codex/graph/dd_domain_classifier.py:classify_domains, imas_codex/graph/dd_domain_classifier.py:decide_domain_tree, imas_codex/llm/prompt_loader.py:_provide_physics_domains\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/definitions/physics/domains.yaml:1205 drops the summary/* claim and replaces the container rule, and imas_codex/graph/dd_domain_classifier.py:1498 sends a placeholder-documented leaf to the existing Tier 2 inheritance at :283, which is the goal's two parts.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate measures the done_when at gate-head.log (144 passed, matching the manifest) and gate-base.log (138 passed), and the before/after accuracy is recorded in the JSON arms and the fragment; the head log names the base revision and the fragment's rule count does not reconcile with its own table.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 3e786744b names only the five declared write paths, with nothing outside them and nothing the goal does not imply.\nSCORE durability: 17\nJUSTIFICATION durability: tests/graph/test_domain_classifier_state.py:95 and :114 fail when carries_own_subject always returns True or the filter is removed from imas_codex/graph/dd_domain_classifier.py:1554, and the two guidance tests red on the aae1ac667 copy; the other two added tests hold tree_state and _format_batch_user_prompt, which the diff does not change.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/graph/dd_domain_classifier.py:1498 follows the module's predicate-helper idiom, no plan, section or ticket label appears in the new names or the test module, and the guidance prose matches the register of the surrounding clauses.\nSCORE reuse: 16\nJUSTIFICATION reuse: the classifier change extends the owner it belongs to, but _PLACEHOLDER_DOCUMENTATION at imas_codex/graph/dd_domain_classifier.py:1495 does not extend imas_codex/graph/dd_enrichment.py:99, the repository's existing container/accessor-leaf vocabulary, and a search for \"placeholder\" and \"subject\" over imas_codex/graph found only that owner and the build_dd.py unit-placeholder helpers.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-summary-domain-guidance.html:6 follow-on: the fragment states \"Ten clauses, five in data_management and five outside it\", but the table that follows lists seven rows and the commit touches seven prose hunks, so the count does not reconcile with the table a reader checks.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-summary-domain-guidance.html:1 follow-on: the fragment is an evidence doc whose subject is a before/after comparison yet carries no figure, though the node's write scope reserved a figures directory, leaving the 17-path comparison as a text table only.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T075516654762-scg-summary-domain-guidance/gate-head.log:3 follow-on: the head gate log names its revision as 89f18bdd6, the base, not the head sha 3e786744b it ran against, so the 144-passed head arm cannot be pinned to a commit from the log's own header.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T075516654762-scg-summary-domain-guidance/manifest.md:11 follow-on: the manifest carries no baseline_suite or after_suite JSON blocks, so added_failure_count and added_failure_ids could not be read from its own fields and had to be derived from gate-base.log and gate-head.log.\nFINDING imas_codex/graph/dd_domain_classifier.py:1495 follow-on: _PLACEHOLDER_DOCUMENTATION re-expresses the container/accessor-leaf vocabulary owned by imas_codex/graph/dd_enrichment.py:99 (ACCESSOR_TERMINAL_NAMES) without consulting or extending that owner, so a later change to the accessor vocabulary will not reach this predicate.\n",
+  "review_run_id": "r-20261015T083320872971-review-of-scg-summary-domain-guidance-3e786744bc26",
+  "reviewed_base_sha": "89f18bdd647b408d13b71e5a0f5192be08f31a4f",
+  "reviewed_head_sha": "3e786744bc26d88583afe52571f94fcf6c3ca281",
+  "reviewed_run_id": "r-20261015T075516654762-scg-summary-domain-guidance",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T08:52:00+00:00",
+  "total": 107
+}
