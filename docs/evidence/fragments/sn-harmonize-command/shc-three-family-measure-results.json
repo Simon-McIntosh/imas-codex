@@ -48,6 +48,53 @@
         "planned_calls": 7,
         "refusals": {},
         "seed": "electron_number_density"
+      },
+      "partial": {
+        "anchor": "total_ion_number_density",
+        "boundary_overlap": [],
+        "decision": "apply",
+        "documentation_scores": {
+          "electron_number_density": 0.95,
+          "fast_neutral_internal_state_number_density": 0.91875,
+          "normalized_ion_species_number_density": 0.875,
+          "thermal_ion_charge_state_number_density": 0.8875,
+          "total_ion_number_density": null,
+          "total_neutral_number_density": 0.9,
+          "volume_averaged_electron_number_density_over_scrape_off_layer": null
+        },
+        "estimate_basis": {
+          "calls": 24,
+          "mean_usd_per_call": 0.4026,
+          "runs": 9,
+          "total_usd": 9.6626
+        },
+        "estimate_usd": 2.8183,
+        "invariant": [
+          "number_density",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "lint": {
+          "convention_violation": 3,
+          "link_dead_link": 1,
+          "link_missing_reverse": 1
+        },
+        "lint_total": 5,
+        "members": [
+          "electron_number_density",
+          "fast_neutral_internal_state_number_density",
+          "normalized_ion_species_number_density",
+          "thermal_ion_charge_state_number_density",
+          "total_ion_number_density",
+          "total_neutral_number_density",
+          "volume_averaged_electron_number_density_over_scrape_off_layer"
+        ],
+        "physical_base": "number_density",
+        "planned_calls": 7,
+        "refusals": {},
+        "seed": "electron_number_density"
       }
     },
     "electrostatic_potential": {
@@ -167,5 +214,62 @@
       ]
     },
     "threshold": 0.85
+  },
+  "component_selection": {
+    "already_harmonized": "parallel_conductivity",
+    "unavailable_candidate": "parallel_current_density",
+    "chosen_seed": "parallel_vorticity",
+    "reason": "The first available, unharmonized non-WEST component family checked by report and dry run; six calls estimated at USD 2.48, within the approximately USD 3.03 reserved after the other two estimates."
+  },
+  "west_roster_check": {
+    "searched": "imas_codex/standard_names/manifests/reviews",
+    "chosen_family_member_matches": 0,
+    "positive_control": "flux_surface_averaged_electron_density_at_plasma_boundary",
+    "positive_control_matches": "present in multiple review rosters"
+  },
+  "budget": {
+    "ceiling_usd": 8.0,
+    "spent_usd": 0.130036,
+    "remaining_usd": 7.869964,
+    "completed_names": 0,
+    "measured_cost_per_completed_name_usd": null,
+    "west_limit_usd": null,
+    "west_limit_reason": "No name completed a documentation review, so this run cannot measure a defensible per-name cost or set a WEST limit."
+  },
+  "apply_attempts": [
+    {
+      "seed": "electron_number_density",
+      "command": "timeout 540 uv run imas-codex sn harmonize --family electron_number_density --apply --cost-limit 8.00 --json",
+      "exit_status": 124,
+      "wall_seconds": 673,
+      "pipeline_elapsed_seconds": 540.640386,
+      "stop_reason": "interrupted",
+      "receipt_cost_spent_usd": 0.130036,
+      "llm_run_id": "36afdad7-bf84-424b-9c3d-ec3c48189209",
+      "llm_cost_rows": {
+        "generate_docs": {
+          "calls": 1,
+          "usd": 0.009678
+        },
+        "review_docs": {
+          "calls": 2,
+          "usd": 0.120358
+        }
+      },
+      "receipt_names_enriched": 1,
+      "receipt_names_reviewed": 0,
+      "post_attempt_planned_calls": 7,
+      "post_attempt_lint": {
+        "convention_violation": 3,
+        "link_dead_link": 1,
+        "link_missing_reverse": 1
+      },
+      "post_attempt_anchor_score": null
+    }
+  ],
+  "result": {
+    "three_families_applied": false,
+    "reason": "The first apply reached the mandatory 540-second timeout before its anchor was reviewed. A new dry run still plans all seven calls; repeating the same apply would restart the anchor-first run and full reconciliation.",
+    "members_below_threshold_after_completed_apply": null
   }
 }
