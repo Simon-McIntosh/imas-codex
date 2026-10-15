@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T06:05:26.646Z",
+  "dispatched_at": "2026-10-15T05:56:16Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html:187",
+      "id": "done_when-1",
+      "reason": "without a stated order (run the A/B against the still-live comment path, then retire), a worker can delete the comment path first and lose the control arm the measurement depends on.",
+      "text": "\u00a75 states \"The free-text comment field remains for people and no code path reads it\", yet its own done-when (line 190) requires \"one refine rotation driven by checks with one driven by comments\"; the comment-driven arm reads the comment field, and the section also retires the comment-driven refine instruction list in the same breath, so the node is asked both to keep the comment path alive for the A/B control and to make it unread.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-review-through-jev.html:187",
+      "id": "reasoning-1",
+      "reason": "the claim is imprecise as written, but no node's gate rests on the literal no-reader assertion (the done-when binds only `should_trigger_fanout`), so correcting the sentence does not change a measure or a delivered path.",
+      "text": "\u00a75 asserts \"no code path reads it\" of the free-text comment field, but `imas_codex/standard_names/chain_history.py:43` (name axis) and `:88` (docs axis) select `ancestor.reviewer_comments_per_dim_name` / `_docs` from the graph and carry them into every `chain_history` entry, which `graph_ops.py:18251` / `:25118` attach to the refine item and pass into the trigger; the field therefore has a reader \u00a75 does not account for.",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "7a136e7a8c27a7ca110635a41050f4f108dfe9ec323fdec0eb753fba7d58d24d",
+  "plan_slug": "sn-review-through-jev",
+  "plan_version": 18,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261015T055557694509-plan-review-of-sn-review-through-jev",
+  "reviewed_blob_sha": "cf1f72236ca22a3374b4d398e946b9aa4481527c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every \u00a75 anchor resolves against the tree: `imas_codex/standard_names/review/checks.py` exists and is the taxonomy loader, `review_checks.yaml` resolves at `imas_codex/llm/prompts/sn/review_checks.yaml`, the retired fields are real (`refine_trigger_keywords` at `fanout/config.py:95`, `refine_trigger_comment_dims` at `:115`, `refine_trigger_comment_chars` at `:126`), and their only reader is `workers.py:7304` (`should_trigger_fanout`, defined at `fanout/trigger.py:105`).",
+    "done_when": "a finding \u2014 \u00a75's done-when requires a refine rotation \"driven by comments\", while the same section asserts the comment field has no reader and retires the comment-driven path, so the control arm the done-when names cannot exist once the node's own change lands.",
+    "evidence_paths": "pass \u2014 \u00a75 names no gate log of its own, matching the plan's house convention where the prototype's evidence fragment lives in the landed-evidence archive; nothing in \u00a75 points at a scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 \u00a75 introduces no plan labels, ticket numbers or version tags into symbols or comments; the new `conforming` field is named by what it holds.",
+    "reasoning": "a finding \u2014 \u00a75's claim that \"no code path reads\" the free-text comment field is contradicted by the code it does not cite: `chain_history.py` selects `ancestor.reviewer_comments_per_dim_name` (and `_docs`) into each ancestor refine-context entry.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable (make refine and the fanout trigger read the failed checks instead of reviewer prose); \u00a77 no longer re-claims the comment-keyword trigger deletion, so the deletion is owned once.",
+    "wiring": "pass \u2014 \u00a75 declares `depends-on` \u00a73 and \u00a74 (both exist and are the askers of the per-check probabilities the trigger reduces over), and \u00a77 explicitly yields the comment-keyword trigger to \u00a75, so no dependency is missing and none points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "543d4a9b36d0ffd3b6d48ae55e20ad33ac58257be049be48bded4d4bde22d77e",
+    "s1": "b8cee26002f21b31c1a5f020a11fedfa75c8e98c039fce1165802727fd21109c",
+    "s2": "b0d251917e3803e82c6003cfad44e327e0dbf0a7c36f72f34588a4dcb7e50352",
+    "s3": "82d51a77c26ae07933f012ccecb84e177e87b43c91b5cc909713ed332088bbf2",
+    "s4": "e78806378f26a26e205e71908b31a7cc50522c0f562ceab8c62c76181e212f2e",
+    "s5": "d08fb7f8185ddf0e1b82bcbe41253ab61102b4e534d228bea4cab9a5200c243c",
+    "s6": "302fcd03fbde84ccac2e27b1a967b5abe0865d72c784a3232ff0113f5720b038",
+    "s7": "fb477768b44f7ce245281c7986ffdfcf74871a6c841ca83d809682f1ebc062f2"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T06:12:28.160307+00:00"
+}
