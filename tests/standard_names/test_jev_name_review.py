@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import textwrap
 
+import pytest
+
 from imas_codex.standard_names.review import jev_review
 from imas_codex.standard_names.review.audits import AuditReport, LintFinding
 from imas_codex.standard_names.review.checks import (
@@ -209,6 +211,32 @@ def test_choice_question_options_propagate_from_the_taxonomy():
     assert set(choice["criteria"]) == {"the bound source object", "a different object"}
 
 
+def test_choice_without_an_identifiable_acceptable_form_is_refused():
+    # A Choice authors its acceptable form first, so a blank first option names
+    # no acceptable form and the check cannot be split into acceptable against
+    # defect. Table construction refuses it rather than reading a blank
+    # acceptable form and mis-deciding the check.
+    check = _choice(
+        "unsplittable",
+        "semantic",
+        ["source_paths"],
+        "Which form is it?",
+        ["", "a defective form"],
+    )
+    with pytest.raises(ValueError, match="acceptable form"):
+        jev_review.name_question_table([check])
+
+
+def test_choice_acceptable_form_reads_the_authored_first_option():
+    question = JevQuestion(
+        kind=JevQuestionKind.CHOICE, text="q?", options=["ok", "defect"]
+    )
+    assert jev_review.choice_acceptable_form(question) == "ok"
+    question.options = ["only one"]
+    with pytest.raises(ValueError, match="acceptable form"):
+        jev_review.choice_acceptable_form(question)
+
+
 # ---------------------------------------------------------------------------
 # A dimension's decision is derived in code from its category answer
 # ---------------------------------------------------------------------------
@@ -339,6 +367,33 @@ async def test_audit_decided_check_contributes_its_finding_with_no_question(
     assert record["failed"] is True
     assert record["question"] is None
     assert "round_trip_failure" in record["audit_finding"]
+
+
+async def test_audit_check_without_a_report_is_unanswered_not_passed(monkeypatch):
+    # An audit that was never run must not read as answered-and-not-failed: the
+    # check is unknown, so its derived decision is neither accept nor reject.
+    monkeypatch.setattr(jev_review, "rerank_name_comparators", _no_rerank)
+    monkeypatch.setattr(jev_review, "decide_batch", _fake_decide_batch({}, cost=0.0))
+    review = await jev_review.review_names([_item()], checks=_small_checks())
+    record = review.items[0]["checks"]["grammar_round_trip_failure"]
+    assert record["answered"] is False
+    assert record["failed"] is False
+    assert record["decision"] == "unknown"
+
+
+async def test_audit_check_with_a_report_is_answered_from_it(monkeypatch):
+    # A report that carries no finding for this name still means the audit ran,
+    # so the check is answered and accepted rather than left unknown.
+    monkeypatch.setattr(jev_review, "rerank_name_comparators", _no_rerank)
+    monkeypatch.setattr(jev_review, "decide_batch", _fake_decide_batch({}, cost=0.0))
+    report = AuditReport(lint_findings=[])
+    review = await jev_review.review_names(
+        [_item()], checks=_small_checks(), audit_report=report
+    )
+    record = review.items[0]["checks"]["grammar_round_trip_failure"]
+    assert record["answered"] is True
+    assert record["failed"] is False
+    assert record["decision"] == "accept"
 
 
 # ---------------------------------------------------------------------------

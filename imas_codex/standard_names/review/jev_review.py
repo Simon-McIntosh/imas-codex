@@ -84,20 +84,9 @@ _CORE_FIELDS: frozenset[str] = frozenset(
 # against — so they are named here rather than derived from the checks.
 _SIBLING_FIELD = "sibling_names"
 
-# The defect a Choice question names, keyed by check id. A Choice check's
-# options list one acceptable form and the defective forms beside it; the
-# accepted form is the first option, which the taxonomy authors first, and the
-# defect set is the rest. It is stated in code because the taxonomy holds the
-# question, not the verdict, and a check whose options do not carry an
-# acceptable form first would be mis-decided silently — so a Choice check whose
-# options the rule cannot split is refused at table construction rather than
-# guessed.
-# Noul questions need no entry: the check's true case is the defect.
-
-# The probability above which a Noul's true case is read as holding. The
-# cascade's calibrated per-check threshold replaces this when the cascade of
-# the plan lands; until then a check's fail is derived here at the question's
-# own midpoint, never asked of the model.
+# The probability at or above which a Noul's true case is read as the defect
+# holding. The model returns a probability rather than a verdict, and the fail
+# is derived here rather than asked of it, so this midpoint is the classifier.
 NOUL_FAIL_PROBABILITY = 0.5
 
 # Ordered categories per review dimension, best first. The judge places a
@@ -284,10 +273,32 @@ def _dimension_question_def(dimension: str) -> dict[str, Any]:
     }
 
 
+def choice_acceptable_form(question: JevQuestion) -> str:
+    """The acceptable form of a Choice question, or a refusal when it is unreadable.
+
+    The taxonomy authors a Choice question's options with the acceptable form
+    first and the defective forms after it, so the split the check reads is the
+    first option against the rest. A question whose options carry no readable
+    acceptable form — fewer than two options, so there is no defect set to
+    split off, or a blank first option — is refused rather than read from
+    whichever option happens to be first, because a mis-split decides the check
+    silently in the wrong direction.
+    """
+    options = question.options
+    if len(options) < 2 or not options[0].strip():
+        raise ValueError(
+            f"Choice question {question.text!r} carries no identifiable "
+            "acceptable form: its options must list the acceptable form first, "
+            "with at least one defective form beside it"
+        )
+    return options[0]
+
+
 def _question_def(question: JevQuestion) -> dict[str, Any]:
     """Render one taxonomy question as the decisions-endpoint definition."""
     if question.kind is JevQuestionKind.NOUL:
         return {"type": "noul", "instructions": question.text}
+    choice_acceptable_form(question)
     return {
         "type": "choice",
         "instructions": question.text,
@@ -319,7 +330,20 @@ def check_failed(check: ReviewCheck, answer: Mapping[str, Any] | None) -> bool:
     choice = answer.get("choice")
     if choice is None:
         return False
-    return str(choice) != str(check.question.options[0])
+    return str(choice) != str(choice_acceptable_form(check.question))
+
+
+def _check_decision(answered: bool, failed: bool) -> str:
+    """Derive one check's decision from whether it was answered and what it found.
+
+    An answered check accepts when it found, and rejects when it found the
+    defect. A check that was never answered — no answer to its question, or an
+    audit that was not run — is ``unknown``: an absent call is not an
+    acceptance, so an audit that never ran is unknown rather than a pass.
+    """
+    if not answered:
+        return "unknown"
+    return "reject" if failed else "accept"
 
 
 def audit_finding_for(
@@ -496,18 +520,23 @@ def _item_record(
     for check in name_checks:
         if check.audit_finding_class is not None:
             finding = audit_finding_for(check, name_id, audit_report)
+            answered = audit_report is not None
             check_records[check.id] = {
-                "answered": True,
-                "failed": finding is not None,
+                "answered": answered,
+                "failed": answered and finding is not None,
+                "decision": _check_decision(answered, finding is not None),
                 "audit_finding": finding,
                 "question": None,
             }
             continue
         question_name = check_question_name(check.id)
         answer = answers.get(question_name)
+        answered = answer is not None
+        failed = check_failed(check, answer)
         check_records[check.id] = {
-            "answered": answer is not None,
-            "failed": check_failed(check, answer),
+            "answered": answered,
+            "failed": failed,
+            "decision": _check_decision(answered, failed),
             "answer": answer,
             "question": questions.get(question_name),
             "audit_finding": None,
