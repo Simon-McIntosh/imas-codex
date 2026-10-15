@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s7&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-harmonize-command#s3&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="55">
-<meta name="plan-modified" content="2026-10-14">
+<meta name="plan-version" content="56">
+<meta name="plan-modified" content="2026-10-15">
 </head>
 <body>
   <main class="plan-doc">
@@ -117,7 +117,7 @@
     </p>
 
     <h2 id="s4">§4 — Prompts that see the right neighbours</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       The compose and documentation prompts carry a comparator block of nearby names and a set of
       scored exemplars, both selected by embedding similarity. Rerank each with
@@ -309,6 +309,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-lead-rerank-ruling" data-who="Simon McIntosh" data-when="2026-10-14T19:50:00Z">
     <div class="r-comment-body"><p><strong>Lead ruling, 2026-10-14:</strong> keep the comparator rerank off by default, and measure a larger draw before deciding. Node <code>ssog-rerank-acceptance-large</code> runs about 120 held-out sources per arm on a new seed, counting candidates the reviewer did not score separately rather than as rejections.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-10-15T07:55:00Z">
+    <div class="r-comment-body"><p>§4 closed. The comparator rerank was built with embedding order kept on failure, and measured by nDCG@10 on 30 labelled items and by held-out first-pass acceptance. The large draw shows 0.396 against 0.396 over 48 paired sources, interval [−0.14, 0.14] (<code>6b6c459c0</code>, review 91/120). No gain, so under the lead's ruling the rerank stays off. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s4-rerank-acceptance-large">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e" data-who="reckon-build" data-when="2026-10-13T05:56:49.621Z">
     <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
