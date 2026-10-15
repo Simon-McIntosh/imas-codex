@@ -10,8 +10,10 @@ import json
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
+from time import perf_counter
 
 import matplotlib.pyplot as plt
+from neo4j import Query
 
 from imas_codex.discovery.base.evaluation import bootstrap_interval
 from imas_codex.graph.client import GraphClient
@@ -33,7 +35,7 @@ RANK = {domain: rank for rank, domain in enumerate(FALLBACK_RANK_TABLE)}
 RULES = ("set_precedence", "path_plurality", "ids_plurality", "ids_then_paths")
 
 
-def source_rows() -> dict[str, dict]:
+def source_rows() -> tuple[dict[str, dict], float]:
     """Read the audit's live row set, retaining each DD path and its domain."""
     old = "RETURN collect(DISTINCT dd.id) AS dd_paths,"
     new = (
@@ -43,9 +45,15 @@ def source_rows() -> dict[str, dict]:
     )
     assert _LIVE_NAMES_QUERY.count(old) == 1
     query = _LIVE_NAMES_QUERY.replace(old, new)
+    assert query.count("       dd_paths,\n") == 1
+    query = query.replace(
+        "       dd_paths,\n", "       dd_paths,\n       dd_path_domains,\n"
+    )
     with GraphClient() as client:
-        rows = client.query(query, live=sorted(LIVE_NAME_STAGES))
-    return {row["sn_id"]: dict(row) for row in rows}
+        started = perf_counter()
+        rows = client.query(Query(query, timeout=10), live=sorted(LIVE_NAME_STAGES))
+        elapsed = perf_counter() - started
+    return {row["sn_id"]: dict(row) for row in rows}, elapsed
 
 
 def sources_for(
@@ -128,6 +136,7 @@ def make_figure(metrics: dict, selected: str) -> None:
     style = Path.home() / ".config/matplotlib/stylelib/data-ink.mplstyle"
     if style.exists():
         plt.style.use(style)
+    plt.rcParams["svg.hashsalt"] = "source-domain-selection"
     fig, axes = plt.subplots(1, 3, figsize=(14, 6.7), sharex=True)
     labels = {
         "set_precedence": "set precedence",
@@ -171,7 +180,7 @@ def make_figure(metrics: dict, selected: str) -> None:
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)
     fig.tight_layout()
-    fig.savefig(FIGURE, format="svg")
+    fig.savefig(FIGURE, format="svg", metadata={"Date": None})
     plt.close(fig)
 
 
@@ -256,23 +265,22 @@ def render(payload: dict) -> None:
         + "</ul>"
     )
     lines.append(
-        "<h3>Misses shared by every rule</h3><ul>"
+        "<h3>Misses shared by every rule</h3><p>This list uses approved and "
+        "calibration labels only; validation is scored for the selected rule "
+        "and control only.</p><ul>"
         + "".join(
             f"<li>{escape(item['name'])} ({escape(item['cohort'])}): "
             f"approved {escape(item['approved_domain'])}; "
-            f"{escape(item['override_assessment'])}; sources "
-            + escape(
-                ", ".join(
-                    f"{p} ({d or 'unclassified'})" for p, d in item["sources"].items()
-                )
-            )
-            + "</li>"
+            f"{escape(item['override_assessment'])}" + "</li>"
             for item in payload["unfixed_misses"]
         )
         + "</ul>"
     )
     lines.append(
-        "<h3>Largest selected-rule moves</h3><table><tr>"
+        "<p>Full source-path bindings for these misses are in the results JSON.</p>"
+    )
+    lines.append(
+        "<h3>Largest selected-rule domain moves</h3><table><tr>"
         "<th>Stored → derived</th><th>Names</th></tr>"
         + "".join(
             f"<tr><td>{escape(item['from'])} → {escape(item['to'])}</td>"
@@ -292,7 +300,7 @@ def render(payload: dict) -> None:
 def main() -> None:
     sheet = json.loads(SHEET.read_text())
     audit = json.loads(AUDIT.read_text())
-    rows = source_rows()
+    rows, query_seconds = source_rows()
     assert len(rows) == audit["live_names"], "live-name read must see the known census"
     memo: dict[str, dict[str, str | None]] = {}
     sources = {name: sources_for(name, rows, memo) for name in rows}
@@ -347,7 +355,11 @@ def main() -> None:
                 )
             ],
         }
-        blast[rule]["largest_moves"] = blast[rule]["moves"][:10]
+        blast[rule]["largest_moves"] = [
+            move
+            for move in blast[rule]["moves"]
+            if move["from"] != "∅" and move["to"] != "∅"
+        ][:10]
 
     def detailed(row: dict, rule: str) -> dict:
         name = row["name"]
@@ -380,29 +392,47 @@ def main() -> None:
         if answers[row["name"]][selected] != row["label"]
     ]
     unfixed = []
-    for cohort_name, cohort in (
-        ("approved", approved),
-        ("calibration", calibration),
-        ("validation", validation),
-    ):
+    for cohort_name, cohort in (("approved", approved), ("calibration", calibration)):
         for row in cohort:
             name = row["name"]
             if all(answers[name][rule] != row["label"] for rule in RULES):
                 item = detailed(row, selected)
                 item["cohort"] = cohort_name
-                item["override_assessment"] = (
-                    "an override at a listed DD path could supply the approved domain"
-                    if item["sources"]
-                    else "no classified DD source; a path override needs a source first"
+                single_override_paths = []
+                for path in item["sources"]:
+                    revised = item["sources"] | {path: row["label"]}
+                    if choose_domain(revised, selected) == row["label"]:
+                        single_override_paths.append(path)
+                item["one_path_override_suffices"] = bool(single_override_paths)
+                item["one_path_override_example"] = (
+                    single_override_paths[0] if single_override_paths else None
                 )
-                item["all_source_domains_conflict"] = all(
+                item["all_source_domains_conflict"] = bool(item["sources"]) and all(
                     domain != row["label"] for domain in item["sources"].values()
                 )
+                if not item["sources"]:
+                    item["override_assessment"] = (
+                        "no DD source binding; a path override has no target"
+                    )
+                else:
+                    conflict = (
+                        "approved label conflicts with every DD source classification"
+                        if item["all_source_domains_conflict"]
+                        else "some DD sources carry the approved domain but lose the vote"
+                    )
+                    override = (
+                        f"one path override at {single_override_paths[0]} fixes "
+                        "the selected rule"
+                        if single_override_paths
+                        else "one path override cannot fix the selected rule"
+                    )
+                    item["override_assessment"] = f"{conflict}; {override}"
                 unfixed.append(item)
     payload = {
         "read_only": True,
         "measured_at_utc": datetime.now(UTC).isoformat(),
         "live_names": len(rows),
+        "query_seconds": round(query_seconds, 3),
         "source_control": {
             "name": "electron_temperature",
             "contains_core_plasma_physics": True,
@@ -425,7 +455,9 @@ def main() -> None:
     RESULTS.write_text(json.dumps(payload, indent=2) + "\n")
     make_figure(metrics, selected)
     render(payload)
-    print(f"live names: {len(rows)}; approved control: 9/20")
+    print(
+        f"live names: {len(rows)}; query: {query_seconds:.3f}s; approved control: 9/20"
+    )
     for cohort, scored in metrics.items():
         print(
             cohort, {rule: f"{m['correct']}/{m['count']}" for rule, m in scored.items()}
