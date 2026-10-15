@@ -143,9 +143,11 @@ categories:
 
   data_computing:
     scope: >-
-      Data products and computational infrastructure: archived and summary
-      results, atomic and molecular reference data, geometry definitions and
-      workflow tooling that carries no single physics subject.
+      Data products and computational infrastructure: the description and
+      metadata of a dataset, archives, atomic and molecular reference data,
+      geometry definitions and workflow tooling that carries no single physics
+      subject. A physical quantity stored under a data container keeps the
+      domain of the physics it names.
 
   general:
     scope: >-
@@ -1069,8 +1071,10 @@ domains:
       - quantity: a summary data product
         neighbour: data_management
         rule: >-
-          Operational metadata about a shot is machine_operations; the archived
-          summary data products from it are data_management.
+          Operational metadata about a shot is machine_operations; the
+          operation's own records do not become a data product by being
+          summarised, and a summary of a physical quantity takes that
+          quantity's domain instead.
       - quantity: a plant-system state
         neighbour: plant_systems
         rule: >-
@@ -1199,15 +1203,18 @@ domains:
 
   data_management:
     scope: >-
-      Summary data products, integrated analysis results and the archival and
-      FAIR metadata of a dataset. Judge by whether the quantity is a data
-      product assembled from a run, rather than a direct physics measurement
-      or state.
+      The dataset as such rather than the physics it records: dataset
+      description, provenance, FAIR metadata and the archives kept for
+      downstream use. Judge by whether the quantity says something about a
+      dataset — what it contains, where it came from, when it was written —
+      rather than about the plasma. A quantity that names a physical quantity
+      takes that quantity's domain even when it is stored under a container
+      such as `summary`, because the container records where the value is
+      filed and not what it measures.
     includes:
-      - summary and integrated global quantities — `summary/*`
-      - assembled data products that combine several sources
       - dataset description, provenance and FAIR metadata — `dataset_description/*`, `dataset_fair/*`
-      - archives and derived products intended for downstream use
+      - archives, catalogues and manifests of a dataset
+      - records of what a dataset holds, when it was produced and by what
     excludes:
       - quantity: a line-density constraint on the equilibrium
         neighbour: equilibrium
@@ -1218,9 +1225,12 @@ domains:
       - quantity: a directly measured or modelled plasma state
         neighbour: core_plasma_physics
         rule: >-
-          A plasma profile is core_plasma_physics; a product that summarises
-          many of them is data_management. The summary's own container decides
-          the domain, not the physical quantity it happens to name.
+          A plasma profile is core_plasma_physics, and a summary quantity
+          takes the domain of the physical quantity it names: an elongation
+          under `summary` is equilibrium, a fusion neutron rate is neutronics,
+          a plasma composition is the composition's domain. `data_management`
+          holds only data about the dataset itself, and being summarised into
+          a product does not turn a plasma quantity into such data.
       - quantity: operational metadata about a shot
         neighbour: machine_operations
         rule: >-
@@ -1263,11 +1273,12 @@ domains:
           exists to separate: a kinetic profile or a fast-particle
           distribution must not fall to computational_workflow merely because
           its IDS also carries numerics.
-      - quantity: an archived summary product
-        neighbour: data_management
+      - quantity: a physics quantity delivered as an assembled product
+        neighbour: core_plasma_physics
         rule: >-
-          Tooling and reference data are computational_workflow; a summary
-          product assembled from a run is data_management.
+          Tooling and reference data are computational_workflow; a product
+          that summarises physical quantities takes the domain of the
+          quantities it names, never that of the container it is delivered in.
       - quantity: a structural geometry of a real component
         neighbour: structural_components
         rule: >-
@@ -1298,9 +1309,10 @@ domains:
       - quantity: a summary data product
         neighbour: data_management
         rule: >-
-          A product assembled from a run is data_management; general is for a
-          physical quantity itself, not a container around many, so a summary
-          product does not default to general.
+          A summary product takes the domain of the physical quantity it
+          names; general is for a quantity with no single subject, and a
+          container around many quantities does not supply one. A product
+          about the dataset itself is data_management.
 
   gyrokinetics:
     scope: >-
