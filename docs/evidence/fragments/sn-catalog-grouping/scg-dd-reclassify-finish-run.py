@@ -1,27 +1,45 @@
 #!/usr/bin/env python3
-"""Run the DD build's classify phase in bounded passes and log each pass.
+"""Drive the DD path re-classification and read its result back from the graph.
 
-The re-classification runs as one pass per IDS group, because a single tool
-call cannot outlast ten minutes and the classify phase is all-or-nothing at the
-write. This driver invokes the CLI as a subprocess (the CLI must not be piped or
-redirected from a shell), captures the combined output, and writes a pass log
-whose first line is the literal command and whose last line is ``EXIT=<code>``.
-The CLI's own DEBUG log under ``~/.local/share/imas-codex/logs/`` is cited
-beside each pass log.
+Two subcommands:
+
+``pass``
+    Run one bounded re-classification pass over a set of IDS groups by invoking
+    the DD build's classify phase as a subprocess. The CLI must not be piped or
+    redirected from a shell, and a single tool call cannot outlast ten minutes,
+    so the pass is invoked through this driver and each pass log carries the
+    literal command on its first line and ``EXIT=<code>`` on its last. The
+    classify phase writes its result once, after every batch completes, so a
+    pass that is cut off before its write leaves the graph unchanged -- only
+    its spend is lost.
+
+``readback``
+    Read the classified result back from the graph under one bounded
+    connection: the ``domain_source`` distribution, the ``domain_source`` x
+    ``physics_domain`` matrix for the LLM-tier paths, how many ``summary`` paths
+    sit at ``data_management``, and the rule-labelled paths scored against the
+    graph.
 
 Usage:
-    python scg-dd-reclassify-finish-run.py --ids a b c [--reset] [--dry] \
+    python scg-dd-reclassify-finish-run.py pass --ids a b c [--reset] [--dry] \
         [--timeout 540] --log <path>
+    python scg-dd-reclassify-finish-run.py readback --labels <json> --out <json>
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 from pathlib import Path
 
 VENV = Path("/home/ITER/mcintos/Code/imas-codex/.venv")
+
+# domain_source values the two-tier classifier writes for a path it judged
+# itself, as opposed to one that inherited a parent's domain or was left null
+# for infrastructure metadata.
+LLM_TIER_SOURCES = ("jev_tree", "llm_classified")
 
 
 def _find_repo(start: Path) -> Path:
@@ -34,15 +52,7 @@ def _find_repo(start: Path) -> Path:
 REPO = _find_repo(Path(__file__).resolve())
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--ids", nargs="*", default=None)
-    ap.add_argument("--reset", action="store_true", help="pass --reset-to embedded")
-    ap.add_argument("--dry", action="store_true", help="pass --dry-run")
-    ap.add_argument("--timeout", type=int, default=540)
-    ap.add_argument("--log", required=True)
-    args = ap.parse_args()
-
+def _run_pass(args: argparse.Namespace) -> int:
     cmd = [str(VENV / "bin" / "imas-codex"), "imas", "dd", "build"]
     if args.reset:
         cmd += ["--reset-to", "embedded"]
@@ -71,6 +81,102 @@ def main() -> int:
         fh.write(f"\nEXIT={code}\n")
     print(f"wrote {log_path} EXIT={code}")
     return 0
+
+
+def _readback(args: argparse.Namespace) -> int:
+    from imas_codex.graph.client import GraphClient
+
+    labels = json.loads(Path(args.labels).read_text())["path_answers"]
+    label_paths = sorted(labels)
+
+    out: dict[str, object] = {"labelled_paths_total": len(label_paths)}
+
+    with GraphClient() as gc:
+        out["domain_source_distribution"] = {
+            str(r["src"]): r["c"]
+            for r in gc.query(
+                "MATCH (n:IMASNode) RETURN n.domain_source AS src, "
+                "count(*) AS c ORDER BY c DESC"
+            )
+        }
+
+        out["llm_tier_matrix"] = [
+            {
+                "domain_source": r["src"],
+                "physics_domain": r["dom"],
+                "count": r["c"],
+            }
+            for r in gc.query(
+                "MATCH (n:IMASNode) WHERE n.domain_source IN $srcs "
+                "RETURN n.domain_source AS src, n.physics_domain AS dom, "
+                "count(*) AS c ORDER BY src, c DESC",
+                srcs=list(LLM_TIER_SOURCES),
+            )
+        ]
+
+        out["summary_at_data_management"] = gc.query(
+            "MATCH (n:IMASNode {ids: 'summary'}) "
+            "WHERE n.physics_domain = 'data_management' "
+            "RETURN count(*) AS c"
+        )[0]["c"]
+        out["summary_total"] = gc.query(
+            "MATCH (n:IMASNode {ids: 'summary'}) RETURN count(*) AS c"
+        )[0]["c"]
+
+        graph_domains = {
+            r["id"]: r["dom"]
+            for r in gc.query(
+                "MATCH (n:IMASNode) WHERE n.id IN $paths "
+                "RETURN n.id AS id, n.physics_domain AS dom",
+                paths=label_paths,
+            )
+        }
+
+    matches = 0
+    mismatches = []
+    for path in label_paths:
+        lab = labels[path]
+        dom = graph_domains.get(path)
+        if dom == lab:
+            matches += 1
+        else:
+            mismatches.append({"path": path, "label": lab, "graph": dom})
+    out["labelled_paths_scored"] = len(graph_domains)
+    out["labelled_matches"] = matches
+    out["labelled_accuracy"] = (
+        round(matches / len(graph_domains), 4) if graph_domains else None
+    )
+    out["labelled_mismatches"] = mismatches
+
+    Path(args.out).write_text(json.dumps(out, indent=2) + "\n")
+    src = out["domain_source_distribution"]
+    print(
+        f"wrote {args.out}: {matches}/{len(graph_domains)} labelled match; "
+        f"summary/data_management={out['summary_at_data_management']}; "
+        f"jev_tree={src.get('jev_tree')} llm_classified={src.get('llm_classified')}"
+    )
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p = sub.add_parser("pass")
+    p.add_argument("--ids", nargs="*", default=None)
+    p.add_argument("--reset", action="store_true")
+    p.add_argument("--dry", action="store_true")
+    p.add_argument("--timeout", type=int, default=540)
+    p.add_argument("--log", required=True)
+    p.set_defaults(func=_run_pass)
+
+    r = sub.add_parser("readback")
+    r.add_argument("--labels", required=True)
+    r.add_argument("--out", required=True)
+    r.set_defaults(func=_readback)
+
+    args = ap.parse_args()
+    return args.func(args)
 
 
 if __name__ == "__main__":
