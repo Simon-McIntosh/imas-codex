@@ -1,0 +1,239 @@
+<section id="scg-domain-consistency-audit">
+  <h2>Live-name domain consistency audit</h2>
+
+  <p>
+    A new read-only instrument, <code>imas_codex/standard_names/domain_audit.py</code>,
+    re-asks the domain derivation's own question of every live standard name and
+    reports the names that disagree. It writes nothing: it opens the live graph,
+    reads the live names in one bounded scan, and returns a count and the failing
+    ids per check. The four checks, in the order the module states them, are that
+    <code>physics_domain</code> is set; that <code>physics_domain</code> equals
+    <code>select_primary_domain(expected)</code> (the one selector in
+    <code>domain_ranking</code>, not a re-ranking); that <code>source_domains</code>
+    equals the expected set — the domains of the name's current
+    <code>StandardNameSource</code> DD paths, or, for a derived parent with no DD
+    source, the union of its live children's expected sets; and that its
+    <code>HAS_PHYSICS_DOMAIN</code> edges are exactly <code>source_domains</code>.
+    Every comparison is between sets, so arrival order and duplicates carry no
+    meaning.
+  </p>
+
+  <p>
+    Run once against the live graph from the audit module landed at revision
+    <code>f17b64387</code> (log: <code>census.log</code>, which records the
+    command line, the tree revision it ran at, and <code>EXIT=0</code> last). The
+    read saw <strong>2,677 live names</strong> — those holding stage
+    <code>accepted</code>, <code>reviewed</code>, <code>drafted</code> or
+    <code>pending</code> — against the 2,675 the plan's section-3 census of
+    2026-10-13 recorded. Two names were added in the interval, which is why the
+    counts below are read as a fresh figure rather than as a corrected census.
+  </p>
+
+  <h3 id="scg-domain-consistency-audit-census">The four checks beside the census</h3>
+
+  <table id="scg-domain-consistency-audit-census-table">
+    <thead>
+      <tr>
+        <th>Check</th>
+        <th>This audit</th>
+        <th>Census row, 2026-10-13</th>
+        <th>Census</th>
+        <th>How close the two measures are</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="scg-domain-consistency-audit-check-domain-set">
+        <td><code>physics_domain</code> is set</td>
+        <td>212</td>
+        <td><code>physics_domain_unset</code></td>
+        <td>212</td>
+        <td>Exact — same question, same property.</td>
+      </tr>
+      <tr id="scg-domain-consistency-audit-check-domain-derived">
+        <td><code>physics_domain</code> equals the derivation's answer</td>
+        <td>1477</td>
+        <td><code>domain_none_of_dd_sources</code></td>
+        <td>560</td>
+        <td>
+          Approximate. This check fires on any disagreement between the stored
+          scalar and the selection, including one that is merely a lower-ranked
+          member of the same set; the census splits that disagreement across
+          <code>domain_none_of_dd_sources</code>,
+          <code>physics_domain_not_among_edges</code> and
+          <code>physics_domain_not_in_source_domains</code>, so its row is the
+          nearest single row, not the same measure.
+        </td>
+      </tr>
+      <tr id="scg-domain-consistency-audit-check-sources">
+        <td><code>source_domains</code> equals the expected set</td>
+        <td>1701</td>
+        <td><code>source_domains_differ_from_dd_sources</code></td>
+        <td>1147</td>
+        <td>
+          Near-exact — the same property against the same source-derived set. The
+          gap is the derived parents: a name with no DD source contributes nothing
+          to the census's set while this audit gives it its children's union.
+        </td>
+      </tr>
+      <tr id="scg-domain-consistency-audit-check-edges">
+        <td><code>HAS_PHYSICS_DOMAIN</code> edges equal <code>source_domains</code></td>
+        <td>777</td>
+        <td><code>edges_differ_from_source_domains</code></td>
+        <td>777</td>
+        <td>Exact — the same property pair, over the same population. The edge is matched unlabelled so a stray target surfaces rather than being read past, and a name with no edge has an empty edge set rather than a placeholder, so absence and an unnameable target stay separate findings.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="scg-domain-consistency-audit-census-notes">
+    Two of the four checks measure more names than their census row, and the
+    direction is the same in both: this audit treats a disagreement as a failure
+    wherever it sits, while the census's rows partition the same population
+    differently. The edges check is exact — 777 against 777, which is the
+    strongest agreement available to a checker written independently of the
+    census, and the reason the two figures agree is worth stating, because it is
+    also where the count is decided: the check compares an <em>empty</em> edge set
+    to an empty <code>source_domains</code> as a match. Of the 984 live names that
+    carry no <code>HAS_PHYSICS_DOMAIN</code> edge, the 238 that claim no domains
+    either are not disagreements and drop out; the other 746 do fail the check,
+    correctly, because they claim domains the graph holds no edge for. The
+    remaining 31 are names whose <code>source_domains</code> and edge set are both
+    non-empty and disagree — 746 + 31 = 777. No edge on the live graph points at a
+    target without an <code>id</code>, so the unnameable-target half of the check
+    is armed and untriggered. The per-check ids are in
+    <code>scg-domain-consistency-audit-results.json</code> beside these counts.
+  </p>
+
+  <h3 id="scg-domain-consistency-audit-schema">The schema property that carries &ldquo;live&rdquo;</h3>
+
+  <p>
+    The live set is read from <code>name_stage</code> on
+    <code>StandardName</code>. Every property and relationship the query touches
+    was checked against <code>imas_codex/schemas/standard_name.yaml</code> first,
+    because a query on a property the schema does not define returns zero rows
+    rather than an error. The two lines that decide the row set, quoted from the
+    schema:
+  </p>
+
+  <pre id="scg-domain-consistency-audit-schema-lines"><code>      name_stage:
+        description: >-
+          Name-pipeline stage for this StandardName. Set by
+          _finalize_generated_name_stage (drafted), the name-review worker
+          (reviewed, accepted, exhausted), persist_refined_name (superseded
+          on predecessor, drafted on new node), and the refine_name claim
+          (refining). See NameStage enum for all values.
+        range: NameStage</code></pre>
+
+  <p>
+    <code>NameStage</code> declares <code>pending</code>, <code>drafted</code>,
+    <code>reviewed</code>, <code>accepted</code>, <code>exhausted</code> and
+    <code>superseded</code>. The audit takes the first four as live: an
+    exhausted or superseded name is no longer claimed by the catalog, so its
+    edges are the deliberate provenance record and there is no derivation for it
+    to contradict.
+  </p>
+
+  <h3 id="scg-domain-consistency-audit-largest">Ten names drawing on the most domains</h3>
+
+  <p>
+    A sample of the expected sets, largest first, ties by id. These are the names
+    whose single scalar <code>physics_domain</code> is doing the most work: each
+    could have come from many source paths and the selection collapses them to
+    one label.
+  </p>
+
+  <table id="scg-domain-consistency-audit-largest-table">
+    <thead>
+      <tr><th>Name</th><th>Expected domains</th><th>Count</th></tr>
+    </thead>
+    <tbody>
+      <tr id="scg-domain-consistency-audit-largest-radial-coordinate"><td><code>radial_coordinate</code></td><td>auxiliary_heating, divertor_physics, electromagnetic_wave_diagnostics, equilibrium, fueling, gyrokinetics, magnetic_field_diagnostics, magnetic_field_systems, magnetohydrodynamics, mechanical_measurement_diagnostics, neutronics, particle_measurement_diagnostics, plasma_control, radiation_measurement_diagnostics, spectroscopy, waves</td><td>16</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-atomic-count"><td><code>atomic_count</code></td><td>auxiliary_heating, computational_workflow, core_plasma_physics, edge_plasma_physics, fast_particles, fueling, plant_systems, plasma_control, plasma_initiation, plasma_wall_interactions, radiation_measurement_diagnostics, spectroscopy, transport, turbulence, waves</td><td>15</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-atomic-mass"><td><code>atomic_mass</code></td><td>auxiliary_heating, computational_workflow, core_plasma_physics, edge_plasma_physics, fast_particles, fueling, plant_systems, plasma_control, plasma_wall_interactions, spectroscopy, transport, waves</td><td>12</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-radial-coordinate-position"><td><code>radial_coordinate_of_measurement_position</code></td><td>auxiliary_heating, electromagnetic_wave_diagnostics, equilibrium, fueling, magnetic_field_diagnostics, magnetohydrodynamics, mechanical_measurement_diagnostics, neutronics, particle_measurement_diagnostics, radiation_measurement_diagnostics, spectroscopy, waves</td><td>12</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-atomic-number"><td><code>atomic_number</code></td><td>auxiliary_heating, core_plasma_physics, edge_plasma_physics, fueling, plant_systems, plasma_control, plasma_wall_interactions, spectroscopy, turbulence, waves</td><td>10</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-electric-field"><td><code>electric_field</code></td><td>core_plasma_physics, edge_plasma_physics, electromagnetic_wave_diagnostics, magnetic_field_systems, magnetohydrodynamics, plasma_initiation, radiation_measurement_diagnostics, spectroscopy, transport, waves</td><td>10</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-ion-charge"><td><code>ion_charge</code></td><td>core_plasma_physics, edge_plasma_physics, fast_particles, plasma_control, plasma_wall_interactions, spectroscopy, transport, turbulence, waves</td><td>9</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-normalized-toroidal-flux"><td><code>normalized_toroidal_flux_coordinate</code></td><td>auxiliary_heating, computational_workflow, edge_plasma_physics, electromagnetic_wave_diagnostics, equilibrium, magnetohydrodynamics, particle_measurement_diagnostics, radiation_measurement_diagnostics, transport</td><td>9</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-toroidal-angle-position"><td><code>toroidal_angle_of_measurement_position</code></td><td>auxiliary_heating, electromagnetic_wave_diagnostics, equilibrium, fueling, magnetic_field_diagnostics, mechanical_measurement_diagnostics, particle_measurement_diagnostics, radiation_measurement_diagnostics, spectroscopy</td><td>9</td></tr>
+      <tr id="scg-domain-consistency-audit-largest-vertical-coordinate-position"><td><code>vertical_coordinate_of_measurement_position</code></td><td>auxiliary_heating, electromagnetic_wave_diagnostics, equilibrium, fueling, mechanical_measurement_diagnostics, particle_measurement_diagnostics, radiation_measurement_diagnostics, spectroscopy, waves</td><td>9</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="scg-domain-consistency-audit-approved">The twenty lead-approved names</h3>
+
+  <p>
+    The twenty names in <code>scg-domain-label-sheet.json</code>, each beside the
+    domain the graph stores now, the domain the derivation answers, and the
+    approved label. All twenty are live. <strong>7 of 20 carry the approved
+    domain</strong> and <strong>9 of 20</strong> have the derivation agree with
+    the approval — and the two sets do not coincide, which is the useful part:
+    <code>safety_factor</code> and <code>normalized_poloidal_flux_coordinate</code>
+    are stored on a domain the derivation does not choose, and the derivation's
+    answer for them is the approved one.
+  </p>
+
+  <table id="scg-domain-consistency-audit-approved-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Stored <code>physics_domain</code></th>
+        <th>Derivation's answer</th>
+        <th>Approved</th>
+        <th>Agreement</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="scg-domain-consistency-audit-approved-electron-temperature"><td><code>electron_temperature</code></td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>core_plasma_physics</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-electron-density"><td><code>electron_density</code></td><td>equilibrium</td><td>equilibrium</td><td>core_plasma_physics</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-safety-factor"><td><code>safety_factor</code></td><td>transport</td><td>equilibrium</td><td>equilibrium</td><td>Derivation only</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-plasma-current"><td><code>plasma_current</code></td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>Both</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-poloidal-magnetic-flux"><td><code>poloidal_magnetic_flux</code></td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>Both</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-atomic-count"><td><code>atomic_count</code></td><td>transport</td><td>transport</td><td>general</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-atomic-mass"><td><code>atomic_mass</code></td><td>transport</td><td>transport</td><td>general</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-radial-los"><td><code>radial_coordinate_of_line_of_sight</code></td><td>radiation_measurement_diagnostics</td><td>fueling</td><td>plasma_measurement_diagnostics</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-vertical-los"><td><code>vertical_coordinate_of_line_of_sight</code></td><td>electromagnetic_wave_diagnostics</td><td>fueling</td><td>plasma_measurement_diagnostics</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-atomic-number"><td><code>atomic_number</code></td><td>transport</td><td>core_plasma_physics</td><td>general</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-ion-charge"><td><code>ion_charge</code></td><td>transport</td><td>transport</td><td>core_plasma_physics</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-ion-state-max-charge"><td><code>ion_state_maximum_charge_number</code></td><td>transport</td><td>transport</td><td>core_plasma_physics</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-normalized-poloidal-flux"><td><code>normalized_poloidal_flux_coordinate</code></td><td>magnetohydrodynamics</td><td>equilibrium</td><td>equilibrium</td><td>Derivation only</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-poloidal-flux-boundary"><td><code>poloidal_magnetic_flux_at_plasma_boundary</code></td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>Both</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-toroidal-angle-position"><td><code>toroidal_angle_of_measurement_position</code></td><td>equilibrium</td><td>equilibrium</td><td>plasma_measurement_diagnostics</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-normalized-toroidal-flux"><td><code>normalized_toroidal_flux_coordinate</code></td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>Both</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-aperture-area"><td><code>area_of_diagnostic_aperture</code></td><td>radiation_measurement_diagnostics</td><td>auxiliary_heating</td><td>plasma_measurement_diagnostics</td><td>Neither</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-flux-surface-volume"><td><code>volume_of_flux_surface</code></td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>Both</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-toroidal-flux"><td><code>toroidal_flux_coordinate</code></td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>Both</td></tr>
+      <tr id="scg-domain-consistency-audit-approved-reference-major-radius"><td><code>reference_major_radius</code></td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>Both</td></tr>
+    </tbody>
+  </table>
+
+  <p id="scg-domain-consistency-audit-approved-notes">
+    The disagreement runs in both directions, so it is not one stale writer being
+    read off one name: seven of the twenty have no agreement at all, and the
+    derivation answers a <em>different</em> domain from the stored one for
+    <code>safety_factor</code>, <code>normalized_poloidal_flux_coordinate</code>,
+    <code>atomic_number</code>, <code>area_of_diagnostic_aperture</code> and both
+    line-of-sight coordinates. Where the stored value and the derivation agree
+    but the approval does not — <code>electron_temperature</code>,
+    <code>electron_density</code>, <code>atomic_count</code>,
+    <code>ion_charge</code> — the derivation is doing exactly what the graph's
+    sources say, and the lead's approval is a different claim: the sources
+    classify the quantity by where it appears, the approval by what it is. That
+    distinction is the repair node's to settle, not this audit's; this audit only
+    reports that 13 of the 20 names are stored on a domain the lead-approved
+    sheet does not name.
+  </p>
+
+  <p>
+    Everything above is read-only output of one run. The instrument itself is
+    covered by <code>tests/standard_names/test_domain_audit.py</code>: each check
+    has a passing and a failing fixture, a derived parent carries its own, an
+    order-and-duplicate-only difference must pass, and removing the four
+    comparisons turns the file red: the recorded control run reads
+    <strong>10 failed, 37 passed</strong> of 47 collected, in
+    <code>negative-control.log</code>, after which the module is restored
+    byte-for-byte. That figure is not transcribed by hand — the census run checks
+    this paragraph against the log it cites and exits non-zero if they disagree,
+    so the record and the log cannot drift apart.
+  </p>
+</section>
