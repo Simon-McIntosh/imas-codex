@@ -1,0 +1,48 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "db4d66dd177e510e2d4f6b27387e6277f99da7b0",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T19:41:59Z",
+  "dispatched_at": "2026-10-15T19:35:44Z",
+  "findings": [],
+  "head_log_revision": "0db9968da0046c08550eb173b233f878a4abad80",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "from 0db9968da0046c08550eb173b233f878a4abad80 to 28c5134395b2301c606a519cd85bcdaec6f9a711, one commit adds only the 32-line evidence fragment and adds no code, definitions or assertions.",
+    "done_when": "the source brief requires base and merged-head counts and failing IDs plus attribution for added failures; base-cli.log and head-cli.log each reach a pytest summary and EXIT=0, and the fragment at lines 14-25 reports 146 and 151 passes with no IDs to attribute.",
+    "goal": "the source brief asks for a code-free CLI regression comparison, and docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:1-32 records the two runs, their counts and the zero added-failure result.",
+    "manifest": "the source manifest names commit 28c5134395b2301c606a519cd85bcdaec6f9a711, both completed suite records, both log paths, 146 and 151 passes, and no failing IDs.",
+    "write_paths": "the source manifest grants docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html and the related figures directory, and the sole changed path is that HTML fragment."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:14-25 adds no assertion to protect the report itself, while head-cli.log records the five existing logging tests alongside the 146 existing CLI tests that would fail for a covered logging or CLI regression.",
+    "evidence": "docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:26-31 links the complete receipts whose summaries report 146 and 151 passes and whose final lines both read EXIT=0.",
+    "fit": "docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:1-32 uses a semantic section, a compact results table and receipt paths, with no new source identifier or forbidden name.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:14-25 states both gate counts and the zero added failures the source goal asks to record.",
+    "reuse": "docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:1-32 adds no function, class or module and therefore forks no existing runtime capability.",
+    "scope_discipline": "docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html is the diff's only path and is within the source manifest's declared write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief asks for a code-free CLI regression comparison, and docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:1-32 records the two runs, their counts and the zero added-failure result.\nVERDICT done_when: the source brief requires base and merged-head counts and failing IDs plus attribution for added failures; base-cli.log and head-cli.log each reach a pytest summary and EXIT=0, and the fragment at lines 14-25 reports 146 and 151 passes with no IDs to attribute.\nVERDICT write_paths: the source manifest grants docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html and the related figures directory, and the sole changed path is that HTML fragment.\nVERDICT manifest: the source manifest names commit 28c5134395b2301c606a519cd85bcdaec6f9a711, both completed suite records, both log paths, 146 and 151 passes, and no failing IDs.\nVERDICT diff: from 0db9968da0046c08550eb173b233f878a4abad80 to 28c5134395b2301c606a519cd85bcdaec6f9a711, one commit adds only the 32-line evidence fragment and adds no code, definitions or assertions.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:14-25 states both gate counts and the zero added failures the source goal asks to record.\nSCORE evidence: 20\nJUSTIFICATION evidence: docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:26-31 links the complete receipts whose summaries report 146 and 151 passes and whose final lines both read EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html is the diff's only path and is within the source manifest's declared write scope.\nSCORE durability: 15\nJUSTIFICATION durability: docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:14-25 adds no assertion to protect the report itself, while head-cli.log records the five existing logging tests alongside the 146 existing CLI tests that would fail for a covered logging or CLI regression.\nSCORE fit: 19\nJUSTIFICATION fit: docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:1-32 uses a semantic section, a compact results table and receipt paths, with no new source identifier or forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html:1-32 adds no function, class or module and therefore forks no existing runtime capability.\n",
+  "review_run_id": "r-20261015T193445843812-review-of-shc-run-log-verify-28c5134395b2",
+  "reviewed_base_sha": "0db9968da0046c08550eb173b233f878a4abad80",
+  "reviewed_head_sha": "28c5134395b2301c606a519cd85bcdaec6f9a711",
+  "reviewed_run_id": "r-20261015T192418977789-shc-run-log-verify",
+  "scores": {
+    "durability": 15,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T19:39:13.919127+00:00",
+  "total": 114
+}
