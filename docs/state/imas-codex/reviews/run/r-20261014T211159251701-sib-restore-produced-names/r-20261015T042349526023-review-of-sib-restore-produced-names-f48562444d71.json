@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:7566",
+    "imas_codex/standard_names/repair_authority.py:135"
+  ],
+  "completed_at": "2026-10-15T04:39:14.602Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "an operational signed apply against the live graph adds no test by design; its controls are the refused control row, the readback counts (successorless 513 to 498, population unchanged) and the replay preview",
+      "recorded_at": "2026-10-15T04:42:35.210582+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-15T04:24:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-produced-names-run.py",
+      "line": "290",
+      "severity": "follow-on",
+      "text": "follow-on: the split-rationale assertion at :290 compares the receipt reason stored in the graph against SPLIT_ACCEPTED, the same constant retirement_reason() at :114 fed to apply_signed_manifest, so both sides move together and the assertion holds whatever the constant says; it catches only a graph write that dropped the rationale, not a rationale that regressed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-produced-names-run.py",
+      "line": "182",
+      "severity": "follow-on",
+      "text": "follow-on: the replay preview in replay.log re-admits all 25 applied rows (would_change=25, changed=0), so the applied authority is not replay-stable; the guard gap is pre-existing for successor-link rows and the node records it under follow_ons and leaves repair elsewhere, but the ten retirement rows now widen its reach."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s): the signed-manifest write path apply_signed_manifest (imas_codex/standard_names/signed_manifest.py:7566) the authority is applied through, and the canonical authority builder build_repair_authority (imas_codex/standard_names/repair_authority.py:135) the rows are emitted by; the graph instrument itself is an evidence script, not runtime code.",
+    "diff": "read all three commits against base c8ab3575: 2e0e49b3c adds the drift record and stop instrument, 91eb6b0cc signs the 15 link and 10 retirement rows via build_repair_authority, f48562444 records the readback; every path is the fragment directory, no product code and no test.",
+    "done_when": "the revised \u00a732 done_when requires the authority to preview 25 admitted (15 links, 10 retirements) with 1 control refused and apply under that digest, and a logged read showing each of the 15 with exactly one receipt-stamped edge, each of the 10 with one retirement receipt still superseded, population unchanged and successor-less down 15; preview.log records 25 admitted/1 refused, apply.log the digest, and readback-final.log the 15 edges, 10 receipts, 2166\u21922166 and 513\u2192498.",
+    "goal": "the dispatched goal (prompt.txt:30) reads 'Restore the 25 still-produced superseded names to their stated stages', but plan sn-integrity-backlog \u00a732 was revised mid-flight (version 156: 'The restore this section first asked for is withdrawn... the lead ruled to link 15 and record 10'); the landed change implements the revised ruling, and commit 2e0e49b3c records the drift and the NEEDS-HELP stop (final.txt) that triggered the revision.",
+    "manifest": "read; it sets status complete, names commits 2e0e49b3c/91eb6b0cc/f48562444, records the cypher property check 4 passed EXIT=0 and the readback logs, and carries the replay re-admission under follow_ons.",
+    "write_paths": "the fence (prompt.txt:186-190) names the html, the authority JSON, the run.py and a docs/figures/sn-integrity-backlog/sib-restore-produced-names directory; git diff --name-status c8ab3575 f48562444 adds exactly the three fragment files (A) and nothing else."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261015T042349526023-review-of-sib-restore-produced-names-f48562444d71",
+  "reviewed_base_sha": "c8ab3575c264e481b99d733c92ad69c83534bf20",
+  "reviewed_head_sha": "f48562444d712b96ee996fd4545d725496359172",
+  "reviewed_run_id": "r-20261014T211159251701-sib-restore-produced-names",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "subject": "r-20261014T211159251701-sib-restore-produced-names",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T04:44:05.660257+00:00",
+  "total": 99
+}
