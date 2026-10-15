@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-15T10:32:41.898Z",
+  "dispatched_at": "2026-10-15T10:21:26Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:23",
+      "id": "wiring-1",
+      "reason": "without the edge (or an explicit \"\u00a713 lands before the \u00a73 final apply\" ordering), \u00a73's completion apply runs with no file logging, which is exactly the gap \u00a713 was added to close, and the same shape was already acted on for \u00a73's \u00a75\u2013\u00a712 edges.",
+      "text": "\u00a713 states that \"\u00a73's final apply and \u00a74's three-family measure both spend, and their evidence must be readable afterwards\", yet the `plan-section-depends-on` map gives `s3` only \u00a75\u2013\u00a712 and `s4` only `sn-house-style#s5`, and \u00a73's done-when (line 182) enumerates its prerequisites as \"\u00a75 to \u00a712\" only; \u00a713 therefore has no consumer edge, so the apply it exists to log can be dispatched before it lands",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-harmonize-command.html:245",
+      "id": "reasoning-1",
+      "reason": "the repair (call the shared helper at the harmonize entry) is right and unaltered; only the \"every other\" framing is overstated, and correcting it would change no work item.",
+      "text": "\u00a713 justifies the repair with \"Every other `sn` command that spends calls `setup_logging` \u2026 `sn review` ~6433, and `sn run` ~3031\", but `sn edit` (`imas_codex/cli/sn.py:6849`) spends model calls through `run_inline_review` and calls neither `setup_logging` nor `configure_cli_logging`, so harmonize is not the sole spender without a log",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "69ada8b5b5b741ebd88c7f22cbde82124d9cdf03947b0616293c1795c43b250b",
+  "plan_slug": "sn-harmonize-command",
+  "plan_version": 86,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261015T102108474519-plan-review-of-sn-harmonize-command",
+  "reviewed_blob_sha": "67f61e83262752bd81e6874d63097a92e765ef73",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/cli/discover/common.py` (`setup_logging`, line 219), `sn review` at `sn.py:6433`, `sn run` at `sn.py:3031` and `sn harmonize` at `sn.py:5909` all resolve as cited; every evidence href in the document resolves with `.html` appended, and each cited fragment exists under `docs/evidence/fragments/sn-harmonize-command/`.",
+    "done_when": "pass \u2014 \u00a713's done-when is measurable (\"invokes `sn harmonize --report` \u2026 asserts `configure_cli_logging` is called with domain `sn` and the `sn-harmonize` stem\") and declares its negative control (\"the test fails with the call removed\"); the `_document` change adds only the section's declaration.",
+    "evidence_paths": "pass \u2014 \u00a713's own output lands at `~/.local/share/imas-codex/logs/`, a durable home path a later reader can open, not a scratchpad or node-local temporary.",
+    "naming": "pass \u2014 \u00a713 introduces no symbols, and `sn-harmonize` is the log file's stem (a data value), not a plan label or ticket number.",
+    "reasoning": "a finding \u2014 \u00a713's premise \"Every other `sn` command that spends calls `setup_logging`\" is contradicted by `sn edit`, which spends through `run_inline_review` and calls no logging helper; the mechanism \u00a713 proposes is nonetheless correct and independently verified.",
+    "single_goal": "pass \u2014 \u00a713 carries one deliverable (call the shared logging helper at the harmonize entry); the `_document` change declares it `implementable` and nothing else.",
+    "wiring": "a finding \u2014 the `_document` dependency declarations (`plan.html:23`) and \u00a73's done-when do not name \u00a713, although \u00a713's own text declares \u00a73's final apply and \u00a74's measure as its consumers."
+  },
+  "section_digests": {
+    "_document": "5f566777994e3e2cdf9f086601e7bc065cdbc21a2f0ea427a851646137d94b95",
+    "s1": "4fa12690005d1b41ae8396edb8ea97780c9c6ff0ae9044de84c59e8d354923a8",
+    "s10": "d1bb9bb9dfcae650a5653ea3bbdb319e3ecf676ab9a3cc351968b46d2f10607a",
+    "s11": "cb00438301915812ef678ff6517b2477e98180338b6d1863e1a73e87af25a889",
+    "s12": "783b5bfd673def7e7a1b834abaabe5858e0ea763e54aadcb2a31c7d0cab015a5",
+    "s13": "6882b90ec08c7df243e7e3cb3766f403d4fe7aa8632f263f48cd1248c9facf1d",
+    "s2": "767a2fe2b092486b6f4c5277a919edca224cd3a5f242f4bf747c1657bda4d5af",
+    "s3": "9416801e555c3ed92b47ddba985fbf47123b22c7ddd20d69a46baa82f2840272",
+    "s4": "d8a195d581499ba47528563ccd0b133c2a64fcc77f88bdffde03a1ef4e28a4aa",
+    "s5": "ebb66a7ebb10c4aad132f61567b089ce315607a670a86403166cdf201a496bbf",
+    "s6": "74bec4f3403c9293f29290ca6de60b070dd4973bb9e04aef58c53838d9ca9932",
+    "s7": "2eed016a7c36b87fbd866c3a21ae396d57071d75eebb6222595db5e505dd8701",
+    "s8": "bc1625cd02b97ea52367a81c977f73194ffee6eb11240f56cbecfd9adb7b9de9",
+    "s9": "a56a7ae67d3f4140a7d38abbe65fb56d981b5b3bff3ced30fa63005c9dfebcb3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T11:06:02.480514+00:00"
+}
