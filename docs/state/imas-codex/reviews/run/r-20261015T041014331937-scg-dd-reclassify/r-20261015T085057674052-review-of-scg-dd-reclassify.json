@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/graph/dd_domain_classifier.py:_tree_threshold",
+    "imas_codex/graph/dd_domain_classifier.py:1266",
+    "imas_codex/graph/dd_domain_classifier.py:713",
+    "imas_codex/settings.py:get_sn_domain_tree_threshold"
+  ],
+  "completed_at": "2026-10-15T09:08:55.166Z",
+  "dispatched_at": "2026-10-15T08:51:12Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: spend_usd reads 12.43 while spend_landed_usd (:423) reads 14.05 and spend_incurred_usd (:425) reads 15.73 in the same file, so the headline spend contradicts the body and a reader checking the ceiling the run stopped the remaining groups against gets two different numbers."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json",
+      "line": "450",
+      "severity": "follow-on",
+      "text": "follow-on: projected_remaining_usd reads 11.13 and projected_total_usd (:451) 25.24 while projected_finish_total_usd (:14) reads 23.56, and 11.13 is not tier1_paths_remaining 4,801 (:449) times spend_per_path_usd 0.001942 (which is 9.32), so the stale pre-drain projection and the current one both survive in one object."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json",
+      "line": "9",
+      "severity": "follow-on",
+      "text": "follow-on: chat_share 0.5564 equals 112/201, the count the pyproject comment (pyproject.toml:379) and scg-tree-rerun-revised-guidance.html:16 assign to the TREE, so the tree_settled_share/chat_share pair is labelled opposite to the figure the threshold comment cites."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T041014331937-scg-dd-reclassify/manifest.md",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: orientation_base_sha ad5ca7a167ff27fd025ab0037e6ddb4571f0d2ba6a resolves to no object; the commit the review was taken from is ad5ca7a167ff27fd025ab0037e6ddb4571a66e8b, so the record's own base revision cannot be checked against the diff."
+    },
+    {
+      "file": "tests/graph/test_dd_build_classify_tree.py",
+      "line": "178",
+      "severity": "follow-on",
+      "text": "follow-on: the node edited a test file its brief's Write-scope section does not list (commit e26fd6676 called it out of scope, b19b3ee18 then changed it), so the threshold change and the test repair landed in one node despite the declared scope separating them."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against base ad5ca7a16 over e26fd6676..61bfe044e; one config value in pyproject.toml, one test file made threshold-agnostic, and three new evidence documents, nothing else.",
+    "done_when": "the done-when names tests/graph/test_dd_build_classify_tree.py passing at head (manifest records 5 passed EXIT=0, log test-classify-tree-at-head.log) and the 201-path readback with its log at EXIT=0 (readback logs exit 0, fragment and results JSON report 95/113=0.8407); both hold, but results.json:10 and :450 carry spend/projection figures that contradict its own :423/:425/:451.",
+    "goal": "the node re-classifies DD path domains at the 0.8 tree threshold; pyproject.toml:381 moves [tool.imas-codex.sn-domain-tree].threshold 0.9->0.8 and eleven IDS groups were run through `imas dd build --reset-to embedded`, landing 7,235 of 12,036 Tier-1 paths, with the remaining eight groups stopped for a lead ruling.",
+    "manifest": "read; it states the gate (5 passed, EXIT=0 at head) and the readback, but its orientation_base_sha ad5ca7a167ff27fd025ab0037e6ddb4571f0d2ba6a names no commit (the resolved base is ad5ca7a167ff27fd025ab0037e6ddb4571a66e8b).",
+    "write_paths": "the manifest declares pyproject.toml, tests/graph/test_dd_build_classify_tree.py, the three sn-catalog-grouping/scg-dd-reclassify fragments and a docs/figures dir; the diff touches only pyproject.toml, the test file and the three fragments, all inside the declared set, though the test file is absent from the brief's own Write-scope list."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_dd_build_classify_tree.py:293 monkeypatches get_sn_domain_tree_threshold to probe*0.5 and reddens if routing ignores the setting, so the mechanism is guarded, but the 0.8 value itself is unpinned (the base arm test-classify-tree.log shows the old pinned tests red.",
+    "evidence": "the gate log tests/graph/test_dd_build_classify_tree.py (5 passed, EXIT=0) and the readback log are recorded, but the delivered docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json states spend_usd 12.43 (:10) against spend_landed_usd 14.05 (:423)/spend_incurred_usd 15.73 (:425) in its own body.",
+    "fit": "the added helpers threshold_bar/probes_bracketing at tests/graph/test_dd_build_classify_tree.py:181-195 are named by behaviour and carry no plan or gate label, matching the module's style.",
+    "goal_fidelity": "pyproject.toml:381 sets threshold 0.8 and the fragment docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify.html records eleven groups re-classified, though eight groups remain by the coordinator's ruling rather than by defect.",
+    "reuse": "the change reuses the existing owner imas_codex/settings.py:1480 get_sn_domain_tree_threshold rather than adding a second threshold mechanism, and the added test helpers are test-local.",
+    "scope_discipline": "every path in the diff resolves within the manifest's orientation_write_paths, but tests/graph/test_dd_build_classify_tree.py is outside the brief's declared Write scope and commit e26fd6676 itself called the file out of scope before b19b3ee18 edited it."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node re-classifies DD path domains at the 0.8 tree threshold; pyproject.toml:381 moves [tool.imas-codex.sn-domain-tree].threshold 0.9->0.8 and eleven IDS groups were run through `imas dd build --reset-to embedded`, landing 7,235 of 12,036 Tier-1 paths, with the remaining eight groups stopped for a lead ruling.\nVERDICT done_when: the done-when names tests/graph/test_dd_build_classify_tree.py passing at head (manifest records 5 passed EXIT=0, log test-classify-tree-at-head.log) and the 201-path readback with its log at EXIT=0 (readback logs exit 0, fragment and results JSON report 95/113=0.8407); both hold, but results.json:10 and :450 carry spend/projection figures that contradict its own :423/:425/:451.\nVERDICT write_paths: the manifest declares pyproject.toml, tests/graph/test_dd_build_classify_tree.py, the three sn-catalog-grouping/scg-dd-reclassify fragments and a docs/figures dir; the diff touches only pyproject.toml, the test file and the three fragments, all inside the declared set, though the test file is absent from the brief's own Write-scope list.\nVERDICT manifest: read; it states the gate (5 passed, EXIT=0 at head) and the readback, but its orientation_base_sha ad5ca7a167ff27fd025ab0037e6ddb4571f0d2ba6a names no commit (the resolved base is ad5ca7a167ff27fd025ab0037e6ddb4571a66e8b).\nVERDICT diff: read commit by commit against base ad5ca7a16 over e26fd6676..61bfe044e; one config value in pyproject.toml, one test file made threshold-agnostic, and three new evidence documents, nothing else.\nCALL_SITES: imas_codex/graph/dd_domain_classifier.py:_tree_threshold, imas_codex/graph/dd_domain_classifier.py:1266, imas_codex/graph/dd_domain_classifier.py:713, imas_codex/settings.py:get_sn_domain_tree_threshold\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: pyproject.toml:381 sets threshold 0.8 and the fragment docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify.html records eleven groups re-classified, though eight groups remain by the coordinator's ruling rather than by defect.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate log tests/graph/test_dd_build_classify_tree.py (5 passed, EXIT=0) and the readback log are recorded, but the delivered docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json states spend_usd 12.43 (:10) against spend_landed_usd 14.05 (:423)/spend_incurred_usd 15.73 (:425) in its own body.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: every path in the diff resolves within the manifest's orientation_write_paths, but tests/graph/test_dd_build_classify_tree.py is outside the brief's declared Write scope and commit e26fd6676 itself called the file out of scope before b19b3ee18 edited it.\nSCORE durability: 15\nJUSTIFICATION durability: tests/graph/test_dd_build_classify_tree.py:293 monkeypatches get_sn_domain_tree_threshold to probe*0.5 and reddens if routing ignores the setting, so the mechanism is guarded, but the 0.8 value itself is unpinned (the base arm test-classify-tree.log shows the old pinned tests red.\nSCORE fit: 18\nJUSTIFICATION fit: the added helpers threshold_bar/probes_bracketing at tests/graph/test_dd_build_classify_tree.py:181-195 are named by behaviour and carry no plan or gate label, matching the module's style.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change reuses the existing owner imas_codex/settings.py:1480 get_sn_domain_tree_threshold rather than adding a second threshold mechanism, and the added test helpers are test-local.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json:10 follow-on: spend_usd reads 12.43 while spend_landed_usd (:423) reads 14.05 and spend_incurred_usd (:425) reads 15.73 in the same file, so the headline spend contradicts the body and a reader checking the ceiling the run stopped the remaining groups against gets two different numbers.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json:450 follow-on: projected_remaining_usd reads 11.13 and projected_total_usd (:451) 25.24 while projected_finish_total_usd (:14) reads 23.56, and 11.13 is not tier1_paths_remaining 4,801 (:449) times spend_per_path_usd 0.001942 (which is 9.32), so the stale pre-drain projection and the current one both survive in one object.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-dd-reclassify-results.json:9 follow-on: chat_share 0.5564 equals 112/201, the count the pyproject comment (pyproject.toml:379) and scg-tree-rerun-revised-guidance.html:16 assign to the TREE, so the tree_settled_share/chat_share pair is labelled opposite to the figure the threshold comment cites.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261015T041014331937-scg-dd-reclassify/manifest.md:2 follow-on: orientation_base_sha ad5ca7a167ff27fd025ab0037e6ddb4571f0d2ba6a resolves to no object; the commit the review was taken from is ad5ca7a167ff27fd025ab0037e6ddb4571a66e8b, so the record's own base revision cannot be checked against the diff.\nFINDING tests/graph/test_dd_build_classify_tree.py:178 follow-on: the node edited a test file its brief's Write-scope section does not list (commit e26fd6676 called it out of scope, b19b3ee18 then changed it), so the threshold change and the test repair landed in one node despite the declared scope separating them.\n",
+  "review_run_id": "r-20261015T085057674052-review-of-scg-dd-reclassify",
+  "reviewed_base_sha": "ad5ca7a167ff27fd025ab0037e6ddb4571a66e8b",
+  "reviewed_head_sha": "61bfe044efbeb50962b175e205828cacb4c4d40a",
+  "reviewed_run_id": "r-20261015T041014331937-scg-dd-reclassify",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T09:02:58.223138+00:00",
+  "total": 97
+}
