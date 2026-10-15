@@ -1,0 +1,222 @@
+{
+  "scope": [
+    {
+      "kind": "boundary",
+      "seed": "flux_surface_averaged_argon_density_at_plasma_boundary",
+      "why": "the 17-member boundary-averaged density family \u00a73 completes on"
+    },
+    {
+      "kind": "species",
+      "seed": "electron_number_density",
+      "why": "members differ by subject species (electron, ion, neutral \u2026)"
+    },
+    {
+      "kind": "component",
+      "seed": "parallel_conductivity",
+      "why": "members differ by vector component (parallel, poloidal, radial \u2026)"
+    },
+    {
+      "kind": "locus",
+      "seed": "electrostatic_potential",
+      "why": "members differ by the locus that places the quantity (wall, midplane \u2026)"
+    }
+  ],
+  "acceptance_threshold": 0.85,
+  "estimate_basis": {
+    "runs": 7,
+    "calls": 23,
+    "mean_usd_per_call": 0.414,
+    "total_usd": 9.5226
+  },
+  "total_planned_calls": 29,
+  "total_estimate_usd": 12.0068,
+  "families": [
+    {
+      "kind": "boundary",
+      "seed": "flux_surface_averaged_argon_density_at_plasma_boundary",
+      "why": "the 17-member boundary-averaged density family \u00a73 completes on",
+      "physical_base": "density",
+      "invariant": [
+        "density",
+        "",
+        "flux_surface_averaged",
+        "",
+        ""
+      ],
+      "members": [
+        "flux_surface_averaged_argon_density_at_plasma_boundary",
+        "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+        "flux_surface_averaged_carbon_density_at_plasma_boundary",
+        "flux_surface_averaged_deuterium_density_at_plasma_boundary",
+        "flux_surface_averaged_electron_density_at_plasma_boundary",
+        "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+        "flux_surface_averaged_helium_4_density_at_plasma_boundary",
+        "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+        "flux_surface_averaged_ion_density_at_plasma_boundary",
+        "flux_surface_averaged_iron_density_at_plasma_boundary",
+        "flux_surface_averaged_lithium_density_at_plasma_boundary",
+        "flux_surface_averaged_neon_density_at_plasma_boundary",
+        "flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+        "flux_surface_averaged_oxygen_density_at_plasma_boundary",
+        "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+        "flux_surface_averaged_tritium_density_at_plasma_boundary",
+        "flux_surface_averaged_xenon_density_at_plasma_boundary"
+      ],
+      "n": 17,
+      "decision": "apply",
+      "planned_calls": 17,
+      "anchor": "flux_surface_averaged_xenon_density_at_plasma_boundary",
+      "estimate_usd": 7.0385,
+      "refusals": {
+        "flux_surface_averaged_electron_density_at_plasma_boundary": "candidate_request=https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3"
+      },
+      "lint": {
+        "convention_violation": 17,
+        "link_missing_reverse": 12
+      },
+      "doc_scores": {
+        "flux_surface_averaged_argon_density_at_plasma_boundary": 0.9875,
+        "flux_surface_averaged_beryllium_density_at_plasma_boundary": 1.0,
+        "flux_surface_averaged_carbon_density_at_plasma_boundary": 1.0,
+        "flux_surface_averaged_deuterium_density_at_plasma_boundary": 0.93125,
+        "flux_surface_averaged_electron_density_at_plasma_boundary": null,
+        "flux_surface_averaged_helium_3_density_at_plasma_boundary": 0.9375,
+        "flux_surface_averaged_helium_4_density_at_plasma_boundary": 0.875,
+        "flux_surface_averaged_hydrogen_density_at_plasma_boundary": 0.9375,
+        "flux_surface_averaged_ion_density_at_plasma_boundary": 1.0,
+        "flux_surface_averaged_iron_density_at_plasma_boundary": 1.0,
+        "flux_surface_averaged_lithium_density_at_plasma_boundary": 0.85,
+        "flux_surface_averaged_neon_density_at_plasma_boundary": 1.0,
+        "flux_surface_averaged_nitrogen_density_at_plasma_boundary": 0.98125,
+        "flux_surface_averaged_oxygen_density_at_plasma_boundary": 0.9875,
+        "flux_surface_averaged_total_ion_density_at_plasma_boundary": null,
+        "flux_surface_averaged_tritium_density_at_plasma_boundary": 1.0,
+        "flux_surface_averaged_xenon_density_at_plasma_boundary": 0.9375
+      },
+      "docs_below_threshold": [],
+      "drift": 0.8823529411764706
+    },
+    {
+      "kind": "species",
+      "seed": "electron_number_density",
+      "why": "members differ by subject species (electron, ion, neutral \u2026)",
+      "physical_base": "number_density",
+      "invariant": [
+        "number_density",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "members": [
+        "electron_number_density",
+        "fast_neutral_internal_state_number_density",
+        "normalized_ion_species_number_density",
+        "thermal_ion_charge_state_number_density",
+        "total_ion_number_density",
+        "total_neutral_number_density",
+        "volume_averaged_electron_number_density_over_scrape_off_layer"
+      ],
+      "n": 7,
+      "decision": "apply",
+      "planned_calls": 7,
+      "anchor": "total_ion_number_density",
+      "estimate_usd": 2.8982,
+      "refusals": {},
+      "lint": {
+        "convention_violation": 3,
+        "link_dead_link": 1,
+        "link_missing_reverse": 1
+      },
+      "doc_scores": {
+        "electron_number_density": 0.95,
+        "fast_neutral_internal_state_number_density": 0.91875,
+        "normalized_ion_species_number_density": 0.875,
+        "thermal_ion_charge_state_number_density": 0.8875,
+        "total_ion_number_density": 0.98125,
+        "total_neutral_number_density": 0.9,
+        "volume_averaged_electron_number_density_over_scrape_off_layer": null
+      },
+      "docs_below_threshold": [],
+      "drift": 0.8571428571428572
+    },
+    {
+      "kind": "component",
+      "seed": "parallel_conductivity",
+      "why": "members differ by vector component (parallel, poloidal, radial \u2026)",
+      "physical_base": "conductivity",
+      "invariant": [
+        "conductivity",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "members": [
+        "parallel_conductivity",
+        "poloidal_conductivity",
+        "radial_conductivity",
+        "toroidal_conductivity",
+        "vertical_conductivity"
+      ],
+      "n": 5,
+      "decision": "harmonized",
+      "planned_calls": 0,
+      "anchor": "vertical_conductivity",
+      "estimate_usd": 0.0,
+      "refusals": {},
+      "lint": {
+        "link_missing_reverse": 5
+      },
+      "doc_scores": {
+        "parallel_conductivity": 0.9375,
+        "poloidal_conductivity": 0.9125,
+        "radial_conductivity": 0.9375,
+        "toroidal_conductivity": 0.875,
+        "vertical_conductivity": 0.9875
+      },
+      "docs_below_threshold": [],
+      "drift": 0.8
+    },
+    {
+      "kind": "locus",
+      "seed": "electrostatic_potential",
+      "why": "members differ by the locus that places the quantity (wall, midplane \u2026)",
+      "physical_base": "electrostatic_potential",
+      "invariant": [
+        "electrostatic_potential",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "members": [
+        "electrostatic_potential",
+        "electrostatic_potential_at_langmuir_probe_position",
+        "floating_electrostatic_potential",
+        "plasma_electrostatic_potential_at_outboard_midplane",
+        "plasma_electrostatic_potential_at_wall"
+      ],
+      "n": 5,
+      "decision": "apply",
+      "planned_calls": 5,
+      "anchor": "electrostatic_potential_at_langmuir_probe_position",
+      "estimate_usd": 2.0701,
+      "refusals": {},
+      "lint": {
+        "defining_equation": 1,
+        "link_missing_reverse": 2
+      },
+      "doc_scores": {
+        "electrostatic_potential": 0.85625,
+        "electrostatic_potential_at_langmuir_probe_position": 0.9375,
+        "floating_electrostatic_potential": 0.85,
+        "plasma_electrostatic_potential_at_outboard_midplane": null,
+        "plasma_electrostatic_potential_at_wall": null
+      },
+      "docs_below_threshold": [],
+      "drift": 0.8
+    }
+  ],
+  "wrote_graph": false
+}
