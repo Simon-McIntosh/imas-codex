@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-15T20:24:55.431Z",
+  "dispatched_at": "2026-10-15T20:05:20Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-umbrella-measure-run.py",
+      "line": "209",
+      "severity": "follow-on",
+      "text": "follow-on: make_figure copy-adapts the style-sheet load, three-cohort loop, errorbar idiom and selected/grey palette of the sibling renderer at docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py:134 instead of importing or parameterising it, so the two figure paths will drift; it does extend the run's own guard with the mandated canvas and text-overlap check the sibling lacks."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-umbrella-measure-run.py",
+      "line": "120",
+      "severity": "follow-on",
+      "text": "follow-on: verify_rule_cases pins choose_umbrella only at threshold 0.5, so a regression in the 0.6 or 0.667 comparison, or in the THRESHOLDS tuple, would leave all three rule-control assertions green."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the landed change: the run script is executed directly as uv run python and is imported by nothing, and the fragment, results JSON and SVG are documentation consumed by prose.",
+    "diff": "read against base 6cfe8f445 \u2014 one commit adding the run script, results JSON, HTML fragment and SVG, all inside the declared scope.",
+    "done_when": "all three parts land \u2014 the fragment and results JSON carry per-rule accuracy with intervals, per-approved-name answers, the live blast radius, the fixes and breaks across all three sets and the unreachable approved labels; scg-name-domain-umbrella-measure-run.py reproduces at EXIT=0 in final-rerun.log; and docs/figures/sn-catalog-grouping/scg-name-domain-umbrella-measure/accuracy.svg compares the rules on the three cohorts.",
+    "goal": "read the landed measurement at docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-umbrella-measure.html \u2014 it runs the band-umbrella rule over two base selectors and three thresholds, selects on approved plus calibration only, then reads validation once, and reports a negative result (64 total versus 65 for the best base control).",
+    "manifest": "read; status complete, one commit bca565b31, and the byte-for-byte rerun it claims is independently confirmed below rather than taken on its word.",
+    "write_paths": "the manifest declares four paths and the single commit bca565b31 touches exactly those four, with accuracy.svg under the declared figures directory."
+  },
+  "justifications": {
+    "durability": "rule-negative-control.log shows the choose_umbrella guards at scg-name-domain-umbrella-measure-run.py:120 red at EXIT=1 under a stubbed selector and :443-444 pin the base controls to 9 and 53/56, but the guards live in a one-shot evidence script and exercise only the 0.5 threshold; no added assertion compares a value against an input the script itself supplied.",
+    "evidence": "final-rerun.log ends EXIT=0 and the three artefacts it last wrote at 21:58:27 hash byte-for-byte to the committed blobs b679b2f/fc28cb6/29fa5bd6, so the reproduction is a verified receipt.",
+    "fit": "the script follows the sibling evidence-script idiom (importlib load of the prior run script at scg-name-domain-umbrella-measure-run.py:16-20, savefig with metadata Date None at :297).",
+    "goal_fidelity": "scg-name-domain-umbrella-measure-run.py:77 choose_umbrella carries both briefed branches (the cross-band general at :93 and the single-band umbrella at :97) and :445 selects on approved plus calibration before :454 reads validation.",
+    "reuse": "the loaders, selectors and scoring are imported from the base script as the brief directs rather than copied, but make_figure at scg-name-domain-umbrella-measure-run.py:209 re-derives the accuracy-interval renderer owned by docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py:134.",
+    "scope_discipline": "git diff 6cfe8f445..bca565b31 touches only the four declared paths and adds nothing the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the landed measurement at docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-umbrella-measure.html \u2014 it runs the band-umbrella rule over two base selectors and three thresholds, selects on approved plus calibration only, then reads validation once, and reports a negative result (64 total versus 65 for the best base control).\nVERDICT done_when: all three parts land \u2014 the fragment and results JSON carry per-rule accuracy with intervals, per-approved-name answers, the live blast radius, the fixes and breaks across all three sets and the unreachable approved labels; scg-name-domain-umbrella-measure-run.py reproduces at EXIT=0 in final-rerun.log; and docs/figures/sn-catalog-grouping/scg-name-domain-umbrella-measure/accuracy.svg compares the rules on the three cohorts.\nVERDICT write_paths: the manifest declares four paths and the single commit bca565b31 touches exactly those four, with accuracy.svg under the declared figures directory.\nVERDICT manifest: read; status complete, one commit bca565b31, and the byte-for-byte rerun it claims is independently confirmed below rather than taken on its word.\nVERDICT diff: read against base 6cfe8f445 \u2014 one commit adding the run script, results JSON, HTML fragment and SVG, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scg-name-domain-umbrella-measure-run.py:77 choose_umbrella carries both briefed branches (the cross-band general at :93 and the single-band umbrella at :97) and :445 selects on approved plus calibration before :454 reads validation.\nSCORE evidence: 18\nJUSTIFICATION evidence: final-rerun.log ends EXIT=0 and the three artefacts it last wrote at 21:58:27 hash byte-for-byte to the committed blobs b679b2f/fc28cb6/29fa5bd6, so the reproduction is a verified receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 6cfe8f445..bca565b31 touches only the four declared paths and adds nothing the goal does not imply.\nSCORE durability: 15\nJUSTIFICATION durability: rule-negative-control.log shows the choose_umbrella guards at scg-name-domain-umbrella-measure-run.py:120 red at EXIT=1 under a stubbed selector and :443-444 pin the base controls to 9 and 53/56, but the guards live in a one-shot evidence script and exercise only the 0.5 threshold; no added assertion compares a value against an input the script itself supplied.\nSCORE fit: 18\nJUSTIFICATION fit: the script follows the sibling evidence-script idiom (importlib load of the prior run script at scg-name-domain-umbrella-measure-run.py:16-20, savefig with metadata Date None at :297).\nSCORE reuse: 16\nJUSTIFICATION reuse: the loaders, selectors and scoring are imported from the base script as the brief directs rather than copied, but make_figure at scg-name-domain-umbrella-measure-run.py:209 re-derives the accuracy-interval renderer owned by docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py:134.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-umbrella-measure-run.py:209 follow-on: make_figure copy-adapts the style-sheet load, three-cohort loop, errorbar idiom and selected/grey palette of the sibling renderer at docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-rule-measure-run.py:134 instead of importing or parameterising it, so the two figure paths will drift; it does extend the run's own guard with the mandated canvas and text-overlap check the sibling lacks.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-umbrella-measure-run.py:120 follow-on: verify_rule_cases pins choose_umbrella only at threshold 0.5, so a regression in the 0.6 or 0.667 comparison, or in the THRESHOLDS tuple, would leave all three rule-control assertions green.\n",
+  "review_run_id": "r-20261015T200458955361-review-of-scg-name-domain-umbrella-measure-bca565b317a6",
+  "reviewed_base_sha": "6cfe8f445275a034ca1c9da00a10c3285a68ae3d",
+  "reviewed_head_sha": "bca565b317a60efb048d4f474aee11b2a2a50db5",
+  "reviewed_run_id": "r-20261015T193308133366-scg-name-domain-umbrella-measure",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-15T20:25:00+00:00",
+  "total": 106
+}
